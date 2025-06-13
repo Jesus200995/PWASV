@@ -1,21 +1,30 @@
-<template>  <div class="page-container py-6">
-    <div class="card mb-6 transform transition-all duration-300 hover:shadow-xl">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-gray-100">
-        <div class="mb-4 sm:mb-0">
-          <h2 class="text-2xl font-bold text-gray-800 mb-1">Registrar ubicación</h2>
-          <p class="text-sm text-gray-500">Captura tu ubicación actual para el registro</p>
+<template>
+  <div class="page-container py-4">
+    <div class="card mb-4">
+      <div class="text-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-2">Registrar ubicación</h2>
+        <p class="text-sm text-gray-500">Captura tu ubicación actual para el registro</p>
+      </div>
+      
+      <!-- Info del usuario -->
+      <div class="bg-primary/10 rounded-lg p-3 mb-6">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
+            <span class="text-white text-sm font-bold">{{ getUserInitials }}</span>
+          </div>
+          <div>
+            <p class="font-medium text-primary">{{ user.nombre_completo }}</p>
+            <p class="text-xs text-gray-500">{{ user.cargo }}</p>
+          </div>
         </div>
-        <div class="bg-primary/10 rounded-lg p-3 text-center">
-          <p class="text-sm text-gray-600">Bienvenido,</p>
-          <p class="font-medium text-primary text-lg">{{ user.nombre_completo }}</p>
-          <p class="text-xs text-gray-500 mt-1">{{ user.cargo }}</p>
-        </div>
-      </div>      <form @submit.prevent="enviarRegistro">
+      </div>
+
+      <form @submit.prevent="enviarRegistro">
         <!-- Botón para obtener ubicación -->
         <button
           type="button"
           @click="getUbicacion"
-          class="btn btn-secondary w-full mb-4 flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-102"
+          class="btn btn-secondary w-full mb-4 flex items-center justify-center"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -38,19 +47,21 @@
             />
           </svg>
           Obtener ubicación actual
-        </button>        <!-- Mapa -->
+        </button>
+
+        <!-- Mapa -->
         <div
           v-if="mapVisible"
-          class="relative h-56 mb-4 bg-gray-100 rounded-lg overflow-hidden shadow-md transform transition-all duration-300"
+          class="relative h-48 mb-4 bg-gray-100 rounded-lg overflow-hidden shadow-sm"
         >
           <div id="map" class="absolute inset-0"></div>
           <div
             v-if="!mapReady"
-            class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 backdrop-blur-sm"
+            class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70"
           >
             <div class="flex flex-col items-center">
-              <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
-              <p class="mt-2 text-sm text-gray-600 font-medium">Cargando mapa...</p>
+              <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+              <p class="mt-2 text-sm text-gray-600">Cargando mapa...</p>
             </div>
           </div>
         </div>
@@ -60,25 +71,23 @@
           v-if="latitud && longitud"
           class="bg-green-50 border border-green-200 rounded-lg p-3 mb-4"
         >
-          <div class="flex space-x-4">
-            <div class="flex-1">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
               <p class="text-xs text-gray-500">Latitud</p>
-              <p class="font-mono font-medium text-gray-800">{{ latitud }}</p>
+              <p class="font-mono text-sm font-medium text-gray-800">{{ latitud }}</p>
             </div>
-            <div class="flex-1">
+            <div>
               <p class="text-xs text-gray-500">Longitud</p>
-              <p class="font-mono font-medium text-gray-800">{{ longitud }}</p>
+              <p class="font-mono text-sm font-medium text-gray-800">{{ longitud }}</p>
             </div>
           </div>
         </div>
 
         <!-- Input de archivo para foto -->
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Foto</label>
           <div class="flex items-center justify-center w-full">
-            <label
-              class="flex flex-col w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"
-            >
+            <label class="flex flex-col w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100">
               <div v-if="!foto" class="flex flex-col items-center justify-center pt-7">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -112,11 +121,7 @@
 
         <!-- Descripción -->
         <div class="mb-4">
-          <label
-            for="descripcion"
-            class="block text-sm font-medium text-gray-700 mb-1"
-            >Descripción</label
-          >
+          <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
           <textarea
             v-model="descripcion"
             id="descripcion"
@@ -257,6 +262,17 @@ const user = computed(() => {
     return {};
   }
   return JSON.parse(storedUser);
+});
+
+// Función para obtener las iniciales del usuario
+const getUserInitials = computed(() => {
+  if (user.value && user.value.nombre_completo) {
+    const names = user.value.nombre_completo.split(' ');
+    return names.length >= 2 ? 
+      (names[0][0] + names[1][0]).toUpperCase() : 
+      names[0].substring(0, 2).toUpperCase();
+  }
+  return 'US';
 });
 
 // Inicializar mapa cuando sea visible

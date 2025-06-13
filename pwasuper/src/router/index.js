@@ -4,12 +4,14 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Home from '../views/Home.vue'
 import Historial from '../views/Historial.vue'
+import Profile from '../views/Profile.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/login', name: 'Login', component: Login },
   { path: '/register', name: 'Register', component: Register },
-  { path: '/historial', name: 'Historial', component: Historial }
+  { path: '/historial', name: 'Historial', component: Historial },
+  { path: '/profile', name: 'Profile', component: Profile }
 ]
 
 const router = createRouter({

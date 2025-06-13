@@ -270,6 +270,9 @@ function initMap() {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map.value);
+
+      // Configurar iconos personalizados para los marcadores
+      setupCustomIcons();
     }
 
     mapReady.value = true;
@@ -280,6 +283,25 @@ function initMap() {
   }, 100);
 }
 
+// Configurar iconos personalizados con animación
+function setupCustomIcons() {
+  // Crear icono personalizado animado
+  const customIcon = L.divIcon({
+    html: `
+      <div class="custom-marker-wrapper">
+        <div class="custom-marker"></div>
+        <div class="marker-pulse"></div>
+      </div>
+    `,
+    className: 'custom-marker-icon',
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+  });
+
+  // Almacenar el icono para uso posterior
+  window.customMapIcon = customIcon;
+}
+
 function updateMapMarker() {
   if (!map.value) return;
 
@@ -287,12 +309,27 @@ function updateMapMarker() {
   if (marker.value) {
     marker.value.setLatLng([latitud.value, longitud.value]);
   } else {
-    // Si no existe, crear uno nuevo
-    marker.value = L.marker([latitud.value, longitud.value]).addTo(map.value);
+    // Si no existe, crear uno nuevo con el icono personalizado
+    const icon = window.customMapIcon || L.divIcon({
+      html: `
+        <div class="custom-marker-wrapper">
+          <div class="custom-marker"></div>
+          <div class="marker-pulse"></div>
+        </div>
+      `,
+      className: 'custom-marker-icon',
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+    
+    marker.value = L.marker([latitud.value, longitud.value], { icon: icon }).addTo(map.value);
   }
 
-  // Centrar el mapa en la ubicación
-  map.value.setView([latitud.value, longitud.value], 15);
+  // Centrar el mapa en la ubicación con animación
+  map.value.setView([latitud.value, longitud.value], 15, {
+    animate: true,
+    duration: 1
+  });
 }
 
 function getUbicacion() {
@@ -427,5 +464,76 @@ onMounted(async () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+</style>
+
+<style>
+/* Estilos para el marcador personalizado con animación */
+.custom-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-marker-wrapper {
+  position: relative;
+  width: 30px;
+  height: 30px;
+}
+
+.custom-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: #4CAF50;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  animation: markerBounce 1s ease-out;
+}
+
+.marker-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #4CAF50;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: markerPulse 2s infinite;
+  z-index: 1;
+}
+
+@keyframes markerBounce {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes markerPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* Efecto hover para el marcador */
+.custom-marker:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  transition: transform 0.2s ease;
 }
 </style>

@@ -222,9 +222,20 @@ function verEnMapa(registro) {
         detailMap.value.removeLayer(layer);
       }
     });
+      // Añadir marcador con icono personalizado
+    const customIcon = L.divIcon({
+      html: `
+        <div class="custom-marker-wrapper">
+          <div class="custom-marker"></div>
+          <div class="marker-pulse"></div>
+        </div>
+      `,
+      className: 'custom-marker-icon',
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
     
-    // Añadir marcador
-    const marker = L.marker([registro.latitud, registro.longitud]).addTo(detailMap.value);
+    const marker = L.marker([registro.latitud, registro.longitud], { icon: customIcon }).addTo(detailMap.value);
     if (registro.descripcion) {
       marker.bindPopup(registro.descripcion).openPopup();
     }
@@ -241,5 +252,74 @@ function verEnMapa(registro) {
 /* Para asegurar que el mapa de detalle se muestre correctamente */
 #detailMap {
   min-height: 300px;
+}
+
+/* Estilos para el marcador personalizado con animación */
+.custom-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-marker-wrapper {
+  position: relative;
+  width: 30px;
+  height: 30px;
+}
+
+.custom-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: #4CAF50;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  animation: markerBounce 1s ease-out;
+}
+
+.marker-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #4CAF50;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: markerPulse 2s infinite;
+  z-index: 1;
+}
+
+@keyframes markerBounce {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes markerPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* Efecto hover para el marcador */
+.custom-marker:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  transition: transform 0.2s ease;
 }
 </style>

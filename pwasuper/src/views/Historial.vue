@@ -1,9 +1,13 @@
 <template>
-  <div class="page-container">
-    <div class="card mb-6">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold text-gray-800">Historial de registros</h2>
-        <button @click="cargarRegistros" class="btn btn-secondary text-sm px-3 py-1">
+  <div class="page-container">    <div class="card mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">Historial de registros</h2>
+          <p v-if="userInfo" class="text-sm text-gray-600 mt-1">
+            Registros de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
+          </p>
+        </div>
+        <button @click="cargarRegistros" class="btn btn-secondary text-sm px-3 py-1 mt-2 sm:mt-0">
           <svg v-if="cargando" class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -11,14 +15,19 @@
           <span v-else>Actualizar</span>
         </button>
       </div>
-      
-      <div v-if="error" class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+        <div v-if="error" class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
         <p>{{ error }}</p>
+        <p class="text-sm mt-2">
+          <strong>Problema técnico detectado:</strong> El servidor principal está experimentando problemas. 
+          El administrador del sistema necesita actualizar el código del servidor.
+        </p>
       </div>
-      
-      <!-- Lista de registros -->
-      <div v-if="registros.length > 0" class="space-y-4">
-        <div v-for="(registro, index) in registros" :key="index" class="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <!-- Lista de registros -->
+      <div v-if="registros.length > 0">
+        <div class="mb-4 text-sm text-gray-600">
+          Total de registros: <span class="font-semibold text-primary">{{ registros.length }}</span>
+        </div>
+        <div class="space-y-4">        <div v-for="(registro, index) in registros" :key="index" class="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
           <div class="p-4">
             <div class="flex flex-col sm:flex-row">
               <div class="sm:w-24 sm:h-24 h-32 w-full bg-gray-100 rounded overflow-hidden mb-3 sm:mb-0 sm:mr-4">
@@ -54,14 +63,15 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
-      
-      <!-- Estado vacío -->
+        <!-- Estado vacío -->
       <div v-else-if="!cargando" class="text-center py-8">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
-        <p class="mt-2 text-gray-500">No se encontraron registros</p>
+        <p class="mt-2 text-gray-500">Aún no tienes registros guardados</p>
+        <p class="text-sm text-gray-400 mt-1">Crea tu primer registro para verlo aquí</p>
         <router-link to="/" class="btn btn-primary inline-block mt-4 text-sm">Crear nuevo registro</router-link>
       </div>
       
@@ -144,24 +154,33 @@ async function cargarRegistros() {
     cargando.value = false;
     return;
   }
-  
-  try {
+    try {
+    console.log('Cargando registros para usuario:', userInfo.value.id);
+    
     // Obtener registros específicos del usuario actual
     const response = await axios.get(`${API_URL}/registros?usuario_id=${userInfo.value.id}`, {
       timeout: 10000 // 10 segundos de timeout
     });
+    
+    console.log('Respuesta del servidor:', response.data);
     
     // Procesar las URLs de las fotos para que sean rutas absolutas
     registros.value = response.data.registros.map(r => ({
       ...r,
       foto_url: r.foto_url ? `${API_URL}/${r.foto_url}` : null
     }));
-  } catch (err) {
+    
+    console.log('Registros procesados:', registros.value.length);  } catch (err) {
     console.error('Error al cargar registros:', err);
     
     if (err.response) {
       // Error de respuesta del servidor
-      error.value = 'Error del servidor: ' + (err.response.data.detail || err.response.statusText);    } else if (err.request) {
+      if (err.response.status === 500) {
+        error.value = 'El servidor está experimentando problemas técnicos. Por favor, inténtalo más tarde.';
+      } else {
+        error.value = 'Error del servidor: ' + (err.response.data.detail || err.response.statusText);
+      }
+    } else if (err.request) {
       // Error de conexión
       error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
     } else {

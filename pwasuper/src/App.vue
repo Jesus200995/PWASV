@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConnectivityStatus from './components/ConnectivityStatus.vue';
 
@@ -10,32 +10,93 @@ const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
 
-onMounted(() => {
-  // Obtener los datos del usuario del localStorage
+// Watcher para detectar cambios de ruta y actualizar el estado
+watch(() => route.path, () => {
+  // Verificar estado de autenticación en cada cambio de ruta
   const storedUser = localStorage.getItem('user');
-  if (storedUser) {
-    userData.value = JSON.parse(storedUser);
-    
-    // Mostrar mensaje de bienvenida solo si recién inició sesión
-    const justLoggedIn = sessionStorage.getItem('justLoggedIn');
-    if (justLoggedIn) {
-      showWelcome.value = true;
-      sessionStorage.removeItem('justLoggedIn');
-      
-      // Ocultar el mensaje después de 3 segundos
-      setTimeout(() => {
-        showWelcome.value = false;
-      }, 3000);
+  if (storedUser && !userData.value) {
+    try {
+      userData.value = JSON.parse(storedUser);
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      localStorage.clear();
+      sessionStorage.clear();
     }
+  } else if (!storedUser && userData.value) {
+    userData.value = null;
   }
 });
 
+// Listener para cambios en localStorage (útil para logout desde otras pestañas)
+const handleStorageChange = (e) => {
+  if (e.key === 'user') {
+    if (e.newValue === null) {
+      // Si se eliminó el usuario del localStorage, limpiar estado y redirigir
+      userData.value = null;
+      showWelcome.value = false;
+      showMobileMenu.value = false;
+      router.push('/login');
+    } else if (e.newValue && !userData.value) {
+      // Si se agregó un usuario y no tenemos datos, cargarlos
+      try {
+        userData.value = JSON.parse(e.newValue);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('user');
+      }
+    }
+  }
+};
+
+onMounted(() => {
+  // Verificar el estado de autenticación al cargar la app
+  const storedUser = localStorage.getItem('user');
+  
+  if (storedUser) {
+    try {
+      userData.value = JSON.parse(storedUser);
+      
+      // Mostrar mensaje de bienvenida solo si recién inició sesión
+      const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+      if (justLoggedIn) {
+        showWelcome.value = true;
+        sessionStorage.removeItem('justLoggedIn');
+        
+        // Ocultar el mensaje después de 3 segundos
+        setTimeout(() => {
+          showWelcome.value = false;
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      // Si hay error al parsear, limpiar y redirigir
+      localStorage.clear();
+      sessionStorage.clear();
+      router.push('/login');
+    }
+  } else {
+    // Si no hay usuario logueado, asegurar que esté en login
+    if (route.name !== 'Login' && route.name !== 'Register') {
+      router.push('/login');
+    }
+  }
+  
+  // Escuchar cambios en localStorage
+  window.addEventListener('storage', handleStorageChange);
+});
+
+onUnmounted(() => {
+  // Limpiar listener
+  window.removeEventListener('storage', handleStorageChange);
+});
+
 const isLoggedIn = computed(() => {
-  return localStorage.getItem('user') !== null;
+  // Verificar tanto el ref como el localStorage para mayor seguridad
+  return userData.value !== null && localStorage.getItem('user') !== null;
 });
 
 const userName = computed(() => {
-  if (userData.value) {
+  if (userData.value && userData.value.nombre_completo) {
     return userData.value.nombre_completo;
   }
   return '';
@@ -61,12 +122,19 @@ function logout() {
   isLoggingOut.value = true;
   showMobileMenu.value = false;
   
-  // Simulamos un pequeño retraso para mostrar la animación
+  // Limpiar el estado reactivo primero
+  userData.value = null;
+  showWelcome.value = false;
+  
+  // Limpiar completamente el localStorage y sessionStorage
+  localStorage.clear();
+  sessionStorage.clear();
+  
+  // Pequeño delay para que se vea la limpieza del estado
   setTimeout(() => {
-    localStorage.removeItem('user');
-    router.push('/login');
-    isLoggingOut.value = false;
-  }, 600);
+    // Recargar la página completamente para limpiar todo el estado
+    window.location.href = '/login';
+  }, 100);
 }
 </script>
 

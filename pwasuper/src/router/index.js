@@ -19,4 +19,23 @@ const router = createRouter({
   routes
 })
 
+// Guard de navegación para proteger rutas
+router.beforeEach((to, from, next) => {
+  const user = localStorage.getItem('user')
+  const isLoggedIn = !!user
+  
+  // Si intenta acceder a login o register y ya está logueado, redirigir a home
+  if ((to.name === 'Login' || to.name === 'Register') && isLoggedIn) {
+    next({ name: 'Home' })
+  }
+  // Si intenta acceder a rutas protegidas sin estar logueado, redirigir a login
+  else if ((to.name === 'Home' || to.name === 'Historial' || to.name === 'Profile') && !isLoggedIn) {
+    next({ name: 'Login' })
+  }
+  // En cualquier otro caso, permitir la navegación
+  else {
+    next()
+  }
+})
+
 export default router

@@ -52,8 +52,12 @@
         </svg>
         Cambiar Contraseña
       </h2>
-      
-      <form @submit.prevent="changePassword" class="space-y-4">
+        <form @submit.prevent="changePassword" class="space-y-4">
+        <!-- Mensaje de error general -->
+        <div v-if="errors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg" role="alert">
+          <p class="text-sm">{{ errors.general }}</p>
+        </div>
+        
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Nueva contraseña</label>
           <input
@@ -119,6 +123,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
+import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js'
 
 const user = ref({})
 const passwordForm = ref({
@@ -167,25 +173,50 @@ const changePassword = async () => {
   if (!validateForm()) return
   
   isChangingPassword.value = true
+  errors.value = {}
   
   try {
-    // Simular llamada a la API
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Aquí iría la lógica real para cambiar la contraseña
-    // Por ahora solo simulamos éxito
-      // Limpiar el formulario
-    passwordForm.value = {
-      newPassword: '',
-      confirmPassword: ''
+    // Verificar conexión a internet
+    const online = await checkInternetConnection()
+    if (!online) {
+      errors.value.general = getOfflineMessage()
+      return
     }
     
-    // Mostrar modal de éxito
-    showSuccessModal.value = true
+    // Llamada a la API para cambiar contraseña
+    const response = await axios.post(`${API_URL}/cambiar_contrasena`, {
+      usuario_id: user.value.id,
+      nueva_contrasena: passwordForm.value.newPassword
+    })
+    
+    // Verificar respuesta exitosa
+    if (response.status === 200) {
+      // Limpiar el formulario
+      passwordForm.value = {
+        newPassword: '',
+        confirmPassword: ''
+      }
+      
+      // Mostrar modal de éxito
+      showSuccessModal.value = true
+    }
     
   } catch (error) {
     console.error('Error al cambiar contraseña:', error)
-    errors.value.general = 'Error al cambiar la contraseña. Por favor, intenta de nuevo.'
+    
+    if (error.response) {
+      // El servidor respondió con un estado de error
+      const errorMsg = error.response.data?.detail || 
+                      error.response.data?.message || 
+                      'Error al cambiar la contraseña'
+      errors.value.general = errorMsg
+    } else if (error.request) {
+      // La solicitud fue hecha pero no se recibió respuesta
+      errors.value.general = 'No se pudo conectar con el servidor. Verifica tu conexión.'
+    } else {
+      // Algo ocurrió al configurar la solicitud
+      errors.value.general = 'Error al cambiar la contraseña: ' + error.message
+    }
   } finally {
     isChangingPassword.value = false
   }

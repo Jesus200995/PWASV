@@ -52,6 +52,10 @@ class UserLogin(BaseModel):
     correo: str
     contrasena: str
 
+class PasswordChange(BaseModel):
+    usuario_id: int
+    nueva_contrasena: str
+
 # Montar carpeta de fotos para servir estáticamente
 app.mount("/fotos", StaticFiles(directory="fotos"), name="fotos")
 
@@ -93,14 +97,47 @@ async def login(usuario: UserLogin):
     # Verificar contraseña
     if not bcrypt.checkpw(usuario.contrasena.encode('utf-8'), user[4].encode('utf-8')):
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
-    
-    # Devolver datos del usuario (sin la contraseña)
+      # Devolver datos del usuario (sin la contraseña)
     return {
         "id": user[0],
         "correo": user[1],
         "nombre_completo": user[2],
         "cargo": user[3]
     }
+
+@app.post("/cambiar_contrasena")
+async def cambiar_contrasena(datos: PasswordChange):
+    try:
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (datos.usuario_id,))
+        usuario = cursor.fetchone()
+        
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Validar que la nueva contraseña no esté vacía
+        if not datos.nueva_contrasena or len(datos.nueva_contrasena.strip()) < 6:
+            raise HTTPException(status_code=400, detail="La nueva contraseña debe tener al menos 6 caracteres")
+        
+        # Hash de la nueva contraseña
+        hashed_password = bcrypt.hashpw(datos.nueva_contrasena.encode('utf-8'), bcrypt.gensalt())
+        
+        # Actualizar la contraseña en la base de datos
+        cursor.execute(
+            "UPDATE usuarios SET contrasena = %s WHERE id = %s",
+            (hashed_password.decode('utf-8'), datos.usuario_id)
+        )
+        
+        conn.commit()
+        
+        return {"success": True, "message": "Contraseña actualizada exitosamente"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error al cambiar contraseña: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al cambiar contraseña: {str(e)}")
 
 @app.post("/registro")
 async def registrar(

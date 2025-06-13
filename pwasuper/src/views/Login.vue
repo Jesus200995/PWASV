@@ -146,15 +146,14 @@ async function login() {
     
     // Obtener datos del usuario desde la respuesta
     const userData = response.data;
-    
-    // Guardar datos del usuario en localStorage
+      // Guardar datos del usuario en localStorage
     localStorage.setItem('user', JSON.stringify(userData));
     
     // Establecer bandera para mostrar mensaje de bienvenida
     sessionStorage.setItem('justLoggedIn', 'true');
     
-    // Redirigir a la página principal
-    router.push('/');
+    // Forzar recarga de la página para asegurar que el estado se actualice correctamente
+    window.location.href = '/';
   } catch (error) {
     console.error('Error de inicio de sesión:', error);
     

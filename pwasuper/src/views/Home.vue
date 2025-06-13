@@ -211,6 +211,14 @@
         </router-link>
       </div>
     </div>
+
+    <!-- Modal de confirmación -->
+    <Modal 
+      :show="showModal" 
+      title="¡Éxito!"
+      message="¡Registro enviado y guardado correctamente!"
+      @close="showModal = false"
+    />
   </div>
 </template>
 
@@ -221,6 +229,7 @@ import axios from "axios";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+import Modal from '../components/Modal.vue';
 
 // Referencias y estado
 const latitud = ref(null);
@@ -238,6 +247,7 @@ const map = ref(null);
 const marker = ref(null);
 const router = useRouter();
 const isOnline = ref(true);
+const showModal = ref(false);
 
 // Obtener información del usuario del localStorage
 const user = computed(() => {
@@ -374,10 +384,8 @@ async function enviarRegistro() {
 
     if (fileInput.value) {
       fileInput.value.value = ""; // Limpiar input file
-    }
-
-    // Mostrar notificación de éxito
-    alert("¡Registro enviado y guardado correctamente!");
+    }    // Mostrar modal de éxito
+    showModal.value = true;
   } catch (err) {
     console.error("Error al enviar datos:", err);
     if (err.response) {

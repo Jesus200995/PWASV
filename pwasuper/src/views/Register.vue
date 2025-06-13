@@ -68,8 +68,7 @@
           <router-link to="/login" class="font-medium text-primary hover:text-primary/80">
             Iniciar sesión
           </router-link>
-        </p>
-      </div>
+        </p>      </div>
     </div>
   </div>
 </template>
@@ -125,9 +124,7 @@ async function register() {
       cargo: form.cargo,
       supervisor: form.supervisor || null, // Enviar null si está vacío
       contrasena: form.password
-    });
-    
-    // Mostrar mensaje de éxito
+    });    // Mostrar mensaje de éxito
     message.text = '¡Cuenta creada exitosamente! Redirigiendo...';
     message.type = 'success';
     

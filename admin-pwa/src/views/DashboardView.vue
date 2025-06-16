@@ -84,10 +84,14 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr v-for="registro in registros" :key="registro.id">
+              <tbody>                <tr v-for="registro in registros.slice(0, 10)" :key="registro.id">
                   <td>#{{ registro.id }}</td>
-                  <td>Usuario {{ registro.usuario_id }}</td>
+                  <td>
+                    <div class="usuario-info">
+                      <strong>{{ registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}` }}</strong>
+                      <small>{{ registro.usuario?.correo || 'No disponible' }}</small>
+                    </div>
+                  </td>
                   <td>
                     <img 
                       v-if="registro.foto_url" 
@@ -138,6 +142,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
+import { usuariosService } from '../services/usuariosService.js'
 
 const router = useRouter()
 
@@ -146,6 +151,7 @@ const adminUser = ref(localStorage.getItem('admin_user') || 'Admin')
 const isOnline = ref(navigator.onLine)
 
 const registros = ref([])
+const usuarios = ref([])
 const loading = ref(false)
 const error = ref('')
 
@@ -165,6 +171,7 @@ window.addEventListener('offline', () => { isOnline.value = false })
 
 onMounted(() => {
   cargarRegistros()
+  cargarUsuarios() // También cargar usuarios para estadísticas más precisas
 })
 
 const cargarRegistros = async () => {
@@ -180,8 +187,13 @@ const cargarRegistros = async () => {
       }
     })
     
-    registros.value = response.data.registros || []
+    // La respuesta puede ser directamente un array o tener una propiedad específica
+    const registrosRaw = Array.isArray(response.data) ? response.data : (response.data.registros || [])
+      // Enriquecer registros con información de usuarios reales
+    registros.value = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
     calcularEstadisticas()
+    
+    console.log('Registros cargados en Dashboard:', registros.value)
   } catch (err) {
     console.error('Error al cargar registros:', err)
     if (err.response?.status === 401) {
@@ -195,9 +207,24 @@ const cargarRegistros = async () => {
   }
 }
 
+const cargarUsuarios = async () => {
+  try {
+    usuarios.value = await usuariosService.obtenerUsuarios()
+    calcularEstadisticas() // Recalcular con usuarios reales
+    console.log('✅ Usuarios reales cargados en Dashboard:', usuarios.value)
+  } catch (err) {
+    console.error('❌ Error al cargar usuarios desde la base de datos:', err)
+    // Si no se pueden cargar usuarios, usar los únicos de registros
+    if (registros.value.length > 0) {
+      const usuariosUnicos = [...new Set(registros.value.map(r => r.usuario_id))]
+      stats.totalUsuarios = usuariosUnicos.length
+    }
+  }
+}
+
 const calcularEstadisticas = () => {
   const totalRegistros = registros.value.length
-  const usuariosUnicos = [...new Set(registros.value.map(r => r.usuario_id))].length
+  const totalUsuarios = usuarios.value.length // Usar usuarios reales en lugar de únicos de registros
   
   const hoy = new Date().toDateString()
   const registrosHoy = registros.value.filter(r => {
@@ -206,7 +233,7 @@ const calcularEstadisticas = () => {
   }).length
   
   stats.totalRegistros = totalRegistros
-  stats.totalUsuarios = usuariosUnicos
+  stats.totalUsuarios = totalUsuarios
   stats.registrosHoy = registrosHoy
 }
 
@@ -461,6 +488,23 @@ const logout = () => {
 .ubicacion, .fecha {
   font-size: 12px;
   color: #666;
+}
+
+.usuario-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usuario-info strong {
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.usuario-info small {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
 }
 
 .descripcion {

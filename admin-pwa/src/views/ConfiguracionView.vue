@@ -242,12 +242,16 @@ const exportarDatos = async () => {
       })
     ])
     
+    // Manejar diferentes formatos de respuesta
+    const usuariosData = Array.isArray(usuariosRes.data) ? usuariosRes.data : (usuariosRes.data.usuarios || [])
+    const registrosData = Array.isArray(registrosRes.data) ? registrosRes.data : (registrosRes.data.registros || [])
+    
     const datos = {
-      usuarios: usuariosRes.data.usuarios || [],
-      registros: registrosRes.data.registros || [],
+      usuarios: usuariosData,
+      registros: registrosData,
       exportado_en: new Date().toISOString(),
-      total_usuarios: usuariosRes.data.usuarios?.length || 0,
-      total_registros: registrosRes.data.registros?.length || 0
+      total_usuarios: usuariosData.length,
+      total_registros: registrosData.length
     }
     
     // Crear y descargar archivo JSON

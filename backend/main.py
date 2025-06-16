@@ -219,6 +219,77 @@ def obtener_registros(usuario_id: int = None):
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener registros: {str(e)}")
 
+# Nuevo endpoint para obtener usuarios (para el panel de administración)
+@app.get("/usuarios")
+async def obtener_usuarios():
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+          # Obtener todos los usuarios (sin la contraseña por seguridad)
+        cursor.execute(
+            "SELECT id, correo, nombre_completo, cargo, supervisor FROM usuarios ORDER BY id DESC"
+        )
+        
+        resultados = cursor.fetchall()
+        print(f"📊 Encontrados {len(resultados)} usuarios")
+          # Convertir tuplas a diccionarios manualmente
+        usuarios = []
+        for row in resultados:
+            usuario = {
+                "id": row[0],
+                "correo": row[1],
+                "nombre_completo": row[2],
+                "cargo": row[3],
+                "supervisor": row[4]
+            }
+            usuarios.append(usuario)
+        
+        print(f"✅ Usuarios procesados correctamente")
+        return {"usuarios": usuarios}
+        
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuarios: {str(e)}")
+
+# Endpoint para obtener un usuario específico por ID
+@app.get("/usuarios/{user_id}")
+async def obtener_usuario(user_id: int):
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+          # Buscar usuario por ID (sin la contraseña por seguridad)
+        cursor.execute(
+            "SELECT id, correo, nombre_completo, cargo, supervisor FROM usuarios WHERE id = %s",
+            (user_id,)
+        )
+        
+        resultado = cursor.fetchone()        
+        if not resultado:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        usuario = {
+            "id": resultado[0],
+            "correo": resultado[1],
+            "nombre_completo": resultado[2],
+            "cargo": resultado[3],
+            "supervisor": resultado[4]
+        }
+        
+        print(f"✅ Usuario {user_id} encontrado correctamente")
+        return usuario
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuario: {str(e)}")
+
 # Endpoint de autenticación para administradores
 @app.post("/admin/login")
 def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):

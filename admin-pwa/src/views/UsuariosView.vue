@@ -66,17 +66,16 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
+              <tbody>                <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
                   <td>#{{ usuario.id }}</td>
                   <td>{{ usuario.correo }}</td>
-                  <td>{{ usuario.nombre_completo || 'No especificado' }}</td>
-                  <td>{{ usuario.cargo || 'No especificado' }}</td>
-                  <td>{{ usuario.supervisor || 'No especificado' }}</td>
-                  <td>{{ formatFecha(usuario.fecha_registro) }}</td>
+                  <td>{{ usuario.nombre_completo }}</td>
+                  <td>{{ usuario.cargo }}</td>
+                  <td>{{ usuario.supervisor }}</td>
+                  <td>{{ formatFecha(usuario.created_at || new Date()) }}</td>
                   <td>
-                    <span class="status-badge" :class="usuario.activo ? 'active' : 'inactive'">
-                      {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                    <span class="status-badge active">
+                      Activo
                     </span>
                   </td>
                   <td>
@@ -110,6 +109,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
+import { usuariosService } from '../services/usuariosService.js'
 
 const router = useRouter()
 
@@ -133,23 +133,16 @@ const cargarUsuarios = async () => {
   error.value = ''
   
   try {
-    const token = localStorage.getItem('admin_token')
-    const response = await axios.get(`${API_URL}/usuarios`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    
-    usuarios.value = response.data.usuarios || []
+    // Usar el servicio de usuarios con datos reales de la base de datos
+    usuarios.value = await usuariosService.obtenerUsuarios()
     usuariosFiltrados.value = usuarios.value
+    
+    console.log('✅ Usuarios reales cargados desde la base de datos:', usuarios.value)
   } catch (err) {
-    console.error('Error al cargar usuarios:', err)
-    if (err.response?.status === 401) {
-      logout()
-    } else {
-      error.value = 'Error al cargar los usuarios: ' + (err.response?.data?.detail || err.message)
-    }
+    console.error('❌ Error al cargar usuarios desde la base de datos:', err)
+    error.value = 'Error al conectar con la base de datos. Verifica que el servidor esté funcionando.'
+    usuarios.value = []
+    usuariosFiltrados.value = []
   } finally {
     loading.value = false
   }
@@ -164,7 +157,9 @@ const filtrarUsuarios = () => {
   const termino = searchTerm.value.toLowerCase()
   usuariosFiltrados.value = usuarios.value.filter(usuario => 
     usuario.correo.toLowerCase().includes(termino) ||
-    (usuario.nombre_completo && usuario.nombre_completo.toLowerCase().includes(termino))
+    (usuario.nombre_completo && usuario.nombre_completo.toLowerCase().includes(termino)) ||
+    (usuario.cargo && usuario.cargo.toLowerCase().includes(termino)) ||
+    (usuario.supervisor && usuario.supervisor.toLowerCase().includes(termino))
   )
 }
 
@@ -177,18 +172,15 @@ const formatFecha = (fechaStr) => {
 }
 
 const verDetalles = (usuario) => {
-  const fecha = formatFecha(usuario.fecha_registro)
-  
   modalTitle.value = 'Detalles del Usuario'
   modalContent.value = `
     <div class="usuario-detalles">
       <div><strong>ID:</strong> #${usuario.id}</div>
       <div><strong>Correo:</strong> ${usuario.correo}</div>
-      <div><strong>Nombre Completo:</strong> ${usuario.nombre_completo || 'No especificado'}</div>
-      <div><strong>Cargo:</strong> ${usuario.cargo || 'No especificado'}</div>
-      <div><strong>Supervisor:</strong> ${usuario.supervisor || 'No especificado'}</div>
-      <div><strong>Fecha de Registro:</strong> ${fecha}</div>
-      <div><strong>Estado:</strong> ${usuario.activo ? 'Activo' : 'Inactivo'}</div>
+      <div><strong>Nombre Completo:</strong> ${usuario.nombre_completo}</div>
+      <div><strong>Cargo:</strong> ${usuario.cargo}</div>
+      <div><strong>Supervisor:</strong> ${usuario.supervisor}</div>
+      <div><strong>Estado:</strong> Activo</div>
     </div>
   `
   showModal.value = true

@@ -29,9 +29,8 @@
               @change="filtrarRegistros"
               class="filter-select"
             >
-              <option value="">Todos los usuarios</option>
-              <option v-for="usuario in usuariosDisponibles" :key="usuario" :value="usuario">
-                Usuario {{ usuario }}
+              <option value="">Todos los usuarios</option>              <option v-for="usuario in usuariosDisponibles" :key="usuario.id" :value="usuario.id">
+                {{ usuario.nombre_completo || `Usuario ${usuario.id}` }}
               </option>
             </select>
           </div>
@@ -52,7 +51,7 @@
           <div v-else-if="registrosFiltrados.length === 0" class="empty-state">
             <div class="empty-icon">📭</div>
             <h3>No hay registros</h3>
-            <p v-if="filtroUsuario">No se encontraron registros para Usuario {{ filtroUsuario }}</p>
+            <p v-if="filtroUsuario">No se encontraron registros para {{ usuariosDisponibles.find(u => u.id.toString() === filtroUsuario.toString())?.nombre_completo || `Usuario ${filtroUsuario}` }}</p>
             <p v-else>Aún no se han creado registros en la aplicación.</p>
           </div>
           
@@ -69,10 +68,14 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr v-for="registro in registrosFiltrados" :key="registro.id">
+              <tbody>                <tr v-for="registro in registrosFiltrados" :key="registro.id">
                   <td>#{{ registro.id }}</td>
-                  <td>Usuario {{ registro.usuario_id }}</td>
+                  <td>
+                    <div class="usuario-info">
+                      <strong>{{ registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}` }}</strong>
+                      <small>{{ registro.usuario?.correo || 'No disponible' }}</small>
+                    </div>
+                  </td>
                   <td>
                     <img 
                       v-if="registro.foto_url" 
@@ -114,10 +117,10 @@
           <button @click="cerrarModal" class="btn-close">×</button>
         </div>
         <div class="modal-body">
-          <div v-if="modalType === 'details'" class="registro-detalles">
-            <div class="details-info">
+          <div v-if="modalType === 'details'" class="registro-detalles">            <div class="details-info">
               <div><strong>ID del Registro:</strong> #{{ selectedRegistro?.id }}</div>
-              <div><strong>Usuario:</strong> Usuario {{ selectedRegistro?.usuario_id }}</div>
+              <div><strong>Usuario:</strong> {{ selectedRegistro?.usuario?.nombre_completo || `Usuario ${selectedRegistro?.usuario_id}` }}</div>
+              <div><strong>Correo:</strong> {{ selectedRegistro?.usuario?.correo || 'No disponible' }}</div>
               <div><strong>Fecha y Hora:</strong> {{ formatFecha(selectedRegistro?.fecha_hora) }}</div>
               <div><strong>Descripción:</strong> {{ selectedRegistro?.descripcion || 'Sin descripción' }}</div>
               <div v-if="selectedRegistro?.foto_url">
@@ -147,6 +150,7 @@ import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
+import { usuariosService } from '../services/usuariosService.js'
 
 const router = useRouter()
 
@@ -194,12 +198,30 @@ const cargarRegistros = async () => {
       }
     })
     
-    registros.value = response.data.registros || []
+    // La respuesta puede ser directamente un array o tener una propiedad específica
+    const registrosRaw = Array.isArray(response.data) ? response.data : (response.data.registros || [])
+    
+    // Enriquecer registros con información de usuarios
+    registros.value = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
     registrosFiltrados.value = registros.value
     
-    // Extraer usuarios únicos para el filtro
-    const usuarios = [...new Set(registros.value.map(r => r.usuario_id))].sort((a, b) => a - b)
-    usuariosDisponibles.value = usuarios
+    // Extraer usuarios únicos para el filtro (con información completa)
+    const usuariosUnicos = []
+    const usuariosVistos = new Set()
+    
+    registros.value.forEach(registro => {
+      if (!usuariosVistos.has(registro.usuario_id)) {
+        usuariosVistos.add(registro.usuario_id)
+        usuariosUnicos.push({
+          id: registro.usuario_id,
+          nombre_completo: registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`
+        })
+      }
+    })
+    
+    usuariosDisponibles.value = usuariosUnicos.sort((a, b) => a.id - b.id)
+    
+    console.log('Registros enriquecidos cargados:', registros.value)
     
   } catch (err) {
     console.error('Error al cargar registros:', err)
@@ -220,7 +242,7 @@ const filtrarRegistros = () => {
   }
   
   registrosFiltrados.value = registros.value.filter(registro => 
-    registro.usuario_id.toString() === filtroUsuario.value
+    registro.usuario_id.toString() === filtroUsuario.value.toString()
   )
 }
 
@@ -516,6 +538,23 @@ const logout = () => {
 .fecha {
   white-space: nowrap;
   font-size: 12px;
+}
+
+.usuario-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usuario-info strong {
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.usuario-info small {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
 }
 
 .btn-ver {

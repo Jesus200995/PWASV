@@ -1,0 +1,122 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.5;
+  color: #333;
+  background: #f8fafc;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* Utilidades globales */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #4CAF50;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #cbd5e0;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.rotate {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive helpers */
+.hide-mobile {
+  display: block;
+}
+
+.show-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
+  }
+  
+  .show-mobile {
+    display: block;
+  }
+}
+
+/* Estados de carga */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}

@@ -9,9 +9,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'PWA Super',
-        short_name: 'PWA',
-        description: 'Registro de ubicaciones y fotos',
+        name: 'Sembrando Datos',
+        short_name: 'Sembrando Datos',
+        description: 'Aplicación para registro de ubicaciones y reforestación',
         theme_color: '#4CAF50',
         background_color: '#FFFFFF',
         display: 'standalone',

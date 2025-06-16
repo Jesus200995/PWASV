@@ -14,11 +14,10 @@
         <p>Admin Panel</p>
       </div>
     </div>
-    
-    <nav class="sidebar-nav">
+      <nav class="sidebar-nav">
       <ul>
-        <li class="nav-item active">
-          <a href="#" class="nav-link">
+        <li class="nav-item" :class="{ active: $route.name === 'Dashboard' }">
+          <router-link to="/dashboard" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
@@ -26,11 +25,11 @@
             </div>
             <span class="nav-text">Dashboard</span>
             <div class="nav-glow"></div>
-          </a>
+          </router-link>
         </li>
         
-        <li class="nav-item">
-          <a href="#" class="nav-link">
+        <li class="nav-item" :class="{ active: $route.name === 'Registros' }">
+          <router-link to="/registros" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
@@ -38,11 +37,11 @@
             </div>
             <span class="nav-text">Registros</span>
             <div class="nav-glow"></div>
-          </a>
+          </router-link>
         </li>
         
-        <li class="nav-item">
-          <a href="#" class="nav-link">
+        <li class="nav-item" :class="{ active: $route.name === 'Usuarios' }">
+          <router-link to="/usuarios" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"/>
@@ -50,11 +49,11 @@
             </div>
             <span class="nav-text">Usuarios</span>
             <div class="nav-glow"></div>
-          </a>
+          </router-link>
         </li>
         
-        <li class="nav-item">
-          <a href="#" class="nav-link">
+        <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }">
+          <router-link to="/configuracion" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
@@ -62,7 +61,7 @@
             </div>
             <span class="nav-text">Configuración</span>
             <div class="nav-glow"></div>
-          </a>
+          </router-link>
         </li>
       </ul>
     </nav>
@@ -249,6 +248,17 @@ defineEmits(['logout'])
 }
 
 .nav-item.active .nav-link {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: white;
+  box-shadow: 
+    0 4px 15px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Estilos específicos para router-link */
+.nav-link.router-link-active,
+.nav-link.router-link-exact-active {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   color: white;

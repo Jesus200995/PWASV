@@ -107,8 +107,7 @@
                   </td>
                   <td class="fecha">
                     {{ formatFecha(registro.fecha_hora) }}
-                  </td>
-                  <td>
+                  </td>                  <td>
                     <button @click="verDetalles(registro)" class="btn-ver">
                       Ver Detalles
                     </button>
@@ -220,36 +219,8 @@ const formatFecha = (fechaStr) => {
 }
 
 const verDetalles = (registro) => {
-  const fecha = formatFecha(registro.fecha_hora)
-  const fotoUrl = registro.foto_url ? `${API_URL}/${registro.foto_url}` : null
-  
-  modalTitle.value = 'Detalles del Registro'
-  modalContent.value = `
-    <div class="registro-detalles">
-      <div><strong>ID del Registro:</strong> #${registro.id}</div>
-      <div><strong>Usuario:</strong> Usuario ${registro.usuario_id}</div>
-      <div><strong>Fecha y Hora:</strong> ${fecha}</div>
-      <div>
-        <strong>Ubicación:</strong><br>
-        Latitud: ${parseFloat(registro.latitud).toFixed(6)}<br>
-        Longitud: ${parseFloat(registro.longitud).toFixed(6)}
-      </div>
-      <div><strong>Descripción:</strong><br>${registro.descripcion || 'Sin descripción'}</div>
-      ${fotoUrl ? `
-        <div>
-          <strong>Fotografía:</strong><br>
-          <img src="${fotoUrl}" alt="Foto del registro" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">
-        </div>
-      ` : '<div><strong>Fotografía:</strong> No disponible</div>'}
-      <div>
-        <strong>Ver en Google Maps:</strong><br>
-        <a href="https://www.google.com/maps?q=${registro.latitud},${registro.longitud}" target="_blank" style="color: #4CAF50; text-decoration: none;">
-          📍 Abrir ubicación en Google Maps
-        </a>
-      </div>
-    </div>
-  `
-  showModal.value = true
+  // Redirigir a la vista de registros para ver el detalle completo con mapa
+  router.push('/registros')
 }
 
 const verFoto = (fotoUrl) => {

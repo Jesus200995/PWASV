@@ -142,11 +142,17 @@ async function login() {
     const response = await axios.post(`${API_URL}/login`, {
       correo: email.value,
       contrasena: password.value
+    }, {
+      timeout: 10000, // 10 segundos de timeout
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     
     // Obtener datos del usuario desde la respuesta
     const userData = response.data;
-      // Guardar datos del usuario en localStorage
+    
+    // Guardar datos del usuario en localStorage
     localStorage.setItem('user', JSON.stringify(userData));
     
     // Establecer bandera para mostrar mensaje de bienvenida
@@ -159,11 +165,22 @@ async function login() {
     
     if (error.response) {
       // El servidor respondió con un estado de error
-      errorMessage.value = error.response.data.detail || 'Error al iniciar sesión. Verifica tus credenciales.';
+      const status = error.response.status;
+      if (status === 401) {
+        errorMessage.value = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+      } else if (status === 500) {
+        errorMessage.value = 'Error del servidor. Inténtalo de nuevo en unos minutos.';
+      } else {
+        errorMessage.value = error.response.data.detail || 'Error al iniciar sesión. Verifica tus credenciales.';
+      }
     } else if (error.request) {
       // La solicitud fue hecha pero no se recibió respuesta
-      errorMessage.value = 'No se pudo conectar con el servidor. Verifica tu conexión.';
-    } else {      // Algo ocurrió al configurar la solicitud
+      errorMessage.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+    } else if (error.code === 'ECONNABORTED') {
+      // Timeout
+      errorMessage.value = 'La conexión tardó demasiado. Verifica tu conexión a internet.';
+    } else {
+      // Algo ocurrió al configurar la solicitud
       errorMessage.value = 'Error al iniciar sesión: ' + error.message;
     }
     

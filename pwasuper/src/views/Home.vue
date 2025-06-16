@@ -415,7 +415,9 @@ async function enviarRegistro() {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-      timeout: 15000 // 15 segundos de timeout
+      timeout: 15000, // 15 segundos de timeout
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity
     });
 
     // Guardar en historial local

@@ -159,7 +159,10 @@ async function cargarRegistros() {
     
     // Obtener registros específicos del usuario actual
     const response = await axios.get(`${API_URL}/registros?usuario_id=${userInfo.value.id}`, {
-      timeout: 10000 // 10 segundos de timeout
+      timeout: 10000, // 10 segundos de timeout
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     
     console.log('Respuesta del servidor:', response.data);

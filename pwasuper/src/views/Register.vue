@@ -124,7 +124,14 @@ async function register() {
       cargo: form.cargo,
       supervisor: form.supervisor || null, // Enviar null si está vacío
       contrasena: form.password
-    });    // Mostrar mensaje de éxito
+    }, {
+      timeout: 10000, // 10 segundos de timeout
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    // Mostrar mensaje de éxito
     message.text = '¡Cuenta creada exitosamente! Redirigiendo...';
     message.type = 'success';
     
@@ -137,10 +144,20 @@ async function register() {
     
     if (error.response) {
       // Error de respuesta del servidor
-      message.text = error.response.data.detail || 'Error al crear la cuenta.';
+      const status = error.response.status;
+      if (status === 400) {
+        message.text = error.response.data.detail || 'El correo ya está registrado o los datos son inválidos.';
+      } else if (status === 500) {
+        message.text = 'Error del servidor. Inténtalo de nuevo en unos minutos.';
+      } else {
+        message.text = error.response.data.detail || 'Error al crear la cuenta.';
+      }
     } else if (error.request) {
       // Error de conexión
       message.text = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+    } else if (error.code === 'ECONNABORTED') {
+      // Timeout
+      message.text = 'La conexión tardó demasiado. Verifica tu conexión a internet.';
     } else {
       // Error general
       message.text = 'Error al crear la cuenta: ' + error.message;

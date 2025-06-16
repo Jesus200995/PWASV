@@ -187,6 +187,11 @@ const changePassword = async () => {
     const response = await axios.post(`${API_URL}/cambiar_contrasena`, {
       usuario_id: user.value.id,
       nueva_contrasena: passwordForm.value.newPassword
+    }, {
+      timeout: 10000, // 10 segundos de timeout
+      headers: {
+        'Content-Type': 'application/json'
+      }
     })
     
     // Verificar respuesta exitosa

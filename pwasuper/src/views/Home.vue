@@ -222,7 +222,7 @@
       :show="showModal" 
       title="¡Éxito!"
       message="¡Registro enviado y guardado correctamente!"
-      @close="showModal = false"
+      @close="closeSuccessModal"
     />
   </div>
 </template>
@@ -458,6 +458,22 @@ async function enviarRegistro() {
   }
 }
 
+// Función para cerrar el modal y limpiar el mapa si es necesario
+function closeSuccessModal() {
+  showModal.value = false;
+  
+  // Opcional: limpiar ubicación después de cerrar el modal
+  // latitud.value = null;
+  // longitud.value = null;
+  // mapVisible.value = false;
+  
+  // Si quieres mantener el mapa visible pero resetear el marcador
+  if (map.value && marker.value) {
+    map.value.removeLayer(marker.value);
+    marker.value = null;
+  }
+}
+
 // Comprobar si el usuario está autenticado y verificar conexión
 onMounted(async () => {
   // Verificar si el usuario está autenticado
@@ -482,6 +498,11 @@ onMounted(async () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Asegurar que el mapa no interfiera con otros elementos */
+#map {
+  z-index: 1 !important;
 }
 </style>
 
@@ -553,5 +574,20 @@ onMounted(async () => {
 .custom-marker:hover {
   transform: translate(-50%, -50%) scale(1.1);
   transition: transform 0.2s ease;
+}
+
+/* Corregir z-index del contenedor del mapa de Leaflet */
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+.leaflet-control-container {
+  z-index: 2 !important;
+}
+
+/* Asegurar que los controles de Leaflet no interfieran */
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 2 !important;
 }
 </style>

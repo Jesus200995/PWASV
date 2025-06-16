@@ -1,12 +1,15 @@
 from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.security import OAuth2PasswordRequestForm
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 import os
 import bcrypt
 from pydantic import BaseModel
+from jose import jwt
+from passlib.context import CryptContext
 
 app = FastAPI()
 
@@ -58,6 +61,10 @@ class PasswordChange(BaseModel):
 
 # Montar carpeta de fotos para servir estáticamente
 app.mount("/fotos", StaticFiles(directory="fotos"), name="fotos")
+
+# Configuración para autenticación JWT
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"  # Cambia esto por seguridad
 
 # Endpoints de autenticación
 @app.post("/usuarios")
@@ -211,6 +218,28 @@ def obtener_registros(usuario_id: int = None):
     except Exception as e:
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener registros: {str(e)}")
+
+# Endpoint de autenticación para administradores
+@app.post("/admin/login")
+def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
+    try:
+        username = form_data.username
+        password = form_data.password
+        
+        # Buscar usuario administrador en la base de datos
+        cursor.execute("SELECT password FROM admin_users WHERE username = %s", (username,))
+        row = cursor.fetchone()
+        
+        if not row or not pwd_context.verify(password, row[0]):
+            raise HTTPException(status_code=400, detail="Credenciales incorrectas")
+        
+        # Generar token JWT
+        token = jwt.encode({"sub": username, "role": "admin"}, SECRET_KEY, algorithm="HS256")
+        return {"access_token": token, "token_type": "bearer"}
+        
+    except Exception as e:
+        print(f"❌ Error en admin login: {e}")
+        raise HTTPException(status_code=500, detail=f"Error en autenticación: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

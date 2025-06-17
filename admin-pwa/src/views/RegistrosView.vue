@@ -315,11 +315,10 @@ const cerrarModal = () => {
 }
 
 const logout = () => {
-  if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-    localStorage.removeItem('admin_token')
-    localStorage.removeItem('admin_user')
-    router.push('/login')
-  }
+  // No usar confirm(), el modal se maneja en el Sidebar
+  localStorage.removeItem('admin_token')
+  localStorage.removeItem('admin_user')
+  router.push('/login')
 }
 </script>
 

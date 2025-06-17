@@ -128,9 +128,7 @@
           </div>
         </div>
       </div>
-    </main>
-
-    <!-- Modal para mensajes -->
+    </main>    <!-- Modal para mensajes -->
     <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
@@ -139,7 +137,14 @@
         </div>
         <div class="modal-body" v-html="modalContent"></div>
       </div>
-    </div>
+    </div>    <!-- Modal de confirmación -->
+    <ConfirmModal
+      :show="showConfirmModal"
+      :title="confirmTitle"
+      :message="confirmMessage"
+      @confirm="handleConfirm"
+      @cancel="handleCancel"
+    />
   </div>
 </template>
 
@@ -148,12 +153,19 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
+import ConfirmModal from '../components/ConfirmModal.vue'
 
 const router = useRouter()
 
 const adminUser = ref(localStorage.getItem('admin_user') || 'Admin')
 const checking = ref(false)
 const exporting = ref(false)
+
+// Variables para el modal de confirmación
+const showConfirmModal = ref(false)
+const confirmAction = ref(null)
+const confirmTitle = ref('')
+const confirmMessage = ref('')
 
 const apiConfig = reactive({
   url: 'https://apipwa.sembrandodatos.com',
@@ -273,30 +285,58 @@ const exportarDatos = async () => {
   }
 }
 
-const limpiarCache = () => {
-  if (confirm('¿Estás seguro de que quieres limpiar el cache? Esto eliminará datos temporales almacenados.')) {
-    // Limpiar cache del navegador (localStorage excepto tokens)
-    const token = localStorage.getItem('admin_token')
-    const user = localStorage.getItem('admin_user')
-    
-    localStorage.clear()
-    
-    if (token) localStorage.setItem('admin_token', token)
-    if (user) localStorage.setItem('admin_user', user)
-    
-    // Guardar configuraciones actuales
-    localStorage.setItem('admin_api_config', JSON.stringify(apiConfig))
-    localStorage.setItem('admin_app_config', JSON.stringify(appConfig))
-    
-    mostrarMensaje('Éxito', 'Cache limpiado correctamente.')
+// Funciones para el modal de confirmación
+const showConfirmation = (title, message, action) => {
+  confirmTitle.value = title
+  confirmMessage.value = message
+  confirmAction.value = action
+  showConfirmModal.value = true
+}
+
+const handleConfirm = () => {
+  if (confirmAction.value) {
+    confirmAction.value()
   }
+  showConfirmModal.value = false
+}
+
+const handleCancel = () => {
+  showConfirmModal.value = false
+  confirmAction.value = null
+}
+
+const limpiarCache = () => {
+  showConfirmation(
+    'Limpiar Cache',
+    '¿Estás seguro de que quieres limpiar el cache? Esto eliminará datos temporales almacenados.',
+    () => {
+      // Limpiar cache del navegador (localStorage excepto tokens)
+      const token = localStorage.getItem('admin_token')
+      const user = localStorage.getItem('admin_user')
+      
+      localStorage.clear()
+      
+      if (token) localStorage.setItem('admin_token', token)
+      if (user) localStorage.setItem('admin_user', user)
+      
+      // Guardar configuraciones actuales
+      localStorage.setItem('admin_api_config', JSON.stringify(apiConfig))
+      localStorage.setItem('admin_app_config', JSON.stringify(appConfig))
+      
+      mostrarMensaje('Éxito', 'Cache limpiado correctamente.')
+    }
+  )
 }
 
 const reiniciarContadores = () => {
-  if (confirm('¿Estás seguro de que quieres reiniciar los contadores del sistema?')) {
-    // Simular reinicio de contadores
-    mostrarMensaje('Éxito', 'Contadores del sistema reiniciados correctamente.')
-  }
+  showConfirmation(
+    'Reiniciar Contadores',
+    '¿Estás seguro de que quieres reiniciar los contadores del sistema?',
+    () => {
+      // Simular reinicio de contadores
+      mostrarMensaje('Éxito', 'Contadores del sistema reiniciados correctamente.')
+    }
+  )
 }
 
 const mostrarLogs = () => {
@@ -321,11 +361,10 @@ const cerrarModal = () => {
 }
 
 const logout = () => {
-  if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-    localStorage.removeItem('admin_token')
-    localStorage.removeItem('admin_user')
-    router.push('/login')
-  }
+  // No usar confirm(), el modal se maneja en el Sidebar
+  localStorage.removeItem('admin_token')
+  localStorage.removeItem('admin_user')
+  router.push('/login')
 }
 </script>
 

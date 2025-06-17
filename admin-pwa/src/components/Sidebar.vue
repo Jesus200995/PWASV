@@ -110,9 +110,8 @@
         </li>
       </ul>
     </nav>
-    
-    <div class="sidebar-footer">
-      <button @click="$emit('logout')" class="logout-btn">
+      <div class="sidebar-footer">
+      <button @click="showLogoutModal = true" class="logout-btn">
         <div class="btn-icon-wrapper">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
             <path d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z"/>
@@ -122,11 +121,67 @@
         <div class="btn-glow"></div>
       </button>
     </div>
+    
+    <!-- Modal de confirmación de logout -->
+    <Teleport to="body">
+      <div v-if="showLogoutModal" class="logout-modal-overlay" @click="closeModal">
+        <div class="logout-modal" @click.stop>
+          <div class="modal-header">
+            <div class="modal-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z"/>
+              </svg>
+            </div>
+            <h3>Cerrar Sesión</h3>
+          </div>
+          
+          <div class="modal-body">
+            <p>¿Estás seguro de que quieres cerrar sesión?</p>
+          </div>
+          
+          <div class="modal-actions">
+            <button @click="closeModal" class="btn-cancel">
+              Cancelar
+            </button>
+            <button @click="confirmLogout" class="btn-confirm">
+              Aceptar
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-defineEmits(['logout'])
+import { ref } from 'vue'
+
+const emit = defineEmits(['logout'])
+
+// Estado del modal
+const showLogoutModal = ref(false)
+
+// Funciones del modal
+const closeModal = () => {
+  showLogoutModal.value = false
+}
+
+const confirmLogout = () => {
+  showLogoutModal.value = false
+  emit('logout')
+}
+
+// Cerrar modal con Escape
+const handleKeydown = (event) => {
+  if (event.key === 'Escape' && showLogoutModal.value) {
+    closeModal()
+  }
+}
+
+// Agregar listener para Escape
+if (typeof window !== 'undefined') {
+  window.addEventListener('keydown', handleKeydown)
+}
 </script>
 
 <style scoped>
@@ -710,5 +765,261 @@ defineEmits(['logout'])
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+/* Estilos del Modal de Logout */
+.logout-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+.logout-modal {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  max-width: 400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 30px 30px 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.modal-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+}
+
+.modal-icon svg {
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2E7D32;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.modal-body {
+  padding: 20px 30px;
+  text-align: center;
+}
+
+.modal-body p {
+  margin: 0;
+  font-size: 16px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  padding: 20px 30px 30px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-cancel,
+.btn-confirm {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 120px;
+}
+
+.btn-cancel {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  color: #666;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.btn-cancel:hover {
+  background: linear-gradient(135deg, #eeeeee 0%, #d5d5d5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.btn-confirm:hover {
+  background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.btn-confirm::before,
+.btn-cancel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-confirm:hover::before,
+.btn-cancel:hover::before {
+  left: 100%;
+}
+
+.btn-confirm:active,
+.btn-cancel:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .logout-modal {
+    margin: 10px;
+    border-radius: 16px;
+  }
+  
+  .modal-header {
+    padding: 24px 20px 16px;
+  }
+  
+  .modal-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 12px;
+  }
+  
+  .modal-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .modal-header h3 {
+    font-size: 20px;
+  }
+  
+  .modal-body {
+    padding: 16px 20px;
+  }
+  
+  .modal-body p {
+    font-size: 15px;
+  }
+  
+  .modal-actions {
+    padding: 16px 20px 24px;
+    flex-direction: column;
+  }
+  
+  .btn-cancel,
+  .btn-confirm {
+    min-width: auto;
+    padding: 14px 20px;
+  }
+}
+
+/* Animación de cierre */
+.logout-modal-overlay.fade-out {
+  animation: overlayFadeOut 0.3s ease-in;
+}
+
+.logout-modal-overlay.fade-out .logout-modal {
+  animation: modalSlideOut 0.3s ease-in;
+}
+
+@keyframes overlayFadeOut {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
+  }
 }
 </style>

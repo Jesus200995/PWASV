@@ -1,6 +1,5 @@
 // Servicio para manejo de usuarios usando la API real con endpoints GET
-// NOTA: Usando servidor local temporalmente hasta que se despliegue el remoto
-const API_BASE = 'http://localhost:8000'; // Cambiar a 'https://apipwa.sembrandodatos.com' cuando esté desplegado
+const API_BASE = 'https://apipwa.sembrandodatos.com'; // Servidor remoto definitivo
 
 class UsuariosService {
   constructor() {

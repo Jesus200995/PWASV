@@ -6,9 +6,54 @@
       <div class="liquid-shape shape-2"></div>
       <div class="liquid-shape shape-3"></div>
     </div>
-    
-    <div class="sidebar-header">
-      <div class="logo">🌱</div>
+      <div class="sidebar-header">
+      <div class="logo">
+        <!-- Icono de localización/ubicación profesional animado -->
+        <svg class="location-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="sidebarLocationGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#66BB6A;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#81C784;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="sidebarPinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#2E7D32;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:1" />
+            </linearGradient>
+            <filter id="sidebarGlow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <filter id="sidebarShadow">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#2E7D32" flood-opacity="0.3"/>
+            </filter>
+          </defs>
+          
+          <!-- Pin de ubicación principal -->
+          <path class="sidebar-location-pin" 
+                d="M50 15 C35 15 25 25 25 40 C25 55 50 80 50 80 C50 80 75 55 75 40 C75 25 65 15 50 15 Z" 
+                fill="url(#sidebarLocationGradient)" 
+                filter="url(#sidebarShadow)"/>
+          
+          <!-- Círculo interior del pin -->
+          <circle class="sidebar-pin-center" cx="50" cy="40" r="12" fill="url(#sidebarPinGradient)"/>
+          <circle class="sidebar-pin-dot" cx="50" cy="40" r="6" fill="#FFFFFF"/>
+          
+          <!-- Ondas de señal -->
+          <circle class="sidebar-signal-wave sidebar-wave1" cx="50" cy="40" r="20" fill="none" stroke="#4CAF50" stroke-width="2" opacity="0"/>
+          <circle class="sidebar-signal-wave sidebar-wave2" cx="50" cy="40" r="25" fill="none" stroke="#66BB6A" stroke-width="1.5" opacity="0"/>
+          <circle class="sidebar-signal-wave sidebar-wave3" cx="50" cy="40" r="30" fill="none" stroke="#81C784" stroke-width="1" opacity="0"/>
+          
+          <!-- Puntos de referencia alrededor -->
+          <circle class="sidebar-ref-point sidebar-point1" cx="20" cy="25" r="2" fill="#4CAF50" opacity="0.6"/>
+          <circle class="sidebar-ref-point sidebar-point2" cx="80" cy="30" r="1.5" fill="#66BB6A" opacity="0.7"/>
+          <circle class="sidebar-ref-point sidebar-point3" cx="15" cy="60" r="1.8" fill="#81C784" opacity="0.5"/>
+          <circle class="sidebar-ref-point sidebar-point4" cx="85" cy="65" r="2.2" fill="#4CAF50" opacity="0.6"/>
+        </svg>
+      </div>
       <div class="logo-text">
         <h2>Sembrando Vida</h2>
         <p>Admin Panel</p>
@@ -186,9 +231,149 @@ defineEmits(['logout'])
 }
 
 .logo {
-  font-size: 36px;
   min-width: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.location-icon {
+  width: 40px;
+  height: 40px;
+  animation: sidebarIconFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 2px 8px rgba(76, 175, 80, 0.3));
+  transition: all 0.3s ease;
+}
+
+.location-icon:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 12px rgba(76, 175, 80, 0.4));
+}
+
+/* Animaciones del icono en sidebar */
+@keyframes sidebarIconFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Animación del pin de ubicación en sidebar */
+.sidebar-location-pin {
+  animation: sidebarPinPulse 2.5s ease-in-out infinite;
+  transform-origin: 50px 40px;
+}
+
+@keyframes sidebarPinPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: url(#sidebarShadow) brightness(1);
+  }
+  50% {
+    transform: scale(1.03);
+    filter: url(#sidebarShadow) brightness(1.1);
+  }
+}
+
+/* Animación del centro del pin en sidebar */
+.sidebar-pin-center {
+  animation: sidebarCenterGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes sidebarCenterGlow {
+  0% {
+    r: 12;
+    opacity: 1;
+  }
+  100% {
+    r: 13;
+    opacity: 0.8;
+  }
+}
+
+/* Animación del punto central en sidebar */
+.sidebar-pin-dot {
+  animation: sidebarDotPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes sidebarDotPulse {
+  0%, 100% {
+    r: 6;
+    opacity: 1;
+  }
+  50% {
+    r: 5;
+    opacity: 0.8;
+  }
+}
+
+/* Animaciones de las ondas de señal en sidebar */
+.sidebar-signal-wave {
+  animation: sidebarSignalRipple 4s ease-out infinite;
+}
+
+.sidebar-wave1 {
+  animation-delay: 0s;
+}
+
+.sidebar-wave2 {
+  animation-delay: 1.3s;
+}
+
+.sidebar-wave3 {
+  animation-delay: 2.6s;
+}
+
+@keyframes sidebarSignalRipple {
+  0% {
+    r: 15;
+    opacity: 0.6;
+    stroke-width: 2;
+  }
+  50% {
+    opacity: 0.3;
+    stroke-width: 1.5;
+  }
+  100% {
+    r: 32;
+    opacity: 0;
+    stroke-width: 0.5;
+  }
+}
+
+/* Animación de los puntos de referencia en sidebar */
+.sidebar-ref-point {
+  animation: sidebarPointTwinkle 5s ease-in-out infinite;
+}
+
+.sidebar-point1 {
+  animation-delay: 0s;
+}
+
+.sidebar-point2 {
+  animation-delay: 1.25s;
+}
+
+.sidebar-point3 {
+  animation-delay: 2.5s;
+}
+
+.sidebar-point4 {
+  animation-delay: 3.75s;
+}
+
+@keyframes sidebarPointTwinkle {
+  0%, 85%, 100% {
+    opacity: 0.4;
+    r: 1.5;
+  }
+  15% {
+    opacity: 1;
+    r: 2.5;
+  }
 }
 
 .logo-text h2 {

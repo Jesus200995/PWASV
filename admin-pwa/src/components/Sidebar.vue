@@ -57,8 +57,24 @@
       <div class="logo-text">
         <h2>Sembrando Vida</h2>
         <p>Admin Panel</p>
-      </div>
+      </div>    </div>
+    
+    <!-- Botón para ir al geoportal -->
+    <div class="geoportal-section">
+      <a href="https://geoportal.sembrandodatos.com/" target="_blank" class="geoportal-btn">
+        <div class="geoportal-icon-wrapper">
+          <svg class="geoportal-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/>
+          </svg>
+          <svg class="arrow-icon" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+          </svg>
+        </div>
+        <span class="geoportal-text">Ir a Inicio Geoportal</span>
+        <div class="geoportal-glow"></div>
+      </a>
     </div>
+      
       <nav class="sidebar-nav">
       <ul>
         <li class="nav-item" :class="{ active: $route.name === 'Dashboard' }">
@@ -444,6 +460,131 @@ if (typeof window !== 'undefined') {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
+}
+
+/* Estilos para el botón del geoportal */
+.geoportal-section {
+  padding: 16px 16px 20px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.geoportal-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    transparent 100%);
+}
+
+.geoportal-btn {
+  width: 100%;
+  background: linear-gradient(135deg, 
+    rgba(33, 150, 243, 0.9) 0%, 
+    rgba(25, 118, 210, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 15px rgba(33, 150, 243, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.geoportal-btn:hover {
+  background: linear-gradient(135deg, 
+    rgba(33, 150, 243, 1) 0%, 
+    rgba(25, 118, 210, 1) 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(33, 150, 243, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.geoportal-btn:hover .geoportal-glow {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.geoportal-btn:hover .arrow-icon {
+  transform: translateX(4px);
+}
+
+.geoportal-btn:active {
+  transform: translateY(0px);
+}
+
+.geoportal-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  gap: 4px;
+}
+
+.geoportal-icon {
+  width: 18px;
+  height: 18px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  animation: geoportalPulse 2s ease-in-out infinite;
+}
+
+.arrow-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.geoportal-text {
+  font-size: 14px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  flex: 1;
+}
+
+.geoportal-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  border-radius: 12px;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+@keyframes geoportalPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
 }
 
 .sidebar-nav {

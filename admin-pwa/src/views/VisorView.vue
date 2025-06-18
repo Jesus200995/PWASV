@@ -670,7 +670,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 .page-header {
   background: white;
   border-bottom: 1px solid #e0e0e0;
-  padding: 24px 32px;
+  padding: 14px 32px; /* Reducido de 24px a 14px */
 }
 
 .header-content {
@@ -680,14 +680,14 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .header-content h1 {
-  font-size: 28px;
+  font-size: 24px; /* Reducido de 28px a 24px */
   color: #2c3e50;
-  margin-bottom: 4px;
+  margin-bottom: 2px; /* Reducido de 4px a 2px */
 }
 
 .header-content p {
   color: #7f8c8d;
-  font-size: 14px;
+  font-size: 13px; /* Reducido de 14px a 13px */
 }
 
 .refresh-btn {
@@ -724,29 +724,31 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .page-content {
-  padding: 24px 32px;
+  padding: 16px 32px; /* Reducido el padding vertical de 24px a 16px */
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  height: calc(100vh - 120px);
+  gap: 16px; /* Reducido de 24px a 16px */
+  height: calc(100vh - 90px); /* Ajustado para la nueva altura del encabezado */
+  position: relative; /* Añadido para posicionamiento correcto del panel de detalles */
 }
 
 /* Controles del mapa */
 .map-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px; /* Reducido de 16px a 12px */
   background: white;
-  padding: 16px;
+  padding: 12px; /* Reducido de 16px a 12px */
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 12px; /* Añadido para dar espacio al panel de detalles */
 }
 
 .control-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 200px;
+  gap: 4px; /* Reducido de 6px a 4px */
+  min-width: 180px; /* Reducido de 200px a 180px */
   flex: 1;
 }
 
@@ -762,10 +764,10 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .control-select, .control-input {
-  padding: 10px 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 8px 10px; /* Reducido de 10px 12px a 8px 10px */
+  border: 1px solid #e0e0e0; /* Reducido de 2px a 1px */
+  border-radius: 6px; /* Reducido de 8px a 6px */
+  font-size: 13px; /* Reducido de 14px a 13px */
   transition: all 0.2s;
 }
 
@@ -899,15 +901,16 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 /* Panel de información del registro seleccionado */
 .registro-info-panel {
-  position: fixed;
-  top: 100px;
+  position: absolute;
+  top: 84px; /* Posicionado justo debajo de los controles del mapa */
   right: 20px;
-  width: 360px;
+  width: 320px; /* Reducido de 360px a 320px */
   max-width: 100%;
+  max-height: calc(100% - 100px); /* Limitar altura para no superponer con otros elementos */
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
+  overflow: auto; /* Cambiado a auto para permitir scroll si el contenido es grande */
   z-index: 900;
   animation: slideinPanel 0.3s ease-out;
 }
@@ -924,27 +927,30 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .panel-header {
-  padding: 16px 20px;
+  padding: 12px 16px; /* Reducido de 16px 20px a 12px 16px */
   background: #4CAF50;
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky; /* Mantener el encabezado visible durante el scroll */
+  top: 0;
+  z-index: 5;
 }
 
 .panel-header h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px; /* Reducido de 18px a 16px */
 }
 
 .close-panel-btn {
   background: none;
   border: none;
   color: white;
-  font-size: 24px;
+  font-size: 22px; /* Reducido de 24px a 22px */
   cursor: pointer;
-  width: 30px;
-  height: 30px;
+  width: 28px; /* Reducido de 30px a 28px */
+  height: 28px; /* Reducido de 30px a 28px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -957,16 +963,16 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .panel-content {
-  padding: 16px 20px;
-  max-height: 60vh;
+  padding: 14px 16px; /* Reducido de 16px 20px a 14px 16px */
+  max-height: calc(100% - 50px); /* Ajuste para considerar la altura del header */
   overflow-y: auto;
 }
 
 .info-row {
-  margin-bottom: 12px;
-  padding-bottom: 12px;
+  margin-bottom: 10px; /* Reducido de 12px a 10px */
+  padding-bottom: 10px; /* Reducido de 12px a 10px */
   border-bottom: 1px solid #f0f0f0;
-  font-size: 14px;
+  font-size: 13px; /* Reducido de 14px a 13px */
 }
 
 .info-row:last-child {
@@ -979,13 +985,15 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .info-photo {
-  margin-top: 16px;
-  margin-bottom: 16px;
+  margin-top: 12px; /* Reducido de 16px a 12px */
+  margin-bottom: 12px; /* Reducido de 16px a 12px */
+  text-align: center;
 }
 
 .info-photo img {
   width: 100%;
-  height: auto;
+  max-height: 180px; /* Limitar altura máxima */
+  object-fit: cover;
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.2s;
@@ -997,19 +1005,21 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .panel-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px; /* Reducido de 10px a 8px */
+  margin-top: 12px; /* Reducido de 16px a 12px */
+  flex-wrap: wrap; /* Permitir que los botones se envuelvan en pantallas pequeñas */
 }
 
 .action-btn {
   flex: 1;
-  padding: 10px;
+  padding: 8px 10px; /* Reducido de 10px a 8px 10px */
   border: none;
-  border-radius: 8px;
+  border-radius: 6px; /* Reducido de 8px a 6px */
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px; /* Reducido de 14px a 13px */
   font-weight: 500;
   transition: all 0.2s;
+  min-width: 100px; /* Asegurar botones con ancho adecuado */
 }
 
 .center-btn {
@@ -1230,7 +1240,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 /* Responsive */
 @media (max-width: 1200px) {
   .registro-info-panel {
-    width: 320px;
+    width: 300px;
+    top: 78px; /* Ajustado para adaptarse a la nueva altura de los controles */
   }
 }
 
@@ -1242,6 +1253,10 @@ watch([filtroTipo, filtroPeriodo], () => {
   .search-group {
     min-width: 200px;
   }
+  
+  .registro-info-panel {
+    width: 280px; /* Reducido para pantallas medianas */
+  }
 }
 
 @media (max-width: 768px) {
@@ -1250,23 +1265,24 @@ watch([filtroTipo, filtroPeriodo], () => {
   }
   
   .page-header {
-    padding: 16px 20px;
+    padding: 14px 20px;
   }
   
   .header-content {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: flex-start;
   }
   
   .page-content {
-    padding: 16px 20px;
+    padding: 12px 20px;
     height: auto;
   }
   
   .map-controls {
     flex-direction: column;
     gap: 12px;
+    padding: 10px;
   }
   
   .control-group {
@@ -1289,7 +1305,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   }
   
   .panel-content {
-    max-height: 30vh;
+    max-height: 35vh;
   }
   
   .map-legend {
@@ -1327,5 +1343,16 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 :global(.estado-badge.antiguo) {
   background-color: #FF9800;
+}
+
+/* Mejoras para badges en el panel de detalles */
+.ubicacion-badge, .estado-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin: 2px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 </style>

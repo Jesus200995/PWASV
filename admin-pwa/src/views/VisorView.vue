@@ -380,29 +380,65 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
         iconSize: iconSize,
         iconAnchor: [iconSize[0] / 2, iconSize[0] / 2],
         popupAnchor: [0, -iconSize[0] / 2]
-      })
-        // Crear marcador y popup
+      })        // Crear marcador y popup
       const marker = window.L.marker([lat, lng], { icon: customIcon })
         .bindPopup(`
-          <div class="marker-popup">
-            <h3>Registro #${registro.id}</h3>
-            <p><strong>Usuario:</strong> ${registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`}</p>
-            <p><strong>Fecha:</strong> ${formatFecha(registro.fecha_hora)}</p>
-            <p><strong>Estado:</strong> <span class="estado-badge ${esReciente ? 'reciente' : 'antiguo'}">${esReciente ? 'Hoy' : 'Días anteriores'}</span></p>
-            <p><strong>Última ubicación:</strong> Sí</p>
-            <button class="popup-btn">Ver detalles</button>
+          <div class="modern-marker-popup">
+            <div class="popup-header">
+              <div class="popup-title">
+                <span class="popup-id">#${registro.id}</span>
+                <h3>Registro de Usuario</h3>
+              </div>
+              <div class="popup-status">
+                <span class="status-badge ${esReciente ? 'recent' : 'old'}">${esReciente ? 'Hoy' : 'Anterior'}</span>
+              </div>
+            </div>
+            
+            <div class="popup-content">
+              <div class="user-info">
+                <div class="user-avatar">
+                  <span class="avatar-text">${(registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`).charAt(0).toUpperCase()}</span>
+                </div>                <div class="user-details">
+                  <div class="user-name">${registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`}</div>
+                  <div class="user-email">
+                    <span class="email-icon">📧</span>
+                    <span class="email-text">${registro.usuario?.correo || registro.usuario?.email || 'correo@noregistrado.com'}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="popup-info">
+                <div class="info-item">
+                  <span class="info-icon">📅</span>
+                  <span class="info-text">${formatFecha(registro.fecha_hora)}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon">📍</span>
+                  <span class="info-text">Última ubicación conocida</span>
+                </div>
+              </div>
+              
+              <div class="popup-actions">
+                <button class="modern-popup-btn">
+                  <span class="btn-icon">👁️</span>
+                  Ver detalles completos
+                </button>
+              </div>
+            </div>
           </div>
-        `)
+        `, {
+          maxWidth: 300,
+          className: 'modern-popup-container'
+        })
       
       // Añadir evento de click para mostrar más detalles
       marker.on('click', () => {
         mostrarDetallesRegistro(registro)
       })
-      
-      // Añadir evento al botón dentro del popup
+        // Añadir evento al botón dentro del popup
       marker.on('popupopen', () => {
         setTimeout(() => {
-          const btn = document.querySelector('.popup-btn')
+          const btn = document.querySelector('.modern-popup-btn')
           if (btn) {
             btn.addEventListener('click', () => {
               mostrarDetallesRegistro(registro)
@@ -1197,184 +1233,448 @@ watch([filtroTipo, filtroPeriodo], () => {
   }
 }
 
-:global(.marker-popup) {
-  text-align: center;
-  min-width: 200px;
+/* Estilos para el popup moderno del marcador */
+:global(.modern-popup-container .leaflet-popup-content-wrapper) {
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: none;
+  padding: 0;
+  overflow: hidden;
+  animation: popupFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-:global(.marker-popup h3) {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: #2c3e50;
+:global(.modern-popup-container .leaflet-popup-content) {
+  margin: 0;
+  padding: 0;
+  width: 300px !important;
+}
+
+:global(.modern-popup-container .leaflet-popup-tip) {
+  background: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+:global(.modern-popup-container .leaflet-container a.leaflet-popup-close-button) {
+  top: 12px;
+  right: 12px;
+  color: #666;
+  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+:global(.modern-popup-container .leaflet-container a.leaflet-popup-close-button:hover) {
+  background: rgba(255, 255, 255, 1);
+  color: #333;
+  transform: scale(1.1);
+}
+
+@keyframes popupFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+:global(.modern-marker-popup) {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+  overflow: hidden;
+  min-width: 280px;
+  animation: slideInContent 0.5s ease-out 0.1s both;
+}
+
+@keyframes slideInContent {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:global(.popup-header) {
+  padding: 16px 20px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+:global(.popup-title) {
+  flex: 1;
+}
+
+:global(.popup-id) {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+:global(.popup-title h3) {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:global(.popup-status) {
+  animation: bounceIn 0.8s ease-out 0.4s both;
+}
+
+:global(.status-badge) {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+:global(.status-badge.recent) {
+  background: rgba(76, 175, 80, 0.9);
+  color: white;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  animation: pulseGreen 2s ease-in-out infinite 2s;
+}
+
+:global(.status-badge.old) {
+  background: rgba(255, 152, 0, 0.9);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  animation: pulseOrange 2s ease-in-out infinite 2s;
+}
+
+@keyframes pulseGreen {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 15px rgba(76, 175, 80, 0.6);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulseOrange {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 15px rgba(255, 152, 0, 0.6);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+:global(.popup-content) {
+  padding: 20px;
+}
+
+:global(.user-info) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  animation: slideInLeft 0.7s ease-out 0.5s both;
+}
+
+@keyframes slideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+:global(.user-avatar) {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: rotateIn 0.8s ease-out 0.6s both;
+}
+
+@keyframes rotateIn {
+  0% {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+:global(.avatar-text) {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+:global(.user-details) {
+  flex: 1;
+  min-width: 0;
+}
+
+:global(.user-name) {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: white;
+  animation: fadeInRight 0.6s ease-out 0.7s both;
+}
+
+:global(.user-email) {
+  font-size: 13px;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.8);
+  word-break: break-word;
+  animation: typewriterEmail 1.2s ease-out 0.8s both;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+:global(.email-icon) {
+  font-size: 12px;
+  opacity: 0;
+  animation: bounceInIcon 0.6s ease-out 1.2s both;
+}
+
+@keyframes bounceInIcon {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(180deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.2) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+:global(.email-text) {
+  flex: 1;
+  min-width: 0;
+}
+
+@keyframes typewriterEmail {
+  0% {
+    opacity: 0;
+    width: 0;
+    transform: translateX(-10px);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0.9;
+    width: 100%;
+  }
+}
+
+/* Efecto adicional de destello para el email */
+:global(.user-email::after) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: emailShine 2s ease-out 1.5s;
+}
+
+@keyframes emailShine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+:global(.popup-info) {
+  margin-bottom: 20px;
+}
+
+:global(.info-item) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+:global(.info-item:nth-child(1)) {
+  animation-delay: 0.9s;
+}
+
+:global(.info-item:nth-child(2)) {
+  animation-delay: 1s;
+}
+
+:global(.info-icon) {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+:global(.info-text) {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+:global(.popup-actions) {
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out 1.1s both;
+}
+
+:global(.modern-popup-btn) {
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+:global(.modern-popup-btn:hover) {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+:global(.modern-popup-btn:hover .btn-icon) {
+  transform: scale(1.1);
+  animation: wiggle 0.6s ease-in-out;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg) scale(1.1); }
+  25% { transform: rotate(-3deg) scale(1.1); }
+  75% { transform: rotate(3deg) scale(1.1); }
+}
+
+:global(.modern-popup-btn:active) {
+  transform: translateY(0);
+}
+
+:global(.btn-icon) {
   font-size: 16px;
 }
 
-:global(.marker-popup p) {
-  margin: 5px 0;
-  font-size: 14px;
-}
-
-:global(.popup-btn) {
-  margin-top: 10px;
-  padding: 6px 12px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-:global(.popup-btn:hover) {
-  background: #45a049;
-}
-
-:global(.leaflet-popup-content-wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.2);
-}
-
-:global(.leaflet-popup-content) {
-  margin: 12px 16px;
-}
-
-:global(.leaflet-container a.leaflet-popup-close-button) {
-  top: 10px;
-  right: 10px;
-  color: #333;
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-  .registro-info-panel {
-    width: 280px; /* Reducido de 300px a 280px */
-    top: 75px; /* Ajustado para los controles más pequeños */
-  }
-}
-
-@media (max-width: 992px) {
-  .control-group {
-    min-width: 140px; /* Reducido de 150px a 140px */
-  }
-  
-  .search-group {
-    min-width: 180px; /* Reducido de 200px a 180px */
-  }
-  
-  .registro-info-panel {
-    width: 260px; /* Reducido para pantallas medianas */
-    top: 72px;
-  }
-  
-  .map-controls {
-    padding: 6px 10px; /* Aún más compacto en pantallas medianas */
-  }
-}
-
+/* Responsive para popup moderno */
 @media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
+  :global(.modern-popup-container .leaflet-popup-content) {
+    width: 250px !important;
   }
   
-  .page-header {
-    padding: 12px 16px; /* Reducido de 14px 20px */
+  :global(.modern-marker-popup) {
+    min-width: 240px;
   }
   
-  .header-content {
-    flex-direction: column;
-    gap: 10px; /* Reducido de 12px a 10px */
-    align-items: flex-start;
+  :global(.popup-header) {
+    padding: 12px 16px 8px;
   }
   
-  .page-content {
-    padding: 10px 16px; /* Reducido de 12px 20px */
-    height: auto;
+  :global(.popup-title h3) {
+    font-size: 16px;
   }
   
-  .map-controls {
-    flex-direction: column;
-    gap: 8px; /* Reducido de 12px a 8px */
-    padding: 8px; /* Reducido de 10px a 8px */
+  :global(.popup-content) {
+    padding: 16px;
   }
   
-  .control-group {
-    width: 100%;
-    min-width: auto;
+  :global(.user-avatar) {
+    width: 40px;
+    height: 40px;
   }
   
-  .visor-section {
-    height: 60vh;
+  :global(.avatar-text) {
+    font-size: 18px;
   }
   
-  .registro-info-panel {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    border-radius: 10px 10px 0 0; /* Ajustado al nuevo border-radius */
-    max-height: 45vh; /* Reducido de 50vh a 45vh */
+  :global(.user-name) {
+    font-size: 14px;
+  }
+    :global(.user-email) {
+    font-size: 12px;
+    gap: 4px;
   }
   
-  .panel-content {
-    max-height: 30vh; /* Reducido de 35vh a 30vh */
+  :global(.email-icon) {
+    font-size: 11px;
   }
   
-  .map-legend {
-    bottom: 8px; /* Reducido de 10px a 8px */
-    left: 8px; /* Reducido de 10px a 8px */
-    right: auto;
-    padding: 8px; /* Reducido de 12px a 8px */
+  :global(.modern-popup-btn) {
+    padding: 10px 16px;
+    font-size: 13px;
   }
-}
-
-/* Estilos para badge de última ubicación */
-.ubicacion-badge {
-  display: inline-block;
-  font-size: 0.75rem;
-  background-color: #4CAF50;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 10px;
-  margin-left: 8px;
-  font-weight: 500;
-}
-
-/* Estilos para las etiquetas de estado en los popups */
-:global(.estado-badge) {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 0.75rem;
-  color: white;
-  font-weight: 500;
-}
-
-:global(.estado-badge.reciente) {
-  background-color: #4CAF50;
-}
-
-:global(.estado-badge.antiguo) {
-  background-color: #FF9800;
-}
-
-/* Mejoras para badges en el panel de detalles */
-.ubicacion-badge, .estado-badge {
-  display: inline-block;
-  font-size: 0.65rem; /* Reducido de 0.7rem a 0.65rem */
-  padding: 1px 4px; /* Reducido padding horizontal */
-  border-radius: 8px; /* Reducido de 10px a 8px */
-  margin: 1px; /* Reducido de 2px a 1px */
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-/* Mejoras adicionales para la compactación */
-.control-input {
-  padding-right: 32px; /* Ajustado para el botón más pequeño */
-}
-
-.search-wrapper .control-input {
-  height: 32px; /* Asegurar altura consistente */
 }
 </style>

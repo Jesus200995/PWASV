@@ -58,8 +58,7 @@
         <h2>Sembrando Vida</h2>
         <p>Admin Panel</p>
       </div>    </div>
-    
-    <!-- Botón para ir al geoportal -->
+      <!-- Botón para ir al geoportal -->
     <div class="geoportal-section">
       <a href="https://geoportal.sembrandodatos.com/" target="_blank" class="geoportal-btn">
         <div class="geoportal-icon-wrapper">
@@ -72,6 +71,20 @@
         </div>
         <span class="geoportal-text">Ir a Inicio Geoportal</span>
         <div class="geoportal-glow"></div>
+      </a>
+      
+      <!-- Botón para ir a la App Móvil -->
+      <a href="https://app.sembrandodatos.com/login" target="_blank" class="mobile-app-btn">
+        <div class="mobile-app-icon-wrapper">
+          <svg class="mobile-app-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17,19H7V5H17M17,1H7C5.89,1 5,1.89 5,3V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V3C19,1.89 18.1,1 17,1Z"/>
+          </svg>
+          <svg class="mobile-arrow-icon" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+          </svg>
+        </div>
+        <span class="mobile-app-text">App Móvil</span>
+        <div class="mobile-app-glow"></div>
       </a>
     </div>
       
@@ -577,6 +590,112 @@ if (typeof window !== 'undefined') {
 }
 
 @keyframes geoportalPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Estilos para el botón de la App Móvil */
+.mobile-app-btn {
+  width: 100%;
+  background: linear-gradient(135deg, 
+    rgba(156, 39, 176, 0.9) 0%, 
+    rgba(123, 31, 162, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 12px;
+  box-shadow: 
+    0 4px 15px rgba(156, 39, 176, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.mobile-app-btn:hover {
+  background: linear-gradient(135deg, 
+    rgba(156, 39, 176, 1) 0%, 
+    rgba(123, 31, 162, 1) 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(156, 39, 176, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.mobile-app-btn:hover .mobile-app-glow {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.mobile-app-btn:hover .mobile-arrow-icon {
+  transform: translateX(4px);
+}
+
+.mobile-app-btn:active {
+  transform: translateY(0px);
+}
+
+.mobile-app-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  gap: 4px;
+}
+
+.mobile-app-icon {
+  width: 18px;
+  height: 18px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  animation: mobileAppPulse 2s ease-in-out infinite;
+}
+
+.mobile-arrow-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.mobile-app-text {
+  font-size: 14px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  flex: 1;
+}
+
+.mobile-app-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  border-radius: 12px;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+@keyframes mobileAppPulse {
   0%, 100% {
     opacity: 1;
     transform: scale(1);

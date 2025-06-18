@@ -724,51 +724,53 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .page-content {
-  padding: 16px 32px; /* Reducido el padding vertical de 24px a 16px */
+  padding: 12px 24px; /* Reducido aún más el padding */
   display: flex;
   flex-direction: column;
-  gap: 16px; /* Reducido de 24px a 16px */
-  height: calc(100vh - 90px); /* Ajustado para la nueva altura del encabezado */
-  position: relative; /* Añadido para posicionamiento correcto del panel de detalles */
+  gap: 10px; /* Reducido de 16px a 10px */
+  height: calc(100vh - 85px); /* Ajustado para optimizar el espacio */
+  position: relative;
 }
 
 /* Controles del mapa */
 .map-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px; /* Reducido de 16px a 12px */
+  gap: 8px; /* Reducido de 12px a 8px */
   background: white;
-  padding: 12px; /* Reducido de 16px a 12px */
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 12px; /* Añadido para dar espacio al panel de detalles */
+  padding: 8px 12px; /* Reducido padding vertical */
+  border-radius: 8px; /* Reducido el border-radius */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Sombra más sutil */
+  margin-bottom: 8px; /* Reducido el margen inferior */
+  min-height: 60px; /* Altura mínima controlada */
 }
 
 .control-group {
   display: flex;
   flex-direction: column;
-  gap: 4px; /* Reducido de 6px a 4px */
-  min-width: 180px; /* Reducido de 200px a 180px */
+  gap: 2px; /* Reducido de 4px a 2px */
+  min-width: 160px; /* Reducido de 180px a 160px */
   flex: 1;
 }
 
 .search-group {
-  min-width: 300px;
+  min-width: 250px; /* Reducido de 300px a 250px */
   flex: 2;
 }
 
 .control-group label {
   font-weight: 500;
   color: #2c3e50;
-  font-size: 14px;
+  font-size: 12px; /* Reducido de 14px a 12px */
 }
 
 .control-select, .control-input {
-  padding: 8px 10px; /* Reducido de 10px 12px a 8px 10px */
-  border: 1px solid #e0e0e0; /* Reducido de 2px a 1px */
-  border-radius: 6px; /* Reducido de 8px a 6px */
-  font-size: 13px; /* Reducido de 14px a 13px */
+  padding: 6px 8px; /* Reducido de 8px 10px */
+  border: 1px solid #e0e0e0;
+  border-radius: 4px; /* Reducido de 6px a 4px */
+  font-size: 12px; /* Reducido de 13px a 12px */
   transition: all 0.2s;
+  height: 32px; /* Altura fija para mejor control */
 }
 
 .control-select:focus, .control-input:focus {
@@ -789,20 +791,21 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .search-btn {
   position: absolute;
-  right: 4px;
+  right: 2px;
   top: 50%;
   transform: translateY(-50%);
   background: #4CAF50;
   color: white;
   border: none;
-  border-radius: 6px;
-  width: 36px;
-  height: 36px;
+  border-radius: 4px;
+  width: 28px; /* Reducido de 36px a 28px */
+  height: 28px; /* Reducido de 36px a 28px */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 12px; /* Añadido para mejor proporción */
 }
 
 .search-btn:hover {
@@ -902,22 +905,22 @@ watch([filtroTipo, filtroPeriodo], () => {
 /* Panel de información del registro seleccionado */
 .registro-info-panel {
   position: absolute;
-  top: 84px; /* Posicionado justo debajo de los controles del mapa */
-  right: 20px;
-  width: 320px; /* Reducido de 360px a 320px */
-  max-width: 100%;
-  max-height: calc(100% - 100px); /* Limitar altura para no superponer con otros elementos */
+  top: 78px; /* Posicionado después de los controles más compactos */
+  right: 16px; /* Reducido de 20px a 16px */
+  width: 300px; /* Reducido de 320px a 300px */
+  max-width: calc(100% - 32px); /* Espacio en ambos lados */
+  max-height: calc(100% - 95px); /* Ajustado para no superponer */
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  overflow: auto; /* Cambiado a auto para permitir scroll si el contenido es grande */
+  border-radius: 10px; /* Reducido de 12px a 10px */
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12); /* Sombra más sutil */
+  overflow: auto;
   z-index: 900;
   animation: slideinPanel 0.3s ease-out;
 }
 
 @keyframes slideinPanel {
   from {
-    transform: translateX(420px);
+    transform: translateX(320px); /* Ajustado al nuevo ancho */
     opacity: 0;
   }
   to {
@@ -927,30 +930,30 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .panel-header {
-  padding: 12px 16px; /* Reducido de 16px 20px a 12px 16px */
+  padding: 10px 14px; /* Reducido aún más */
   background: #4CAF50;
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky; /* Mantener el encabezado visible durante el scroll */
+  position: sticky;
   top: 0;
   z-index: 5;
 }
 
 .panel-header h3 {
   margin: 0;
-  font-size: 16px; /* Reducido de 18px a 16px */
+  font-size: 15px; /* Reducido de 16px a 15px */
 }
 
 .close-panel-btn {
   background: none;
   border: none;
   color: white;
-  font-size: 22px; /* Reducido de 24px a 22px */
+  font-size: 20px; /* Reducido de 22px a 20px */
   cursor: pointer;
-  width: 28px; /* Reducido de 30px a 28px */
-  height: 28px; /* Reducido de 30px a 28px */
+  width: 26px; /* Reducido de 28px a 26px */
+  height: 26px; /* Reducido de 28px a 26px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -963,16 +966,17 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .panel-content {
-  padding: 14px 16px; /* Reducido de 16px 20px a 14px 16px */
-  max-height: calc(100% - 50px); /* Ajuste para considerar la altura del header */
+  padding: 12px 14px; /* Reducido de 14px 16px */
+  max-height: calc(100% - 46px); /* Ajustado para el nuevo header más pequeño */
   overflow-y: auto;
 }
 
 .info-row {
-  margin-bottom: 10px; /* Reducido de 12px a 10px */
-  padding-bottom: 10px; /* Reducido de 12px a 10px */
+  margin-bottom: 8px; /* Reducido de 10px a 8px */
+  padding-bottom: 8px; /* Reducido de 10px a 8px */
   border-bottom: 1px solid #f0f0f0;
-  font-size: 13px; /* Reducido de 14px a 13px */
+  font-size: 12px; /* Reducido de 13px a 12px */
+  line-height: 1.4; /* Mejorar legibilidad */
 }
 
 .info-row:last-child {
@@ -982,19 +986,21 @@ watch([filtroTipo, filtroPeriodo], () => {
 .info-row strong {
   color: #2c3e50;
   margin-right: 6px;
+  display: inline-block;
+  min-width: 65px; /* Alinear mejor las etiquetas */
 }
 
 .info-photo {
-  margin-top: 12px; /* Reducido de 16px a 12px */
-  margin-bottom: 12px; /* Reducido de 16px a 12px */
+  margin-top: 10px; /* Reducido de 12px a 10px */
+  margin-bottom: 10px; /* Reducido de 12px a 10px */
   text-align: center;
 }
 
 .info-photo img {
   width: 100%;
-  max-height: 180px; /* Limitar altura máxima */
+  max-height: 150px; /* Reducido de 180px a 150px */
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 6px; /* Reducido de 8px a 6px */
   cursor: pointer;
   transition: transform 0.2s;
 }
@@ -1005,21 +1011,21 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .panel-actions {
   display: flex;
-  gap: 8px; /* Reducido de 10px a 8px */
-  margin-top: 12px; /* Reducido de 16px a 12px */
-  flex-wrap: wrap; /* Permitir que los botones se envuelvan en pantallas pequeñas */
+  gap: 6px; /* Reducido de 8px a 6px */
+  margin-top: 10px; /* Reducido de 12px a 10px */
+  flex-wrap: wrap;
 }
 
 .action-btn {
   flex: 1;
-  padding: 8px 10px; /* Reducido de 10px a 8px 10px */
+  padding: 6px 8px; /* Reducido de 8px 10px */
   border: none;
-  border-radius: 6px; /* Reducido de 8px a 6px */
+  border-radius: 4px; /* Reducido de 6px a 4px */
   cursor: pointer;
-  font-size: 13px; /* Reducido de 14px a 13px */
+  font-size: 11px; /* Reducido de 13px a 11px */
   font-weight: 500;
   transition: all 0.2s;
-  min-width: 100px; /* Asegurar botones con ancho adecuado */
+  min-width: 80px; /* Reducido de 100px a 80px */
 }
 
 .center-btn {
@@ -1240,22 +1246,27 @@ watch([filtroTipo, filtroPeriodo], () => {
 /* Responsive */
 @media (max-width: 1200px) {
   .registro-info-panel {
-    width: 300px;
-    top: 78px; /* Ajustado para adaptarse a la nueva altura de los controles */
+    width: 280px; /* Reducido de 300px a 280px */
+    top: 75px; /* Ajustado para los controles más pequeños */
   }
 }
 
 @media (max-width: 992px) {
   .control-group {
-    min-width: 150px;
+    min-width: 140px; /* Reducido de 150px a 140px */
   }
   
   .search-group {
-    min-width: 200px;
+    min-width: 180px; /* Reducido de 200px a 180px */
   }
   
   .registro-info-panel {
-    width: 280px; /* Reducido para pantallas medianas */
+    width: 260px; /* Reducido para pantallas medianas */
+    top: 72px;
+  }
+  
+  .map-controls {
+    padding: 6px 10px; /* Aún más compacto en pantallas medianas */
   }
 }
 
@@ -1265,28 +1276,29 @@ watch([filtroTipo, filtroPeriodo], () => {
   }
   
   .page-header {
-    padding: 14px 20px;
+    padding: 12px 16px; /* Reducido de 14px 20px */
   }
   
   .header-content {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px; /* Reducido de 12px a 10px */
     align-items: flex-start;
   }
   
   .page-content {
-    padding: 12px 20px;
+    padding: 10px 16px; /* Reducido de 12px 20px */
     height: auto;
   }
   
   .map-controls {
     flex-direction: column;
-    gap: 12px;
-    padding: 10px;
+    gap: 8px; /* Reducido de 12px a 8px */
+    padding: 8px; /* Reducido de 10px a 8px */
   }
   
   .control-group {
     width: 100%;
+    min-width: auto;
   }
   
   .visor-section {
@@ -1300,18 +1312,19 @@ watch([filtroTipo, filtroPeriodo], () => {
     left: 0;
     right: 0;
     width: 100%;
-    border-radius: 12px 12px 0 0;
-    max-height: 50vh;
+    border-radius: 10px 10px 0 0; /* Ajustado al nuevo border-radius */
+    max-height: 45vh; /* Reducido de 50vh a 45vh */
   }
   
   .panel-content {
-    max-height: 35vh;
+    max-height: 30vh; /* Reducido de 35vh a 30vh */
   }
   
   .map-legend {
-    bottom: 10px;
-    left: 10px;
+    bottom: 8px; /* Reducido de 10px a 8px */
+    left: 8px; /* Reducido de 10px a 8px */
     right: auto;
+    padding: 8px; /* Reducido de 12px a 8px */
   }
 }
 
@@ -1348,11 +1361,20 @@ watch([filtroTipo, filtroPeriodo], () => {
 /* Mejoras para badges en el panel de detalles */
 .ubicacion-badge, .estado-badge {
   display: inline-block;
-  font-size: 0.7rem;
-  padding: 1px 6px;
-  border-radius: 10px;
-  margin: 2px;
+  font-size: 0.65rem; /* Reducido de 0.7rem a 0.65rem */
+  padding: 1px 4px; /* Reducido padding horizontal */
+  border-radius: 8px; /* Reducido de 10px a 8px */
+  margin: 1px; /* Reducido de 2px a 1px */
   font-weight: 500;
   white-space: nowrap;
+}
+
+/* Mejoras adicionales para la compactación */
+.control-input {
+  padding-right: 32px; /* Ajustado para el botón más pequeño */
+}
+
+.search-wrapper .control-input {
+  height: 32px; /* Asegurar altura consistente */
 }
 </style>

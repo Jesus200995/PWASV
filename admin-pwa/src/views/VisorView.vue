@@ -68,20 +68,18 @@
             <button @click="inicializarMapa" class="retry-btn">Reintentar</button>
           </div>
           
-          <div id="mapa-principal" class="mapa-container"></div>
-          
-          <div class="map-legend">
+          <div id="mapa-principal" class="mapa-container"></div>          <div class="map-legend">
             <h3>Leyenda</h3>
             <div class="legend-item">
-              <span class="legend-marker regular"></span>
-              <span>Registro regular</span>
+              <span class="legend-point regular"></span>
+              <span>Última ubicación normal</span>
             </div>
             <div class="legend-item">
-              <span class="legend-marker critical"></span>
+              <span class="legend-point critical"></span>
               <span>Punto crítico</span>
             </div>
             <div class="legend-item">
-              <span class="legend-marker selected"></span>
+              <span class="legend-point selected"></span>
               <span>Seleccionado</span>
             </div>
           </div>
@@ -102,9 +100,9 @@
             </div>
             <div class="info-row">
               <strong>Fecha:</strong> {{ formatFecha(registroSeleccionado.fecha_hora) }}
-            </div>
-            <div class="info-row">
+            </div>            <div class="info-row">
               <strong>Ubicación:</strong> {{ formatCoordenadas(registroSeleccionado.latitud, registroSeleccionado.longitud) }}
+              <span class="ubicacion-badge">Última conocida</span>
             </div>
             <div class="info-row">
               <strong>Descripción:</strong> {{ registroSeleccionado.descripcion || 'Sin descripción' }}
@@ -210,12 +208,18 @@ const cargarRegistros = async () => {
     const registrosRaw = Array.isArray(response.data) ? response.data : (response.data.registros || [])
     
     // Enriquecer registros con información de usuarios
-    registros.value = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
+    const registrosEnriquecidos = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
+    
+    // Filtrar para mostrar solo la última ubicación de cada usuario
+    const ultimasUbicacionesPorUsuario = obtenerUltimasUbicacionesPorUsuario(registrosEnriquecidos)
+    
+    // Guardar todos los registros para referencia (por si se quiere cambiar el filtro)
+    registros.value = registrosEnriquecidos
     
     if (mapInitialized.value) {
-      actualizarMarcadores()
+      actualizarMarcadores(ultimasUbicacionesPorUsuario)
     } else {
-      inicializarMapa()
+      inicializarMapa(ultimasUbicacionesPorUsuario)
     }
     
   } catch (err) {
@@ -230,8 +234,27 @@ const cargarRegistros = async () => {
   }
 }
 
+// Función para obtener las últimas ubicaciones por usuario
+const obtenerUltimasUbicacionesPorUsuario = (registros) => {
+  // Agrupar por usuario_id y obtener el más reciente según fecha_hora
+  const mapaUsuarios = new Map()
+  
+  registros.forEach(registro => {
+    const usuarioId = registro.usuario_id
+    const fechaHora = new Date(registro.fecha_hora)
+    
+    if (!mapaUsuarios.has(usuarioId) || 
+        fechaHora > new Date(mapaUsuarios.get(usuarioId).fecha_hora)) {
+      mapaUsuarios.set(usuarioId, registro)
+    }
+  })
+  
+  // Convertir el mapa de vuelta a un array
+  return Array.from(mapaUsuarios.values())
+}
+
 // Inicializar el mapa
-const inicializarMapa = () => {
+const inicializarMapa = (ultimasUbicaciones = null) => {
   if (mapInitialized.value) return
   
   // Asegurarse de que Leaflet está disponible
@@ -262,7 +285,13 @@ const inicializarMapa = () => {
     }).addTo(map)
     
     // Personalizar íconos de marcadores
-    actualizarMarcadores()
+    if (ultimasUbicaciones) {
+      actualizarMarcadores(ultimasUbicaciones)
+    } else {
+      // Si no hay ubicaciones pasadas, obtener las últimas
+      const ultimasUbicacionesPorUsuario = obtenerUltimasUbicacionesPorUsuario(registros.value)
+      actualizarMarcadores(ultimasUbicacionesPorUsuario)
+    }
     
     mapInitialized.value = true
     
@@ -303,15 +332,25 @@ const cargarLeaflet = () => {
 }
 
 // Actualizar marcadores en el mapa
-const actualizarMarcadores = () => {
+const actualizarMarcadores = (ubicacionesAMostrar = null) => {
   if (!map || !markersLayer) return
   
   // Limpiar marcadores existentes
   markersLayer.clearLayers()
   markers = []
   
-  // Filtrar registros según criterios
-  const registrosFiltrados = filtrarRegistros()
+  // Determinar qué registros mostrar
+  let registrosFiltrados
+  
+  if (ubicacionesAMostrar) {
+    // Si se pasan específicamente las ubicaciones a mostrar, usar esas
+    registrosFiltrados = ubicacionesAMostrar
+  } else {
+    // En caso contrario, filtrar los registros según criterios
+    // y luego obtener las últimas ubicaciones por usuario
+    registrosFiltrados = filtrarRegistros()
+    registrosFiltrados = obtenerUltimasUbicacionesPorUsuario(registrosFiltrados)
+  }
   
   // Crear nuevos marcadores
   registrosFiltrados.forEach(registro => {
@@ -319,19 +358,24 @@ const actualizarMarcadores = () => {
       const lat = parseFloat(registro.latitud)
       const lng = parseFloat(registro.longitud)
       
-      if (isNaN(lat) || isNaN(lng)) return
-      
-      // Determinar el tipo de marcador (normal o crítico)
+      if (isNaN(lat) || isNaN(lng)) return      // Determinar el tipo de marcador (normal o crítico)
       const esCritico = Math.random() < 0.3 // Solo para demo, deberías tener un criterio real
-      const iconColor = esCritico ? '#e74c3c' : '#4CAF50'
-      const iconSize = esCritico ? [32, 32] : [25, 25]
+      const baseColor = esCritico ? '#e74c3c' : '#4CAF50'
+      const iconSize = esCritico ? [36, 36] : [32, 32]
+      
+      // Crear un HTML más simple y moderno para el marcador
+      const markerHtml = `
+        <div class="location-marker ${esCritico ? 'critical' : 'regular'}">
+          <div class="pulse-ring"></div>
+        </div>
+      `
       
       const customIcon = window.L.divIcon({
-        className: 'custom-map-marker',
-        html: `<div class="marker-pin" style="background-color: ${iconColor}; width: ${iconSize[0]}px; height: ${iconSize[1]}px;"></div>`,
+        className: 'custom-location-marker',
+        html: markerHtml,
         iconSize: iconSize,
-        iconAnchor: [iconSize[0] / 2, iconSize[1]],
-        popupAnchor: [0, -iconSize[1] / 2]
+        iconAnchor: [iconSize[0] / 2, iconSize[0] / 2],
+        popupAnchor: [0, -iconSize[0] / 2]
       })
       
       // Crear marcador y popup
@@ -341,6 +385,7 @@ const actualizarMarcadores = () => {
             <h3>Registro #${registro.id}</h3>
             <p><strong>Usuario:</strong> ${registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`}</p>
             <p><strong>Fecha:</strong> ${formatFecha(registro.fecha_hora)}</p>
+            <p><strong>Última ubicación:</strong> Sí</p>
             <button class="popup-btn">Ver detalles</button>
           </div>
         `)
@@ -424,7 +469,14 @@ const filtrarRegistros = () => {
 
 // Aplicar filtros y actualizar mapa
 const aplicarFiltros = () => {
-  actualizarMarcadores()
+  // Primero aplicamos los filtros normales
+  const registrosFiltrados = filtrarRegistros()
+  
+  // Luego obtenemos solo la última ubicación de cada usuario
+  const ultimasUbicaciones = obtenerUltimasUbicacionesPorUsuario(registrosFiltrados)
+  
+  // Actualizamos los marcadores con estas ubicaciones filtradas
+  actualizarMarcadores(ultimasUbicaciones)
 }
 
 // Buscar ubicación por dirección o coordenadas
@@ -478,14 +530,20 @@ const mostrarDetallesRegistro = (registro) => {
     markers.forEach(m => {
       const markerElement = m.getElement()
       if (markerElement) {
-        markerElement.querySelector('.marker-pin')?.classList.remove('selected')
+        const marker = markerElement.querySelector('.location-marker')
+        if (marker) {
+          marker.classList.remove('selected')
+        }
       }
     })
     
     if (registro.marker) {
       const markerElement = registro.marker.getElement()
       if (markerElement) {
-        markerElement.querySelector('.marker-pin')?.classList.add('selected')
+        const marker = markerElement.querySelector('.location-marker')
+        if (marker) {
+          marker.classList.add('selected')
+        }
       }
     }
   }
@@ -500,7 +558,10 @@ const cerrarDetalles = () => {
     markers.forEach(m => {
       const markerElement = m.getElement()
       if (markerElement) {
-        markerElement.querySelector('.marker-pin')?.classList.remove('selected')
+        const marker = markerElement.querySelector('.location-marker')
+        if (marker) {
+          marker.classList.remove('selected')
+        }
       }
     })
   }
@@ -798,28 +859,31 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   font-size: 12px;
 }
 
-.legend-marker {
+.legend-point {
   display: inline-block;
   width: 16px;
   height: 16px;
   border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
-.legend-marker.regular {
+.legend-point.regular {
   background: #4CAF50;
 }
 
-.legend-marker.critical {
+.legend-point.critical {
   background: #e74c3c;
 }
 
-.legend-marker.selected {
-  background: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+.legend-point.selected {
+  background: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.4);
+  border: 2px solid white;
 }
 
 /* Panel de información del registro seleccionado */
@@ -1019,38 +1083,78 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 /* Estilos para marcadores personalizados */
-:global(.custom-map-marker) {
+:global(.custom-location-marker) {
   background: transparent;
   border: none;
 }
 
-:global(.marker-pin) {
-  width: 30px;
-  height: 30px;
-  border-radius: 50% 50% 50% 0;
-  background: #4CAF50;
-  transform: rotate(-45deg);
-  animation: pulseMarker 2s infinite;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-:global(.marker-pin)::after {
-  content: '';
-  width: 60%;
-  height: 60%;
-  margin: auto;
-  background: white;
+:global(.location-marker) {
+  position: relative;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  animation: appearScale 0.4s ease-out;
 }
 
-:global(.marker-pin.selected) {
-  background: #3498db;
-  transform: rotate(-45deg) scale(1.2);
-  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.4), 0 0 15px rgba(0, 0, 0, 0.4);
-  z-index: 1000;
+:global(.location-marker.regular) {
+  background: #4CAF50;
+}
+
+:global(.location-marker.critical) {
+  background: #e74c3c;
+}
+
+:global(.location-marker.selected) {
+  border: 3px solid white;
+  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.7), 0 0 10px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+:global(.pulse-ring) {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  animation: pulsate 2s ease-out infinite;
+  background: inherit;
+  opacity: 0;
+  z-index: -1;
+}
+
+@keyframes pulsate {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  
+  70% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes appearScale {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  
+  60% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes pulseMarker {
@@ -1181,5 +1285,17 @@ watch([filtroTipo, filtroPeriodo], () => {
     left: 10px;
     right: auto;
   }
+}
+
+/* Estilos para badge de última ubicación */
+.ubicacion-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  background-color: #4CAF50;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+  font-weight: 500;
 }
 </style>

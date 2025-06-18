@@ -4,6 +4,7 @@ import DashboardView from '../views/DashboardView.vue'
 import UsuariosView from '../views/UsuariosView.vue'
 import RegistrosView from '../views/RegistrosView.vue'
 import ConfiguracionView from '../views/ConfiguracionView.vue'
+import VisorView from '../views/VisorView.vue'
 
 const routes = [
   {
@@ -38,6 +39,14 @@ const routes = [
     name: 'Configuracion',
     component: ConfiguracionView,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/visor',
+    name: 'Visor',
+    component: VisorView,
+    meta: {
+      requiresAuth: true
+    }
   }
 ]
 

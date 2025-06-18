@@ -71,16 +71,12 @@
           <div id="mapa-principal" class="mapa-container"></div>          <div class="map-legend">
             <h3>Leyenda</h3>
             <div class="legend-item">
-              <span class="legend-point regular"></span>
-              <span>Última ubicación normal</span>
+              <span class="legend-point reciente"></span>
+              <span>Ubicación del día de hoy</span>
             </div>
             <div class="legend-item">
-              <span class="legend-point critical"></span>
-              <span>Punto crítico</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-point selected"></span>
-              <span>Seleccionado</span>
+              <span class="legend-point antiguo"></span>
+              <span>Ubicación de días anteriores</span>
             </div>
           </div>
         </div>
@@ -103,6 +99,9 @@
             </div>            <div class="info-row">
               <strong>Ubicación:</strong> {{ formatCoordenadas(registroSeleccionado.latitud, registroSeleccionado.longitud) }}
               <span class="ubicacion-badge">Última conocida</span>
+              <span :class="['estado-badge', esUbicacionReciente(registroSeleccionado.fecha_hora) ? 'reciente' : 'antiguo']">
+                {{ esUbicacionReciente(registroSeleccionado.fecha_hora) ? 'Hoy' : 'Días anteriores' }}
+              </span>
             </div>
             <div class="info-row">
               <strong>Descripción:</strong> {{ registroSeleccionado.descripcion || 'Sin descripción' }}
@@ -358,14 +357,19 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
       const lat = parseFloat(registro.latitud)
       const lng = parseFloat(registro.longitud)
       
-      if (isNaN(lat) || isNaN(lng)) return      // Determinar el tipo de marcador (normal o crítico)
-      const esCritico = Math.random() < 0.3 // Solo para demo, deberías tener un criterio real
-      const baseColor = esCritico ? '#e74c3c' : '#4CAF50'
-      const iconSize = esCritico ? [36, 36] : [32, 32]
+      if (isNaN(lat) || isNaN(lng)) return      // Determinar la antigüedad del registro para asignar color
+      const fechaRegistro = new Date(registro.fecha_hora)
+      const ahora = new Date()
+      const diferenciaMilisegundos = ahora - fechaRegistro
+      const diferenciaHoras = diferenciaMilisegundos / (1000 * 60 * 60)
       
-      // Crear un HTML más simple y moderno para el marcador
+      // Si es de hoy (menos de 24 horas), verde; si es más antiguo, azul
+      const esReciente = diferenciaHoras <= 24
+      const iconSize = [32, 32]
+      
+      // Crear un HTML simple y moderno para el marcador
       const markerHtml = `
-        <div class="location-marker ${esCritico ? 'critical' : 'regular'}">
+        <div class="location-marker ${esReciente ? 'reciente' : 'antiguo'}">
           <div class="pulse-ring"></div>
         </div>
       `
@@ -377,14 +381,14 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
         iconAnchor: [iconSize[0] / 2, iconSize[0] / 2],
         popupAnchor: [0, -iconSize[0] / 2]
       })
-      
-      // Crear marcador y popup
+        // Crear marcador y popup
       const marker = window.L.marker([lat, lng], { icon: customIcon })
         .bindPopup(`
           <div class="marker-popup">
             <h3>Registro #${registro.id}</h3>
             <p><strong>Usuario:</strong> ${registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`}</p>
             <p><strong>Fecha:</strong> ${formatFecha(registro.fecha_hora)}</p>
+            <p><strong>Estado:</strong> <span class="estado-badge ${esReciente ? 'reciente' : 'antiguo'}">${esReciente ? 'Hoy' : 'Días anteriores'}</span></p>
             <p><strong>Última ubicación:</strong> Sí</p>
             <button class="popup-btn">Ver detalles</button>
           </div>
@@ -614,6 +618,19 @@ const logout = () => {
   localStorage.removeItem('admin_token')
   localStorage.removeItem('admin_user')
   router.push('/login')
+}
+
+// Función para determinar si una ubicación es reciente (dentro de las últimas 24 horas)
+const esUbicacionReciente = (fechaStr) => {
+  try {
+    const fechaRegistro = new Date(fechaStr)
+    const ahora = new Date()
+    const diferenciaMilisegundos = ahora - fechaRegistro
+    const diferenciaHoras = diferenciaMilisegundos / (1000 * 60 * 60)
+    return diferenciaHoras <= 24
+  } catch (e) {
+    return false
+  }
 }
 
 // Ciclo de vida
@@ -872,18 +889,12 @@ watch([filtroTipo, filtroPeriodo], () => {
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
-.legend-point.regular {
-  background: #4CAF50;
+.legend-point.reciente {
+  background: #4CAF50; /* Verde para ubicaciones del día de hoy */
 }
 
-.legend-point.critical {
-  background: #e74c3c;
-}
-
-.legend-point.selected {
-  background: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.4);
-  border: 2px solid white;
+.legend-point.antiguo {
+  background: #FF9800; /* Naranja para ubicaciones de días anteriores */
 }
 
 /* Panel de información del registro seleccionado */
@@ -1098,17 +1109,18 @@ watch([filtroTipo, filtroPeriodo], () => {
   animation: appearScale 0.4s ease-out;
 }
 
-:global(.location-marker.regular) {
-  background: #4CAF50;
+:global(.location-marker.reciente) {
+  background: #4CAF50; /* Verde para ubicaciones del día de hoy (últimas 24 horas) */
 }
 
-:global(.location-marker.critical) {
-  background: #e74c3c;
+:global(.location-marker.antiguo) {
+  background: #FF9800; /* Naranja para ubicaciones de días anteriores (más de 24 horas) */
 }
 
 :global(.location-marker.selected) {
   border: 3px solid white;
   box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.7), 0 0 10px rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
   z-index: 100;
 }
 
@@ -1297,5 +1309,23 @@ watch([filtroTipo, filtroPeriodo], () => {
   border-radius: 10px;
   margin-left: 8px;
   font-weight: 500;
+}
+
+/* Estilos para las etiquetas de estado en los popups */
+:global(.estado-badge) {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  color: white;
+  font-weight: 500;
+}
+
+:global(.estado-badge.reciente) {
+  background-color: #4CAF50;
+}
+
+:global(.estado-badge.antiguo) {
+  background-color: #FF9800;
 }
 </style>

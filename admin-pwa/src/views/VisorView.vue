@@ -383,7 +383,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
       })        // Crear marcador y popup
       const marker = window.L.marker([lat, lng], { icon: customIcon })
         .bindPopup(`
-          <div class="modern-marker-popup">
+          <div class="modern-marker-popup ${esReciente ? 'recent-popup' : 'old-popup'}">
             <div class="popup-header">
               <div class="popup-title">
                 <span class="popup-id">#${registro.id}</span>
@@ -399,36 +399,50 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
                 <div class="user-avatar">
                   <span class="avatar-text">${(registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`).charAt(0).toUpperCase()}</span>
                 </div>                <div class="user-details">
-                  <div class="user-name">${registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`}</div>
-                  <div class="user-email">
-                    <span class="email-icon">📧</span>
+                  <div class="user-name">${registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`}</div>                  <div class="user-email">
+                    <span class="email-icon">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                      </svg>
+                    </span>
                     <span class="email-text">${registro.usuario?.correo || registro.usuario?.email || 'correo@noregistrado.com'}</span>
                   </div>
                 </div>
               </div>
-              
-              <div class="popup-info">
+                <div class="popup-info">
                 <div class="info-item">
-                  <span class="info-icon">📅</span>
+                  <span class="info-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
+                    </svg>
+                  </span>
                   <span class="info-text">${formatFecha(registro.fecha_hora)}</span>
                 </div>
                 <div class="info-item">
-                  <span class="info-icon">📍</span>
+                  <span class="info-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                  </span>
                   <span class="info-text">Última ubicación conocida</span>
                 </div>
               </div>
-              
-              <div class="popup-actions">
+                <div class="popup-actions">
                 <button class="modern-popup-btn">
-                  <span class="btn-icon">👁️</span>
-                  Ver detalles completos
+                  <span class="btn-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    </svg>
+                  </span>
+                  Ver detalles
                 </button>
               </div>
             </div>
-          </div>
-        `, {
+          </div>        `, {
           maxWidth: 300,
-          className: 'modern-popup-container'
+          className: 'modern-popup-container',
+          offset: [150, 0], // Mover el popup hacia la derecha
+          autoPan: false // Evitar que el mapa se mueva automáticamente
         })
       
       // Añadir evento de click para mostrar más detalles
@@ -564,6 +578,25 @@ const buscarUbicacion = async () => {
 // Mostrar detalles de un registro
 const mostrarDetallesRegistro = (registro) => {
   registroSeleccionado.value = registro
+  // Centrar el mapa en la ubicación seleccionada con animación suave
+  if (map && registro.latitud && registro.longitud) {
+    // Calcular offset para posicionar el marcador más hacia la izquierda
+    // para que el popup aparezca bien visible a la derecha
+    const mapContainer = map.getContainer()
+    const mapWidth = mapContainer.offsetWidth
+    const popupOffset = 180 // Offset para el popup
+    
+    // Convertir el offset a coordenadas geográficas
+    const targetPoint = map.latLngToContainerPoint([registro.latitud, registro.longitud])
+    const offsetPoint = window.L.point(targetPoint.x - popupOffset, targetPoint.y)
+    const newCenter = map.containerPointToLatLng(offsetPoint)
+    
+    map.flyTo(newCenter, 15, {
+      animate: true,
+      duration: 1.0,
+      easeLinearity: 0.2
+    })
+  }
   
   // Resaltar el marcador seleccionado
   if (map && markers.length > 0) {
@@ -615,11 +648,22 @@ const centrarMapa = (registro) => {
   const lng = parseFloat(registro.longitud)
   
   if (!isNaN(lat) && !isNaN(lng)) {
-    map.setView([lat, lng], 16)
+    // Calcular offset para el popup
+    const targetPoint = map.latLngToContainerPoint([lat, lng])
+    const offsetPoint = window.L.point(targetPoint.x - 180, targetPoint.y)
+    const newCenter = map.containerPointToLatLng(offsetPoint)
     
-    // Si hay un marcador asociado, abrir su popup
+    map.flyTo(newCenter, 16, {
+      animate: true,
+      duration: 1.2,
+      easeLinearity: 0.15
+    })
+    
+    // Si hay un marcador asociado, abrir su popup después de la animación
     if (registro.marker) {
-      registro.marker.openPopup()
+      setTimeout(() => {
+        registro.marker.openPopup()
+      }, 600)
     }
   }
 }
@@ -1235,12 +1279,13 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 /* Estilos para el popup moderno del marcador */
 :global(.modern-popup-container .leaflet-popup-content-wrapper) {
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   border: none;
   padding: 0;
   overflow: hidden;
-  animation: popupFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: popupSlideFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
 }
 
 :global(.modern-popup-container .leaflet-popup-content) {
@@ -1252,7 +1297,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 :global(.modern-popup-container .leaflet-popup-tip) {
   background: white;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 :global(.modern-popup-container .leaflet-container a.leaflet-popup-close-button) {
@@ -1275,28 +1320,123 @@ watch([filtroTipo, filtroPeriodo], () => {
   transform: scale(1.1);
 }
 
-@keyframes popupFadeIn {
+@keyframes popupSlideFromRight {
   0% {
     opacity: 0;
-    transform: translateY(10px) scale(0.9);
+    transform: translateX(50px) rotateY(-15deg) scale(0.9);
+  }
+  60% {
+    opacity: 0.9;
+    transform: translateX(-5px) rotateY(2deg) scale(1.02);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(0) rotateY(0deg) scale(1);
   }
 }
 
 :global(.modern-marker-popup) {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   min-width: 280px;
-  animation: slideInContent 0.5s ease-out 0.1s both;
+  animation: contentFlipIn 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+  position: relative;
 }
 
-@keyframes slideInContent {
+/* Popup para ubicaciones recientes (verde) */
+:global(.modern-marker-popup.recent-popup) {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #388e3c 100%);
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);
+}
+
+/* Popup para ubicaciones antiguas (naranja) */
+:global(.modern-marker-popup.old-popup) {
+  background: linear-gradient(135deg, #FF9800 0%, #f57c00 50%, #ef6c00 100%);
+  box-shadow: 0 8px 32px rgba(255, 152, 0, 0.3);
+}
+
+@keyframes contentFlipIn {
+  0% {
+    opacity: 0;
+    transform: rotateX(-90deg) scale(0.8);
+    transform-origin: center bottom;
+  }
+  50% {
+    opacity: 0.7;
+    transform: rotateX(10deg) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg) scale(1);
+  }
+}
+
+:global(.popup-header) {
+  padding: 18px 22px 14px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  position: relative;
+  animation: headerSlideDown 0.6s ease-out 0.4s both;
+}
+
+@keyframes headerSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Efecto brillante en el header */
+:global(.popup-header::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: headerShine 3s ease-in-out infinite;
+}
+
+@keyframes headerShine {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+:global(.popup-title) {
+  flex: 1;
+}
+
+:global(.popup-id) {
+  font-size: 12px;
+  opacity: 0.9;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s both;
+  letter-spacing: 0.5px;
+}
+
+:global(.popup-title h3) {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeInUp {
   0% {
     opacity: 0;
     transform: translateY(20px);
@@ -1307,49 +1447,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   }
 }
 
-:global(.popup-header) {
-  padding: 16px 20px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-:global(.popup-title) {
-  flex: 1;
-}
-
-:global(.popup-id) {
-  font-size: 12px;
-  opacity: 0.8;
-  font-weight: 500;
-  display: block;
-  margin-bottom: 4px;
-  animation: fadeInUp 0.6s ease-out 0.2s both;
-}
-
-:global(.popup-title h3) {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  animation: fadeInUp 0.6s ease-out 0.3s both;
-}
-
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 :global(.popup-status) {
-  animation: bounceIn 0.8s ease-out 0.4s both;
+  animation: bounceIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.5s both;
 }
 
 :global(.status-badge) {
@@ -1398,28 +1497,31 @@ watch([filtroTipo, filtroPeriodo], () => {
 @keyframes bounceIn {
   0% {
     opacity: 0;
-    transform: scale(0.3);
+    transform: scale(0.3) rotate(-45deg);
   }
   50% {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.15) rotate(5deg);
+  }
+  70% {
+    transform: scale(0.95) rotate(-2deg);
   }
   100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
   }
 }
 
 :global(.popup-content) {
-  padding: 20px;
+  padding: 22px;
 }
 
 :global(.user-info) {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  animation: slideInLeft 0.7s ease-out 0.5s both;
+  gap: 14px;
+  margin-bottom: 18px;
+  animation: slideInLeft 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s both;
 }
 
 @keyframes slideInLeft {
@@ -1434,32 +1536,35 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.user-avatar) {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  animation: rotateIn 0.8s ease-out 0.6s both;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  animation: rotateIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.7s both;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes rotateIn {
   0% {
     opacity: 0;
-    transform: rotate(-180deg) scale(0);
+    transform: rotate(-180deg) scale(0.8);
   }
   100% {
     opacity: 1;
-    transform: rotate(0) scale(1);
+    transform: rotate(0deg) scale(1);
   }
 }
 
 :global(.avatar-text) {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 :global(.user-details) {
@@ -1468,19 +1573,31 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.user-name) {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 5px;
   color: white;
-  animation: fadeInRight 0.6s ease-out 0.7s both;
+  animation: fadeInRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s both;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 :global(.user-email) {
   font-size: 13px;
-  opacity: 0.9;
-  color: rgba(255, 255, 255, 0.8);
+  opacity: 0.95;
+  color: rgba(255, 255, 255, 0.9);
   word-break: break-word;
-  animation: typewriterEmail 1.2s ease-out 0.8s both;
+  animation: typewriterEmail 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.9s both;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -1489,9 +1606,16 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.email-icon) {
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
   animation: bounceInIcon 0.6s ease-out 1.2s both;
+}
+
+:global(.email-icon svg) {
+  width: 12px;
+  height: 12px;
 }
 
 @keyframes bounceInIcon {
@@ -1573,9 +1697,16 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.info-icon) {
-  font-size: 16px;
-  width: 20px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+:global(.info-icon svg) {
+  width: 14px;
+  height: 14px;
 }
 
 :global(.info-text) {
@@ -1585,48 +1716,43 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 :global(.popup-actions) {
   text-align: center;
-  animation: fadeInUp 0.6s ease-out 1.1s both;
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.2s both;
 }
 
 :global(.modern-popup-btn) {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   color: #333;
   border: none;
-  padding: 12px 20px;
-  border-radius: 25px;
+  padding: 10px 18px;
+  border-radius: 20px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
 }
 
 :global(.modern-popup-btn:hover) {
   background: white;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
 }
 
 :global(.modern-popup-btn:hover .btn-icon) {
   transform: scale(1.1);
-  animation: wiggle 0.6s ease-in-out;
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0deg) scale(1.1); }
-  25% { transform: rotate(-3deg) scale(1.1); }
-  75% { transform: rotate(3deg) scale(1.1); }
 }
 
 :global(.modern-popup-btn:active) {
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 :global(.btn-icon) {
   font-size: 16px;
+  transition: all 0.3s ease;
 }
 
 /* Responsive para popup moderno */
@@ -1671,10 +1797,9 @@ watch([filtroTipo, filtroPeriodo], () => {
   :global(.email-icon) {
     font-size: 11px;
   }
-  
-  :global(.modern-popup-btn) {
-    padding: 10px 16px;
-    font-size: 13px;
+    :global(.modern-popup-btn) {
+    padding: 8px 14px;
+    font-size: 12px;
   }
 }
 </style>

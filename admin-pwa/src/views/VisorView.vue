@@ -1,57 +1,76 @@
 <template>
   <div class="visor-container">
+    <!-- Importar fuentes modernas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <Sidebar @logout="logout" />
     
-    <main class="main-content">
-      <header class="page-header">
+    <main class="main-content">      <header class="page-header">
         <div class="header-content">
-          <div>
-            <h1>Visor de Mapa</h1>
+          <div class="title-section">
+            <div class="title-glass-container">
+              <svg class="title-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              <h1>Visor de Mapa</h1>
+            </div>
             <p>Visualiza todas las ubicaciones en tiempo real</p>
           </div>
           <div class="header-actions">
             <button @click="recargarMapa" class="refresh-btn" :disabled="loading">
-              <span class="refresh-icon" :class="{ spinning: loading }">🔄</span>
+              <svg class="refresh-icon" :class="{ spinning: loading }" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+              </svg>
               {{ loading ? 'Cargando...' : 'Actualizar' }}
             </button>
           </div>
         </div>
       </header>
 
-      <div class="page-content">
-        <div class="map-controls">
-          <div class="control-group">
-            <label for="filter-type">Filtrar por tipo:</label>
-            <select id="filter-type" v-model="filtroTipo" class="control-select" @change="aplicarFiltros">
-              <option value="">Todos los registros</option>
-              <option value="critical">Puntos críticos</option>
-              <option value="regular">Puntos regulares</option>
-            </select>
-          </div>
-          
-          <div class="control-group">
-            <label for="filter-date">Periodo de tiempo:</label>
-            <select id="filter-date" v-model="filtroPeriodo" class="control-select" @change="aplicarFiltros">
-              <option value="all">Todo el tiempo</option>
-              <option value="today">Hoy</option>
-              <option value="week">Esta semana</option>
-              <option value="month">Este mes</option>
-            </select>
-          </div>
-          
-          <div class="control-group search-group">
-            <label for="search-location">Buscar ubicación:</label>
-            <div class="search-wrapper">
-              <input 
-                id="search-location" 
-                v-model="busquedaUbicacion" 
-                type="text" 
-                placeholder="Dirección o coordenadas..." 
-                class="control-input"
-              >
-              <button @click="buscarUbicacion" class="search-btn">
-                <span class="search-icon">🔍</span>
-              </button>
+      <div class="page-content">        <div class="modern-filter-bar">
+          <div class="filter-group">
+            <div class="filter-item">
+              <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+              </svg>
+              <select v-model="filtroTipo" class="modern-select" @change="aplicarFiltros">
+                <option value="">Todos los registros</option>
+                <option value="critical">Puntos críticos</option>
+                <option value="regular">Puntos regulares</option>
+              </select>
+            </div>
+            
+            <div class="filter-item">
+              <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
+              </svg>
+              <select v-model="filtroPeriodo" class="modern-select" @change="aplicarFiltros">
+                <option value="all">Todo el tiempo</option>
+                <option value="today">Hoy</option>
+                <option value="week">Esta semana</option>
+                <option value="month">Este mes</option>
+              </select>
+            </div>
+            
+            <div class="filter-item search-item">
+              <div class="modern-search-wrapper">
+                <svg class="search-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <input 
+                  v-model="busquedaUbicacion" 
+                  type="text" 
+                  placeholder="Buscar ubicación..." 
+                  class="modern-search-input"
+                >
+                <button @click="buscarUbicacion" class="modern-search-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -547,8 +566,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
           keepInView: true,
           closeButton: false // Desactivar botón de cerrar por defecto para usar el personalizado
         })
-      
-      // Solo guardar referencia del marcador al hacer click (no mostrar panel aún)
+        // Solo guardar referencia del marcador al hacer click (no mostrar panel aún)
       marker.on('click', () => {
         // Centrar el mapa en la ubicación seleccionada
         centrarMapaEnUbicacion(registro)
@@ -974,67 +992,178 @@ watch([filtroTipo, filtroPeriodo], () => {
 </script>
 
 <style scoped>
+/* Importación de fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Estilos principales */
 .visor-container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  background: linear-gradient(135deg, #f0f2f5 0%, #e8f5e8 100%);
+  font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
   margin-left: 280px;
-  background: #f8f9fa;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
+/* Header con efecto liquid glass */
 .page-header {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-bottom: 1px solid #e0e0e0;
-  padding: 14px 32px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px 32px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(76, 175, 80, 0.1), 
+    transparent
+  );
+  animation: headerGlassShine 6s ease-in-out infinite;
+}
+
+@keyframes headerGlassShine {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
-.header-content h1 {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+.title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title-glass-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: titleFadeIn 1s ease-out;
+}
+
+@keyframes titleFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.title-icon {
+  color: #4CAF50;
+  filter: drop-shadow(0 2px 4px rgba(76, 175, 80, 0.3));
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.title-glass-container h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2c3e50 0%, #4CAF50 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-size: 24px;
-  margin-bottom: 2px;
-  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.header-content p {
-  color: #7f8c8d;
-  font-size: 13px; /* Reducido de 14px a 13px */
+.title-section p {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
 }
 
 .refresh-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  background: #4CAF50;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
+  font-weight: 500;
   font-size: 14px;
-  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.refresh-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+.refresh-btn:hover::before {
+  left: 100%;
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: #45a049;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(76, 175, 80, 0.4);
+}
+
+.refresh-btn:active {
+  transform: translateY(0);
 }
 
 .refresh-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.7;
   cursor: not-allowed;
+  transform: none;
+}
+
+.refresh-icon {
+  transition: transform 0.3s ease;
 }
 
 .refresh-icon.spinning {
@@ -1042,98 +1171,170 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
+/* Contenido principal */
 .page-content {
-  padding: 12px 24px; /* Reducido aún más el padding */
+  flex: 1;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Reducido de 16px a 10px */
-  height: calc(100vh - 85px); /* Ajustado para optimizar el espacio */
+  gap: 16px;
+  overflow: hidden;
+}
+
+/* Barra de filtros moderna */
+.modern-filter-bar {
+  animation: filterBarSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes filterBarSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 12px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.filter-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.3), transparent);
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: relative;
 }
 
-/* Controles del mapa */
-.map-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px; /* Reducido de 12px a 8px */
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  padding: 8px 12px; /* Reducido padding vertical */
-  border-radius: 8px; /* Reducido el border-radius */
-  margin-bottom: 8px; /* Reducido el margen inferior */
-  min-height: 60px; /* Altura mínima controlada */
+.filter-icon {
+  color: #4CAF50;
+  opacity: 0.8;
+  transition: all 0.3s ease;
 }
 
-.control-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px; /* Reducido de 4px a 2px */
-  min-width: 160px; /* Reducido de 180px a 160px */
-  flex: 1;
+.filter-item:hover .filter-icon {
+  opacity: 1;
+  transform: scale(1.1);
 }
 
-.search-group {
-  min-width: 250px; /* Reducido de 300px a 250px */
-  flex: 2;
-}
-
-.control-group label {
-  font-weight: 500;
+.modern-select {
+  background: transparent;
+  border: none;
   color: #2c3e50;
-  font-size: 12px; /* Reducido de 14px a 12px */
-}
-
-.control-select, .control-input {
-  padding: 6px 8px; /* Reducido de 8px 10px */
-  border: 1px solid #e0e0e0;
-  border-radius: 4px; /* Reducido de 6px a 4px */
-  font-size: 12px; /* Reducido de 13px a 12px */
-  transition: all 0.2s;
-  height: 32px; /* Altura fija para mejor control */
-}
-
-.control-select:focus, .control-input:focus {
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
   outline: none;
+  min-width: 140px;
+}
+
+.modern-select:hover {
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.modern-select:focus {
+  background: rgba(76, 175, 80, 0.08);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Elemento de búsqueda */
+.search-item {
+  margin-left: auto;
+}
+
+.modern-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  border-radius: 12px;
+  padding: 4px;
+  transition: all 0.3s ease;
+  min-width: 280px;
+}
+
+.modern-search-wrapper:focus-within {
   border-color: #4CAF50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  background: rgba(255, 255, 255, 0.95);
 }
 
-.search-wrapper {
-  position: relative;
-  display: flex;
+.search-input-icon {
+  color: #4CAF50;
+  margin-left: 12px;
+  opacity: 0.7;
 }
 
-.control-input {
+.modern-search-input {
   flex: 1;
-  padding-right: 44px;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #2c3e50;
+  outline: none;
+  font-weight: 400;
 }
 
-.search-btn {
-  position: absolute;
-  right: 2px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #4CAF50;
+.modern-search-input::placeholder {
+  color: #999;
+  font-weight: 400;
+}
+
+.modern-search-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
-  border-radius: 4px;
-  width: 28px; /* Reducido de 36px a 28px */
-  height: 28px; /* Reducido de 36px a 28px */
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
-  font-size: 12px; /* Añadido para mejor proporción */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
-.search-btn:hover {
-  background: #45a049;
+.modern-search-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
+}
+
+.modern-search-btn:active {
+  transform: scale(0.95);
 }
 
 /* Mapa principal */
@@ -1141,11 +1342,14 @@ watch([filtroTipo, filtroPeriodo], () => {
   position: relative;
   flex: 1;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .loading-container, .error-container {
@@ -2654,706 +2858,117 @@ watch([filtroTipo, filtroPeriodo], () => {
   transition: all 0.3s ease;
 }
 
-/* Responsive mejorado para popup moderno y panel de detalles */
-@media (max-width: 1200px) {
-  .registro-info-panel {
-    width: 350px;
-    right: -370px;
-  }
-  
-  .registro-info-panel.panel-visible {
-    right: 15px;
-  }
-}
-
+/* Estilos responsivos para la barra de filtros moderna */
 @media (max-width: 1024px) {
-  .registro-info-panel {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    right: auto;
-    width: 90%;
-    max-width: 400px;
-    max-height: 85vh;
-    z-index: 2000;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  }
-  
-  .registro-info-panel.panel-visible {
-    right: auto;
-    animation: scaleInCenter 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-    /* Overlay para móvil que no bloquee el mapa */
-  .registro-info-panel::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-    animation: fadeInOverlay 0.3s ease-out;
-    pointer-events: none; /* No bloquear eventos del mapa */
-  }
-  
-  :global(.modern-popup-container .leaflet-popup-content) {
-    width: 280px !important;
-  }
-  
-  :global(.modern-marker-popup) {
-    min-width: 260px;
-  }
-}
-
-@keyframes scaleInCenter {
-  0% {
-    transform: translate(-50%, -50%) scale(0.8);
-    opacity: 0;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-}
-
-@media (max-width: 768px) {
   .main-content {
     margin-left: 0;
   }
   
-  .registro-info-panel {
-    width: 95%;
-    max-width: none;
-    border-radius: 12px;
-  }
-  
-  .user-section {
-    padding: 16px;
+  .filter-group {
+    flex-wrap: wrap;
     gap: 12px;
+    width: 100%;
   }
   
-  .user-avatar-large {
-    width: 50px;
-    height: 50px;
+  .search-item {
+    margin-left: 0;
+    width: 100%;
   }
   
-  .avatar-text-large {
-    font-size: 20px;
+  .modern-search-wrapper {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 12px 16px;
   }
   
-  .user-name-large {
-    font-size: 16px;
+  .title-glass-container h1 {
+    font-size: 24px;
   }
   
-  .user-email-large {
-    font-size: 13px;
-  }
-  
-  .info-section,
-  .photo-section,
-  .panel-actions-section {
-    padding: 16px;
-  }
-  
-  .section-title {
-    font-size: 15px;
-  }
-  
-  .info-item-detail {
-    padding: 10px;
-  }
-  
-  .info-icon-wrapper {
+  .title-icon {
     width: 20px;
     height: 20px;
   }
   
-  .info-label {
-    font-size: 11px;
-  }
-  
-  .info-value {
+  .refresh-btn {
+    padding: 10px 16px;
     font-size: 13px;
   }
   
-  .action-btn-large {
-    padding: 10px 14px;
-    font-size: 13px;
+  .page-content {
+    padding: 16px 12px;
   }
   
-  :global(.modern-popup-container .leaflet-popup-content) {
-    width: 250px !important;
-  }
-  
-  :global(.modern-marker-popup) {
-    min-width: 240px;
-  }
-  
-  :global(.popup-header) {
-    padding: 12px 16px 8px;
-  }
-  
-  :global(.popup-title h3) {
-    font-size: 16px;
-  }
-  
-  :global(.popup-content) {
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
     padding: 16px;
   }
   
-  :global(.user-avatar) {
+  .filter-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .modern-select {
+    width: 100%;
+    min-width: auto;
+    padding: 12px;
+    font-size: 16px;
+  }
+  
+  .modern-search-wrapper {
+    min-width: 100%;
+    padding: 6px;
+  }
+  
+  .modern-search-input {
+    padding: 12px;
+    font-size: 16px;
+  }
+  
+  .modern-search-btn {
     width: 40px;
     height: 40px;
-  }
-  
-  :global(.avatar-text) {
-    font-size: 18px;
-  }
-    :global(.user-name) {
-    font-size: 14px;
-  }
-    /* Responsive para botón glass en móviles - estilo iPhone optimizado */
-  :global(.enhanced-detail-btn) {
-    padding: 10px 20px !important;
-    font-size: 0.9rem !important;
-    width: auto !important;
-    margin: 8px auto !important;
-    border-radius: 18px !important;
-  }
-  
-  :global(.enhanced-detail-btn .btn-icon) {
-    font-size: 12px !important;
-  }
-  
-  :global(.enhanced-detail-btn .btn-text) {
-    font-size: 0.85rem !important;
-  }
-  
-  :global(.user-email) {
-    font-size: 12px;
-    gap: 4px;
-  }
-  
-  :global(.email-icon svg) {
-    width: 10px;
-    height: 10px;
-  }
-    :global(.modern-popup-btn) {
-    padding: 8px 14px;
-    font-size: 12px;
-    min-width: 160px;
-  }
-    :global(.enhanced-detail-btn) {
-    padding: 8px 12px;
-    font-size: 11px;
-    min-width: 120px;
-    letter-spacing: 0.3px;
-  }
-  
-  :global(.enhanced-detail-btn .btn-text) {
-    font-size: 11px;
-  }
-    :global(.popup-close-btn) {
-    width: 20px;
-    height: 20px;
-    top: 6px;
-    right: 6px;
-  }
-  
-  :global(.popup-close-btn svg) {
-    width: 10px;
-    height: 10px;
-  }
-  
-  :global(.popup-header) {
-    padding: 12px 32px 8px 16px !important; /* Más padding derecho para el botón */
-  }
-  
-  .map-controls {
-    flex-direction: column;
-    gap: 8px;
-    padding: 12px;
-  }
-  
-  .control-group {
-    min-width: auto;
-  }
-  
-  .search-group {
-    min-width: auto;
   }
 }
 
 @media (max-width: 480px) {
-  .registro-info-panel {
-    width: 98%;
-    max-height: 90vh;
+  .title-glass-container {
+    gap: 8px;
   }
   
-  .panel-header {
-    padding: 12px 16px;
+  .title-glass-container h1 {
+    font-size: 20px;
   }
   
-  .panel-title-section h3 {
-    font-size: 16px;
-  }
-  
-  .user-section {
-    padding: 12px;
-    gap: 10px;
-  }
-  
-  .user-avatar-large {
-    width: 45px;
-    height: 45px;
-  }
-  
-  .avatar-text-large {
-    font-size: 18px;
-  }
-  
-  .user-name-large {
-    font-size: 15px;
-  }
-  
-  .user-email-large {
+  .title-section p {
     font-size: 12px;
   }
   
-  .info-section,
-  .photo-section,
-  .panel-actions-section {
-    padding: 12px;
-  }
-  
-  .section-title {
-    font-size: 14px;
-    margin-bottom: 12px;
-  }
-  
-  .info-item-detail {
-    padding: 8px;
-    margin-bottom: 12px;
-  }
-  
-  .action-btn-large {
+  .refresh-btn {
     padding: 8px 12px;
     font-size: 12px;
     gap: 6px;
   }
   
-  :global(.modern-popup-container .leaflet-popup-content) {
-    width: 220px !important;
-  }
-  
-  :global(.modern-marker-popup) {
-    min-width: 200px;
-  }
-  
-  :global(.popup-content) {
+  .filter-group {
+    border-radius: 12px;
     padding: 12px;
   }
   
-  :global(.user-info) {
-    gap: 10px;
+  .modern-search-wrapper {
+    border-radius: 10px;
   }
   
-  :global(.user-avatar) {
-    width: 35px;
-    height: 35px;
+  .modern-search-btn {
+    border-radius: 6px;
   }
-  
-  :global(.avatar-text) {
-    font-size: 16px;
-  }
-  
-  .page-content {
-    padding: 8px 12px;
-  }
-  
-  .map-controls {
-    padding: 8px;
-  }
-}
-
-/* Animaciones y efectos adicionales */
-
-/* Efecto de brillo en el panel header */
-.panel-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  animation: headerShinePanel 4s ease-in-out infinite;
-}
-
-@keyframes headerShinePanel {
-  0% { left: -100%; }
-  50% { left: 100%; }
-  100% { left: 100%; }
-}
-
-/* Animaciones mejoradas para el popup */
-:global(.popup-header) {
-  animation: headerSlideDown 0.6s ease-out 0.4s both;
-}
-
-/* Efectos para la navegación del mapa siempre habilitada */
-:global(.leaflet-clickable) {
-  cursor: pointer !important;
-}
-
-:global(.leaflet-container) {
-  cursor: grab !important;
-}
-
-:global(.leaflet-container:active) {
-  cursor: grabbing !important;
-}
-
-/* Mejorar visibilidad de controles del mapa */
-:global(.leaflet-control-zoom a) {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #333 !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  transition: all 0.2s ease !important;
-}
-
-:global(.leaflet-control-zoom a:hover) {
-  background-color: #4CAF50 !important;
-  color: white !important;
-  transform: scale(1.05) !important;
-}
-
-/* Animación de entrada para elementos del panel */
-.info-item-detail {
-  opacity: 0;
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-
-.info-item-detail:nth-child(1) { animation-delay: 0.1s; }
-.info-item-detail:nth-child(2) { animation-delay: 0.2s; }
-.info-item-detail:nth-child(3) { animation-delay: 0.3s; }
-.info-item-detail:nth-child(4) { animation-delay: 0.4s; }
-.info-item-detail:nth-child(5) { animation-delay: 0.5s; }
-
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Efecto de pulso para el avatar */
-.user-avatar-large {
-  animation: avatarPulse 3s ease-in-out infinite;
-}
-
-@keyframes avatarPulse {
-  0%, 100% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  50% {
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
-  }
-}
-
-.panel-old .user-avatar-large {
-  animation: avatarPulseOrange 3s ease-in-out infinite;
-}
-
-@keyframes avatarPulseOrange {
-  0%, 100% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  50% {
-    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.3);
-  }
-}
-
-/* Animación para la foto */
-.photo-container {
-  opacity: 0;
-  animation: fadeInScale 0.6s ease-out 0.8s forwards;
-}
-
-@keyframes fadeInScale {
-  0% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Animación para los botones de acción */
-.action-btn-large {
-  opacity: 0;
-  animation: slideInBottom 0.5s ease-out forwards;
-}
-
-.action-btn-large:nth-child(1) { animation-delay: 0.9s; }
-.action-btn-large:nth-child(2) { animation-delay: 1s; }
-
-@keyframes slideInBottom {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Efectos de hover mejorados */
-.info-item-detail:hover {
-  transform: translateX(4px);
-  background: #f1f3f4;
-  border-left-width: 4px;
-}
-
-.info-icon-wrapper:hover {
-  transform: scale(1.1);
-}
-
-/* Scroll personalizado para el panel */
-.panel-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.panel-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.panel-content::-webkit-scrollbar-thumb {
-  background: #4CAF50;
-  border-radius: 3px;
-}
-
-.panel-old .panel-content::-webkit-scrollbar-thumb {
-  background: #FF9800;
-}
-
-.panel-content::-webkit-scrollbar-thumb:hover {
-  background: #45a049;
-}
-
-.panel-old .panel-content::-webkit-scrollbar-thumb:hover {
-  background: #f57c00;
-}
-
-/* Efectos adicionales para marcadores */
-:global(.location-marker:hover) {
-  transform: scale(1.1);
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
-}
-
-:global(.location-marker.antiguo:hover) {
-  box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);
-}
-
-/* Mejoras en la accesibilidad - focus visible */
-.modern-popup-btn:focus-visible,
-.action-btn-large:focus-visible,
-.close-panel-btn:focus-visible,
-.control-select:focus-visible,
-.control-input:focus-visible,
-.search-btn:focus-visible,
-.refresh-btn:focus-visible {
-  outline: 2px solid #4CAF50;
-  outline-offset: 2px;
-}
-
-/* Transiciones suaves para todos los elementos interactivos */
-* {
-  transition: all 0.2s ease-out;
-}
-
-/* Estados de carga mejorados */
-.loading-container {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12px;
-  padding: 60px 20px;
-  text-align: center;
-  animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Mejoras en el contenedor del mapa para evitar problemas de z-index */
-.mapa-container {
-  flex: 1;
-  width: 100%;
-  min-height: 400px;
-  z-index: 10;
-  position: relative;
-}
-
-/* Asegurar que Leaflet no interfiera con nuestros z-index */
-:global(.leaflet-map-pane) {
-  z-index: 1 !important;
-}
-
-:global(.leaflet-popup-pane) {
-  z-index: 1000 !important;
-}
-
-:global(.leaflet-tooltip-pane) {
-  z-index: 1050 !important;
-}
-
-/* Prevenir scroll del body cuando el panel móvil está abierto */
-@media (max-width: 1024px) {
-  body.panel-open {
-    overflow: hidden;
-  }
-}
-
-/* Transiciones suaves para todos los elementos interactivos */
-* {
-  transition: all 0.2s ease-out;
-}
-
-/* Mejora en la accesibilidad - focus visible */
-.modern-popup-btn:focus-visible,
-.action-btn:focus-visible,
-.control-select:focus-visible,
-.control-input:focus-visible,
-.search-btn:focus-visible,
-.refresh-btn:focus-visible {
-  outline: 2px solid #4CAF50;
-  outline-offset: 2px;
-}
-
-/* Estados de carga mejorados */
-.loading-container {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12px;
-  padding: 60px 20px;
-  text-align: center;
-  animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.spinner-large {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #e0e0e0;
-  border-top: 4px solid #4CAF50;
-  border-radius: 50%;
-  animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
-  margin: 0 auto 20px;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-/* Mejoras en el estado de error */
-.error-container {
-  background: linear-gradient(135deg, #fee 0%, #fcc 100%);
-  border: 1px solid #f5c6cb;
-  color: #721c24;
-  padding: 60px 20px;
-  text-align: center;
-  border-radius: 12px;
-  animation: shakeError 0.6s ease-out;
-}
-
-@keyframes shakeError {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
-}
-
-.retry-btn {
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 16px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-}
-
-.retry-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-}
-
-.retry-btn:active {
-  transform: translateY(0);
-}
-
-/* Mejoras en el header */
-.page-header {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-bottom: 1px solid #e0e0e0;
-  padding: 14px 32px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.header-content h1 {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-size: 24px;
-  margin-bottom: 2px;
-  font-weight: 700;
-}
-
-/* Mejoras finales en controles */
-.map-controls {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 </style>

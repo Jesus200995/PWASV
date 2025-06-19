@@ -51,8 +51,7 @@
                 <option value="today">Hoy</option>
                 <option value="week">Esta semana</option>
                 <option value="month">Este mes</option>
-              </select>
-            </div>
+              </select>            </div>
             
             <div class="filter-item search-item">
               <div class="modern-search-wrapper">
@@ -64,12 +63,23 @@
                   type="text" 
                   placeholder="Buscar ubicación..." 
                   class="modern-search-input"
-                >
-                <button @click="buscarUbicacion" class="modern-search-btn">
+                >                <button @click="buscarUbicacion" class="modern-search-btn">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                   </svg>
                 </button>
+              </div>
+            </div>
+            
+            <!-- Leyenda de colores al lado del buscador -->
+            <div class="filter-legend">
+              <div class="legend-item-inline">
+                <span class="legend-point-small reciente"></span>
+                <span class="legend-text">Hoy</span>
+              </div>
+              <div class="legend-item-inline">
+                <span class="legend-point-small antiguo"></span>
+                <span class="legend-text">Anteriores</span>
               </div>
             </div>
           </div>
@@ -85,19 +95,8 @@
           <div v-else-if="error" class="error-container">
             <p>{{ error }}</p>
             <button @click="inicializarMapa" class="retry-btn">Reintentar</button>
-          </div>
-          
-          <div id="mapa-principal" class="mapa-container"></div>          <div class="map-legend">
-            <h3>Leyenda</h3>
-            <div class="legend-item">
-              <span class="legend-point reciente"></span>
-              <span>Ubicación del día de hoy</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-point antiguo"></span>
-              <span>Ubicación de días anteriores</span>
-            </div>
-          </div>
+          </div>          
+          <div id="mapa-principal" class="mapa-container"></div>
         </div>
           <!-- Panel lateral de detalles - separado del popup -->
         <div 
@@ -1268,9 +1267,50 @@ watch([filtroTipo, filtroPeriodo], () => {
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-/* Elemento de búsqueda */
-.search-item {
-  margin-left: auto;
+/* Leyenda integrada en los filtros - ubicada al lado del buscador */
+.filter-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  background: rgba(76, 175, 80, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(76, 175, 80, 0.15);
+  margin-left: 12px; /* Espacio entre el buscador y la leyenda */
+}
+
+.legend-item-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.legend-point-small {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.legend-point-small.reciente {
+  background: #4CAF50; /* Verde para ubicaciones del día de hoy */
+}
+
+.legend-point-small.antiguo {
+  background: #FF9800; /* Naranja para ubicaciones de días anteriores */
+}
+
+.legend-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  white-space: nowrap;
 }
 
 .modern-search-wrapper {
@@ -1424,7 +1464,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   z-index: 1000 !important;
 }
 
-/* Leyenda del mapa */
+/* Leyenda del mapa - REMOVIDA: Ahora está integrada en los filtros */
+/* 
 .map-legend {
   position: absolute;
   bottom: 20px;
@@ -1461,12 +1502,13 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .legend-point.reciente {
-  background: #4CAF50; /* Verde para ubicaciones del día de hoy */
+  background: #4CAF50;
 }
 
 .legend-point.antiguo {
-  background: #FF9800; /* Naranja para ubicaciones de días anteriores */
+  background: #FF9800;
 }
+*/
 
 /* Panel de información del registro seleccionado - Versión mejorada */
 .registro-info-panel {
@@ -2869,10 +2911,17 @@ watch([filtroTipo, filtroPeriodo], () => {
     gap: 12px;
     width: 100%;
   }
+    .filter-legend {
+    order: 2; /* Colocar después del buscador en pantallas medianas */
+    width: auto;
+    justify-content: center;
+    margin: 8px 0 0 0;
+  }
   
   .search-item {
     margin-left: 0;
     width: 100%;
+    order: 1; /* Buscador antes que la leyenda */
   }
   
   .modern-search-wrapper {
@@ -2902,12 +2951,32 @@ watch([filtroTipo, filtroPeriodo], () => {
   .page-content {
     padding: 16px 12px;
   }
-  
-  .filter-group {
+    .filter-group {
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
     padding: 16px;
+  }
+    .filter-legend {
+    order: 2; /* Mantener la leyenda después del buscador */
+    width: 100%;
+    justify-content: center;
+    gap: 20px;
+    margin: 8px 0 0 0;
+    padding: 12px;
+  }
+  
+  .legend-item-inline {
+    gap: 8px;
+  }
+  
+  .legend-point-small {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .legend-text {
+    font-size: 13px;
   }
   
   .filter-item {
@@ -2957,10 +3026,28 @@ watch([filtroTipo, filtroPeriodo], () => {
     font-size: 12px;
     gap: 6px;
   }
-  
-  .filter-group {
+    .filter-group {
     border-radius: 12px;
     padding: 12px;
+  }
+  
+  .filter-legend {
+    padding: 10px;
+    gap: 16px;
+    border-radius: 8px;
+  }
+  
+  .legend-item-inline {
+    gap: 6px;
+  }
+  
+  .legend-point-small {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .legend-text {
+    font-size: 11px;
   }
   
   .modern-search-wrapper {

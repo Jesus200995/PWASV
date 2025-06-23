@@ -196,44 +196,134 @@
                   alt="Foto del registro"
                   @click="verFotoAmpliada(`${API_URL}/${registroSeleccionado.foto_url}`)"
                   class="registro-photo"
-                >
-                <div class="photo-overlay" @click="verFotoAmpliada(`${API_URL}/${registroSeleccionado.foto_url}`)">
+                >                <div class="photo-overlay" @click="verFotoAmpliada(`${API_URL}/${registroSeleccionado.foto_url}`)">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                  </svg>                </div>                <!-- Mini botón de descarga animado -->
+                <button @click.stop="descargarFoto(`${API_URL}/${registroSeleccionado.foto_url}`, `registro_${registroSeleccionado.id}_foto`, $event)" class="download-mini-btn" title="Descargar imagen">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="download-icon">
+                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                  </svg>
+                  <div class="download-progress"></div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+      <!-- Modal para detalles completos y foto ampliada -->
+    <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
+      <div class="modal-content" @click.stop :class="modalType">
+        <div class="modal-header">
+          <h3>{{ modalTitle }}</h3>
+          <button @click="cerrarModal" class="btn-close">×</button>
+        </div>
+        <div class="modal-body">
+          <!-- Modal para foto ampliada -->
+          <img v-if="modalType === 'photo'" :src="selectedPhotoUrl" alt="Fotografía ampliada" class="full-photo">
+          
+          <!-- Modal para detalles completos -->
+          <div v-if="modalType === 'details'" class="details-modal-content">
+            <!-- Información del usuario -->
+            <div class="modal-user-section">
+              <div class="modal-user-avatar">
+                <span class="modal-avatar-text">{{ (registroSeleccionado?.usuario?.nombre_completo || `Usuario ${registroSeleccionado?.usuario_id}`).charAt(0).toUpperCase() }}</span>
+              </div>
+              <div class="modal-user-info">
+                <h4 class="modal-user-name">{{ registroSeleccionado?.usuario?.nombre_completo || `Usuario ${registroSeleccionado?.usuario_id}` }}</h4>
+                <p class="modal-user-email">{{ registroSeleccionado?.usuario?.correo || registroSeleccionado?.usuario?.email || 'correo@noregistrado.com' }}</p>
+                <span :class="['modal-status-badge', esUbicacionReciente(registroSeleccionado?.fecha_hora) ? 'recent' : 'old']">
+                  {{ esUbicacionReciente(registroSeleccionado?.fecha_hora) ? 'Ubicación de hoy' : 'Ubicación anterior' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Grid de información detallada -->
+            <div class="modal-info-grid">
+              <div class="modal-info-card">
+                <div class="modal-info-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
+                  </svg>
+                </div>
+                <div class="modal-info-content">
+                  <h5>Fecha y Hora</h5>
+                  <p>{{ formatFecha(registroSeleccionado?.fecha_hora) }}</p>
+                </div>
+              </div>
+
+              <div class="modal-info-card">
+                <div class="modal-info-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                </div>
+                <div class="modal-info-content">
+                  <h5>Ubicación</h5>
+                  <p>{{ formatCoordenadas(registroSeleccionado?.latitud, registroSeleccionado?.longitud) }}</p>
+                </div>
+              </div>
+
+              <div class="modal-info-card">
+                <div class="modal-info-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+                <div class="modal-info-content">
+                  <h5>ID del Registro</h5>
+                  <p>#{{ registroSeleccionado?.id }}</p>
+                </div>
+              </div>
+
+              <div v-if="registroSeleccionado?.descripcion" class="modal-info-card full-width">
+                <div class="modal-info-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                  </svg>
+                </div>
+                <div class="modal-info-content">
+                  <h5>Descripción</h5>
+                  <p>{{ registroSeleccionado?.descripcion }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Foto si existe -->
+            <div v-if="registroSeleccionado?.foto_url" class="modal-photo-section">
+              <h5>Fotografía del Registro</h5>
+              <div class="modal-photo-container">
+                <img 
+                  :src="`${API_URL}/${registroSeleccionado.foto_url}`" 
+                  alt="Foto del registro"
+                  @click="verFotoAmpliada(`${API_URL}/${registroSeleccionado.foto_url}`)"
+                  class="modal-photo"
+                >
+                <div class="modal-photo-overlay" @click="verFotoAmpliada(`${API_URL}/${registroSeleccionado.foto_url}`)">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
                     <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                   </svg>
                 </div>
               </div>
             </div>
 
-            <!-- Acciones del panel -->
-            <div class="panel-actions-section">
-              <button @click="centrarMapa(registroSeleccionado)" class="action-btn-large primary-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <!-- Acciones del modal -->
+            <div class="modal-actions">
+              <button @click="centrarMapa(registroSeleccionado)" class="modal-action-btn primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M3.05,13H1V11H3.05C3.5,6.83 6.83,3.5 11,3.05V1H13V3.05C17.17,3.5 20.5,6.83 20.95,11H23V13H20.95C20.5,17.17 17.17,20.5 13,20.95V23H11V20.95C6.83,20.5 3.5,17.17 3.05,13M12,5A7,7 0 0,0 5,12A7,7 0 0,0 12,19A7,7 0 0,0 19,12A7,7 0 0,0 12,5Z"/>
                 </svg>
                 Centrar en mapa
               </button>
-              <button @click="verRegistroCompleto(registroSeleccionado)" class="action-btn-large secondary-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/>
+              <button @click="cerrarModal" class="modal-action-btn secondary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
-                Ver registro completo
+                Cerrar
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    </main>
-    
-    <!-- Modal para foto ampliada -->
-    <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>{{ modalTitle }}</h3>
-          <button @click="cerrarModal" class="btn-close">×</button>
-        </div>
-        <div class="modal-body">
-          <img v-if="modalType === 'photo'" :src="selectedPhotoUrl" alt="Fotografía ampliada" class="full-photo">
         </div>
       </div>
     </div>
@@ -909,12 +999,121 @@ const verRegistroCompleto = (registro) => {
   router.push('/registros')
 }
 
+// Ver detalles completos en modal
+const verDetallesCompletos = (registro) => {
+  registroSeleccionado.value = registro
+  modalTitle.value = `Detalles del Registro #${registro.id}`
+  modalType.value = 'details'
+  showModal.value = true
+}
+
 // Ver foto ampliada en modal
 const verFotoAmpliada = (fotoUrl) => {
   selectedPhotoUrl.value = fotoUrl
   modalTitle.value = 'Fotografía del Registro'
   modalType.value = 'photo'
   showModal.value = true
+}
+
+// Descargar foto
+const descargarFoto = async (fotoUrl, nombreArchivo, evento = null) => {
+  try {
+    console.log('Iniciando descarga de:', fotoUrl)
+    
+    // Mostrar animación de carga en el botón
+    const button = evento?.target?.closest('.download-mini-btn')
+    if (button) {
+      button.style.pointerEvents = 'none'
+      button.querySelector('.download-progress')?.classList.add('downloading')
+    }
+
+    // Obtener el token de autenticación
+    const token = localStorage.getItem('admin_token')
+    
+    // Configurar headers para la petición
+    const headers = {
+      'Accept': 'image/*'
+    }
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+    
+    const response = await fetch(fotoUrl, {
+      method: 'GET',
+      headers: headers
+    })
+    
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`)
+    }
+    
+    const blob = await response.blob()
+    
+    // Detectar el tipo de imagen
+    const contentType = blob.type || 'image/jpeg'
+    let extension = 'jpg'
+    
+    if (contentType.includes('png')) extension = 'png'
+    else if (contentType.includes('gif')) extension = 'gif'
+    else if (contentType.includes('webp')) extension = 'webp'
+    else if (contentType.includes('jpeg') || contentType.includes('jpg')) extension = 'jpg'
+    
+    // Crear un enlace temporal para forzar la descarga
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.style.display = 'none'
+    link.href = url
+    link.download = `${nombreArchivo}.${extension}`
+    
+    // Forzar el atributo download para asegurar la descarga
+    link.setAttribute('download', `${nombreArchivo}.${extension}`)
+    
+    // Agregar al DOM, hacer clic para descargar y remover
+    document.body.appendChild(link)
+    link.click()
+    
+    // Limpiar recursos después de un breve delay
+    setTimeout(() => {
+      if (document.body.contains(link)) {
+        document.body.removeChild(link)
+      }
+      window.URL.revokeObjectURL(url)
+      
+      // Restaurar el botón
+      if (button) {
+        button.style.pointerEvents = 'auto'
+        button.querySelector('.download-progress')?.classList.remove('downloading')
+      }
+    }, 100)
+    
+    console.log(`Imagen descargada exitosamente: ${nombreArchivo}.${extension}`)
+    
+  } catch (error) {
+    console.error('Error al descargar la foto:', error)
+    
+    // Restaurar el botón en caso de error
+    const button = evento?.target?.closest('.download-mini-btn')
+    if (button) {
+      button.style.pointerEvents = 'auto'
+      button.querySelector('.download-progress')?.classList.remove('downloading')
+    }
+    
+    // Método alternativo: abrir en nueva pestaña
+    try {
+      const link = document.createElement('a')
+      link.href = fotoUrl
+      link.target = '_blank'
+      link.download = `${nombreArchivo}.jpg`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      console.log('Descarga iniciada usando método alternativo')
+    } catch (fallbackError) {
+      console.error('Error en método alternativo:', fallbackError)
+      alert('No se pudo descargar la imagen. Haz clic derecho en la imagen y selecciona "Guardar imagen como..."')
+    }
+  }
 }
 
 // Cerrar modal
@@ -1514,8 +1713,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 .registro-info-panel {
   position: fixed;
   top: 90px;
-  right: -400px;
-  width: 380px;
+  right: -320px; /* Reducido de -400px */
+  width: 300px; /* Reducido de 380px */
   max-width: calc(100% - 40px);
   max-height: calc(100vh - 110px);
   background: white;
@@ -1561,7 +1760,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .panel-header {
-  padding: 16px 20px;
+  padding: 10px 14px; /* Reducido de 16px 20px */
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   display: flex;
@@ -1581,13 +1780,13 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .panel-title-section h3 {
-  margin: 0 0 4px 0;
-  font-size: 18px;
+  margin: 0 0 2px 0; /* Reducido de 4px */
+  font-size: 14px; /* Reducido de 18px */
   font-weight: 700;
 }
 
 .panel-id {
-  font-size: 12px;
+  font-size: 10px; /* Reducido de 12px */
   opacity: 0.9;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -1597,8 +1796,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
-  width: 32px;
-  height: 32px;
+  width: 26px; /* Reducido de 32px */
+  height: 26px; /* Reducido de 32px */
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1615,30 +1814,31 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .panel-content {
   padding: 0;
-  max-height: calc(100vh - 180px);
+  max-height: calc(100vh - 160px); /* Ajustado para el header más pequeño */
   overflow-y: auto;
+  padding-bottom: 20px; /* Más espacio en la parte inferior */
 }
 
 /* Sección de usuario */
 .user-section {
-  padding: 20px;
+  padding: 12px; /* Reducido de 20px */
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-bottom: 1px solid #dee2e6;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px; /* Reducido de 16px */
 }
 
 .user-avatar-large {
-  width: 60px;
-  height: 60px;
+  width: 40px; /* Reducido de 60px */
+  height: 40px; /* Reducido de 60px */
   border-radius: 50%;
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid white; /* Reducido de 3px */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Reducido */
 }
 
 .panel-old .user-avatar-large {
@@ -1646,10 +1846,10 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .avatar-text-large {
-  font-size: 24px;
+  font-size: 16px; /* Reducido de 24px */
   font-weight: 800;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .user-info-detail {
@@ -1658,42 +1858,44 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .user-name-large {
-  margin: 0 0 8px 0;
-  font-size: 18px;
+  margin: 0 0 4px 0; /* Reducido de 8px */
+  font-size: 14px; /* Reducido de 18px */
   font-weight: 700;
   color: #2c3e50;
 }
 
 .user-email-large {
   margin: 0;
-  font-size: 14px;
+  font-size: 11px; /* Reducido de 14px */
   color: #6c757d;
   word-break: break-word;
 }
 
 /* Sección de información */
 .info-section {
-  padding: 20px;
+  padding: 16px; /* Mejor padding uniforme */
+  margin-top: 4px; /* Pequeño espacio superior */
+  margin-bottom: 12px; /* Más espacio entre secciones */
 }
 
 .section-title {
-  margin: 0 0 16px 0;
-  font-size: 16px;
+  margin: 0 0 10px 0; /* Reducido de 16px */
+  font-size: 13px; /* Reducido de 16px */
   font-weight: 600;
   color: #2c3e50;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef; /* Reducido de 2px */
+  padding-bottom: 4px; /* Reducido de 8px */
 }
 
 .info-item-detail {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding: 12px;
+  gap: 8px; /* Reducido de 12px */
+  margin-bottom: 10px; /* Reducido de 16px */
+  padding: 8px; /* Reducido de 12px */
   background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 3px solid #4CAF50;
+  border-radius: 6px; /* Reducido de 8px */
+  border-left: 2px solid #4CAF50; /* Reducido de 3px */
 }
 
 .panel-old .info-item-detail {
@@ -1704,8 +1906,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 18px; /* Reducido de 24px */
+  height: 18px; /* Reducido de 24px */
   background: #4CAF50;
   border-radius: 50%;
   color: white;
@@ -1723,29 +1925,29 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .info-label {
   display: block;
-  font-size: 12px;
+  font-size: 10px; /* Reducido de 12px */
   font-weight: 600;
   color: #6c757d;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
+  letter-spacing: 0.3px; /* Reducido de 0.5px */
+  margin-bottom: 2px; /* Reducido de 4px */
 }
 
 .info-value {
   display: block;
-  font-size: 14px;
+  font-size: 12px; /* Reducido de 14px */
   color: #2c3e50;
   font-weight: 500;
 }
 
 .status-badge-large {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+  padding: 2px 8px; /* Reducido de 4px 12px */
+  border-radius: 12px; /* Reducido de 20px */
+  font-size: 10px; /* Reducido de 12px */
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px; /* Reducido de 0.5px */
 }
 
 .status-badge-large.recent {
@@ -1757,18 +1959,18 @@ watch([filtroTipo, filtroPeriodo], () => {
   background: #FF9800;
   color: white;
 }
-
 /* Sección de foto */
 .photo-section {
-  padding: 20px;
+  padding: 16px; /* Padding uniforme */
   border-top: 1px solid #dee2e6;
+  margin-bottom: 16px; /* Más espacio inferior para la parte final del panel */
 }
 
 .photo-container {
   position: relative;
-  border-radius: 12px;
+  border-radius: 8px; /* Reducido de 12px */
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Reducido */
   cursor: pointer;
   transition: transform 0.2s;
 }
@@ -1780,7 +1982,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 .registro-photo {
   width: 100%;
   height: auto;
-  max-height: 200px;
+  max-height: 120px; /* Reducido de 200px */
   object-fit: cover;
   display: block;
 }
@@ -1803,73 +2005,105 @@ watch([filtroTipo, filtroPeriodo], () => {
   opacity: 1;
 }
 
-/* Sección de acciones */
-.panel-actions-section {
-  padding: 20px;
-  border-top: 1px solid #dee2e6;
-  background: #f8f9fa;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.action-btn-large {
+/* Mini botón de descarga animado */
+.download-mini-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background: rgba(76, 175, 80, 0.9);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.2s;
-  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
-.primary-btn {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+.photo-container:hover .download-mini-btn {
+  opacity: 1;
+  transform: scale(1);
+  animation: downloadAppear 0.3s ease-out;
 }
 
-.primary-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+@keyframes downloadAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-180deg);
+  }
+  60% {
+    transform: scale(1.2) rotate(-10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
 }
 
-.secondary-btn {
-  background: white;
-  color: #4CAF50;
-  border: 2px solid #4CAF50;
+.download-mini-btn:hover {
+  background: rgba(76, 175, 80, 1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
 }
 
-.secondary-btn:hover {
-  background: #4CAF50;
-  color: white;
-  transform: translateY(-2px);
+.download-mini-btn:active {
+  transform: scale(0.95);
 }
 
-.panel-old .primary-btn {
-  background: linear-gradient(135deg, #FF9800 0%, #f57c00 100%);
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+.download-icon {
+  transition: transform 0.2s ease;
 }
 
-.panel-old .primary-btn:hover {
-  box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
+.download-mini-btn:hover .download-icon {
+  transform: translateY(-1px);
+  animation: downloadBounce 0.6s ease-in-out;
 }
 
-.panel-old .secondary-btn {
-  color: #FF9800;
-  border-color: #FF9800;
+@keyframes downloadBounce {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-2px); }
+  50% { transform: translateY(1px); }
+  75% { transform: translateY(-1px); }
 }
 
-.panel-old .secondary-btn:hover {
-  background: #FF9800;
+.download-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
-/* Modal para foto ampliada */
+.download-progress.downloading {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.6);
+  animation: downloadSpin 1s linear infinite;
+}
+
+.download-mini-btn:active .download-progress {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.6);
+  animation: downloadSpin 0.8s linear;
+}
+
+@keyframes downloadSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Modal para foto ampliada y detalles completos */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1880,30 +2114,59 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   max-width: 90%;
   width: auto;
   max-height: 90vh;
   overflow-y: auto;
   margin: 20px;
+  animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal para detalles completos - más ancho */
+.modal-content.details {
+  width: 800px;
+  max-width: 95%;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 20px 24px;
   border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px 16px 0 0;
 }
 
 .modal-header h3 {
   margin: 0;
   color: #2c3e50;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .btn-close {
@@ -1913,15 +2176,22 @@ watch([filtroTipo, filtroPeriodo], () => {
   cursor: pointer;
   color: #666;
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 24px;
 }
 
 .full-photo {
@@ -1930,6 +2200,263 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: block;
   margin: 0 auto;
   border-radius: 8px;
+}
+
+/* Estilos para el modal de detalles completos */
+.details-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modal-user-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border-left: 4px solid #4CAF50;
+}
+
+.modal-user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modal-avatar-text {
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-user-info {
+  flex: 1;
+}
+
+.modal-user-name {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.modal-user-email {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.modal-status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-status-badge.recent {
+  background: #4CAF50;
+  color: white;
+}
+
+.modal-status-badge.old {
+  background: #FF9800;
+  color: white;
+}
+
+.modal-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.modal-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.modal-info-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.modal-info-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.modal-info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-radius: 10px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.modal-info-content h5 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-info-content p {
+  margin: 0;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.modal-photo-section {
+  margin-top: 8px;
+}
+
+.modal-photo-section h5 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.modal-photo-container {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.modal-photo-container:hover {
+  transform: scale(1.02);
+}
+
+.modal-photo {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: cover;
+  display: block;
+}
+
+.modal-photo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.modal-photo-container:hover .modal-photo-overlay {
+  opacity: 1;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.modal-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.modal-action-btn.primary {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.modal-action-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.modal-action-btn.secondary {
+  background: white;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.modal-action-btn.secondary:hover {
+  background: #f8f9fa;
+  color: #495057;
+  transform: translateY(-1px);
+}
+
+/* Responsivo para el modal */
+@media (max-width: 768px) {
+  .modal-content.details {
+    width: 100%;
+    margin: 10px;
+    max-height: 95vh;
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .modal-info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .modal-user-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modal-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Estilos para marcadores personalizados */

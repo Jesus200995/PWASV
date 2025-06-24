@@ -20,27 +20,11 @@
       <div class="dashboard-content">
         <!-- Estadísticas -->
         <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">📊</div>
+          <div class="stat-card animated-card" v-for="stat in statCards" :key="stat.label">
+            <div class="stat-icon svg-icon" v-html="stat.icon"></div>
             <div class="stat-info">
-              <h3>{{ stats.totalRegistros }}</h3>
-              <p>Total Registros</p>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon">👥</div>
-            <div class="stat-info">
-              <h3>{{ stats.totalUsuarios }}</h3>
-              <p>Usuarios Activos</p>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon">📱</div>
-            <div class="stat-info">
-              <h3>{{ stats.registrosHoy }}</h3>
-              <p>Registros Hoy</p>
+              <h3>{{ stat.value }}</h3>
+              <p>{{ stat.label }}</p>
             </div>
           </div>
         </div>
@@ -138,7 +122,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
@@ -164,6 +148,24 @@ const stats = reactive({
 const showModal = ref(false)
 const modalTitle = ref('')
 const modalContent = ref('')
+
+const statCards = computed(() => [
+  {
+    label: 'Total Registros',
+    value: stats.totalRegistros,
+    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M7 17v-6m5 6V7m5 10v-3" stroke="#4CAF50" stroke-width="2" stroke-linecap="round"/></svg>`
+  },
+  {
+    label: 'Usuarios Activos',
+    value: stats.totalUsuarios,
+    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><circle cx="12" cy="10" r="3" stroke="#4CAF50" stroke-width="2"/><path d="M6 18c0-2.21 3.58-3.5 6-3.5s6 1.29 6 3.5" stroke="#4CAF50" stroke-width="2"/></svg>`
+  },
+  {
+    label: 'Registros Hoy',
+    value: stats.registrosHoy,
+    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M8 7h8M8 11h8m-8 4h5" stroke="#4CAF50" stroke-width="2" stroke-linecap="round"/></svg>`
+  }
+])
 
 // Detectar cambios de conexión
 window.addEventListener('online', () => { isOnline.value = true })
@@ -337,29 +339,66 @@ const logout = () => {
 .stat-card {
   background: white;
   padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(76, 175, 80, 0.08), 0 1.5px 6px rgba(0,0,0,0.04);
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
+  transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+  cursor: pointer;
+  border: 1.5px solid #e8f5e8;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.7s cubic-bezier(.4,2,.6,1);
 }
 
-.stat-icon {
-  font-size: 32px;
-  background: #f0f8f0;
-  padding: 12px;
-  border-radius: 8px;
+.stat-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.16), 0 2px 8px rgba(0,0,0,0.08);
+  border-color: #4CAF50;
+}
+
+.animated-card {
+  opacity: 0;
+  animation: fadeInUp 0.7s cubic-bezier(.4,2,.6,1) forwards;
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.svg-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(.4,2,.6,1);
+}
+
+.stat-card:hover .svg-icon {
+  transform: scale(1.15) rotate(-6deg);
 }
 
 .stat-info h3 {
-  font-size: 28px;
+  font-size: 32px;
   color: #4CAF50;
   margin-bottom: 4px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+
+.stat-card:hover .stat-info h3 {
+  color: #388e3c;
 }
 
 .stat-info p {
   color: #666;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
 }
 
 .section {

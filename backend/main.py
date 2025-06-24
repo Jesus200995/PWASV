@@ -5,31 +5,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
-import pytz
 import os
 import bcrypt
 from pydantic import BaseModel
 from jose import jwt
 from passlib.context import CryptContext
-
-# Configurar zona horaria de Ciudad de México
-CDMX_TZ = pytz.timezone("America/Mexico_City")
-
-def obtener_fecha_cdmx():
-    """
-    Obtiene la fecha y hora actual en zona horaria de Ciudad de México
-    Retorna un datetime object con timezone aware
-    """
-    return datetime.now(CDMX_TZ)
-
-def convertir_a_cdmx(fecha_naive):
-    """
-    Convierte una fecha naive a timezone CDMX
-    """
-    if fecha_naive.tzinfo is None:
-        return CDMX_TZ.localize(fecha_naive)
-    else:
-        return fecha_naive.astimezone(CDMX_TZ)
 
 app = FastAPI()
 
@@ -53,13 +33,7 @@ try:
         host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASS
     )
     cursor = conn.cursor()
-    
-    # Configurar timezone en la sesión de PostgreSQL
-    cursor.execute("SET timezone = 'America/Mexico_City';")
-    conn.commit()
-    
     print("✅ Conexión a la base de datos exitosa")
-    print("✅ Timezone configurado en PostgreSQL: America/Mexico_City")
 except Exception as e:
     print(f"❌ Error conectando a la base de datos: {e}")
     conn = None
@@ -180,32 +154,23 @@ async def registrar(
     descripcion: str = Form(""),
     foto: UploadFile = File(...)
 ):
-    try:
-        # Obtener fecha/hora de Ciudad de México de forma centralizada
-        fecha_cdmx = obtener_fecha_cdmx()
-        
-        # Guardar la foto en disco
-        ext = os.path.splitext(foto.filename)[1]
-        nombre_archivo = f"{usuario_id}_{fecha_cdmx.strftime('%Y%m%d%H%M%S')}{ext}"
-        ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
-        with open(ruta_archivo, "wb") as f:
-            contenido = await foto.read()
-            f.write(contenido)
+    # Guardar la foto en disco
+    ext = os.path.splitext(foto.filename)[1]
+    nombre_archivo = f"{usuario_id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}{ext}"
+    ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
+    with open(ruta_archivo, "wb") as f:
+        contenido = await foto.read()
+        f.write(contenido)
 
-        # Guardar registro en la base con fecha/hora de Ciudad de México (timezone aware)
-        cursor.execute(
-            "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora) VALUES (%s, %s, %s, %s, %s, %s)",
-            (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_cdmx)
-        )
-        conn.commit()
-        
-        print(f"✅ Registro guardado con fecha CDMX: {fecha_cdmx}")
-        return {"status": "ok", "foto_url": ruta_archivo, "fecha_hora": fecha_cdmx.isoformat()}
-        
-    except Exception as e:
-        conn.rollback()
-        print(f"❌ Error al guardar registro: {e}")
-        raise HTTPException(status_code=500, detail=f"Error al guardar registro: {str(e)}")
+    # Guardar registro en la base
+    fecha_hora = datetime.utcnow()
+    cursor.execute(
+        "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora) VALUES (%s, %s, %s, %s, %s, %s)",
+        (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora)
+    )
+    conn.commit()
+
+    return {"status": "ok", "foto_url": ruta_archivo}
 
 # ENDPOINT CORREGIDO - Esta es la parte importante que debe actualizarse
 @app.get("/registros")
@@ -228,21 +193,11 @@ def obtener_registros(usuario_id: int = None):
             )
         
         resultados = cursor.fetchall()
-        print(f"📊 Encontrados {len(resultados)} registros")        # Convertir tuplas a diccionarios manualmente
+        print(f"📊 Encontrados {len(resultados)} registros")
+        
+        # Convertir tuplas a diccionarios manualmente
         registros = []
         for row in resultados:
-            # Asegurar que todas las fechas estén en timezone CDMX
-            fecha_hora_cdmx = None
-            if row[6]:
-                try:
-                    # Usar la función centralizada para convertir fechas
-                    fecha_hora_cdmx = convertir_a_cdmx(row[6])
-                    print(f"🕐 Fecha convertida: {row[6]} -> {fecha_hora_cdmx}")
-                except Exception as e:
-                    print(f"⚠️ Error convirtiendo fecha {row[6]}: {e}")
-                    # Fallback: asumir que ya está en CDMX
-                    fecha_hora_cdmx = row[6]
-            
             registro = {
                 "id": row[0],
                 "usuario_id": row[1],
@@ -250,7 +205,7 @@ def obtener_registros(usuario_id: int = None):
                 "longitud": float(row[3]) if row[3] else None,
                 "descripcion": row[4],
                 "foto_url": row[5],
-                "fecha_hora": fecha_hora_cdmx.isoformat() if fecha_hora_cdmx else None
+                "fecha_hora": row[6].isoformat() if row[6] else None
             }
             registros.append(registro)
         

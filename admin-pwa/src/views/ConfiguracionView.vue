@@ -154,7 +154,6 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
-import { obtenerFechaActualCDMX } from '../utils/dateUtils.js'
 
 const router = useRouter()
 
@@ -341,12 +340,11 @@ const reiniciarContadores = () => {
 }
 
 const mostrarLogs = () => {
-  const fechaActual = obtenerFechaActualCDMX().format('DD/MM/YYYY HH:mm:ss')
   const logs = [
-    `[${fechaActual}] Sistema iniciado`,
-    `[${fechaActual}] Usuario ${adminUser.value} autenticado`,
-    `[${fechaActual}] Configuración cargada`,
-    `[${fechaActual}] Estado del servidor verificado`
+    `[${new Date().toLocaleString()}] Sistema iniciado`,
+    `[${new Date().toLocaleString()}] Usuario ${adminUser.value} autenticado`,
+    `[${new Date().toLocaleString()}] Configuración cargada`,
+    `[${new Date().toLocaleString()}] Estado del servidor verificado`
   ]
   
   mostrarMensaje('Logs del Sistema', `<pre>${logs.join('\n')}</pre>`)

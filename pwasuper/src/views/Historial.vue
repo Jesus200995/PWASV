@@ -111,7 +111,6 @@ import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
-import { formatearFechaCDMX } from '../utils/dateUtils.js';
 
 const router = useRouter();
 const registros = ref([]);
@@ -198,10 +197,9 @@ async function cargarRegistros() {
 
 function formatFecha(fechaStr) {
   try {
-    // Usar la nueva utilidad para formatear fechas en horario CDMX
-    return formatearFechaCDMX(fechaStr, 'DD/MM/YYYY HH:mm');
+    const fecha = new Date(fechaStr);
+    return fecha.toLocaleString();
   } catch (e) {
-    console.error('Error formateando fecha:', e);
     return fechaStr;
   }
 }

@@ -898,26 +898,25 @@ const logout = () => {
 }
 
 .btn-ver {
-  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
   border: none;
-  padding: 6px 14px;
   border-radius: 20px;
   cursor: pointer;
   font-size: 11px;
   font-weight: 600;
-  transition: all 0.2s ease;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.25);
-  min-width: 90px;
-  text-align: center;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  white-space: nowrap;
 }
 
 .btn-ver:hover {
-  background: linear-gradient(135deg, #45a049 0%, #5cb85c 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
+  background: linear-gradient(135deg, #43A047, #388E3C);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
 .btn-ver:active {

@@ -111,10 +111,6 @@
                     {{ formatFecha(registro.fecha_hora) }}
                   </td>                  <td>
                     <button @click="verDetalles(registro)" class="btn-ver">
-                      <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
                       Ver Detalles
                     </button>
                   </td>
@@ -902,85 +898,31 @@ const logout = () => {
 }
 
 .btn-ver {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 50%, #007bff 100%);
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
   color: white;
   border: none;
-  padding: 10px 18px;
-  border-radius: 50px;
+  padding: 6px 14px;
+  border-radius: 20px;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.2s ease;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  box-shadow: 
-    0 4px 16px rgba(0, 123, 255, 0.35),
-    0 2px 6px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
-  min-width: 120px;
-  justify-content: center;
-}
-
-.btn-ver::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  transition: left 0.5s ease;
-}
-
-.btn-ver::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  transform: translate(-50%, -50%);
-}
-
-.btn-ver:hover::before {
-  left: 100%;
-}
-
-.btn-ver:hover::after {
-  width: 200px;
-  height: 200px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.25);
+  min-width: 90px;
+  text-align: center;
 }
 
 .btn-ver:hover {
-  background: linear-gradient(135deg, #0056b3 0%, #004085 50%, #0056b3 100%);
-  transform: translateY(-2px) scale(1.08);
-  box-shadow: 
-    0 8px 24px rgba(0, 123, 255, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #45a049 0%, #5cb85c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
 }
 
 .btn-ver:active {
-  transform: translateY(0) scale(1.02);
-  transition: all 0.1s ease;
-}
-
-.btn-icon {
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
-}
-
-.btn-ver:hover .btn-icon {
-  transform: scale(1.1) rotate(5deg);
-  filter: drop-shadow(0 2px 4px rgba(255,255,255,0.3));
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(76, 175, 80, 0.3);
 }
 
 .modal-overlay {

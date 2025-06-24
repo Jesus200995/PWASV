@@ -143,6 +143,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
+import { formatearFechaCDMX, obtenerFechaActualCDMX, convertirUTCAcdmx } from '../utils/dateUtils.js'
 
 const router = useRouter()
 
@@ -226,10 +227,15 @@ const calcularEstadisticas = () => {
   const totalRegistros = registros.value.length
   const totalUsuarios = usuarios.value.length // Usar usuarios reales en lugar de únicos de registros
   
-  const hoy = new Date().toDateString()
+  // Usar la fecha actual en horario CDMX para comparar
+  const hoyCDMX = obtenerFechaActualCDMX().format('YYYY-MM-DD')
+  
   const registrosHoy = registros.value.filter(r => {
-    const fechaRegistro = new Date(r.fecha_hora).toDateString()
-    return fechaRegistro === hoy
+    if (!r.fecha_hora) return false
+    
+    // Convertir la fecha del registro a CDMX y comparar solo la fecha
+    const fechaRegistroCDMX = convertirUTCAcdmx(r.fecha_hora).format('YYYY-MM-DD')
+    return fechaRegistroCDMX === hoyCDMX
   }).length
   
   stats.totalRegistros = totalRegistros
@@ -239,8 +245,9 @@ const calcularEstadisticas = () => {
 
 const formatFecha = (fechaStr) => {
   try {
-    return new Date(fechaStr).toLocaleString('es-ES')
+    return formatearFechaCDMX(fechaStr, 'DD/MM/YYYY HH:mm')
   } catch (e) {
+    console.error('Error formateando fecha:', e)
     return fechaStr
   }
 }

@@ -336,6 +336,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
+import { formatearFechaCDMX } from '../utils/dateUtils.js'
 
 const router = useRouter()
 
@@ -369,8 +370,9 @@ const selectedPhotoUrl = ref('')
 // Función para formatear fechas
 const formatFecha = (fechaStr) => {
   try {
-    return new Date(fechaStr).toLocaleString('es-ES')
+    return formatearFechaCDMX(fechaStr, 'DD/MM/YYYY HH:mm:ss')
   } catch (e) {
+    console.error('Error formateando fecha:', e)
     return fechaStr
   }
 }

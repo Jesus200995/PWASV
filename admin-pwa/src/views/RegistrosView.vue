@@ -2,16 +2,28 @@
   <div class="registros-container">
     <Sidebar @logout="logout" />
     
-    <main class="main-content">
-      <header class="page-header">
+    <main class="main-content">      <header class="page-header">
         <div class="header-content">
-          <div>
-            <h1>Gestión de Registros</h1>
-            <p>Administra todos los registros de usuarios en la aplicación</p>
-          </div>          <div class="header-actions">
-            <span class="connection-status" :class="{ online: true, offline: false }">
-              🟢 Conectado
-            </span>
+          <div class="header-main">
+            <div class="header-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+              </svg>
+            </div>
+            <div class="header-text">
+              <h1 class="header-title">Gestión de Registros</h1>
+              <p class="header-subtitle">Administra todos los registros de usuarios en la aplicación</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <div class="connection-status" :class="{ 'online': isOnline, 'offline': !isOnline }">
+              <div class="status-indicator"></div>
+              <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
+            </div>
             <button @click="cargarRegistros" class="refresh-btn" :disabled="loading">
               <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10"></polyline>
@@ -172,6 +184,9 @@ import { usuariosService } from '../services/usuariosService.js'
 
 const router = useRouter()
 
+// Estado de conexión
+const isOnline = ref(navigator.onLine)
+
 const API_URL = 'https://apipwa.sembrandodatos.com'
 const registros = ref([])
 const registrosFiltrados = ref([])
@@ -190,6 +205,16 @@ let map = null
 
 onMounted(() => {
   cargarRegistros()
+  
+  // Escuchar cambios de conexión
+  window.addEventListener('online', () => {
+    isOnline.value = true
+  })
+  
+  window.addEventListener('offline', () => {
+    isOnline.value = false
+  })
+  
   // Cargar Leaflet desde CDN
   if (!window.L) {
     const link = document.createElement('link')
@@ -355,10 +380,11 @@ const logout = () => {
 }
 
 .page-header {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
-  padding: 32px 40px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  border-bottom: none;
+  padding: 32px;
+  color: white;
+  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
   overflow: hidden;
 }
@@ -369,37 +395,71 @@ const logout = () => {
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50);
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
-.header-content h1 {
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: float 3s ease-in-out infinite;
+}
+
+.header-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.header-text {
+  flex: 1;
+}
+
+.header-title {
   font-size: 32px;
-  color: #333;
-  margin-bottom: 4px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #2c3e50 0%, #4CAF50 100%);
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  letter-spacing: -0.5px;
 }
 
-.header-content p {
-  color: #666;
-  font-size: 14px;
-  font-weight: 500;
+.header-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
 
 .header-actions {
@@ -409,38 +469,99 @@ const logout = () => {
 }
 
 .connection-status {
-  font-size: 12px;
-  padding: 6px 12px;
-  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
   font-weight: 500;
-  background: #e8f5e8;
-  color: #2e7d2e;
+  transition: all 0.3s ease;
+}
+
+.connection-status.online {
+  background: rgba(39, 174, 96, 0.2);
+  border-color: rgba(39, 174, 96, 0.3);
+}
+
+.connection-status.offline {
+  background: rgba(231, 76, 60, 0.2);
+  border-color: rgba(231, 76, 60, 0.3);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.connection-status.online .status-indicator {
+  background: #27ae60;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+
+.connection-status.offline .status-indicator {
+  background: #e74c3c;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.status-text {
+  color: white;
+  font-weight: 500;
 }
 
 .refresh-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #4CAF50 100%);
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
   color: white;
-  border: none;
-  padding: 14px 24px;
-  border-radius: 50px;
-  cursor: pointer;
   font-size: 14px;
-  font-weight: 700;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 
-    0 6px 20px rgba(76, 175, 80, 0.35),
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  min-width: 140px;
-  justify-content: center;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
+
+.refresh-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.refresh-icon {
+  transition: transform 0.3s ease;
+}
+
+.refresh-icon.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Contenido de la página */
 
 .refresh-btn::before {
   content: '';

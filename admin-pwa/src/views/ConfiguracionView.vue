@@ -2,12 +2,23 @@
   <div class="configuracion-container">
     <Sidebar @logout="logout" />
     
-    <main class="main-content">
-      <header class="page-header">
+    <main class="main-content">      <header class="page-header">
         <div class="header-content">
-          <div>
-            <h1>Configuración del Sistema</h1>
-            <p>Administra las configuraciones generales de la aplicación</p>
+          <div class="header-main">
+            <div class="header-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+              </svg>
+            </div>
+            <div class="header-text">
+              <h1 class="header-title">Configuración del Sistema</h1>
+              <p class="header-subtitle">Administra las configuraciones generales de la aplicación</p>
+            </div>
+          </div>
+          <div class="connection-status" :class="{ 'online': isOnline, 'offline': !isOnline }">
+            <div class="status-indicator"></div>
+            <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
           </div>
         </div>
       </header>
@@ -157,6 +168,9 @@ import ConfirmModal from '../components/ConfirmModal.vue'
 
 const router = useRouter()
 
+// Estado de conexión
+const isOnline = ref(navigator.onLine)
+
 const adminUser = ref(localStorage.getItem('admin_user') || 'Admin')
 const checking = ref(false)
 const exporting = ref(false)
@@ -190,6 +204,15 @@ const modalContent = ref('')
 onMounted(() => {
   cargarConfiguraciones()
   verificarEstadoServidor()
+  
+  // Escuchar cambios de conexión
+  window.addEventListener('online', () => {
+    isOnline.value = true
+  })
+  
+  window.addEventListener('offline', () => {
+    isOnline.value = false
+  })
 })
 
 const cargarConfiguraciones = () => {
@@ -381,20 +404,138 @@ const logout = () => {
 }
 
 .page-header {
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 24px 32px;
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  border-bottom: none;
+  padding: 32px;
+  color: white;
+  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
+  position: relative;
+  overflow: hidden;
 }
 
-.header-content h1 {
-  font-size: 28px;
-  color: #2c3e50;
-  margin-bottom: 4px;
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
 }
 
-.header-content p {
-  color: #7f8c8d;
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: float 3s ease-in-out infinite;
+}
+
+.header-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.header-text {
+  flex: 1;
+}
+
+.header-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  letter-spacing: -0.5px;
+}
+
+.header-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.connection-status.online {
+  background: rgba(39, 174, 96, 0.2);
+  border-color: rgba(39, 174, 96, 0.3);
+}
+
+.connection-status.offline {
+  background: rgba(231, 76, 60, 0.2);
+  border-color: rgba(231, 76, 60, 0.3);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.connection-status.online .status-indicator {
+  background: #27ae60;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+
+.connection-status.offline .status-indicator {
+  background: #e74c3c;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.status-text {
+  color: white;
+  font-weight: 500;
 }
 
 .page-content {
@@ -645,7 +786,39 @@ const logout = () => {
   }
   
   .page-header {
-    padding: 16px 20px;
+    padding: 24px 20px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .header-main {
+    gap: 16px;
+  }
+  
+  .header-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .header-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .header-title {
+    font-size: 24px;
+  }
+  
+  .header-subtitle {
+    font-size: 14px;
+  }
+  
+  .connection-status {
+    align-self: flex-end;
   }
   
   .page-content {

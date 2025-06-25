@@ -2,16 +2,25 @@
   <div class="dashboard-container">
     <Sidebar @logout="logout" />
     
-    <main class="main-content">
-      <header class="dashboard-header">
+    <main class="main-content">      <header class="dashboard-header">
         <div class="header-content">
-          <div>
-            <h1>Panel Administrativo</h1>
-            <p>Bienvenido, {{ adminUser }}</p>
-          </div>          <div class="header-actions">
-            <span class="connection-status" :class="{ online: isOnline, offline: !isOnline }">
-              {{ isOnline ? '🟢 Conectado' : '🔴 Sin conexión' }}
-            </span>
+          <div class="header-main">
+            <div class="header-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+              </svg>
+            </div>
+            <div class="header-text">
+              <h1 class="header-title">Panel Administrativo</h1>
+              <p class="header-subtitle">Bienvenido, {{ adminUser }}</p>
+            </div>
+          </div>
+          <div class="connection-status" :class="{ 'online': isOnline, 'offline': !isOnline }">
+            <div class="status-indicator"></div>
+            <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
           </div>
         </div>
       </header>
@@ -302,10 +311,11 @@ const logout = () => {
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
-  padding: 32px 40px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  border-bottom: none;
+  padding: 32px;
+  color: white;
+  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
   overflow: hidden;
 }
@@ -316,85 +326,128 @@ const logout = () => {
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50);
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
-.header-content h1 {
-  color: #333;
-  margin-bottom: 4px;
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: float 3s ease-in-out infinite;
+}
+
+.header-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.header-text {
+  flex: 1;
+}
+
+.header-title {
   font-size: 32px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #2c3e50 0%, #4CAF50 100%);
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  letter-spacing: -0.5px;
 }
 
-.header-content p {
-  color: #666;
-  font-size: 14px;
-  font-weight: 500;
+.header-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
 
 .connection-status {
-  font-size: 12px;
-  padding: 6px 12px;
-  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .connection-status.online {
-  background: #e8f5e8;
-  color: #2e7d2e;
+  background: rgba(39, 174, 96, 0.2);
+  border-color: rgba(39, 174, 96, 0.3);
 }
 
 .connection-status.offline {
-  background: #fdeaea;
-  color: #d63384;
+  background: rgba(231, 76, 60, 0.2);
+  border-color: rgba(231, 76, 60, 0.3);
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
 }
 
-.refresh-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #4CAF50 100%);
+.connection-status.online .status-indicator {
+  background: #27ae60;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+
+.connection-status.offline .status-indicator {
+  background: #e74c3c;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.status-text {
   color: white;
-  border: none;
-  padding: 14px 24px;
-  border-radius: 50px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 
-    0 6px 20px rgba(76, 175, 80, 0.35),
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  min-width: 140px;
-  justify-content: center;
+  font-weight: 500;
+}
+
+/* Contenido del dashboard */
+.dashboard-content {
+  padding: 32px 40px;
 }
 
 .refresh-btn::before {

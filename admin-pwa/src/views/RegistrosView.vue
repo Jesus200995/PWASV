@@ -153,7 +153,7 @@
                       :src="`${API_URL}/${registro.foto_url}`"
                       alt="Foto" 
                       class="foto-mini"
-                      @click="verFoto(`${API_URL}/${registro.foto_url}`)"
+                      @click="abrirFotoCompleta(registro.foto_url)"
                     >
                     <span v-else class="no-foto">Sin foto</span>
                   </td>
@@ -180,44 +180,180 @@
       </div>
     </main>
 
-    <!-- Modal para detalles con mapa -->
-    <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
-      <div class="modal-content modal-large" @click.stop>
-        <div class="modal-header">
-          <h3>{{ modalTitle }}</h3>
-          <button @click="cerrarModal" class="btn-close">×</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="modalType === 'details'" class="registro-detalles">            <div class="details-info">
-              <div><strong>ID del Registro:</strong> #{{ selectedRegistro?.id }}</div>
-              <div><strong>Usuario:</strong> {{ selectedRegistro?.usuario?.nombre_completo || `Usuario ${selectedRegistro?.usuario_id}` }}</div>
-              <div><strong>Correo:</strong> {{ selectedRegistro?.usuario?.correo || 'No disponible' }}</div>
-              <div><strong>Fecha y Hora:</strong> {{ formatFecha(selectedRegistro?.fecha_hora) }}</div>
-              <div><strong>Descripción:</strong> {{ selectedRegistro?.descripcion || 'Sin descripción' }}</div>
-              <div v-if="selectedRegistro?.foto_url">
-                <strong>Fotografía:</strong><br>
-                <img 
-                  :src="`${API_URL}/${selectedRegistro.foto_url}`" 
-                  alt="Foto del registro" 
-                  class="detail-photo"
-                >
+    <!-- Modal para detalles -->
+    <Teleport to="body">
+      <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
+        <div class="modal-content" @click.stop>
+          <!-- Header del modal con degradado verde -->
+          <div class="modal-header">
+            <div class="modal-header-content">
+              <div class="modal-icon">
+                <svg width="18" height="18" fill="white" viewBox="0 0 24 24">
+                  <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625zM7.5 15a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 15zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H8.25z" clip-rule="evenodd"/>
+                  <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z"/>
+                </svg>
+              </div>
+              <h3 class="modal-title">
+                Detalles del Registro
+              </h3>
+            </div>
+            <button @click="cerrarModal" class="btn-close">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Contenido del modal -->
+          <div class="modal-body">
+            <!-- Vista de detalles del registro -->
+            <div v-if="modalType === 'details' && selectedRegistro" class="registro-detalles">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">ID del Registro</span>
+                    <span class="detail-value highlight">#{{ selectedRegistro.id }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Usuario</span>
+                    <span class="detail-value">{{ selectedRegistro.usuario?.nombre_completo || `Usuario ${selectedRegistro.usuario_id}` }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z"/>
+                      <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Correo Electrónico</span>
+                    <span class="detail-value">{{ selectedRegistro.usuario?.correo || 'No disponible' }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Fecha y Hora</span>
+                    <span class="detail-value">{{ formatFecha(selectedRegistro.fecha_hora) }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Ubicación</span>
+                    <span class="detail-value location">{{ parseFloat(selectedRegistro.latitud).toFixed(6) }}, {{ parseFloat(selectedRegistro.longitud).toFixed(6) }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item full-width">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M4.125 3C3.089 3 2.25 3.84 2.25 4.875V18a3 3 0 003 3h15a3 3 0 01-3-3V4.875C17.25 3.839 16.41 3 15.375 3H4.125zM12 9.75a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5H12zm-.75-2.25a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5H12a.75.75 0 01-.75-.75zM6 12.75a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5H6zm-.75 3.75a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5H6a.75.75 0 01-.75-.75zM6 6.75a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h3a.75.75 0 00.75-.75v-3A.75.75 0 009 6.75H6z" clip-rule="evenodd"/>
+                      <path d="M18.75 6.75h1.875c.621 0 1.125.504 1.125 1.125V18a1.5 1.5 0 01-3 0V6.75z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Descripción</span>
+                    <span class="detail-value description">{{ selectedRegistro.descripcion || 'Sin descripción' }}</span>
+                  </div>
+                </div>
+
+                <div v-if="selectedRegistro.foto_url" class="detail-item full-width">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Fotografía</span>
+                    <div class="photo-container">
+                      <img 
+                        :src="`${API_URL}/${selectedRegistro.foto_url}`" 
+                        alt="Foto del registro" 
+                        class="detail-photo"
+                        @click="abrirFotoCompleta(selectedRegistro.foto_url)"
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="detail-item full-width">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M8.25 6.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-1.381z" clip-rule="evenodd"/>
+                      <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a3.75 3.75 0 013.57-4.047z"/>
+                      <path d="M20.226 19.389a8.287 8.287 0 00-1.308-5.135 3.75 3.75 0 013.57 4.047l-.01.121a.563.563 0 01-.373.486l-.115.041c-.07.027-.148.053-.3.102-.331.108-.763.21-1.464.338z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Mapa de Ubicación</span>
+                    <div class="map-container">
+                      <div id="map" class="leaflet-map"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="map-container">
-              <div id="map" class="leaflet-map"></div>
-            </div>
           </div>
-          <div v-else-if="modalType === 'photo'" class="photo-modal">
-            <img :src="selectedPhotoUrl" alt="Fotografía del registro" class="full-photo">
+
+          <!-- Footer del modal -->
+          <div class="modal-footer">
+            <!-- Footer simplificado sin botón de cerrar -->
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
+
+    <!-- Lightbox para ver foto en pantalla completa -->
+    <Teleport to="body" v-if="showLightbox">
+      <div class="lightbox-overlay" @click="cerrarLightbox">
+        <div class="lightbox-container">
+          <button class="lightbox-close" @click="cerrarLightbox">
+            <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+          <img 
+            :src="lightboxImageUrl" 
+            alt="Fotografía en pantalla completa"
+            class="lightbox-image"
+            @click.stop="requestFullscreen"
+          >
+          <p class="lightbox-hint">Haz clic en la imagen para pantalla completa • ESC o clic fuera para cerrar</p>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
@@ -243,7 +379,8 @@ const showModal = ref(false)
 const modalTitle = ref('')
 const modalType = ref('')
 const selectedRegistro = ref(null)
-const selectedPhotoUrl = ref('')
+const showLightbox = ref(false)
+const lightboxImageUrl = ref('')
 
 let map = null
 
@@ -270,6 +407,21 @@ onMounted(() => {
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
     document.head.appendChild(script)
   }
+})
+
+// Event listener para cerrar lightbox con ESC
+const handleKeyDown = (event) => {
+  if (event.key === 'Escape' && showLightbox.value) {
+    cerrarLightbox()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 const cargarRegistros = async () => {
@@ -451,11 +603,20 @@ const initMap = (lat, lng) => {
   }
 }
 
-const verFoto = (fotoUrl) => {
-  selectedPhotoUrl.value = fotoUrl
-  modalTitle.value = 'Fotografía del Registro'
-  modalType.value = 'photo'
-  showModal.value = true
+const abrirFotoCompleta = (fotoUrl) => {
+  lightboxImageUrl.value = `${API_URL}/${fotoUrl}`
+  showLightbox.value = true
+}
+
+const cerrarLightbox = () => {
+  showLightbox.value = false
+  lightboxImageUrl.value = ''
+}
+
+const requestFullscreen = (event) => {
+  if (event.target.requestFullscreen) {
+    event.target.requestFullscreen()
+  }
 }
 
 const cerrarModal = () => {
@@ -1299,110 +1460,398 @@ const logout = () => {
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
-/* Modal styles */
+/* Modal styles modernos */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
   z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalBackdropIn 0.3s ease-out;
+}
+
+@keyframes modalBackdropIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
 }
 
 .modal-content {
-  background: white;
-  border-radius: 12px;
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
+  background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
+  border-radius: 24px;
+  box-shadow: 
+    0 24px 80px rgba(0, 0, 0, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: modalContentIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  position: relative;
 }
 
-.modal-content.modal-large {
-  max-width: 900px;
-  max-height: 90vh;
+@keyframes modalContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .modal-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #388e3c 100%);
+  padding: 20px 28px;
+  color: white;
+  position: relative;
+  overflow: hidden;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
 }
 
-.modal-header h3 {
-  margin: 0;
-  color: #2c3e50;
+.modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
 }
 
-.btn-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #666;
-  padding: 0;
-  width: 30px;
-  height: 30px;
+.modal-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.modal-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.3px;
+}
+
+.btn-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 2;
 }
 
 .btn-close:hover {
-  background: #f0f0f0;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 0;
+  overflow-y: auto;
+  max-height: calc(90vh - 120px);
 }
 
 .registro-detalles {
+  padding: 32px;
+  animation: contentFadeIn 0.4s ease-out 0.1s both;
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.detail-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
+  max-width: none;
 }
 
-.details-info div {
-  margin-bottom: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.04) 0%, rgba(76, 175, 80, 0.02) 100%);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.details-info div:last-child {
-  border-bottom: none;
+.detail-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border-radius: 0 2px 2px 0;
+}
+
+.detail-item:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.04) 100%);
+  border-color: rgba(76, 175, 80, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.15);
+}
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.detail-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  transition: all 0.3s ease;
+}
+
+.detail-item:hover .detail-icon {
+  transform: scale(1.1) rotate(-3deg);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.detail-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4CAF50;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.detail-value {
+  display: block;
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.detail-value.highlight {
+  color: #4CAF50;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.detail-value.location {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.detail-value.description {
+  max-height: 60px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.photo-container {
+  margin-top: 8px;
 }
 
 .detail-photo {
-  max-width: 100%;
+  width: 100%;
+  max-width: 200px;
   height: auto;
-  border-radius: 8px;
-  margin-top: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(76, 175, 80, 0.2);
+}
+
+.detail-photo:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-color: rgba(76, 175, 80, 0.4);
 }
 
 .map-container {
-  min-height: 300px;
+  margin-top: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(76, 175, 80, 0.2);
 }
 
 .leaflet-map {
-  height: 300px;
-  border-radius: 8px;
+  height: 200px;
+  width: 100%;
 }
 
-.photo-modal {
-  text-align: center;
+.modal-footer {
+  padding: 0;
+  background: transparent;
+  border: none;
+  height: 0;
 }
 
-.full-photo {
+/* Estilos del Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lightboxFadeIn 0.3s ease-out;
+}
+
+.lightbox-container {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.lightbox-image {
   max-width: 100%;
-  height: auto;
-  border-radius: 8px;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  animation: lightboxImageIn 0.4s ease-out;
+}
+
+.lightbox-image:hover {
+  transform: scale(1.02);
+}
+
+.lightbox-hint {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+@keyframes lightboxFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lightboxImageIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Responsive */
@@ -1464,12 +1913,58 @@ const logout = () => {
     padding: 8px 4px;
   }
   
-  .modal-content.modal-large {
-    max-width: 95%;
+  .modal-content {
+    margin: 10px;
+    max-width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+  }
+  
+  .modal-header {
+    padding: 16px 20px;
+  }
+  
+  .modal-title {
+    font-size: 18px;
   }
   
   .registro-detalles {
+    padding: 20px;
+  }
+  
+  .detail-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .detail-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .modal-footer {
+    display: none;
+  }
+  
+  .lightbox-container {
+    max-width: 95vw;
+    max-height: 95vh;
+    gap: 15px;
+  }
+  
+  .lightbox-close {
+    top: -40px;
+    width: 35px;
+    height: 35px;
+  }
+  
+  .lightbox-image {
+    max-height: 75vh;
+    border-radius: 8px;
+  }
+  
+  .lightbox-hint {
+    font-size: 12px;
+    padding: 8px 16px;
   }
 }
 </style>

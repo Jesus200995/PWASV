@@ -252,6 +252,20 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="detail-item full-width">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Mapa de Ubicación</span>
+                    <div class="map-container">
+                      <div id="map" class="leaflet-map"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -287,7 +301,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
@@ -316,6 +330,9 @@ const selectedRecord = ref(null)
 const showLightbox = ref(false)
 const lightboxImageUrl = ref('')
 
+// Variable para el mapa
+let map = null
+
 const statCards = computed(() => [
   {
     label: 'Total Registros',
@@ -341,6 +358,18 @@ window.addEventListener('offline', () => { isOnline.value = false })
 onMounted(() => {
   cargarRegistros()
   cargarUsuarios() // También cargar usuarios para estadísticas más precisas
+  
+  // Cargar Leaflet desde CDN
+  if (!window.L) {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+    document.head.appendChild(link)
+    
+    const script = document.createElement('script')
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    document.head.appendChild(script)
+  }
 })
 
 // Event listener para cerrar lightbox con ESC
@@ -429,10 +458,48 @@ const formatFecha = (fechaStr) => {
   }
 }
 
-const verDetalles = (registro) => {
+const verDetalles = async (registro) => {
   selectedRecord.value = registro
   modalType.value = 'details'
   showModal.value = true
+  
+  // Esperar a que el modal se renderice
+  await nextTick()
+  
+  // Inicializar el mapa
+  setTimeout(() => {
+    initMap(registro.latitud, registro.longitud)
+  }, 100)
+}
+
+const initMap = (lat, lng) => {
+  if (map) {
+    map.remove()
+  }
+  
+  const mapElement = document.getElementById('map')
+  if (!mapElement) return
+  
+  // Verificar que Leaflet esté cargado
+  if (!window.L) {
+    console.error('Leaflet no está cargado')
+    return
+  }
+  
+  try {
+    map = window.L.map('map').setView([parseFloat(lat), parseFloat(lng)], 15)
+    
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map)
+    
+    window.L.marker([parseFloat(lat), parseFloat(lng)])
+      .addTo(map)
+      .bindPopup(`Registro #${selectedRecord.value?.id}<br>Lat: ${lat}<br>Lng: ${lng}`)
+      .openPopup()
+  } catch (error) {
+    console.error('Error al inicializar el mapa:', error)
+  }
 }
 
 const abrirFotoCompleta = (fotoUrl) => {
@@ -453,6 +520,10 @@ const requestFullscreen = (event) => {
 
 const cerrarModal = () => {
   showModal.value = false
+  if (map) {
+    map.remove()
+    map = null
+  }
 }
 
 const logout = () => {
@@ -1523,6 +1594,19 @@ const logout = () => {
 
 .detail-photo:hover {
   box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+}
+
+/* Estilos para el mapa */
+.map-container {
+  margin-top: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-map {
+  height: 200px;
+  width: 100%;
 }
 
 /* Footer del modal */

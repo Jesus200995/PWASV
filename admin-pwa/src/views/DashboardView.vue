@@ -104,7 +104,7 @@
                       :src="`${API_URL}/${registro.foto_url}`"
                       alt="Foto" 
                       class="foto-mini"
-                      @click="verFoto(`${API_URL}/${registro.foto_url}`)"
+                      @click="abrirFotoCompleta(registro.foto_url)"
                     >
                     <span v-else class="no-foto">Sin foto</span>
                   </td>
@@ -131,20 +131,166 @@
     </main>
 
     <!-- Modal para detalles -->
-    <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>{{ modalTitle }}</h3>
-          <button @click="cerrarModal" class="btn-close">×</button>
+    <Teleport to="body">
+      <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
+        <div class="modal-content" @click.stop>
+          <!-- Header del modal con degradado verde -->
+          <div class="modal-header">
+            <div class="modal-header-content">
+              <div class="modal-icon">
+                <svg width="18" height="18" fill="white" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14,2 14,8 20,8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+              </div>
+              <h3 class="modal-title">
+                Detalles del Registro
+              </h3>
+            </div>
+            <button @click="cerrarModal" class="btn-close">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Contenido del modal -->
+          <div class="modal-body">
+            <!-- Vista de detalles del registro -->
+            <div v-if="modalType === 'details' && selectedRecord" class="registro-detalles">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">ID del Registro</span>
+                    <span class="detail-value highlight">#{{ selectedRecord.id }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Usuario</span>
+                    <span class="detail-value">{{ selectedRecord.usuario?.nombre_completo || `Usuario ${selectedRecord.usuario_id}` }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Correo Electrónico</span>
+                    <span class="detail-value">{{ selectedRecord.usuario?.correo || 'No disponible' }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12,6 12,12 16,14"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Fecha y Hora</span>
+                    <span class="detail-value">{{ formatFecha(selectedRecord.fecha_hora) }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Ubicación</span>
+                    <span class="detail-value location">{{ parseFloat(selectedRecord.latitud).toFixed(6) }}, {{ parseFloat(selectedRecord.longitud).toFixed(6) }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item full-width">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Descripción</span>
+                    <span class="detail-value description">{{ selectedRecord.descripcion || 'Sin descripción' }}</span>
+                  </div>
+                </div>
+
+                <div v-if="selectedRecord.foto_url" class="detail-item full-width">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21,15 16,10 5,21"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Fotografía</span>
+                    <div class="photo-container">
+                      <img 
+                        :src="`${API_URL}/${selectedRecord.foto_url}`" 
+                        alt="Foto del registro" 
+                        class="detail-photo"
+                        @click="abrirFotoCompleta(selectedRecord.foto_url)"
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer del modal -->
+          <div class="modal-footer">
+            <!-- Footer simplificado sin botón de cerrar -->
+          </div>
         </div>
-        <div class="modal-body" v-html="modalContent"></div>
       </div>
-    </div>
+    </Teleport>
+
+    <!-- Lightbox para ver foto en pantalla completa -->
+    <Teleport to="body" v-if="showLightbox">
+      <div class="lightbox-overlay" @click="cerrarLightbox">
+        <div class="lightbox-container">
+          <button class="lightbox-close" @click="cerrarLightbox">
+            <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+          <img 
+            :src="lightboxImageUrl" 
+            alt="Fotografía en pantalla completa"
+            class="lightbox-image"
+            @click.stop="requestFullscreen"
+          >
+          <p class="lightbox-hint">Haz clic en la imagen para pantalla completa • ESC o clic fuera para cerrar</p>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
@@ -168,8 +314,10 @@ const stats = reactive({
 })
 
 const showModal = ref(false)
-const modalTitle = ref('')
-const modalContent = ref('')
+const modalType = ref('details')
+const selectedRecord = ref(null)
+const showLightbox = ref(false)
+const lightboxImageUrl = ref('')
 
 const statCards = computed(() => [
   {
@@ -196,6 +344,21 @@ window.addEventListener('offline', () => { isOnline.value = false })
 onMounted(() => {
   cargarRegistros()
   cargarUsuarios() // También cargar usuarios para estadísticas más precisas
+})
+
+// Event listener para cerrar lightbox con ESC
+const handleKeyDown = (event) => {
+  if (event.key === 'Escape' && showLightbox.value) {
+    cerrarLightbox()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 const cargarRegistros = async () => {
@@ -270,18 +433,25 @@ const formatFecha = (fechaStr) => {
 }
 
 const verDetalles = (registro) => {
-  // Redirigir a la vista de registros para ver el detalle completo con mapa
-  router.push('/registros')
+  selectedRecord.value = registro
+  modalType.value = 'details'
+  showModal.value = true
 }
 
-const verFoto = (fotoUrl) => {
-  modalTitle.value = 'Fotografía del Registro'
-  modalContent.value = `
-    <div style="text-align: center;">
-      <img src="${fotoUrl}" alt="Fotografía del registro" style="max-width: 100%; height: auto; border-radius: 8px;">
-    </div>
-  `
-  showModal.value = true
+const abrirFotoCompleta = (fotoUrl) => {
+  lightboxImageUrl.value = `${API_URL}/${fotoUrl}`
+  showLightbox.value = true
+}
+
+const cerrarLightbox = () => {
+  showLightbox.value = false
+  lightboxImageUrl.value = ''
+}
+
+const requestFullscreen = (event) => {
+  if (event.target.requestFullscreen) {
+    event.target.requestFullscreen()
+  }
 }
 
 const cerrarModal = () => {
@@ -1078,6 +1248,7 @@ const logout = () => {
   box-shadow: 0 1px 3px rgba(76, 175, 80, 0.3);
 }
 
+/* Estilos del modal mejorados */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1085,68 +1256,287 @@ const logout = () => {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 20px;
-  backdrop-filter: blur(5px);
-  animation: fadeIn 0.3s ease-out;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
 }
 
 .modal-content {
-  background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
-  border-radius: 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
   max-width: 600px;
-  max-height: 80vh;
   width: 100%;
+  max-height: 85vh;
   overflow: hidden;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.2),
-    0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(76, 175, 80, 0.1);
-  animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  animation: modalSlideIn 0.3s ease-out;
 }
 
 @keyframes modalSlideIn {
-  0% { 
-    opacity: 0; 
-    transform: scale(0.8) translateY(20px); 
+  from {
+    transform: translateY(30px) scale(0.95);
+    opacity: 0;
   }
-  100% { 
-    opacity: 1; 
-    transform: scale(1) translateY(0); 
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
   }
 }
 
 .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  color: white;
   padding: 20px 24px;
-  border-bottom: 1px solid #e0e0e0;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
 }
 
-.modal-header h3 {
+.modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='20' cy='20' r='1.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
+}
+
+.modal-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.modal-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.modal-title {
   margin: 0;
-  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
 }
 
 .btn-close {
-  background: none;
-  border: none;
-  font-size: 24px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
   cursor: pointer;
-  color: #666;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 2;
+}
+
+.btn-close:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .modal-body {
   padding: 24px;
-  overflow: auto;
-  max-height: calc(80vh - 120px);
+  max-height: 55vh;
+  overflow-y: auto;
 }
 
-/* Responsive */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #4CAF50;
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #45a049;
+}
+
+/* Estilos para detalles del registro */
+.registro-detalles {
+  animation: contentFadeIn 0.4s ease-out 0.1s both;
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fffe 0%, #f0fff4 100%);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.detail-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.08);
+  border-color: rgba(76, 175, 80, 0.2);
+}
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.detail-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.detail-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4CAF50;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #2c3e50;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+.detail-value.highlight {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.detail-value.location {
+  font-family: 'Courier New', monospace;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.detail-value.description {
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #4CAF50;
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Estilos para fotografías */
+.photo-container {
+  position: relative;
+  display: inline-block;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.photo-container:hover {
+  transform: scale(1.02);
+}
+
+.detail-photo {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.detail-photo:hover {
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+}
+
+/* Footer del modal */
+.modal-footer {
+  padding: 0;
+  background: transparent;
+  border: none;
+  height: 0;
+}
+
+/* Responsividad */
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
@@ -1165,17 +1555,166 @@ const logout = () => {
     gap: 16px;
     align-items: stretch;
   }
+  
+  .modal-overlay {
+    padding: 10px;
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+  
+  .modal-header {
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .modal-title {
+    font-size: 18px;
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .detail-item {
+    padding: 12px;
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  .detail-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .modal-footer {
+    display: none;
+  }
 }
-</style>
 
-<style>
-.registro-detalles > div {
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+/* Estilos del Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lightboxFadeIn 0.3s ease-out;
 }
 
-.registro-detalles > div:last-child {
-  border-bottom: none;
+.lightbox-container {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.lightbox-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  animation: lightboxImageIn 0.4s ease-out;
+}
+
+.lightbox-image:hover {
+  transform: scale(1.02);
+}
+
+.lightbox-hint {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+@keyframes lightboxFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lightboxImageIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive para lightbox */
+@media (max-width: 768px) {
+  .lightbox-container {
+    max-width: 95vw;
+    max-height: 95vh;
+    gap: 15px;
+  }
+  
+  .lightbox-close {
+    top: -40px;
+    width: 35px;
+    height: 35px;
+  }
+  
+  .lightbox-image {
+    max-height: 75vh;
+    border-radius: 8px;
+  }
+  
+  .lightbox-hint {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
 }
 </style>

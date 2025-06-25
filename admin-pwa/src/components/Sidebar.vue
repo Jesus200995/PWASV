@@ -28,8 +28,10 @@
       <a href="https://geoportal.sembrandodatos.com/" target="_blank" class="geoportal-btn">
         <div class="geoportal-icon-wrapper">
           <svg class="geoportal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M2 12h20"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            <path d="M8 12c0-2.5 1.8-4.5 4-4.5s4 2 4 4.5-1.8 4.5-4 4.5-4-2-4-4.5"/>
           </svg>
           <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M7 17l10-10"/>
@@ -410,8 +412,8 @@ if (typeof window !== 'undefined') {
 .geoportal-btn {
   width: 100%;
   background: linear-gradient(135deg, 
-    rgba(33, 150, 243, 0.9) 0%, 
-    rgba(25, 118, 210, 0.9) 100%);
+    rgba(76, 175, 80, 0.9) 0%, 
+    rgba(102, 187, 106, 0.9) 100%);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: white;
@@ -429,18 +431,18 @@ if (typeof window !== 'undefined') {
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 8px 25px rgba(33, 150, 243, 0.25),
+    0 8px 25px rgba(76, 175, 80, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .geoportal-btn:hover {
   background: linear-gradient(135deg, 
-    rgba(33, 150, 243, 1) 0%, 
-    rgba(25, 118, 210, 1) 100%);
+    rgba(76, 175, 80, 1) 0%, 
+    rgba(102, 187, 106, 1) 100%);
   transform: translateY(-3px) scale(1.02);
   box-shadow: 
-    0 15px 35px rgba(33, 150, 243, 0.4),
+    0 15px 35px rgba(76, 175, 80, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
@@ -508,8 +510,8 @@ if (typeof window !== 'undefined') {
 .mobile-app-btn {
   width: 100%;
   background: linear-gradient(135deg, 
-    rgba(156, 39, 176, 0.9) 0%, 
-    rgba(123, 31, 162, 0.9) 100%);
+    rgba(33, 150, 243, 0.8) 0%, 
+    rgba(25, 118, 210, 0.8) 100%);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: white;
@@ -528,18 +530,18 @@ if (typeof window !== 'undefined') {
   overflow: hidden;
   margin-top: 12px;
   box-shadow: 
-    0 8px 25px rgba(156, 39, 176, 0.25),
+    0 8px 25px rgba(33, 150, 243, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .mobile-app-btn:hover {
   background: linear-gradient(135deg, 
-    rgba(156, 39, 176, 1) 0%, 
-    rgba(123, 31, 162, 1) 100%);
+    rgba(33, 150, 243, 0.95) 0%, 
+    rgba(25, 118, 210, 0.95) 100%);
   transform: translateY(-3px) scale(1.02);
   box-shadow: 
-    0 15px 35px rgba(156, 39, 176, 0.4),
+    0 15px 35px rgba(33, 150, 243, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }

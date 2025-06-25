@@ -40,6 +40,16 @@
         <!-- Filtros -->
         <div class="filters-section">
           <div class="filter-box">
+            <label for="busqueda-usuario">Buscar Usuario:</label>
+            <input 
+              id="busqueda-usuario"
+              v-model="busquedaUsuario" 
+              @input="filtrarRegistros"
+              type="text"
+              placeholder="Buscar por nombre o correo..."
+              class="filter-input"
+            >
+            
             <label for="usuario-filter">Filtrar por Usuario:</label>
             <select 
               id="usuario-filter"
@@ -51,6 +61,19 @@
                 {{ usuario.nombre_completo || `Usuario ${usuario.id}` }}
               </option>
             </select>
+
+            <button 
+              v-if="busquedaUsuario || filtroUsuario" 
+              @click="limpiarFiltros" 
+              class="clear-filters-btn"
+              title="Limpiar filtros"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              Limpiar
+            </button>
           </div>
         </div>
 
@@ -81,7 +104,8 @@
               </svg>
             </div>
             <h3>No hay registros</h3>
-            <p v-if="filtroUsuario">No se encontraron registros para {{ usuariosDisponibles.find(u => u.id.toString() === filtroUsuario.toString())?.nombre_completo || `Usuario ${filtroUsuario}` }}</p>
+            <p v-if="busquedaUsuario">No se encontraron registros que coincidan con "{{ busquedaUsuario }}"</p>
+            <p v-else-if="filtroUsuario">No se encontraron registros para {{ usuariosDisponibles.find(u => u.id.toString() === filtroUsuario.toString())?.nombre_completo || `Usuario ${filtroUsuario}` }}</p>
             <p v-else>Aún no se han creado registros en la aplicación.</p>
           </div>
           
@@ -194,6 +218,7 @@ const usuariosDisponibles = ref([])
 const loading = ref(false)
 const error = ref('')
 const filtroUsuario = ref('')
+const busquedaUsuario = ref('')
 
 const showModal = ref(false)
 const modalTitle = ref('')
@@ -279,14 +304,36 @@ const cargarRegistros = async () => {
 }
 
 const filtrarRegistros = () => {
-  if (!filtroUsuario.value) {
-    registrosFiltrados.value = registros.value
-    return
+  let registrosFiltrar = registros.value
+
+  // Filtrar por búsqueda de texto
+  if (busquedaUsuario.value) {
+    const busqueda = busquedaUsuario.value.toLowerCase()
+    registrosFiltrar = registrosFiltrar.filter(registro => {
+      const nombreCompleto = registro.usuario?.nombre_completo?.toLowerCase() || ''
+      const correo = registro.usuario?.correo?.toLowerCase() || ''
+      const usuarioId = `usuario ${registro.usuario_id}`.toLowerCase()
+      
+      return nombreCompleto.includes(busqueda) || 
+             correo.includes(busqueda) || 
+             usuarioId.includes(busqueda)
+    })
   }
-  
-  registrosFiltrados.value = registros.value.filter(registro => 
-    registro.usuario_id.toString() === filtroUsuario.value.toString()
-  )
+
+  // Filtrar por usuario específico
+  if (filtroUsuario.value) {
+    registrosFiltrar = registrosFiltrar.filter(registro => 
+      registro.usuario_id.toString() === filtroUsuario.value.toString()
+    )
+  }
+
+  registrosFiltrados.value = registrosFiltrar
+}
+
+const limpiarFiltros = () => {
+  busquedaUsuario.value = ''
+  filtroUsuario.value = ''
+  registrosFiltrados.value = registros.value
 }
 
 const formatFecha = (fechaStr) => {
@@ -736,6 +783,67 @@ const logout = () => {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23388E3C' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
 
+.filter-input {
+  padding: 12px 20px;
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  border-radius: 50px;
+  font-size: 14px;
+  min-width: 280px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+  font-weight: 500;
+  color: #333;
+}
+
+.filter-input::placeholder {
+  color: #999;
+  font-weight: 400;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.25);
+  transform: translateY(-1px);
+}
+
+.filter-input:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.15);
+}
+
+.clear-filters-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
+  white-space: nowrap;
+}
+
+.clear-filters-btn:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.clear-filters-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.clear-filters-btn:hover svg {
+  transform: rotate(90deg);
+}
+
 .registros-section {
   background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
   border-radius: 20px;
@@ -1164,6 +1272,19 @@ const logout = () => {
     min-width: unset;
     padding: 14px 48px 14px 20px;
     font-size: 16px; /* Evita el zoom en iOS */
+  }
+
+  .filter-input {
+    width: 100%;
+    min-width: unset;
+    padding: 14px 20px;
+    font-size: 16px; /* Evita el zoom en iOS */
+  }
+
+  .clear-filters-btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
   }
   
   .table-container {

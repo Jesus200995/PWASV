@@ -188,14 +188,14 @@
       <div class="sidebar-footer">
       <button @click="showLogoutModal = true" class="logout-btn">
         <div class="btn-icon-wrapper">
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
             <polyline points="16,17 21,12 16,7"/>
             <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
         </div>
-        <span class="nav-text">Cerrar Sesión</span>
-        <div class="btn-glow"></div>
+        <span class="logout-text">Cerrar Sesión</span>
+        <div class="logout-glow"></div>
       </button>
     </div>
     
@@ -865,7 +865,7 @@ if (typeof window !== 'undefined') {
 }
 
 .sidebar-footer {
-  padding: 20px 16px 24px;
+  padding: 16px 16px 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
   display: flex;
@@ -888,59 +888,104 @@ if (typeof window !== 'undefined') {
 
 .logout-btn {
   width: 100%;
+  max-width: 200px;
   background: linear-gradient(135deg, 
-    rgba(244, 67, 54, 0.9) 0%, 
-    rgba(211, 47, 47, 0.9) 100%);
+    rgba(244, 67, 54, 0.85) 0%, 
+    rgba(211, 47, 47, 0.85) 100%);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: white;
-  padding: 16px 18px;
-  border-radius: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  font-size: 15px;
+  gap: 10px;
+  font-size: 13px;
   font-weight: 600;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 8px 25px rgba(244, 67, 54, 0.25),
+    0 6px 20px rgba(244, 67, 54, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: logoutPulse 3s ease-in-out infinite;
 }
 
 .logout-btn:hover {
   background: linear-gradient(135deg, 
     rgba(244, 67, 54, 1) 0%, 
     rgba(211, 47, 47, 1) 100%);
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-2px) scale(1.05);
   box-shadow: 
-    0 15px 35px rgba(244, 67, 54, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 12px 30px rgba(244, 67, 54, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: none;
 }
 
-.logout-btn:hover .btn-glow {
+.logout-btn:hover .logout-glow {
   opacity: 1;
   transform: scale(1);
 }
 
+.logout-btn:hover .logout-icon {
+  animation: logoutShake 0.6s ease-in-out;
+}
+
 .logout-btn:active {
-  transform: translateY(-1px) scale(1.01);
+  transform: translateY(-1px) scale(1.02);
+}
+
+/* Animación sutil de pulsación para el botón */
+@keyframes logoutPulse {
+  0%, 100% {
+    box-shadow: 
+      0 6px 20px rgba(244, 67, 54, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  50% {
+    box-shadow: 
+      0 8px 25px rgba(244, 67, 54, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+}
+
+/* Animación de temblor para el icono en hover */
+@keyframes logoutShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
 }
 
 .btn-icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
 }
 
-.btn-glow {
+.logout-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+}
+
+.logout-text {
+  font-size: 13px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.01em;
+}
+
+.logout-glow {
   position: absolute;
   top: 50%;
   left: 50%;

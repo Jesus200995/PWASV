@@ -40,30 +40,48 @@
         <!-- Filtros -->
         <div class="filters-section">
           <div class="filter-box">
-            <label for="busqueda-usuario">Buscar Usuario:</label>
-            <input 
-              id="busqueda-usuario"
-              v-model="busquedaUsuario" 
-              @input="filtrarRegistros"
-              type="text"
-              placeholder="Buscar por nombre o correo..."
-              class="filter-input"
-            >
-            
             <label for="usuario-filter">Filtrar por Usuario:</label>
-            <select 
-              id="usuario-filter"
-              v-model="filtroUsuario" 
-              @change="filtrarRegistros"
-              class="filter-select"
-            >
-              <option value="">Todos los usuarios</option>              <option v-for="usuario in usuariosDisponibles" :key="usuario.id" :value="usuario.id">
-                {{ usuario.nombre_completo || `Usuario ${usuario.id}` }}
-              </option>
-            </select>
+            <div class="autocomplete-container">
+              <input 
+                id="usuario-filter"
+                v-model="filtroUsuarioTexto"
+                @input="buscarUsuarios"
+                @focus="mostrarSugerencias = true"
+                @blur="ocultarSugerencias"
+                type="text"
+                placeholder="Escribir nombre de usuario..."
+                class="filter-input"
+                autocomplete="off"
+              >
+              <div v-if="mostrarSugerencias && usuariosFiltrados.length > 0" class="suggestions-dropdown">
+                <div 
+                  v-for="usuario in usuariosFiltrados.slice(0, 10)" 
+                  :key="usuario.id"
+                  @mousedown="seleccionarUsuario(usuario)"
+                  class="suggestion-item"
+                >
+                  {{ usuario.nombre_completo || `Usuario ${usuario.id}` }}
+                </div>
+                <div v-if="usuariosFiltrados.length > 10" class="suggestion-more">
+                  Y {{ usuariosFiltrados.length - 10 }} más...
+                </div>
+              </div>
+              <button 
+                v-if="filtroUsuario"
+                @click="limpiarFiltroUsuario"
+                class="clear-user-btn"
+                type="button"
+                title="Limpiar filtro de usuario"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
 
             <button 
-              v-if="busquedaUsuario || filtroUsuario" 
+              v-if="filtroUsuario || filtroUsuarioTexto" 
               @click="limpiarFiltros" 
               class="clear-filters-btn"
               title="Limpiar filtros"
@@ -104,8 +122,7 @@
               </svg>
             </div>
             <h3>No hay registros</h3>
-            <p v-if="busquedaUsuario">No se encontraron registros que coincidan con "{{ busquedaUsuario }}"</p>
-            <p v-else-if="filtroUsuario">No se encontraron registros para {{ usuariosDisponibles.find(u => u.id.toString() === filtroUsuario.toString())?.nombre_completo || `Usuario ${filtroUsuario}` }}</p>
+            <p v-if="filtroUsuario">No se encontraron registros para {{ usuariosDisponibles.find(u => u.id.toString() === filtroUsuario.toString())?.nombre_completo || `Usuario ${filtroUsuario}` }}</p>
             <p v-else>Aún no se han creado registros en la aplicación.</p>
           </div>
           
@@ -215,10 +232,12 @@ const API_URL = 'https://apipwa.sembrandodatos.com'
 const registros = ref([])
 const registrosFiltrados = ref([])
 const usuariosDisponibles = ref([])
+const usuariosFiltrados = ref([])
 const loading = ref(false)
 const error = ref('')
 const filtroUsuario = ref('')
-const busquedaUsuario = ref('')
+const filtroUsuarioTexto = ref('')
+const mostrarSugerencias = ref(false)
 
 const showModal = ref(false)
 const modalTitle = ref('')
@@ -288,6 +307,7 @@ const cargarRegistros = async () => {
     })
     
     usuariosDisponibles.value = usuariosUnicos.sort((a, b) => a.id - b.id)
+    usuariosFiltrados.value = usuariosDisponibles.value
     
     console.log('Registros enriquecidos cargados:', registros.value)
     
@@ -306,20 +326,6 @@ const cargarRegistros = async () => {
 const filtrarRegistros = () => {
   let registrosFiltrar = registros.value
 
-  // Filtrar por búsqueda de texto
-  if (busquedaUsuario.value) {
-    const busqueda = busquedaUsuario.value.toLowerCase()
-    registrosFiltrar = registrosFiltrar.filter(registro => {
-      const nombreCompleto = registro.usuario?.nombre_completo?.toLowerCase() || ''
-      const correo = registro.usuario?.correo?.toLowerCase() || ''
-      const usuarioId = `usuario ${registro.usuario_id}`.toLowerCase()
-      
-      return nombreCompleto.includes(busqueda) || 
-             correo.includes(busqueda) || 
-             usuarioId.includes(busqueda)
-    })
-  }
-
   // Filtrar por usuario específico
   if (filtroUsuario.value) {
     registrosFiltrar = registrosFiltrar.filter(registro => 
@@ -330,9 +336,65 @@ const filtrarRegistros = () => {
   registrosFiltrados.value = registrosFiltrar
 }
 
-const limpiarFiltros = () => {
-  busquedaUsuario.value = ''
+const buscarUsuarios = () => {
+  const texto = filtroUsuarioTexto.value.toLowerCase().trim()
+  
+  if (!texto) {
+    usuariosFiltrados.value = usuariosDisponibles.value
+    filtroUsuario.value = ''
+    mostrarSugerencias.value = false
+    filtrarRegistros()
+    return
+  }
+  
+  usuariosFiltrados.value = usuariosDisponibles.value.filter(usuario => {
+    const nombre = (usuario.nombre_completo || '').toLowerCase()
+    const usuarioId = `usuario ${usuario.id}`.toLowerCase()
+    return nombre.includes(texto) || usuarioId.includes(texto)
+  })
+  
+  mostrarSugerencias.value = true
+  
+  // Buscar coincidencia exacta para filtrar automáticamente
+  const coincidenciaExacta = usuariosFiltrados.value.find(usuario => 
+    (usuario.nombre_completo || '').toLowerCase() === texto
+  )
+  
+  if (coincidenciaExacta) {
+    filtroUsuario.value = coincidenciaExacta.id.toString()
+    filtrarRegistros()
+  } else {
+    filtroUsuario.value = ''
+    filtrarRegistros()
+  }
+}
+
+const seleccionarUsuario = (usuario) => {
+  filtroUsuarioTexto.value = usuario.nombre_completo || `Usuario ${usuario.id}`
+  filtroUsuario.value = usuario.id.toString()
+  mostrarSugerencias.value = false
+  filtrarRegistros()
+}
+
+const ocultarSugerencias = () => {
+  setTimeout(() => {
+    mostrarSugerencias.value = false
+  }, 200) // Delay para permitir clic en sugerencias
+}
+
+const limpiarFiltroUsuario = () => {
+  filtroUsuarioTexto.value = ''
   filtroUsuario.value = ''
+  usuariosFiltrados.value = usuariosDisponibles.value
+  mostrarSugerencias.value = false
+  filtrarRegistros()
+}
+
+const limpiarFiltros = () => {
+  filtroUsuario.value = ''
+  filtroUsuarioTexto.value = ''
+  mostrarSugerencias.value = false
+  usuariosFiltrados.value = usuariosDisponibles.value
   registrosFiltrados.value = registros.value
 }
 
@@ -717,6 +779,8 @@ const logout = () => {
   margin-bottom: 24px;
   padding: 24px;
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 10;
 }
 
 .filters-section:hover {
@@ -811,6 +875,105 @@ const logout = () => {
 .filter-input:hover {
   border-color: rgba(76, 175, 80, 0.4);
   box-shadow: 0 3px 12px rgba(76, 175, 80, 0.15);
+}
+
+.autocomplete-container {
+  position: relative;
+  display: inline-block;
+  min-width: 280px;
+  z-index: 100;
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(76, 175, 80, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 9999;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.suggestion-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(224, 224, 224, 0.3);
+}
+
+.suggestion-item:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-more {
+  padding: 8px 16px;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  background: rgba(246, 246, 246, 0.8);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.clear-user-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(108, 117, 125, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.clear-user-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.clear-user-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.clear-user-btn:hover svg {
+  transform: rotate(90deg);
 }
 
 .clear-filters-btn {

@@ -9,6 +9,9 @@
             <h1>Gestión de Registros</h1>
             <p>Administra todos los registros de usuarios en la aplicación</p>
           </div>          <div class="header-actions">
+            <span class="connection-status" :class="{ online: true, offline: false }">
+              🟢 Conectado
+            </span>
             <button @click="cargarRegistros" class="refresh-btn" :disabled="loading">
               <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10"></polyline>
@@ -21,99 +24,53 @@
         </div>
       </header>
 
-      <div class="page-content">        <!-- Filtros -->
+      <div class="page-content">
+        <!-- Filtros -->
         <div class="filters-section">
           <div class="filter-box">
-            <div class="filter-group">
-              <label for="usuario-filter">Filtrar por Usuario:</label>
-              <select 
-                id="usuario-filter"
-                v-model="filtroUsuario" 
-                @change="filtrarRegistros"
-                class="filter-select"
-              >
-                <option value="">Todos los usuarios</option>
-                <option v-for="usuario in usuariosDisponibles" :key="usuario.id" :value="usuario.id">
-                  {{ usuario.nombre_completo || `Usuario ${usuario.id}` }}
-                </option>
-              </select>
-            </div>
-            
-            <div class="filter-group">
-              <label for="search-input">Buscar Usuario:</label>
-              <div class="search-container">
-                <input
-                  id="search-input"
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Buscar por nombre o correo..."
-                  class="search-input"
-                  @input="buscarUsuarios"
-                />
-                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <button 
-                  v-if="searchQuery" 
-                  @click="limpiarBusqueda" 
-                  class="clear-search"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
-              </div>
-            </div>
+            <label for="usuario-filter">Filtrar por Usuario:</label>
+            <select 
+              id="usuario-filter"
+              v-model="filtroUsuario" 
+              @change="filtrarRegistros"
+              class="filter-select"
+            >
+              <option value="">Todos los usuarios</option>              <option v-for="usuario in usuariosDisponibles" :key="usuario.id" :value="usuario.id">
+                {{ usuario.nombre_completo || `Usuario ${usuario.id}` }}
+              </option>
+            </select>
           </div>
-        </div>        <!-- Tabla de registros -->
+        </div>
+
+        <!-- Tabla de registros -->
         <div class="registros-section">
-          <!-- Información de filtros activos -->
-          <div v-if="(filtroUsuario || searchQuery) && registrosFiltrados.length > 0" class="filter-info">
-            <span class="filter-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-              </svg>
-              Mostrando {{ registrosFiltrados.length }} de {{ registros.length }} registros
-              <span v-if="filtroUsuario"> • Filtrado por usuario</span>
-              <span v-if="searchQuery"> • Búsqueda: "{{ searchQuery }}"</span>
-            </span>
-          </div>
-            <div v-if="loading && registros.length === 0" class="loading-container">
+          <div v-if="loading && registros.length === 0" class="loading-container">
             <div class="spinner-large"></div>
             <p>Cargando registros...</p>
           </div>
           
           <div v-else-if="error" class="error-container">
             <p>{{ error }}</p>
-            <button @click="cargarRegistros" class="retry-btn">Reintentar</button>
-          </div>
-          
-          <div v-else-if="registros.length === 0 && !loading" class="empty-state">
-            <div class="empty-icon">📭</div>
-            <h3>No hay registros</h3>
-            <p>Aún no se han creado registros en la aplicación.</p>
-          </div>
-          
-          <div v-else-if="registrosFiltrados.length === 0 && registros.length > 0" class="empty-state">
-            <div class="empty-icon">�</div>
-            <h3>Sin resultados</h3>
-            <p v-if="filtroUsuario && searchQuery">
-              No se encontraron registros para el usuario seleccionado que coincidan con "{{ searchQuery }}"
-            </p>
-            <p v-else-if="filtroUsuario">
-              No se encontraron registros para {{ usuariosDisponibles.find(u => u.id.toString() === filtroUsuario.toString())?.nombre_completo || `Usuario ${filtroUsuario}` }}
-            </p>
-            <p v-else-if="searchQuery">
-              No se encontraron registros que coincidan con "{{ searchQuery }}"
-            </p>
-            <button @click="limpiarFiltros" class="retry-btn" style="background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);">
+            <button @click="cargarRegistros" class="retry-btn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c0 1 1 2 2 2v2"></path>
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                <path d="M21 21v-5h-5"></path>
               </svg>
-              Limpiar Filtros
+              Reintentar
             </button>
+          </div>
+            <div v-else-if="registrosFiltrados.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="4"/>
+                <path d="M7 17v-6m5 6V7m5 10v-3"/>
+              </svg>
+            </div>
+            <h3>No hay registros</h3>
+            <p v-if="filtroUsuario">No se encontraron registros para {{ usuariosDisponibles.find(u => u.id.toString() === filtroUsuario.toString())?.nombre_completo || `Usuario ${filtroUsuario}` }}</p>
+            <p v-else>Aún no se han creado registros en la aplicación.</p>
           </div>
           
           <div v-else class="table-container">
@@ -222,8 +179,6 @@ const usuariosDisponibles = ref([])
 const loading = ref(false)
 const error = ref('')
 const filtroUsuario = ref('')
-const searchQuery = ref('')
-const searchTimeout = ref(null)
 
 const showModal = ref(false)
 const modalTitle = ref('')
@@ -262,10 +217,11 @@ const cargarRegistros = async () => {
     })
     
     // La respuesta puede ser directamente un array o tener una propiedad específica
-    const registrosRaw = Array.isArray(response.data) ? response.data : (response.data.registros || [])    // Enriquecer registros con información de usuarios
+    const registrosRaw = Array.isArray(response.data) ? response.data : (response.data.registros || [])
+    
+    // Enriquecer registros con información de usuarios
     registros.value = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
-    console.log('Registros cargados:', registros.value.length)
-    aplicarFiltros() // Usar la nueva función de filtros
+    registrosFiltrados.value = registros.value
     
     // Extraer usuarios únicos para el filtro (con información completa)
     const usuariosUnicos = []
@@ -279,14 +235,11 @@ const cargarRegistros = async () => {
           nombre_completo: registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`
         })
       }
-    })    
+    })
+    
     usuariosDisponibles.value = usuariosUnicos.sort((a, b) => a.id - b.id)
     
-    console.log('Registros enriquecidos cargados:', {
-      total: registros.value.length,
-      filtrados: registrosFiltrados.value.length,
-      usuarios: usuariosDisponibles.value.length
-    })
+    console.log('Registros enriquecidos cargados:', registros.value)
     
   } catch (err) {
     console.error('Error al cargar registros:', err)
@@ -301,63 +254,14 @@ const cargarRegistros = async () => {
 }
 
 const filtrarRegistros = () => {
-  aplicarFiltros()
-}
-
-const buscarUsuarios = () => {
-  // Limpiar timeout anterior
-  if (searchTimeout.value) {
-    clearTimeout(searchTimeout.value)
+  if (!filtroUsuario.value) {
+    registrosFiltrados.value = registros.value
+    return
   }
   
-  // Aplicar búsqueda con debounce de 300ms
-  searchTimeout.value = setTimeout(() => {
-    aplicarFiltros()
-  }, 300)
-}
-
-const limpiarBusqueda = () => {
-  searchQuery.value = ''
-  aplicarFiltros()
-}
-
-const limpiarFiltros = () => {
-  filtroUsuario.value = ''
-  searchQuery.value = ''
-  aplicarFiltros()
-}
-
-const aplicarFiltros = () => {
-  let registrosFiltradosTemp = [...registros.value] // Crear copia para evitar mutaciones
-  
-  // Filtrar por usuario seleccionado
-  if (filtroUsuario.value) {
-    registrosFiltradosTemp = registrosFiltradosTemp.filter(registro => 
-      registro.usuario_id.toString() === filtroUsuario.value.toString()
-    )
-  }
-  
-  // Filtrar por búsqueda de texto
-  if (searchQuery.value && searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase().trim()
-    registrosFiltradosTemp = registrosFiltradosTemp.filter(registro => {
-      const nombreCompleto = (registro.usuario?.nombre_completo || '').toLowerCase()
-      const correo = (registro.usuario?.correo || '').toLowerCase()
-      const descripcion = (registro.descripcion || '').toLowerCase()
-      
-      return nombreCompleto.includes(query) || 
-             correo.includes(query) || 
-             descripcion.includes(query)
-    })
-  }
-  
-  registrosFiltrados.value = registrosFiltradosTemp
-  console.log('Filtros aplicados:', {
-    total: registros.value.length,
-    filtrados: registrosFiltradosTemp.length,
-    filtroUsuario: filtroUsuario.value,
-    searchQuery: searchQuery.value
-  })
+  registrosFiltrados.value = registros.value.filter(registro => 
+    registro.usuario_id.toString() === filtroUsuario.value.toString()
+  )
 }
 
 const formatFecha = (fechaStr) => {
@@ -482,14 +386,35 @@ const logout = () => {
 }
 
 .header-content h1 {
-  font-size: 28px;
+  font-size: 32px;
   color: #333;
   margin-bottom: 4px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2c3e50 0%, #4CAF50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header-content p {
   color: #666;
   font-size: 14px;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.connection-status {
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+  background: #e8f5e8;
+  color: #2e7d2e;
 }
 
 .refresh-btn {
@@ -636,16 +561,9 @@ const logout = () => {
 
 .filter-box {
   display: flex;
-  align-items: flex-start;
-  gap: 32px;
+  align-items: center;
+  gap: 20px;
   flex-wrap: wrap;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 250px;
 }
 
 .filter-box label {
@@ -656,79 +574,6 @@ const logout = () => {
   letter-spacing: 0.5px;
   font-size: 13px;
   min-width: fit-content;
-}
-
-.search-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-input {
-  padding: 12px 48px 12px 20px;
-  border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: 50px;
-  font-size: 14px;
-  width: 100%;
-  min-width: 250px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
-  font-weight: 500;
-  color: #333;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.25);
-  transform: translateY(-1px);
-}
-
-.search-input:hover {
-  border-color: rgba(76, 175, 80, 0.4);
-  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.15);
-}
-
-.search-input::placeholder {
-  color: #999;
-  font-style: italic;
-}
-
-.search-icon {
-  position: absolute;
-  right: 16px;
-  color: #4CAF50;
-  pointer-events: none;
-  transition: all 0.3s ease;
-}
-
-.search-input:focus + .search-icon {
-  color: #388E3C;
-  transform: scale(1.1);
-}
-
-.clear-search {
-  position: absolute;
-  right: 44px;
-  background: none;
-  border: none;
-  color: #999;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-
-.clear-search:hover {
-  background: rgba(76, 175, 80, 0.1);
-  color: #4CAF50;
-  transform: scale(1.1);
 }
 
 .filter-select {
@@ -788,27 +633,6 @@ const logout = () => {
     0 12px 40px rgba(0, 0, 0, 0.12),
     0 4px 20px rgba(0, 0, 0, 0.06),
     inset 0 1px 0 rgba(255,255,255,0.9);
-}
-
-.filter-info {
-  padding: 16px 24px;
-  border-bottom: 1px solid rgba(224, 224, 224, 0.3);
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.03) 0%, rgba(76, 175, 80, 0.01) 100%);
-}
-
-.filter-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
-  color: #4CAF50;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  border: 1px solid rgba(76, 175, 80, 0.2);
 }
 
 .loading-container, .error-container, .empty-state {
@@ -905,22 +729,44 @@ const logout = () => {
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Estilo específico para el botón verde de limpiar filtros */
-.retry-btn[style*="background: linear-gradient(135deg, #4CAF50"]:hover {
-  background: linear-gradient(135deg, #45a049 0%, #5cb85c 100%) !important;
-  box-shadow: 
-    0 8px 24px rgba(76, 175, 80, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
 .empty-state {
   color: #666;
 }
 
 .empty-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  animation: bounce 2s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-icon svg {
+  filter: drop-shadow(0 4px 8px rgba(76, 175, 80, 0.3));
+  transition: all 0.3s ease;
+}
+
+.empty-state:hover .empty-icon svg {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 6px 12px rgba(76, 175, 80, 0.4));
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+.empty-state h3 {
+  color: #4CAF50;
+  font-size: 24px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: #888;
 }
 
 .table-container {
@@ -1186,27 +1032,17 @@ const logout = () => {
   .page-content {
     padding: 16px 20px;
   }
-  .filter-box {
+    .filter-box {
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: 12px;
   }
   
-  .filter-group {
-    width: 100%;
-    min-width: unset;
-  }
-  
-  .filter-select,
-  .search-input {
+  .filter-select {
     width: 100%;
     min-width: unset;
     padding: 14px 48px 14px 20px;
     font-size: 16px; /* Evita el zoom en iOS */
-  }
-  
-  .search-input {
-    padding-right: 70px; /* Más espacio para iconos en móvil */
   }
   
   .table-container {

@@ -8,16 +8,66 @@
     </div>
       <div class="sidebar-header">
       <div class="logo">
-        <!-- Icono moderno de Sembrando Vida -->
-        <svg class="location-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2v6.5c0 2.5-2 4.5-4.5 4.5S3 11 3 8.5V2"/>
-          <path d="M21 2v6.5c0 2.5-2 4.5-4.5 4.5S12 11 12 8.5V2"/>
-          <path d="M12 13v9"/>
-          <path d="M8 16h8"/>
-          <path d="M10 20h4"/>
-          <circle cx="6" cy="6" r="1"/>
-          <circle cx="18" cy="6" r="1"/>
-        </svg>
+        <!-- Animación de flor elegante -->
+        <div class="flower-animation">
+          <svg class="flower-icon" viewBox="0 0 100 100" fill="none">
+            <!-- Fondo circular sutil -->
+            <circle cx="50" cy="50" r="35" fill="rgba(76, 175, 80, 0.05)" opacity="0.6"/>
+            <circle cx="50" cy="50" r="30" fill="rgba(255, 255, 255, 0.03)" opacity="0.8"/>
+            
+            <!-- Pétalos principales con degradados -->
+            <g class="petals-main">
+              <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-1)" opacity="0.95" transform="rotate(0 50 50)"/>
+              <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-2)" opacity="0.9" transform="rotate(45 50 50)"/>
+              <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-1)" opacity="0.95" transform="rotate(90 50 50)"/>
+              <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-2)" opacity="0.9" transform="rotate(135 50 50)"/>
+              <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-1)" opacity="0.95" transform="rotate(180 50 50)"/>
+              <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-2)" opacity="0.9" transform="rotate(225 50 50)"/>
+              <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-1)" opacity="0.95" transform="rotate(270 50 50)"/>
+              <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-2)" opacity="0.9" transform="rotate(315 50 50)"/>
+            </g>
+            
+            <!-- Pétalos secundarios más refinados -->
+            <g class="petals-secondary">
+              <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(22.5 50 50)"/>
+              <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(67.5 50 50)"/>
+              <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(112.5 50 50)"/>
+              <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(157.5 50 50)"/>
+              <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(202.5 50 50)"/>
+              <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(247.5 50 50)"/>
+              <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(292.5 50 50)"/>
+              <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(337.5 50 50)"/>
+            </g>
+            
+            <!-- Centro mejorado con brillos -->
+            <circle cx="50" cy="50" r="7" fill="url(#center-gradient)" opacity="0.95"/>
+            <circle cx="50" cy="50" r="4" fill="#FFB300" opacity="0.9"/>
+            <circle cx="50" cy="50" r="2" fill="#FFF9C4" opacity="0.8"/>
+            
+            <!-- Brillos en el centro -->
+            <circle cx="48" cy="48" r="1" fill="#FFFFFF" opacity="0.9"/>
+            <circle cx="52" cy="51" r="0.5" fill="#FFFFFF" opacity="0.7"/>
+            
+            <!-- Definiciones de degradados -->
+            <defs>
+              <linearGradient id="petal-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
+                <stop offset="50%" style="stop-color:#E8F5E8;stop-opacity:0.8" />
+                <stop offset="100%" style="stop-color:#C8E6C9;stop-opacity:0.7" />
+              </linearGradient>
+              <linearGradient id="petal-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#F1F8E9;stop-opacity:0.85" />
+                <stop offset="50%" style="stop-color:#DCEDC8;stop-opacity:0.75" />
+                <stop offset="100%" style="stop-color:#AED581;stop-opacity:0.65" />
+              </linearGradient>
+              <radialGradient id="center-gradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" style="stop-color:#FFD54F;stop-opacity:1" />
+                <stop offset="70%" style="stop-color:#FF8F00;stop-opacity:0.9" />
+                <stop offset="100%" style="stop-color:#E65100;stop-opacity:0.8" />
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
       </div>
       <div class="logo-text">
         <h2>Sembrando Vida</h2>
@@ -323,68 +373,171 @@ if (typeof window !== 'undefined') {
 }
 
 .logo {
-  min-width: 42px;
-  height: 42px;
+  min-width: 48px;
+  height: 48px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(76, 175, 80, 0.08) 100%);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.2));
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.location-icon {
-  width: 24px;
-  height: 24px;
-  color: #E8F5E8;
-  animation: logoFloat 4s ease-in-out infinite;
-  filter: drop-shadow(0 2px 8px rgba(76, 175, 80, 0.3));
-  transition: all 0.3s ease;
+.logo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    transparent 50%);
+  border-radius: 14px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.location-icon:hover {
-  transform: scale(1.08);
-  color: #FFFFFF;
-  filter: drop-shadow(0 4px 16px rgba(76, 175, 80, 0.5));
+.logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Animación mejorada del logo */
-@keyframes logoFloat {
+.logo:hover::before {
+  opacity: 1;
+}
+
+/* Estilos para la animación de la flor mejorada */
+.flower-animation {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: flowerRotate 15s linear infinite;
+  position: relative;
+}
+
+.flower-animation::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: flowerPulse 4s ease-in-out infinite;
+}
+
+.flower-icon {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 3px 12px rgba(76, 175, 80, 0.4));
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 1;
+  position: relative;
+}
+
+.flower-icon:hover {
+  transform: scale(1.15);
+  filter: drop-shadow(0 6px 20px rgba(76, 175, 80, 0.6));
+}
+
+/* Animaciones mejoradas para la flor */
+@keyframes flowerRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes flowerPulse {
   0%, 100% {
-    transform: translateY(0px);
+    transform: scale(1);
+    opacity: 0.3;
   }
   50% {
-    transform: translateY(-3px);
+    transform: scale(1.2);
+    opacity: 0.6;
   }
 }
 
-/* Animaciones mejoradas para el logo */
-@keyframes logoFloat {
-  0%, 100% {
-    transform: translateY(0px);
+/* Animación de los pétalos con movimiento más suave */
+.petals-main {
+  animation: petalsRotate 20s linear infinite;
+  transform-origin: 50px 50px;
+}
+
+.petals-secondary {
+  animation: petalsRotate 25s linear infinite reverse;
+  transform-origin: 50px 50px;
+}
+
+@keyframes petalsRotate {
+  0% {
+    transform: rotate(0deg);
   }
-  50% {
-    transform: translateY(-3px);
+  100% {
+    transform: rotate(360deg);
   }
+}
+
+
+
+/* Tipografía profesional mejorada */
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .logo-text h2 {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  letter-spacing: -0.01em;
+  font-size: 21px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #FFFFFF 0%, #E8F5E8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  filter: drop-shadow(0 2px 8px rgba(76, 175, 80, 0.3));
+  transition: all 0.3s ease;
+}
+
+.logo-text h2:hover {
+  filter: drop-shadow(0 4px 16px rgba(76, 175, 80, 0.5));
+  transform: translateY(-1px);
 }
 
 .logo-text p {
   margin: 0;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
+
+.logo-text p:hover {
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 1;
 }
 
 /* Estilos modernos para el botón del geoportal */

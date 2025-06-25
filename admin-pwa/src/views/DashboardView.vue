@@ -8,8 +8,7 @@
           <div>
             <h1>Panel Administrativo</h1>
             <p>Bienvenido, {{ adminUser }}</p>
-          </div>
-          <div class="header-actions">
+          </div>          <div class="header-actions">
             <span class="connection-status" :class="{ online: isOnline, offline: !isOnline }">
               {{ isOnline ? '🟢 Conectado' : '🔴 Sin conexión' }}
             </span>
@@ -336,16 +335,23 @@ const logout = () => {
 .header-content h1 {
   color: #333;
   margin-bottom: 4px;
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2c3e50 0%, #4CAF50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header-content p {
   color: #666;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .connection-status {
   font-size: 12px;
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: 12px;
   font-weight: 500;
 }
@@ -358,6 +364,101 @@ const logout = () => {
 .connection-status.offline {
   background: #fdeaea;
   color: #d63384;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #4CAF50 100%);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 
+    0 6px 20px rgba(76, 175, 80, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.refresh-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.6s ease;
+}
+
+.refresh-btn:hover::before {
+  left: 100%;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #45a049 0%, #5cb85c 50%, #45a049 100%);
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 
+    0 12px 32px rgba(76, 175, 80, 0.5),
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.refresh-btn:disabled {
+  background: linear-gradient(135deg, #bbb 0%, #ddd 50%, #bbb 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  color: #888;
+}
+
+.refresh-icon {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+
+.refresh-icon.spinning {
+  animation: spinGlow 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes spinGlow {
+  0% { 
+    transform: rotate(0deg) scale(1); 
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  }
+  25% {
+    transform: rotate(90deg) scale(1.1);
+    filter: drop-shadow(0 2px 4px rgba(255,255,255,0.5));
+  }
+  50% { 
+    transform: rotate(180deg) scale(1.15);
+    filter: drop-shadow(0 3px 6px rgba(255,255,255,0.7));
+  }
+  75% {
+    transform: rotate(270deg) scale(1.1);
+    filter: drop-shadow(0 2px 4px rgba(255,255,255,0.5));
+  }
+  100% { 
+    transform: rotate(360deg) scale(1); 
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  }
 }
 
 .dashboard-content {

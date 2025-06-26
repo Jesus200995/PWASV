@@ -1,32 +1,6 @@
 <template>
   <div class="sidebar">
     <!-- Efecto liquid glass background -->
-    <div class="liquid-bg">
-      <div class="liquid-shape shape-1"></div>
-      <div class="liquid-shape shape-2"></div>
-      <div class="liquid-shape shape-3"></div>
-      <div class="liquid-shape shape-4"></div>
-      <div class="liquid-shape shape-5"></div>
-      
-      <!-- Pétalos flotantes brillantes -->
-      <div class="floating-petals">
-        <div class="petal petal-1"></div>
-        <div class="petal petal-2"></div>
-        <div class="petal petal-3"></div>
-        <div class="petal petal-4"></div>
-        <div class="petal petal-5"></div>
-        <div class="petal petal-6"></div>
-      </div>
-      
-      <!-- Brillos de fondo -->
-      <div class="sparkles">
-        <div class="sparkle sparkle-1"></div>
-        <div class="sparkle sparkle-2"></div>
-        <div class="sparkle sparkle-3"></div>
-        <div class="sparkle sparkle-4"></div>
-        <div class="sparkle sparkle-5"></div>
-      </div>
-    </div>
     <div class="sidebar-header">
       <div class="header-content">
         <!-- Animación de flor elegante flotante -->
@@ -78,21 +52,21 @@
             <!-- Definiciones de degradados mejorados -->
             <defs>
               <linearGradient id="petal-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#E8F5E8;stop-opacity:0.95" />
-                <stop offset="30%" style="stop-color:#C8E6C9;stop-opacity:0.9" />
-                <stop offset="70%" style="stop-color:#A5D6A7;stop-opacity:0.8" />
-                <stop offset="100%" style="stop-color:#81C784;stop-opacity:0.7" />
+                <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.95" />
+                <stop offset="30%" style="stop-color:#F1F8E9;stop-opacity:0.9" />
+                <stop offset="70%" style="stop-color:#E8F5E8;stop-opacity:0.8" />
+                <stop offset="100%" style="stop-color:#C8E6C9;stop-opacity:0.7" />
               </linearGradient>
               <linearGradient id="petal-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#F1F8E9;stop-opacity:0.9" />
-                <stop offset="30%" style="stop-color:#DCEDC8;stop-opacity:0.85" />
-                <stop offset="70%" style="stop-color:#C5E1A5;stop-opacity:0.75" />
-                <stop offset="100%" style="stop-color:#AED581;stop-opacity:0.65" />
+                <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
+                <stop offset="30%" style="stop-color:#F8FFF8;stop-opacity:0.85" />
+                <stop offset="70%" style="stop-color:#F1F8E9;stop-opacity:0.75" />
+                <stop offset="100%" style="stop-color:#E8F5E8;stop-opacity:0.65" />
               </linearGradient>
               <linearGradient id="inner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
-                <stop offset="50%" style="stop-color:#E8F5E8;stop-opacity:0.7" />
-                <stop offset="100%" style="stop-color:#C8E6C9;stop-opacity:0.5" />
+                <stop offset="50%" style="stop-color:#F8FFF8;stop-opacity:0.7" />
+                <stop offset="100%" style="stop-color:#F1F8E9;stop-opacity:0.5" />
               </linearGradient>
               <radialGradient id="center-gradient" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" style="stop-color:#FFE082;stop-opacity:1" />
@@ -311,115 +285,32 @@ if (typeof window !== 'undefined') {
   bottom: 0;
   width: 280px;
   background: linear-gradient(180deg, 
-    rgba(240, 255, 240, 0.98) 0%, 
-    rgba(230, 250, 230, 0.98) 50%,
-    rgba(220, 245, 220, 0.98) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-right: 3px solid #8BC34A;
-  color: #2E3440;
+    #1B5E20 0%, 
+    #2E7D32 25%,
+    #388E3C 50%,
+    #2E7D32 75%,
+    #1B5E20 100%);
+  border-right: 3px solid #0D4E14;
+  color: #FFFFFF;
   display: flex;
   flex-direction: column;
   z-index: 1000;
   overflow: hidden;
   box-shadow: 
-    0 8px 32px rgba(139, 195, 74, 0.15),
-    0 2px 16px rgba(0, 0, 0, 0.05),
-    inset -1px 0 0 rgba(139, 195, 74, 0.1);
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(27, 94, 32, 0.4);
 }
-
-/* Efecto liquid glass background mejorado */
-.liquid-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: hidden;
-  z-index: -1;
-}
-
-.liquid-shape {
-  position: absolute;
-  border-radius: 50%;
-  background: linear-gradient(135deg, 
-    rgba(139, 195, 74, 0.08) 0%, 
-    rgba(205, 220, 57, 0.06) 30%,
-    rgba(156, 204, 101, 0.10) 60%,
-    rgba(174, 213, 129, 0.08) 100%);
-  animation: float 15s ease-in-out infinite;
-  filter: blur(3px);
-  box-shadow: 
-    0 0 20px rgba(139, 195, 74, 0.1),
-    inset 0 0 20px rgba(174, 213, 129, 0.15);
-}
-
-.shape-1 {
-  width: 240px;
-  height: 240px;
-  top: -60px;
-  right: -60px;
-  animation-delay: 0s;
-}
-
-.shape-2 {
-  width: 180px;
-  height: 180px;
-  bottom: 120px;
-  left: -40px;
-  animation-delay: 2.7s;
-}
-
-.shape-3 {
-  width: 120px;
-  height: 120px;
-  top: 45%;
-  right: -30px;
-  animation-delay: 5.4s;
-}
-
-.shape-4 {
-  width: 80px;
-  height: 80px;
-  top: 75%;
-  left: -20px;
-  animation-delay: 8.1s;
-}
-
-.shape-5 {
-  width: 200px;
-  height: 200px;
-  top: 20%;
-  left: -50px;
-  animation-delay: 10.8s;
-}
-
-@keyframes float {
-  0%, 100% { 
-    transform: translateY(0px) rotate(0deg) scale(1);
-    opacity: 0.4;
-  }
-  33% {
-    transform: translateY(-15px) rotate(120deg) scale(1.05);
-    opacity: 0.7;
-  }
-  66% {
-    transform: translateY(-25px) rotate(240deg) scale(0.95);
-    opacity: 0.5;
-  }
-}
-
 .sidebar-header {
   padding: 28px 20px 32px;
-  border-bottom: 2px solid #C8E6C9;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   background: linear-gradient(135deg, 
-    rgba(139, 195, 74, 0.08) 0%, 
-    rgba(255, 255, 255, 0.9) 100%);
+    rgba(13, 78, 20, 0.8) 0%, 
+    rgba(27, 94, 32, 0.6) 100%);
 }
 
 .header-content {
@@ -440,7 +331,7 @@ if (typeof window !== 'undefined') {
   height: 2px;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    #8BC34A 50%, 
+    rgba(255, 255, 255, 0.6) 50%, 
     transparent 100%);
 }
 
@@ -560,7 +451,7 @@ if (typeof window !== 'undefined') {
   margin: 0;
   font-size: 28px;
   font-weight: 600;
-  background: linear-gradient(135deg, #2E7D32 0%, #388E3C 25%, #4CAF50 50%, #2C2C2C 75%, #1A1A1A 100%);
+  background: linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 25%, #E0E0E0 50%, #BDBDBD 75%, #9E9E9E 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -573,6 +464,7 @@ if (typeof window !== 'undefined') {
   text-transform: uppercase;
   font-variant: small-caps;
   position: relative;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .brand-title:hover {
@@ -582,18 +474,14 @@ if (typeof window !== 'undefined') {
 .brand-subtitle {
   margin: 0;
   font-size: 12px;
-  color: #4A5568;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
-  text-shadow: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   font-family: 'Montserrat', 'Inter', 'Source Sans Pro', sans-serif;
-  opacity: 0.8;
+  opacity: 0.9;
   transition: all 0.3s ease;
-  background: linear-gradient(135deg, #757575 0%, #8BC34A 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   font-variant: small-caps;
 }
 
@@ -606,9 +494,11 @@ if (typeof window !== 'undefined') {
 .geoportal-section {
   padding: 16px 16px 20px;
   margin-bottom: 8px;
-  border-bottom: 1px solid #C8E6C9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
-  background: rgba(240, 255, 240, 0.6);
+  background: linear-gradient(135deg, 
+    rgba(13, 78, 20, 0.6) 0%, 
+    rgba(27, 94, 32, 0.4) 100%);
 }
 
 .geoportal-section::after {
@@ -620,18 +510,18 @@ if (typeof window !== 'undefined') {
   height: 1px;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    #8BC34A 50%, 
+    rgba(255, 255, 255, 0.4) 50%, 
     transparent 100%);
 }
 
 .geoportal-btn {
   width: 100%;
   background: linear-gradient(135deg, 
-    #2E7D32 0%, 
-    #388E3C 50%,
-    #4CAF50 100%);
+    #0D4E14 0%, 
+    #1B5E20 50%,
+    #0D4E14 100%);
   backdrop-filter: blur(12px);
-  border: 2px solid rgba(46, 125, 50, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   color: white;
   padding: 10px 14px;
   border-radius: 20px;
@@ -647,20 +537,20 @@ if (typeof window !== 'undefined') {
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 4px 15px rgba(46, 125, 50, 0.4),
-    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 4px 15px rgba(13, 78, 20, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .geoportal-btn:hover {
   background: linear-gradient(135deg, 
-    #1B5E20 0%, 
-    #2E7D32 100%);
+    #004D40 0%, 
+    #0D4E14 100%);
   transform: translateY(-3px) scale(1.05);
   box-shadow: 
-    0 12px 30px rgba(46, 125, 50, 0.6),
+    0 12px 30px rgba(13, 78, 20, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 0 3px rgba(76, 175, 80, 0.3);
+    0 0 0 3px rgba(255, 255, 255, 0.3);
 }
 
 .geoportal-btn:hover .geoportal-glow {
@@ -841,7 +731,7 @@ if (typeof window !== 'undefined') {
   align-items: center;
   gap: 16px;
   padding: 16px 18px;
-  color: #5F6368;
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   border-radius: 12px;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -853,13 +743,13 @@ if (typeof window !== 'undefined') {
 
 .nav-link:hover {
   background: linear-gradient(135deg, 
-    rgba(139, 195, 74, 0.12) 0%, 
-    rgba(139, 195, 74, 0.08) 100%);
-  color: #33691E;
+    rgba(13, 78, 20, 0.3) 0%, 
+    rgba(27, 94, 32, 0.2) 100%);
+  color: #FFFFFF;
   transform: translateX(4px) scale(1.01);
   box-shadow: 
-    0 4px 15px rgba(139, 195, 74, 0.2),
-    inset 0 1px 0 rgba(139, 195, 74, 0.15);
+    0 4px 15px rgba(13, 78, 20, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .nav-link:hover .nav-glow {
@@ -871,11 +761,11 @@ if (typeof window !== 'undefined') {
 .nav-link.router-link-active,
 .nav-link.router-link-exact-active {
   background: linear-gradient(135deg, 
-    #8BC34A 0%, 
-    #9CCC65 100%);
+    #0D4E14 0%, 
+    #1B5E20 100%);
   color: white;
   box-shadow: 
-    0 6px 20px rgba(139, 195, 74, 0.4),
+    0 6px 20px rgba(13, 78, 20, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transform: translateX(3px);
 }
@@ -916,7 +806,7 @@ if (typeof window !== 'undefined') {
   left: 50%;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(139, 195, 74, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(27, 94, 32, 0.3) 0%, transparent 70%);
   border-radius: 16px;
   transform: translate(-50%, -50%) scale(0);
   opacity: 0;
@@ -926,11 +816,13 @@ if (typeof window !== 'undefined') {
 
 .sidebar-footer {
   padding: 16px 16px 20px;
-  border-top: 2px solid #C8E6C9;
+  border-top: 2px solid rgba(255, 255, 255, 0.3);
   position: relative;
   display: flex;
   justify-content: center;
-  background: rgba(240, 255, 240, 0.6);
+  background: linear-gradient(135deg, 
+    rgba(13, 78, 20, 0.8) 0%, 
+    rgba(27, 94, 32, 0.6) 100%);
 }
 
 .sidebar-footer::before {
@@ -942,7 +834,7 @@ if (typeof window !== 'undefined') {
   height: 2px;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    #8BC34A 50%, 
+    rgba(255, 255, 255, 0.4) 50%, 
     transparent 100%);
 }
 
@@ -1053,159 +945,6 @@ if (typeof window !== 'undefined') {
   opacity: 0;
   transition: all 0.3s ease;
   pointer-events: none;
-}
-
-/* Pétalos flotantes brillantes */
-.floating-petals {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.petal {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: linear-gradient(45deg, 
-    rgba(139, 195, 74, 0.4) 0%, 
-    rgba(174, 213, 129, 0.6) 50%,
-    rgba(205, 220, 57, 0.3) 100%);
-  border-radius: 50% 0;
-  animation: petalFloat 20s infinite linear;
-  filter: blur(0.5px);
-  box-shadow: 
-    0 0 10px rgba(139, 195, 74, 0.3),
-    inset 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-.petal-1 {
-  left: 10%;
-  animation-delay: 0s;
-  animation-duration: 18s;
-}
-
-.petal-2 {
-  left: 25%;
-  animation-delay: -3s;
-  animation-duration: 22s;
-  transform: scale(0.8);
-}
-
-.petal-3 {
-  left: 45%;
-  animation-delay: -6s;
-  animation-duration: 20s;
-  transform: scale(1.2);
-}
-
-.petal-4 {
-  left: 65%;
-  animation-delay: -9s;
-  animation-duration: 19s;
-  transform: scale(0.9);
-}
-
-.petal-5 {
-  left: 80%;
-  animation-delay: -12s;
-  animation-duration: 21s;
-  transform: scale(1.1);
-}
-
-.petal-6 {
-  left: 95%;
-  animation-delay: -15s;
-  animation-duration: 23s;
-  transform: scale(0.7);
-}
-
-@keyframes petalFloat {
-  0% {
-    transform: translateY(100vh) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-100px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-/* Brillos de fondo */
-.sparkles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.sparkle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: radial-gradient(circle, 
-    rgba(255, 255, 255, 0.8) 0%, 
-    rgba(139, 195, 74, 0.6) 50%, 
-    transparent 100%);
-  border-radius: 50%;
-  animation: sparkleShine 4s infinite ease-in-out;
-}
-
-.sparkle-1 {
-  top: 15%;
-  left: 20%;
-  animation-delay: 0s;
-}
-
-.sparkle-2 {
-  top: 35%;
-  right: 25%;
-  animation-delay: 1s;
-  animation-duration: 5s;
-}
-
-.sparkle-3 {
-  top: 55%;
-  left: 15%;
-  animation-delay: 2s;
-  animation-duration: 3.5s;
-}
-
-.sparkle-4 {
-  top: 75%;
-  right: 20%;
-  animation-delay: 3s;
-  animation-duration: 4.5s;
-}
-
-.sparkle-5 {
-  top: 85%;
-  left: 50%;
-  animation-delay: 1.5s;
-  animation-duration: 6s;
-}
-
-@keyframes sparkleShine {
-  0%, 100% {
-    opacity: 0;
-    transform: scale(0);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.5);
-  }
 }
 
 /* Responsive para pantallas muy pequeñas */

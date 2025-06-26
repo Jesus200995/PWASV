@@ -518,11 +518,12 @@ if (typeof window !== 'undefined') {
 .geoportal-btn {
   width: 100%;
   background: linear-gradient(135deg, 
-    #0D4E14 0%, 
-    #1B5E20 50%,
-    #0D4E14 100%);
+    #2E7D32 0%, 
+    #4CAF50 30%,
+    #388E3C 70%,
+    #1B5E20 100%);
   backdrop-filter: blur(12px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(46, 125, 50, 0.4);
   color: white;
   padding: 10px 14px;
   border-radius: 20px;
@@ -538,20 +539,21 @@ if (typeof window !== 'undefined') {
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 4px 15px rgba(13, 78, 20, 0.4),
+    0 4px 15px rgba(46, 125, 50, 0.4),
     0 2px 8px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .geoportal-btn:hover {
   background: linear-gradient(135deg, 
-    #004D40 0%, 
+    #1B5E20 0%, 
+    #2E7D32 50%,
     #0D4E14 100%);
   transform: translateY(-3px) scale(1.05);
   box-shadow: 
-    0 12px 30px rgba(13, 78, 20, 0.5),
+    0 12px 30px rgba(46, 125, 50, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 0 3px rgba(255, 255, 255, 0.3);
+    0 0 0 3px rgba(46, 125, 50, 0.4);
 }
 
 .geoportal-btn:hover .geoportal-glow {

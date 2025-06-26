@@ -533,8 +533,6 @@ if (typeof window !== 'undefined') {
   }
 }
 
-
-
 /* Tipografía profesional mejorada */
 .logo-text {
   display: flex;
@@ -612,17 +610,17 @@ if (typeof window !== 'undefined') {
   backdrop-filter: blur(12px);
   border: 2px solid rgba(46, 125, 50, 0.3);
   color: white;
-  padding: 14px 18px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  font-size: 14px;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   position: relative;
   overflow: hidden;
   box-shadow: 
@@ -635,10 +633,11 @@ if (typeof window !== 'undefined') {
   background: linear-gradient(135deg, 
     #1B5E20 0%, 
     #2E7D32 100%);
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-3px) scale(1.05);
   box-shadow: 
-    0 8px 25px rgba(46, 125, 50, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 12px 30px rgba(46, 125, 50, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 0 3px rgba(76, 175, 80, 0.3);
 }
 
 .geoportal-btn:hover .geoportal-glow {
@@ -663,16 +662,16 @@ if (typeof window !== 'undefined') {
 }
 
 .geoportal-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   transition: all 0.3s ease;
 }
 
 .arrow-icon {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   opacity: 0.8;
   stroke-width: 2.5;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -680,7 +679,7 @@ if (typeof window !== 'undefined') {
 }
 
 .geoportal-text {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   flex: 1;
@@ -709,17 +708,17 @@ if (typeof window !== 'undefined') {
   backdrop-filter: blur(12px);
   border: 2px solid rgba(33, 150, 243, 0.2);
   color: white;
-  padding: 14px 18px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  font-size: 14px;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   position: relative;
   overflow: hidden;
   margin-top: 12px;
@@ -732,10 +731,11 @@ if (typeof window !== 'undefined') {
   background: linear-gradient(135deg, 
     #1976D2 0%, 
     #1565C0 100%);
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-3px) scale(1.05);
   box-shadow: 
-    0 8px 25px rgba(33, 150, 243, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 12px 30px rgba(33, 150, 243, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 0 3px rgba(33, 150, 243, 0.3);
 }
 
 .mobile-app-btn:hover .mobile-app-glow {
@@ -760,16 +760,16 @@ if (typeof window !== 'undefined') {
 }
 
 .mobile-app-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   transition: all 0.3s ease;
 }
 
 .mobile-arrow-icon {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   opacity: 0.8;
   stroke-width: 2.5;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -777,7 +777,7 @@ if (typeof window !== 'undefined') {
 }
 
 .mobile-app-text {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   flex: 1;

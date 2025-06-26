@@ -449,14 +449,14 @@ if (typeof window !== 'undefined') {
 
 .brand-title {
   margin: 0;
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 600;
-  background: linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 25%, #E0E0E0 50%, #BDBDBD 75%, #9E9E9E 100%);
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFEF7 20%, #FFF8DC 40%, #FFD700 60%, #FFF8DC 80%, #FFFFFF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 0.1em;
-  line-height: 1.2;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
   font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -464,7 +464,8 @@ if (typeof window !== 'undefined') {
   text-transform: uppercase;
   font-variant: small-caps;
   position: relative;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.3);
+  white-space: nowrap;
 }
 
 .brand-title:hover {

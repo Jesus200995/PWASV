@@ -29,70 +29,85 @@
     </div>
     <div class="sidebar-header">
       <div class="header-content">
-        <div class="logo">
-          <!-- Animación de flor elegante -->
-          <div class="flower-animation">
-            <svg class="flower-icon" viewBox="0 0 100 100" fill="none">
-              <!-- Fondo circular sutil -->
-              <circle cx="50" cy="50" r="35" fill="rgba(76, 175, 80, 0.05)" opacity="0.6"/>
-              <circle cx="50" cy="50" r="30" fill="rgba(255, 255, 255, 0.03)" opacity="0.8"/>
-              
-              <!-- Pétalos principales con degradados -->
-              <g class="petals-main">
-                <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-1)" opacity="0.95" transform="rotate(0 50 50)"/>
-                <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-2)" opacity="0.9" transform="rotate(45 50 50)"/>
-                <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-1)" opacity="0.95" transform="rotate(90 50 50)"/>
-                <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-2)" opacity="0.9" transform="rotate(135 50 50)"/>
-                <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-1)" opacity="0.95" transform="rotate(180 50 50)"/>
-                <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-2)" opacity="0.9" transform="rotate(225 50 50)"/>
-                <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-1)" opacity="0.95" transform="rotate(270 50 50)"/>
-                <path d="M50 20 C45 25, 45 35, 50 40 C55 35, 55 25, 50 20 Z" fill="url(#petal-gradient-2)" opacity="0.9" transform="rotate(315 50 50)"/>
-              </g>
-              
-              <!-- Pétalos secundarios más refinados -->
-              <g class="petals-secondary">
-                <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(22.5 50 50)"/>
-                <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(67.5 50 50)"/>
-                <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(112.5 50 50)"/>
-                <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(157.5 50 50)"/>
-                <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(202.5 50 50)"/>
-                <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(247.5 50 50)"/>
-                <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(292.5 50 50)"/>
-                <ellipse cx="50" cy="32" rx="3" ry="8" fill="rgba(200, 230, 201, 0.7)" opacity="0.8" transform="rotate(337.5 50 50)"/>
-              </g>
-              
-              <!-- Centro mejorado con brillos -->
-              <circle cx="50" cy="50" r="7" fill="url(#center-gradient)" opacity="0.95"/>
-              <circle cx="50" cy="50" r="4" fill="#FFB300" opacity="0.9"/>
-              <circle cx="50" cy="50" r="2" fill="#FFF9C4" opacity="0.8"/>
-              
-              <!-- Brillos en el centro -->
-              <circle cx="48" cy="48" r="1" fill="#FFFFFF" opacity="0.9"/>
-              <circle cx="52" cy="51" r="0.5" fill="#FFFFFF" opacity="0.7"/>
-              
-              <!-- Definiciones de degradados -->
-              <defs>
-                <linearGradient id="petal-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
-                  <stop offset="50%" style="stop-color:#E8F5E8;stop-opacity:0.8" />
-                  <stop offset="100%" style="stop-color:#C8E6C9;stop-opacity:0.7" />
-                </linearGradient>
-                <linearGradient id="petal-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#F1F8E9;stop-opacity:0.85" />
-                  <stop offset="50%" style="stop-color:#DCEDC8;stop-opacity:0.75" />
-                  <stop offset="100%" style="stop-color:#AED581;stop-opacity:0.65" />
-                </linearGradient>
-                <radialGradient id="center-gradient" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" style="stop-color:#FFD54F;stop-opacity:1" />
-                  <stop offset="70%" style="stop-color:#FF8F00;stop-opacity:0.9" />
-                  <stop offset="100%" style="stop-color:#E65100;stop-opacity:0.8" />
-                </radialGradient>
-              </defs>
-            </svg>
-          </div>
+        <!-- Animación de flor elegante flotante -->
+        <div class="flower-animation">
+          <svg class="flower-icon" viewBox="0 0 120 120" fill="none">
+            <!-- Pétalos principales mejorados -->
+            <g class="petals-main">
+              <!-- Pétalos exteriores grandes -->
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(0 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(36 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(72 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(108 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(144 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(180 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(216 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(252 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(288 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(324 60 60)"/>
+            </g>
+            
+            <!-- Pétalos internos más pequeños -->
+            <g class="petals-inner">
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(18 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(54 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(90 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(126 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(162 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(198 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(234 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(270 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(306 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(342 60 60)"/>
+            </g>
+            
+            <!-- Centro con múltiples capas -->
+            <circle cx="60" cy="60" r="10" fill="url(#center-gradient)" opacity="0.95"/>
+            <circle cx="60" cy="60" r="7" fill="url(#center-gradient-2)" opacity="0.9"/>
+            <circle cx="60" cy="60" r="4" fill="#FFD700" opacity="0.8"/>
+            <circle cx="60" cy="60" r="2" fill="#FFF8DC" opacity="0.9"/>
+            
+            <!-- Brillos dinámicos en el centro -->
+            <circle cx="57" cy="57" r="1.5" fill="#FFFFFF" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="63" cy="62" r="1" fill="#FFFFFF" opacity="0.7">
+              <animate attributeName="opacity" values="0.7;0.3;0.7" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            
+            <!-- Definiciones de degradados mejorados -->
+            <defs>
+              <linearGradient id="petal-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#E8F5E8;stop-opacity:0.95" />
+                <stop offset="30%" style="stop-color:#C8E6C9;stop-opacity:0.9" />
+                <stop offset="70%" style="stop-color:#A5D6A7;stop-opacity:0.8" />
+                <stop offset="100%" style="stop-color:#81C784;stop-opacity:0.7" />
+              </linearGradient>
+              <linearGradient id="petal-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#F1F8E9;stop-opacity:0.9" />
+                <stop offset="30%" style="stop-color:#DCEDC8;stop-opacity:0.85" />
+                <stop offset="70%" style="stop-color:#C5E1A5;stop-opacity:0.75" />
+                <stop offset="100%" style="stop-color:#AED581;stop-opacity:0.65" />
+              </linearGradient>
+              <linearGradient id="inner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
+                <stop offset="50%" style="stop-color:#E8F5E8;stop-opacity:0.7" />
+                <stop offset="100%" style="stop-color:#C8E6C9;stop-opacity:0.5" />
+              </linearGradient>
+              <radialGradient id="center-gradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" style="stop-color:#FFE082;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#FFB300;stop-opacity:0.95" />
+                <stop offset="100%" style="stop-color:#FF8F00;stop-opacity:0.8" />
+              </radialGradient>
+              <radialGradient id="center-gradient-2" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" style="stop-color:#FFF176;stop-opacity:0.9" />
+                <stop offset="100%" style="stop-color:#FFB300;stop-opacity:0.7" />
+              </radialGradient>
+            </defs>
+          </svg>
         </div>
         <div class="logo-text">
-          <h1 class="brand-title">Sembrando Vida</h1>
+          <h1 class="brand-title">SEMBRANDO VIDA</h1>
           <p class="brand-subtitle">Admin Panel</p>
         </div>
       </div>
@@ -287,6 +302,8 @@ if (typeof window !== 'undefined') {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Source+Sans+Pro:wght@300;400;600;700;900&display=swap');
+
 .sidebar {
   position: fixed;
   left: 0;
@@ -433,109 +450,91 @@ if (typeof window !== 'undefined') {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, 
-    #8BC34A 0%, 
-    #9CCC65 100%);
+  background: transparent;
   border-radius: 18px;
-  backdrop-filter: blur(12px);
-  border: 2px solid rgba(139, 195, 74, 0.3);
-  filter: drop-shadow(0 4px 12px rgba(139, 195, 74, 0.4));
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   margin-bottom: 4px;
 }
 
-.logo::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.3) 0%, 
-    transparent 50%);
-  border-radius: 16px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
 .logo:hover {
-  transform: scale(1.05);
-  filter: drop-shadow(0 6px 20px rgba(139, 195, 74, 0.5));
-  border-color: rgba(139, 195, 74, 0.5);
+  transform: scale(1.1);
 }
 
-.logo:hover::before {
-  opacity: 1;
-}
-
-/* Estilos para la animación de la flor mejorada */
+/* Estilos para la animación de flor flotante mejorada */
 .flower-animation {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: flowerRotate 15s linear infinite;
+  animation: flowerFloat 8s ease-in-out infinite;
   position: relative;
+  filter: drop-shadow(0 4px 15px rgba(139, 195, 74, 0.3));
 }
 
 .flower-animation::before {
   content: '';
   position: absolute;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(139, 195, 74, 0.15) 0%, transparent 70%);
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(139, 195, 74, 0.1) 0%, transparent 70%);
   border-radius: 50%;
-  animation: flowerPulse 4s ease-in-out infinite;
+  animation: flowerAura 6s ease-in-out infinite;
+  z-index: -1;
 }
 
 .flower-icon {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 3px 12px rgba(139, 195, 74, 0.5));
+  filter: drop-shadow(0 2px 8px rgba(139, 195, 74, 0.4));
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 1;
   position: relative;
 }
 
 .flower-icon:hover {
-  transform: scale(1.15);
-  filter: drop-shadow(0 6px 20px rgba(139, 195, 74, 0.7));
+  transform: scale(1.2);
+  filter: drop-shadow(0 6px 20px rgba(139, 195, 74, 0.6));
 }
 
-/* Animaciones mejoradas para la flor */
-@keyframes flowerRotate {
-  0% {
-    transform: rotate(0deg);
+/* Animaciones mejoradas para la flor flotante */
+@keyframes flowerFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
   }
-  100% {
-    transform: rotate(360deg);
+  25% {
+    transform: translateY(-8px) rotate(90deg) scale(1.05);
+  }
+  50% {
+    transform: translateY(-4px) rotate(180deg) scale(1.1);
+  }
+  75% {
+    transform: translateY(-10px) rotate(270deg) scale(1.05);
   }
 }
 
-@keyframes flowerPulse {
+@keyframes flowerAura {
   0%, 100% {
     transform: scale(1);
     opacity: 0.3;
   }
   50% {
-    transform: scale(1.2);
+    transform: scale(1.3);
     opacity: 0.6;
   }
 }
 
-/* Animación de los pétalos con movimiento más suave */
+/* Animación de los pétalos con movimiento independiente */
 .petals-main {
-  animation: petalsRotate 20s linear infinite;
-  transform-origin: 50px 50px;
+  animation: petalsRotate 12s linear infinite;
+  transform-origin: 60px 60px;
 }
 
-.petals-secondary {
-  animation: petalsRotate 25s linear infinite reverse;
-  transform-origin: 50px 50px;
+.petals-inner {
+  animation: petalsRotate 18s linear infinite reverse;
+  transform-origin: 60px 60px;
 }
 
 @keyframes petalsRotate {
@@ -559,43 +558,43 @@ if (typeof window !== 'undefined') {
 
 .brand-title {
   margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #4CAF50 100%);
+  font-size: 28px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2E7D32 0%, #388E3C 25%, #4CAF50 50%, #2C2C2C 75%, #1A1A1A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-  filter: drop-shadow(0 1px 4px rgba(139, 195, 74, 0.4));
-  transition: all 0.3s ease;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-transform: uppercase;
+  font-variant: small-caps;
+  position: relative;
 }
 
 .brand-title:hover {
-  filter: drop-shadow(0 4px 16px rgba(139, 195, 74, 0.6));
   transform: translateY(-1px);
 }
 
 .brand-subtitle {
   margin: 0;
-  font-size: 11px;
+  font-size: 12px;
   color: #4A5568;
-  font-weight: 600;
+  font-weight: 500;
   text-shadow: none;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-  opacity: 0.75;
+  font-family: 'Montserrat', 'Inter', 'Source Sans Pro', sans-serif;
+  opacity: 0.8;
   transition: all 0.3s ease;
   background: linear-gradient(135deg, #757575 0%, #8BC34A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  font-variant: small-caps;
 }
 
 .brand-subtitle:hover {

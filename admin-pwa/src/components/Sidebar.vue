@@ -6,76 +6,126 @@
         <!-- Animación de flor elegante flotante -->
         <div class="flower-animation">
           <svg class="flower-icon" viewBox="0 0 120 120" fill="none">
-            <!-- Pétalos principales mejorados -->
+            <!-- Pétalos principales mejorados con animación verde -->
             <g class="petals-main">
               <!-- Pétalos exteriores grandes -->
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(0 60 60)"/>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(36 60 60)"/>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(72 60 60)"/>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(108 60 60)"/>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(144 60 60)"/>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(180 60 60)"/>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(216 60 60)"/>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(252 60 60)"/>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(288 60 60)"/>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(324 60 60)"/>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(0 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="0 60 60;10 60 60;0 60 60" dur="4s" repeatCount="indefinite"/>
+              </path>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(36 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="36 60 60;46 60 60;36 60 60" dur="4.2s" repeatCount="indefinite"/>
+              </path>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(72 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="72 60 60;82 60 60;72 60 60" dur="3.8s" repeatCount="indefinite"/>
+              </path>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(108 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="108 60 60;118 60 60;108 60 60" dur="4.1s" repeatCount="indefinite"/>
+              </path>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(144 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="144 60 60;154 60 60;144 60 60" dur="3.9s" repeatCount="indefinite"/>
+              </path>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(180 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="180 60 60;190 60 60;180 60 60" dur="4.3s" repeatCount="indefinite"/>
+              </path>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(216 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="216 60 60;226 60 60;216 60 60" dur="3.7s" repeatCount="indefinite"/>
+              </path>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(252 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="252 60 60;262 60 60;252 60 60" dur="4.4s" repeatCount="indefinite"/>
+              </path>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(288 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="288 60 60;298 60 60;288 60 60" dur="3.6s" repeatCount="indefinite"/>
+              </path>
+              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(324 60 60)">
+                <animateTransform attributeName="transform" type="rotate" values="324 60 60;334 60 60;324 60 60" dur="4.5s" repeatCount="indefinite"/>
+              </path>
             </g>
             
-            <!-- Pétalos internos más pequeños -->
+            <!-- Pétalos internos más pequeños con pulsación -->
             <g class="petals-inner">
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(18 60 60)"/>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(54 60 60)"/>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(90 60 60)"/>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(126 60 60)"/>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(162 60 60)"/>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(198 60 60)"/>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(234 60 60)"/>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(270 60 60)"/>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(306 60 60)"/>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(342 60 60)"/>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(18 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.5s" repeatCount="indefinite"/>
+              </ellipse>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(54 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.8s" repeatCount="indefinite"/>
+              </ellipse>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(90 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.3s" repeatCount="indefinite"/>
+              </ellipse>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(126 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.7s" repeatCount="indefinite"/>
+              </ellipse>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(162 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.4s" repeatCount="indefinite"/>
+              </ellipse>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(198 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.9s" repeatCount="indefinite"/>
+              </ellipse>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(234 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.2s" repeatCount="indefinite"/>
+              </ellipse>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(270 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.6s" repeatCount="indefinite"/>
+              </ellipse>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(306 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.1s" repeatCount="indefinite"/>
+              </ellipse>
+              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(342 60 60)">
+                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="3.0s" repeatCount="indefinite"/>
+              </ellipse>
             </g>
             
-            <!-- Centro con múltiples capas -->
-            <circle cx="60" cy="60" r="10" fill="url(#center-gradient)" opacity="0.95"/>
-            <circle cx="60" cy="60" r="7" fill="url(#center-gradient-2)" opacity="0.9"/>
-            <circle cx="60" cy="60" r="4" fill="#FFD700" opacity="0.8"/>
-            <circle cx="60" cy="60" r="2" fill="#FFF8DC" opacity="0.9"/>
-            
-            <!-- Brillos dinámicos en el centro -->
-            <circle cx="57" cy="57" r="1.5" fill="#FFFFFF" opacity="0.9">
-              <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2s" repeatCount="indefinite"/>
+            <!-- Centro con múltiples capas verdes -->
+            <circle cx="60" cy="60" r="10" fill="url(#center-gradient)" opacity="0.95">
+              <animate attributeName="r" values="10;12;10" dur="3s" repeatCount="indefinite"/>
             </circle>
-            <circle cx="63" cy="62" r="1" fill="#FFFFFF" opacity="0.7">
-              <animate attributeName="opacity" values="0.7;0.3;0.7" dur="3s" repeatCount="indefinite"/>
+            <circle cx="60" cy="60" r="7" fill="url(#center-gradient-2)" opacity="0.9">
+              <animate attributeName="r" values="7;9;7" dur="2.8s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="60" cy="60" r="4" fill="#66BB6A" opacity="0.8">
+              <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="60" cy="60" r="2" fill="#A5D6A7" opacity="0.9">
+              <animate attributeName="r" values="2;3;2" dur="2.2s" repeatCount="indefinite"/>
             </circle>
             
-            <!-- Definiciones de degradados mejorados -->
+            <!-- Brillos dinámicos en el centro con efecto verde -->
+            <circle cx="57" cy="57" r="1.5" fill="#E8F5E8" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.8s" repeatCount="indefinite"/>
+              <animate attributeName="r" values="1.5;2.5;1.5" dur="1.8s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="63" cy="62" r="1" fill="#F1F8E9" opacity="0.7">
+              <animate attributeName="opacity" values="0.7;0.2;0.7" dur="2.3s" repeatCount="indefinite"/>
+              <animate attributeName="r" values="1;1.8;1" dur="2.3s" repeatCount="indefinite"/>
+            </circle>
+            
+            <!-- Definiciones de degradados verdes mejorados -->
             <defs>
               <linearGradient id="petal-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.95" />
-                <stop offset="30%" style="stop-color:#F1F8E9;stop-opacity:0.9" />
-                <stop offset="70%" style="stop-color:#E8F5E8;stop-opacity:0.8" />
-                <stop offset="100%" style="stop-color:#C8E6C9;stop-opacity:0.7" />
+                <stop offset="0%" style="stop-color:#C8E6C9;stop-opacity:0.95" />
+                <stop offset="30%" style="stop-color:#A5D6A7;stop-opacity:0.9" />
+                <stop offset="70%" style="stop-color:#81C784;stop-opacity:0.8" />
+                <stop offset="100%" style="stop-color:#66BB6A;stop-opacity:0.7" />
               </linearGradient>
               <linearGradient id="petal-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
-                <stop offset="30%" style="stop-color:#F8FFF8;stop-opacity:0.85" />
-                <stop offset="70%" style="stop-color:#F1F8E9;stop-opacity:0.75" />
-                <stop offset="100%" style="stop-color:#E8F5E8;stop-opacity:0.65" />
+                <stop offset="0%" style="stop-color:#E8F5E8;stop-opacity:0.9" />
+                <stop offset="30%" style="stop-color:#C8E6C9;stop-opacity:0.85" />
+                <stop offset="70%" style="stop-color:#A5D6A7;stop-opacity:0.75" />
+                <stop offset="100%" style="stop-color:#81C784;stop-opacity:0.65" />
               </linearGradient>
               <linearGradient id="inner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
-                <stop offset="50%" style="stop-color:#F8FFF8;stop-opacity:0.7" />
-                <stop offset="100%" style="stop-color:#F1F8E9;stop-opacity:0.5" />
+                <stop offset="0%" style="stop-color:#F1F8E9;stop-opacity:0.9" />
+                <stop offset="50%" style="stop-color:#E8F5E8;stop-opacity:0.7" />
+                <stop offset="100%" style="stop-color:#C8E6C9;stop-opacity:0.5" />
               </linearGradient>
               <radialGradient id="center-gradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" style="stop-color:#FFE082;stop-opacity:1" />
-                <stop offset="50%" style="stop-color:#FFB300;stop-opacity:0.95" />
-                <stop offset="100%" style="stop-color:#FF8F00;stop-opacity:0.8" />
+                <stop offset="0%" style="stop-color:#A5D6A7;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#81C784;stop-opacity:0.95" />
+                <stop offset="100%" style="stop-color:#66BB6A;stop-opacity:0.8" />
               </radialGradient>
               <radialGradient id="center-gradient-2" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" style="stop-color:#FFF176;stop-opacity:0.9" />
-                <stop offset="100%" style="stop-color:#FFB300;stop-opacity:0.7" />
+                <stop offset="0%" style="stop-color:#C8E6C9;stop-opacity:0.9" />
+                <stop offset="100%" style="stop-color:#81C784;stop-opacity:0.7" />
               </radialGradient>
             </defs>
           </svg>
@@ -353,87 +403,88 @@ if (typeof window !== 'undefined') {
   transform: scale(1.1);
 }
 
-/* Estilos para la animación de flor flotante mejorada */
+/* Estilos para la animación de flor girando */
 .flower-animation {
   width: 48px;
   height: 48px;
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: flowerFloat 8s ease-in-out infinite;
   position: relative;
-  filter: drop-shadow(0 4px 15px rgba(139, 195, 74, 0.3));
+  filter: drop-shadow(0 4px 20px rgba(76, 175, 80, 0.4));
+  animation: flowerRotate 8s linear infinite;
 }
 
 .flower-animation::before {
   content: '';
   position: absolute;
-  width: 120%;
-  height: 120%;
-  background: radial-gradient(circle, rgba(139, 195, 74, 0.1) 0%, transparent 70%);
+  width: 130%;
+  height: 130%;
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.15) 0%, rgba(139, 195, 74, 0.08) 40%, transparent 70%);
   border-radius: 50%;
-  animation: flowerAura 6s ease-in-out infinite;
+  animation: flowerAura 4s ease-in-out infinite;
   z-index: -1;
 }
 
 .flower-icon {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 2px 8px rgba(139, 195, 74, 0.4));
+  filter: drop-shadow(0 3px 12px rgba(76, 175, 80, 0.5));
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 1;
   position: relative;
 }
 
 .flower-icon:hover {
-  transform: scale(1.2);
-  filter: drop-shadow(0 6px 20px rgba(139, 195, 74, 0.6));
+  transform: scale(1.15);
+  filter: drop-shadow(0 6px 25px rgba(76, 175, 80, 0.7));
 }
 
-/* Animaciones mejoradas para la flor flotante */
-@keyframes flowerFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg) scale(1);
+/* Animación de rotación continua para la flor */
+@keyframes flowerRotate {
+  0% {
+    transform: rotate(0deg);
   }
-  25% {
-    transform: translateY(-8px) rotate(90deg) scale(1.05);
-  }
-  50% {
-    transform: translateY(-4px) rotate(180deg) scale(1.1);
-  }
-  75% {
-    transform: translateY(-10px) rotate(270deg) scale(1.05);
+  100% {
+    transform: rotate(360deg);
   }
 }
 
 @keyframes flowerAura {
   0%, 100% {
     transform: scale(1);
-    opacity: 0.3;
+    opacity: 0.4;
+  }
+  33% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  66% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+}
+
+/* Efectos adicionales para la nueva animación verde */
+.flower-animation::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, transparent 60%, rgba(76, 175, 80, 0.1) 80%, transparent 100%);
+  border-radius: 50%;
+  animation: flowerPulse 3s ease-in-out infinite;
+  z-index: -2;
+}
+
+@keyframes flowerPulse {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0;
   }
   50% {
-    transform: scale(1.3);
+    transform: scale(1.4);
     opacity: 0.6;
-  }
-}
-
-/* Animación de los pétalos con movimiento independiente */
-.petals-main {
-  animation: petalsRotate 12s linear infinite;
-  transform-origin: 60px 60px;
-}
-
-.petals-inner {
-  animation: petalsRotate 18s linear infinite reverse;
-  transform-origin: 60px 60px;
-}
-
-@keyframes petalsRotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
   }
 }
 
@@ -451,7 +502,15 @@ if (typeof window !== 'undefined') {
   margin: 0;
   font-size: 16px;
   font-weight: 800;
-  color: #FFFFFF;
+  background: linear-gradient(135deg, 
+    #E8F5E8 0%, 
+    #A5D6A7 25%,
+    #66BB6A 50%,
+    #4CAF50 75%,
+    #2E7D32 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: 0.15em;
   line-height: 1.2;
   font-family: 'Source Sans Pro', 'SF Pro Display', 'system-ui', '-apple-system', sans-serif;
@@ -460,8 +519,43 @@ if (typeof window !== 'undefined') {
   -moz-osx-font-smoothing: grayscale;
   text-transform: uppercase;
   position: relative;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.2);
   white-space: nowrap;
+  filter: drop-shadow(0 2px 4px rgba(76, 175, 80, 0.3));
+  padding-bottom: 8px;
+}
+
+.brand-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    #E8F5E8 10%,
+    #A5D6A7 25%,
+    #66BB6A 50%,
+    #4CAF50 75%,
+    #2E7D32 90%,
+    transparent 100%);
+  border-radius: 2px;
+  box-shadow: 
+    0 0 8px rgba(76, 175, 80, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: underlineGlow 3s ease-in-out infinite;
+}
+
+@keyframes underlineGlow {
+  0%, 100% {
+    opacity: 0.8;
+    transform: translateX(-50%) scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1.05);
+  }
 }
 
 .brand-title:hover {

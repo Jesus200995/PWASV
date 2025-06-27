@@ -449,22 +449,18 @@ if (typeof window !== 'undefined') {
 
 .brand-title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #FFFFFF 0%, #FFFEF7 20%, #FFF8DC 40%, #FFD700 60%, #FFF8DC 80%, #FFFFFF 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 0.08em;
-  line-height: 1.1;
-  font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.15em;
+  line-height: 1.2;
+  font-family: 'Source Sans Pro', 'SF Pro Display', 'system-ui', '-apple-system', sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-transform: uppercase;
-  font-variant: small-caps;
   position: relative;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.3);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.2);
   white-space: nowrap;
 }
 

@@ -107,14 +107,26 @@ class AsistenciasService {
         usuariosMap.set(usuario.id, usuario);
       });
 
-      // Enriquecer asistencias con información de usuario
+      // Enriquecer asistencias con información de usuario y URLs de fotos
       const asistenciasEnriquecidas = asistencias.map(asistencia => {
         const usuario = usuariosMap.get(asistencia.usuario_id);
+        
+        // Construir URLs completas para las fotos
+        const fotoEntradaUrl = asistencia.foto_entrada_url 
+          ? this.construirUrlFoto(asistencia.foto_entrada_url)
+          : null;
+        
+        const fotoSalidaUrl = asistencia.foto_salida_url 
+          ? this.construirUrlFoto(asistencia.foto_salida_url)
+          : null;
+
         return {
           ...asistencia,
           nombre_usuario: usuario ? usuario.nombre_completo : 'Usuario no encontrado',
           correo_usuario: usuario ? usuario.correo : 'N/A',
-          cargo_usuario: usuario ? usuario.cargo : 'N/A'
+          cargo_usuario: usuario ? usuario.cargo : 'N/A',
+          foto_entrada_url: fotoEntradaUrl,
+          foto_salida_url: fotoSalidaUrl
         };
       });
 
@@ -124,6 +136,43 @@ class AsistenciasService {
       console.error('❌ Error al obtener asistencias con usuarios:', error);
       throw error;
     }
+  }
+
+  /**
+   * Construye la URL completa para una foto
+   * @param {string} rutaFoto - Ruta relativa de la foto desde el backend
+   * @returns {string} URL completa de la foto
+   */
+  construirUrlFoto(rutaFoto) {
+    if (!rutaFoto) return null;
+    
+    // Si la ruta ya es una URL completa, devolverla tal como está
+    if (rutaFoto.startsWith('http://') || rutaFoto.startsWith('https://')) {
+      return rutaFoto;
+    }
+    
+    // Limpiar la ruta: remover prefijos innecesarios y normalizar
+    let rutaLimpia = rutaFoto;
+    
+    // Si la ruta comienza con 'fotos/', mantenerla
+    // Si no, pero es solo el nombre del archivo, agregarle 'fotos/'
+    if (!rutaLimpia.startsWith('fotos/')) {
+      // Si es solo el nombre del archivo, agregamos el prefijo fotos/
+      if (!rutaLimpia.includes('/')) {
+        rutaLimpia = `fotos/${rutaLimpia}`;
+      }
+    }
+    
+    // Construir la URL completa
+    const urlCompleta = `${API_URL}/${rutaLimpia}`;
+    
+    console.log('🖼️ URL de foto construida:', {
+      original: rutaFoto,
+      limpia: rutaLimpia,
+      completa: urlCompleta
+    });
+    
+    return urlCompleta;
   }
 
   /**

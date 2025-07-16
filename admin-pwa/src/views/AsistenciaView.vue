@@ -232,6 +232,8 @@
                           alt="Foto de entrada"
                           class="photo-thumbnail"
                           @click="abrirModal(asistencia.foto_entrada_url, 'Foto de entrada')"
+                          @error="onImageError"
+                          @load="onImageLoad"
                         >
                         <span class="photo-label">Entrada</span>
                       </div>
@@ -241,6 +243,8 @@
                           alt="Foto de salida"
                           class="photo-thumbnail"
                           @click="abrirModal(asistencia.foto_salida_url, 'Foto de salida')"
+                          @error="onImageError"
+                          @load="onImageLoad"
                         >
                         <span class="photo-label">Salida</span>
                       </div>
@@ -459,6 +463,16 @@ export default {
       window.addEventListener('offline', () => {
         this.isOnline = false
       })
+    },
+
+    onImageLoad(event) {
+      console.log('✅ Imagen cargada correctamente:', event.target.src)
+    },
+
+    onImageError(event) {
+      console.error('❌ Error al cargar imagen:', event.target.src)
+      // Opcional: establecer una imagen por defecto
+      event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMiA5TDE0IDEwTDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDIgMTBMMTAgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0iI2Y5ZjlmOSIvPgo8L3N2Zz4K'
     },
 
     logout() {

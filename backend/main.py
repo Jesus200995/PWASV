@@ -325,6 +325,13 @@ async def marcar_entrada(
     foto: UploadFile = File(...)
 ):
     try:
+        print(f"🔍 ENTRADA - Datos recibidos:")
+        print(f"   usuario_id: {usuario_id} (tipo: {type(usuario_id)})")
+        print(f"   latitud: {latitud}")
+        print(f"   longitud: {longitud}")
+        print(f"   descripcion: {descripcion}")
+        print(f"   foto: {foto.filename}")
+        
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
             
@@ -332,15 +339,21 @@ async def marcar_entrada(
         fecha = now.date()
         hora_entrada = now
 
-        # Revisa si ya existe asistencia para hoy
+        # Revisa si ya existe asistencia para hoy para este usuario específico
         cursor.execute(
             "SELECT id FROM asistencias WHERE usuario_id = %s AND fecha = %s",
             (usuario_id, fecha)
         )
         existe = cursor.fetchone()
 
+        print(f"🔍 Verificando entrada para usuario {usuario_id} en fecha {fecha}")
+        print(f"📊 Resultado de consulta: {existe}")
+
         if existe:
-            raise HTTPException(status_code=400, detail="Ya existe registro de entrada para hoy")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"El usuario {usuario_id} ya tiene registro de entrada para el día {fecha}"
+            )
 
         # Guardar la foto en disco
         ext = os.path.splitext(foto.filename)[1]
@@ -389,23 +402,39 @@ async def marcar_salida(
     foto: UploadFile = File(...)
 ):
     try:
+        print(f"🔍 SALIDA - Datos recibidos:")
+        print(f"   usuario_id: {usuario_id} (tipo: {type(usuario_id)})")
+        print(f"   latitud: {latitud}")
+        print(f"   longitud: {longitud}")
+        print(f"   descripcion: {descripcion}")
+        print(f"   foto: {foto.filename}")
+        
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
             
         now = datetime.now(CDMX_TZ)
         fecha = now.date()
 
-        # Busca el registro de asistencia de hoy
+        # Busca el registro de asistencia de hoy para este usuario específico
         cursor.execute(
             "SELECT id, hora_salida FROM asistencias WHERE usuario_id = %s AND fecha = %s",
             (usuario_id, fecha)
         )
         registro = cursor.fetchone()
 
+        print(f"🔍 Verificando salida para usuario {usuario_id} en fecha {fecha}")
+        print(f"📊 Resultado de consulta: {registro}")
+
         if not registro:
-            raise HTTPException(status_code=400, detail="No se ha registrado entrada para hoy")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"El usuario {usuario_id} no tiene registro de entrada para el día {fecha}"
+            )
         if registro[1] is not None:
-            raise HTTPException(status_code=400, detail="Ya se registró la salida para hoy")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"El usuario {usuario_id} ya registró la salida para el día {fecha}"
+            )
 
         # Guardar la foto en disco
         ext = os.path.splitext(foto.filename)[1]
@@ -506,6 +535,48 @@ async def obtener_historial_asistencias(usuario_id: int = None):
     except Exception as e:
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener historial: {str(e)}")
+
+# Endpoint temporal para verificar la estructura de la tabla asistencias
+@app.get("/debug/asistencias-estructura")
+async def verificar_estructura_asistencias():
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Verificar si la tabla existe
+        cursor.execute("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_name = 'asistencias'
+        """)
+        tabla_existe = cursor.fetchone()
+        
+        if not tabla_existe:
+            return {"error": "La tabla 'asistencias' no existe"}
+        
+        # Obtener la estructura de la tabla
+        cursor.execute("""
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns 
+            WHERE table_name = 'asistencias' 
+            ORDER BY ordinal_position
+        """)
+        columnas = cursor.fetchall()
+        
+        # Obtener algunos registros de ejemplo
+        cursor.execute("SELECT * FROM asistencias LIMIT 3")
+        registros_ejemplo = cursor.fetchall()
+        
+        return {
+            "tabla_existe": True,
+            "columnas": [{"nombre": col[0], "tipo": col[1], "nullable": col[2]} for col in columnas],
+            "total_registros": len(registros_ejemplo),
+            "registros_ejemplo": registros_ejemplo
+        }
+        
+    except Exception as e:
+        print(f"❌ Error verificando estructura: {e}")
+        raise HTTPException(status_code=500, detail=f"Error verificando estructura: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

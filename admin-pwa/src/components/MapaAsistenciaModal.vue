@@ -269,11 +269,53 @@ export default {
     },
 
     formatearHora(hora) {
-      if (!hora) return ''
-      return new Date(`1970-01-01T${hora}`).toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      if (!hora) return 'No registrada'
+      
+      try {
+        // Si la hora ya viene como string completo (ej: "2023-12-25T14:30:00")
+        if (hora.includes('T')) {
+          const date = new Date(hora)
+          if (!isNaN(date.getTime())) {
+            return date.toLocaleTimeString('es-ES', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            })
+          }
+        }
+        
+        // Si la hora viene solo como tiempo (ej: "14:30:00" o "14:30")
+        const timePattern = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+        const match = hora.match(timePattern)
+        
+        if (match) {
+          const [, hours, minutes] = match
+          const date = new Date()
+          date.setHours(parseInt(hours), parseInt(minutes), 0, 0)
+          
+          return date.toLocaleTimeString('es-ES', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          })
+        }
+        
+        // Intentar crear una fecha con el formato original
+        const date = new Date(`1970-01-01T${hora}`)
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleTimeString('es-ES', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          })
+        }
+        
+        // Si todo falla, devolver la hora tal como viene
+        return hora
+      } catch (error) {
+        console.warn('Error al formatear hora:', hora, error)
+        return hora || 'No registrada'
+      }
     }
   }
 }

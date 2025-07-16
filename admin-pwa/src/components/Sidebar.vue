@@ -233,6 +233,21 @@
           </router-link>
         </li>
         
+        <li class="nav-item" :class="{ active: $route.name === 'Asistencia' }">
+          <router-link to="/asistencia" class="nav-link">
+            <div class="nav-icon-wrapper">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"/>
+                <path d="M3 12h6m6-6h6m-6 12h6"/>
+                <rect x="7" y="3" width="3" height="18" rx="1"/>
+                <rect x="14" y="3" width="3" height="18" rx="1"/>
+              </svg>
+            </div>
+            <span class="nav-text">Asistencia</span>
+            <div class="nav-glow"></div>
+          </router-link>
+        </li>
+        
         <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }">
           <router-link to="/configuracion" class="nav-link">
             <div class="nav-icon-wrapper">

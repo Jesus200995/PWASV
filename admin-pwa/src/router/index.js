@@ -5,6 +5,7 @@ import UsuariosView from '../views/UsuariosView.vue'
 import RegistrosView from '../views/RegistrosView.vue'
 import ConfiguracionView from '../views/ConfiguracionView.vue'
 import VisorView from '../views/VisorView.vue'
+import AsistenciaView from '../views/AsistenciaView.vue'
 
 const routes = [
   {
@@ -26,6 +27,12 @@ const routes = [
     path: '/usuarios',
     name: 'Usuarios',
     component: UsuariosView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/asistencia',
+    name: 'Asistencia',
+    component: AsistenciaView,
     meta: { requiresAuth: true }
   },
   {

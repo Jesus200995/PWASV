@@ -306,6 +306,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
+import AsistenciasService from '../services/asistenciasService.js'
 
 const router = useRouter()
 
@@ -315,13 +316,17 @@ const isOnline = ref(navigator.onLine)
 
 const registros = ref([])
 const usuarios = ref([])
+const asistencias = ref([])
 const loading = ref(false)
 const error = ref('')
 
 const stats = reactive({
   totalRegistros: '-',
   totalUsuarios: '-',
-  registrosHoy: '-'
+  registrosHoy: '-',
+  totalAsistencias: '-',
+  asistenciasHoy: '-',
+  usuariosPresentes: '-'
 })
 
 const showModal = ref(false)
@@ -348,6 +353,21 @@ const statCards = computed(() => [
     label: 'Registros Hoy',
     value: stats.registrosHoy,
     icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M8 7h8M8 11h8m-8 4h5" stroke="#4CAF50" stroke-width="2" stroke-linecap="round"/></svg>`
+  },
+  {
+    label: 'Total Asistencias',
+    value: stats.totalAsistencias,
+    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M20 6L9 17l-5-5" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  },
+  {
+    label: 'Asistencias Hoy',
+    value: stats.asistenciasHoy,
+    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M12 6v6l4 2" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="#4CAF50" stroke-width="2"/></svg>`
+  },
+  {
+    label: 'Usuarios Presentes',
+    value: stats.usuariosPresentes,
+    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="#4CAF50" stroke-width="2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
   }
 ])
 
@@ -358,6 +378,7 @@ window.addEventListener('offline', () => { isOnline.value = false })
 onMounted(() => {
   cargarRegistros()
   cargarUsuarios() // También cargar usuarios para estadísticas más precisas
+  cargarAsistencias() // Cargar asistencias para estadísticas
   
   // Cargar Leaflet desde CDN
   if (!window.L) {
@@ -404,6 +425,10 @@ const cargarRegistros = async () => {
     const registrosRaw = Array.isArray(response.data) ? response.data : (response.data.registros || [])
       // Enriquecer registros con información de usuarios reales
     registros.value = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
+    
+    // También cargar asistencias cuando se actualicen los registros
+    await cargarAsistencias()
+    
     calcularEstadisticas()
     
     console.log('Registros cargados en Dashboard:', registros.value)
@@ -435,6 +460,16 @@ const cargarUsuarios = async () => {
   }
 }
 
+const cargarAsistencias = async () => {
+  try {
+    asistencias.value = await AsistenciasService.obtenerAsistencias()
+    calcularEstadisticas() // Recalcular con asistencias
+    console.log('✅ Asistencias cargadas en Dashboard:', asistencias.value)
+  } catch (err) {
+    console.error('❌ Error al cargar asistencias:', err)
+  }
+}
+
 const calcularEstadisticas = () => {
   const totalRegistros = registros.value.length
   const totalUsuarios = usuarios.value.length // Usar usuarios reales en lugar de únicos de registros
@@ -444,10 +479,26 @@ const calcularEstadisticas = () => {
     const fechaRegistro = new Date(r.fecha_hora).toDateString()
     return fechaRegistro === hoy
   }).length
+
+  // Estadísticas de asistencias
+  const totalAsistencias = asistencias.value.length
+  const hoyISO = new Date().toISOString().split('T')[0]
+  const asistenciasHoy = asistencias.value.filter(a => a.fecha === hoyISO).length
+  
+  // Usuarios presentes hoy (que han marcado entrada)
+  const usuariosPresentes = new Set()
+  asistencias.value.forEach(a => {
+    if (a.fecha === hoyISO && a.hora_entrada) {
+      usuariosPresentes.add(a.usuario_id)
+    }
+  })
   
   stats.totalRegistros = totalRegistros
   stats.totalUsuarios = totalUsuarios
   stats.registrosHoy = registrosHoy
+  stats.totalAsistencias = totalAsistencias
+  stats.asistenciasHoy = asistenciasHoy
+  stats.usuariosPresentes = usuariosPresentes.size
 }
 
 const formatFecha = (fechaStr) => {

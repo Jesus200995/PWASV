@@ -184,35 +184,43 @@
                   </td>
                   <td>
                     <div v-if="asistencia.latitud_entrada && asistencia.longitud_entrada" class="location-cell">
-                      <span class="location-badge"
-                            :title="`Lat: ${asistencia.latitud_entrada}, Lng: ${asistencia.longitud_entrada}`">
-                        {{ formatearCoordenadas(asistencia.latitud_entrada, asistencia.longitud_entrada) }}
-                      </span>
-                      <button @click="abrirMapaModal(asistencia, 'entrada')" 
-                              class="map-btn entrada-map"
-                              title="Ver ubicación de entrada en el mapa">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                          <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                      </button>
+                      <div class="location-info">
+                        <span class="location-badge compact"
+                              :title="`Lat: ${asistencia.latitud_entrada}, Lng: ${asistencia.longitud_entrada}`">
+                          {{ formatearCoordenadas(asistencia.latitud_entrada, asistencia.longitud_entrada) }}
+                        </span>
+                      </div>
+                      <div class="location-actions">
+                        <button @click="abrirMapaModal(asistencia, 'entrada')" 
+                                class="map-btn circular entrada-map"
+                                title="Ver ubicación de entrada en el mapa">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                     <span v-else class="no-data">N/A</span>
                   </td>
                   <td>
                     <div v-if="asistencia.latitud_salida && asistencia.longitud_salida" class="location-cell">
-                      <span class="location-badge"
-                            :title="`Lat: ${asistencia.latitud_salida}, Lng: ${asistencia.longitud_salida}`">
-                        {{ formatearCoordenadas(asistencia.latitud_salida, asistencia.longitud_salida) }}
-                      </span>
-                      <button @click="abrirMapaModal(asistencia, 'salida')" 
-                              class="map-btn salida-map"
-                              title="Ver ubicación de salida en el mapa">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                          <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                      </button>
+                      <div class="location-info">
+                        <span class="location-badge compact"
+                              :title="`Lat: ${asistencia.latitud_salida}, Lng: ${asistencia.longitud_salida}`">
+                          {{ formatearCoordenadas(asistencia.latitud_salida, asistencia.longitud_salida) }}
+                        </span>
+                      </div>
+                      <div class="location-actions">
+                        <button @click="abrirMapaModal(asistencia, 'salida')" 
+                                class="map-btn circular salida-map"
+                                title="Ver ubicación de salida en el mapa">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                     <span v-else class="no-data">N/A</span>
                   </td>
@@ -845,12 +853,34 @@ export default {
   text-align: center;
 }
 
+/* Estilos específicos para columnas de ubicación */
+.asistencias-table th:nth-child(6),
+.asistencias-table th:nth-child(7),
+.asistencias-table td:nth-child(6),
+.asistencias-table td:nth-child(7) {
+  min-width: 180px;
+  max-width: 220px;
+  padding: 0.75rem;
+}
+
 /* Estilos para las celdas de ubicación */
 .location-cell {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 44px;
+}
+
+.location-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.location-actions {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .location-badge {
@@ -862,6 +892,15 @@ export default {
   font-family: monospace;
   cursor: help;
   flex-shrink: 0;
+  display: inline-block;
+}
+
+.location-badge.compact {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.4rem;
+  line-height: 1.2;
+  max-width: 100%;
+  word-break: break-all;
 }
 
 /* Botones de mapa */
@@ -869,21 +908,51 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   flex-shrink: 0;
   padding: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.map-btn.circular {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  animation: subtlePulse 4s ease-in-out infinite;
+}
+
+@keyframes subtlePulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 4px rgba(76, 175, 80, 0.1);
+  }
+}
+
+.map-btn.salida-map.circular {
+  animation: subtlePulseSalida 4s ease-in-out infinite;
+}
+
+@keyframes subtlePulseSalida {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 4px rgba(244, 67, 54, 0.1);
+  }
 }
 
 .map-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: white;
+  position: relative;
+  z-index: 2;
 }
 
 .map-btn.entrada-map {
@@ -892,8 +961,25 @@ export default {
 
 .map-btn.entrada-map:hover {
   background: linear-gradient(135deg, #45a049, #388e3c);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.map-btn.entrada-map::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.map-btn.entrada-map:hover::before {
+  opacity: 1;
 }
 
 .map-btn.salida-map {
@@ -902,13 +988,30 @@ export default {
 
 .map-btn.salida-map:hover {
   background: linear-gradient(135deg, #d32f2f, #c62828);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+}
+
+.map-btn.salida-map::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.map-btn.salida-map:hover::before {
+  opacity: 1;
 }
 
 .map-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .photos-cell {
@@ -1104,22 +1207,32 @@ export default {
   .location-cell {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.25rem;
+    gap: 0.5rem;
+    min-height: auto;
   }
 
-  .map-btn {
-    width: 28px;
-    height: 28px;
+  .location-info {
+    width: 100%;
+  }
+
+  .location-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .map-btn.circular {
+    width: 32px;
+    height: 32px;
   }
 
   .map-btn svg {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
   }
 
-  .location-badge {
-    font-size: 0.625rem;
-    padding: 0.125rem 0.375rem;
+  .location-badge.compact {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
   }
 }
 </style>

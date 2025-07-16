@@ -145,25 +145,29 @@ class AsistenciasService {
   }
 
   /**
-   * Formatea hora para mostrar
+   * Formatea hora para mostrar en formato 12 horas con AM/PM
    * @param {string} hora - Hora en formato ISO o datetime completo
-   * @returns {string} Hora formateada
+   * @returns {string} Hora formateada en formato 12 horas
    */
   formatearHora(hora) {
     if (!hora) return 'N/A';
     try {
+      let fechaObj;
+      
       // Si viene un datetime completo (2025-07-16T12:25:22.626565)
       if (hora.includes('T')) {
-        return new Date(hora).toLocaleTimeString('es-ES', {
-          hour: '2-digit',
-          minute: '2-digit'
-        });
+        fechaObj = new Date(hora);
+      } else {
+        // Si viene solo la hora (12:25:22)
+        fechaObj = new Date(`1970-01-01T${hora}`);
       }
-      // Si viene solo la hora (12:25:22)
-      return new Date(`1970-01-01T${hora}`).toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      
+      // Formatear en 12 horas con AM/PM - formato legible con espacio y minúsculas
+      return fechaObj.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }).toLowerCase();
     } catch (error) {
       console.error('Error formateando hora:', error, 'Hora original:', hora);
       return hora;

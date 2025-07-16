@@ -773,6 +773,10 @@ export default {
   border-radius: 20px;
   font-weight: 500;
   font-size: 0.75rem;
+  white-space: nowrap;
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
 }
 
 .time-badge.entrada {
@@ -783,6 +787,16 @@ export default {
 .time-badge.salida {
   background: rgba(255, 152, 0, 0.1);
   color: #FF9800;
+}
+
+/* Estilos específicos para columnas de hora */
+.asistencias-table th:nth-child(4),
+.asistencias-table th:nth-child(5),
+.asistencias-table td:nth-child(4),
+.asistencias-table td:nth-child(5) {
+  min-width: 100px;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .location-badge {

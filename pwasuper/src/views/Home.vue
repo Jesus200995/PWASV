@@ -14,17 +14,30 @@
         <!-- Botón Marcar Entrada -->
         <button
           @click="iniciarAsistencia('entrada')"
-          :disabled="entradaMarcada"
+          :disabled="entradaMarcada || verificandoAsistencia"
           class="relative overflow-hidden flex flex-col items-center justify-center p-6 rounded-xl transition-all duration-300 transform"
           :class="{
-            'bg-green-500 text-white shadow-lg hover:bg-green-600 hover:scale-105 active:scale-95': !entradaMarcada,
-            'bg-gray-300 text-gray-500 cursor-not-allowed': entradaMarcada
+            'bg-green-500 text-white shadow-lg hover:bg-green-600 hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
+            'bg-gray-300 text-gray-500 cursor-not-allowed': entradaMarcada || verificandoAsistencia
           }"
         >
+          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
+            <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-current"></div>
+          </div>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span class="font-semibold text-lg">Marcar Entrada</span>
+          <span class="font-semibold text-lg">
+            <span v-if="asistenciaHoy && asistenciaHoy.entrada">
+              Entrada: {{ formatearHora(asistenciaHoy.entrada) }}
+            </span>
+            <span v-else-if="entradaMarcada && datosEntrada.hora">
+              Entrada: {{ datosEntrada.hora }}
+            </span>
+            <span v-else>
+              Marcar Entrada
+            </span>
+          </span>
           <span v-if="entradaMarcada" class="text-xs mt-1 opacity-75">✓ Registrada</span>
           
           <!-- Mostrar resumen de entrada si está marcada -->
@@ -38,17 +51,30 @@
         <!-- Botón Marcar Salida -->
         <button
           @click="iniciarAsistencia('salida')"
-          :disabled="!entradaMarcada || salidaMarcada"
+          :disabled="!entradaMarcada || salidaMarcada || verificandoAsistencia"
           class="relative overflow-hidden flex flex-col items-center justify-center p-6 rounded-xl transition-all duration-300 transform"
           :class="{
-            'bg-red-500 text-white shadow-lg hover:bg-red-600 hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada,
-            'bg-gray-300 text-gray-500 cursor-not-allowed': !entradaMarcada || salidaMarcada
+            'bg-red-500 text-white shadow-lg hover:bg-red-600 hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
+            'bg-gray-300 text-gray-500 cursor-not-allowed': !entradaMarcada || salidaMarcada || verificandoAsistencia
           }"
         >
+          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
+            <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-current"></div>
+          </div>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span class="font-semibold text-lg">Marcar Salida</span>
+          <span class="font-semibold text-lg">
+            <span v-if="asistenciaHoy && asistenciaHoy.salida">
+              Salida: {{ formatearHora(asistenciaHoy.salida) }}
+            </span>
+            <span v-else-if="salidaMarcada && datosSalida.hora">
+              Salida: {{ datosSalida.hora }}
+            </span>
+            <span v-else>
+              Marcar Salida
+            </span>
+          </span>
           <span v-if="salidaMarcada" class="text-xs mt-1 opacity-75">✓ Registrada</span>
           <span v-else-if="!entradaMarcada" class="text-xs mt-1 opacity-75">Marca entrada primero</span>
           
@@ -445,6 +471,7 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 import Modal from '../components/Modal.vue';
+import asistenciasService from '../services/asistenciasService.js';
 
 // Referencias y estado para asistencia
 const modoAsistencia = ref(false);
@@ -456,6 +483,8 @@ const obteniendoUbicacion = ref(false);
 const mensajeAsistencia = ref('');
 const datosEntrada = ref({});
 const datosSalida = ref({});
+const asistenciaHoy = ref(null);
+const verificandoAsistencia = ref(false);
 
 // Referencias y estado para asistencia (datos del formulario)
 const latitud = ref(null);
@@ -557,52 +586,45 @@ async function confirmarAsistencia() {
     formData.append("descripcion", descripcion.value);
     formData.append("foto", archivoFoto.value);
 
-    // Determinar endpoint según tipo de asistencia
-    const endpoint = tipoAsistencia.value === 'entrada' ? 
-      `${API_URL}/asistencia/entrada` : 
-      `${API_URL}/asistencia/salida`;
-
-    // Enviar datos al backend
-    const response = await axios.post(endpoint, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      timeout: 15000,
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity
-    });
+    // Determinar endpoint según tipo de asistencia y usar el servicio
+    let response;
+    if (tipoAsistencia.value === 'entrada') {
+      response = await asistenciasService.registrarEntrada(formData);
+    } else {
+      response = await asistenciasService.registrarSalida(formData);
+    }
 
     // Procesar respuesta exitosa
     if (tipoAsistencia.value === 'entrada') {
       entradaMarcada.value = true;
       datosEntrada.value = {
-        hora: new Date(response.data.hora_entrada).toLocaleTimeString('es-MX', {
+        hora: new Date(response.hora_entrada).toLocaleTimeString('es-MX', {
           hour: '2-digit',
           minute: '2-digit',
           timeZone: 'America/Mexico_City'
         }),
-        descripcion: response.data.descripcion,
-        latitud: response.data.latitud,
-        longitud: response.data.longitud,
-        foto_url: response.data.foto_url
+        descripcion: response.descripcion,
+        latitud: response.latitud,
+        longitud: response.longitud,
+        foto_url: response.foto_url
       };
     } else {
       salidaMarcada.value = true;
       datosSalida.value = {
-        hora: new Date(response.data.hora_salida).toLocaleTimeString('es-MX', {
+        hora: new Date(response.hora_salida).toLocaleTimeString('es-MX', {
           hour: '2-digit',
           minute: '2-digit',
           timeZone: 'America/Mexico_City'
         }),
-        descripcion: response.data.descripcion,
-        latitud: response.data.latitud,
-        longitud: response.data.longitud,
-        foto_url: response.data.foto_url
+        descripcion: response.descripcion,
+        latitud: response.latitud,
+        longitud: response.longitud,
+        foto_url: response.foto_url
       };
     }
 
     // Mostrar mensaje de éxito
-    mensajeAsistencia.value = response.data.mensaje;
+    mensajeAsistencia.value = response.mensaje;
     modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida'} registrada exitosamente!`;
     showModal.value = true;
     
@@ -613,6 +635,9 @@ async function confirmarAsistencia() {
     
     // Guardar estado en localStorage
     guardarEstadoAsistencia();
+    
+    // Verificar asistencia con el backend para actualizar datos
+    await verificarAsistenciaHoy();
     
     // Limpiar mensaje después de 5 segundos
     setTimeout(() => {
@@ -631,6 +656,9 @@ async function confirmarAsistencia() {
         } else {
           salidaMarcada.value = true;
         }
+        
+        // Actualizar datos desde el servidor
+        await verificarAsistenciaHoy();
       }
     } else if (err.request) {
       error.value = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
@@ -800,9 +828,70 @@ function verificarEstadoAsistencia() {
       datosEntrada.value = datos.datosEntrada || {};
       datosSalida.value = datos.datosSalida || {};
     }
+
+    // Después de cargar del localStorage, verificar con el backend
+    verificarAsistenciaHoy();
   } catch (error) {
     console.error('Error al verificar estado de asistencia:', error);
   }
+}
+
+/**
+ * Consulta al backend si el usuario ya registró entrada/salida hoy
+ */
+async function verificarAsistenciaHoy() {
+  verificandoAsistencia.value = true;
+  try {
+    // Verificar conexión a internet antes de consultar
+    isOnline.value = await checkInternetConnection();
+    if (!isOnline.value) {
+      console.log('Sin conexión, usando datos locales de asistencia');
+      return;
+    }
+
+    const datos = await asistenciasService.consultarAsistenciaHoy(user.value.id);
+    asistenciaHoy.value = datos;
+    
+    // Actualizar estado de botones según la respuesta del backend
+    if (datos.entrada) {
+      entradaMarcada.value = true;
+      datosEntrada.value = {
+        hora: formatearHora(datos.entrada),
+        descripcion: datos.descripcion_entrada || '',
+        latitud: datos.latitud_entrada,
+        longitud: datos.longitud_entrada,
+        foto_url: datos.foto_entrada_url
+      };
+    }
+    
+    if (datos.salida) {
+      salidaMarcada.value = true;
+      datosSalida.value = {
+        hora: formatearHora(datos.salida),
+        descripcion: datos.descripcion_salida || '',
+        latitud: datos.latitud_salida,
+        longitud: datos.longitud_salida,
+        foto_url: datos.foto_salida_url
+      };
+    }
+    
+    // Guardar estado actualizado
+    guardarEstadoAsistencia();
+  } catch (error) {
+    console.error('Error al verificar asistencia de hoy:', error);
+    // Si hay error de conexión, usamos los datos locales que ya cargamos
+  } finally {
+    verificandoAsistencia.value = false;
+  }
+}
+
+/**
+ * Formatea una fecha ISO a formato de hora local
+ */
+function formatearHora(fechaISO) {
+  if (!fechaISO) return "";
+  const hora = new Date(fechaISO);
+  return hora.toLocaleTimeString("es-MX", { hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' });
 }
 
 function guardarEstadoAsistencia() {

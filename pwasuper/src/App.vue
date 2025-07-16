@@ -126,9 +126,34 @@ function logout() {
   userData.value = null;
   showWelcome.value = false;
   
-  // Limpiar completamente el localStorage y sessionStorage
+  // Guardar el estado de asistencia del localStorage antes de limpiarlo
+  const today = new Date().toISOString().split('T')[0];
+  const storedUser = localStorage.getItem('user');
+  let userId = null;
+  
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      userId = user.id;
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+    }
+  }
+  
+  // Si tenemos el ID del usuario, guardar su estado de asistencia
+  let asistenciaHoy = null;
+  if (userId) {
+    asistenciaHoy = localStorage.getItem(`asistencia_${userId}_${today}`);
+  }
+  
+  // Limpiar localStorage y sessionStorage (excepto datos de asistencia)
   localStorage.clear();
   sessionStorage.clear();
+  
+  // Restaurar el estado de asistencia del día en localStorage si existe
+  if (userId && asistenciaHoy) {
+    localStorage.setItem(`asistencia_${userId}_${today}`, asistenciaHoy);
+  }
   
   // Pequeño delay para que se vea la limpieza del estado
   setTimeout(() => {

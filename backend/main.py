@@ -445,6 +445,68 @@ async def marcar_salida(
         print(f"❌ Error general en salida: {e}")
         raise HTTPException(status_code=500, detail=f"Error al registrar salida: {str(e)}")
 
+@app.get("/asistencias")
+async def obtener_historial_asistencias(usuario_id: int = None):
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🔍 Obteniendo historial de asistencias para usuario: {usuario_id}")
+        
+        if usuario_id:
+            cursor.execute(
+                """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
+                          latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
+                          foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
+                   FROM asistencias 
+                   WHERE usuario_id = %s 
+                   ORDER BY fecha DESC, hora_entrada DESC 
+                   LIMIT 50""",
+                (usuario_id,)
+            )
+        else:
+            cursor.execute(
+                """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
+                          latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
+                          foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
+                   FROM asistencias 
+                   ORDER BY fecha DESC, hora_entrada DESC 
+                   LIMIT 50"""
+            )
+        
+        resultados = cursor.fetchall()
+        print(f"📊 Encontradas {len(resultados)} asistencias")
+        
+        # Convertir tuplas a diccionarios manualmente
+        asistencias = []
+        for row in resultados:
+            asistencia = {
+                "id": row[0],
+                "usuario_id": row[1],
+                "fecha": row[2].isoformat() if row[2] else None,
+                "hora_entrada": row[3].isoformat() if row[3] else None,
+                "hora_salida": row[4].isoformat() if row[4] else None,
+                "latitud_entrada": float(row[5]) if row[5] else None,
+                "longitud_entrada": float(row[6]) if row[6] else None,
+                "latitud_salida": float(row[7]) if row[7] else None,
+                "longitud_salida": float(row[8]) if row[8] else None,
+                "foto_entrada_url": row[9],
+                "foto_salida_url": row[10],
+                "descripcion_entrada": row[11],
+                "descripcion_salida": row[12]
+            }
+            asistencias.append(asistencia)
+        
+        print(f"✅ Historial de asistencias procesado correctamente")
+        return {"asistencias": asistencias}
+        
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener historial: {str(e)}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

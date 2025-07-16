@@ -65,15 +65,14 @@
         </div>
       </div>
 
-      <div v-if="error" class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+        <div v-if="error" class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
         <p>{{ error }}</p>
         <p class="text-sm mt-2">
           <strong>Problema técnico detectado:</strong> El servidor principal está experimentando problemas. 
           El administrador del sistema necesita actualizar el código del servidor.
         </p>
       </div>
-
-      <!-- Lista de registros -->
+        <!-- Lista de registros -->
       <div v-if="tabActiva === 'registros' && registros.length > 0">
         <div class="mb-4 text-sm text-gray-600">
           Total de registros: <span class="font-semibold text-primary">{{ registros.length }}</span>
@@ -203,6 +202,23 @@
           </div>
         </div>
       </div>
+                
+                <p class="text-gray-800 mt-1">{{ registro.descripcion || "Sin descripción" }}</p>
+                
+                <div class="mt-2 flex space-x-4">
+                  <div class="text-xs font-mono text-gray-600">
+                    Lat: {{ registro.latitud }}
+                  </div>
+                  <div class="text-xs font-mono text-gray-600">
+                    Lon: {{ registro.longitud }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
 
       <!-- Estado vacío para registros -->
       <div v-if="tabActiva === 'registros' && registros.length === 0 && !cargando" class="text-center py-8">
@@ -299,8 +315,6 @@ onMounted(async () => {
   }
   
   cargarRegistros();
-  // Cargar asistencias también al inicio
-  cargarAsistencias();
 });
 
 async function cargarRegistros() {
@@ -333,8 +347,7 @@ async function cargarRegistros() {
       foto_url: r.foto_url ? `${API_URL}/${r.foto_url}` : null
     }));
     
-    console.log('Registros procesados:', registros.value.length);
-  } catch (err) {
+    console.log('Registros procesados:', registros.value.length);  } catch (err) {
     console.error('Error al cargar registros:', err);
     
     if (err.response) {
@@ -493,6 +506,29 @@ function cambiarTab(tab) {
     cargarAsistencias();
   }
 }
+
+// Modificar el onMounted para cargar asistencias si es necesario
+onMounted(async () => {
+  const userStr = localStorage.getItem('user');
+  if (!userStr) {
+    router.push('/login');
+    return;
+  }
+  
+  userInfo.value = JSON.parse(userStr);
+  
+  // Verificar conexión a internet
+  isOnline.value = await checkInternetConnection();
+  if (!isOnline.value) {
+    error.value = getOfflineMessage();
+    cargando.value = false;
+    return;
+  }
+  
+  cargarRegistros();
+  // Cargar asistencias también al inicio
+  cargarAsistencias();
+});
 </script>
 
 <style>
@@ -517,41 +553,56 @@ function cambiarTab(tab) {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
-  background-color: #3b82f6;
-  border: 2px solid white;
+  width: 20px;
+  height: 20px;
+  background: #4CAF50;
+  border: 3px solid white;
   border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transform: translate(-50%, -50%);
   z-index: 2;
+  animation: markerBounce 1s ease-out;
 }
 
 .marker-pulse {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   width: 30px;
   height: 30px;
-  background-color: #3b82f6;
+  border: 2px solid #4CAF50;
   border-radius: 50%;
-  opacity: 0.6;
-  animation: pulse 2s ease-in-out infinite;
+  transform: translate(-50%, -50%);
+  animation: markerPulse 2s infinite;
+  z-index: 1;
 }
 
-@keyframes pulse {
+@keyframes markerBounce {
   0% {
-    transform: translate(-50%, -50%) scale(0.5);
-    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(0);
   }
   50% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1.2);
   }
   100% {
-    transform: translate(-50%, -50%) scale(1.5);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes markerPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
     opacity: 0;
   }
+}
+
+/* Efecto hover para el marcador */
+.custom-marker:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  transition: transform 0.2s ease;
 }
 </style>

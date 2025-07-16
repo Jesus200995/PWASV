@@ -146,17 +146,26 @@ class AsistenciasService {
 
   /**
    * Formatea hora para mostrar
-   * @param {string} hora - Hora en formato ISO
+   * @param {string} hora - Hora en formato ISO o datetime completo
    * @returns {string} Hora formateada
    */
   formatearHora(hora) {
     if (!hora) return 'N/A';
     try {
+      // Si viene un datetime completo (2025-07-16T12:25:22.626565)
+      if (hora.includes('T')) {
+        return new Date(hora).toLocaleTimeString('es-ES', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+      // Si viene solo la hora (12:25:22)
       return new Date(`1970-01-01T${hora}`).toLocaleTimeString('es-ES', {
         hour: '2-digit',
         minute: '2-digit'
       });
     } catch (error) {
+      console.error('Error formateando hora:', error, 'Hora original:', hora);
       return hora;
     }
   }

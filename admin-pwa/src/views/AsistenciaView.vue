@@ -183,19 +183,37 @@
                     <span v-else class="no-data">Pendiente</span>
                   </td>
                   <td>
-                    <span v-if="asistencia.latitud_entrada && asistencia.longitud_entrada" 
-                          class="location-badge"
-                          :title="`Lat: ${asistencia.latitud_entrada}, Lng: ${asistencia.longitud_entrada}`">
-                      {{ formatearCoordenadas(asistencia.latitud_entrada, asistencia.longitud_entrada) }}
-                    </span>
+                    <div v-if="asistencia.latitud_entrada && asistencia.longitud_entrada" class="location-cell">
+                      <span class="location-badge"
+                            :title="`Lat: ${asistencia.latitud_entrada}, Lng: ${asistencia.longitud_entrada}`">
+                        {{ formatearCoordenadas(asistencia.latitud_entrada, asistencia.longitud_entrada) }}
+                      </span>
+                      <button @click="abrirMapaModal(asistencia, 'entrada')" 
+                              class="map-btn entrada-map"
+                              title="Ver ubicación de entrada en el mapa">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                      </button>
+                    </div>
                     <span v-else class="no-data">N/A</span>
                   </td>
                   <td>
-                    <span v-if="asistencia.latitud_salida && asistencia.longitud_salida" 
-                          class="location-badge"
-                          :title="`Lat: ${asistencia.latitud_salida}, Lng: ${asistencia.longitud_salida}`">
-                      {{ formatearCoordenadas(asistencia.latitud_salida, asistencia.longitud_salida) }}
-                    </span>
+                    <div v-if="asistencia.latitud_salida && asistencia.longitud_salida" class="location-cell">
+                      <span class="location-badge"
+                            :title="`Lat: ${asistencia.latitud_salida}, Lng: ${asistencia.longitud_salida}`">
+                        {{ formatearCoordenadas(asistencia.latitud_salida, asistencia.longitud_salida) }}
+                      </span>
+                      <button @click="abrirMapaModal(asistencia, 'salida')" 
+                              class="map-btn salida-map"
+                              title="Ver ubicación de salida en el mapa">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                      </button>
+                    </div>
                     <span v-else class="no-data">N/A</span>
                   </td>
                   <td>
@@ -257,17 +275,27 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal del mapa de asistencia -->
+    <MapaAsistenciaModal 
+      :visible="mapaModalVisible"
+      :asistencia="asistenciaSeleccionada"
+      :tipo="tipoMapa"
+      @cerrar="cerrarMapaModal"
+    />
   </div>
 </template>
 
 <script>
 import Sidebar from '../components/Sidebar.vue'
+import MapaAsistenciaModal from '../components/MapaAsistenciaModal.vue'
 import AsistenciasService from '../services/asistenciasService.js'
 
 export default {
   name: 'AsistenciaView',
   components: {
-    Sidebar
+    Sidebar,
+    MapaAsistenciaModal
   },
   data() {
     return {
@@ -280,7 +308,11 @@ export default {
       isOnline: navigator.onLine,
       modalVisible: false,
       modalImage: '',
-      modalTitle: ''
+      modalTitle: '',
+      // Propiedades para el modal del mapa
+      mapaModalVisible: false,
+      asistenciaSeleccionada: null,
+      tipoMapa: 'entrada' // 'entrada', 'salida', 'asistencia'
     }
   },
   computed: {
@@ -393,6 +425,20 @@ export default {
       this.modalVisible = false
       this.modalImage = ''
       this.modalTitle = ''
+      document.body.style.overflow = 'auto'
+    },
+
+    abrirMapaModal(asistencia, tipo) {
+      this.asistenciaSeleccionada = asistencia
+      this.tipoMapa = tipo
+      this.mapaModalVisible = true
+      document.body.style.overflow = 'hidden'
+    },
+
+    cerrarMapaModal() {
+      this.mapaModalVisible = false
+      this.asistenciaSeleccionada = null
+      this.tipoMapa = 'entrada'
       document.body.style.overflow = 'auto'
     },
 
@@ -799,6 +845,14 @@ export default {
   text-align: center;
 }
 
+/* Estilos para las celdas de ubicación */
+.location-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .location-badge {
   background: rgba(156, 39, 176, 0.1);
   color: #9C27B0;
@@ -807,6 +861,54 @@ export default {
   font-size: 0.75rem;
   font-family: monospace;
   cursor: help;
+  flex-shrink: 0;
+}
+
+/* Botones de mapa */
+.map-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-btn svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+}
+
+.map-btn.entrada-map {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.map-btn.entrada-map:hover {
+  background: linear-gradient(135deg, #45a049, #388e3c);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.map-btn.salida-map {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+.map-btn.salida-map:hover {
+  background: linear-gradient(135deg, #d32f2f, #c62828);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.map-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .photos-cell {
@@ -996,6 +1098,28 @@ export default {
   .asistencias-table th,
   .asistencias-table td {
     padding: 0.5rem;
+  }
+
+  /* Ajustes para botones de mapa en móvil */
+  .location-cell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .map-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .map-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .location-badge {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.375rem;
   }
 }
 </style>

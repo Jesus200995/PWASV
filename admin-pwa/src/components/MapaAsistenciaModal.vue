@@ -463,6 +463,22 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: markerAppear 0.6s ease-out;
+}
+
+@keyframes markerAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-20px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .marker-icon {
@@ -475,15 +491,30 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 2;
-  animation: bounce 2s infinite;
+  animation: gentleGlow 3s ease-in-out infinite;
+  transition: all 0.3s ease;
 }
 
 .marker-container.entrada .marker-icon {
   background: linear-gradient(135deg, #4CAF50, #45a049);
+  border: 2px solid rgba(76, 175, 80, 0.3);
+}
+
+.marker-container.entrada:hover .marker-icon {
+  background: linear-gradient(135deg, #45a049, #388e3c);
+  border-color: rgba(76, 175, 80, 0.5);
+  transform: scale(1.1);
 }
 
 .marker-container.salida .marker-icon {
   background: linear-gradient(135deg, #f44336, #d32f2f);
+  border: 2px solid rgba(244, 67, 54, 0.3);
+}
+
+.marker-container.salida:hover .marker-icon {
+  background: linear-gradient(135deg, #d32f2f, #c62828);
+  border-color: rgba(244, 67, 54, 0.5);
+  transform: scale(1.1);
 }
 
 .marker-icon svg {
@@ -499,42 +530,43 @@ export default {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  opacity: 0.6;
-  animation: pulse 2s infinite;
+  opacity: 0.7;
+  animation: pulse 2.5s ease-out infinite;
 }
 
 .marker-container.entrada .marker-pulse {
-  background: #4CAF50;
+  background: rgba(76, 175, 80, 0.6);
+  animation: pulse 2.5s ease-out infinite;
 }
 
 .marker-container.salida .marker-pulse {
-  background: #f44336;
+  background: rgba(244, 67, 54, 0.6);
+  animation: pulse 2.5s ease-out infinite 0.3s;
 }
 
 @keyframes pulse {
   0% {
     transform: translate(-50%, -50%) scale(1);
-    opacity: 0.6;
+    opacity: 0.7;
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.5);
-    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0.4;
   }
   100% {
-    transform: translate(-50%, -50%) scale(2);
+    transform: translate(-50%, -50%) scale(1.6);
     opacity: 0;
   }
 }
 
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
+@keyframes gentleGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   }
 }
 

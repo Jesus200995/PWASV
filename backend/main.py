@@ -10,6 +10,7 @@ import bcrypt
 from pydantic import BaseModel
 from jose import jwt
 from passlib.context import CryptContext
+import pytz
 
 app = FastAPI()
 
@@ -311,6 +312,138 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
     except Exception as e:
         print(f"❌ Error en admin login: {e}")
         raise HTTPException(status_code=500, detail=f"Error en autenticación: {str(e)}")
+
+# Define el timezone de CDMX
+CDMX_TZ = pytz.timezone("America/Mexico_City")
+
+@app.post("/asistencia/entrada")
+async def marcar_entrada(
+    usuario_id: int = Form(...),
+    latitud: float = Form(...),
+    longitud: float = Form(...),
+    descripcion: str = Form(""),
+    foto: UploadFile = File(...)
+):
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            
+        now = datetime.now(CDMX_TZ)
+        fecha = now.date()
+        hora_entrada = now
+
+        # Revisa si ya existe asistencia para hoy
+        cursor.execute(
+            "SELECT id FROM asistencias WHERE usuario_id = %s AND fecha = %s",
+            (usuario_id, fecha)
+        )
+        existe = cursor.fetchone()
+
+        if existe:
+            raise HTTPException(status_code=400, detail="Ya existe registro de entrada para hoy")
+
+        # Guardar la foto en disco
+        ext = os.path.splitext(foto.filename)[1]
+        nombre_archivo = f"entrada_{usuario_id}_{datetime.now(CDMX_TZ).strftime('%Y%m%d%H%M%S')}{ext}"
+        ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
+        
+        with open(ruta_archivo, "wb") as f:
+            contenido = await foto.read()
+            f.write(contenido)
+
+        # Insertar registro de asistencia con ubicación y foto
+        cursor.execute(
+            "INSERT INTO asistencias (usuario_id, fecha, hora_entrada, latitud_entrada, longitud_entrada, foto_entrada_url, descripcion_entrada) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (usuario_id, fecha, hora_entrada, latitud, longitud, ruta_archivo, descripcion)
+        )
+        conn.commit()
+        print(f"✅ Entrada registrada para usuario {usuario_id} a las {hora_entrada}")
+        
+        return {
+            "status": "ok", 
+            "mensaje": "Entrada registrada exitosamente", 
+            "hora_entrada": str(hora_entrada),
+            "latitud": latitud,
+            "longitud": longitud,
+            "foto_url": ruta_archivo,
+            "descripcion": descripcion
+        }
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL en entrada: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general en entrada: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al registrar entrada: {str(e)}")
+
+@app.post("/asistencia/salida")
+async def marcar_salida(
+    usuario_id: int = Form(...),
+    latitud: float = Form(...),
+    longitud: float = Form(...),
+    descripcion: str = Form(""),
+    foto: UploadFile = File(...)
+):
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            
+        now = datetime.now(CDMX_TZ)
+        fecha = now.date()
+
+        # Busca el registro de asistencia de hoy
+        cursor.execute(
+            "SELECT id, hora_salida FROM asistencias WHERE usuario_id = %s AND fecha = %s",
+            (usuario_id, fecha)
+        )
+        registro = cursor.fetchone()
+
+        if not registro:
+            raise HTTPException(status_code=400, detail="No se ha registrado entrada para hoy")
+        if registro[1] is not None:
+            raise HTTPException(status_code=400, detail="Ya se registró la salida para hoy")
+
+        # Guardar la foto en disco
+        ext = os.path.splitext(foto.filename)[1]
+        nombre_archivo = f"salida_{usuario_id}_{datetime.now(CDMX_TZ).strftime('%Y%m%d%H%M%S')}{ext}"
+        ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
+        
+        with open(ruta_archivo, "wb") as f:
+            contenido = await foto.read()
+            f.write(contenido)
+
+        # Actualizar registro con salida, ubicación y foto
+        cursor.execute(
+            "UPDATE asistencias SET hora_salida = %s, latitud_salida = %s, longitud_salida = %s, foto_salida_url = %s, descripcion_salida = %s WHERE usuario_id = %s AND fecha = %s",
+            (now, latitud, longitud, ruta_archivo, descripcion, usuario_id, fecha)
+        )
+        conn.commit()
+        print(f"✅ Salida registrada para usuario {usuario_id} a las {now}")
+        
+        return {
+            "status": "ok", 
+            "mensaje": "Salida registrada exitosamente", 
+            "hora_salida": str(now),
+            "latitud": latitud,
+            "longitud": longitud,
+            "foto_url": ruta_archivo,
+            "descripcion": descripcion
+        }
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL en salida: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general en salida: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al registrar salida: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

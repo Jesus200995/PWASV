@@ -37,28 +37,195 @@
       </header>
 
       <div class="page-content">
-        <!-- Barra de búsqueda -->
-        <div class="search-section">
-          <div class="search-box">
-            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
-            <input 
-              v-model="searchTerm" 
-              type="text" 
-              placeholder="Buscar por nombre, correo o fecha..." 
-              class="search-input"
-              @input="filtrarAsistencias"
-            >
+        <!-- Panel de filtros avanzados -->
+        <div class="advanced-filters">
+          <!-- Filtros principales -->
+          <div class="filters-main">
+            <!-- Barra de búsqueda -->
+            <div class="search-box">
+              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+              <input 
+                v-model="searchTerm" 
+                type="text" 
+                placeholder="Buscar por nombre, correo o ubicación..." 
+                class="search-input"
+                @input="filtrarAsistencias"
+              >
+              <button v-if="searchTerm" @click="limpiarBusqueda" class="clear-search-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Filtro de rango de fecha con datepickers -->
+            <div class="date-range-filter">
+              <div class="date-picker-container">
+                <label class="date-label">Desde:</label>
+                <input 
+                  type="date" 
+                  v-model="filtroFechaInicio" 
+                  class="date-input" 
+                  :max="filtroFechaFin || maxDate"
+                  @change="filtrarAsistencias"
+                >
+              </div>
+              <div class="date-picker-container">
+                <label class="date-label">Hasta:</label>
+                <input 
+                  type="date" 
+                  v-model="filtroFechaFin" 
+                  class="date-input" 
+                  :min="filtroFechaInicio"
+                  :max="maxDate"
+                  @change="filtrarAsistencias"
+                >
+              </div>
+              
+              <!-- Selectores rápidos de fecha -->
+              <div class="quick-date-filters">
+                <button 
+                  @click="seleccionarFechaRapida('hoy')" 
+                  :class="['quick-date-btn', filtroRapido === 'hoy' ? 'active' : '']"
+                >
+                  Hoy
+                </button>
+                <button 
+                  @click="seleccionarFechaRapida('ayer')" 
+                  :class="['quick-date-btn', filtroRapido === 'ayer' ? 'active' : '']"
+                >
+                  Ayer
+                </button>
+                <button 
+                  @click="seleccionarFechaRapida('semana')" 
+                  :class="['quick-date-btn', filtroRapido === 'semana' ? 'active' : '']"
+                >
+                  Esta semana
+                </button>
+                <button 
+                  @click="seleccionarFechaRapida('mes')" 
+                  :class="['quick-date-btn', filtroRapido === 'mes' ? 'active' : '']"
+                >
+                  Este mes
+                </button>
+                <button 
+                  v-if="hayFiltrosFechas" 
+                  @click="limpiarFiltrosFechas" 
+                  class="clear-date-btn"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Limpiar
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="filter-section">
-            <select v-model="filtroFecha" @change="filtrarAsistencias" class="filter-select">
-              <option value="">Todas las fechas</option>
-              <option value="hoy">Hoy</option>
-              <option value="semana">Esta semana</option>
-              <option value="mes">Este mes</option>
-            </select>
+          
+          <!-- Filtros adicionales y acciones (expandibles) -->
+          <div class="filters-advanced" v-show="mostrarFiltrosAvanzados">
+            <div class="advanced-filters-grid">
+              <!-- Filtro por estado -->
+              <div class="filter-group">
+                <label class="filter-label">Estado</label>
+                <div class="filter-options">
+                  <label class="checkbox-option">
+                    <input type="checkbox" v-model="filtroEntrada" @change="filtrarAsistencias">
+                    <span>Con entrada</span>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" v-model="filtroSalida" @change="filtrarAsistencias">
+                    <span>Con salida</span>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" v-model="filtroSinSalida" @change="filtrarAsistencias">
+                    <span>Sin salida</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Filtro por departamento -->
+              <div class="filter-group" v-if="departamentos.length > 0">
+                <label class="filter-label">Departamento</label>
+                <select v-model="filtroDepartamento" @change="filtrarAsistencias" class="filter-select">
+                  <option value="">Todos los departamentos</option>
+                  <option v-for="depto in departamentos" :key="depto" :value="depto">{{ depto }}</option>
+                </select>
+              </div>
+              
+              <!-- Filtro por usuario -->
+              <div class="filter-group">
+                <label class="filter-label">Usuario</label>
+                <select v-model="filtroUsuario" @change="filtrarAsistencias" class="filter-select">
+                  <option value="">Todos los usuarios</option>
+                  <option v-for="usuario in usuariosUnicos" :key="usuario.id" :value="usuario.id">
+                    {{ usuario.nombre }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="advanced-actions">
+              <button @click="exportarAsistencias('csv')" class="export-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Exportar CSV
+              </button>
+              <button @click="exportarAsistencias('excel')" class="export-btn excel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Exportar Excel
+              </button>
+              <button @click="imprimirAsistencias" class="export-btn print">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Imprimir
+              </button>
+            </div>
+          </div>
+          
+          <!-- Botón para mostrar/ocultar filtros avanzados -->
+          <button @click="mostrarFiltrosAvanzados = !mostrarFiltrosAvanzados" class="toggle-filters-btn">
+            {{ mostrarFiltrosAvanzados ? 'Ocultar filtros avanzados' : 'Mostrar filtros avanzados' }}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 :style="{ transform: mostrarFiltrosAvanzados ? 'rotate(180deg)' : 'rotate(0deg)' }">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          
+          <!-- Resumen de filtros activos -->
+          <div v-if="filtrosActivos.length > 0" class="active-filters">
+            <span class="active-filters-label">Filtros activos:</span>
+            <div class="active-filter-tags">
+              <div v-for="(filtro, index) in filtrosActivos" :key="index" class="filter-tag">
+                {{ filtro.label }}
+                <button @click="quitarFiltro(filtro.tipo, filtro.valor)" class="remove-filter">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              <button @click="limpiarTodosFiltros" class="clear-all-filters">
+                Limpiar todos
+              </button>
+            </div>
           </div>
         </div>
 
@@ -314,7 +481,19 @@ export default {
       asistencias: [],
       asistenciasFiltradas: [],
       searchTerm: '',
+      // Filtros antiguos
       filtroFecha: '',
+      // Nuevos filtros avanzados
+      filtroFechaInicio: '',
+      filtroFechaFin: '',
+      filtroRapido: '',
+      filtroUsuario: '',
+      filtroDepartamento: '',
+      filtroEntrada: false,
+      filtroSalida: false,
+      filtroSinSalida: false,
+      mostrarFiltrosAvanzados: false,
+      // Estado UI
       loading: false,
       error: null,
       isOnline: navigator.onLine,
@@ -344,6 +523,109 @@ export default {
         }
       })
       return usuariosHoy.size
+    },
+    departamentos() {
+      // Obtiene lista única de departamentos
+      const departamentosSet = new Set()
+      this.asistencias.forEach(a => {
+        if (a.departamento) {
+          departamentosSet.add(a.departamento)
+        }
+      })
+      return [...departamentosSet].sort()
+    },
+    usuariosUnicos() {
+      // Obtiene lista única de usuarios
+      const usuariosMap = new Map()
+      this.asistencias.forEach(a => {
+        if (a.usuario_id && a.nombre_usuario) {
+          usuariosMap.set(a.usuario_id, {
+            id: a.usuario_id,
+            nombre: a.nombre_usuario
+          })
+        }
+      })
+      return [...usuariosMap.values()]
+    },
+    hayFiltrosFechas() {
+      return this.filtroFechaInicio || this.filtroFechaFin || this.filtroRapido
+    },
+    maxDate() {
+      return new Date().toISOString().split('T')[0]
+    },
+    filtrosActivos() {
+      const filtros = []
+      
+      if (this.searchTerm) {
+        filtros.push({
+          tipo: 'busqueda',
+          valor: this.searchTerm,
+          label: `Búsqueda: ${this.searchTerm}`
+        })
+      }
+      
+      if (this.filtroFechaInicio && this.filtroFechaFin) {
+        filtros.push({
+          tipo: 'fechaRango',
+          valor: [this.filtroFechaInicio, this.filtroFechaFin],
+          label: `Periodo: ${this.formatearFechaCorta(this.filtroFechaInicio)} - ${this.formatearFechaCorta(this.filtroFechaFin)}`
+        })
+      } else if (this.filtroRapido) {
+        const etiquetas = {
+          'hoy': 'Hoy',
+          'ayer': 'Ayer',
+          'semana': 'Esta semana',
+          'mes': 'Este mes'
+        }
+        filtros.push({
+          tipo: 'fechaRapida',
+          valor: this.filtroRapido,
+          label: `Periodo: ${etiquetas[this.filtroRapido]}`
+        })
+      }
+      
+      if (this.filtroDepartamento) {
+        filtros.push({
+          tipo: 'departamento',
+          valor: this.filtroDepartamento,
+          label: `Departamento: ${this.filtroDepartamento}`
+        })
+      }
+      
+      if (this.filtroUsuario) {
+        const usuario = this.usuariosUnicos.find(u => u.id === this.filtroUsuario)
+        filtros.push({
+          tipo: 'usuario',
+          valor: this.filtroUsuario,
+          label: `Usuario: ${usuario ? usuario.nombre : this.filtroUsuario}`
+        })
+      }
+      
+      if (this.filtroEntrada) {
+        filtros.push({
+          tipo: 'entrada',
+          valor: true,
+          label: 'Con entrada'
+        })
+      }
+      
+      if (this.filtroSalida) {
+        filtros.push({
+          tipo: 'salida',
+          valor: true,
+          label: 'Con salida'
+        })
+      }
+      
+      if (this.filtroSinSalida) {
+        filtros.push({
+          tipo: 'sinSalida',
+          valor: true,
+          label: 'Sin salida'
+        })
+      }
+      
+      return filtros
     }
   },
   mounted() {
@@ -374,31 +656,86 @@ export default {
       if (this.searchTerm) {
         const termino = this.searchTerm.toLowerCase()
         filtradas = filtradas.filter(asistencia => 
-          asistencia.nombre_usuario.toLowerCase().includes(termino) ||
-          asistencia.correo_usuario.toLowerCase().includes(termino) ||
-          asistencia.fecha.includes(termino)
+          (asistencia.nombre_usuario && asistencia.nombre_usuario.toLowerCase().includes(termino)) ||
+          (asistencia.correo_usuario && asistencia.correo_usuario.toLowerCase().includes(termino)) ||
+          (asistencia.departamento && asistencia.departamento.toLowerCase().includes(termino)) ||
+          (asistencia.fecha && asistencia.fecha.includes(termino))
         )
       }
 
-      // Filtro por fecha
-      if (this.filtroFecha) {
+      // Filtro por usuario específico
+      if (this.filtroUsuario) {
+        filtradas = filtradas.filter(asistencia => 
+          asistencia.usuario_id === this.filtroUsuario
+        )
+      }
+      
+      // Filtro por departamento
+      if (this.filtroDepartamento) {
+        filtradas = filtradas.filter(asistencia => 
+          asistencia.departamento === this.filtroDepartamento
+        )
+      }
+      
+      // Filtro por estado de entrada/salida
+      if (this.filtroEntrada) {
+        filtradas = filtradas.filter(asistencia => asistencia.hora_entrada)
+      }
+      
+      if (this.filtroSalida) {
+        filtradas = filtradas.filter(asistencia => asistencia.hora_salida)
+      }
+      
+      if (this.filtroSinSalida) {
+        filtradas = filtradas.filter(asistencia => 
+          asistencia.hora_entrada && !asistencia.hora_salida
+        )
+      }
+
+      // Filtros por fechas rápidas
+      if (this.filtroRapido) {
         const hoy = new Date()
+        hoy.setHours(0, 0, 0, 0)
+        
+        switch (this.filtroRapido) {
+          case 'hoy':
+            const fechaHoy = hoy.toISOString().split('T')[0]
+            filtradas = filtradas.filter(asistencia => asistencia.fecha === fechaHoy)
+            break
+          case 'ayer':
+            const ayer = new Date(hoy)
+            ayer.setDate(ayer.getDate() - 1)
+            const fechaAyer = ayer.toISOString().split('T')[0]
+            filtradas = filtradas.filter(asistencia => asistencia.fecha === fechaAyer)
+            break
+          case 'semana':
+            const inicioSemana = new Date(hoy)
+            inicioSemana.setDate(hoy.getDate() - hoy.getDay())
+            filtradas = filtradas.filter(asistencia => {
+              const fechaAsistencia = new Date(asistencia.fecha)
+              return fechaAsistencia >= inicioSemana && fechaAsistencia <= hoy
+            })
+            break
+          case 'mes':
+            const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+            filtradas = filtradas.filter(asistencia => {
+              const fechaAsistencia = new Date(asistencia.fecha)
+              return fechaAsistencia >= inicioMes && fechaAsistencia <= hoy
+            })
+            break
+        }
+      } 
+      // Filtro por rango de fechas personalizado
+      else if (this.filtroFechaInicio && this.filtroFechaFin) {
+        const fechaInicio = new Date(this.filtroFechaInicio)
+        fechaInicio.setHours(0, 0, 0, 0)
+        
+        const fechaFin = new Date(this.filtroFechaFin)
+        fechaFin.setHours(23, 59, 59, 999)
+        
         filtradas = filtradas.filter(asistencia => {
           const fechaAsistencia = new Date(asistencia.fecha)
-          
-          switch (this.filtroFecha) {
-            case 'hoy':
-              return fechaAsistencia.toDateString() === hoy.toDateString()
-            case 'semana':
-              const inicioSemana = new Date(hoy)
-              inicioSemana.setDate(hoy.getDate() - hoy.getDay())
-              return fechaAsistencia >= inicioSemana
-            case 'mes':
-              return fechaAsistencia.getMonth() === hoy.getMonth() && 
-                     fechaAsistencia.getFullYear() === hoy.getFullYear()
-            default:
-              return true
-          }
+          return fechaAsistencia >= fechaInicio && fechaAsistencia <= fechaFin
         })
       }
 
@@ -469,16 +806,145 @@ export default {
       console.log('✅ Imagen cargada correctamente:', event.target.src)
     },
 
-    onImageError(event) {
-      console.error('❌ Error al cargar imagen:', event.target.src)
-      // Opcional: establecer una imagen por defecto
-      event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMiA5TDE0IDEwTDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDIgMTBMMTAgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0iI2Y5ZjlmOSIvPgo8L3N2Zz4K'
+    limpiarBusqueda() {
+      this.searchTerm = ''
+      this.filtrarAsistencias()
     },
 
-    logout() {
-      localStorage.removeItem('authToken')
-      this.$router.push('/login')
-    }
+    seleccionarFechaRapida(tipo) {
+      this.filtroRapido = this.filtroRapido === tipo ? '' : tipo
+      this.filtroFechaInicio = ''
+      this.filtroFechaFin = ''
+      this.filtrarAsistencias()
+    },
+
+    limpiarFiltrosFechas() {
+      this.filtroFechaInicio = ''
+      this.filtroFechaFin = ''
+      this.filtroRapido = ''
+      this.filtrarAsistencias()
+    },
+
+    quitarFiltro(tipo, valor) {
+      switch (tipo) {
+        case 'busqueda':
+          this.searchTerm = ''
+          break
+        case 'fechaRango':
+          this.filtroFechaInicio = ''
+          this.filtroFechaFin = ''
+          break
+        case 'fechaRapida':
+          this.filtroRapido = ''
+          break
+        case 'departamento':
+          this.filtroDepartamento = ''
+          break
+        case 'usuario':
+          this.filtroUsuario = ''
+          break
+        case 'entrada':
+          this.filtroEntrada = false
+          break
+        case 'salida':
+          this.filtroSalida = false
+          break
+        case 'sinSalida':
+          this.filtroSinSalida = false
+          break
+      }
+      this.filtrarAsistencias()
+    },
+
+    limpiarTodosFiltros() {
+      this.searchTerm = ''
+      this.filtroFechaInicio = ''
+      this.filtroFechaFin = ''
+      this.filtroRapido = ''
+      this.filtroUsuario = ''
+      this.filtroDepartamento = ''
+      this.filtroEntrada = false
+      this.filtroSalida = false
+      this.filtroSinSalida = false
+      this.filtrarAsistencias()
+    },
+
+    exportarAsistencias(tipo) {
+      if (tipo === 'csv') {
+        this.exportarCSV()
+      } else if (tipo === 'excel') {
+        this.exportarExcel()
+      }
+    },
+
+    exportarCSV() {
+      // Crear encabezados
+      const encabezados = [
+        'Usuario',
+        'Email',
+        'Departamento',
+        'Fecha',
+        'Hora Entrada',
+        'Hora Salida',
+        'Coordenadas Entrada',
+        'Coordenadas Salida',
+        'Observaciones Entrada',
+        'Observaciones Salida'
+      ].join(',')
+
+      // Crear filas de datos
+      const filas = this.asistenciasFiltradas.map(a => {
+        const coordenadasEntrada = a.latitud_entrada && a.longitud_entrada 
+          ? `"${a.latitud_entrada},${a.longitud_entrada}"`
+          : '""'
+        
+        const coordenadasSalida = a.latitud_salida && a.longitud_salida 
+          ? `"${a.latitud_salida},${a.longitud_salida}"`
+          : '""'
+        
+        return [
+          `"${a.nombre_usuario || ''}"`,
+          `"${a.correo_usuario || ''}"`,
+          `"${a.departamento || ''}"`,
+          `"${a.fecha || ''}"`,
+          `"${a.hora_entrada || ''}"`,
+          `"${a.hora_salida || ''}"`,
+          coordenadasEntrada,
+          coordenadasSalida,
+          `"${a.descripcion_entrada || ''}"`,
+          `"${a.descripcion_salida || ''}"`
+        ].join(',')
+      })
+
+      // Combinar encabezados y filas
+      const contenidoCSV = [encabezados, ...filas].join('\n')
+      
+      // Crear y descargar el archivo
+      const blob = new Blob([contenidoCSV], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.setAttribute('href', url)
+      link.setAttribute('download', `asistencias_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    },
+
+    exportarExcel() {
+      alert('La exportación a Excel se implementará próximamente')
+      // En una implementación real, se usaría una librería como SheetJS
+    },
+
+    imprimirAsistencias() {
+      window.print()
+    },
+
+    formatearFechaCorta(fechaStr) {
+      if (!fechaStr) return ''
+      const fecha = new Date(fechaStr)
+      return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    },
   }
 }
 </script>
@@ -630,12 +1096,22 @@ export default {
   margin: 0 auto;
 }
 
-/* Búsqueda y filtros */
-.search-section {
-  display: flex;
-  gap: 1rem;
+/* Filtros avanzados */
+.advanced-filters {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 1.5rem;
   margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.filters-main {
+  display: flex;
   flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .search-box {
@@ -655,10 +1131,9 @@ export default {
 .search-input {
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
   font-size: 1rem;
   transition: all 0.3s ease;
 }
@@ -669,26 +1144,304 @@ export default {
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
-.filter-section {
+.clear-search-btn {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.clear-search-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #4b5563;
+}
+
+.date-range-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.date-picker-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-label {
+  font-weight: 500;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.date-input {
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.quick-date-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.quick-date-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quick-date-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.quick-date-btn.active {
+  background: #4CAF50;
+  color: white;
+}
+
+.clear-date-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(244, 67, 54, 0.1);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #f44336;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-date-btn:hover {
+  background: rgba(244, 67, 54, 0.2);
+}
+
+.filters-advanced {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.advanced-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 0.25rem;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
 }
 
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #4CAF50;
+  cursor: pointer;
+}
+
 .filter-select {
-  padding: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  font-size: 1rem;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  width: 100%;
 }
 
 .filter-select:focus {
   outline: none;
   border-color: #4CAF50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.advanced-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.export-btn:hover {
+  background: rgba(33, 150, 243, 0.2);
+}
+
+.export-btn.excel {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.export-btn.excel:hover {
+  background: rgba(76, 175, 80, 0.2);
+}
+
+.export-btn.print {
+  background: rgba(156, 39, 176, 0.1);
+  color: #9C27B0;
+}
+
+.export-btn.print:hover {
+  background: rgba(156, 39, 176, 0.2);
+}
+
+.toggle-filters-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.02);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.toggle-filters-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.toggle-filters-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.active-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.active-filters-label {
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.active-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.remove-filter {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4CAF50;
+  transition: all 0.2s ease;
+}
+
+.remove-filter:hover {
+  background: rgba(76, 175, 80, 0.2);
+}
+
+.clear-all-filters {
+  padding: 0.5rem 1rem;
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-all-filters:hover {
+  background: rgba(244, 67, 54, 0.2);
 }
 
 /* Estadísticas */

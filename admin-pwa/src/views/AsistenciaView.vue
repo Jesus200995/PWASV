@@ -968,7 +968,7 @@ export default {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 2rem;
+  padding: 1.25rem;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -985,29 +985,29 @@ export default {
 .header-main {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .header-icon {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   background: linear-gradient(135deg, #4CAF50, #45a049);
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 6px 24px rgba(76, 175, 80, 0.25);
 }
 
 .header-icon svg {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   color: white;
 }
 
 .header-text h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #2d3748;
   background: linear-gradient(135deg, #4CAF50, #2196F3);
@@ -1017,9 +1017,9 @@ export default {
 }
 
 .header-text p {
-  margin: 0.5rem 0 0 0;
+  margin: 0.25rem 0 0 0;
   color: #718096;
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 
 .header-actions {
@@ -1031,10 +1031,10 @@ export default {
 .connection-status {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -1049,8 +1049,8 @@ export default {
 }
 
 .status-indicator {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: currentColor;
 }
@@ -1058,16 +1058,17 @@ export default {
 .refresh-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  gap: 0.35rem;
+  padding: 0.5rem 1rem;
   background: linear-gradient(135deg, #4CAF50, #45a049);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   font-weight: 500;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.25);
 }
 
 .refresh-btn:hover:not(:disabled) {
@@ -1101,17 +1102,17 @@ export default {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
 .filters-main {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
 }
 
 .search-box {
@@ -1130,18 +1131,18 @@ export default {
 
 .search-input {
   width: 100%;
-  padding: 1rem 1rem 1rem 3rem;
-  border: 2px solid rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
+  padding: 0.65rem 1rem 0.65rem 3rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
+  font-size: 0.85rem;
   transition: all 0.3s ease;
 }
 
 .search-input:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
 }
 
 .clear-search-btn {
@@ -1186,18 +1187,18 @@ export default {
 }
 
 .date-input {
-  padding: 0.75rem 1rem;
-  border: 2px solid rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.9);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   transition: all 0.3s ease;
 }
 
 .date-input:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
 }
 
 .quick-date-filters {
@@ -1208,11 +1209,11 @@ export default {
 }
 
 .quick-date-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.35rem 0.75rem;
   background: rgba(0, 0, 0, 0.05);
   border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
@@ -1231,12 +1232,12 @@ export default {
 .clear-date-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
   background: rgba(244, 67, 54, 0.1);
   border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #f44336;
   cursor: pointer;
@@ -1249,56 +1250,58 @@ export default {
 
 .filters-advanced {
   border-top: 1px solid rgba(0, 0, 0, 0.05);
-  padding-top: 1.5rem;
-  margin-top: 0.5rem;
+  padding-top: 0.8rem;
+  margin-top: 0.4rem;
 }
 
 .advanced-filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3rem;
 }
 
 .filter-label {
   font-weight: 600;
   color: #4b5563;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
+  font-size: 0.8rem;
 }
 
 .filter-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.65rem;
 }
 
 .checkbox-option {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   cursor: pointer;
   user-select: none;
+  font-size: 0.8rem;
 }
 
 .checkbox-option input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   accent-color: #4CAF50;
   cursor: pointer;
 }
 
 .filter-select {
-  padding: 0.75rem 1rem;
-  border: 2px solid rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.9);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
@@ -1307,7 +1310,7 @@ export default {
 .filter-select:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
 }
 
 .advanced-actions {
@@ -1320,13 +1323,14 @@ export default {
 .export-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  gap: 0.35rem;
+  padding: 0.45rem 0.8rem;
   background: rgba(33, 150, 243, 0.1);
   color: #2196F3;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: 500;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -1357,18 +1361,18 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.4rem;
   background: rgba(0, 0, 0, 0.02);
   border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 0.5rem;
+  margin-top: 0.35rem;
 }
 
 .toggle-filters-btn:hover {
@@ -1382,32 +1386,33 @@ export default {
 .active-filters {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .active-filters-label {
   font-weight: 600;
   color: #4b5563;
+  font-size: 0.75rem;
 }
 
 .active-filter-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .filter-tag {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
   background: rgba(76, 175, 80, 0.1);
   color: #4CAF50;
-  border-radius: 20px;
-  font-size: 0.875rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -1415,7 +1420,7 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.15rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1429,12 +1434,12 @@ export default {
 }
 
 .clear-all-filters {
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.6rem;
   background: rgba(244, 67, 54, 0.1);
   color: #f44336;
   border: none;
-  border-radius: 20px;
-  font-size: 0.875rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1447,21 +1452,21 @@ export default {
 /* Estadísticas */
 .stats-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .stat-card {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  padding: 1.5rem;
+  border-radius: 12px;
+  padding: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  gap: 0.75rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease;
 }
 
@@ -1470,10 +1475,10 @@ export default {
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   background: linear-gradient(135deg, #4CAF50, #45a049);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1481,8 +1486,8 @@ export default {
 }
 
 .stat-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   color: white;
 }
 
@@ -1492,16 +1497,16 @@ export default {
 }
 
 .stat-number {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #2d3748;
   line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: #718096;
-  margin-top: 0.25rem;
+  margin-top: 0.15rem;
 }
 
 /* Tabla */

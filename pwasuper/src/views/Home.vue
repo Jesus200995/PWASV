@@ -819,6 +819,13 @@ function verificarEstadoAsistencia() {
     const ahora = new Date();
     const fechaHoy = ahora.toISOString().split('T')[0];
     
+    // Cada día es un nuevo registro, así que primero limpiamos los estados
+    entradaMarcada.value = false;
+    salidaMarcada.value = false;
+    datosEntrada.value = {};
+    datosSalida.value = {};
+    
+    // Verificamos si hay datos guardados para el día de hoy específicamente
     const estadoHoy = localStorage.getItem(`asistencia_${user.value.id}_${fechaHoy}`);
     
     if (estadoHoy) {
@@ -829,10 +836,35 @@ function verificarEstadoAsistencia() {
       datosSalida.value = datos.datosSalida || {};
     }
 
+    // Limpiamos datos de días anteriores para no acumular basura en localStorage
+    limpiarDatosAntiguos();
+
     // Después de cargar del localStorage, verificar con el backend
     verificarAsistenciaHoy();
   } catch (error) {
     console.error('Error al verificar estado de asistencia:', error);
+  }
+}
+
+/**
+ * Limpia los datos de asistencia de días anteriores del localStorage
+ */
+function limpiarDatosAntiguos() {
+  try {
+    const hoy = new Date().toISOString().split('T')[0];
+    
+    // Recorremos todas las claves del localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      
+      // Si es una clave de asistencia para este usuario pero no de hoy, la eliminamos
+      if (key && key.startsWith(`asistencia_${user.value.id}_`) && !key.includes(hoy)) {
+        localStorage.removeItem(key);
+        console.log(`🧹 Eliminando datos antiguos: ${key}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error al limpiar datos antiguos:', error);
   }
 }
 
@@ -849,37 +881,70 @@ async function verificarAsistenciaHoy() {
       return;
     }
 
+    // Obtener la fecha actual para comparar
+    const fechaActual = new Date().toISOString().split('T')[0];
+    
     const datos = await asistenciasService.consultarAsistenciaHoy(user.value.id);
     asistenciaHoy.value = datos;
     
-    // Actualizar estado de botones según la respuesta del backend
-    if (datos.entrada) {
-      entradaMarcada.value = true;
-      datosEntrada.value = {
-        hora: formatearHora(datos.entrada),
-        descripcion: datos.descripcion_entrada || '',
-        latitud: datos.latitud_entrada,
-        longitud: datos.longitud_entrada,
-        foto_url: datos.foto_entrada_url
-      };
+    // Verificar que los datos correspondan al día actual
+    if (datos.fecha && datos.fecha === fechaActual) {
+      // Actualizar estado de botones según la respuesta del backend
+      if (datos.entrada) {
+        entradaMarcada.value = true;
+        datosEntrada.value = {
+          hora: formatearHora(datos.entrada),
+          descripcion: datos.descripcion_entrada || '',
+          latitud: datos.latitud_entrada,
+          longitud: datos.longitud_entrada,
+          foto_url: datos.foto_entrada_url
+        };
+      } else {
+        // Si no hay entrada registrada hoy, resetear estado
+        entradaMarcada.value = false;
+        datosEntrada.value = {};
+      }
+      
+      if (datos.salida) {
+        salidaMarcada.value = true;
+        datosSalida.value = {
+          hora: formatearHora(datos.salida),
+          descripcion: datos.descripcion_salida || '',
+          latitud: datos.latitud_salida,
+          longitud: datos.longitud_salida,
+          foto_url: datos.foto_salida_url
+        };
+      } else {
+        // Si no hay salida registrada hoy, resetear estado de salida
+        salidaMarcada.value = false;
+        datosSalida.value = {};
+      }
+      
+      // Guardar estado actualizado
+      guardarEstadoAsistencia();
+    } else {
+      console.log('Sin registros para el día de hoy. Reiniciando estados.');
+      // Es un nuevo día, reiniciar estados
+      entradaMarcada.value = false;
+      salidaMarcada.value = false;
+      datosEntrada.value = {};
+      datosSalida.value = {};
+      guardarEstadoAsistencia();
     }
-    
-    if (datos.salida) {
-      salidaMarcada.value = true;
-      datosSalida.value = {
-        hora: formatearHora(datos.salida),
-        descripcion: datos.descripcion_salida || '',
-        latitud: datos.latitud_salida,
-        longitud: datos.longitud_salida,
-        foto_url: datos.foto_salida_url
-      };
-    }
-    
-    // Guardar estado actualizado
-    guardarEstadoAsistencia();
   } catch (error) {
     console.error('Error al verificar asistencia de hoy:', error);
-    // Si hay error de conexión, usamos los datos locales que ya cargamos
+    // Si hay error de conexión pero es un nuevo día, reiniciar estados
+    const fechaGuardada = localStorage.getItem(`asistencia_ultima_fecha_${user.value.id}`);
+    const fechaActual = new Date().toISOString().split('T')[0];
+    
+    if (fechaGuardada !== fechaActual) {
+      // Es un nuevo día, reiniciar estados incluso sin conexión
+      entradaMarcada.value = false;
+      salidaMarcada.value = false;
+      datosEntrada.value = {};
+      datosSalida.value = {};
+      guardarEstadoAsistencia();
+    }
   } finally {
     verificandoAsistencia.value = false;
   }
@@ -902,10 +967,15 @@ function guardarEstadoAsistencia() {
     entradaMarcada: entradaMarcada.value,
     salidaMarcada: salidaMarcada.value,
     datosEntrada: datosEntrada.value,
-    datosSalida: datosSalida.value
+    datosSalida: datosSalida.value,
+    ultimaActualizacion: ahora.toISOString()
   };
   
+  // Guardar el estado del día actual
   localStorage.setItem(`asistencia_${user.value.id}_${fechaHoy}`, JSON.stringify(estado));
+  
+  // También guardar la última fecha consultada para comparaciones
+  localStorage.setItem(`asistencia_ultima_fecha_${user.value.id}`, fechaHoy);
 }
 
 // Comprobar si el usuario está autenticado y verificar conexión

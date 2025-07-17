@@ -140,10 +140,13 @@ function logout() {
     }
   }
   
-  // Si tenemos el ID del usuario, guardar su estado de asistencia
+  // Si tenemos el ID del usuario, guardar su estado de asistencia y la última fecha
   let asistenciaHoy = null;
+  let ultimaFecha = null;
+  
   if (userId) {
     asistenciaHoy = localStorage.getItem(`asistencia_${userId}_${today}`);
+    ultimaFecha = localStorage.getItem(`asistencia_ultima_fecha_${userId}`);
   }
   
   // Limpiar localStorage y sessionStorage (excepto datos de asistencia)
@@ -153,6 +156,11 @@ function logout() {
   // Restaurar el estado de asistencia del día en localStorage si existe
   if (userId && asistenciaHoy) {
     localStorage.setItem(`asistencia_${userId}_${today}`, asistenciaHoy);
+  }
+  
+  // Restaurar la última fecha consultada
+  if (userId && ultimaFecha) {
+    localStorage.setItem(`asistencia_ultima_fecha_${userId}`, ultimaFecha);
   }
   
   // Pequeño delay para que se vea la limpieza del estado

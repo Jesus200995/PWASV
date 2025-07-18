@@ -75,41 +75,47 @@
 
       <!-- Lista de registros -->
       <div v-if="tabActiva === 'registros' && registros.length > 0">
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-2 text-xs text-gray-600">
           Total de registros: <span class="font-semibold text-primary">{{ registros.length }}</span>
         </div>
-        <div class="space-y-4">
+        <div class="space-y-2">
           <div v-for="(registro, index) in registros" :key="index" class="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <div class="p-4">
-              <div class="flex flex-col sm:flex-row">
-                <div class="sm:w-24 sm:h-24 h-32 w-full bg-gray-100 rounded overflow-hidden mb-3 sm:mb-0 sm:mr-4">
-                  <img v-if="registro.foto_url" :src="registro.foto_url" class="w-full h-full object-cover" alt="Foto del registro" />
+            <div class="p-3">
+              <div class="flex gap-3">
+                <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative" :class="{'cursor-pointer': registro.foto_url}" @click="registro.foto_url && verImagen(registro.foto_url)">
+                  <img v-if="registro.foto_url" :src="registro.foto_url" class="w-full h-full object-cover" alt="Foto" />
                   <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div v-if="registro.foto_url" class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
                 </div>
                 
-                <div class="flex-1">
-                  <div class="flex justify-between">
-                    <p class="text-sm text-gray-500">{{ formatFecha(registro.fecha_hora) }}</p>
-                    <button @click="verEnMapa(registro)" class="text-primary hover:text-primary-dark text-sm flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-start">
+                    <p class="text-xs text-gray-500 font-medium">{{ formatFecha(registro.fecha_hora) }}</p>
+                    <button @click="verEnMapa(registro)" class="text-primary hover:text-primary-dark text-xs flex items-center ml-2 whitespace-nowrap">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                       </svg>
-                      Ver en mapa
+                      Ver mapa
                     </button>
                   </div>
                   
-                  <p class="text-gray-800 mt-1">{{ registro.descripcion || "Sin descripción" }}</p>
+                  <p class="text-xs text-gray-800 mt-1 line-clamp-2">{{ registro.descripcion || "Sin descripción" }}</p>
                   
-                  <div class="mt-2 flex space-x-4">
-                    <div class="text-xs font-mono text-gray-600">
-                      Lat: {{ registro.latitud }}
-                    </div>
-                    <div class="text-xs font-mono text-gray-600">
-                      Lon: {{ registro.longitud }}
+                  <div class="mt-1 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <div class="text-xs text-gray-600 truncate">
+                      {{ registro.latitud }}, {{ registro.longitud }}
                     </div>
                   </div>
                 </div>
@@ -124,79 +130,97 @@
         <div class="mb-4 text-sm text-gray-600">
           Total de asistencias: <span class="font-semibold text-primary">{{ asistencias.length }}</span>
         </div>
-        <div class="space-y-4">
+        <div class="space-y-2">
           <div v-for="(asistencia, index) in asistencias" :key="index" class="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <div class="p-4">
+            <div class="p-3">
               <!-- Información de la fecha -->
-              <div class="flex justify-between items-center mb-3">
-                <h3 class="text-lg font-semibold text-gray-800">{{ formatFecha(asistencia.fecha) }}</h3>
-                <div class="flex space-x-2">
-                  <span v-if="asistencia.hora_entrada" class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                    Entrada: {{ formatHora(asistencia.hora_entrada) }}
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="text-base font-medium text-gray-800">{{ formatFecha(asistencia.fecha) }}</h3>
+                <div class="flex flex-wrap gap-1">
+                  <span v-if="asistencia.hora_entrada" class="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                    E: {{ formatHora(asistencia.hora_entrada) }}
                   </span>
-                  <span v-if="asistencia.hora_salida" class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                    Salida: {{ formatHora(asistencia.hora_salida) }}
+                  <span v-if="asistencia.hora_salida" class="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                    S: {{ formatHora(asistencia.hora_salida) }}
                   </span>
                 </div>
               </div>
 
               <!-- Entrada -->
-              <div v-if="asistencia.hora_entrada" class="mb-4 bg-green-50 rounded-lg p-3">
-                <h4 class="text-sm font-medium text-green-800 mb-2 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div v-if="asistencia.hora_entrada" class="mb-2 bg-green-50 rounded-lg p-2">
+                <h4 class="text-xs font-medium text-green-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>
                   Entrada - {{ formatHora(asistencia.hora_entrada) }}
                 </h4>
-                <div class="flex flex-col sm:flex-row">
-                  <div v-if="asistencia.foto_entrada_url" class="sm:w-20 sm:h-20 h-24 w-full bg-gray-100 rounded overflow-hidden mb-2 sm:mb-0 sm:mr-3">
-                    <img :src="`${API_URL}/${asistencia.foto_entrada_url}`" class="w-full h-full object-cover" alt="Foto de entrada" />
+                <div class="flex items-start gap-2">
+                  <div v-if="asistencia.foto_entrada_url" class="w-14 h-14 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_entrada_url}`)">
+                    <img :src="`${API_URL}/${asistencia.foto_entrada_url}`" class="w-full h-full object-cover" alt="Foto" />
+                    <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
                   </div>
-                  <div class="flex-1">
-                    <p class="text-sm text-gray-700 mb-1">{{ asistencia.descripcion_entrada || "Sin descripción" }}</p>
-                    <div class="flex space-x-4 text-xs text-gray-600">
-                      <span>Lat: {{ asistencia.latitud_entrada }}</span>
-                      <span>Lon: {{ asistencia.longitud_entrada }}</span>
-                      <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" class="text-green-600 hover:text-green-800">
-                        Ver ubicación
-                      </button>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-700 mb-1 line-clamp-2">{{ asistencia.descripcion_entrada || "Sin descripción" }}</p>
+                    <div class="flex flex-wrap gap-2 text-xs text-gray-600">
+                      <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" class="text-green-600 hover:text-green-800 underline">
+                          Ver mapa
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- Salida -->
-              <div v-if="asistencia.hora_salida" class="bg-blue-50 rounded-lg p-3">
-                <h4 class="text-sm font-medium text-blue-800 mb-2 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div v-if="asistencia.hora_salida" class="bg-blue-50 rounded-lg p-2">
+                <h4 class="text-xs font-medium text-blue-800 mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                   Salida - {{ formatHora(asistencia.hora_salida) }}
                 </h4>
-                <div class="flex flex-col sm:flex-row">
-                  <div v-if="asistencia.foto_salida_url" class="sm:w-20 sm:h-20 h-24 w-full bg-gray-100 rounded overflow-hidden mb-2 sm:mb-0 sm:mr-3">
-                    <img :src="`${API_URL}/${asistencia.foto_salida_url}`" class="w-full h-full object-cover" alt="Foto de salida" />
+                <div class="flex items-start gap-2">
+                  <div v-if="asistencia.foto_salida_url" class="w-14 h-14 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_salida_url}`)">
+                    <img :src="`${API_URL}/${asistencia.foto_salida_url}`" class="w-full h-full object-cover" alt="Foto" />
+                    <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
                   </div>
-                  <div class="flex-1">
-                    <p class="text-sm text-gray-700 mb-1">{{ asistencia.descripcion_salida || "Sin descripción" }}</p>
-                    <div class="flex space-x-4 text-xs text-gray-600">
-                      <span>Lat: {{ asistencia.latitud_salida }}</span>
-                      <span>Lon: {{ asistencia.longitud_salida }}</span>
-                      <button @click="verAsistenciaEnMapa(asistencia, 'salida')" class="text-blue-600 hover:text-blue-800">
-                        Ver ubicación
-                      </button>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-700 mb-1 line-clamp-2">{{ asistencia.descripcion_salida || "Sin descripción" }}</p>
+                    <div class="flex flex-wrap gap-2 text-xs text-gray-600">
+                      <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <button @click="verAsistenciaEnMapa(asistencia, 'salida')" class="text-blue-600 hover:text-blue-800 underline">
+                          Ver mapa
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- Estado incompleto -->
-              <div v-if="asistencia.hora_entrada && !asistencia.hora_salida" class="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p class="text-sm text-yellow-800 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div v-if="asistencia.hora_entrada && !asistencia.hora_salida" class="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+                <p class="text-xs text-yellow-800 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Asistencia en curso - Sin registro de salida
+                  En curso - Sin registro de salida
                 </p>
               </div>
             </div>
@@ -238,12 +262,12 @@
     </div>
     
     <!-- Diálogo de mapa -->
-    <div v-if="mapaVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] flex flex-col">
-        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 class="text-lg font-medium">Ubicación del registro</h3>
+    <div v-if="mapaVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
+        <div class="p-3 border-b border-gray-200 flex justify-between items-center">
+          <h3 class="text-sm font-medium">Ubicación</h3>
           <button @click="mapaVisible = false" class="text-gray-500 hover:text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -251,8 +275,22 @@
         <div class="flex-1 min-h-0">
           <div id="detailMap" class="h-full w-full"></div>
         </div>
-        <div class="p-4 border-t border-gray-200">
-          <button @click="mapaVisible = false" class="btn btn-secondary w-full">Cerrar</button>
+        <div class="p-2 border-t border-gray-200">
+          <button @click="mapaVisible = false" class="btn btn-secondary w-full text-sm py-1.5">Cerrar</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal para visualizar imagen -->
+    <div v-if="imagenModalVisible" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-3">
+      <div class="w-full max-w-xs sm:max-w-sm md:max-w-md max-h-[85vh] flex flex-col relative">
+        <button @click="imagenModalVisible = false" class="absolute right-1 top-1 bg-black bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-70 transition-opacity z-10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="overflow-hidden rounded-lg bg-black bg-opacity-30">
+          <img :src="imagenSeleccionada" class="w-full h-auto object-contain max-h-[80vh]" alt="Imagen ampliada" />
         </div>
       </div>
     </div>
@@ -279,6 +317,8 @@ const detailMap = ref(null);
 const isOnline = ref(true);
 const userInfo = ref(null);
 const tabActiva = ref('registros');
+const imagenModalVisible = ref(false);
+const imagenSeleccionada = ref('');
 
 // Comprobar autenticación y cargar datos
 onMounted(async () => {
@@ -418,7 +458,20 @@ function formatFecha(fechaStr) {
 function formatHora(fechaStr) {
   try {
     const fecha = new Date(fechaStr);
-    return fecha.toLocaleTimeString();
+    
+    // Formato personalizado para hora de 12 horas con am/pm en español
+    const hora = fecha.getHours();
+    const minutos = fecha.getMinutes();
+    
+    // Convertir a formato 12 horas
+    const hora12 = hora % 12 || 12;
+    const ampm = hora >= 12 ? 'pm' : 'am';
+    
+    // Asegurar que tanto horas como minutos tengan siempre dos dígitos
+    const horaStr = hora12 < 10 ? `0${hora12}` : hora12;
+    const minutosStr = minutos < 10 ? `0${minutos}` : minutos;
+    
+    return `${horaStr}:${minutosStr} ${ampm}`;
   } catch (e) {
     return fechaStr;
   }
@@ -493,12 +546,47 @@ function cambiarTab(tab) {
     cargarAsistencias();
   }
 }
+
+// Función para abrir una imagen en el modal
+function verImagen(url) {
+  if (url) {
+    imagenSeleccionada.value = url;
+    imagenModalVisible.value = true;
+    
+    // Configurar gestos táctiles para cerrar el modal
+    setTimeout(() => {
+      const modalElement = document.querySelector('[v-if="imagenModalVisible"]');
+      if (modalElement) {
+        let startY = 0;
+        let distY = 0;
+        
+        modalElement.addEventListener('touchstart', (e) => {
+          startY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        modalElement.addEventListener('touchmove', (e) => {
+          distY = e.touches[0].clientY - startY;
+          if (distY > 100) {
+            imagenModalVisible.value = false;
+          }
+        }, { passive: true });
+        
+        // Cerrar modal con un toque en el fondo
+        modalElement.addEventListener('click', (e) => {
+          if (e.target === modalElement) {
+            imagenModalVisible.value = false;
+          }
+        });
+      }
+    }, 100);
+  }
+}
 </script>
 
 <style>
 /* Para asegurar que el mapa de detalle se muestre correctamente */
 #detailMap {
-  min-height: 300px;
+  min-height: 250px;
 }
 
 /* Estilos para el marcador personalizado con animación */
@@ -509,8 +597,8 @@ function cambiarTab(tab) {
 
 .custom-marker-wrapper {
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
 }
 
 .custom-marker {
@@ -518,12 +606,12 @@ function cambiarTab(tab) {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   background-color: #3b82f6;
   border: 2px solid white;
   border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   z-index: 2;
 }
 
@@ -532,8 +620,8 @@ function cambiarTab(tab) {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   background-color: #3b82f6;
   border-radius: 50%;
   opacity: 0.6;
@@ -552,6 +640,91 @@ function cambiarTab(tab) {
   100% {
     transform: translate(-50%, -50%) scale(1.5);
     opacity: 0;
+  }
+}
+
+/* Mejoras generales para responsividad */
+.btn {
+  transition: all 0.2s ease;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 320px) {
+  .w-16 {
+    width: 3.5rem;
+  }
+  
+  .h-16 {
+    height: 3.5rem;
+  }
+  
+  .w-14 {
+    width: 3rem;
+  }
+  
+  .h-14 {
+    height: 3rem;
+  }
+  
+  .gap-3 {
+    gap: 0.5rem;
+  }
+  
+  .gap-2 {
+    gap: 0.375rem;
+  }
+}
+
+/* Estilos para el modal de imagen */
+[v-if="imagenModalVisible"] {
+  animation: fadeIn 0.2s ease-out;
+  touch-action: pan-y pinch-zoom;
+}
+
+[v-if="imagenModalVisible"] img {
+  max-height: 80vh;
+  max-width: 95vw;
+  object-fit: contain;
+  animation: scaleIn 0.25s cubic-bezier(0.19, 1, 0.22, 1);
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Estilos para efecto de hover en las imágenes */
+.cursor-pointer {
+  transition: transform 0.2s ease;
+}
+
+.cursor-pointer:hover {
+  transform: scale(1.05);
+}
+
+/* Ajustes específicos para modal en móvil */
+@media (max-width: 480px) {
+  [v-if="imagenModalVisible"] .max-w-xs {
+    max-width: 90vw;
+  }
+  
+  [v-if="imagenModalVisible"] img {
+    max-height: 70vh;
   }
 }
 </style>

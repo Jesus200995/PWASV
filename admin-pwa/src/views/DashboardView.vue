@@ -589,24 +589,31 @@ const logout = () => {
 .dashboard-container {
   display: flex;
   min-height: 100vh;
+  position: relative;
 }
 
 .main-content {
   flex: 1;
-  margin-left: 280px;
+  margin-left: clamp(180px, 18vw, 240px);
   background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
   min-height: 100vh;
   position: relative;
+  width: calc(100vw - clamp(180px, 18vw, 240px));
+  max-width: calc(100vw - clamp(180px, 18vw, 240px));
+  padding: 0;
+  overflow-x: hidden;
 }
 
 .dashboard-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: 32px;
+  padding: clamp(16px, 3vh, 32px) clamp(16px, 3vw, 32px);
   color: white;
   box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .dashboard-header::before {
@@ -626,25 +633,32 @@ const logout = () => {
   align-items: center;
   position: relative;
   z-index: 2;
+  flex-wrap: wrap;
+  gap: clamp(8px, 2vw, 16px);
+  width: 100%;
+  max-width: 100%;
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: clamp(12px, 2vw, 20px);
+  flex: 1;
+  min-width: 0;
 }
 
 .header-icon {
-  width: 48px;
-  height: 48px;
+  width: clamp(40px, 5vw, 48px);
+  height: clamp(40px, 5vw, 48px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  border-radius: clamp(8px, 1.5vw, 12px);
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   animation: float 3s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 .header-icon svg {
@@ -804,27 +818,32 @@ const logout = () => {
 }
 
 .dashboard-content {
-  padding: 32px;
+  padding: clamp(16px, 4vw, 32px) clamp(12px, 3vw, 32px);
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(200px, 25vw, 250px), 1fr));
+  gap: clamp(12px, 3vw, 24px);
+  margin-bottom: clamp(16px, 4vw, 32px);
+  width: 100%;
 }
 
 .stat-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  padding: 28px;
-  border-radius: 20px;
+  padding: clamp(16px, 3.5vw, 28px);
+  border-radius: clamp(12px, 2.5vw, 20px);
   box-shadow: 
     0 8px 32px rgba(76, 175, 80, 0.1), 
     0 2px 16px rgba(0,0,0,0.05),
     inset 0 1px 0 rgba(255,255,255,0.8);
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: clamp(12px, 3vw, 24px);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
   border: 2px solid transparent;
@@ -832,6 +851,9 @@ const logout = () => {
   overflow: hidden;
   animation: fadeInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   backdrop-filter: blur(10px);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: clamp(80px, 12vh, 120px);
 }
 
 .stat-card::before {

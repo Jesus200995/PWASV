@@ -245,24 +245,31 @@ const logout = () => {
 .usuarios-container {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
-  margin-left: 280px;
+  margin-left: clamp(180px, 18vw, 240px);
+  width: calc(100vw - clamp(180px, 18vw, 240px));
   background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
   min-height: 100vh;
   position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: 32px;
+  padding: clamp(16px, 4vh, 32px) clamp(16px, 4vw, 32px);
   color: white;
   box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header::before {
@@ -282,19 +289,23 @@ const logout = () => {
   align-items: center;
   position: relative;
   z-index: 2;
+  flex-wrap: wrap;
+  gap: clamp(12px, 3vw, 20px);
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: clamp(12px, 3vw, 20px);
+  flex: 1;
+  min-width: 200px;
 }
 
 .header-icon {
-  width: 48px;
-  height: 48px;
+  width: clamp(40px, 6vw, 48px);
+  height: clamp(40px, 6vw, 48px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  border-radius: clamp(8px, 2vw, 12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -304,8 +315,8 @@ const logout = () => {
 }
 
 .header-icon svg {
-  width: 24px;
-  height: 24px;
+  width: clamp(20px, 3vw, 24px);
+  height: clamp(20px, 3vw, 24px);
   color: white;
 }
 
@@ -316,46 +327,51 @@ const logout = () => {
 
 .header-text {
   flex: 1;
+  min-width: 200px;
 }
 
 .header-title {
-  font-size: 32px;
+  font-size: clamp(20px, 5vw, 32px);
   font-weight: 700;
-  margin: 0 0 8px 0;
+  margin: 0 0 clamp(4px, 1vh, 8px) 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   letter-spacing: -0.5px;
+  line-height: 1.2;
 }
 
 .header-subtitle {
-  font-size: 16px;
+  font-size: clamp(12px, 2.5vw, 16px);
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
   font-weight: 400;
   letter-spacing: 0.2px;
+  line-height: 1.4;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: clamp(8px, 2vw, 16px);
+  flex-wrap: wrap;
 }
 
 .connection-status {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
+  gap: clamp(6px, 1.5vw, 8px);
+  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px);
+  border-radius: clamp(16px, 4vw, 20px);
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 14px);
   font-weight: 500;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .connection-status.online {
@@ -399,19 +415,20 @@ const logout = () => {
 .refresh-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: clamp(6px, 1.5vw, 8px);
+  padding: clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px);
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  border-radius: clamp(8px, 2vw, 10px);
   color: white;
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 14px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .refresh-btn:hover:not(:disabled) {
@@ -546,11 +563,13 @@ const logout = () => {
 }
 
 .page-content {
-  padding: 32px;
+  padding: clamp(16px, 4vw, 32px);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .search-section {
-  margin-bottom: 32px;
+  margin-bottom: clamp(20px, 5vh, 32px);
   animation: slideInRight 0.6s ease-out;
 }
 
@@ -561,21 +580,23 @@ const logout = () => {
 
 .search-box {
   position: relative;
-  max-width: 500px;
+  max-width: clamp(300px, 60vw, 500px);
+  width: 100%;
 }
 
 .search-input {
   width: 100%;
-  padding: 16px 20px 16px 52px;
+  padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px) clamp(12px, 3vw, 16px) clamp(44px, 10vw, 52px);
   border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: 25px;
-  font-size: 16px;
+  border-radius: clamp(20px, 5vw, 25px);
+  font-size: clamp(14px, 3vw, 16px);
   background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 
     0 4px 16px rgba(76, 175, 80, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   font-weight: 500;
+  box-sizing: border-box;
 }
 
 .search-input:focus {
@@ -596,7 +617,7 @@ const logout = () => {
 
 .search-icon {
   position: absolute;
-  left: 18px;
+  left: clamp(14px, 3vw, 18px);
   top: 50%;
   transform: translateY(-50%);
   color: #4CAF50;
@@ -610,7 +631,7 @@ const logout = () => {
 
 .usuarios-section {
   background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
-  border-radius: 20px;
+  border-radius: clamp(12px, 3vw, 20px);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.08),
     0 2px 16px rgba(0, 0, 0, 0.04),
@@ -619,6 +640,8 @@ const logout = () => {
   border: 1px solid rgba(76, 175, 80, 0.1);
   transition: all 0.3s ease;
   animation: fadeInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  padding: clamp(16px, 4vw, 24px);
+  box-sizing: border-box;
 }
 
 @keyframes fadeInUp {
@@ -642,7 +665,7 @@ const logout = () => {
 
 .loading-container, .error-container, .empty-state {
   text-align: center;
-  padding: 80px 32px;
+  padding: clamp(40px, 10vh, 80px) clamp(16px, 4vw, 32px);
   color: #666;
   animation: fadeIn 0.5s ease-out;
 }
@@ -653,8 +676,8 @@ const logout = () => {
 }
 
 .spinner-large {
-  width: 48px;
-  height: 48px;
+  width: clamp(40px, 8vw, 48px);
+  height: clamp(40px, 8vw, 48px);
   border: 4px solid rgba(76, 175, 80, 0.1);
   border-top: 4px solid #4CAF50;
   border-radius: 50%;
@@ -770,39 +793,96 @@ const logout = () => {
 }
 
 .table-container {
-  overflow-x: auto;
+  overflow: hidden;
   animation: fadeInUp 0.6s ease-out 0.2s both;
+  border-radius: clamp(12px, 3vw, 16px);
+  background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 100%;
 }
 
 .usuarios-table {
   width: 100%;
+  max-width: 100%;
   border-collapse: collapse;
   position: relative;
+  background: transparent;
+  table-layout: fixed;
+  overflow: hidden;
 }
 
 .usuarios-table th {
   background: linear-gradient(135deg, #f8f9fa 0%, #f0f8f0 100%);
-  padding: 20px 16px;
-  text-align: left;
+  padding: clamp(8px, 1.5vw, 12px) clamp(4px, 1vw, 8px);
+  text-align: center;
   font-weight: 700;
   color: #4CAF50;
   text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.8px;
+  font-size: clamp(8px, 1.5vw, 10px);
+  letter-spacing: 0.5px;
   border-bottom: 2px solid rgba(76, 175, 80, 0.2);
   position: sticky;
   top: 0;
   z-index: 10;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .usuarios-table td {
-  padding: 18px 16px;
+  padding: clamp(6px, 1.2vw, 10px) clamp(3px, 0.8vw, 6px);
   border-bottom: 1px solid rgba(224, 224, 224, 0.6);
-  font-size: 14px;
+  font-size: clamp(9px, 1.8vw, 12px);
   transition: all 0.3s ease;
   color: #444;
   font-weight: 500;
+  white-space: nowrap;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.usuarios-table td:nth-child(1) { /* ID */
+  width: 8%;
+  text-align: center;
+}
+
+.usuarios-table td:nth-child(2) { /* Correo */
+  width: 22%;
+  text-align: center;
+}
+
+.usuarios-table td:nth-child(3) { /* Nombre */
+  width: 18%;
+  text-align: center;
+}
+
+.usuarios-table td:nth-child(4) { /* Cargo */
+  width: 15%;
+  text-align: center;
+}
+
+.usuarios-table td:nth-child(5) { /* Supervisor */
+  width: 15%;
+  text-align: center;
+}
+
+.usuarios-table td:nth-child(6) { /* Fecha */
+  width: 12%;
+  text-align: center;
+}
+
+.usuarios-table td:nth-child(7) { /* Estado */
+  width: 10%;
+  text-align: center;
+}
+
+.usuarios-table td:nth-child(8) { /* Acciones */
+  width: 15%;
+  text-align: center;
 }
 
 .usuarios-table tbody tr {
@@ -821,16 +901,20 @@ const logout = () => {
 }
 
 .status-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
+  padding: clamp(3px, 0.6vw, 5px) clamp(6px, 1.2vw, 8px);
+  border-radius: clamp(8px, 2vw, 12px);
+  font-size: clamp(7px, 1.4vw, 9px);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   transition: all 0.3s ease;
   display: inline-block;
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
+  min-width: clamp(35px, 7vw, 50px);
+  text-align: center;
+  max-width: 100%;
 }
 
 .status-badge::before {
@@ -869,23 +953,26 @@ const logout = () => {
 }
 
 .btn-ver {
-  padding: 10px 18px;
+  padding: clamp(4px, 0.8vw, 6px) clamp(6px, 1.2vw, 8px);
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
   border: none;
-  border-radius: 25px;
+  border-radius: clamp(8px, 2vw, 12px);
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: clamp(8px, 1.5vw, 10px);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 
-    0 4px 12px rgba(76, 175, 80, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  white-space: nowrap;
+  letter-spacing: 0.3px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
+  min-width: clamp(50px, 10vw, 70px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
 }
 
 .btn-ver::before {
@@ -905,9 +992,10 @@ const logout = () => {
 
 .btn-ver:hover {
   background: linear-gradient(135deg, #43A047, #388E3C);
-  transform: translateY(-3px) scale(1.05);
+  transform: translateY(-2px) scale(1.05);
   box-shadow: 
-    0 8px 20px rgba(76, 175, 80, 0.4),
+    0 8px 20px rgba(76, 175, 80, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
@@ -935,9 +1023,9 @@ const logout = () => {
 
 .modal-content {
   background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
-  border-radius: 20px;
-  max-width: 600px;
-  max-height: 80vh;
+  border-radius: clamp(12px, 4vw, 20px);
+  max-width: clamp(300px, 80vw, 600px);
+  max-height: clamp(400px, 80vh, 80vh);
   width: 100%;
   overflow: hidden;
   box-shadow: 
@@ -945,6 +1033,7 @@ const logout = () => {
     0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(76, 175, 80, 0.1);
   animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  margin: clamp(10px, 5vw, 20px);
 }
 
 @keyframes modalSlideIn {
@@ -962,7 +1051,7 @@ const logout = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 28px;
+  padding: clamp(16px, 4vw, 24px) clamp(20px, 5vw, 28px);
   border-bottom: 1px solid rgba(76, 175, 80, 0.1);
   background: linear-gradient(135deg, #f8fffe 0%, #f0fff0 100%);
 }
@@ -970,7 +1059,7 @@ const logout = () => {
 .modal-header h3 {
   margin: 0;
   color: #333;
-  font-size: 20px;
+  font-size: clamp(16px, 4vw, 20px);
   font-weight: 700;
   background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
   -webkit-background-clip: text;
@@ -981,12 +1070,12 @@ const logout = () => {
 .btn-close {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border: 2px solid rgba(76, 175, 80, 0.2);
-  font-size: 20px;
+  font-size: clamp(16px, 4vw, 20px);
   cursor: pointer;
   color: #666;
-  padding: 8px;
-  width: 36px;
-  height: 36px;
+  padding: clamp(6px, 1.5vw, 8px);
+  width: clamp(30px, 8vw, 36px);
+  height: clamp(30px, 8vw, 36px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1004,9 +1093,9 @@ const logout = () => {
 }
 
 .modal-body {
-  padding: 24px 28px;
+  padding: clamp(16px, 4vw, 24px) clamp(20px, 5vw, 28px);
   overflow: auto;
-  max-height: calc(80vh - 120px);
+  max-height: calc(80vh - clamp(80px, 20vw, 120px));
 }
 
 .usuario-detalles div {
@@ -1039,19 +1128,65 @@ const logout = () => {
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: clamp(120px, 12vw, 180px);
+    width: calc(100vw - clamp(120px, 12vw, 180px));
+  }
+  
+  .table-container {
+    overflow: hidden;
+    width: 100%;
+  }
+  
+  .usuarios-table {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(8px, 1.6vw, 11px);
+  }
+  
+  .usuarios-table th,
+  .usuarios-table td {
+    padding: clamp(5px, 1vw, 8px) clamp(2px, 0.6vw, 5px);
+    font-size: clamp(8px, 1.6vw, 11px);
+    text-align: center;
+  }
+  
+  .btn-ver {
+    padding: clamp(3px, 0.6vw, 5px) clamp(4px, 0.8vw, 6px);
+    font-size: clamp(7px, 1.2vw, 9px);
+    min-width: clamp(40px, 8vw, 60px);
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .status-badge {
+    padding: clamp(2px, 0.4vw, 4px) clamp(4px, 0.8vw, 6px);
+    font-size: clamp(6px, 1.2vw, 8px);
+    min-width: clamp(30px, 6vw, 45px);
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
+    width: 100%;
   }
   
   .page-header {
-    padding: 20px 24px;
+    padding: clamp(12px, 3vw, 20px);
   }
   
   .header-content {
     flex-direction: column;
-    gap: 16px;
+    gap: clamp(8px, 2vw, 12px);
     align-items: flex-start;
+  }
+  
+  .header-main {
+    width: 100%;
   }
   
   .header-actions {
@@ -1060,30 +1195,255 @@ const logout = () => {
   }
   
   .page-content {
-    padding: 20px 24px;
+    padding: clamp(12px, 3vw, 20px);
   }
   
   .search-box {
     max-width: 100%;
   }
   
+  .table-container {
+    border-radius: clamp(6px, 1.5vw, 10px);
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+  }
+  
   .usuarios-table {
-    font-size: 12px;
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(7px, 1.4vw, 10px);
+    table-layout: fixed;
   }
   
   .usuarios-table th,
   .usuarios-table td {
-    padding: 12px 8px;
+    padding: clamp(4px, 0.8vw, 6px) clamp(2px, 0.5vw, 4px);
+    font-size: clamp(7px, 1.4vw, 10px);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .usuarios-table td:nth-child(1) { /* ID */
+    width: 6%;
+  }
+  
+  .usuarios-table td:nth-child(2) { /* Correo */
+    width: 25%;
+  }
+  
+  .usuarios-table td:nth-child(3) { /* Nombre */
+    width: 20%;
+  }
+  
+  .usuarios-table td:nth-child(4) { /* Cargo */
+    width: 15%;
+  }
+  
+  .usuarios-table td:nth-child(5) { /* Supervisor */
+    width: 12%;
+  }
+  
+  .usuarios-table td:nth-child(6) { /* Fecha */
+    width: 10%;
+  }
+  
+  .usuarios-table td:nth-child(7) { /* Estado */
+    width: 8%;
+  }
+  
+  .usuarios-table td:nth-child(8) { /* Acciones */
+    width: 12%;
   }
   
   .btn-ver {
-    padding: 8px 12px;
-    font-size: 10px;
+    padding: clamp(2px, 0.5vw, 4px) clamp(3px, 0.8vw, 5px);
+    font-size: clamp(6px, 1.2vw, 8px);
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    border-radius: clamp(6px, 1.5vw, 10px);
+  }
+  
+  .status-badge {
+    padding: clamp(2px, 0.4vw, 3px) clamp(3px, 0.8vw, 5px);
+    font-size: clamp(6px, 1.2vw, 8px);
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    border-radius: clamp(6px, 1.5vw, 10px);
   }
   
   .modal-content {
-    margin: 10px;
-    max-width: calc(100% - 20px);
+    margin: clamp(5px, 2vw, 10px);
+    max-width: calc(100vw - clamp(10px, 4vw, 20px));
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .header-main {
+    flex-direction: column;
+    gap: clamp(6px, 1.5vw, 10px);
+  }
+  
+  .table-container {
+    border-radius: clamp(4px, 1vw, 8px);
+    overflow: hidden;
+    width: 100%;
+  }
+  
+  .usuarios-table {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(6px, 1.2vw, 9px);
+    table-layout: fixed;
+  }
+  
+  .usuarios-table th,
+  .usuarios-table td {
+    padding: clamp(3px, 0.6vw, 5px) clamp(1px, 0.3vw, 3px);
+    font-size: clamp(6px, 1.2vw, 9px);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .usuarios-table td:nth-child(1) { /* ID */
+    width: 5%;
+  }
+  
+  .usuarios-table td:nth-child(2) { /* Correo */
+    width: 28%;
+  }
+  
+  .usuarios-table td:nth-child(3) { /* Nombre */
+    width: 22%;
+  }
+  
+  .usuarios-table td:nth-child(4) { /* Cargo */
+    width: 13%;
+  }
+  
+  .usuarios-table td:nth-child(5) { /* Supervisor */
+    width: 10%;
+  }
+  
+  .usuarios-table td:nth-child(6) { /* Fecha */
+    width: 8%;
+  }
+  
+  .usuarios-table td:nth-child(7) { /* Estado */
+    width: 6%;
+  }
+  
+  .usuarios-table td:nth-child(8) { /* Acciones */
+    width: 8%;
+  }
+  
+  .btn-ver {
+    padding: clamp(1px, 0.3vw, 3px) clamp(2px, 0.5vw, 4px);
+    font-size: clamp(5px, 1vw, 7px);
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    border-radius: clamp(4px, 1vw, 8px);
+  }
+  
+  .status-badge {
+    padding: clamp(1px, 0.3vw, 2px) clamp(2px, 0.5vw, 4px);
+    font-size: clamp(5px, 1vw, 7px);
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    border-radius: clamp(4px, 1vw, 8px);
+  }
+  
+  .modal-content {
+    max-width: calc(100vw - 10px);
+    margin: 5px;
+  }
+}
+
+/* Media query específico para dispositivos ultra pequeños */
+@media (max-width: 360px) {
+  .table-container {
+    overflow: hidden;
+    width: 100%;
+  }
+  
+  .usuarios-table {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(5px, 1vw, 7px);
+    table-layout: fixed;
+  }
+  
+  .usuarios-table th,
+  .usuarios-table td {
+    padding: clamp(2px, 0.4vw, 3px) clamp(1px, 0.2vw, 2px);
+    font-size: clamp(5px, 1vw, 7px);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .usuarios-table td:nth-child(1) { /* ID */
+    width: 4%;
+  }
+  
+  .usuarios-table td:nth-child(2) { /* Correo */
+    width: 30%;
+  }
+  
+  .usuarios-table td:nth-child(3) { /* Nombre */
+    width: 25%;
+  }
+  
+  .usuarios-table td:nth-child(4) { /* Cargo */
+    width: 12%;
+  }
+  
+  .usuarios-table td:nth-child(5) { /* Supervisor */
+    width: 9%;
+  }
+  
+  .usuarios-table td:nth-child(6) { /* Fecha */
+    width: 7%;
+  }
+  
+  .usuarios-table td:nth-child(7) { /* Estado */
+    width: 5%;
+  }
+  
+  .usuarios-table td:nth-child(8) { /* Acciones */
+    width: 8%;
+  }
+  
+  .btn-ver {
+    padding: 1px 2px;
+    font-size: clamp(4px, 0.8vw, 6px);
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 3px;
+  }
+  
+  .status-badge {
+    padding: 1px;
+    font-size: clamp(4px, 0.8vw, 6px);
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 3px;
   }
 }
 </style>

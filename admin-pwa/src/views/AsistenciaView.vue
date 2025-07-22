@@ -1106,11 +1106,11 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-/* CONTENIDO ULTRA RESPONSIVE */
+/* CONTENIDO ULTRA RESPONSIVE - APROVECHA TODO EL ANCHO */
 .page-content {
-  padding: clamp(1rem, 3vw, 2rem);
-  max-width: clamp(800px, 95vw, 1400px);
-  margin: 0 auto;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  max-width: 100%;
+  margin: 0;
   width: 100%;
   box-sizing: border-box;
 }

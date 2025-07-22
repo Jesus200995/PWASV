@@ -342,32 +342,32 @@ const statCards = computed(() => [
   {
     label: 'Total Registros',
     value: stats.totalRegistros,
-    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M7 17v-6m5 6V7m5 10v-3" stroke="#4CAF50" stroke-width="2" stroke-linecap="round"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow1"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad1)" opacity="0.2" class="pulse-bg"/><path d="M12 7v10M7 12h10" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" filter="url(#glow1)" class="sparkle"/></svg>`
   },
   {
     label: 'Usuarios Activos',
     value: stats.totalUsuarios,
-    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><circle cx="12" cy="10" r="3" stroke="#4CAF50" stroke-width="2"/><path d="M6 18c0-2.21 3.58-3.5 6-3.5s6 1.29 6 3.5" stroke="#4CAF50" stroke-width="2"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow2"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad2)" opacity="0.2" class="pulse-bg"/><path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z" fill="#4CAF50" filter="url(#glow2)" class="sparkle"/></svg>`
   },
   {
     label: 'Registros Hoy',
     value: stats.registrosHoy,
-    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M8 7h8M8 11h8m-8 4h5" stroke="#4CAF50" stroke-width="2" stroke-linecap="round"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow3"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad3)" opacity="0.2" class="pulse-bg"/><path d="M8 6h8v2H8zM6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" fill="#4CAF50" filter="url(#glow3)" class="sparkle"/><circle cx="9" cy="13" r="0.5" fill="#66BB6A"/><circle cx="12" cy="13" r="0.5" fill="#66BB6A"/><circle cx="15" cy="13" r="0.5" fill="#66BB6A"/></svg>`
   },
   {
     label: 'Total Asistencias',
     value: stats.totalAsistencias,
-    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M20 6L9 17l-5-5" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow4"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad4)" opacity="0.2" class="pulse-bg"/><path d="m9 12 2 2 4-4" stroke="#4CAF50" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow4)" class="sparkle"/></svg>`
   },
   {
     label: 'Asistencias Hoy',
     value: stats.asistenciasHoy,
-    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M12 6v6l4 2" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="#4CAF50" stroke-width="2"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow5"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad5)" opacity="0.2" class="pulse-bg"/><circle cx="12" cy="12" r="8" stroke="#4CAF50" stroke-width="2" fill="none" filter="url(#glow5)" class="sparkle"/><path d="m12 6 v6 l4 2" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" filter="url(#glow5)" class="sparkle"/></svg>`
   },
   {
     label: 'Usuarios Presentes',
     value: stats.usuariosPresentes,
-    icon: `<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4" fill="#e8f5e8"/><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="#4CAF50" stroke-width="2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow6"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad6)" opacity="0.2" class="pulse-bg"/><circle cx="8" cy="8" r="2" fill="#4CAF50" filter="url(#glow6)" class="sparkle"/><circle cx="16" cy="8" r="2" fill="#4CAF50" filter="url(#glow6)" class="sparkle"/><path d="M4 18v-1a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v1M16 13a4 4 0 0 1 4 4v1" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" filter="url(#glow6)" class="sparkle"/></svg>`
   }
 ])
 
@@ -827,23 +827,23 @@ const logout = () => {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(clamp(200px, 25vw, 250px), 1fr));
-  gap: clamp(12px, 3vw, 24px);
-  margin-bottom: clamp(16px, 4vw, 32px);
+  grid-template-columns: repeat(auto-fit, minmax(clamp(140px, 20vw, 180px), 1fr));
+  gap: clamp(8px, 2vw, 14px);
+  margin-bottom: clamp(10px, 2.5vw, 20px);
   width: 100%;
 }
 
 .stat-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  padding: clamp(16px, 3.5vw, 28px);
-  border-radius: clamp(12px, 2.5vw, 20px);
+  padding: clamp(10px, 2vw, 16px);
+  border-radius: clamp(8px, 1.5vw, 12px);
   box-shadow: 
-    0 8px 32px rgba(76, 175, 80, 0.1), 
-    0 2px 16px rgba(0,0,0,0.05),
+    0 4px 20px rgba(76, 175, 80, 0.06), 
+    0 2px 10px rgba(0,0,0,0.03),
     inset 0 1px 0 rgba(255,255,255,0.8);
   display: flex;
   align-items: center;
-  gap: clamp(12px, 3vw, 24px);
+  gap: clamp(8px, 2vw, 14px);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
   border: 2px solid transparent;
@@ -853,7 +853,7 @@ const logout = () => {
   backdrop-filter: blur(10px);
   width: 100%;
   box-sizing: border-box;
-  min-height: clamp(80px, 12vh, 120px);
+  min-height: clamp(55px, 8vh, 75px);
 }
 
 .stat-card::before {
@@ -872,10 +872,10 @@ const logout = () => {
 }
 
 .stat-card:hover {
-  transform: translateY(-12px) scale(1.05);
+  transform: translateY(-8px) scale(1.03);
   box-shadow: 
-    0 20px 48px rgba(76, 175, 80, 0.2), 
-    0 8px 24px rgba(0,0,0,0.12),
+    0 16px 36px rgba(76, 175, 80, 0.15), 
+    0 6px 18px rgba(0,0,0,0.08),
     inset 0 1px 0 rgba(255,255,255,0.9);
   border-color: rgba(76, 175, 80, 0.3);
   background: linear-gradient(135deg, #ffffff 0%, #f0fff0 100%);
@@ -912,15 +912,16 @@ const logout = () => {
 }
 
 .svg-icon {
-  width: 56px;
-  height: 56px;
+  width: clamp(32px, 6vw, 40px);
+  height: clamp(32px, 6vw, 40px);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+  border-radius: clamp(8px, 1.5vw, 12px);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.04) 100%);
   position: relative;
+  flex-shrink: 0;
 }
 
 .svg-icon::before {
@@ -937,21 +938,29 @@ const logout = () => {
 }
 
 .stat-card:hover .svg-icon {
-  transform: scale(1.2) rotate(-8deg);
+  transform: scale(1.15) rotate(-5deg);
   background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.08) 100%);
 }
 
 .stat-card:hover .svg-icon::before {
-  width: 80px;
-  height: 80px;
+  width: clamp(50px, 10vw, 60px);
+  height: clamp(50px, 10vw, 60px);
+}
+
+.stat-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .stat-info h3 {
-  font-size: 36px;
+  font-size: clamp(20px, 4vw, 28px);
   color: #4CAF50;
-  margin-bottom: 6px;
+  margin-bottom: clamp(2px, 0.8vw, 4px);
   font-weight: 800;
-  letter-spacing: 1.5px;
+  letter-spacing: clamp(0.6px, 0.12vw, 1px);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
   -webkit-background-clip: text;
@@ -961,7 +970,7 @@ const logout = () => {
 }
 
 .stat-card:hover .stat-info h3 {
-  transform: scale(1.1);
+  transform: scale(1.08);
   background: linear-gradient(135deg, #388e3c 0%, #4CAF50 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -971,17 +980,101 @@ const logout = () => {
 
 .stat-info p {
   color: #666;
-  font-size: 16px;
+  font-size: clamp(9px, 1.8vw, 12px);
   font-weight: 600;
   margin: 0;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: clamp(0.2px, 0.06vw, 0.4px);
+  line-height: 1.3;
 }
 
 .stat-card:hover .stat-info p {
   color: #4CAF50;
-  transform: translateX(4px);
+  transform: translateX(2px);
+}
+
+/* Animaciones para iconos modernos con brillo */
+:deep(.sparkle) {
+  animation: sparkle 3s infinite;
+  transform-origin: center;
+}
+
+:deep(.pulse-bg) {
+  animation: pulseGlow 4s infinite ease-in-out;
+}
+
+@keyframes sparkle {
+  0%, 100% { 
+    opacity: 1; 
+    filter: drop-shadow(0 0 2px rgba(76, 175, 80, 0.3));
+  }
+  20% { 
+    opacity: 0.8; 
+    filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.5)) brightness(1.2);
+  }
+  50% { 
+    opacity: 1.2; 
+    filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.8)) brightness(1.5) saturate(1.3);
+    transform: scale(1.1);
+  }
+  80% { 
+    opacity: 0.9; 
+    filter: drop-shadow(0 0 6px rgba(76, 175, 80, 0.6)) brightness(1.3);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    opacity: 0.2; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.4; 
+    transform: scale(1.05);
+  }
+}
+
+.stat-card:hover :deep(.sparkle) {
+  animation: sparkleHover 1.5s infinite;
+}
+
+.stat-card:hover :deep(.pulse-bg) {
+  animation: pulseGlowHover 2s infinite ease-in-out;
+}
+
+@keyframes sparkleHover {
+  0%, 100% { 
+    opacity: 1; 
+    filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.6)) brightness(1.3);
+    transform: scale(1);
+  }
+  25% { 
+    opacity: 1.3; 
+    filter: drop-shadow(0 0 12px rgba(76, 175, 80, 1)) brightness(1.8) saturate(1.5);
+    transform: scale(1.15) rotate(5deg);
+  }
+  50% { 
+    opacity: 1.5; 
+    filter: drop-shadow(0 0 16px rgba(102, 187, 106, 1)) brightness(2) saturate(1.7);
+    transform: scale(1.2);
+  }
+  75% { 
+    opacity: 1.2; 
+    filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.9)) brightness(1.6) saturate(1.4);
+    transform: scale(1.1) rotate(-3deg);
+  }
+}
+
+@keyframes pulseGlowHover {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1.05);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.15);
+  }
 }
 
 .section {
@@ -1697,11 +1790,32 @@ const logout = () => {
   }
   
   .dashboard-content {
-    padding: 16px;
+    padding: 14px;
   }
   
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  
+  .stat-card {
+    padding: 8px 10px;
+    min-height: 50px;
+    gap: 8px;
+  }
+  
+  .svg-icon {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .stat-info h3 {
+    font-size: 16px;
+    margin-bottom: 1px;
+  }
+  
+  .stat-info p {
+    font-size: 8px;
   }
   
   .section-header {
@@ -1751,6 +1865,56 @@ const logout = () => {
   
   .modal-footer {
     display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  
+  .stat-card {
+    padding: 8px 10px;
+    min-height: 50px;
+    gap: 8px;
+  }
+  
+  .svg-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+  
+  .stat-info h3 {
+    font-size: 16px;
+    letter-spacing: 0.5px;
+  }
+  
+  .stat-info p {
+    font-size: 9px;
+    letter-spacing: 0.2px;
+  }
+}
+
+@media (max-width: 320px) {
+  .stat-card {
+    padding: 6px 8px;
+    min-height: 45px;
+    gap: 6px;
+  }
+  
+  .svg-icon {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .stat-info h3 {
+    font-size: 14px;
+  }
+  
+  .stat-info p {
+    font-size: 8px;
   }
 }
 

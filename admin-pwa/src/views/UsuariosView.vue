@@ -291,6 +291,9 @@ const logout = () => {
   z-index: 2;
   flex-wrap: wrap;
   gap: clamp(12px, 3vw, 20px);
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
 }
 
 .header-main {
@@ -563,9 +566,11 @@ const logout = () => {
 }
 
 .page-content {
-  padding: clamp(16px, 4vw, 32px);
+  padding: clamp(16px, 2vw, 24px);
   box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
+  margin: 0;
 }
 
 .search-section {

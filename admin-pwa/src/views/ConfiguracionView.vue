@@ -392,25 +392,31 @@ const logout = () => {
 </script>
 
 <style scoped>
+/* CONFIGURACION VIEW - ULTRA RESPONSIVE CON APROVECHAMIENTO TOTAL DEL ANCHO */
 .configuracion-container {
   display: flex;
   min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .main-content {
   flex: 1;
-  margin-left: 280px;
-  background: #f8f9fa;
+  margin-left: clamp(180px, 18vw, 240px);
+  width: calc(100vw - clamp(180px, 18vw, 240px));
+  background: transparent;
+  overflow-x: hidden;
 }
 
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: 32px;
+  padding: clamp(1.5rem, 4vw, 2rem);
   color: white;
   box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header::before {
@@ -430,6 +436,11 @@ const logout = () => {
   align-items: center;
   position: relative;
   z-index: 2;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 3vw, 1.5rem);
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
 }
 
 .header-main {
@@ -539,7 +550,11 @@ const logout = () => {
 }
 
 .page-content {
-  padding: 24px 32px;
+  padding: clamp(1rem, 3vw, 2rem);
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .config-section {
@@ -779,20 +794,24 @@ const logout = () => {
   overflow-x: auto;
 }
 
-/* Responsive */
+/* RESPONSIVE ULTRA COMPLETO - USA TODO EL ANCHO */
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
+    width: 100vw;
+    overflow-x: hidden;
   }
   
   .page-header {
-    padding: 24px 20px;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    width: 100%;
   }
   
   .header-content {
     flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
+    gap: clamp(0.75rem, 2vw, 1rem);
+    align-items: center;
+    text-align: center;
   }
   
   .header-main {
@@ -818,15 +837,15 @@ const logout = () => {
   }
   
   .connection-status {
-    align-self: flex-end;
+    align-self: center;
   }
   
   .page-content {
-    padding: 16px 20px;
+    padding: clamp(1rem, 4vw, 1.5rem);
   }
   
   .config-card {
-    padding: 16px;
+    padding: clamp(1rem, 2vw, 1.5rem);
   }
   
   .actions-grid {

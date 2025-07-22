@@ -982,10 +982,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: clamp(800px, 95vw, 1400px);
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   gap: clamp(0.5rem, 2vw, 1rem);
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .header-main {
@@ -1560,7 +1561,7 @@ export default {
   text-overflow: ellipsis;
 }
 
-/* TABLA ULTRA RESPONSIVE - PATRÓN DE ÉXITO USUARIOS - SIN SCROLL HORIZONTAL */
+/* TABLA ULTRA RESPONSIVE - APROVECHA TODO EL ANCHO DISPONIBLE */
 .asistencias-section {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
@@ -1569,26 +1570,30 @@ export default {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   width: 100%;
+  margin: 0;
 }
 
 .table-container {
   overflow-x: hidden !important; /* CRITICAL: Sin scroll horizontal */
   overflow-y: auto;
   width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .asistencias-table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed; /* CRITICAL: Layout fijo para control total */
-  font-size: clamp(0.65rem, 1.5vw, 0.875rem);
+  font-size: clamp(0.65rem, 1.3vw, 0.875rem);
+  margin: 0;
 }
 
-/* DISTRIBUCIÓN DE COLUMNAS ULTRA RESPONSIVE */
+/* DISTRIBUCIÓN DE COLUMNAS OPTIMIZADA PARA MÁXIMO ANCHO */
 .asistencias-table th:nth-child(1), 
-.asistencias-table td:nth-child(1) { width: 15%; } /* Usuario */
+.asistencias-table td:nth-child(1) { width: 16%; } /* Usuario - más espacio */
 .asistencias-table th:nth-child(2), 
-.asistencias-table td:nth-child(2) { width: 12%; } /* Correo */
+.asistencias-table td:nth-child(2) { width: 14%; } /* Correo - más espacio */
 .asistencias-table th:nth-child(3), 
 .asistencias-table td:nth-child(3) { width: 10%; } /* Fecha */
 .asistencias-table th:nth-child(4), 
@@ -1596,13 +1601,13 @@ export default {
 .asistencias-table th:nth-child(5), 
 .asistencias-table td:nth-child(5) { width: 8%; }  /* Salida */
 .asistencias-table th:nth-child(6), 
-.asistencias-table td:nth-child(6) { width: 12%; } /* Ubicación Entrada */
+.asistencias-table td:nth-child(6) { width: 13%; } /* Ubicación Entrada - más espacio */
 .asistencias-table th:nth-child(7), 
-.asistencias-table td:nth-child(7) { width: 12%; } /* Ubicación Salida */
+.asistencias-table td:nth-child(7) { width: 13%; } /* Ubicación Salida - más espacio */
 .asistencias-table th:nth-child(8), 
-.asistencias-table td:nth-child(8) { width: 10%; } /* Fotos */
+.asistencias-table td:nth-child(8) { width: 9%; }  /* Fotos - más espacio */
 .asistencias-table th:nth-child(9), 
-.asistencias-table td:nth-child(9) { width: 13%; } /* Observaciones */
+.asistencias-table td:nth-child(9) { width: 9%; }  /* Observaciones - más espacio */
 
 .asistencias-table th {
   background: linear-gradient(135deg, #f8fafc, #e2e8f0);
@@ -2126,25 +2131,25 @@ export default {
     padding: clamp(0.4rem, 1.2vw, 0.6rem);
   }
 
-  /* TABLA MÓVIL - DISTRIBUCIÓN OPTIMIZADA */
+  /* TABLA MÓVIL - DISTRIBUCIÓN OPTIMIZADA PARA TODO EL ANCHO */
   .asistencias-table th:nth-child(1), 
-  .asistencias-table td:nth-child(1) { width: 18%; } /* Usuario - más espacio */
+  .asistencias-table td:nth-child(1) { width: 20%; } /* Usuario - máximo espacio */
   .asistencias-table th:nth-child(2), 
-  .asistencias-table td:nth-child(2) { width: 15%; } /* Correo */
+  .asistencias-table td:nth-child(2) { width: 16%; } /* Correo - más espacio */
   .asistencias-table th:nth-child(3), 
   .asistencias-table td:nth-child(3) { width: 12%; } /* Fecha */
   .asistencias-table th:nth-child(4), 
-  .asistencias-table td:nth-child(4) { width: 10%; } /* Entrada */
+  .asistencias-table td:nth-child(4) { width: 9%; }  /* Entrada */
   .asistencias-table th:nth-child(5), 
-  .asistencias-table td:nth-child(5) { width: 10%; } /* Salida */
+  .asistencias-table td:nth-child(5) { width: 9%; }  /* Salida */
   .asistencias-table th:nth-child(6), 
-  .asistencias-table td:nth-child(6) { width: 10%; } /* Ubicación Entrada */
+  .asistencias-table td:nth-child(6) { width: 11%; } /* Ubicación Entrada */
   .asistencias-table th:nth-child(7), 
-  .asistencias-table td:nth-child(7) { width: 10%; } /* Ubicación Salida */
+  .asistencias-table td:nth-child(7) { width: 11%; } /* Ubicación Salida */
   .asistencias-table th:nth-child(8), 
-  .asistencias-table td:nth-child(8) { width: 8%; }  /* Fotos */
+  .asistencias-table td:nth-child(8) { width: 6%; }  /* Fotos - compacto */
   .asistencias-table th:nth-child(9), 
-  .asistencias-table td:nth-child(9) { width: 7%; }  /* Observaciones */
+  .asistencias-table td:nth-child(9) { width: 6%; }  /* Observaciones - compacto */
 
   .user-info {
     flex-direction: column;
@@ -2219,24 +2224,24 @@ export default {
     font-size: clamp(0.5rem, 1.5vw, 0.6rem);
   }
   
-  /* TABLA EXTRA COMPACTA */
+  /* TABLA EXTRA COMPACTA - USA TODO EL ANCHO DISPONIBLE */
   .asistencias-table th:nth-child(1), 
-  .asistencias-table td:nth-child(1) { width: 20%; } /* Usuario */
+  .asistencias-table td:nth-child(1) { width: 22%; } /* Usuario - máximo espacio en pantalla pequeña */
   .asistencias-table th:nth-child(2), 
-  .asistencias-table td:nth-child(2) { width: 15%; } /* Correo */
+  .asistencias-table td:nth-child(2) { width: 18%; } /* Correo - más espacio */
   .asistencias-table th:nth-child(3), 
   .asistencias-table td:nth-child(3) { width: 12%; } /* Fecha */
   .asistencias-table th:nth-child(4), 
-  .asistencias-table td:nth-child(4) { width: 10%; } /* Entrada */
+  .asistencias-table td:nth-child(4) { width: 9%; }  /* Entrada */
   .asistencias-table th:nth-child(5), 
-  .asistencias-table td:nth-child(5) { width: 10%; } /* Salida */
+  .asistencias-table td:nth-child(5) { width: 9%; }  /* Salida */
   .asistencias-table th:nth-child(6), 
-  .asistencias-table td:nth-child(6) { width: 8%; }  /* Ubicación Entrada */
+  .asistencias-table td:nth-child(6) { width: 10%; } /* Ubicación Entrada */
   .asistencias-table th:nth-child(7), 
-  .asistencias-table td:nth-child(7) { width: 8%; }  /* Ubicación Salida */
+  .asistencias-table td:nth-child(7) { width: 10%; } /* Ubicación Salida */
   .asistencias-table th:nth-child(8), 
-  .asistencias-table td:nth-child(8) { width: 8%; }  /* Fotos */
+  .asistencias-table td:nth-child(8) { width: 5%; }  /* Fotos - muy compacto */
   .asistencias-table th:nth-child(9), 
-  .asistencias-table td:nth-child(9) { width: 9%; }  /* Observaciones */
+  .asistencias-table td:nth-child(9) { width: 5%; }  /* Observaciones - muy compacto */
 }
 </style>

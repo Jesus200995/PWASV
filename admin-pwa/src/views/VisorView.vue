@@ -1224,11 +1224,12 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .main-content {
   flex: 1;
-  margin-left: 280px;
+  margin-left: clamp(180px, 18vw, 240px);
   background: transparent;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: calc(100vw - clamp(180px, 18vw, 240px));
 }
 
 /* Header con diseño moderno y verde */

@@ -122,14 +122,146 @@
       </div>
     </main>
 
-    <!-- Modal para detalles -->
-    <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>{{ modalTitle }}</h3>
-          <button @click="cerrarModal" class="btn-close">×</button>
+    <!-- Modal para detalles - Diseño Moderno Responsivo -->
+    <div v-if="showModal" class="modal-overlay-modern" @click="cerrarModal">
+      <div class="modal-content-modern" @click.stop>
+        <div class="modal-header-modern">
+          <div class="modal-title-section">
+            <div class="modal-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">{{ modalTitle }}</h3>
+          </div>
+          <button @click="cerrarModal" class="btn-close-modern">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
-        <div class="modal-body" v-html="modalContent"></div>
+        
+        <div class="modal-body-modern">
+          <div v-if="usuarioSeleccionado" class="user-details-grid">
+            <!-- ID Usuario -->
+            <div class="detail-card">
+              <div class="detail-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">ID Usuario</span>
+                <span class="detail-value">#{{ usuarioSeleccionado.id }}</span>
+              </div>
+            </div>
+
+            <!-- Correo Electrónico -->
+            <div class="detail-card">
+              <div class="detail-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Correo</span>
+                <span class="detail-value">{{ usuarioSeleccionado.correo }}</span>
+              </div>
+            </div>
+
+            <!-- Nombre Completo -->
+            <div class="detail-card">
+              <div class="detail-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Nombre</span>
+                <span class="detail-value">{{ usuarioSeleccionado.nombre_completo || 'No especificado' }}</span>
+              </div>
+            </div>
+
+            <!-- Cargo -->
+            <div class="detail-card">
+              <div class="detail-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Cargo</span>
+                <span class="detail-value">{{ usuarioSeleccionado.cargo || 'No especificado' }}</span>
+              </div>
+            </div>
+
+            <!-- Supervisor -->
+            <div class="detail-card">
+              <div class="detail-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Supervisor</span>
+                <span class="detail-value">{{ usuarioSeleccionado.supervisor || 'No asignado' }}</span>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="detail-card">
+              <div class="detail-icon status-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22,4 12,14.01 9,11.01"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Estado</span>
+                <span class="detail-value status-active">● Activo</span>
+              </div>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="detail-card password-card">
+              <div class="detail-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <circle cx="12" cy="16" r="1"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </div>
+              <div class="detail-content password-content">
+                <span class="detail-label">Contraseña</span>
+                <div class="password-display">
+                  <span class="password-value">
+                    {{ showPassword ? (usuarioSeleccionado.password || usuarioSeleccionado.contraseña || 'Sin contraseña') : '••••••••••••' }}
+                  </span>
+                  <button @click="togglePassword" class="password-toggle-btn" type="button">
+                    <svg v-if="showPassword" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                    <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -157,6 +289,8 @@ const searchTerm = ref('')
 const showModal = ref(false)
 const modalTitle = ref('')
 const modalContent = ref('')
+const usuarioSeleccionado = ref(null)
+const showPassword = ref(false)
 
 onMounted(() => {
   cargarUsuarios()
@@ -216,21 +350,24 @@ const formatFecha = (fechaStr) => {
 
 const verDetalles = (usuario) => {
   modalTitle.value = 'Detalles del Usuario'
-  modalContent.value = `
-    <div class="usuario-detalles">
-      <div><strong>ID:</strong> #${usuario.id}</div>
-      <div><strong>Correo:</strong> ${usuario.correo}</div>
-      <div><strong>Nombre Completo:</strong> ${usuario.nombre_completo}</div>
-      <div><strong>Cargo:</strong> ${usuario.cargo}</div>
-      <div><strong>Supervisor:</strong> ${usuario.supervisor}</div>
-      <div><strong>Estado:</strong> Activo</div>
-    </div>
-  `
+  usuarioSeleccionado.value = usuario
+  showPassword.value = false // Resetear al cerrar/abrir modal
+  
+  // Debug para ver qué datos tiene el usuario
+  console.log('🔍 Usuario seleccionado para detalles:', usuario)
+  console.log('🔑 Contraseña disponible:', usuario.password || usuario.contraseña || 'No encontrada')
+  
   showModal.value = true
+}
+
+const togglePassword = () => {
+  showPassword.value = !showPassword.value
 }
 
 const cerrarModal = () => {
   showModal.value = false
+  usuarioSeleccionado.value = null
+  showPassword.value = false
 }
 
 const logout = () => {
@@ -1009,42 +1146,41 @@ const logout = () => {
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
-/* Modal styles */
-.modal-overlay {
+/* Modal Moderno - Diseño Responsivo */
+.modal-overlay-modern {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  backdrop-filter: blur(5px);
+  z-index: 2000;
+  padding: clamp(12px, 3vw, 20px);
+  backdrop-filter: blur(8px);
   animation: fadeIn 0.3s ease-out;
 }
 
-.modal-content {
-  background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
-  border-radius: clamp(12px, 4vw, 20px);
-  max-width: clamp(300px, 80vw, 600px);
-  max-height: clamp(400px, 80vh, 80vh);
+.modal-content-modern {
+  background: linear-gradient(135deg, #ffffff 0%, #fdfdfd 100%);
+  border-radius: clamp(16px, 2.5vw, 24px);
+  max-width: clamp(320px, 90vw, 480px);
+  max-height: clamp(500px, 85vh, 700px);
   width: 100%;
   overflow: hidden;
   box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.2),
-    0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(76, 175, 80, 0.1);
-  animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  margin: clamp(10px, 5vw, 20px);
+    0 25px 80px rgba(0, 0, 0, 0.15),
+    0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 2px solid rgba(76, 175, 80, 0.08);
+  animation: modalSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-@keyframes modalSlideIn {
+@keyframes modalSlideUp {
   0% { 
     opacity: 0; 
-    transform: scale(0.8) translateY(20px); 
+    transform: scale(0.85) translateY(30px); 
   }
   100% { 
     opacity: 1; 
@@ -1052,13 +1188,225 @@ const logout = () => {
   }
 }
 
-.modal-header {
+.modal-header-modern {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: clamp(16px, 4vw, 24px) clamp(20px, 5vw, 28px);
-  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
-  background: linear-gradient(135deg, #f8fffe 0%, #f0fff0 100%);
+  padding: clamp(12px, 3vw, 18px) clamp(16px, 4vw, 24px);
+  border-bottom: 2px solid rgba(76, 175, 80, 0.1);
+  background: linear-gradient(135deg, 
+    rgba(76, 175, 80, 0.05) 0%, 
+    rgba(76, 175, 80, 0.02) 100%);
+}
+
+.modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 2vw, 12px);
+}
+
+.modal-icon {
+  width: clamp(28px, 6vw, 36px);
+  height: clamp(28px, 6vw, 36px);
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.modal-title {
+  font-size: clamp(14px, 3.5vw, 18px);
+  font-weight: 700;
+  color: #2E7D32;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.btn-close-modern {
+  width: clamp(28px, 6vw, 32px);
+  height: clamp(28px, 6vw, 32px);
+  background: rgba(244, 67, 54, 0.1);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #F44336;
+}
+
+.btn-close-modern:hover {
+  background: rgba(244, 67, 54, 0.2);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.modal-body-modern {
+  padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px) clamp(16px, 4vw, 24px);
+  max-height: calc(85vh - clamp(60px, 12vw, 80px));
+  overflow-y: auto;
+}
+
+.modal-body-modern::-webkit-scrollbar {
+  width: 4px;
+}
+
+.modal-body-modern::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.modal-body-modern::-webkit-scrollbar-thumb {
+  background: #4CAF50;
+  border-radius: 2px;
+}
+
+.user-details-grid {
+  display: grid;
+  gap: clamp(6px, 1.5vw, 10px);
+}
+
+.detail-card {
+  background: linear-gradient(135deg, 
+    rgba(248, 255, 254, 0.6) 0%, 
+    rgba(240, 255, 240, 0.4) 100%);
+  border: 1px solid rgba(76, 175, 80, 0.15);
+  border-radius: clamp(8px, 2vw, 12px);
+  padding: clamp(8px, 2vw, 12px) clamp(10px, 2.5vw, 14px);
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(6px, 1.5vw, 10px);
+  transition: all 0.3s ease;
+}
+
+.detail-card:hover {
+  background: linear-gradient(135deg, 
+    rgba(240, 255, 240, 0.8) 0%, 
+    rgba(232, 245, 232, 0.6) 100%);
+  border-color: rgba(76, 175, 80, 0.25);
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+}
+
+.detail-icon {
+  width: clamp(24px, 5vw, 28px);
+  height: clamp(24px, 5vw, 28px);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(76, 175, 80, 0.1));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4CAF50;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.status-icon {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.15));
+}
+
+.detail-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-label {
+  display: block;
+  font-size: clamp(9px, 2vw, 11px);
+  font-weight: 600;
+  color: #4CAF50;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: clamp(2px, 0.5vw, 4px);
+}
+
+.detail-value {
+  display: block;
+  font-size: clamp(11px, 2.5vw, 14px);
+  font-weight: 500;
+  color: #2E7D32;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.status-active {
+  color: #4CAF50 !important;
+  font-weight: 600;
+}
+
+/* Estilos especiales para el campo de contraseña */
+.password-card {
+  border-color: rgba(255, 87, 34, 0.2);
+  background: linear-gradient(135deg, 
+    rgba(255, 243, 224, 0.4) 0%, 
+    rgba(255, 248, 225, 0.3) 100%);
+}
+
+.password-card:hover {
+  border-color: rgba(255, 87, 34, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(255, 243, 224, 0.6) 0%, 
+    rgba(255, 248, 225, 0.5) 100%);
+}
+
+.password-card .detail-icon {
+  background: linear-gradient(135deg, rgba(255, 87, 34, 0.15), rgba(255, 87, 34, 0.1));
+  color: #FF5722;
+}
+
+.password-content {
+  width: 100%;
+}
+
+.password-display {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.5vw, 8px);
+  margin-top: clamp(4px, 1vw, 6px);
+}
+
+.password-value {
+  font-family: 'Courier New', 'Monaco', monospace;
+  font-size: clamp(10px, 2.2vw, 12px);
+  font-weight: 600;
+  color: #FF5722;
+  background: rgba(255, 255, 255, 0.8);
+  padding: clamp(4px, 1vw, 6px) clamp(6px, 1.5vw, 8px);
+  border-radius: clamp(4px, 1vw, 6px);
+  border: 1px solid rgba(255, 87, 34, 0.2);
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.password-toggle-btn {
+  width: clamp(22px, 4.5vw, 26px);
+  height: clamp(22px, 4.5vw, 26px);
+  background: linear-gradient(135deg, #FF5722, #FF7043);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(255, 87, 34, 0.3);
+}
+
+.password-toggle-btn:hover {
+  background: linear-gradient(135deg, #E64A19, #FF5722);
+  transform: scale(1.1);
+  box-shadow: 0 3px 9px rgba(255, 87, 34, 0.4);
+}
+
+.password-toggle-btn:active {
+  transform: scale(1.05);
 }
 
 .modal-header h3 {
@@ -1130,6 +1478,85 @@ const logout = () => {
   text-transform: uppercase;
   font-size: 11px;
   letter-spacing: 0.5px;
+}
+
+/* Estilos para el campo de contraseña */
+.detalle-item {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8fffe 0%, #f0fff0 100%);
+  border-radius: 12px;
+  border-left: 4px solid #4CAF50;
+  transition: all 0.3s ease;
+}
+
+.detalle-item:hover {
+  background: linear-gradient(135deg, #f0fff0 0%, #e8f5e8 100%);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+}
+
+.detalle-item:last-child {
+  margin-bottom: 0;
+}
+
+.password-field {
+  border-left-color: #FF5722;
+}
+
+.password-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.password-text {
+  font-family: 'Courier New', monospace;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  font-size: 14px;
+  font-weight: 600;
+  color: #2E7D32;
+  letter-spacing: 1px;
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+.toggle-password-btn {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.toggle-password-btn:hover {
+  background: linear-gradient(135deg, #43A047, #4CAF50);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.toggle-password-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(76, 175, 80, 0.3);
+}
+
+.estado-activo {
+  color: #4CAF50;
+  font-weight: 600;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 
 /* Responsive */
@@ -1449,6 +1876,135 @@ const logout = () => {
     width: 100%;
     max-width: 100%;
     border-radius: 3px;
+  }
+}
+
+/* Responsive para Modal Moderno */
+@media (max-width: 768px) {
+  .modal-content-modern {
+    max-width: 95vw;
+    max-height: 90vh;
+    margin: clamp(5px, 2vw, 10px);
+  }
+  
+  .modal-header-modern {
+    padding: clamp(10px, 2.5vw, 14px) clamp(14px, 3.5vw, 18px);
+  }
+  
+  .modal-title {
+    font-size: clamp(12px, 3vw, 16px);
+  }
+  
+  .modal-icon {
+    width: clamp(24px, 5vw, 30px);
+    height: clamp(24px, 5vw, 30px);
+  }
+  
+  .btn-close-modern {
+    width: clamp(24px, 5vw, 28px);
+    height: clamp(24px, 5vw, 28px);
+  }
+  
+  .modal-body-modern {
+    padding: clamp(6px, 1.5vw, 8px) clamp(14px, 3.5vw, 18px) clamp(14px, 3.5vw, 18px);
+  }
+  
+  .detail-card {
+    padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 10px);
+    gap: clamp(4px, 1vw, 6px);
+  }
+  
+  .detail-icon {
+    width: clamp(20px, 4vw, 24px);
+    height: clamp(20px, 4vw, 24px);
+  }
+  
+  .detail-label {
+    font-size: clamp(8px, 1.8vw, 10px);
+  }
+  
+  .detail-value {
+    font-size: clamp(10px, 2.2vw, 12px);
+  }
+  
+  .password-value {
+    font-size: clamp(9px, 2vw, 11px);
+    padding: clamp(3px, 0.8vw, 4px) clamp(4px, 1vw, 6px);
+  }
+  
+  .password-toggle-btn {
+    width: clamp(18px, 3.5vw, 22px);
+    height: clamp(18px, 3.5vw, 22px);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content-modern {
+    max-width: 98vw;
+    max-height: 95vh;
+    border-radius: clamp(12px, 2vw, 16px);
+  }
+  
+  .modal-header-modern {
+    padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
+  }
+  
+  .modal-title-section {
+    gap: clamp(6px, 1.5vw, 8px);
+  }
+  
+  .modal-title {
+    font-size: clamp(11px, 2.8vw, 14px);
+  }
+  
+  .modal-icon {
+    width: clamp(20px, 4.5vw, 26px);
+    height: clamp(20px, 4.5vw, 26px);
+  }
+  
+  .btn-close-modern {
+    width: clamp(20px, 4.5vw, 24px);
+    height: clamp(20px, 4.5vw, 24px);
+  }
+  
+  .detail-card {
+    padding: clamp(5px, 1.2vw, 7px) clamp(7px, 1.8vw, 9px);
+    gap: clamp(3px, 0.8vw, 5px);
+    border-radius: clamp(6px, 1.5vw, 8px);
+  }
+  
+  .detail-icon {
+    width: clamp(16px, 3.5vw, 20px);
+    height: clamp(16px, 3.5vw, 20px);
+  }
+  
+  .detail-label {
+    font-size: clamp(7px, 1.6vw, 9px);
+    margin-bottom: clamp(1px, 0.3vw, 2px);
+  }
+  
+  .detail-value {
+    font-size: clamp(9px, 2vw, 11px);
+  }
+  
+  .password-display {
+    gap: clamp(4px, 1vw, 6px);
+    margin-top: clamp(2px, 0.5vw, 4px);
+  }
+  
+  .password-value {
+    font-size: clamp(8px, 1.8vw, 10px);
+    padding: clamp(2px, 0.6vw, 3px) clamp(3px, 0.8vw, 4px);
+  }
+  
+  .password-toggle-btn {
+    width: clamp(16px, 3vw, 18px);
+    height: clamp(16px, 3vw, 18px);
+  }
+  
+  .password-toggle-btn svg {
+    width: clamp(10px, 2.2vw, 12px);
+    height: clamp(10px, 2.2vw, 12px);
   }
 }
 </style>

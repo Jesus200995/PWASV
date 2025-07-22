@@ -639,24 +639,31 @@ const logout = () => {
 .registros-container {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
-  margin-left: 280px;
+  margin-left: clamp(180px, 18vw, 240px);
+  width: calc(100vw - clamp(180px, 18vw, 240px));
   background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
   min-height: 100vh;
   position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: 32px;
+  padding: clamp(16px, 4vh, 32px) clamp(16px, 4vw, 32px);
   color: white;
   box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header::before {
@@ -676,19 +683,23 @@ const logout = () => {
   align-items: center;
   position: relative;
   z-index: 2;
+  flex-wrap: wrap;
+  gap: clamp(12px, 3vw, 20px);
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: clamp(12px, 3vw, 20px);
+  flex: 1;
+  min-width: 200px;
 }
 
 .header-icon {
-  width: 48px;
-  height: 48px;
+  width: clamp(40px, 6vw, 48px);
+  height: clamp(40px, 6vw, 48px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  border-radius: clamp(8px, 2vw, 12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -698,8 +709,8 @@ const logout = () => {
 }
 
 .header-icon svg {
-  width: 24px;
-  height: 24px;
+  width: clamp(20px, 3vw, 24px);
+  height: clamp(20px, 3vw, 24px);
   color: white;
 }
 
@@ -710,46 +721,51 @@ const logout = () => {
 
 .header-text {
   flex: 1;
+  min-width: 200px;
 }
 
 .header-title {
-  font-size: 32px;
+  font-size: clamp(20px, 5vw, 32px);
   font-weight: 700;
-  margin: 0 0 8px 0;
+  margin: 0 0 clamp(4px, 1vh, 8px) 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   letter-spacing: -0.5px;
+  line-height: 1.2;
 }
 
 .header-subtitle {
-  font-size: 16px;
+  font-size: clamp(12px, 2.5vw, 16px);
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
   font-weight: 400;
   letter-spacing: 0.2px;
+  line-height: 1.4;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: clamp(8px, 2vw, 16px);
+  flex-wrap: wrap;
 }
 
 .connection-status {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
+  gap: clamp(6px, 1.5vw, 8px);
+  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px);
+  border-radius: clamp(16px, 4vw, 20px);
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 14px);
   font-weight: 500;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .connection-status.online {
@@ -763,8 +779,8 @@ const logout = () => {
 }
 
 .status-indicator {
-  width: 8px;
-  height: 8px;
+  width: clamp(6px, 1.5vw, 8px);
+  height: clamp(6px, 1.5vw, 8px);
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
@@ -793,17 +809,20 @@ const logout = () => {
 .refresh-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: clamp(6px, 1.5vw, 8px);
+  padding: clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px);
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  border-radius: clamp(8px, 2vw, 10px);
   color: white;
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 14px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .refresh-btn:hover:not(:disabled) {
@@ -926,22 +945,25 @@ const logout = () => {
 }
 
 .page-content {
-  padding: 32px;
+  padding: clamp(16px, 4vw, 32px);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .filters-section {
   background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
-  border-radius: 20px;
+  border-radius: clamp(12px, 3vw, 20px);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.08),
     0 2px 16px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255,255,255,0.8);
   border: 1px solid rgba(76, 175, 80, 0.1);
-  margin-bottom: 24px;
-  padding: 24px;
+  margin-bottom: clamp(16px, 4vw, 24px);
+  padding: clamp(16px, 4vw, 24px);
   transition: all 0.3s ease;
   position: relative;
   z-index: 10;
+  box-sizing: border-box;
 }
 
 .filters-section:hover {
@@ -955,7 +977,7 @@ const logout = () => {
 .filter-box {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: clamp(12px, 3vw, 20px);
   flex-wrap: wrap;
 }
 
@@ -965,16 +987,16 @@ const logout = () => {
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-size: 13px;
+  font-size: clamp(11px, 2.5vw, 13px);
   min-width: fit-content;
 }
 
 .filter-select {
-  padding: 12px 48px 12px 20px;
+  padding: clamp(10px, 2.5vw, 12px) clamp(40px, 8vw, 48px) clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 20px);
   border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: 50px;
-  font-size: 14px;
-  min-width: 250px;
+  border-radius: clamp(20px, 8vw, 50px);
+  font-size: clamp(12px, 3vw, 14px);
+  min-width: clamp(180px, 25vw, 250px);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
@@ -1009,16 +1031,17 @@ const logout = () => {
 }
 
 .filter-input {
-  padding: 12px 20px;
+  padding: clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 20px);
   border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: 50px;
-  font-size: 14px;
-  min-width: 280px;
+  border-radius: clamp(20px, 8vw, 50px);
+  font-size: clamp(12px, 3vw, 14px);
+  min-width: clamp(180px, 25vw, 280px);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
   font-weight: 500;
   color: #333;
+  box-sizing: border-box;
 }
 
 .filter-input::placeholder {
@@ -1041,7 +1064,7 @@ const logout = () => {
 .autocomplete-container {
   position: relative;
   display: inline-block;
-  min-width: 280px;
+  min-width: clamp(180px, 25vw, 280px);
   z-index: 100;
 }
 
@@ -1053,12 +1076,12 @@ const logout = () => {
   background: white;
   border: 2px solid rgba(76, 175, 80, 0.2);
   border-top: none;
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px);
   box-shadow: 
     0 12px 40px rgba(0, 0, 0, 0.15),
     0 4px 16px rgba(76, 175, 80, 0.2),
     0 2px 8px rgba(0, 0, 0, 0.1);
-  max-height: 200px;
+  max-height: clamp(150px, 20vh, 200px);
   overflow-y: auto;
   z-index: 9999;
   animation: fadeInDown 0.2s ease-out;
@@ -1140,18 +1163,19 @@ const logout = () => {
 .clear-filters-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
+  gap: clamp(6px, 1.5vw, 8px);
+  padding: clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 20px);
   background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
   border: none;
-  border-radius: 50px;
+  border-radius: clamp(20px, 8vw, 50px);
   cursor: pointer;
-  font-size: 14px;
+  font-size: clamp(12px, 3vw, 14px);
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .clear-filters-btn:hover {
@@ -1170,14 +1194,18 @@ const logout = () => {
 
 .registros-section {
   background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
-  border-radius: 20px;
+  border-radius: clamp(12px, 3vw, 20px);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.08),
     0 2px 16px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255,255,255,0.8);
   border: 1px solid rgba(76, 175, 80, 0.1);
-  overflow: hidden;
+  padding: clamp(16px, 4vw, 24px);
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 5;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .registros-section:hover {
@@ -1325,6 +1353,10 @@ const logout = () => {
 .table-container {
   overflow-x: auto;
   animation: fadeInUp 0.6s ease-out 0.2s both;
+  border-radius: clamp(8px, 2vw, 12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  box-sizing: border-box;
 }
 
 @keyframes fadeInUp {
@@ -1340,30 +1372,36 @@ const logout = () => {
 
 .registros-table {
   width: 100%;
+  min-width: clamp(600px, 80vw, 800px);
   border-collapse: collapse;
   position: relative;
 }
 
 .registros-table th {
   background: linear-gradient(135deg, #f8f9fa 0%, #f0f8f0 100%);
-  padding: 16px 12px;
+  padding: clamp(12px, 3vw, 16px) clamp(8px, 2vw, 12px);
   text-align: left;
   font-weight: 700;
   color: #4CAF50;
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: clamp(10px, 2.5vw, 12px);
   letter-spacing: 0.5px;
   position: sticky;
   top: 0;
   z-index: 10;
   border-bottom: 1px solid rgba(224, 224, 224, 0.6);
+  white-space: nowrap;
 }
 
 .registros-table td {
-  padding: 16px 12px;
+  padding: clamp(12px, 3vw, 16px) clamp(8px, 2vw, 12px);
   border-bottom: 1px solid rgba(224, 224, 224, 0.6);
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 14px);
   transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
 }
 
 .registros-table tbody tr {
@@ -1382,10 +1420,10 @@ const logout = () => {
 }
 
 .foto-mini {
-  width: 48px;
-  height: 48px;
+  width: clamp(40px, 6vw, 48px);
+  height: clamp(40px, 6vw, 48px);
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: clamp(8px, 2vw, 12px);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   border: 2px solid rgba(76, 175, 80, 0.2);
@@ -1401,16 +1439,16 @@ const logout = () => {
 .no-foto {
   color: #999;
   font-style: italic;
-  font-size: 12px;
+  font-size: clamp(10px, 2.5vw, 12px);
 }
 
 .ubicacion {
   font-family: monospace;
-  font-size: 12px;
+  font-size: clamp(10px, 2.5vw, 12px);
 }
 
 .descripcion {
-  max-width: 200px;
+  max-width: clamp(150px, 20vw, 200px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1418,34 +1456,34 @@ const logout = () => {
 
 .fecha {
   white-space: nowrap;
-  font-size: 12px;
+  font-size: clamp(10px, 2.5vw, 12px);
 }
 
 .usuario-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: clamp(1px, 0.5vh, 2px);
 }
 
 .usuario-info strong {
-  font-size: 14px;
+  font-size: clamp(12px, 3vw, 14px);
   color: #2c3e50;
 }
 
 .usuario-info small {
-  font-size: 12px;
+  font-size: clamp(10px, 2.5vw, 12px);
   color: #666;
   font-style: italic;
 }
 
 .btn-ver {
-  padding: 8px 16px;
+  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px);
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: clamp(16px, 4vw, 20px);
   cursor: pointer;
-  font-size: 11px;
+  font-size: clamp(9px, 2vw, 11px);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;

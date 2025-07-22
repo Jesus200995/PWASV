@@ -348,7 +348,9 @@ if (typeof window !== 'undefined') {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 280px;
+  width: min(220px, 18vw);
+  max-width: 240px;
+  min-width: 180px;
   background: linear-gradient(180deg, 
     #1B5E20 0%, 
     #2E7D32 25%,
@@ -360,13 +362,18 @@ if (typeof window !== 'undefined') {
   display: flex;
   flex-direction: column;
   z-index: 1000;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 
     0 8px 24px rgba(0, 0, 0, 0.25),
     0 4px 12px rgba(27, 94, 32, 0.4);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  /* Escalado dinámico basado en viewport */
+  font-size: clamp(12px, 1.2vw, 16px);
 }
 .sidebar-header {
-  padding: 28px 20px 32px;
+  padding: clamp(12px, 2.5vh, 28px) clamp(8px, 1.5vw, 20px) clamp(16px, 3vh, 32px);
   border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
@@ -376,15 +383,18 @@ if (typeof window !== 'undefined') {
   background: linear-gradient(135deg, 
     rgba(13, 78, 20, 0.8) 0%, 
     rgba(27, 94, 32, 0.6) 100%);
+  flex-shrink: 0;
+  min-height: fit-content;
+  max-height: 25vh;
 }
 
 .header-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: clamp(6px, 1.2vh, 12px);
   width: 100%;
-  max-width: 220px;
+  max-width: min(180px, 90%);
 }
 
 .sidebar-header::after {
@@ -420,8 +430,8 @@ if (typeof window !== 'undefined') {
 
 /* Estilos para la animación de flor girando */
 .flower-animation {
-  width: 48px;
-  height: 48px;
+  width: clamp(20px, 3.5vw, 40px);
+  height: clamp(20px, 3.5vw, 40px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -515,7 +525,7 @@ if (typeof window !== 'undefined') {
 
 .brand-title {
   margin: 0;
-  font-size: 16px;
+  font-size: clamp(9px, 1.2vw, 14px);
   font-weight: 800;
   background: linear-gradient(135deg, 
     #E8F5E8 0%, 
@@ -526,7 +536,7 @@ if (typeof window !== 'undefined') {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 0.15em;
+  letter-spacing: clamp(0.06em, 0.1vw, 0.12em);
   line-height: 1.2;
   font-family: 'Source Sans Pro', 'SF Pro Display', 'system-ui', '-apple-system', sans-serif;
   text-rendering: optimizeLegibility;
@@ -536,7 +546,7 @@ if (typeof window !== 'undefined') {
   position: relative;
   white-space: nowrap;
   filter: drop-shadow(0 2px 4px rgba(76, 175, 80, 0.3));
-  padding-bottom: 8px;
+  padding-bottom: clamp(3px, 0.6vh, 6px);
 }
 
 .brand-title::after {
@@ -579,11 +589,11 @@ if (typeof window !== 'undefined') {
 
 .brand-subtitle {
   margin: 0;
-  font-size: 12px;
+  font-size: clamp(7px, 0.9vw, 10px);
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  letter-spacing: 0.15em;
+  letter-spacing: clamp(0.08em, 0.1vw, 0.12em);
   text-transform: uppercase;
   font-family: 'Montserrat', 'Inter', 'Source Sans Pro', sans-serif;
   opacity: 0.9;
@@ -598,13 +608,15 @@ if (typeof window !== 'undefined') {
 
 /* Estilos modernos para el botón del geoportal */
 .geoportal-section {
-  padding: 16px 16px 20px;
-  margin-bottom: 8px;
+  padding: clamp(8px, 1.5vh, 16px) clamp(8px, 1.5vw, 16px) clamp(12px, 2vh, 20px);
+  margin-bottom: clamp(4px, 0.8vh, 8px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   background: linear-gradient(135deg, 
     rgba(13, 78, 20, 0.6) 0%, 
     rgba(27, 94, 32, 0.4) 100%);
+  flex-shrink: 0;
+  max-height: 20vh;
 }
 
 .geoportal-section::after {
@@ -630,19 +642,20 @@ if (typeof window !== 'undefined') {
   backdrop-filter: blur(12px);
   border: 2px solid rgba(46, 125, 50, 0.4);
   color: white;
-  padding: 10px 14px;
-  border-radius: 20px;
+  padding: clamp(5px, 0.8vh, 8px) clamp(6px, 1vw, 10px);
+  border-radius: clamp(10px, 1.8vw, 16px);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: clamp(3px, 0.6vw, 6px);
+  font-size: clamp(9px, 1vw, 11px);
   font-weight: 600;
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   position: relative;
   overflow: hidden;
+  min-height: clamp(28px, 3.5vh, 36px);
   box-shadow: 
     0 4px 15px rgba(46, 125, 50, 0.4),
     0 2px 8px rgba(0, 0, 0, 0.2),
@@ -683,16 +696,16 @@ if (typeof window !== 'undefined') {
 }
 
 .geoportal-icon {
-  width: 16px;
-  height: 16px;
+  width: clamp(10px, 1.2vw, 14px);
+  height: clamp(10px, 1.2vw, 14px);
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   transition: all 0.3s ease;
 }
 
 .arrow-icon {
-  width: 12px;
-  height: 12px;
+  width: clamp(8px, 1vw, 10px);
+  height: clamp(8px, 1vw, 10px);
   opacity: 0.8;
   stroke-width: 2.5;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -700,10 +713,13 @@ if (typeof window !== 'undefined') {
 }
 
 .geoportal-text {
-  font-size: 13px;
+  font-size: clamp(9px, 1vw, 11px);
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .geoportal-glow {
@@ -729,20 +745,21 @@ if (typeof window !== 'undefined') {
   backdrop-filter: blur(12px);
   border: 2px solid rgba(33, 150, 243, 0.2);
   color: white;
-  padding: 10px 14px;
-  border-radius: 20px;
+  padding: clamp(5px, 0.8vh, 8px) clamp(6px, 1vw, 10px);
+  border-radius: clamp(10px, 1.8vw, 16px);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: clamp(3px, 0.6vw, 6px);
+  font-size: clamp(9px, 1vw, 11px);
   font-weight: 600;
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   position: relative;
   overflow: hidden;
-  margin-top: 12px;
+  margin-top: clamp(4px, 1vh, 8px);
+  min-height: clamp(28px, 3.5vh, 36px);
   box-shadow: 
     0 4px 15px rgba(33, 150, 243, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -781,16 +798,16 @@ if (typeof window !== 'undefined') {
 }
 
 .mobile-app-icon {
-  width: 16px;
-  height: 16px;
+  width: clamp(10px, 1.2vw, 14px);
+  height: clamp(10px, 1.2vw, 14px);
   stroke-width: 2.2;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   transition: all 0.3s ease;
 }
 
 .mobile-arrow-icon {
-  width: 12px;
-  height: 12px;
+  width: clamp(8px, 1vw, 10px);
+  height: clamp(8px, 1vw, 10px);
   opacity: 0.8;
   stroke-width: 2.5;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -798,10 +815,13 @@ if (typeof window !== 'undefined') {
 }
 
 .mobile-app-text {
-  font-size: 13px;
+  font-size: clamp(9px, 1vw, 11px);
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mobile-app-glow {
@@ -820,7 +840,10 @@ if (typeof window !== 'undefined') {
 
 .sidebar-nav {
   flex: 1;
-  padding: 24px 0;
+  padding: clamp(12px, 2vh, 24px) 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
 }
 
 .sidebar-nav ul {
@@ -830,23 +853,24 @@ if (typeof window !== 'undefined') {
 }
 
 .nav-item {
-  margin-bottom: 8px;
-  padding: 0 16px;
+  margin-bottom: clamp(3px, 0.6vh, 6px);
+  padding: 0 clamp(6px, 1.2vw, 12px);
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 18px;
+  gap: clamp(8px, 1.2vw, 12px);
+  padding: clamp(6px, 1.4vh, 12px) clamp(8px, 1.5vw, 14px);
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
-  border-radius: 12px;
+  border-radius: clamp(6px, 1vw, 10px);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
-  margin-bottom: 4px;
+  margin-bottom: clamp(1px, 0.3vh, 3px);
   backdrop-filter: blur(10px);
+  min-height: clamp(32px, 4vh, 44px);
 }
 
 .nav-link:hover {
@@ -888,24 +912,30 @@ if (typeof window !== 'undefined') {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: clamp(18px, 2.2vw, 20px);
+  height: clamp(18px, 2.2vw, 20px);
   position: relative;
+  flex-shrink: 0;
 }
 
 .nav-icon {
-  width: 20px;
-  height: 20px;
+  width: clamp(14px, 1.8vw, 18px);
+  height: clamp(14px, 1.8vw, 18px);
   stroke-width: 2.2;
   transition: all 0.3s ease;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
 }
 
 .nav-text {
-  font-size: 15px;
+  font-size: clamp(10px, 1.2vw, 13px);
   font-weight: 600;
   text-shadow: none;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 }
 
 .nav-glow {
@@ -923,7 +953,7 @@ if (typeof window !== 'undefined') {
 }
 
 .sidebar-footer {
-  padding: 16px 16px 20px;
+  padding: clamp(8px, 1.6vh, 16px) clamp(8px, 1.6vw, 16px) clamp(12px, 2vh, 20px);
   border-top: 2px solid rgba(255, 255, 255, 0.3);
   position: relative;
   display: flex;
@@ -931,6 +961,9 @@ if (typeof window !== 'undefined') {
   background: linear-gradient(135deg, 
     rgba(13, 78, 20, 0.8) 0%, 
     rgba(27, 94, 32, 0.6) 100%);
+  flex-shrink: 0;
+  margin-top: auto;
+  max-height: 15vh;
 }
 
 .sidebar-footer::before {
@@ -948,25 +981,26 @@ if (typeof window !== 'undefined') {
 
 .logout-btn {
   width: 100%;
-  max-width: 200px;
+  max-width: min(180px, 90%);
   background: linear-gradient(135deg, 
     #F44336 0%, 
     #E53935 100%);
   backdrop-filter: blur(12px);
   border: 2px solid rgba(244, 67, 54, 0.2);
   color: white;
-  padding: 12px 16px;
-  border-radius: 12px;
+  padding: clamp(6px, 1vh, 10px) clamp(8px, 1.4vw, 12px);
+  border-radius: clamp(6px, 1vw, 10px);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  font-size: 13px;
+  gap: clamp(4px, 0.8vw, 8px);
+  font-size: clamp(9px, 1vw, 11px);
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
+  min-height: clamp(32px, 4vh, 40px);
   box-shadow: 
     0 4px 15px rgba(244, 67, 54, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -1022,23 +1056,29 @@ if (typeof window !== 'undefined') {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: clamp(14px, 1.6vw, 16px);
+  height: clamp(14px, 1.6vw, 16px);
+  flex-shrink: 0;
 }
 
 .logout-icon {
-  width: 16px;
-  height: 16px;
+  width: clamp(10px, 1.2vw, 14px);
+  height: clamp(10px, 1.2vw, 14px);
   stroke-width: 2.2;
   transition: all 0.3s ease;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
 }
 
 .logout-text {
-  font-size: 13px;
+  font-size: clamp(9px, 1vw, 11px);
   font-weight: 600;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 }
 
 .logout-glow {
@@ -1055,38 +1095,421 @@ if (typeof window !== 'undefined') {
   pointer-events: none;
 }
 
-/* Responsive para pantallas muy pequeñas */
+/* Responsive Design para tablets */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .sidebar {
+    width: 260px;
+  }
+  
+  .sidebar-header {
+    padding: 20px 16px 24px;
+  }
+  
+  .flower-animation {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .brand-title {
+    font-size: 14px;
+    letter-spacing: 0.1em;
+  }
+  
+  .brand-subtitle {
+    font-size: 11px;
+  }
+  
+  .geoportal-section {
+    padding: 12px 12px 16px;
+  }
+  
+  .geoportal-btn,
+  .mobile-app-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .nav-link {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+  
+  .nav-text {
+    font-size: 14px;
+  }
+  
+  .logout-btn {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+}
+
+/* Responsive Design para móviles landscape */
+@media (max-width: 768px) and (orientation: landscape) {
+  .sidebar {
+    width: 240px;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: fixed;
+    z-index: 1001;
+  }
+  
+  .sidebar-header {
+    padding: 12px 12px 16px;
+    min-height: auto;
+  }
+  
+  .header-content {
+    gap: 8px;
+  }
+  
+  .flower-animation {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .brand-title {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+  }
+  
+  .brand-subtitle {
+    font-size: 9px;
+  }
+  
+  .geoportal-section {
+    padding: 8px 8px 12px;
+  }
+  
+  .geoportal-btn,
+  .mobile-app-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  
+  .geoportal-icon,
+  .mobile-app-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .arrow-icon,
+  .mobile-arrow-icon {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .sidebar-nav {
+    padding: 12px 0;
+  }
+  
+  .nav-item {
+    margin-bottom: 4px;
+    padding: 0 8px;
+  }
+  
+  .nav-link {
+    padding: 8px 12px;
+    gap: 10px;
+  }
+  
+  .nav-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .nav-text {
+    font-size: 12px;
+  }
+  
+  .sidebar-footer {
+    padding: 8px 8px 12px;
+  }
+  
+  .logout-btn {
+    padding: 8px 12px;
+    font-size: 11px;
+    gap: 8px;
+  }
+  
+  .logout-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Responsive Design para móviles portrait */
+@media (max-width: 768px) and (orientation: portrait) {
+  .sidebar {
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: fixed;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar-header {
+    padding: 16px 16px 20px;
+    flex-shrink: 0;
+  }
+  
+  .header-content {
+    gap: 12px;
+  }
+  
+  .flower-animation {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .brand-title {
+    font-size: 13px;
+    letter-spacing: 0.1em;
+  }
+  
+  .brand-subtitle {
+    font-size: 10px;
+  }
+  
+  .geoportal-section {
+    padding: 12px 16px 16px;
+    flex-shrink: 0;
+  }
+  
+  .geoportal-btn,
+  .mobile-app-btn {
+    padding: 10px 16px;
+    font-size: 12px;
+    gap: 10px;
+  }
+  
+  .mobile-app-btn {
+    margin-top: 10px;
+  }
+  
+  .sidebar-nav {
+    flex: 1;
+    padding: 16px 0;
+    overflow-y: auto;
+  }
+  
+  .nav-item {
+    margin-bottom: 6px;
+    padding: 0 16px;
+  }
+  
+  .nav-link {
+    padding: 12px 16px;
+    gap: 14px;
+  }
+  
+  .nav-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .nav-text {
+    font-size: 13px;
+  }
+  
+  .sidebar-footer {
+    padding: 16px 16px 20px;
+    flex-shrink: 0;
+  }
+  
+  .logout-btn {
+    padding: 12px 16px;
+    font-size: 12px;
+    gap: 10px;
+  }
+  
+  .logout-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Responsive para pantallas muy pequeñas (móviles pequeños) */
 @media (max-width: 480px) {
   .sidebar {
     width: 100%;
   }
+  
+  .sidebar-header {
+    padding: 12px 12px 16px;
+  }
+  
+  .flower-animation {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .brand-title {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+  
+  .brand-subtitle {
+    font-size: 9px;
+  }
+  
+  .geoportal-section {
+    padding: 10px 12px 14px;
+  }
+  
+  .geoportal-btn,
+  .mobile-app-btn {
+    padding: 8px 12px;
+    font-size: 11px;
+    gap: 8px;
+    border-radius: 16px;
+  }
+  
+  .geoportal-icon,
+  .mobile-app-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .arrow-icon,
+  .mobile-arrow-icon {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .sidebar-nav {
+    padding: 14px 0;
+  }
+  
+  .nav-item {
+    margin-bottom: 4px;
+    padding: 0 12px;
+  }
+  
+  .nav-link {
+    padding: 10px 14px;
+    gap: 12px;
+    border-radius: 10px;
+  }
+  
+  .nav-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .nav-text {
+    font-size: 12px;
+  }
+  
+  .sidebar-footer {
+    padding: 12px 12px 16px;
+  }
+  
+  .logout-btn {
+    padding: 10px 14px;
+    font-size: 11px;
+    gap: 8px;
+    border-radius: 10px;
+  }
+  
+  .logout-icon {
+    width: 14px;
+    height: 14px;
+  }
 }
 
-/* Responsive Design */
+/* Ajustes para pantallas extra pequeñas */
+@media (max-width: 320px) {
+  .sidebar-header {
+    padding: 10px 8px 12px;
+  }
+  
+  .flower-animation {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .brand-title {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+  
+  .brand-subtitle {
+    font-size: 8px;
+  }
+  
+  .geoportal-section {
+    padding: 8px 8px 12px;
+  }
+  
+  .geoportal-btn,
+  .mobile-app-btn {
+    padding: 6px 10px;
+    font-size: 10px;
+    gap: 6px;
+  }
+  
+  .nav-item {
+    padding: 0 8px;
+  }
+  
+  .nav-link {
+    padding: 8px 10px;
+    gap: 10px;
+  }
+  
+  .nav-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .nav-text {
+    font-size: 11px;
+  }
+  
+  .sidebar-footer {
+    padding: 8px 8px 12px;
+  }
+  
+  .logout-btn {
+    padding: 8px 10px;
+    font-size: 10px;
+    gap: 6px;
+  }
+  
+  .logout-icon {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Mejoras para scrolling en móviles */
 @media (max-width: 768px) {
   .sidebar {
-    transform: translateX(-100%);
-    width: 280px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
   
-  .sidebar.collapsed {
-    transform: translateX(-100%);
+  .sidebar::-webkit-scrollbar {
+    display: none;
   }
   
-  .sidebar:not(.collapsed) {
-    transform: translateX(0);
+  .sidebar-nav {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
   
-  .mobile-overlay {
-    display: block;
-  }
-  
-  .sidebar-toggle {
-    display: block;
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1002;
+  .sidebar-nav::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -1269,15 +1692,16 @@ if (typeof window !== 'undefined') {
   transform: translateY(0);
 }
 
-/* Responsive Design */
+/* Responsive Design para modal de logout */
 @media (max-width: 480px) {
   .logout-modal {
     margin: 10px;
     border-radius: 16px;
+    max-width: calc(100vw - 20px);
   }
   
   .modal-header {
-    padding: 24px 20px 16px;
+    padding: 20px 16px 12px;
   }
   
   .modal-icon {
@@ -1292,26 +1716,334 @@ if (typeof window !== 'undefined') {
   }
   
   .modal-header h3 {
-    font-size: 20px;
+    font-size: 18px;
   }
   
   .modal-body {
-    padding: 16px 20px;
+    padding: 12px 16px;
   }
   
   .modal-body p {
-    font-size: 15px;
+    font-size: 14px;
   }
   
   .modal-actions {
-    padding: 16px 20px 24px;
+    padding: 12px 16px 20px;
     flex-direction: column;
+    gap: 8px;
   }
   
   .btn-cancel,
   .btn-confirm {
     min-width: auto;
-    padding: 14px 20px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .logout-modal {
+    margin: 8px;
+  }
+  
+  .modal-header {
+    padding: 16px 12px 10px;
+  }
+  
+  .modal-icon {
+    width: 45px;
+    height: 45px;
+    margin-bottom: 10px;
+  }
+  
+  .modal-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+  }
+  
+  .modal-body {
+    padding: 10px 12px;
+  }
+  
+  .modal-body p {
+    font-size: 13px;
+  }
+  
+  .modal-actions {
+    padding: 10px 12px 16px;
+  }
+  
+  .btn-cancel,
+  .btn-confirm {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+/* Mejoras para accesibilidad táctil */
+@media (max-width: 768px) {
+  .nav-link,
+  .geoportal-btn,
+  .mobile-app-btn,
+  .logout-btn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-cancel,
+  .btn-confirm {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+}
+
+/* Reglas para zoom extremo y alta densidad de píxeles */
+@media (max-width: 100vw) and (max-height: 100vh) {
+  .sidebar {
+    font-size: clamp(8px, 1vw, 16px);
+    width: clamp(160px, 20vw, 240px);
+  }
+  
+  .sidebar-header {
+    padding: clamp(6px, 1.5vh, 28px) clamp(4px, 1vw, 20px) clamp(8px, 2vh, 32px);
+    max-height: clamp(80px, 20vh, 160px);
+  }
+  
+  .flower-animation {
+    width: clamp(20px, 3vw, 48px);
+    height: clamp(20px, 3vw, 48px);
+  }
+  
+  .brand-title {
+    font-size: clamp(8px, 1.2vw, 16px);
+    letter-spacing: clamp(0.05em, 0.1vw, 0.15em);
+  }
+  
+  .brand-subtitle {
+    font-size: clamp(6px, 0.8vw, 12px);
+  }
+  
+  .geoportal-section {
+    padding: clamp(4px, 1vh, 16px) clamp(4px, 1vw, 16px) clamp(6px, 1.5vh, 20px);
+    max-height: clamp(60px, 15vh, 120px);
+  }
+  
+  .geoportal-btn,
+  .mobile-app-btn {
+    padding: clamp(4px, 0.8vh, 10px) clamp(6px, 1vw, 14px);
+    font-size: clamp(8px, 0.9vw, 13px);
+    min-height: clamp(28px, 3.5vh, 44px);
+    border-radius: clamp(8px, 1.5vw, 20px);
+  }
+  
+  .geoportal-icon,
+  .mobile-app-icon {
+    width: clamp(10px, 1.2vw, 16px);
+    height: clamp(10px, 1.2vw, 16px);
+  }
+  
+  .arrow-icon,
+  .mobile-arrow-icon {
+    width: clamp(8px, 1vw, 12px);
+    height: clamp(8px, 1vw, 12px);
+  }
+  
+  .sidebar-nav {
+    padding: clamp(8px, 1.5vh, 24px) 0;
+    min-height: clamp(200px, 40vh, 400px);
+  }
+  
+  .nav-item {
+    margin-bottom: clamp(2px, 0.5vh, 8px);
+    padding: 0 clamp(4px, 1vw, 16px);
+  }
+  
+  .nav-link {
+    padding: clamp(6px, 1vh, 16px) clamp(8px, 1.5vw, 18px);
+    gap: clamp(8px, 1.2vw, 16px);
+    min-height: clamp(32px, 4vh, 52px);
+    border-radius: clamp(6px, 1vw, 12px);
+  }
+  
+  .nav-icon {
+    width: clamp(14px, 1.8vw, 20px);
+    height: clamp(14px, 1.8vw, 20px);
+  }
+  
+  .nav-text {
+    font-size: clamp(9px, 1.1vw, 15px);
+  }
+  
+  .sidebar-footer {
+    padding: clamp(6px, 1.2vh, 16px) clamp(6px, 1.2vw, 16px) clamp(8px, 1.6vh, 20px);
+    max-height: clamp(60px, 12vh, 100px);
+  }
+  
+  .logout-btn {
+    padding: clamp(6px, 1vh, 12px) clamp(8px, 1.4vw, 16px);
+    font-size: clamp(8px, 0.9vw, 13px);
+    min-height: clamp(32px, 4vh, 48px);
+    border-radius: clamp(6px, 1vw, 12px);
+    gap: clamp(4px, 0.8vw, 10px);
+  }
+  
+  .logout-icon {
+    width: clamp(10px, 1.2vw, 16px);
+    height: clamp(10px, 1.2vw, 16px);
+  }
+}
+
+/* Ajustes para zoom de navegador */
+@media screen and (-webkit-min-device-pixel-ratio: 1.25), 
+       screen and (min-resolution: 120dpi) {
+  .sidebar {
+    font-size: clamp(10px, 1.1vw, 15px);
+  }
+  
+  .brand-title {
+    font-size: clamp(9px, 1.3vw, 15px);
+  }
+  
+  .nav-text,
+  .geoportal-text,
+  .mobile-app-text,
+  .logout-text {
+    font-size: clamp(9px, 1vw, 12px);
+  }
+}
+
+/* Ajustes para zoom muy alto */
+@media screen and (-webkit-min-device-pixel-ratio: 2), 
+       screen and (min-resolution: 192dpi) {
+  .sidebar {
+    font-size: clamp(8px, 1vw, 14px);
+    width: clamp(140px, 18vw, 220px);
+  }
+  
+  .flower-animation {
+    width: clamp(18px, 2.5vw, 40px);
+    height: clamp(18px, 2.5vw, 40px);
+  }
+  
+  .brand-title {
+    font-size: clamp(7px, 1.1vw, 14px);
+  }
+  
+  .brand-subtitle {
+    font-size: clamp(5px, 0.7vw, 10px);
+  }
+  
+  .nav-text,
+  .geoportal-text,
+  .mobile-app-text,
+  .logout-text {
+    font-size: clamp(7px, 0.9vw, 11px);
+  }
+}
+
+/* Manejo de contenido que se desborda */
+@media (max-height: 500px) {
+  .sidebar {
+    font-size: clamp(8px, 1vw, 12px);
+  }
+  
+  .sidebar-header {
+    padding: clamp(4px, 1vh, 16px) clamp(6px, 1vw, 16px);
+    max-height: 15vh;
+  }
+  
+  .flower-animation {
+    width: clamp(16px, 2.5vw, 32px);
+    height: clamp(16px, 2.5vw, 32px);
+  }
+  
+  .brand-title {
+    font-size: clamp(7px, 1vw, 12px);
+    padding-bottom: clamp(2px, 0.5vh, 6px);
+  }
+  
+  .brand-subtitle {
+    font-size: clamp(5px, 0.7vw, 9px);
+  }
+  
+  .geoportal-section {
+    padding: clamp(3px, 0.8vh, 12px) clamp(6px, 1vw, 12px);
+    max-height: 12vh;
+  }
+  
+  .geoportal-btn,
+  .mobile-app-btn {
+    padding: clamp(3px, 0.6vh, 8px) clamp(6px, 1vw, 12px);
+    font-size: clamp(6px, 0.8vw, 10px);
+    min-height: clamp(24px, 3vh, 36px);
+    margin-top: clamp(3px, 0.8vh, 8px);
+  }
+  
+  .nav-link {
+    padding: clamp(4px, 0.8vh, 12px) clamp(8px, 1.2vw, 14px);
+    min-height: clamp(28px, 3.5vh, 44px);
+  }
+  
+  .nav-text {
+    font-size: clamp(6px, 0.9vw, 12px);
+  }
+  
+  .nav-icon {
+    width: clamp(12px, 1.5vw, 18px);
+    height: clamp(12px, 1.5vw, 18px);
+  }
+  
+  .sidebar-footer {
+    padding: clamp(4px, 1vh, 12px) clamp(6px, 1vw, 12px);
+    max-height: 10vh;
+  }
+  
+  .logout-btn {
+    padding: clamp(4px, 0.8vh, 10px) clamp(6px, 1.2vw, 14px);
+    font-size: clamp(6px, 0.8vw, 11px);
+    min-height: clamp(28px, 3.5vh, 40px);
+  }
+}
+
+/* Prevención de contenido oculto */
+@media (max-height: 400px) {
+  .sidebar {
+    overflow-y: auto !important;
+    height: 100vh;
+  }
+  
+  .sidebar-header,
+  .geoportal-section,
+  .sidebar-footer {
+    flex-shrink: 0;
+  }
+  
+  .sidebar-nav {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  
+  .brand-title {
+    font-size: clamp(6px, 0.9vw, 10px);
+    line-height: 1.1;
+  }
+  
+  .brand-subtitle {
+    font-size: clamp(4px, 0.6vw, 8px);
+  }
+  
+  .nav-text,
+  .geoportal-text,
+  .mobile-app-text,
+  .logout-text {
+    font-size: clamp(5px, 0.7vw, 9px);
   }
 }
 
@@ -1343,6 +2075,84 @@ if (typeof window !== 'undefined') {
   to {
     opacity: 0;
     transform: scale(0.8) translateY(30px);
+  }
+}
+
+/* Optimizaciones finales para escalado dinámico */
+.sidebar * {
+  box-sizing: border-box;
+}
+
+/* Asegurar que el texto nunca se corte */
+.nav-text,
+.geoportal-text,
+.mobile-app-text,
+.logout-text,
+.brand-title,
+.brand-subtitle {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Scroll suave en toda la aplicación */
+.sidebar,
+.sidebar-nav {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar,
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mejora de rendimiento para animaciones */
+.flower-animation,
+.flower-icon,
+.nav-glow,
+.geoportal-glow,
+.mobile-app-glow,
+.logout-glow {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.sidebar {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Estados hover optimizados para zoom */
+@media (hover: hover) and (pointer: fine) {
+  .nav-link:hover,
+  .geoportal-btn:hover,
+  .mobile-app-btn:hover,
+  .logout-btn:hover {
+    transform: translateX(2px) scale(1.01);
+  }
+}
+
+/* Estados activos para touch */
+@media (hover: none) and (pointer: coarse) {
+  .nav-link:active,
+  .geoportal-btn:active,
+  .mobile-app-btn:active,
+  .logout-btn:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Prevención de zoom accidental en iOS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .sidebar input,
+  .sidebar button,
+  .sidebar select,
+  .sidebar textarea {
+    font-size: clamp(16px, 1.2vw, 16px);
   }
 }
 </style>

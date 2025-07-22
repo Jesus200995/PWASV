@@ -342,32 +342,32 @@ const statCards = computed(() => [
   {
     label: 'Total Registros',
     value: stats.totalRegistros,
-    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow1"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad1)" opacity="0.2" class="pulse-bg"/><path d="M12 7v10M7 12h10" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" filter="url(#glow1)" class="sparkle"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow1"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad1)" opacity="0.2"/><path d="M12 7v10M7 12h10" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" filter="url(#glow1)"/></svg>`
   },
   {
     label: 'Usuarios Activos',
     value: stats.totalUsuarios,
-    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow2"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad2)" opacity="0.2" class="pulse-bg"/><path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z" fill="#4CAF50" filter="url(#glow2)" class="sparkle"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow2"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad2)" opacity="0.2"/><path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z" fill="#4CAF50" filter="url(#glow2)"/></svg>`
   },
   {
     label: 'Registros Hoy',
     value: stats.registrosHoy,
-    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow3"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad3)" opacity="0.2" class="pulse-bg"/><path d="M8 6h8v2H8zM6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" fill="#4CAF50" filter="url(#glow3)" class="sparkle"/><circle cx="9" cy="13" r="0.5" fill="#66BB6A"/><circle cx="12" cy="13" r="0.5" fill="#66BB6A"/><circle cx="15" cy="13" r="0.5" fill="#66BB6A"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow3"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad3)" opacity="0.2"/><path d="M8 6h8v2H8zM6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" fill="#4CAF50" filter="url(#glow3)"/><circle cx="9" cy="13" r="0.5" fill="#66BB6A"/><circle cx="12" cy="13" r="0.5" fill="#66BB6A"/><circle cx="15" cy="13" r="0.5" fill="#66BB6A"/></svg>`
   },
   {
     label: 'Total Asistencias',
     value: stats.totalAsistencias,
-    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow4"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad4)" opacity="0.2" class="pulse-bg"/><path d="m9 12 2 2 4-4" stroke="#4CAF50" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow4)" class="sparkle"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow4"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad4)" opacity="0.2"/><path d="m9 12 2 2 4-4" stroke="#4CAF50" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow4)"/></svg>`
   },
   {
     label: 'Asistencias Hoy',
     value: stats.asistenciasHoy,
-    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow5"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad5)" opacity="0.2" class="pulse-bg"/><circle cx="12" cy="12" r="8" stroke="#4CAF50" stroke-width="2" fill="none" filter="url(#glow5)" class="sparkle"/><path d="m12 6 v6 l4 2" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" filter="url(#glow5)" class="sparkle"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow5"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad5)" opacity="0.2"/><circle cx="12" cy="12" r="8" stroke="#4CAF50" stroke-width="2" fill="none" filter="url(#glow5)"/><path d="m12 6 v6 l4 2" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" filter="url(#glow5)"/></svg>`
   },
   {
     label: 'Usuarios Presentes',
     value: stats.usuariosPresentes,
-    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow6"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad6)" opacity="0.2" class="pulse-bg"/><circle cx="8" cy="8" r="2" fill="#4CAF50" filter="url(#glow6)" class="sparkle"/><circle cx="16" cy="8" r="2" fill="#4CAF50" filter="url(#glow6)" class="sparkle"/><path d="M4 18v-1a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v1M16 13a4 4 0 0 1 4 4v1" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" filter="url(#glow6)" class="sparkle"/></svg>`
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient><filter id="glow6"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="12" cy="12" r="10" fill="url(#grad6)" opacity="0.2"/><circle cx="8" cy="8" r="2" fill="#4CAF50" filter="url(#glow6)"/><circle cx="16" cy="8" r="2" fill="#4CAF50" filter="url(#glow6)"/><path d="M4 18v-1a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v1M16 13a4 4 0 0 1 4 4v1" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" filter="url(#glow6)"/></svg>`
   }
 ])
 
@@ -834,26 +834,43 @@ const logout = () => {
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.12) 0%, rgba(76, 175, 80, 0.08) 100%);
   padding: clamp(10px, 2vw, 16px);
-  border-radius: clamp(8px, 1.5vw, 12px);
+  border-radius: clamp(18px, 3vw, 24px);
   box-shadow: 
-    0 4px 20px rgba(76, 175, 80, 0.06), 
-    0 2px 10px rgba(0,0,0,0.03),
-    inset 0 1px 0 rgba(255,255,255,0.8);
+    0 4px 20px rgba(76, 175, 80, 0.15), 
+    0 2px 10px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.6);
   display: flex;
   align-items: center;
   gap: clamp(8px, 2vw, 14px);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
-  border: 2px solid transparent;
   position: relative;
   overflow: hidden;
   animation: fadeInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   width: 100%;
   box-sizing: border-box;
   min-height: clamp(55px, 8vh, 75px);
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(128, 0, 32, 0.6), rgba(76, 175, 80, 0.8));
+  border-radius: clamp(18px, 3vw, 24px);
+  padding: 2px;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .stat-card::before {
@@ -863,8 +880,10 @@ const logout = () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(128, 0, 32, 0.15), rgba(76, 175, 80, 0.2), transparent);
+  border-radius: clamp(18px, 3vw, 24px);
   transition: left 0.6s ease;
+  z-index: 0;
 }
 
 .stat-card:hover::before {
@@ -874,11 +893,14 @@ const logout = () => {
 .stat-card:hover {
   transform: translateY(-8px) scale(1.03);
   box-shadow: 
-    0 16px 36px rgba(76, 175, 80, 0.15), 
-    0 6px 18px rgba(0,0,0,0.08),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  border-color: rgba(76, 175, 80, 0.3);
-  background: linear-gradient(135deg, #ffffff 0%, #f0fff0 100%);
+    0 16px 36px rgba(76, 175, 80, 0.25), 
+    0 6px 18px rgba(128, 0, 32, 0.12),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.18) 0%, rgba(76, 175, 80, 0.12) 100%);
+}
+
+.stat-card:hover::after {
+  background: linear-gradient(135deg, rgba(128, 0, 32, 0.8), rgba(76, 175, 80, 1));
 }
 
 .animated-card {
@@ -922,6 +944,7 @@ const logout = () => {
   background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.04) 100%);
   position: relative;
   flex-shrink: 0;
+  z-index: 2;
 }
 
 .svg-icon::before {
@@ -953,6 +976,8 @@ const logout = () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  z-index: 2;
 }
 
 .stat-info h3 {
@@ -992,89 +1017,6 @@ const logout = () => {
 .stat-card:hover .stat-info p {
   color: #4CAF50;
   transform: translateX(2px);
-}
-
-/* Animaciones para iconos modernos con brillo */
-:deep(.sparkle) {
-  animation: sparkle 3s infinite;
-  transform-origin: center;
-}
-
-:deep(.pulse-bg) {
-  animation: pulseGlow 4s infinite ease-in-out;
-}
-
-@keyframes sparkle {
-  0%, 100% { 
-    opacity: 1; 
-    filter: drop-shadow(0 0 2px rgba(76, 175, 80, 0.3));
-  }
-  20% { 
-    opacity: 0.8; 
-    filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.5)) brightness(1.2);
-  }
-  50% { 
-    opacity: 1.2; 
-    filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.8)) brightness(1.5) saturate(1.3);
-    transform: scale(1.1);
-  }
-  80% { 
-    opacity: 0.9; 
-    filter: drop-shadow(0 0 6px rgba(76, 175, 80, 0.6)) brightness(1.3);
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { 
-    opacity: 0.2; 
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 0.4; 
-    transform: scale(1.05);
-  }
-}
-
-.stat-card:hover :deep(.sparkle) {
-  animation: sparkleHover 1.5s infinite;
-}
-
-.stat-card:hover :deep(.pulse-bg) {
-  animation: pulseGlowHover 2s infinite ease-in-out;
-}
-
-@keyframes sparkleHover {
-  0%, 100% { 
-    opacity: 1; 
-    filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.6)) brightness(1.3);
-    transform: scale(1);
-  }
-  25% { 
-    opacity: 1.3; 
-    filter: drop-shadow(0 0 12px rgba(76, 175, 80, 1)) brightness(1.8) saturate(1.5);
-    transform: scale(1.15) rotate(5deg);
-  }
-  50% { 
-    opacity: 1.5; 
-    filter: drop-shadow(0 0 16px rgba(102, 187, 106, 1)) brightness(2) saturate(1.7);
-    transform: scale(1.2);
-  }
-  75% { 
-    opacity: 1.2; 
-    filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.9)) brightness(1.6) saturate(1.4);
-    transform: scale(1.1) rotate(-3deg);
-  }
-}
-
-@keyframes pulseGlowHover {
-  0%, 100% { 
-    opacity: 0.4; 
-    transform: scale(1.05);
-  }
-  50% { 
-    opacity: 0.7; 
-    transform: scale(1.15);
-  }
 }
 
 .section {

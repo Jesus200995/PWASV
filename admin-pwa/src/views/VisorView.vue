@@ -1593,26 +1593,29 @@ watch([filtroTipo, filtroPeriodo], () => {
 .main-content {
   flex: 1;
   margin-left: clamp(180px, 18vw, 240px);
+  width: calc(100vw - clamp(180px, 18vw, 240px));
   background: transparent;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  width: calc(100vw - clamp(180px, 18vw, 240px));
   min-height: 100vh;
   padding: 0;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
 }
 
 /* Header con diseño moderno y verde */
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(16px, 3vw, 32px);
+  padding: clamp(16px, 4vh, 32px) clamp(16px, 4vw, 32px);
   color: white;
   box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
   overflow: hidden;
   width: 100%;
-  min-height: clamp(80px, 12vh, 120px);
+  box-sizing: border-box;
 }
 
 .page-header::before {
@@ -1906,13 +1909,19 @@ watch([filtroTipo, filtroPeriodo], () => {
   overflow: visible;
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
-/* Barra de filtros moderna */
+/* Barra de filtros moderna - Completamente responsiva */
 .modern-filter-bar {
   position: relative;
-  z-index: 2000;
+  z-index: 500;
   animation: filterBarSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+  box-sizing: border-box;
 }
 
 @keyframes filterBarSlideIn {
@@ -1927,21 +1936,61 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .filter-group {
-  display: flex;
-  align-items: center;
-  gap: clamp(8px, 2vw, 16px);
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: grid;
+  grid-template-columns: 1fr 1fr minmax(280px, 1fr) minmax(200px, 300px);
+  grid-template-areas: "filter1 filter2 search legend";
+  gap: clamp(8px, 1.5vw, 12px);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: clamp(12px, 2vw, 16px);
-  padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px);
+  padding: clamp(10px, 2vw, 16px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: visible;
   width: 100%;
-  max-width: 100%;
-  flex-wrap: wrap;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+/* Layout responsivo con breakpoints específicos */
+@media (max-width: 1400px) {
+  .filter-group {
+    grid-template-columns: 1fr 1fr minmax(250px, 1fr) minmax(180px, 280px);
+    gap: clamp(6px, 1.2vw, 10px);
+  }
+}
+
+@media (max-width: 1200px) {
+  .filter-group {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+      "filter1 filter2"
+      "search search"
+      "legend legend";
+    gap: clamp(8px, 1.5vw, 12px);
+    padding: clamp(12px, 2.5vw, 16px);
+  }
+}
+
+@media (max-width: 900px) {
+  .filter-group {
+    grid-template-columns: 1fr;
+    grid-template-areas: 
+      "search"
+      "filter1"
+      "filter2"  
+      "legend";
+    gap: clamp(10px, 2vw, 14px);
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-group {
+    padding: clamp(8px, 2vw, 12px);
+    gap: clamp(8px, 2vw, 12px);
+  }
 }
 
 .filter-group::before {
@@ -1957,16 +2006,27 @@ watch([filtroTipo, filtroPeriodo], () => {
 .filter-item {
   display: flex;
   align-items: center;
-  gap: clamp(6px, 1.5vw, 8px);
+  gap: clamp(6px, 1.2vw, 8px);
   position: relative;
   min-width: 0;
-  flex: 1;
+  box-sizing: border-box;
+}
+
+.filter-item:nth-child(1) {
+  grid-area: filter1;
+}
+
+.filter-item:nth-child(2) {
+  grid-area: filter2;
 }
 
 .filter-icon {
   color: #4CAF50;
   opacity: 0.8;
   transition: all 0.3s ease;
+  flex-shrink: 0;
+  width: clamp(14px, 2vw, 16px);
+  height: clamp(14px, 2vw, 16px);
 }
 
 .filter-item:hover .filter-icon {
@@ -1975,18 +2035,30 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .modern-select {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(76, 175, 80, 0.2);
   color: #2c3e50;
-  font-size: clamp(12px, 2vw, 14px);
+  font-size: clamp(12px, 1.8vw, 14px);
   font-weight: 500;
   cursor: pointer;
-  padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
+  padding: clamp(6px, 1.2vw, 8px) clamp(8px, 1.5vw, 12px);
   border-radius: clamp(6px, 1vw, 8px);
   transition: all 0.3s ease;
   outline: none;
-  min-width: clamp(100px, 15vw, 140px);
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.modern-select:hover {
+  background: rgba(76, 175, 80, 0.05);
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.modern-select:focus {
+  background: rgba(76, 175, 80, 0.08);
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
 .modern-select:hover {
@@ -1998,35 +2070,90 @@ watch([filtroTipo, filtroPeriodo], () => {
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-/* Leyenda integrada en los filtros - ubicada al lado del buscador */
+/* Leyenda integrada en los filtros - Completamente responsiva */
 .filter-legend {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 8px 12px;
-  background: rgba(76, 175, 80, 0.05);
-  border-radius: 10px;
-  border: 1px solid rgba(76, 175, 80, 0.15);
-  margin-left: 12px; /* Espacio entre el buscador y la leyenda */
+  justify-content: center;
+  gap: clamp(8px, 1.5vw, 12px);
+  padding: clamp(8px, 1.5vw, 12px);
+  background: rgba(76, 175, 80, 0.08);
+  border-radius: clamp(8px, 1.5vw, 10px);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  grid-area: legend;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .legend-item-inline {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: clamp(4px, 1vw, 6px);
+  font-size: clamp(10px, 1.5vw, 12px);
   font-weight: 500;
   color: #2c3e50;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .legend-point-small {
   display: inline-block;
-  width: 12px;
-  height: 12px;
+  width: clamp(10px, 1.5vw, 12px);
+  height: clamp(10px, 1.5vw, 12px);
   border-radius: 50%;
   border: 2px solid white;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
+}
+
+.legend-text {
+  font-size: clamp(10px, 1.5vw, 12px);
+  font-weight: 500;
+  color: #555;
+  white-space: nowrap;
+}
+
+/* Ajustes específicos para diferentes tamaños de pantalla */
+@media (max-width: 1200px) {
+  .filter-legend {
+    justify-content: space-around;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .filter-legend {
+    gap: clamp(12px, 2.5vw, 16px);
+  }
+  
+  .legend-item-inline {
+    gap: clamp(6px, 1.5vw, 8px);
+  }
+}
+
+@media (max-width: 600px) {
+  .filter-legend {
+    flex-wrap: wrap;
+    gap: clamp(8px, 2vw, 12px);
+  }
+  
+  .legend-item-inline {
+    flex: 1 1 45%;
+    justify-content: center;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .legend-text {
+    font-size: clamp(9px, 2vw, 10px);
+  }
+  
+  .legend-point-small {
+    width: clamp(8px, 2vw, 10px);
+    height: clamp(8px, 2vw, 10px);
+  }
 }
 
 /* Actualización de leyenda con nuevos colores */
@@ -2047,10 +2174,12 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .legend-text {
-  font-size: 12px;
+  font-size: clamp(9px, 1.2vw, 11px);
   font-weight: 500;
   color: #555;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Estilos específicos para el elemento de búsqueda */
@@ -2058,43 +2187,54 @@ watch([filtroTipo, filtroPeriodo], () => {
   position: relative !important;
   z-index: 2500 !important;
   overflow: visible !important;
+  grid-area: search;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .modern-search-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(76, 175, 80, 0.2);
-  border-radius: 12px;
-  padding: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: clamp(10px, 1.5vw, 12px);
+  padding: clamp(4px, 0.8vw, 6px);
   transition: all 0.3s ease;
-  min-width: 280px;
+  width: 100%;
   overflow: visible;
   z-index: inherit;
+  box-sizing: border-box;
 }
 
 .modern-search-wrapper:focus-within {
   border-color: #4CAF50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
 }
 
 .search-input-icon {
   color: #4CAF50;
-  margin-left: 12px;
+  margin-left: clamp(8px, 1.5vw, 12px);
   opacity: 0.7;
+  flex-shrink: 0;
+  width: clamp(14px, 2vw, 16px);
+  height: clamp(14px, 2vw, 16px);
 }
 
 .modern-search-input {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 10px 12px;
-  font-size: 14px;
+  padding: clamp(8px, 1.5vw, 12px);
+  font-size: clamp(12px, 1.8vw, 14px);
   color: #2c3e50;
   outline: none;
   font-weight: 400;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .modern-search-input::placeholder {
@@ -2106,15 +2246,17 @@ watch([filtroTipo, filtroPeriodo], () => {
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  width: 36px;
-  height: 36px;
+  border-radius: clamp(6px, 1vw, 8px);
+  width: clamp(32px, 5vw, 40px);
+  height: clamp(32px, 5vw, 40px);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  flex-shrink: 0;
+  margin-right: clamp(2px, 0.5vw, 4px);
 }
 
 .modern-search-btn:hover {
@@ -2336,12 +2478,12 @@ watch([filtroTipo, filtroPeriodo], () => {
   color: #f39c12;
 }
 
-/* Mapa principal */
+/* Mapa principal - Completamente responsivo */
 .visor-section {
   position: relative;
   flex: 1;
   background: white;
-  border-radius: 16px;
+  border-radius: clamp(12px, 2vw, 16px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
@@ -2349,23 +2491,31 @@ watch([filtroTipo, filtroPeriodo], () => {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  min-height: 0;
+  box-sizing: border-box;
 }
 
 .loading-container, .error-container {
-  padding: 60px 20px;
+  padding: clamp(40px, 8vw, 60px) clamp(20px, 4vw, 40px);
   text-align: center;
   background: white;
-  border-radius: 12px;
+  border-radius: clamp(8px, 1.5vw, 12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(200px, 30vh, 300px);
 }
 
 .spinner-large {
-  width: 40px;
-  height: 40px;
+  width: clamp(32px, 6vw, 40px);
+  height: clamp(32px, 6vw, 40px);
   border: 4px solid #e0e0e0;
   border-top: 4px solid #4CAF50;
   border-radius: 50%;
   animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
-  margin: 0 auto 20px;
+  margin: 0 auto clamp(16px, 3vw, 20px);
 }
 
 @keyframes pulse {
@@ -2378,14 +2528,15 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .retry-btn {
-  padding: 12px 20px;
+  padding: clamp(10px, 2vw, 12px) clamp(16px, 3vw, 20px);
   background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: clamp(6px, 1vw, 8px);
   cursor: pointer;
-  margin-top: 16px;
+  margin-top: clamp(12px, 2.5vw, 16px);
   font-weight: 500;
+  font-size: clamp(12px, 2vw, 14px);
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
 }
@@ -2402,14 +2553,45 @@ watch([filtroTipo, filtroPeriodo], () => {
 .mapa-container {
   flex: 1;
   width: 100%;
-  min-height: clamp(300px, 60vh, 600px);
-  max-height: calc(100vh - clamp(180px, 25vh, 300px));
+  height: 100%;
+  min-height: clamp(250px, 45vh, 400px);
+  max-height: none;
   z-index: 10;
   position: relative;
   pointer-events: auto;
-  border-radius: clamp(8px, 1.5vw, 12px);
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+/* Responsividad específica para diferentes dispositivos */
+@media (max-width: 1024px) and (orientation: landscape) {
+  .mapa-container {
+    min-height: clamp(200px, 50vh, 350px);
+  }
+}
+
+@media (max-width: 768px) {
+  .visor-section {
+    border-radius: clamp(8px, 2vw, 12px);
+  }
+  
+  .mapa-container {
+    min-height: clamp(250px, 40vh, 350px);
+  }
+}
+
+@media (max-width: 480px) {
+  .mapa-container {
+    min-height: clamp(200px, 35vh, 300px);
+  }
+}
+
+/* Para tablets en modo portrait */
+@media (max-width: 1024px) and (orientation: portrait) {
+  .mapa-container {
+    min-height: clamp(300px, 50vh, 500px);
+  }
 }
 
 /* Asegurar navegabilidad del mapa en todas las condiciones */
@@ -4482,165 +4664,103 @@ watch([filtroTipo, filtroPeriodo], () => {
   transition: all 0.3s ease;
 }
 
-/* Estilos responsivos para la barra de filtros moderna */
-@media (max-width: 1024px) {
-  .main-content {
-    margin-left: clamp(60px, 8vw, 80px);
-    width: calc(100vw - clamp(60px, 8vw, 80px));
-  }
-  
-  .filter-group {
-    flex-wrap: wrap;
-    gap: clamp(8px, 2vw, 12px);
-    width: 100%;
-    padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
-  }
-  
-  .filter-legend {
-    order: 2;
-    width: 100%;
-    justify-content: center;
-    margin: clamp(4px, 1vw, 8px) 0 0 0;
-  }
-  
-  .search-item {
-    margin-left: 0;
-    width: 100%;
-    order: 1;
-  }
-  
-  .modern-search-wrapper {
-    min-width: 100%;
-  }
-  
-  .mapa-container {
-    min-height: clamp(250px, 50vh, 400px);
-  }
-  
-  .registro-info-panel {
-    width: clamp(250px, 45vw, 300px);
-  }
-}
+/* Estilos responsivos - IGUAL QUE REGISTROSVIEW */
 
+/* Responsive */
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    width: 100vw;
   }
   
   .page-header {
-    padding: clamp(16px, 3vw, 24px) clamp(12px, 3vw, 20px);
+    padding: 16px 20px;
   }
   
   .header-content {
     flex-direction: column;
-    gap: clamp(12px, 2.5vw, 16px);
+    gap: 16px;
     align-items: flex-start;
-  }
-  
-  .header-main {
-    gap: clamp(12px, 2.5vw, 16px);
-    width: 100%;
-  }
-  
-  .header-icon {
-    width: clamp(32px, 6vw, 40px);
-    height: clamp(32px, 6vw, 40px);
-  }
-  
-  .header-icon svg {
-    width: clamp(16px, 3vw, 20px);
-    height: clamp(16px, 3vw, 20px);
-  }
-  
-  .header-title {
-    font-size: clamp(18px, 5vw, 24px);
-  }
-  
-  .header-subtitle {
-    font-size: clamp(12px, 3vw, 14px);
-  }
-  
-  .header-actions {
-    align-self: flex-end;
-    gap: clamp(8px, 2vw, 12px);
-    width: 100%;
-    justify-content: flex-end;
-  }
-  
-  .refresh-btn {
-    padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
-    font-size: clamp(11px, 2.5vw, 13px);
   }
   
   .page-content {
-    padding: clamp(12px, 2.5vw, 16px) clamp(8px, 2vw, 12px);
+    padding: 16px 20px;
   }
   
   .filter-group {
-    flex-direction: column;
-    align-items: stretch;
-    gap: clamp(12px, 3vw, 16px);
-    padding: clamp(12px, 3vw, 16px);
-  }
-  
-  .filter-legend {
-    order: 2;
-    width: 100%;
-    justify-content: center;
-    gap: clamp(16px, 4vw, 20px);
-    margin: clamp(6px, 1.5vw, 8px) 0 0 0;
-    padding: clamp(8px, 2vw, 12px);
-  }
-  
-  .legend-item-inline {
-    gap: clamp(6px, 1.5vw, 8px);
-  }
-  
-  .legend-point-small {
-    width: clamp(12px, 3vw, 14px);
-    height: clamp(12px, 3vw, 14px);
-  }
-  
-  .legend-text {
-    font-size: clamp(11px, 2.5vw, 13px);
+    grid-template-columns: 1fr;
+    grid-template-areas: 
+      "search"
+      "filter1"
+      "filter2"
+      "legend";
+    gap: 12px;
+    padding: 16px;
   }
   
   .filter-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: clamp(6px, 2vw, 8px);
+    width: 100%;
   }
   
   .modern-select {
     width: 100%;
-    min-width: auto;
-    padding: clamp(8px, 2.5vw, 12px);
-    font-size: clamp(14px, 3vw, 16px);
-  }
-  
-  .modern-search-wrapper {
-    min-width: 100%;
-    padding: clamp(4px, 1.5vw, 6px);
+    padding: 10px 12px;
+    font-size: 14px;
   }
   
   .modern-search-input {
-    padding: clamp(8px, 2.5vw, 12px);
-    font-size: clamp(14px, 3vw, 16px);
+    padding: 10px;
+    font-size: 14px;
   }
   
   .modern-search-btn {
-    width: clamp(32px, 7vw, 40px);
-    height: clamp(32px, 7vw, 40px);
+    width: 36px;
+    height: 36px;
   }
   
   .mapa-container {
-    min-height: clamp(200px, 40vh, 300px);
+    min-height: 300px;
   }
-  
+}
+
+/* Ajustes específicos para el panel de detalles responsivo */
+.registro-info-panel {
+  position: fixed;
+  top: clamp(80px, 15vh, 120px);
+  right: -100vw;
+  width: clamp(280px, 35vw, 400px);
+  max-width: calc(100vw - 40px);
+  height: calc(100vh - clamp(100px, 20vh, 160px));
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: clamp(12px, 2vw, 16px) 0 0 clamp(12px, 2vw, 16px);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
+  z-index: 3000;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.registro-info-panel.panel-visible {
+  right: clamp(10px, 2vw, 20px);
+}
+
+/* Responsive para panel de detalles */
+@media (max-width: 1024px) {
+  .registro-info-panel {
+    width: clamp(300px, 50vw, 450px);
+    top: clamp(70px, 12vh, 100px);
+  }
+}
+
+@media (max-width: 768px) {
   .registro-info-panel {
     width: calc(100vw - 20px);
     right: -100vw;
+    top: clamp(60px, 10vh, 80px);
+    height: calc(100vh - clamp(80px, 15vh, 120px));
+    border-radius: clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px) 0 0;
   }
   
   .registro-info-panel.panel-visible {
@@ -4649,73 +4769,57 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 @media (max-width: 480px) {
-  .main-content {
-    margin-left: 0;
-    width: 100vw;
+  .registro-info-panel {
+    width: calc(100vw - 10px);
+    right: -100vw;
+    top: clamp(50px, 8vh, 70px);
+    height: calc(100vh - clamp(60px, 12vh, 100px));
   }
   
-  .page-header {
-    padding: clamp(12px, 3vw, 16px) clamp(8px, 2vw, 12px);
-  }
-  
-  .header-main {
-    gap: clamp(6px, 2vw, 8px);
-  }
-  
-  .header-title {
-    font-size: clamp(16px, 4vw, 20px);
-  }
-  
-  .header-subtitle {
-    font-size: clamp(10px, 2.5vw, 12px);
-  }
-  
-  .refresh-btn {
-    padding: clamp(6px, 2vw, 8px) clamp(8px, 2.5vw, 12px);
-    font-size: clamp(10px, 2.5vw, 12px);
-    gap: clamp(4px, 1.5vw, 6px);
-  }
-  
-  .page-content {
-    padding: clamp(8px, 2vw, 12px) clamp(6px, 1.5vw, 10px);
-  }
-  
-  .filter-group {
-    border-radius: clamp(8px, 2vw, 12px);
-    padding: clamp(8px, 2.5vw, 12px);
-    gap: clamp(8px, 2vw, 12px);
-  }
-  
-  .filter-legend {
-    padding: clamp(8px, 2vw, 10px);
-    gap: clamp(12px, 3vw, 16px);
-    border-radius: clamp(6px, 1.5vw, 8px);
-  }
-  
-  .legend-item-inline {
-    gap: clamp(4px, 1.5vw, 6px);
-  }
-  
-  .legend-point-small {
-    width: clamp(10px, 2.5vw, 12px);
-    height: clamp(10px, 2.5vw, 12px);
-  }
-  
-  .legend-text {
-    font-size: clamp(9px, 2vw, 11px);
-  }
-  
-  .modern-search-wrapper {
-    border-radius: clamp(8px, 2vw, 10px);
-  }
-  
-  .modern-search-btn {
-    border-radius: clamp(4px, 1.5vw, 6px);
-  }
-  
-  .mapa-container {
-    min-height: clamp(200px, 35vh, 250px);
-    border-radius: clamp(6px, 1.5vw, 8px);
+  .registro-info-panel.panel-visible {
+    right: 5px;
   }
 }
+
+/* Asegurar que los controles de Leaflet sean accesibles */
+:global(.leaflet-control-zoom) {
+  margin-right: clamp(10px, 2vw, 20px) !important;
+  margin-top: clamp(10px, 2vw, 20px) !important;
+}
+
+:global(.leaflet-control-attribution) {
+  font-size: clamp(9px, 1.5vw, 11px) !important;
+}
+
+/* Popup responsivo del mapa */
+:global(.leaflet-popup-content-wrapper) {
+  max-width: clamp(280px, 50vw, 400px) !important;
+  min-width: clamp(250px, 45vw, 320px) !important;
+}
+
+:global(.leaflet-popup-content) {
+  margin: clamp(8px, 1.5vw, 12px) clamp(10px, 2vw, 16px) !important;
+  font-size: clamp(11px, 1.8vw, 13px) !important;
+}
+
+@media (max-width: 768px) {
+  :global(.leaflet-popup-content-wrapper) {
+    max-width: calc(100vw - 40px) !important;
+    min-width: clamp(200px, 80vw, 300px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  :global(.leaflet-popup-content-wrapper) {
+    max-width: calc(100vw - 20px) !important;
+    min-width: calc(100vw - 60px) !important;
+  }
+  
+  :global(.leaflet-popup-content) {
+    margin: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 12px) !important;
+    font-size: clamp(10px, 2.5vw, 12px) !important;
+  }
+}
+
+/* Fin de estilos responsivos */
 </style>

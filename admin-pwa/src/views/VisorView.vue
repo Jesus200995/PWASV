@@ -462,6 +462,129 @@ const formatCoordenadas = (lat, lng) => {
   return `${parseFloat(lat).toFixed(6)}, ${parseFloat(lng).toFixed(6)}`
 }
 
+// Función para recalcular la posición del palito cuando sea necesario
+const recalcularPalitos = () => {
+  // Encontrar todos los popups abiertos y recalcular sus palitos
+  setTimeout(() => {
+    const popupsAbiertos = document.querySelectorAll('.leaflet-popup-content .modern-marker-popup')
+    if (popupsAbiertos.length > 0) {
+      // Encontrar el marcador asociado a este popup
+      markers.forEach(marker => {
+        if (marker.isPopupOpen && marker.isPopupOpen()) {
+          conectarPalitoConCirculo(marker, marker.getPopup())
+        }
+      })
+    }
+  }, 100) // Pequeño delay para asegurar que las posiciones se hayan actualizado
+}
+
+// Función para calcular y conectar el palito dinámicamente con el centro del círculo
+const conectarPalitoConCirculo = (marker, popup) => {
+  // Esperar a que el popup esté completamente renderizado
+  setTimeout(() => {
+    const popupElement = popup.getElement()
+    const markerElement = marker.getElement()
+    
+    if (!popupElement || !markerElement) return
+    
+    const popupContent = popupElement.querySelector('.modern-marker-popup')
+    const circleElement = markerElement.querySelector('.location-marker')
+    
+    if (!popupContent || !circleElement) return
+    
+    try {
+      // Obtener las posiciones exactas relativas al viewport
+      const popupRect = popupContent.getBoundingClientRect()
+      const circleRect = circleElement.getBoundingClientRect()
+      
+      // Calcular el centro exacto del círculo
+      const circleCenterX = circleRect.left + (circleRect.width / 2)
+      const circleCenterY = circleRect.top + (circleRect.height / 2)
+      
+      // Calcular el centro del popup
+      const popupCenterX = popupRect.left + (popupRect.width / 2)
+      const popupBottomY = popupRect.bottom
+      
+      // Calcular desplazamiento horizontal para centrar el palito con el círculo
+      const offsetX = circleCenterX - popupCenterX
+      
+      // Calcular la distancia exacta vertical
+      const distanciaVertical = Math.abs(circleCenterY - popupBottomY)
+      
+      // Asegurar una altura mínima visible
+      const palitoHeight = Math.max(distanciaVertical - 2, 15) // Mínimo 15px, menos 2px de ajuste
+      
+      // Obtener el tipo de popup para el color correcto
+      const popupClasses = popupContent.className
+      let colorPalito = '#FF9800' // Naranja por defecto
+      let shadowColor = 'rgba(255, 152, 0, 0.5)'
+      
+      if (popupClasses.includes('entrada-popup')) {
+        colorPalito = '#32CD32'
+        shadowColor = 'rgba(50, 205, 50, 0.5)'
+      } else if (popupClasses.includes('salida-popup')) {
+        colorPalito = '#DC2626'
+        shadowColor = 'rgba(220, 38, 38, 0.5)'
+      } else if (popupClasses.includes('registro-hoy-popup')) {
+        colorPalito = '#1E3A8A'
+        shadowColor = 'rgba(30, 58, 138, 0.5)'
+      }
+      
+      // Crear o actualizar el estilo dinámico del palito
+      let styleElement = document.getElementById('dynamic-palito-style')
+      if (!styleElement) {
+        styleElement = document.createElement('style')
+        styleElement.id = 'dynamic-palito-style'
+        document.head.appendChild(styleElement)
+      }
+      
+      // CSS dinámico para este popup específico - centrado exactamente con el círculo
+      styleElement.textContent = `
+        .modern-marker-popup::after {
+          content: "" !important;
+          display: block !important;
+          position: absolute !important;
+          left: calc(50% + ${offsetX}px) !important;
+          bottom: -${palitoHeight}px !important;
+          transform: translateX(-50%) !important;
+          width: 5px !important;
+          height: ${palitoHeight}px !important;
+          background: ${colorPalito} !important;
+          border-radius: 2.5px !important;
+          box-shadow: 0 0 12px ${shadowColor}, 0 0 0 1px rgba(255, 255, 255, 0.4) !important;
+          z-index: 10000 !important;
+          pointer-events: none !important;
+          opacity: 1 !important;
+        }
+        
+        /* Asegurar que el palito sea visible en responsive */
+        @media (max-width: 768px) {
+          .modern-marker-popup::after {
+            width: 4px !important;
+            height: ${Math.max(palitoHeight * 0.85, 12)}px !important;
+            bottom: -${Math.max(palitoHeight * 0.85, 12)}px !important;
+            left: calc(50% + ${offsetX * 0.9}px) !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .modern-marker-popup::after {
+            width: 3px !important;
+            height: ${Math.max(palitoHeight * 0.7, 10)}px !important;
+            bottom: -${Math.max(palitoHeight * 0.7, 10)}px !important;
+            left: calc(50% + ${offsetX * 0.8}px) !important;
+          }
+        }
+      `
+      
+      console.log(`Palito conectado - Altura: ${palitoHeight}px, OffsetX: ${offsetX}px, Color: ${colorPalito}`)
+      
+    } catch (error) {
+      console.error('Error al calcular posición del palito:', error)
+    }
+  }, 200) // Aumentado el delay para mejor precisión
+}
+
 // Cargar registros y asistencias desde la API
 const cargarRegistros = async () => {
   loading.value = true
@@ -645,6 +768,11 @@ const inicializarMapa = (ultimasUbicaciones = null) => {
     // Crear capa para los marcadores
     markersLayer = window.L.layerGroup().addTo(map)
     
+    // Agregar listeners para recalcular palitos cuando sea necesario
+    map.on('moveend', recalcularPalitos)
+    map.on('zoomend', recalcularPalitos)
+    window.addEventListener('resize', recalcularPalitos)
+    
     // Agregar controles adicionales
     window.L.control.scale({
       imperial: false,
@@ -749,7 +877,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
         html: markerHtml,
         iconSize: iconSize,
         iconAnchor: [iconSize[0] / 2, iconSize[0] / 2],
-        popupAnchor: [0, -iconSize[0] / 2 - 5] // Posicionamiento preciso para alineación con marcador
+        popupAnchor: [0, -iconSize[0] / 2 - 35] // Ajustado para conectar palito con centro del círculo
       })
 
       // Crear marcador y popup con posicionamiento mejorado
@@ -823,7 +951,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
           maxWidth: 320,
           minWidth: 300,
           className: `modern-popup-container centered-popup ${tipoActividad.clase}-tip`,
-          offset: [0, -16], // Ajustado para alinear perfectamente con el marcador
+          offset: [0, -2], // Offset mínimo para que el palito conecte con el círculo
           autoPan: true,
           autoPanPadding: [50, 50],
           keepInView: true,
@@ -846,6 +974,14 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
       
       // Añadir evento al botón "Ver detalles" dentro del popup
       marker.on('popupopen', (e) => {
+        // Conectar dinámicamente el palito con el círculo - primera vez
+        conectarPalitoConCirculo(marker, marker.getPopup())
+        
+        // Recalcular después de un tiempo para asegurar renderizado completo
+        setTimeout(() => {
+          conectarPalitoConCirculo(marker, marker.getPopup())
+        }, 300)
+        
         setTimeout(() => {
           // Botón "Ver detalles"
           const detailBtn = document.querySelector('.popup-detail-btn')
@@ -893,6 +1029,12 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
       
       // Manejar el cierre del popup
       marker.on('popupclose', (e) => {
+        // Limpiar el estilo dinámico del palito
+        const styleElement = document.getElementById('dynamic-palito-style')
+        if (styleElement) {
+          styleElement.remove()
+        }
+        
         // Si el popup se cierra, también cerrar el panel de detalles
         if (mostrarPanelDetalles.value) {
           cerrarPanelDetalles()
@@ -1556,6 +1698,15 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  // Limpiar listeners de redimensionamiento
+  window.removeEventListener('resize', recalcularPalitos)
+  
+  // Limpiar estilo dinámico del palito
+  const styleElement = document.getElementById('dynamic-palito-style')
+  if (styleElement) {
+    styleElement.remove()
+  }
+  
   // Limpiar mapa al salir
   if (map) {
     map.remove()
@@ -4074,75 +4225,32 @@ watch([filtroTipo, filtroPeriodo], () => {
   max-width: calc(100vw - 40px) !important;
   background: transparent !important; /* Quitar el fondo blanco */
   box-shadow: none !important; /* Quitar sombra por defecto */
+  overflow: visible !important; /* Permitir que el palito sea visible */
 }
 
 :global(.modern-popup-container .leaflet-popup-tip) {
-  background: white !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  width: 14px !important;
-  height: 14px !important;
-  margin: 0 !important;
+  display: none !important; /* Ocultar completamente el tip original de Leaflet */
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-/* Posicionamiento mejorado del tip (punta del popup) */
+/* Tip oculto para popup centrado */
 :global(.modern-popup-container.centered-popup .leaflet-popup-tip) {
-  left: 50% !important;
-  margin-left: -7px !important;
+  display: none !important; /* Ocultar el tip de Leaflet */
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 
-/* Asegurar que la punta del popup sea visible y tenga el color correcto */
+/* Ocultar el contenedor del tip de Leaflet */
 :global(.modern-popup-container .leaflet-popup-tip-container) {
-  width: 40px !important;
-  height: 20px !important;
-  pointer-events: none !important;
-  margin: 0 auto !important;
+  display: none !important; /* Ocultar completamente el contenedor del tip */
 }
 
-/* Color de la flecha para popup reciente (verde) */
-:global(.modern-popup-container .leaflet-popup-tip) {
-  background: white !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  width: 14px !important;
-  height: 14px !important;
-  margin: 0 !important;
-  z-index: 1051 !important;
-}
 
-/* Hacer que la flecha herede el color del popup según el tipo de actividad */
-:global(.modern-popup-container:has(.entrada-popup) .leaflet-popup-tip) {
-  background: #32CD32 !important; /* Verde lima para entrada */
-}
 
-:global(.modern-popup-container:has(.salida-popup) .leaflet-popup-tip) {
-  background: #DC2626 !important; /* Rojo para salida */
-}
 
-:global(.modern-popup-container:has(.registro-hoy-popup) .leaflet-popup-tip) {
-  background: #1E3A8A !important; /* Azul marino para registros de hoy */
-}
-
-:global(.modern-popup-container:has(.antiguo-popup) .leaflet-popup-tip) {
-  background: #FF9800 !important; /* Naranja para registros antiguos */
-}
-
-/* Fallback para navegadores que no soportan :has() */
-:global(.modern-popup-container.entrada-tip .leaflet-popup-tip) {
-  background: #32CD32 !important;
-}
-
-:global(.modern-popup-container.salida-tip .leaflet-popup-tip) {
-  background: #DC2626 !important;
-}
-
-:global(.modern-popup-container.registro-hoy-tip .leaflet-popup-tip) {
-  background: #1E3A8A !important;
-}
-
-:global(.modern-popup-container.antiguo-tip .leaflet-popup-tip) {
-  background: #FF9800 !important;
-}
 
 /* Ocultar el botón de cerrar por defecto de Leaflet ya que usamos uno personalizado */
 :global(.modern-popup-container .leaflet-container a.leaflet-popup-close-button) {
@@ -4207,7 +4315,18 @@ watch([filtroTipo, filtroPeriodo], () => {
   box-shadow: none !important;
 }
 
-/* Asegurar que Leaflet sea navegable con z-index apropiados */
+/* Asegurar que todos los contenedores de Leaflet permitan el overflow visible */
+:global(.leaflet-popup-pane) {
+  overflow: visible !important;
+}
+
+:global(.leaflet-popup) {
+  overflow: visible !important;
+}
+
+:global(.modern-popup-container) {
+  overflow: visible !important;
+}
 :global(.leaflet-map-pane) {
   z-index: 1 !important;
 }
@@ -4441,115 +4560,71 @@ watch([filtroTipo, filtroPeriodo], () => {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: white;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible !important; /* Permitir que el palito sea visible fuera del popup */
   min-width: 240px;
   animation: contentFlipIn 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
   position: relative;
+  /* El palito vertical se crea usando ::after - ver estilos más abajo */
 }
 
-/* Flecha personalizada para el popup - Perfectamente alineada con el marcador */
+/* Palito vertical tipo paleta - Conecta el modal con el centro exacto del círculo */
 :global(.modern-marker-popup::after) {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -14px; /* Pegada al borde inferior */
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-width: 14px 14px 0 14px; /* Triángulo hacia abajo */
-  border-style: solid;
-  border-color: transparent transparent transparent transparent;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-  z-index: 5; /* Para no tapar el marcador */
-  pointer-events: none;
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: -35px !important; /* Longitud para llegar al centro del círculo */
+  transform: translateX(-50%) !important;
+  width: 4px !important; /* Ancho del palito */
+  height: 35px !important; /* Altura que llega exactamente al centro del círculo */
+  background: #FF9800 !important; /* Color por defecto naranja */
+  border-radius: 2px !important; /* Bordes redondeados */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  z-index: 1000 !important; /* Z-index alto para estar visible */
+  pointer-events: none !important;
 }
 
-/* Línea de conexión visual mejorada */
-:global(.modern-marker-popup::before) {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -6px;
-  transform: translateX(-50%);
-  width: 3px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 2px;
-  z-index: 6;
-  pointer-events: none;
-  animation: connectionPulse 2s ease-in-out infinite;
-}
 
-@keyframes connectionPulse {
-  0%, 100% { 
-    opacity: 0.8;
-    height: 6px;
-  }
-  50% { 
-    opacity: 1;
-    height: 8px;
-  }
-}
 
-/* Responsive: Flecha ajustada en dispositivos táctiles */
+/* Responsive: Palito ajustado en dispositivos táctiles */
 @media (max-width: 768px) {
   :global(.modern-marker-popup::after) {
-    border-width: 12px 12px 0 12px;
-    bottom: -12px;
-  }
-  
-  :global(.modern-marker-popup::before) {
-    bottom: -4px;
-    height: 4px;
+    width: 3px !important;
+    height: 30px !important;
+    bottom: -30px !important;
   }
 }
 
 @media (max-width: 480px) {
   :global(.modern-marker-popup::after) {
-    border-width: 10px 10px 0 10px;
-    bottom: -10px;
-  }
-  
-  :global(.modern-marker-popup::before) {
-    bottom: -3px;
-    height: 3px;
-    width: 2px;
+    width: 2px !important;
+    height: 25px !important;
+    bottom: -25px !important;
   }
 }
 
-/* Flechas con los nuevos colores según tipo de actividad */
+/* Palito con los colores según tipo de actividad - Más visible y conectado */
 :global(.modern-marker-popup.entrada-popup::after) {
-  border-color: #32CD32 transparent transparent transparent; /* Verde lima para entrada */
+  background: #32CD32 !important; /* Verde lima para entrada */
+  box-shadow: 0 0 8px rgba(50, 205, 50, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2) !important; /* Brillo verde + borde */
 }
 
 :global(.modern-marker-popup.salida-popup::after) {
-  border-color: #DC2626 transparent transparent transparent; /* Rojo para salida */
+  background: #DC2626 !important; /* Rojo para salida */
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2) !important; /* Brillo rojo + borde */
 }
 
 :global(.modern-marker-popup.registro-hoy-popup::after) {
-  border-color: #1E3A8A transparent transparent transparent; /* Azul marino para registros de hoy */
+  background: #1E3A8A !important; /* Azul marino para registros de hoy */
+  box-shadow: 0 0 8px rgba(30, 58, 138, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2) !important; /* Brillo azul + borde */
 }
 
 :global(.modern-marker-popup.antiguo-popup::after) {
-  border-color: #FF9800 transparent transparent transparent; /* Naranja para registros antiguos */
+  background: #FF9800 !important; /* Naranja para registros antiguos */
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2) !important; /* Brillo naranja + borde */
 }
 
-/* Líneas de conexión con colores coincidentes */
-:global(.modern-marker-popup.entrada-popup::before) {
-  background: #32CD32;
-}
 
-:global(.modern-marker-popup.salida-popup::before) {
-  background: #DC2626;
-}
-
-:global(.modern-marker-popup.registro-hoy-popup::before) {
-  background: #1E3A8A;
-}
-
-:global(.modern-marker-popup.antiguo-popup::before) {
-  background: #FF9800;
-}
 
 /* Botón de cerrar personalizado del popup - Posicionamiento mejorado */
 :global(.popup-close-btn) {

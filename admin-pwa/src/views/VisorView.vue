@@ -256,15 +256,20 @@
                 <!-- Foto del registro -->
                 <div v-if="registroSeleccionado.foto_url" class="photo-section">
                   <h5 class="section-title">Fotografía del Registro</h5>
-                  <div class="photo-container" @click="abrirFotoModal(registroSeleccionado.foto_url, `Foto del registro #${registroSeleccionado.usuario_id}`)">
-                    <img :src="registroSeleccionado.foto_url" alt="Foto del registro" class="registro-photo">
+                  <div class="photo-container" @click="verFotoAmpliada(registroSeleccionado.foto_url.startsWith('http') ? registroSeleccionado.foto_url : `${API_URL}/${registroSeleccionado.foto_url}`)">
+                    <img 
+                      :src="registroSeleccionado.foto_url.startsWith('http') ? registroSeleccionado.foto_url : `${API_URL}/${registroSeleccionado.foto_url}`" 
+                      alt="Foto del registro" 
+                      class="registro-photo"
+                      @error="onImageError"
+                      @load="onImageLoad">
                     <div class="photo-overlay">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                         <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                       </svg>
                     </div>
                     <!-- Mini botón de descarga animado -->
-                    <button @click.stop="descargarFoto(registroSeleccionado.foto_url, `registro_${registroSeleccionado.usuario_id}_${new Date(registroSeleccionado.fecha_hora).toISOString().slice(0,10)}.jpg`, $event)" class="download-mini-btn" title="Descargar imagen">
+                    <button @click.stop="descargarFoto(registroSeleccionado.foto_url.startsWith('http') ? registroSeleccionado.foto_url : `${API_URL}/${registroSeleccionado.foto_url}`, `registro_${registroSeleccionado.usuario_id}_${new Date(registroSeleccionado.fecha_hora).toISOString().slice(0,10)}.jpg`, $event)" class="download-mini-btn" title="Descargar imagen">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="download-icon">
                         <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
                       </svg>
@@ -1407,6 +1412,42 @@ const descargarFoto = async (fotoUrl, nombreArchivo, evento = null) => {
       alert('No se pudo descargar la imagen. Haz clic derecho en la imagen y selecciona "Guardar imagen como..."')
     }
   }
+}
+
+// Manejar errores de carga de imagen
+const onImageError = (event) => {
+  console.error('Error al cargar la imagen:', event.target.src)
+  event.target.style.display = 'none'
+  
+  // Crear un placeholder para imagen no encontrada
+  const placeholder = document.createElement('div')
+  placeholder.className = 'image-placeholder'
+  placeholder.innerHTML = `
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="#ccc">
+      <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H20A2,2 0 0,0 22,20V8L14,2M18,20H6V4H13V9H20V20Z"/>
+    </svg>
+    <p style="color: #999; font-size: 10px; margin: 4px 0 0 0;">Imagen no disponible</p>
+  `
+  placeholder.style.cssText = `
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    width: 100%; 
+    height: 80px; 
+    background: #f5f5f5; 
+    border-radius: 6px;
+  `
+  
+  // Reemplazar la imagen con el placeholder
+  event.target.parentNode.insertBefore(placeholder, event.target)
+  event.target.remove()
+}
+
+// Manejar carga exitosa de imagen
+const onImageLoad = (event) => {
+  console.log('Imagen cargada exitosamente:', event.target.src)
+  event.target.style.opacity = '1'
 }
 
 // Cerrar modal
@@ -2748,6 +2789,25 @@ watch([filtroTipo, filtroPeriodo], () => {
   max-height: 80px;
   object-fit: cover;
   display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.registro-photo[src] {
+  opacity: 1;
+}
+
+/* Placeholder para imágenes no disponibles */
+.image-placeholder {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 80px !important;
+  background: #f5f5f5 !important;
+  border-radius: 6px !important;
+  border: 1px dashed #ddd !important;
 }
 
 .photo-overlay {

@@ -82,8 +82,16 @@
             <!-- Leyenda de colores al lado del buscador -->
             <div class="filter-legend">
               <div class="legend-item-inline">
-                <span class="legend-point-small reciente"></span>
-                <span class="legend-text">Hoy</span>
+                <span class="legend-point-small entrada"></span>
+                <span class="legend-text">Entrada</span>
+              </div>
+              <div class="legend-item-inline">
+                <span class="legend-point-small salida"></span>
+                <span class="legend-text">Salida</span>
+              </div>
+              <div class="legend-item-inline">
+                <span class="legend-point-small registro-hoy"></span>
+                <span class="legend-text">Registro Hoy</span>
               </div>
               <div class="legend-item-inline">
                 <span class="legend-point-small antiguo"></span>
@@ -112,8 +120,10 @@
           class="registro-info-panel"
           :class="{ 
             'panel-visible': mostrarPanelDetalles,
-            'panel-recent': esUbicacionReciente(registroSeleccionado.fecha_hora),
-            'panel-old': !esUbicacionReciente(registroSeleccionado.fecha_hora)
+            'panel-entrada': registroSeleccionado.tipo_actividad === 'entrada',
+            'panel-salida': registroSeleccionado.tipo_actividad === 'salida',
+            'panel-registro-hoy': registroSeleccionado.tipo_actividad === 'registro' && esUbicacionReciente(registroSeleccionado.fecha_hora),
+            'panel-old': registroSeleccionado.tipo_actividad === 'registro' && !esUbicacionReciente(registroSeleccionado.fecha_hora)
           }"
         >
           <div class="panel-header">
@@ -176,8 +186,8 @@
                 </div>
                 <div class="info-text-wrapper">
                   <span class="info-label">Estado:</span>
-                  <span :class="['status-badge-large', esUbicacionReciente(registroSeleccionado.fecha_hora) ? 'recent' : 'old']">
-                    {{ esUbicacionReciente(registroSeleccionado.fecha_hora) ? 'Ubicación de hoy' : 'Ubicación anterior' }}
+                  <span :class="['status-badge-large', determinarTipoActividad(registroSeleccionado).clase]">
+                    {{ determinarTipoActividad(registroSeleccionado).descripcion }}
                   </span>
                 </div>
               </div>
@@ -241,8 +251,8 @@
               <div class="modal-user-info">
                 <h4 class="modal-user-name">{{ registroSeleccionado?.usuario?.nombre_completo || `Usuario ${registroSeleccionado?.usuario_id}` }}</h4>
                 <p class="modal-user-email">{{ registroSeleccionado?.usuario?.correo || registroSeleccionado?.usuario?.email || 'correo@noregistrado.com' }}</p>
-                <span :class="['modal-status-badge', esUbicacionReciente(registroSeleccionado?.fecha_hora) ? 'recent' : 'old']">
-                  {{ esUbicacionReciente(registroSeleccionado?.fecha_hora) ? 'Ubicación de hoy' : 'Ubicación anterior' }}
+                <span :class="['modal-status-badge', determinarTipoActividad(registroSeleccionado).clase]">
+                  {{ determinarTipoActividad(registroSeleccionado).descripcion }}
                 </span>
               </div>
             </div>
@@ -344,6 +354,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
+import asistenciasService from '../services/asistenciasService.js'
 
 const router = useRouter()
 
@@ -352,6 +363,7 @@ const isOnline = ref(navigator.onLine)
 
 const API_URL = 'https://apipwa.sembrandodatos.com'
 const registros = ref([])
+const asistencias = ref([])
 const loading = ref(false)
 const error = ref('')
 
@@ -391,36 +403,42 @@ const formatCoordenadas = (lat, lng) => {
   return `${parseFloat(lat).toFixed(6)}, ${parseFloat(lng).toFixed(6)}`
 }
 
-// Cargar registros desde la API
+// Cargar registros y asistencias desde la API
 const cargarRegistros = async () => {
   loading.value = true
   error.value = ''
   
   try {
     const token = localStorage.getItem('admin_token')
-    const response = await axios.get(`${API_URL}/registros`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    })
+    
+    // Cargar registros y asistencias en paralelo
+    const [responseRegistros, asistenciasData] = await Promise.all([
+      axios.get(`${API_URL}/registros`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }),
+      asistenciasService.obtenerAsistenciasConUsuarios()
+    ])
     
     // La respuesta puede ser directamente un array o tener una propiedad específica
-    const registrosRaw = Array.isArray(response.data) ? response.data : (response.data.registros || [])
+    const registrosRaw = Array.isArray(responseRegistros.data) ? responseRegistros.data : (responseRegistros.data.registros || [])
     
     // Enriquecer registros con información de usuarios
     const registrosEnriquecidos = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
     
-    // Filtrar para mostrar solo la última ubicación de cada usuario
-    const ultimasUbicacionesPorUsuario = obtenerUltimasUbicacionesPorUsuario(registrosEnriquecidos)
-    
-    // Guardar todos los registros para referencia (por si se quiere cambiar el filtro)
+    // Guardar datos
     registros.value = registrosEnriquecidos
+    asistencias.value = asistenciasData
+    
+    // Obtener las últimas actividades por usuario (combinando registros y asistencias)
+    const ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosEnriquecidos, asistenciasData)
     
     if (mapInitialized.value) {
-      actualizarMarcadores(ultimasUbicacionesPorUsuario)
+      actualizarMarcadores(ultimasActividades)
     } else {
-      inicializarMapa(ultimasUbicacionesPorUsuario)
+      inicializarMapa(ultimasActividades)
     }
     
   } catch (err) {
@@ -435,7 +453,93 @@ const cargarRegistros = async () => {
   }
 }
 
-// Función para obtener las últimas ubicaciones por usuario
+// Función para obtener las últimas actividades por usuario (combinando registros y asistencias)
+const obtenerUltimasActividadesPorUsuario = (registros, asistencias) => {
+  const mapaUsuarios = new Map()
+  
+  // Procesar registros normales
+  registros.forEach(registro => {
+    const usuarioId = registro.usuario_id
+    const fechaHora = new Date(registro.fecha_hora)
+    
+    const actividad = {
+      ...registro,
+      tipo_actividad: 'registro',
+      fecha_actividad: fechaHora,
+      latitud: registro.latitud,
+      longitud: registro.longitud
+    }
+    
+    if (!mapaUsuarios.has(usuarioId) || 
+        fechaHora > mapaUsuarios.get(usuarioId).fecha_actividad) {
+      mapaUsuarios.set(usuarioId, actividad)
+    }
+  })
+  
+  // Procesar asistencias (entrada y salida)
+  asistencias.forEach(asistencia => {
+    const usuarioId = asistencia.usuario_id
+    
+    // Procesar entrada si existe
+    if (asistencia.hora_entrada && asistencia.latitud_entrada && asistencia.longitud_entrada) {
+      const fechaEntrada = new Date(asistencia.hora_entrada)
+      
+      const actividadEntrada = {
+        id: `entrada_${asistencia.id}`,
+        usuario_id: usuarioId,
+        usuario: {
+          nombre_completo: asistencia.nombre_usuario,
+          correo: asistencia.correo_usuario,
+          cargo: asistencia.cargo_usuario
+        },
+        tipo_actividad: 'entrada',
+        fecha_actividad: fechaEntrada,
+        fecha_hora: asistencia.hora_entrada,
+        latitud: asistencia.latitud_entrada,
+        longitud: asistencia.longitud_entrada,
+        foto_url: asistencia.foto_entrada_url,
+        descripcion: asistencia.descripcion_entrada || 'Entrada registrada'
+      }
+      
+      if (!mapaUsuarios.has(usuarioId) || 
+          fechaEntrada > mapaUsuarios.get(usuarioId).fecha_actividad) {
+        mapaUsuarios.set(usuarioId, actividadEntrada)
+      }
+    }
+    
+    // Procesar salida si existe
+    if (asistencia.hora_salida && asistencia.latitud_salida && asistencia.longitud_salida) {
+      const fechaSalida = new Date(asistencia.hora_salida)
+      
+      const actividadSalida = {
+        id: `salida_${asistencia.id}`,
+        usuario_id: usuarioId,
+        usuario: {
+          nombre_completo: asistencia.nombre_usuario,
+          correo: asistencia.correo_usuario,
+          cargo: asistencia.cargo_usuario
+        },
+        tipo_actividad: 'salida',
+        fecha_actividad: fechaSalida,
+        fecha_hora: asistencia.hora_salida,
+        latitud: asistencia.latitud_salida,
+        longitud: asistencia.longitud_salida,
+        foto_url: asistencia.foto_salida_url,
+        descripcion: asistencia.descripcion_salida || 'Salida registrada'
+      }
+      
+      if (!mapaUsuarios.has(usuarioId) || 
+          fechaSalida > mapaUsuarios.get(usuarioId).fecha_actividad) {
+        mapaUsuarios.set(usuarioId, actividadSalida)
+      }
+    }
+  })
+  
+  // Convertir el mapa de vuelta a un array
+  return Array.from(mapaUsuarios.values())
+}
+
+// Función para obtener las últimas ubicaciones por usuario (método anterior para compatibilidad)
 const obtenerUltimasUbicacionesPorUsuario = (registros) => {
   // Agrupar por usuario_id y obtener el más reciente según fecha_hora
   const mapaUsuarios = new Map()
@@ -554,9 +658,9 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
     registrosFiltrados = ubicacionesAMostrar
   } else {
     // En caso contrario, filtrar los registros según criterios
-    // y luego obtener las últimas ubicaciones por usuario
-    registrosFiltrados = filtrarRegistros()
-    registrosFiltrados = obtenerUltimasUbicacionesPorUsuario(registrosFiltrados)
+    // y luego obtener las últimas actividades por usuario
+    const registrosFiltradosBase = filtrarRegistros()
+    registrosFiltrados = obtenerUltimasActividadesPorUsuario(registrosFiltradosBase, asistencias.value)
   }
   
   // Crear nuevos marcadores
@@ -565,18 +669,15 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
       const lat = parseFloat(registro.latitud)
       const lng = parseFloat(registro.longitud)
       
-      if (isNaN(lat) || isNaN(lng)) return      // Determinar la antigüedad del registro para asignar color
-      const fechaRegistro = new Date(registro.fecha_hora)
-      const ahora = new Date()
-      const diferenciaMilisegundos = ahora - fechaRegistro
-      const diferenciaHoras = diferenciaMilisegundos / (1000 * 60 * 60)
+      if (isNaN(lat) || isNaN(lng)) return
       
-      // Si es de hoy (menos de 24 horas), verde; si es más antiguo, azul
-      const esReciente = diferenciaHoras <= 24
+      // Determinar el tipo de actividad y color
+      const tipoActividad = determinarTipoActividad(registro)
       const iconSize = [32, 32]
-        // Crear un HTML simple y moderno para el marcador
+      
+      // Crear un HTML simple y moderno para el marcador
       const markerHtml = `
-        <div class="location-marker ${esReciente ? 'reciente' : 'antiguo'}">
+        <div class="location-marker ${tipoActividad.clase}">
           <div class="pulse-ring"></div>
         </div>
       `
@@ -591,7 +692,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
 
       // Crear marcador y popup con posicionamiento mejorado
       const marker = window.L.marker([lat, lng], { icon: customIcon })        .bindPopup(`
-          <div class="modern-marker-popup ${esReciente ? 'recent-popup' : 'old-popup'}">
+          <div class="modern-marker-popup ${tipoActividad.clase}-popup">
             <!-- Botón de cerrar personalizado con mejor posicionamiento -->
             <button class="popup-close-btn" data-popup-close="true" title="Cerrar">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -602,10 +703,10 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
             <div class="popup-header">
               <div class="popup-title">
                 <span class="popup-id">#${registro.id}</span>
-                <h3>Registro de Usuario</h3>
+                <h3>${tipoActividad.descripcion}</h3>
               </div>
               <div class="popup-status">
-                <span class="status-badge ${esReciente ? 'recent' : 'old'}">${esReciente ? 'Hoy' : 'Anterior'}</span>
+                <span class="status-badge ${tipoActividad.clase}">${tipoActividad.descripcion}</span>
               </div>
             </div>
             
@@ -642,7 +743,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                     </svg>
                   </span>
-                  <span class="info-text">Última ubicación conocida</span>
+                  <span class="info-text">${tipoActividad.descripcion} más reciente</span>
                 </div>
               </div>
                 <div class="popup-actions">
@@ -659,7 +760,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
           </div>`, {
           maxWidth: 320,
           minWidth: 300,
-          className: `modern-popup-container centered-popup ${esReciente ? 'recent-tip' : 'old-tip'}`,
+          className: `modern-popup-container centered-popup ${tipoActividad.clase}-tip`,
           offset: [0, -16], // Ajustado para alinear perfectamente con el marcador
           autoPan: true,
           autoPanPadding: [50, 50],
@@ -803,11 +904,11 @@ const aplicarFiltros = () => {
   // Primero aplicamos los filtros normales
   const registrosFiltrados = filtrarRegistros()
   
-  // Luego obtenemos solo la última ubicación de cada usuario
-  const ultimasUbicaciones = obtenerUltimasUbicacionesPorUsuario(registrosFiltrados)
+  // Luego obtenemos las últimas actividades de cada usuario
+  const ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosFiltrados, asistencias.value)
   
-  // Actualizamos los marcadores con estas ubicaciones filtradas
-  actualizarMarcadores(ultimasUbicaciones)
+  // Actualizamos los marcadores con estas actividades filtradas
+  actualizarMarcadores(ultimasActividades)
 }
 
 // Buscar ubicación por dirección o coordenadas
@@ -1142,6 +1243,47 @@ const logout = () => {
   localStorage.removeItem('admin_token')
   localStorage.removeItem('admin_user')
   router.push('/login')
+}
+
+// Función para determinar el tipo de actividad y color
+const determinarTipoActividad = (actividad) => {
+  if (actividad.tipo_actividad === 'entrada') {
+    return {
+      tipo: 'entrada',
+      clase: 'entrada',
+      descripcion: 'Entrada',
+      color: '#32CD32' // Verde lima
+    }
+  } else if (actividad.tipo_actividad === 'salida') {
+    return {
+      tipo: 'salida',
+      clase: 'salida',
+      descripcion: 'Salida',
+      color: '#DC2626' // Rojo
+    }
+  } else {
+    // Es un registro normal
+    const fechaRegistro = new Date(actividad.fecha_hora)
+    const ahora = new Date()
+    const diferenciaMilisegundos = ahora - fechaRegistro
+    const diferenciaHoras = diferenciaMilisegundos / (1000 * 60 * 60)
+    
+    if (diferenciaHoras <= 24) {
+      return {
+        tipo: 'registro-hoy',
+        clase: 'registro-hoy',
+        descripcion: 'Registro de Hoy',
+        color: '#1E3A8A' // Azul marino
+      }
+    } else {
+      return {
+        tipo: 'registro-antiguo',
+        clase: 'antiguo',
+        descripcion: 'Registro Anterior',
+        color: '#FF9800' // Naranja
+      }
+    }
+  }
 }
 
 // Función para determinar si una ubicación es reciente (dentro de las últimas 24 horas)
@@ -1659,8 +1801,17 @@ watch([filtroTipo, filtroPeriodo], () => {
   flex-shrink: 0;
 }
 
-.legend-point-small.reciente {
-  background: #4CAF50; /* Verde para ubicaciones del día de hoy */
+/* Actualización de leyenda con nuevos colores */
+.legend-point-small.entrada {
+  background: #32CD32; /* Verde lima para entrada */
+}
+
+.legend-point-small.salida {
+  background: #DC2626; /* Rojo para salida */
+}
+
+.legend-point-small.registro-hoy {
+  background: #1E3A8A; /* Azul marino para registros de hoy */
 }
 
 .legend-point-small.antiguo {
@@ -1898,13 +2049,21 @@ watch([filtroTipo, filtroPeriodo], () => {
   animation: slideInFromRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Bordes superiores con colores según la leyenda */
-.registro-info-panel.panel-recent {
-  border-top: 4px solid #4CAF50;
+/* Bordes superiores con colores según el tipo de actividad */
+.registro-info-panel.panel-entrada {
+  border-top: 4px solid #32CD32; /* Verde lima para entrada */
+}
+
+.registro-info-panel.panel-salida {
+  border-top: 4px solid #DC2626; /* Rojo para salida */
+}
+
+.registro-info-panel.panel-registro-hoy {
+  border-top: 4px solid #1E3A8A; /* Azul marino para registros de hoy */
 }
 
 .registro-info-panel.panel-old {
-  border-top: 4px solid #FF9800;
+  border-top: 4px solid #FF9800; /* Naranja para registros antiguos */
 }
 
 @keyframes slideInFromRight {
@@ -1927,7 +2086,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .panel-header {
   padding: clamp(8px, 2vw, 12px) clamp(10px, 2.5vw, 16px);
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #1E3A8A 0%, #1e40af 100%); /* Azul marino por defecto */
   color: white;
   display: flex;
   justify-content: space-between;
@@ -1938,8 +2097,20 @@ watch([filtroTipo, filtroPeriodo], () => {
   gap: clamp(8px, 2vw, 12px);
 }
 
+.panel-entrada .panel-header {
+  background: linear-gradient(135deg, #32CD32 0%, #28a745 100%); /* Verde lima para entrada */
+}
+
+.panel-salida .panel-header {
+  background: linear-gradient(135deg, #DC2626 0%, #b91c1c 100%); /* Rojo para salida */
+}
+
+.panel-registro-hoy .panel-header {
+  background: linear-gradient(135deg, #1E3A8A 0%, #1e40af 100%); /* Azul marino para registros de hoy */
+}
+
 .panel-old .panel-header {
-  background: linear-gradient(135deg, #FF9800 0%, #f57c00 100%);
+  background: linear-gradient(135deg, #FF9800 0%, #f57c00 100%); /* Naranja para registros antiguos */
 }
 
 .panel-title-section {
@@ -2119,12 +2290,22 @@ watch([filtroTipo, filtroPeriodo], () => {
   letter-spacing: 0.3px; /* Reducido de 0.5px */
 }
 
-.status-badge-large.recent {
-  background: #4CAF50;
+.status-badge-large.entrada {
+  background: #32CD32;
   color: white;
 }
 
-.status-badge-large.old {
+.status-badge-large.salida {
+  background: #DC2626;
+  color: white;
+}
+
+.status-badge-large.registro-hoy {
+  background: #1E3A8A;
+  color: white;
+}
+
+.status-badge-large.antiguo {
   background: #FF9800;
   color: white;
 }
@@ -2434,12 +2615,22 @@ watch([filtroTipo, filtroPeriodo], () => {
   letter-spacing: 0.5px;
 }
 
-.modal-status-badge.recent {
-  background: #4CAF50;
+.modal-status-badge.entrada {
+  background: #32CD32;
   color: white;
 }
 
-.modal-status-badge.old {
+.modal-status-badge.salida {
+  background: #DC2626;
+  color: white;
+}
+
+.modal-status-badge.registro-hoy {
+  background: #1E3A8A;
+  color: white;
+}
+
+.modal-status-badge.antiguo {
   background: #FF9800;
   color: white;
 }
@@ -2644,8 +2835,16 @@ watch([filtroTipo, filtroPeriodo], () => {
   animation: appearScale 0.4s ease-out;
 }
 
-:global(.location-marker.reciente) {
-  background: #4CAF50; /* Verde para ubicaciones del día de hoy (últimas 24 horas) */
+:global(.location-marker.entrada) {
+  background: #32CD32; /* Verde lima para entrada de asistencia */
+}
+
+:global(.location-marker.salida) {
+  background: #DC2626; /* Rojo para salida de asistencia */
+}
+
+:global(.location-marker.registro-hoy) {
+  background: #1E3A8A; /* Azul marino para registros del día de hoy */
 }
 
 :global(.location-marker.antiguo) {
@@ -2923,21 +3122,37 @@ watch([filtroTipo, filtroPeriodo], () => {
   z-index: 1051 !important;
 }
 
-/* Hacer que la flecha herede el color del popup */
-:global(.modern-popup-container:has(.recent-popup) .leaflet-popup-tip) {
-  background: #4CAF50 !important;
+/* Hacer que la flecha herede el color del popup según el tipo de actividad */
+:global(.modern-popup-container:has(.entrada-popup) .leaflet-popup-tip) {
+  background: #32CD32 !important; /* Verde lima para entrada */
 }
 
-:global(.modern-popup-container:has(.old-popup) .leaflet-popup-tip) {
-  background: #FF9800 !important;
+:global(.modern-popup-container:has(.salida-popup) .leaflet-popup-tip) {
+  background: #DC2626 !important; /* Rojo para salida */
+}
+
+:global(.modern-popup-container:has(.registro-hoy-popup) .leaflet-popup-tip) {
+  background: #1E3A8A !important; /* Azul marino para registros de hoy */
+}
+
+:global(.modern-popup-container:has(.antiguo-popup) .leaflet-popup-tip) {
+  background: #FF9800 !important; /* Naranja para registros antiguos */
 }
 
 /* Fallback para navegadores que no soportan :has() */
-:global(.modern-popup-container.recent-tip .leaflet-popup-tip) {
-  background: #4CAF50 !important;
+:global(.modern-popup-container.entrada-tip .leaflet-popup-tip) {
+  background: #32CD32 !important;
 }
 
-:global(.modern-popup-container.old-tip .leaflet-popup-tip) {
+:global(.modern-popup-container.salida-tip .leaflet-popup-tip) {
+  background: #DC2626 !important;
+}
+
+:global(.modern-popup-container.registro-hoy-tip .leaflet-popup-tip) {
+  background: #1E3A8A !important;
+}
+
+:global(.modern-popup-container.antiguo-tip .leaflet-popup-tip) {
   background: #FF9800 !important;
 }
 
@@ -3027,14 +3242,21 @@ watch([filtroTipo, filtroPeriodo], () => {
   }
 }
 
-/* Flecha verde para registros recientes */
-:global(.modern-marker-popup.recent-popup::after) {
-  border-color: #4CAF50 transparent transparent transparent;
+/* Flechas con los nuevos colores según tipo de actividad */
+:global(.modern-marker-popup.entrada-popup::after) {
+  border-color: #32CD32 transparent transparent transparent; /* Verde lima para entrada */
 }
 
-/* Flecha naranja para registros antiguos */
-:global(.modern-marker-popup.old-popup::after) {
-  border-color: #FF9800 transparent transparent transparent;
+:global(.modern-marker-popup.salida-popup::after) {
+  border-color: #DC2626 transparent transparent transparent; /* Rojo para salida */
+}
+
+:global(.modern-marker-popup.registro-hoy-popup::after) {
+  border-color: #1E3A8A transparent transparent transparent; /* Azul marino para registros de hoy */
+}
+
+:global(.modern-marker-popup.antiguo-popup::after) {
+  border-color: #FF9800 transparent transparent transparent; /* Naranja para registros antiguos */
 }
 
 /* Botón de cerrar personalizado del popup - Posicionamiento mejorado */
@@ -3086,14 +3308,26 @@ watch([filtroTipo, filtroPeriodo], () => {
   }
 }
 
-/* Popup para ubicaciones recientes (verde) */
-:global(.modern-marker-popup.recent-popup) {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #388e3c 100%);
-  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);
+/* Popup para entrada (verde lima) */
+:global(.modern-marker-popup.entrada-popup) {
+  background: linear-gradient(135deg, #32CD32 0%, #28a745 50%, #20c997 100%);
+  box-shadow: 0 8px 32px rgba(50, 205, 50, 0.3);
+}
+
+/* Popup para salida (rojo) */
+:global(.modern-marker-popup.salida-popup) {
+  background: linear-gradient(135deg, #DC2626 0%, #b91c1c 50%, #991b1b 100%);
+  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.3);
+}
+
+/* Popup para registros de hoy (azul marino) */
+:global(.modern-marker-popup.registro-hoy-popup) {
+  background: linear-gradient(135deg, #1E3A8A 0%, #1e40af 50%, #1d4ed8 100%);
+  box-shadow: 0 8px 32px rgba(30, 58, 138, 0.3);
 }
 
 /* Popup para ubicaciones antiguas (naranja) */
-:global(.modern-marker-popup.old-popup) {
+:global(.modern-marker-popup.antiguo-popup) {
   background: linear-gradient(135deg, #FF9800 0%, #f57c00 50%, #ef6c00 100%);
   box-shadow: 0 8px 32px rgba(255, 152, 0, 0.3);
 }
@@ -3201,15 +3435,29 @@ watch([filtroTipo, filtroPeriodo], () => {
   letter-spacing: 0.5px;
 }
 
-:global(.status-badge.recent) {
-  background: rgba(76, 175, 80, 0.9);
+:global(.status-badge.entrada) {
+  background: rgba(50, 205, 50, 0.9); /* Verde lima */
   color: white;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-  animation: pulseGreen 2s ease-in-out infinite 2s;
+  box-shadow: 0 2px 8px rgba(50, 205, 50, 0.3);
+  animation: pulseEntrada 2s ease-in-out infinite 2s;
 }
 
-:global(.status-badge.old) {
-  background: rgba(255, 152, 0, 0.9);
+:global(.status-badge.salida) {
+  background: rgba(220, 38, 38, 0.9); /* Rojo */
+  color: white;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  animation: pulseSalida 2s ease-in-out infinite 2s;
+}
+
+:global(.status-badge.registro-hoy) {
+  background: rgba(30, 58, 138, 0.9); /* Azul marino */
+  color: white;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3);
+  animation: pulseRegistroHoy 2s ease-in-out infinite 2s;
+}
+
+:global(.status-badge.antiguo) {
+  background: rgba(255, 152, 0, 0.9); /* Naranja */
   color: white;
   box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
   animation: pulseOrange 2s ease-in-out infinite 2s;
@@ -3231,6 +3479,36 @@ watch([filtroTipo, filtroPeriodo], () => {
   }
   50% {
     box-shadow: 0 2px 15px rgba(255, 152, 0, 0.6);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulseEntrada {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(50, 205, 50, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 15px rgba(50, 205, 50, 0.6);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulseSalida {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 15px rgba(220, 38, 38, 0.6);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulseRegistroHoy {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 15px rgba(30, 58, 138, 0.6);
     transform: scale(1.05);
   }
 }

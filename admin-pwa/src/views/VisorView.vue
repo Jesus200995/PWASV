@@ -161,118 +161,117 @@
             <p>{{ error }}</p>
             <button @click="inicializarMapa" class="retry-btn">Reintentar</button>
           </div>          
-          <div id="mapa-principal" class="mapa-container"></div>
-        </div>
-          <!-- Panel lateral de detalles - separado del popup -->
-        <div 
-          v-if="mostrarPanelDetalles && registroSeleccionado" 
-          class="registro-info-panel"
-          :class="{ 
-            'panel-visible': mostrarPanelDetalles,
-            'panel-entrada': registroSeleccionado.tipo_actividad === 'entrada',
-            'panel-salida': registroSeleccionado.tipo_actividad === 'salida',
-            'panel-registro-hoy': registroSeleccionado.tipo_actividad === 'registro' && esUbicacionReciente(registroSeleccionado.fecha_hora),
-            'panel-old': registroSeleccionado.tipo_actividad === 'registro' && !esUbicacionReciente(registroSeleccionado.fecha_hora)
-          }"
-        >
-          <div class="panel-header">
-            <div class="panel-title-section">
-              <h3>Detalles del Registro</h3>
-              <span class="panel-id">#{{ registroSeleccionado.id }}</span>
-            </div>
-            <button @click="cerrarPanelDetalles" class="close-panel-btn" title="Cerrar panel">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-              </svg>
-            </button>
-          </div>
-          
-          <div class="panel-content">
-            <!-- Información del usuario -->
-            <div class="user-section">
-              <div class="user-avatar-large">
-                <span class="avatar-text-large">{{ (registroSeleccionado.usuario?.nombre_completo || `Usuario ${registroSeleccionado.usuario_id}`).charAt(0).toUpperCase() }}</span>
-              </div>
-              <div class="user-info-detail">
-                <h4 class="user-name-large">{{ registroSeleccionado.usuario?.nombre_completo || `Usuario ${registroSeleccionado.usuario_id}` }}</h4>
-                <p class="user-email-large">{{ registroSeleccionado.usuario?.correo || registroSeleccionado.usuario?.email || 'correo@noregistrado.com' }}</p>
-              </div>
-            </div>
-
-            <!-- Información del registro -->
-            <div class="info-section">
-              <h5 class="section-title">Información del Registro</h5>
-              
-              <div class="info-item-detail">
-                <div class="info-icon-wrapper">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
+          <div id="mapa-principal" class="mapa-container">
+            <!-- Panel lateral de detalles - dentro del mapa -->
+            <div 
+              v-if="mostrarPanelDetalles && registroSeleccionado" 
+              class="registro-info-panel"
+              :class="{ 
+                'panel-visible': mostrarPanelDetalles,
+                'panel-entrada': registroSeleccionado.tipo_actividad === 'entrada',
+                'panel-salida': registroSeleccionado.tipo_actividad === 'salida',
+                'panel-registro-hoy': registroSeleccionado.tipo_actividad === 'registro' && esUbicacionReciente(registroSeleccionado.fecha_hora),
+                'panel-old': registroSeleccionado.tipo_actividad === 'registro' && !esUbicacionReciente(registroSeleccionado.fecha_hora)
+              }"
+            >
+              <div class="panel-header">
+                <div class="panel-title-section">
+                  <h3>Detalles del Registro</h3>
+                  <span class="panel-id">#{{ registroSeleccionado.tipo_actividad }}_{{ registroSeleccionado.usuario_id }}</span>
+                </div>
+                <button @click="cerrarPanelDetalles" class="close-panel-btn" title="Cerrar panel">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                   </svg>
-                </div>
-                <div class="info-text-wrapper">
-                  <span class="info-label">Fecha y hora:</span>
-                  <span class="info-value">{{ formatFecha(registroSeleccionado.fecha_hora) }}</span>
-                </div>
-              </div>
-
-              <div class="info-item-detail">
-                <div class="info-icon-wrapper">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                  </svg>
-                </div>
-                <div class="info-text-wrapper">
-                  <span class="info-label">Coordenadas:</span>
-                  <span class="info-value">{{ formatCoordenadas(registroSeleccionado.latitud, registroSeleccionado.longitud) }}</span>
-                </div>
-              </div>
-
-              <div class="info-item-detail">
-                <div class="info-icon-wrapper">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                </div>
-                <div class="info-text-wrapper">
-                  <span class="info-label">Estado:</span>
-                  <span :class="['status-badge-large', determinarTipoActividad(registroSeleccionado).clase]">
-                    {{ determinarTipoActividad(registroSeleccionado).descripcion }}
-                  </span>
-                </div>
-              </div>
-
-              <div v-if="registroSeleccionado.descripcion" class="info-item-detail">
-                <div class="info-icon-wrapper">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                  </svg>
-                </div>
-                <div class="info-text-wrapper">
-                  <span class="info-label">Descripción:</span>
-                  <span class="info-value">{{ registroSeleccionado.descripcion }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Foto del registro -->
-            <div v-if="registroSeleccionado.foto_url" class="photo-section">
-              <h5 class="section-title">Fotografía del Registro</h5>
-              <div class="photo-container">
-                <img 
-                  :src="`${API_URL}/${registroSeleccionado.foto_url}`" 
-                  alt="Foto del registro"
-                  @click="verFotoAmpliada(`${API_URL}/${registroSeleccionado.foto_url}`)"
-                  class="registro-photo"
-                >                <div class="photo-overlay" @click="verFotoAmpliada(`${API_URL}/${registroSeleccionado.foto_url}`)">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                  </svg>                </div>                <!-- Mini botón de descarga animado -->
-                <button @click.stop="descargarFoto(`${API_URL}/${registroSeleccionado.foto_url}`, `registro_${registroSeleccionado.id}_foto`, $event)" class="download-mini-btn" title="Descargar imagen">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="download-icon">
-                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
-                  </svg>
-                  <div class="download-progress"></div>
                 </button>
+              </div>
+              <div class="panel-content">
+
+                <!-- Información del usuario -->
+                <div class="user-section">
+                  <div class="user-avatar-large">
+                    <span class="avatar-text-large">{{ (registroSeleccionado.usuario?.nombre_completo || `Usuario ${registroSeleccionado.usuario_id}`).charAt(0).toUpperCase() }}</span>
+                  </div>
+                  <div class="user-info-detail">
+                    <h4 class="user-name-large">{{ registroSeleccionado.usuario?.nombre_completo || `Usuario ${registroSeleccionado.usuario_id}` }}</h4>
+                    <p class="user-email-large">{{ registroSeleccionado.usuario?.correo || registroSeleccionado.usuario?.email || 'Sin correo disponible' }}</p>
+                  </div>
+                </div>
+
+                <!-- Información del registro -->
+                <div class="info-section">
+                  <h5 class="section-title">Información del Registro</h5>
+
+                  <div class="info-item-detail">
+                    <div class="info-icon-wrapper">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
+                      </svg>
+                    </div>
+                    <div class="info-text-wrapper">
+                      <span class="info-label">Fecha y hora:</span>
+                      <span class="info-value">{{ new Date(registroSeleccionado.fecha_hora).toLocaleString('es-ES') }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-item-detail">
+                    <div class="info-icon-wrapper">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                    </div>
+                    <div class="info-text-wrapper">
+                      <span class="info-label">Coordenadas:</span>
+                      <span class="info-value">{{ registroSeleccionado.latitud }}, {{ registroSeleccionado.longitud }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-item-detail">
+                    <div class="info-icon-wrapper">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    </div>
+                    <div class="info-text-wrapper">
+                      <span class="info-label">Estado:</span>
+                      <span :class="['status-badge-large', determinarTipoActividad(registroSeleccionado).clase]">
+                        {{ determinarTipoActividad(registroSeleccionado).descripcion }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div v-if="registroSeleccionado.descripcion" class="info-item-detail">
+                    <div class="info-icon-wrapper">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                      </svg>
+                    </div>
+                    <div class="info-text-wrapper">
+                      <span class="info-label">Descripción:</span>
+                      <span class="info-value">{{ registroSeleccionado.descripcion }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Foto del registro -->
+                <div v-if="registroSeleccionado.foto_url" class="photo-section">
+                  <h5 class="section-title">Fotografía del Registro</h5>
+                  <div class="photo-container" @click="abrirFotoModal(registroSeleccionado.foto_url, `Foto del registro #${registroSeleccionado.usuario_id}`)">
+                    <img :src="registroSeleccionado.foto_url" alt="Foto del registro" class="registro-photo">
+                    <div class="photo-overlay">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                      </svg>
+                    </div>
+                    <!-- Mini botón de descarga animado -->
+                    <button @click.stop="descargarFoto(registroSeleccionado.foto_url, `registro_${registroSeleccionado.usuario_id}_${new Date(registroSeleccionado.fecha_hora).toISOString().slice(0,10)}.jpg`, $event)" class="download-mini-btn" title="Descargar imagen">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="download-icon">
+                        <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                      </svg>
+                      <div class="download-progress"></div>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2433,27 +2432,29 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 */
 
-/* Panel de información del registro seleccionado - Versión mejorada */
+/* Panel de información del registro seleccionado - Versión compacta dentro del mapa */
 .registro-info-panel {
-  position: fixed;
-  top: clamp(80px, 12vh, 120px);
-  right: -320px;
-  width: clamp(280px, 35vw, 320px);
-  max-width: calc(100vw - clamp(40px, 5vw, 60px));
-  max-height: calc(100vh - clamp(120px, 20vh, 150px));
-  background: white;
-  border-radius: clamp(12px, 2vw, 16px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  position: absolute;
+  top: 10px;
+  right: -280px;
+  width: clamp(240px, 28vw, 280px);
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 140px);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   z-index: 1100;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   pointer-events: auto;
 }
 
 .registro-info-panel.panel-visible {
-  right: clamp(10px, 2vw, 20px);
-  animation: slideInFromRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  right: 10px;
+  animation: slideInFromRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Bordes superiores con colores según el tipo de actividad */
@@ -2492,7 +2493,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .panel-header {
-  padding: clamp(8px, 2vw, 12px) clamp(10px, 2.5vw, 16px);
+  padding: 8px 12px;
   background: linear-gradient(135deg, #1E3A8A 0%, #1e40af 100%); /* Azul marino por defecto */
   color: white;
   display: flex;
@@ -2501,7 +2502,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   position: sticky;
   top: 0;
   z-index: 5;
-  gap: clamp(8px, 2vw, 12px);
+  gap: 8px;
 }
 
 .panel-entrada .panel-header {
@@ -2526,25 +2527,25 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .panel-title-section h3 {
-  margin: 0 0 clamp(1px, 0.5vw, 3px) 0;
-  font-size: clamp(12px, 2.5vw, 16px);
-  font-weight: 700;
+  margin: 0 0 2px 0;
+  font-size: 13px;
+  font-weight: 600;
   line-height: 1.2;
 }
 
 .panel-id {
-  font-size: clamp(8px, 1.5vw, 11px);
-  opacity: 0.9;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-size: 9px;
+  opacity: 0.85;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 .close-panel-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
-  width: clamp(22px, 4vw, 28px);
-  height: clamp(22px, 4vw, 28px);
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2561,31 +2562,31 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .panel-content {
   padding: 0;
-  max-height: calc(100vh - 160px); /* Ajustado para el header más pequeño */
+  max-height: calc(100vh - 100px);
   overflow-y: auto;
-  padding-bottom: 20px; /* Más espacio en la parte inferior */
+  padding-bottom: 12px;
 }
 
 /* Sección de usuario */
 .user-section {
-  padding: 12px; /* Reducido de 20px */
+  padding: 8px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-bottom: 1px solid #dee2e6;
   display: flex;
   align-items: center;
-  gap: 10px; /* Reducido de 16px */
+  gap: 8px;
 }
 
 .user-avatar-large {
-  width: 40px; /* Reducido de 60px */
-  height: 40px; /* Reducido de 60px */
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white; /* Reducido de 3px */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Reducido */
+  border: 1px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .panel-old .user-avatar-large {
@@ -2593,8 +2594,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .avatar-text-large {
-  font-size: 16px; /* Reducido de 24px */
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 700;
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
@@ -2605,44 +2606,48 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .user-name-large {
-  margin: 0 0 4px 0; /* Reducido de 8px */
-  font-size: 14px; /* Reducido de 18px */
-  font-weight: 700;
+  margin: 0 0 2px 0;
+  font-size: 11px;
+  font-weight: 600;
   color: #2c3e50;
+  line-height: 1.2;
 }
 
 .user-email-large {
   margin: 0;
-  font-size: 11px; /* Reducido de 14px */
+  font-size: 9px;
   color: #6c757d;
   word-break: break-word;
+  line-height: 1.2;
 }
 
 /* Sección de información */
 .info-section {
-  padding: 16px; /* Mejor padding uniforme */
-  margin-top: 4px; /* Pequeño espacio superior */
-  margin-bottom: 12px; /* Más espacio entre secciones */
+  padding: 10px;
+  margin-top: 2px;
+  margin-bottom: 8px;
 }
 
 .section-title {
-  margin: 0 0 10px 0; /* Reducido de 16px */
-  font-size: 13px; /* Reducido de 16px */
+  margin: 0 0 6px 0;
+  font-size: 10px;
   font-weight: 600;
   color: #2c3e50;
-  border-bottom: 1px solid #e9ecef; /* Reducido de 2px */
-  padding-bottom: 4px; /* Reducido de 8px */
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .info-item-detail {
   display: flex;
   align-items: flex-start;
-  gap: 8px; /* Reducido de 12px */
-  margin-bottom: 10px; /* Reducido de 16px */
-  padding: 8px; /* Reducido de 12px */
+  gap: 6px;
+  margin-bottom: 6px;
+  padding: 4px;
   background: #f8f9fa;
-  border-radius: 6px; /* Reducido de 8px */
-  border-left: 2px solid #4CAF50; /* Reducido de 3px */
+  border-radius: 4px;
+  border-left: 2px solid #4CAF50;
 }
 
 .panel-old .info-item-detail {
@@ -2653,8 +2658,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px; /* Reducido de 24px */
-  height: 18px; /* Reducido de 24px */
+  width: 14px;
+  height: 14px;
   background: #4CAF50;
   border-radius: 50%;
   color: white;
@@ -2672,29 +2677,30 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .info-label {
   display: block;
-  font-size: 10px; /* Reducido de 12px */
+  font-size: 8px;
   font-weight: 600;
   color: #6c757d;
   text-transform: uppercase;
-  letter-spacing: 0.3px; /* Reducido de 0.5px */
-  margin-bottom: 2px; /* Reducido de 4px */
+  letter-spacing: 0.2px;
+  margin-bottom: 1px;
 }
 
 .info-value {
   display: block;
-  font-size: 12px; /* Reducido de 14px */
+  font-size: 9px;
   color: #2c3e50;
   font-weight: 500;
+  line-height: 1.2;
 }
 
 .status-badge-large {
   display: inline-block;
-  padding: 2px 8px; /* Reducido de 4px 12px */
-  border-radius: 12px; /* Reducido de 20px */
-  font-size: 10px; /* Reducido de 12px */
+  padding: 1px 4px;
+  border-radius: 8px;
+  font-size: 7px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.3px; /* Reducido de 0.5px */
+  letter-spacing: 0.2px;
 }
 
 .status-badge-large.entrada {
@@ -2718,16 +2724,16 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 /* Sección de foto */
 .photo-section {
-  padding: 16px; /* Padding uniforme */
+  padding: 8px;
   border-top: 1px solid #dee2e6;
-  margin-bottom: 16px; /* Más espacio inferior para la parte final del panel */
+  margin-bottom: 8px;
 }
 
 .photo-container {
   position: relative;
-  border-radius: 8px; /* Reducido de 12px */
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Reducido */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.2s;
 }
@@ -2739,7 +2745,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 .registro-photo {
   width: 100%;
   height: auto;
-  max-height: 120px; /* Reducido de 200px */
+  max-height: 80px;
   object-fit: cover;
   display: block;
 }
@@ -2765,10 +2771,10 @@ watch([filtroTipo, filtroPeriodo], () => {
 /* Mini botón de descarga animado */
 .download-mini-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 32px;
-  height: 32px;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
   background: rgba(76, 175, 80, 0.9);
   border: none;
   border-radius: 50%;
@@ -2777,7 +2783,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   z-index: 10;
@@ -3259,6 +3265,105 @@ watch([filtroTipo, filtroPeriodo], () => {
   .suggestion-status {
     font-size: 9px;
     padding: 1px 4px;
+  }
+  
+  /* Estilos responsive para el panel compacto */
+  .registro-info-panel {
+    width: clamp(200px, 45vw, 240px);
+    top: 5px;
+    right: -240px;
+    max-height: calc(100vh - 100px);
+  }
+  
+  .registro-info-panel.panel-visible {
+    right: 5px;
+  }
+  
+  .panel-header {
+    padding: 6px 8px;
+  }
+  
+  .panel-title-section h3 {
+    font-size: 11px;
+  }
+  
+  .panel-id {
+    font-size: 8px;
+  }
+  
+  .close-panel-btn {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .user-section {
+    padding: 6px;
+    gap: 6px;
+  }
+  
+  .user-avatar-large {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .avatar-text-large {
+    font-size: 9px;
+  }
+  
+  .user-name-large {
+    font-size: 10px;
+  }
+  
+  .user-email-large {
+    font-size: 8px;
+  }
+  
+  .info-section {
+    padding: 6px;
+  }
+  
+  .section-title {
+    font-size: 9px;
+    margin-bottom: 4px;
+  }
+  
+  .info-item-detail {
+    padding: 3px;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  
+  .info-icon-wrapper {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .info-label {
+    font-size: 7px;
+  }
+  
+  .info-value {
+    font-size: 8px;
+  }
+  
+  .status-badge-large {
+    padding: 1px 3px;
+    font-size: 6px;
+  }
+  
+  .photo-section {
+    padding: 6px;
+  }
+  
+  .registro-photo {
+    max-height: 60px;
+  }
+  
+  .download-mini-btn {
+    width: 16px;
+    height: 16px;
+    top: 3px;
+    right: 3px;
   }
 }
 

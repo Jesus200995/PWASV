@@ -191,6 +191,38 @@
           </router-link>
         </li>
         
+        <li class="nav-item" :class="{ active: $route.name === 'Asistencia' }">
+          <router-link to="/asistencia" class="nav-link">
+            <div class="nav-icon-wrapper">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"/>
+                <path d="M3 12h6m6-6h6m-6 12h6"/>
+                <rect x="7" y="3" width="3" height="18" rx="1"/>
+                <rect x="14" y="3" width="3" height="18" rx="1"/>
+              </svg>
+            </div>
+            <span class="nav-text">Asistencia</span>
+            <div class="nav-glow"></div>
+          </router-link>
+        </li>
+        
+        <li class="nav-item" :class="{ active: $route.name === 'Registros' }">
+          <router-link to="/registros" class="nav-link">
+            <div class="nav-icon-wrapper">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <rect x="3" y="10" width="18" height="12"/>
+                <line x1="8" y1="14" x2="16" y2="14"/>
+                <line x1="8" y1="18" x2="12" y2="18"/>
+              </svg>
+            </div>
+            <span class="nav-text">Registro de Actividades</span>
+            <div class="nav-glow"></div>
+          </router-link>
+        </li>
+        
         <li class="nav-item" :class="{ active: $route.name === 'Visor' }">
           <router-link to="/visor" class="nav-link">
             <div class="nav-icon-wrapper">
@@ -204,22 +236,6 @@
           </router-link>
         </li>
         
-        <li class="nav-item" :class="{ active: $route.name === 'Registros' }">
-          <router-link to="/registros" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10,9 9,9 8,9"/>
-              </svg>
-            </div>
-            <span class="nav-text">Registros</span>
-            <div class="nav-glow"></div>
-          </router-link>
-        </li>
-        
         <li class="nav-item" :class="{ active: $route.name === 'Usuarios' }">
           <router-link to="/usuarios" class="nav-link">
             <div class="nav-icon-wrapper">
@@ -229,21 +245,6 @@
               </svg>
             </div>
             <span class="nav-text">Usuarios</span>
-            <div class="nav-glow"></div>
-          </router-link>
-        </li>
-        
-        <li class="nav-item" :class="{ active: $route.name === 'Asistencia' }">
-          <router-link to="/asistencia" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6L9 17l-5-5"/>
-                <path d="M3 12h6m6-6h6m-6 12h6"/>
-                <rect x="7" y="3" width="3" height="18" rx="1"/>
-                <rect x="14" y="3" width="3" height="18" rx="1"/>
-              </svg>
-            </div>
-            <span class="nav-text">Asistencia</span>
             <div class="nav-glow"></div>
           </router-link>
         </li>
@@ -861,7 +862,7 @@ if (typeof window !== 'undefined') {
   display: flex;
   align-items: center;
   gap: clamp(8px, 1.2vw, 12px);
-  padding: clamp(6px, 1.4vh, 12px) clamp(8px, 1.5vw, 14px);
+  padding: clamp(8px, 1.6vh, 14px) clamp(8px, 1.5vw, 14px);
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   border-radius: clamp(6px, 1vw, 10px);
@@ -870,7 +871,7 @@ if (typeof window !== 'undefined') {
   overflow: hidden;
   margin-bottom: clamp(1px, 0.3vh, 3px);
   backdrop-filter: blur(10px);
-  min-height: clamp(32px, 4vh, 44px);
+  min-height: clamp(40px, 5vh, 52px);
 }
 
 .nav-link:hover {
@@ -927,15 +928,17 @@ if (typeof window !== 'undefined') {
 }
 
 .nav-text {
-  font-size: clamp(10px, 1.2vw, 13px);
+  font-size: clamp(9px, 1.1vw, 12px);
   font-weight: 600;
   text-shadow: none;
   letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.2;
   flex: 1;
   min-width: 0;
+  text-align: left;
 }
 
 .nav-glow {
@@ -1132,10 +1135,14 @@ if (typeof window !== 'undefined') {
   .nav-link {
     padding: 12px 14px;
     gap: 12px;
+    min-height: 50px;
   }
   
   .nav-text {
-    font-size: 14px;
+    font-size: 13px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.2;
   }
   
   .logout-btn {
@@ -1215,6 +1222,7 @@ if (typeof window !== 'undefined') {
   .nav-link {
     padding: 8px 12px;
     gap: 10px;
+    min-height: 48px;
   }
   
   .nav-icon {
@@ -1223,7 +1231,10 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 12px;
+    font-size: 11px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.2;
   }
   
   .sidebar-footer {
@@ -1308,6 +1319,7 @@ if (typeof window !== 'undefined') {
   .nav-link {
     padding: 12px 16px;
     gap: 14px;
+    min-height: 52px;
   }
   
   .nav-icon {
@@ -1316,7 +1328,10 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 13px;
+    font-size: 12px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.2;
   }
   
   .sidebar-footer {
@@ -1397,6 +1412,7 @@ if (typeof window !== 'undefined') {
     padding: 10px 14px;
     gap: 12px;
     border-radius: 10px;
+    min-height: 46px;
   }
   
   .nav-icon {
@@ -1405,7 +1421,10 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 12px;
+    font-size: 11px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.2;
   }
   
   .sidebar-footer {
@@ -1463,6 +1482,7 @@ if (typeof window !== 'undefined') {
   .nav-link {
     padding: 8px 10px;
     gap: 10px;
+    min-height: 44px;
   }
   
   .nav-icon {
@@ -1471,7 +1491,10 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 11px;
+    font-size: 10px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.2;
   }
   
   .sidebar-footer {

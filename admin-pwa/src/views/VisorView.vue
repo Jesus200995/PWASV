@@ -547,11 +547,11 @@ const conectarPalitoConCirculo = (marker, popup) => {
           left: calc(50% + ${offsetX}px) !important;
           bottom: -${palitoHeight}px !important;
           transform: translateX(-50%) !important;
-          width: 5px !important;
+          width: 3px !important;
           height: ${palitoHeight}px !important;
           background: ${colorPalito} !important;
-          border-radius: 2.5px !important;
-          box-shadow: 0 0 12px ${shadowColor}, 0 0 0 1px rgba(255, 255, 255, 0.4) !important;
+          border-radius: 1.5px !important;
+          box-shadow: 0 0 10px ${shadowColor}, 0 0 0 1px rgba(255, 255, 255, 0.4) !important;
           z-index: 10000 !important;
           pointer-events: none !important;
           opacity: 1 !important;
@@ -560,7 +560,7 @@ const conectarPalitoConCirculo = (marker, popup) => {
         /* Asegurar que el palito sea visible en responsive */
         @media (max-width: 768px) {
           .modern-marker-popup::after {
-            width: 4px !important;
+            width: 2.5px !important;
             height: ${Math.max(palitoHeight * 0.85, 12)}px !important;
             bottom: -${Math.max(palitoHeight * 0.85, 12)}px !important;
             left: calc(50% + ${offsetX * 0.9}px) !important;
@@ -569,7 +569,7 @@ const conectarPalitoConCirculo = (marker, popup) => {
         
         @media (max-width: 480px) {
           .modern-marker-popup::after {
-            width: 3px !important;
+            width: 2px !important;
             height: ${Math.max(palitoHeight * 0.7, 10)}px !important;
             bottom: -${Math.max(palitoHeight * 0.7, 10)}px !important;
             left: calc(50% + ${offsetX * 0.8}px) !important;
@@ -877,7 +877,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
         html: markerHtml,
         iconSize: iconSize,
         iconAnchor: [iconSize[0] / 2, iconSize[0] / 2],
-        popupAnchor: [0, -iconSize[0] / 2 - 35] // Ajustado para conectar palito con centro del círculo
+        popupAnchor: [5, -iconSize[0] / 2 - 35] // Desplazado 5px a la derecha para mejor centrado
       })
 
       // Crear marcador y popup con posicionamiento mejorado
@@ -951,7 +951,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
           maxWidth: 320,
           minWidth: 300,
           className: `modern-popup-container centered-popup ${tipoActividad.clase}-tip`,
-          offset: [0, -2], // Offset mínimo para que el palito conecte con el círculo
+          offset: [3, -2], // Desplazado 3px a la derecha para mejor centrado
           autoPan: true,
           autoPanPadding: [50, 50],
           keepInView: true,

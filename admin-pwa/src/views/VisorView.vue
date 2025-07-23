@@ -557,13 +557,40 @@ const conectarPalitoConCirculo = (marker, popup) => {
           opacity: 1 !important;
         }
         
-        /* Asegurar que el palito sea visible en responsive */
+        /* Círculo pequeño al final del palito - en el centro exacto del marcador */
+        .modern-marker-popup::before {
+          content: "" !important;
+          display: block !important;
+          position: absolute !important;
+          left: calc(50% + ${offsetX}px) !important;
+          bottom: -${palitoHeight + 8}px !important;
+          transform: translateX(-50%) !important;
+          width: 8px !important;
+          height: 8px !important;
+          background: ${colorPalito} !important;
+          border-radius: 50% !important;
+          border: 2px solid rgba(255, 255, 255, 0.8) !important;
+          box-shadow: 0 0 15px ${shadowColor}, 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+          z-index: 10001 !important;
+          pointer-events: none !important;
+          opacity: 1 !important;
+        }
+        
+        /* Asegurar que el palito y círculo sean visibles en responsive */
         @media (max-width: 768px) {
           .modern-marker-popup::after {
             width: 2.5px !important;
             height: ${Math.max(palitoHeight * 0.85, 12)}px !important;
             bottom: -${Math.max(palitoHeight * 0.85, 12)}px !important;
             left: calc(50% + ${offsetX * 0.9}px) !important;
+          }
+          
+          .modern-marker-popup::before {
+            width: 6px !important;
+            height: 6px !important;
+            bottom: -${Math.max(palitoHeight * 0.85, 12) + 7}px !important;
+            left: calc(50% + ${offsetX * 0.9}px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
           }
         }
         
@@ -574,10 +601,18 @@ const conectarPalitoConCirculo = (marker, popup) => {
             bottom: -${Math.max(palitoHeight * 0.7, 10)}px !important;
             left: calc(50% + ${offsetX * 0.8}px) !important;
           }
+          
+          .modern-marker-popup::before {
+            width: 5px !important;
+            height: 5px !important;
+            bottom: -${Math.max(palitoHeight * 0.7, 10) + 6}px !important;
+            left: calc(50% + ${offsetX * 0.8}px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+          }
         }
       `
       
-      console.log(`Palito conectado - Altura: ${palitoHeight}px, OffsetX: ${offsetX}px, Color: ${colorPalito}`)
+      console.log(`Palito + círculo conectados - Altura: ${palitoHeight}px, OffsetX: ${offsetX}px, Color: ${colorPalito}`)
       
     } catch (error) {
       console.error('Error al calcular posición del palito:', error)

@@ -44,9 +44,11 @@
                 <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
               </svg>
               <select v-model="filtroTipo" class="modern-select" @change="aplicarFiltros">
-                <option value="">Todos los registros</option>
-                <option value="critical">Puntos críticos</option>
-                <option value="regular">Puntos regulares</option>
+                <option value="">Todas las actividades</option>
+                <option value="entrada">Solo Entradas</option>
+                <option value="salida">Solo Salidas</option>
+                <option value="registro-hoy">Solo Registros de Hoy</option>
+                <option value="registro-antiguo">Solo Registros Antiguos</option>
               </select>
             </div>
             
@@ -861,21 +863,7 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
 const filtrarRegistros = () => {
   let resultado = [...registros.value]
   
-  // Filtrar por tipo
-  if (filtroTipo.value === 'critical') {
-    // Ejemplo: supongamos que los "críticos" tienen descripción que incluye "crítico" o "urgente"
-    resultado = resultado.filter(r => {
-      const desc = r.descripcion?.toLowerCase() || ''
-      return desc.includes('crítico') || desc.includes('urgente') || Math.random() < 0.3 // Random para demo
-    })
-  } else if (filtroTipo.value === 'regular') {
-    resultado = resultado.filter(r => {
-      const desc = r.descripcion?.toLowerCase() || ''
-      return !desc.includes('crítico') && !desc.includes('urgente') && Math.random() >= 0.3 // Random para demo
-    })
-  }
-  
-  // Filtrar por periodo
+  // Filtrar por periodo primero (afecta solo a registros normales)
   if (filtroPeriodo.value !== 'all') {
     const now = new Date()
     
@@ -901,11 +889,31 @@ const filtrarRegistros = () => {
 
 // Aplicar filtros y actualizar mapa
 const aplicarFiltros = () => {
-  // Primero aplicamos los filtros normales
+  // Primero aplicamos los filtros de periodo a registros normales
   const registrosFiltrados = filtrarRegistros()
   
   // Luego obtenemos las últimas actividades de cada usuario
-  const ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosFiltrados, asistencias.value)
+  let ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosFiltrados, asistencias.value)
+  
+  // Aplicar filtro por tipo de actividad después de obtener las últimas actividades
+  if (filtroTipo.value) {
+    ultimasActividades = ultimasActividades.filter(actividad => {
+      const tipoActividad = determinarTipoActividad(actividad)
+      
+      switch (filtroTipo.value) {
+        case 'entrada':
+          return tipoActividad.tipo === 'entrada'
+        case 'salida':
+          return tipoActividad.tipo === 'salida'
+        case 'registro-hoy':
+          return tipoActividad.tipo === 'registro-hoy'
+        case 'registro-antiguo':
+          return tipoActividad.tipo === 'registro-antiguo'
+        default:
+          return true
+      }
+    })
+  }
   
   // Actualizamos los marcadores con estas actividades filtradas
   actualizarMarcadores(ultimasActividades)

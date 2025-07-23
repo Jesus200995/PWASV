@@ -69,13 +69,60 @@
                   <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                 </svg>
                 <input 
-                  v-model="busquedaUbicacion" 
+                  v-model="busquedaUsuario" 
                   type="text" 
-                  placeholder="Buscar ubicación..." 
+                  placeholder="Buscar usuario por nombre..." 
                   class="modern-search-input"
-                >                <button @click="buscarUbicacion" class="modern-search-btn">
+                  @input="buscarUsuarioEnTiempoReal"
+                  @focus="mostrarSugerencias = true"
+                  @blur="ocultarSugerenciasConDelay"
+                  @keydown="manejarTeclasNavegacion"
+                  autocomplete="off"
+                >
+                <!-- Dropdown de sugerencias -->
+                <div 
+                  v-if="mostrarSugerencias && sugerenciasUsuarios.length > 0" 
+                  class="suggestions-dropdown"
+                >
+                  <div class="suggestions-header">
+                    <span class="suggestions-count">{{ sugerenciasUsuarios.length }} usuario{{ sugerenciasUsuarios.length !== 1 ? 's' : '' }} encontrado{{ sugerenciasUsuarios.length !== 1 ? 's' : '' }}</span>
+                  </div>
+                  <div class="suggestions-list">
+                    <div 
+                      v-for="(usuario, index) in sugerenciasUsuarios" 
+                      :key="`${usuario.usuario_id}-${usuario.tipo_actividad}`"
+                      :class="['suggestion-item', { 'suggestion-selected': index === sugerenciaSeleccionada }]"
+                      @mousedown="seleccionarUsuario(usuario, index)"
+                      @mouseenter="sugerenciaSeleccionada = index"
+                    >
+                      <div class="suggestion-avatar">
+                        <span :class="['avatar-letter', determinarTipoActividad(usuario).clase]">
+                          {{ (usuario.usuario?.nombre_completo || `Usuario ${usuario.usuario_id}`).charAt(0).toUpperCase() }}
+                        </span>
+                      </div>
+                      <div class="suggestion-info">
+                        <div class="suggestion-name">
+                          {{ usuario.usuario?.nombre_completo || `Usuario ${usuario.usuario_id}` }}
+                        </div>
+                        <div class="suggestion-details">
+                          <span class="suggestion-email">{{ usuario.usuario?.correo || usuario.usuario?.email || 'Sin correo' }}</span>
+                          <span :class="['suggestion-status', determinarTipoActividad(usuario).clase]">
+                            {{ determinarTipoActividad(usuario).descripcion }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Indicador de usuario encontrado -->
+                <div v-if="usuarioEncontrado && !mostrarSugerencias" class="user-found-indicator">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                  <span>{{ usuarioEncontrado.usuario?.nombre_completo || `Usuario ${usuarioEncontrado.usuario_id}` }}</span>
+                </div>                <button @click="enfocarUsuarioSeleccionado" class="modern-search-btn" :disabled="!usuarioEncontrado">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    <path d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M3.05,13H1V11H3.05C3.5,6.83 6.83,3.5 11,3.05V1H13V3.05C17.17,3.5 20.5,6.83 20.95,11H23V13H20.95C20.5,17.17 17.17,20.5 13,20.95V23H11V20.95C6.83,20.5 3.5,17.17 3.05,13M12,5A7,7 0 0,0 5,12A7,7 0 0,0 12,19A7,7 0 0,0 19,12A7,7 0 0,0 12,5Z"/>
                   </svg>
                 </button>
               </div>
@@ -378,7 +425,13 @@ let markersLayer = null
 // Filtros y búsqueda
 const filtroTipo = ref('')
 const filtroPeriodo = ref('all')
-const busquedaUbicacion = ref('')
+const busquedaUsuario = ref('')
+const usuarioEncontrado = ref(null)
+const ultimasActividades = ref([])
+const mostrarSugerencias = ref(false)
+const sugerenciasUsuarios = ref([])
+const sugerenciaSeleccionada = ref(-1)
+const timeoutSugerencias = ref(null)
 
 // Registro seleccionado y estado del panel de detalles
 const registroSeleccionado = ref(null)
@@ -435,12 +488,15 @@ const cargarRegistros = async () => {
     asistencias.value = asistenciasData
     
     // Obtener las últimas actividades por usuario (combinando registros y asistencias)
-    const ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosEnriquecidos, asistenciasData)
+    const ultimasActividadesData = obtenerUltimasActividadesPorUsuario(registrosEnriquecidos, asistenciasData)
+    
+    // Guardar las últimas actividades para búsqueda
+    ultimasActividades.value = ultimasActividadesData
     
     if (mapInitialized.value) {
-      actualizarMarcadores(ultimasActividades)
+      actualizarMarcadores(ultimasActividadesData)
     } else {
-      inicializarMapa(ultimasActividades)
+      inicializarMapa(ultimasActividadesData)
     }
     
   } catch (err) {
@@ -889,15 +945,176 @@ const filtrarRegistros = () => {
 
 // Aplicar filtros y actualizar mapa
 const aplicarFiltros = () => {
-  // Primero aplicamos los filtros de periodo a registros normales
+  // Si hay una búsqueda de usuario activa, mantenerla
+  if (busquedaUsuario.value.trim()) {
+    buscarUsuarioEnTiempoReal()
+    return
+  }
+  
+  // Si no hay búsqueda de usuario, aplicar filtros normales
+  actualizarMarcadoresConFiltros()
+}
+
+// Buscar usuario en tiempo real
+const buscarUsuarioEnTiempoReal = () => {
+  sugerenciaSeleccionada.value = -1
+  
+  if (!busquedaUsuario.value.trim()) {
+    usuarioEncontrado.value = null
+    sugerenciasUsuarios.value = []
+    mostrarSugerencias.value = false
+    // Mostrar todas las actividades si no hay búsqueda
+    limpiarBusquedaUsuario()
+    return
+  }
+  
+  const terminoBusqueda = busquedaUsuario.value.toLowerCase().trim()
+  
+  // Buscar en las últimas actividades
+  const usuariosEncontrados = ultimasActividades.value.filter(actividad => {
+    const nombreCompleto = actividad.usuario?.nombre_completo?.toLowerCase() || ''
+    const correo = actividad.usuario?.correo?.toLowerCase() || actividad.usuario?.email?.toLowerCase() || ''
+    const usuarioId = actividad.usuario_id.toString()
+    
+    return nombreCompleto.includes(terminoBusqueda) ||
+           correo.includes(terminoBusqueda) ||
+           usuarioId.includes(terminoBusqueda)
+  })
+  
+  // Actualizar sugerencias
+  sugerenciasUsuarios.value = usuariosEncontrados.slice(0, 8) // Máximo 8 sugerencias
+  mostrarSugerencias.value = usuariosEncontrados.length > 0
+  
+  if (usuariosEncontrados.length > 0) {
+    // Mostrar solo los usuarios encontrados en el mapa
+    actualizarMarcadores(usuariosEncontrados)
+  } else {
+    usuarioEncontrado.value = null
+    // Si no se encuentra nada, mostrar mapa vacío
+    actualizarMarcadores([])
+  }
+}
+
+// Limpiar búsqueda de usuario
+const limpiarBusquedaUsuario = () => {
+  usuarioEncontrado.value = null
+  mostrarSugerencias.value = false
+  sugerenciasUsuarios.value = []
+  sugerenciaSeleccionada.value = -1
+  if (timeoutSugerencias.value) {
+    clearTimeout(timeoutSugerencias.value)
+    timeoutSugerencias.value = null
+  }
+  actualizarMarcadoresConFiltros()
+}
+
+// Enfocar en el usuario seleccionado
+const enfocarUsuarioSeleccionado = () => {
+  if (!usuarioEncontrado.value || !map) return
+  
+  const lat = parseFloat(usuarioEncontrado.value.latitud)
+  const lng = parseFloat(usuarioEncontrado.value.longitud)
+  
+  if (!isNaN(lat) && !isNaN(lng)) {
+    // Centrar el mapa en la ubicación del usuario con animación suave
+    map.flyTo([lat, lng], Math.max(map.getZoom(), 16), {
+      animate: true,
+      duration: 1.5,
+      easeLinearity: 0.1
+    })
+    
+    // Encontrar el marcador del usuario y abrirle el popup
+    const usuario = usuarioEncontrado.value
+    if (usuario.marker) {
+      setTimeout(() => {
+        usuario.marker.openPopup()
+        
+        // Mostrar también el panel de detalles
+        registroSeleccionado.value = usuario
+        mostrarPanelDetalles.value = true
+        
+        // Añadir animación especial al marcador
+        const markerElement = usuario.marker.getElement()
+        if (markerElement) {
+          const marker = markerElement.querySelector('.location-marker')
+          if (marker) {
+            marker.classList.add('marker-focus-bounce')
+            setTimeout(() => {
+              marker.classList.remove('marker-focus-bounce')
+            }, 1000)
+          }
+        }
+      }, 800)
+    }
+  }
+}
+
+// Funciones para manejar las sugerencias
+const seleccionarUsuario = (usuario, index) => {
+  if (timeoutSugerencias.value) {
+    clearTimeout(timeoutSugerencias.value)
+    timeoutSugerencias.value = null
+  }
+  
+  usuarioEncontrado.value = usuario
+  busquedaUsuario.value = usuario.usuario?.nombre_completo || `Usuario ${usuario.usuario_id}`
+  mostrarSugerencias.value = false
+  sugerenciaSeleccionada.value = -1
+  
+  // Enfocar en el usuario seleccionado
+  setTimeout(() => {
+    enfocarUsuarioSeleccionado()
+  }, 100)
+}
+
+const ocultarSugerenciasConDelay = () => {
+  // Delay para permitir el clic en las sugerencias
+  timeoutSugerencias.value = setTimeout(() => {
+    mostrarSugerencias.value = false
+    sugerenciaSeleccionada.value = -1
+  }, 150) // Reducido el delay para mejor UX
+}
+
+const manejarTeclasNavegacion = (event) => {
+  if (!mostrarSugerencias.value || sugerenciasUsuarios.value.length === 0) return
+  
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault()
+      sugerenciaSeleccionada.value = Math.min(
+        sugerenciaSeleccionada.value + 1,
+        sugerenciasUsuarios.value.length - 1
+      )
+      break
+    case 'ArrowUp':
+      event.preventDefault()
+      sugerenciaSeleccionada.value = Math.max(sugerenciaSeleccionada.value - 1, -1)
+      break
+    case 'Enter':
+      event.preventDefault()
+      if (sugerenciaSeleccionada.value >= 0) {
+        seleccionarUsuario(
+          sugerenciasUsuarios.value[sugerenciaSeleccionada.value],
+          sugerenciaSeleccionada.value
+        )
+      }
+      break
+    case 'Escape':
+      mostrarSugerencias.value = false
+      sugerenciaSeleccionada.value = -1
+      break
+  }
+}
+
+// Función auxiliar para actualizar marcadores con filtros aplicados
+const actualizarMarcadoresConFiltros = () => {
+  // Aplicar filtros normales si no hay búsqueda de usuario
   const registrosFiltrados = filtrarRegistros()
+  let actividadesFiltradas = obtenerUltimasActividadesPorUsuario(registrosFiltrados, asistencias.value)
   
-  // Luego obtenemos las últimas actividades de cada usuario
-  let ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosFiltrados, asistencias.value)
-  
-  // Aplicar filtro por tipo de actividad después de obtener las últimas actividades
+  // Aplicar filtro por tipo de actividad
   if (filtroTipo.value) {
-    ultimasActividades = ultimasActividades.filter(actividad => {
+    actividadesFiltradas = actividadesFiltradas.filter(actividad => {
       const tipoActividad = determinarTipoActividad(actividad)
       
       switch (filtroTipo.value) {
@@ -915,50 +1132,7 @@ const aplicarFiltros = () => {
     })
   }
   
-  // Actualizamos los marcadores con estas actividades filtradas
-  actualizarMarcadores(ultimasActividades)
-}
-
-// Buscar ubicación por dirección o coordenadas
-const buscarUbicacion = async () => {
-  if (!busquedaUbicacion.value || !map) return
-  
-  const searchTerm = busquedaUbicacion.value.trim()
-  
-  // Verificar si son coordenadas
-  const coordsRegex = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/
-  
-  if (coordsRegex.test(searchTerm)) {
-    // Es coordenadas directamente
-    const [lat, lng] = searchTerm.split(',').map(coord => parseFloat(coord.trim()))
-    map.setView([lat, lng], 15)
-    window.L.marker([lat, lng])
-      .addTo(map)
-      .bindPopup(`<b>Ubicación buscada</b><br>Lat: ${lat}, Lng: ${lng}`)
-      .openPopup()
-  } else {
-    // Usar servicio de geocodificación (Nominatim)
-    try {
-      const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchTerm)}`)
-      
-      if (response.data && response.data.length > 0) {
-        const result = response.data[0]
-        const lat = parseFloat(result.lat)
-        const lng = parseFloat(result.lon)
-        
-        map.setView([lat, lng], 15)
-        window.L.marker([lat, lng])
-          .addTo(map)
-          .bindPopup(`<b>${result.display_name}</b>`)
-          .openPopup()
-      } else {
-        alert('No se encontraron resultados para esa ubicación')
-      }
-    } catch (err) {
-      console.error('Error al buscar ubicación:', err)
-      alert('Error al buscar la ubicación')
-    }
-  }
+  actualizarMarcadores(actividadesFiltradas)
 }
 
 // Centrar mapa en una ubicación específica (función separada)
@@ -1307,7 +1481,7 @@ const esUbicacionReciente = (fechaStr) => {
   }
 }
 
-// Manejar tecla Escape para cerrar panel
+// Manejar tecla Escape para cerrar panel y limpiar búsqueda
 const manejarTeclaEscape = (event) => {
   if (event.key === 'Escape') {
     if (mostrarPanelDetalles.value) {
@@ -1315,6 +1489,10 @@ const manejarTeclaEscape = (event) => {
     }
     if (popupActivo.value) {
       popupActivo.value.closePopup()
+    }
+    if (busquedaUsuario.value.trim()) {
+      busquedaUsuario.value = ''
+      limpiarBusquedaUsuario()
     }
   }
 }
@@ -1685,13 +1863,15 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: flex;
   flex-direction: column;
   gap: clamp(10px, 2vw, 16px);
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   max-width: 100%;
 }
 
 /* Barra de filtros moderna */
 .modern-filter-bar {
+  position: relative;
+  z-index: 2000;
   animation: filterBarSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1718,7 +1898,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   max-width: 100%;
   flex-wrap: wrap;
@@ -1833,6 +2013,13 @@ watch([filtroTipo, filtroPeriodo], () => {
   white-space: nowrap;
 }
 
+/* Estilos específicos para el elemento de búsqueda */
+.search-item {
+  position: relative !important;
+  z-index: 2500 !important;
+  overflow: visible !important;
+}
+
 .modern-search-wrapper {
   position: relative;
   display: flex;
@@ -1843,6 +2030,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   padding: 4px;
   transition: all 0.3s ease;
   min-width: 280px;
+  overflow: visible;
+  z-index: inherit;
 }
 
 .modern-search-wrapper:focus-within {
@@ -1895,6 +2084,216 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .modern-search-btn:active {
   transform: scale(0.95);
+}
+
+.modern-search-btn:disabled {
+  background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(149, 165, 166, 0.3);
+  opacity: 0.6;
+}
+
+.modern-search-btn:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(149, 165, 166, 0.3);
+}
+
+/* Indicador de usuario encontrado */
+.user-found-indicator {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+  animation: slideDownFade 0.3s ease-out;
+  z-index: 10;
+}
+
+@keyframes slideDownFade {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-found-indicator svg {
+  flex-shrink: 0;
+}
+
+/* Dropdown de sugerencias */
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e1e8ed;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  margin-top: 8px;
+  z-index: 9999 !important;
+  max-height: 320px;
+  overflow: hidden;
+  animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.suggestions-header {
+  padding: 8px 12px;
+  background: #f7f9fa;
+  border-bottom: 1px solid #e1e8ed;
+  font-size: 11px;
+  color: #657786;
+  font-weight: 500;
+}
+
+.suggestions-count {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.suggestions-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f7f9fa;
+  gap: 12px;
+}
+
+.suggestion-item:hover,
+.suggestion-selected {
+  background: #f0f8ff;
+  border-color: #e3f2fd;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar-letter {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+}
+
+.avatar-letter.entrada {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+}
+
+.avatar-letter.salida {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.avatar-letter.registro-hoy {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+}
+
+.avatar-letter.registro-anterior {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+.suggestion-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestion-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #14171a;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.suggestion-email {
+  font-size: 11px;
+  color: #657786;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.suggestion-status {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.suggestion-status.entrada {
+  background: rgba(39, 174, 96, 0.1);
+  color: #27ae60;
+}
+
+.suggestion-status.salida {
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
+
+.suggestion-status.registro-hoy {
+  background: rgba(30, 58, 138, 0.1);
+  color: #1e3a8a;
+}
+
+.suggestion-status.registro-anterior {
+  background: rgba(243, 156, 18, 0.1);
+  color: #f39c12;
 }
 
 /* Mapa principal */
@@ -2824,6 +3223,42 @@ watch([filtroTipo, filtroPeriodo], () => {
   .modal-action-btn {
     width: 100%;
     justify-content: center;
+  }
+  
+  /* Estilos responsive para sugerencias */
+  .suggestions-dropdown {
+    left: -10px;
+    right: -10px;
+    max-height: 280px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .suggestion-item {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .suggestion-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .avatar-letter {
+    font-size: 12px;
+  }
+  
+  .suggestion-name {
+    font-size: 12px;
+  }
+  
+  .suggestion-email {
+    font-size: 10px;
+    max-width: 120px;
+  }
+  
+  .suggestion-status {
+    font-size: 9px;
+    padding: 1px 4px;
   }
 }
 

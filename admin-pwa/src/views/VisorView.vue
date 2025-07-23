@@ -3119,7 +3119,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 2100; /* Z-index más alto que el popup */
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -3443,7 +3443,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 /* Responsivo para el modal */
 @media (max-width: 768px) {
   .modal-content.details {
-    width: 100%;
+    width: 95%;
+    max-width: 95%;
     margin: 10px;
     max-height: 95vh;
   }
@@ -3459,8 +3460,30 @@ watch([filtroTipo, filtroPeriodo], () => {
   
   .modal-user-section {
     flex-direction: column;
-    text-align: center;
+    align-items: flex-start;
     gap: 12px;
+    padding: 16px;
+  }
+  
+  .modal-user-avatar {
+    width: 50px;
+    height: 50px;
+    align-self: center;
+  }
+  
+  .modal-avatar-text {
+    font-size: 20px;
+  }
+  
+  .modal-user-name {
+    font-size: 18px;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .modal-user-email {
+    text-align: center;
+    width: 100%;
   }
   
   .modal-actions {
@@ -3471,7 +3494,174 @@ watch([filtroTipo, filtroPeriodo], () => {
   .modal-action-btn {
     width: 100%;
     justify-content: center;
+    padding: 14px 20px;
   }
+  
+  .modal-header {
+    padding: 16px 20px;
+  }
+  
+  .modal-header h3 {
+    font-size: 18px;
+  }
+  
+  .modal-info-card {
+    padding: 12px;
+  }
+  
+  .modal-info-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .modal-info-content h5 {
+    font-size: 12px;
+  }
+  
+  .modal-info-content p {
+    font-size: 14px;
+  }
+  
+  .modal-photo {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    margin: 5px;
+    border-radius: 12px;
+  }
+  
+  .modal-content.details {
+    width: calc(100% - 10px);
+    max-width: calc(100% - 10px);
+    max-height: 98vh;
+  }
+  
+  .modal-body {
+    padding: 12px;
+  }
+  
+  .modal-header {
+    padding: 12px 16px;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+  }
+  
+  .btn-close {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+  
+  .modal-user-section {
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .modal-user-avatar {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .modal-avatar-text {
+    font-size: 18px;
+  }
+  
+  .modal-user-name {
+    font-size: 16px;
+  }
+  
+  .modal-user-email {
+    font-size: 12px;
+  }
+  
+  .modal-status-badge {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+  
+  .modal-info-grid {
+    gap: 8px;
+  }
+  
+  .modal-info-card {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .modal-info-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .modal-info-content h5 {
+    font-size: 11px;
+  }
+  
+  .modal-info-content p {
+    font-size: 13px;
+  }
+  
+  .modal-photo {
+    max-height: 200px;
+  }
+  
+  .modal-actions {
+    padding-top: 12px;
+  }
+  
+  .modal-action-btn {
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .modal-content.details {
+    width: calc(100% - 6px);
+    max-width: calc(100% - 6px);
+    margin: 3px;
+    max-height: 99vh;
+  }
+  
+  .modal-body {
+    padding: 10px;
+  }
+  
+  .modal-header {
+    padding: 10px 12px;
+  }
+  
+  .modal-header h3 {
+    font-size: 14px;
+  }
+  
+  .btn-close {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+  
+  .modal-user-name {
+    font-size: 14px;
+  }
+  
+  .modal-user-email {
+    font-size: 11px;
+  }
+  
+  .modal-info-content h5 {
+    font-size: 10px;
+  }
+  
+  .modal-info-content p {
+    font-size: 12px;
+  }
+}
   
   /* Estilos responsive para sugerencias */
   .suggestions-dropdown {
@@ -3607,7 +3797,6 @@ watch([filtroTipo, filtroPeriodo], () => {
     top: 3px;
     right: 3px;
   }
-}
 
 /* Estilos para marcadores personalizados */
 :global(.custom-location-marker) {
@@ -3772,19 +3961,26 @@ watch([filtroTipo, filtroPeriodo], () => {
 /* Estilos mejorados para el popup moderno del marcador */
 :global(.modern-popup-container .leaflet-popup-content-wrapper) {
   border-radius: 20px;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+  box-shadow: none !important;
   border: none;
   padding: 0;
-  overflow: hidden;
-  backdrop-filter: blur(15px);
+  overflow: visible;
+  backdrop-filter: none !important;
   transform-origin: bottom center;
   z-index: 1050; /* Z-index ajustado para no interferir con la navegación del mapa */
   pointer-events: auto; /* Solo el popup captura eventos */
+  background: transparent !important; /* Quitar el fondo blanco */
+  -webkit-backdrop-filter: none !important;
 }
 
 /* Popup centrado - mejora del posicionamiento */
 :global(.modern-popup-container.centered-popup .leaflet-popup-content-wrapper) {
   animation: liquidSplashUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  margin-left: auto !important;
+  margin-right: auto !important;
+  position: relative;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
 }
 
 /* Animación líquida principal - efecto splash */
@@ -3874,8 +4070,10 @@ watch([filtroTipo, filtroPeriodo], () => {
 :global(.modern-popup-container .leaflet-popup-content) {
   margin: 0;
   padding: 0;
-  width: 320px !important;
+  width: 280px !important;
   max-width: calc(100vw - 40px) !important;
+  background: transparent !important; /* Quitar el fondo blanco */
+  box-shadow: none !important; /* Quitar sombra por defecto */
 }
 
 :global(.modern-popup-container .leaflet-popup-tip) {
@@ -3951,6 +4149,64 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: none !important;
 }
 
+/* Ocultar cualquier fondo blanco adicional de Leaflet */
+:global(.modern-popup-container .leaflet-popup-content-wrapper::before) {
+  display: none !important;
+}
+
+:global(.modern-popup-container .leaflet-popup-content-wrapper::after) {
+  display: none !important;
+}
+
+/* Eliminar cualquier pseudo-elemento que pueda crear fondos */
+:global(.modern-popup-container::before) {
+  display: none !important;
+}
+
+:global(.modern-popup-container::after) {
+  display: none !important;
+}
+
+/* Eliminar efectos de desenfoque y fondos en todos los elementos del popup */
+:global(.modern-popup-container .leaflet-popup) {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+:global(.modern-popup-container .leaflet-popup-content-wrapper) {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+/* Asegurar que no haya bordes o fondos blancos en ningún elemento del popup */
+:global(.modern-popup-container *) {
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:global(.modern-popup-container .leaflet-popup-content-wrapper) {
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+:global(.modern-popup-container .leaflet-popup-content) {
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
 /* Asegurar que Leaflet sea navegable con z-index apropiados */
 :global(.leaflet-map-pane) {
   z-index: 1 !important;
@@ -3966,6 +4222,204 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 :global(.leaflet-control-container) {
   z-index: 1000 !important; /* Controles del mapa siempre accesibles */
+}
+
+/* Responsividad completa para el popup */
+@media (max-width: 480px) {
+  :global(.modern-popup-container .leaflet-popup-content) {
+    width: 240px !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+  
+  :global(.modern-popup-container.centered-popup .leaflet-popup-content-wrapper) {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    margin: 0 auto !important;
+  }
+  
+  :global(.modern-marker-popup) {
+    min-width: 200px;
+    border-radius: 12px;
+  }
+  
+  :global(.popup-header) {
+    padding: 10px 28px 8px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  :global(.popup-title) {
+    width: 100%;
+  }
+  
+  :global(.popup-title h3) {
+    font-size: 13px;
+  }
+  
+  :global(.popup-id) {
+    font-size: 9px;
+  }
+  
+  :global(.popup-status) {
+    align-self: flex-end;
+    margin-top: -24px;
+  }
+  
+  :global(.status-badge) {
+    padding: 2px 6px;
+    font-size: 8px;
+  }
+  
+  :global(.popup-content) {
+    padding: 12px;
+  }
+  
+  :global(.user-info) {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  
+  :global(.user-avatar) {
+    width: 36px;
+    height: 36px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+  }
+  
+  :global(.avatar-text) {
+    font-size: 14px;
+  }
+  
+  :global(.user-name) {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+  
+  :global(.user-email) {
+    font-size: 9px;
+    gap: 3px;
+  }
+  
+  :global(.email-icon svg) {
+    width: 8px;
+    height: 8px;
+  }
+  
+  :global(.popup-info) {
+    gap: 8px;
+  }
+  
+  :global(.info-item) {
+    gap: 6px;
+  }
+  
+  :global(.info-icon) {
+    width: 24px;
+    height: 24px;
+  }
+  
+  :global(.info-icon svg) {
+    width: 10px;
+    height: 10px;
+  }
+  
+  :global(.info-text) {
+    font-size: 10px;
+  }
+  
+  :global(.popup-actions) {
+    margin-top: 10px;
+  }
+  
+  :global(.enhanced-detail-btn) {
+    padding: 8px 12px;
+    font-size: 10px;
+    gap: 4px;
+  }
+  
+  :global(.enhanced-detail-btn svg) {
+    width: 10px;
+    height: 10px;
+  }
+  
+  :global(.popup-close-btn) {
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+  }
+  
+  :global(.popup-close-btn svg) {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  :global(.modern-popup-container .leaflet-popup-content) {
+    width: 200px !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+  
+  :global(.modern-popup-container.centered-popup .leaflet-popup-content-wrapper) {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    margin: 0 auto !important;
+  }
+  
+  :global(.modern-marker-popup) {
+    min-width: 180px;
+  }
+  
+  :global(.popup-header) {
+    padding: 8px 24px 6px 10px;
+  }
+  
+  :global(.popup-title h3) {
+    font-size: 12px;
+  }
+  
+  :global(.popup-content) {
+    padding: 10px;
+  }
+  
+  :global(.user-avatar) {
+    width: 32px;
+    height: 32px;
+  }
+  
+  :global(.avatar-text) {
+    font-size: 12px;
+  }
+  
+  :global(.user-name) {
+    font-size: 11px;
+  }
+  
+  :global(.user-email) {
+    font-size: 8px;
+  }
+}
+
+/* Tablet responsividad */
+@media (min-width: 481px) and (max-width: 768px) {
+  :global(.modern-popup-container .leaflet-popup-content) {
+    width: 260px !important;
+  }
+  
+  :global(.modern-popup-container.centered-popup .leaflet-popup-content-wrapper) {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    margin: 0 auto !important;
+  }
+  
+  :global(.popup-header) {
+    padding: 12px 30px 9px 14px;
+  }
+  
+  :global(.popup-content) {
+    padding: 14px;
+  }
 }
 
 @keyframes popupSlideFromRight {
@@ -3986,9 +4440,9 @@ watch([filtroTipo, filtroPeriodo], () => {
 :global(.modern-marker-popup) {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: white;
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
-  min-width: 280px;
+  min-width: 240px;
   animation: contentFlipIn 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
   position: relative;
 }
@@ -3998,11 +4452,11 @@ watch([filtroTipo, filtroPeriodo], () => {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -16px; /* Pegada al borde inferior */
+  bottom: -14px; /* Pegada al borde inferior */
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-width: 16px 16px 0 16px; /* Triángulo hacia abajo */
+  border-width: 14px 14px 0 14px; /* Triángulo hacia abajo */
   border-style: solid;
   border-color: transparent transparent transparent transparent;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
@@ -4010,25 +4464,56 @@ watch([filtroTipo, filtroPeriodo], () => {
   pointer-events: none;
 }
 
-/* Versión alternativa con rotate para mayor compatibilidad */
+/* Línea de conexión visual mejorada */
 :global(.modern-marker-popup::before) {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -8px;
-  transform: translateX(-50%) rotate(180deg);
-  width: 16px;
-  height: 8px;
-  background: transparent;
-  z-index: 4;
+  bottom: -6px;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 2px;
+  z-index: 6;
   pointer-events: none;
+  animation: connectionPulse 2s ease-in-out infinite;
+}
+
+@keyframes connectionPulse {
+  0%, 100% { 
+    opacity: 0.8;
+    height: 6px;
+  }
+  50% { 
+    opacity: 1;
+    height: 8px;
+  }
 }
 
 /* Responsive: Flecha ajustada en dispositivos táctiles */
 @media (max-width: 768px) {
   :global(.modern-marker-popup::after) {
-    border-width: 14px 14px 0 14px;
-    bottom: -14px;
+    border-width: 12px 12px 0 12px;
+    bottom: -12px;
+  }
+  
+  :global(.modern-marker-popup::before) {
+    bottom: -4px;
+    height: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  :global(.modern-marker-popup::after) {
+    border-width: 10px 10px 0 10px;
+    bottom: -10px;
+  }
+  
+  :global(.modern-marker-popup::before) {
+    bottom: -3px;
+    height: 3px;
+    width: 2px;
   }
 }
 
@@ -4049,13 +4534,30 @@ watch([filtroTipo, filtroPeriodo], () => {
   border-color: #FF9800 transparent transparent transparent; /* Naranja para registros antiguos */
 }
 
+/* Líneas de conexión con colores coincidentes */
+:global(.modern-marker-popup.entrada-popup::before) {
+  background: #32CD32;
+}
+
+:global(.modern-marker-popup.salida-popup::before) {
+  background: #DC2626;
+}
+
+:global(.modern-marker-popup.registro-hoy-popup::before) {
+  background: #1E3A8A;
+}
+
+:global(.modern-marker-popup.antiguo-popup::before) {
+  background: #FF9800;
+}
+
 /* Botón de cerrar personalizado del popup - Posicionamiento mejorado */
 :global(.popup-close-btn) {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 24px;
-  height: 24px;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
   background: rgba(255, 255, 255, 0.95);
   border: none;
   border-radius: 50%;
@@ -4067,7 +4569,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   color: #666;
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   animation: fadeInRotate 0.6s ease-out 0.4s both;
 }
 
@@ -4083,8 +4586,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.popup-close-btn svg) {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 @keyframes fadeInRotate {
@@ -4139,9 +4642,10 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.popup-header) {
-  padding: 18px 40px 14px 22px; /* Padding derecho aumentado para el botón de cerrar */
+  padding: 14px 32px 10px 16px; /* Padding derecho aumentado para el botón de cerrar */
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(15px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -4184,18 +4688,18 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.popup-id) {
-  font-size: 12px;
+  font-size: 10px;
   opacity: 0.9;
   font-weight: 600;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s both;
   letter-spacing: 0.5px;
 }
 
 :global(.popup-title h3) {
   margin: 0;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -4217,9 +4721,9 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.status-badge) {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 16px;
+  font-size: 9px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -4322,14 +4826,14 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.popup-content) {
-  padding: 22px;
+  padding: 16px;
 }
 
 :global(.user-info) {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 14px;
   animation: slideInLeft 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s both;
 }
 
@@ -4345,16 +4849,17 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.user-avatar) {
-  width: 52px;
-  height: 52px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.4);
   animation: rotateIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.7s both;
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -4370,7 +4875,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.avatar-text) {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   color: white;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -4382,9 +4887,9 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.user-name) {
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   color: white;
   animation: fadeInRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s both;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -4402,7 +4907,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 :global(.user-email) {
-  font-size: 13px;
+  font-size: 11px;
   opacity: 0.95;
   color: rgba(255, 255, 255, 0.9);
   word-break: break-word;
@@ -4411,7 +4916,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 :global(.email-icon) {
@@ -4542,7 +5047,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   gap: 10px;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   position: relative;
   overflow: hidden;
   min-width: 180px;
@@ -4560,8 +5066,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   width: auto !important;
   margin: 10px auto !important;
   box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
   cursor: pointer !important;
   font-weight: 700 !important;
@@ -4595,8 +5101,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 :global(.enhanced-detail-btn:hover) {
   background: rgba(255, 255, 255, 0.35) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   transform: translateY(-2px) !important;
   border-color: rgba(255, 255, 255, 0.4) !important;
 }

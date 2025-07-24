@@ -291,6 +291,151 @@ async def obtener_usuario(user_id: int):
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener usuario: {str(e)}")
 
+# Endpoint para eliminar un usuario específico con todos sus datos
+@app.delete("/usuarios/{user_id}")
+async def eliminar_usuario(user_id: int):
+    """Elimina completamente un usuario y todos sus datos asociados"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🗑️ Iniciando eliminación completa del usuario {user_id}...")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, correo, nombre_completo FROM usuarios WHERE id = %s", (user_id,))
+        usuario = cursor.fetchone()
+        
+        if not usuario:
+            raise HTTPException(status_code=404, detail=f"Usuario {user_id} no encontrado")
+        
+        usuario_info = {
+            "id": usuario[0],
+            "correo": usuario[1], 
+            "nombre_completo": usuario[2]
+        }
+        
+        print(f"👤 Usuario encontrado: {usuario_info}")
+        
+        # Contadores para el reporte
+        registros_eliminados = 0
+        asistencias_eliminadas = 0
+        fotos_eliminadas = 0
+        
+        # 1. Obtener y eliminar fotos asociadas a registros del usuario
+        try:
+            cursor.execute("SELECT foto_url FROM registros WHERE usuario_id = %s AND foto_url IS NOT NULL", (user_id,))
+            fotos_registros = cursor.fetchall()
+            
+            for foto_row in fotos_registros:
+                foto_path = foto_row[0]
+                if foto_path and os.path.exists(foto_path):
+                    try:
+                        os.remove(foto_path)
+                        fotos_eliminadas += 1
+                        print(f"📸 Foto eliminada: {foto_path}")
+                    except Exception as e:
+                        print(f"⚠️ Error eliminando foto {foto_path}: {e}")
+                        
+        except Exception as e:
+            print(f"⚠️ Error obteniendo fotos de registros: {e}")
+        
+        # 2. Obtener y eliminar fotos asociadas a asistencias del usuario
+        try:
+            cursor.execute(
+                "SELECT foto_entrada_url, foto_salida_url FROM asistencias WHERE usuario_id = %s", 
+                (user_id,)
+            )
+            fotos_asistencias = cursor.fetchall()
+            
+            for foto_row in fotos_asistencias:
+                # Foto de entrada
+                if foto_row[0] and os.path.exists(foto_row[0]):
+                    try:
+                        os.remove(foto_row[0])
+                        fotos_eliminadas += 1
+                        print(f"📸 Foto de entrada eliminada: {foto_row[0]}")
+                    except Exception as e:
+                        print(f"⚠️ Error eliminando foto de entrada {foto_row[0]}: {e}")
+                
+                # Foto de salida
+                if foto_row[1] and os.path.exists(foto_row[1]):
+                    try:
+                        os.remove(foto_row[1])
+                        fotos_eliminadas += 1
+                        print(f"📸 Foto de salida eliminada: {foto_row[1]}")
+                    except Exception as e:
+                        print(f"⚠️ Error eliminando foto de salida {foto_row[1]}: {e}")
+                        
+        except Exception as e:
+            print(f"⚠️ Error obteniendo fotos de asistencias: {e}")
+        
+        # 3. Eliminar registros del usuario
+        try:
+            cursor.execute("SELECT COUNT(*) FROM registros WHERE usuario_id = %s", (user_id,))
+            registros_eliminados = cursor.fetchone()[0]
+            
+            cursor.execute("DELETE FROM registros WHERE usuario_id = %s", (user_id,))
+            print(f"📋 {registros_eliminados} registros eliminados")
+            
+        except Exception as e:
+            print(f"❌ Error eliminando registros: {e}")
+            raise HTTPException(status_code=500, detail=f"Error eliminando registros: {str(e)}")
+        
+        # 4. Eliminar asistencias del usuario
+        try:
+            cursor.execute("SELECT COUNT(*) FROM asistencias WHERE usuario_id = %s", (user_id,))
+            asistencias_eliminadas = cursor.fetchone()[0]
+            
+            cursor.execute("DELETE FROM asistencias WHERE usuario_id = %s", (user_id,))
+            print(f"⏰ {asistencias_eliminadas} asistencias eliminadas")
+            
+        except Exception as e:
+            print(f"❌ Error eliminando asistencias: {e}")
+            raise HTTPException(status_code=500, detail=f"Error eliminando asistencias: {str(e)}")
+        
+        # 5. Finalmente, eliminar el usuario
+        try:
+            cursor.execute("DELETE FROM usuarios WHERE id = %s", (user_id,))
+            print(f"👤 Usuario {user_id} eliminado")
+            
+        except Exception as e:
+            print(f"❌ Error eliminando usuario: {e}")
+            raise HTTPException(status_code=500, detail=f"Error eliminando usuario: {str(e)}")
+        
+        # Confirmar todos los cambios
+        conn.commit()
+        
+        # Resumen de eliminación
+        resultado = {
+            "status": "success",
+            "message": f"Usuario {user_id} eliminado completamente",
+            "usuario_eliminado": usuario_info,
+            "datos_eliminados": {
+                "registros": registros_eliminados,
+                "asistencias": asistencias_eliminadas,
+                "fotos": fotos_eliminadas
+            }
+        }
+        
+        print(f"✅ ELIMINACIÓN COMPLETA EXITOSA:")
+        print(f"   👤 Usuario: {usuario_info['correo']}")
+        print(f"   📋 Registros: {registros_eliminados}")
+        print(f"   ⏰ Asistencias: {asistencias_eliminadas}")
+        print(f"   📸 Fotos: {fotos_eliminadas}")
+        
+        return resultado
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL al eliminar usuario {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general al eliminar usuario {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar usuario: {str(e)}")
+
 # Endpoint de autenticación para administradores
 @app.post("/admin/login")
 def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):

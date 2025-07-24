@@ -184,6 +184,7 @@
                     <th>Usuario</th>
                     <th>Fecha</th>
                     <th>Hora de Entrada</th>
+                    <th>Hora de Salida</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
@@ -200,6 +201,10 @@
                     <td class="fecha">{{ formatFechaElegante(entrada.fecha) }}</td>
                     <td class="hora-entrada">
                       <div class="badge-entrada">{{ formatHora12(entrada.hora_entrada) }}</div>
+                    </td>
+                    <td class="hora-salida">
+                      <div v-if="entrada.hora_salida" class="badge-salida">{{ formatHora12(entrada.hora_salida) }}</div>
+                      <div v-else class="badge-sin-salida">Sin registrar salida</div>
                     </td>
                     <td>
                       <span :class="['status-badge', entrada.hora_salida ? 'completed' : 'active']">
@@ -519,10 +524,10 @@ const statCards = computed(() => [
 
 // Computed properties para las diferentes pestañas
 const entradasRecientes = computed(() => {
-  // Filtrar asistencias que tienen hora de entrada y ordenar por fecha más reciente
+  // Mostrar todas las asistencias que tienen hora de entrada (con o sin salida)
   console.log('Calculando entradas recientes:', asistencias.value)
   const resultado = asistencias.value
-    .filter(asistencia => asistencia.hora_entrada)
+    .filter(asistencia => asistencia.hora_entrada) // Solo las que tienen entrada registrada
     .sort((a, b) => {
       // Ordenar por fecha y hora más recientes
       const fechaA = new Date(`${a.fecha} ${a.hora_entrada}`)
@@ -532,7 +537,11 @@ const entradasRecientes = computed(() => {
     .map(asistencia => {
       // Enriquecer con información del usuario
       const usuario = usuarios.value.find(u => u.id === asistencia.usuario_id)
-      console.log('Entrada con hora:', asistencia.hora_entrada, 'Usuario:', usuario?.nombre_completo)
+      console.log('Entrada:', {
+        hora_entrada: asistencia.hora_entrada,
+        hora_salida: asistencia.hora_salida || 'Sin registrar',
+        usuario: usuario?.nombre_completo
+      })
       return { ...asistencia, usuario }
     })
   
@@ -2433,6 +2442,22 @@ const logout = () => {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.badge-sin-salida {
+  background: linear-gradient(135deg, #FFC107, #FFD54F);
+  color: #333;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 120px;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+  border: 1px solid rgba(255, 152, 0, 0.2);
 }
 
 .status-badge {

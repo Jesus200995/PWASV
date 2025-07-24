@@ -138,6 +138,36 @@
             </div>
           </div>
         </div>
+
+        <!-- NUEVA SECCIÓN: Eliminación Masiva de Datos -->
+        <div class="config-section">
+          <h2>⚠️ Eliminación Masiva de Datos</h2>
+          <div class="config-card danger-card">
+            <div class="danger-warning">
+              <div class="warning-icon">⚠️</div>
+              <div class="warning-text">
+                <strong>¡ATENCIÓN!</strong> Las siguientes acciones eliminarán datos de forma permanente y no se pueden deshacer.
+                <br>Úsalas solo si estás completamente seguro.
+              </div>
+            </div>
+            
+            <div class="danger-actions-grid">
+              <button @click="confirmarEliminarUsuarios" class="danger-btn usuarios-btn" :disabled="eliminandoUsuarios">
+                {{ eliminandoUsuarios ? 'Eliminando...' : '👥 Eliminar TODOS los Usuarios' }}
+              </button>
+              <button @click="confirmarEliminarRegistros" class="danger-btn registros-btn" :disabled="eliminandoRegistros">
+                {{ eliminandoRegistros ? 'Eliminando...' : '📋 Eliminar TODOS los Registros' }}
+              </button>
+              <button @click="confirmarEliminarAsistencias" class="danger-btn asistencias-btn" :disabled="eliminandoAsistencias">
+                {{ eliminandoAsistencias ? 'Eliminando...' : '🕐 Eliminar TODAS las Asistencias' }}
+              </button>
+            </div>
+            
+            <div class="danger-note">
+              <p><strong>Nota:</strong> Estas acciones requerirán múltiples confirmaciones por seguridad.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </main>    <!-- Modal para mensajes -->
     <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
@@ -165,6 +195,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
+import asistenciasService from '../services/asistenciasService.js'
 
 const router = useRouter()
 
@@ -180,6 +211,11 @@ const showConfirmModal = ref(false)
 const confirmAction = ref(null)
 const confirmTitle = ref('')
 const confirmMessage = ref('')
+
+// Variables para las acciones de eliminación masiva
+const eliminandoUsuarios = ref(false)
+const eliminandoRegistros = ref(false)
+const eliminandoAsistencias = ref(false)
 
 const apiConfig = reactive({
   url: 'https://apipwa.sembrandodatos.com',
@@ -381,6 +417,118 @@ const mostrarMensaje = (titulo, contenido) => {
 
 const cerrarModal = () => {
   showModal.value = false
+}
+
+// MÉTODOS DE ELIMINACIÓN MASIVA
+const confirmarEliminarUsuarios = () => {
+  showConfirmation(
+    '⚠️ ELIMINAR TODOS LOS USUARIOS',
+    '¿Estás COMPLETAMENTE SEGURO de que quieres eliminar TODOS los usuarios del sistema?<br><br><strong>Esta acción NO SE PUEDE DESHACER</strong> y eliminará:<br>• Todos los perfiles de usuario<br>• Sus datos de acceso<br>• Toda su información personal<br><br>Escribe "CONFIRMAR" para continuar.',
+    async () => {
+      // Segunda confirmación más estricta
+      const confirmacion = prompt('Para confirmar, escribe exactamente: ELIMINAR USUARIOS')
+      if (confirmacion === 'ELIMINAR USUARIOS') {
+        await eliminarTodosUsuarios()
+      } else {
+        mostrarMensaje('Cancelado', 'Eliminación de usuarios cancelada.')
+      }
+    }
+  )
+}
+
+const confirmarEliminarRegistros = () => {
+  showConfirmation(
+    '⚠️ ELIMINAR TODOS LOS REGISTROS',
+    '¿Estás COMPLETAMENTE SEGURO de que quieres eliminar TODOS los registros del sistema?<br><br><strong>Esta acción NO SE PUEDE DESHACER</strong> y eliminará:<br>• Todos los registros históricos<br>• Fotos y documentos asociados<br>• Datos de ubicación<br><br>Esta operación es irreversible.',
+    async () => {
+      // Segunda confirmación más estricta
+      const confirmacion = prompt('Para confirmar, escribe exactamente: ELIMINAR REGISTROS')
+      if (confirmacion === 'ELIMINAR REGISTROS') {
+        await eliminarTodosRegistros()
+      } else {
+        mostrarMensaje('Cancelado', 'Eliminación de registros cancelada.')
+      }
+    }
+  )
+}
+
+const confirmarEliminarAsistencias = () => {
+  showConfirmation(
+    '⚠️ ELIMINAR TODAS LAS ASISTENCIAS',
+    '¿Estás COMPLETAMENTE SEGURO de que quieres eliminar TODAS las asistencias del sistema?<br><br><strong>Esta acción NO SE PUEDE DESHACER</strong> y eliminará:<br>• Todos los registros de entrada y salida<br>• Fotos de asistencia<br>• Datos de ubicación de asistencias<br>• Historial completo de asistencias<br><br>Esta operación es irreversible.',
+    async () => {
+      // Segunda confirmación más estricta
+      const confirmacion = prompt('Para confirmar, escribe exactamente: ELIMINAR ASISTENCIAS')
+      if (confirmacion === 'ELIMINAR ASISTENCIAS') {
+        await eliminarTodasAsistencias()
+      } else {
+        mostrarMensaje('Cancelado', 'Eliminación de asistencias cancelada.')
+      }
+    }
+  )
+}
+
+const eliminarTodosUsuarios = async () => {
+  eliminandoUsuarios.value = true
+  
+  try {
+    const resultado = await asistenciasService.eliminarTodosUsuarios()
+    
+    if (resultado.status === 'success') {
+      mostrarMensaje(
+        '✅ Usuarios Eliminados', 
+        `Se han eliminado ${resultado.usuarios_eliminados} usuarios exitosamente.<br><br><strong>⚠️ El sistema de usuarios ha sido completamente limpiado.</strong>`
+      )
+    } else if (resultado.status === 'info') {
+      mostrarMensaje('ℹ️ Sin Datos', resultado.message)
+    }
+  } catch (error) {
+    mostrarMensaje('❌ Error', 'Error al eliminar usuarios: ' + (error.message || 'Error desconocido'))
+  } finally {
+    eliminandoUsuarios.value = false
+  }
+}
+
+const eliminarTodosRegistros = async () => {
+  eliminandoRegistros.value = true
+  
+  try {
+    const resultado = await asistenciasService.eliminarTodosRegistros()
+    
+    if (resultado.status === 'success') {
+      mostrarMensaje(
+        '✅ Registros Eliminados', 
+        `Se han eliminado ${resultado.registros_eliminados} registros exitosamente.<br><br><strong>⚠️ El sistema de registros ha sido completamente limpiado.</strong>`
+      )
+    } else if (resultado.status === 'info') {
+      mostrarMensaje('ℹ️ Sin Datos', resultado.message)
+    }
+  } catch (error) {
+    mostrarMensaje('❌ Error', 'Error al eliminar registros: ' + (error.message || 'Error desconocido'))
+  } finally {
+    eliminandoRegistros.value = false
+  }
+}
+
+const eliminarTodasAsistencias = async () => {
+  eliminandoAsistencias.value = true
+  
+  try {
+    const resultado = await asistenciasService.eliminarTodasAsistencias()
+    
+    if (resultado.status === 'success') {
+      mostrarMensaje(
+        '✅ Asistencias Eliminadas', 
+        `Se han eliminado ${resultado.asistencias_eliminadas} asistencias y ${resultado.fotos_eliminadas || 0} fotos exitosamente.<br><br><strong>⚠️ El sistema de asistencias ha sido completamente limpiado.</strong>`
+      )
+    } else if (resultado.status === 'info') {
+      mostrarMensaje('ℹ️ Sin Datos', resultado.message)
+    }
+  } catch (error) {
+    mostrarMensaje('❌ Error', 'Error al eliminar asistencias: ' + (error.message || 'Error desconocido'))
+  } finally {
+    eliminandoAsistencias.value = false
+  }
 }
 
 const logout = () => {
@@ -794,6 +942,161 @@ const logout = () => {
   overflow-x: auto;
 }
 
+/* ESTILOS PARA ELIMINACIÓN MASIVA */
+.danger-card {
+  border: 2px solid #e74c3c;
+  background: linear-gradient(135deg, #ffffff 0%, #ffeaa7 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.danger-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #e74c3c 100%);
+  animation: dangerGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes dangerGlow {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.danger-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.warning-icon {
+  font-size: 32px;
+  color: #e74c3c;
+  animation: shake 2s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.warning-text {
+  flex: 1;
+  color: #2c3e50;
+  line-height: 1.5;
+}
+
+.warning-text strong {
+  color: #e74c3c;
+}
+
+.danger-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.danger-btn {
+  padding: 16px 20px;
+  border: 2px solid;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.danger-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.danger-btn:hover::before {
+  left: 100%;
+}
+
+.usuarios-btn {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  border-color: #c0392b;
+  color: white;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.usuarios-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+.registros-btn {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  border-color: #e67e22;
+  color: white;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+}
+
+.registros-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+}
+
+.asistencias-btn {
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  border-color: #8e44ad;
+  color: white;
+  box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+}
+
+.asistencias-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4);
+}
+
+.danger-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.danger-note {
+  background: rgba(52, 73, 94, 0.1);
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #34495e;
+}
+
+.danger-note p {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 14px;
+  font-style: italic;
+}
+
 /* RESPONSIVE ULTRA COMPLETO - USA TODO EL ANCHO */
 @media (max-width: 768px) {
   .main-content {
@@ -850,6 +1153,20 @@ const logout = () => {
   
   .actions-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .danger-actions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .danger-warning {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .warning-icon {
+    font-size: 28px;
   }
   
   .config-input, .config-select {

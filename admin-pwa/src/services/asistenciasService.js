@@ -1,5 +1,5 @@
 // Servicio para el manejo de asistencias
-const API_URL = 'https://apipwa.sembrandodatos.com';
+const API_URL = 'http://localhost:8000';
 
 class AsistenciasService {
   /**
@@ -232,6 +232,97 @@ class AsistenciasService {
   formatearCoordenadas(latitud, longitud) {
     if (!latitud || !longitud) return 'N/A';
     return `${latitud.toFixed(6)}, ${longitud.toFixed(6)}`;
+  }
+
+  /**
+   * MÉTODOS DE ELIMINACIÓN MASIVA - ¡USO EXTREMO!
+   */
+
+  /**
+   * Elimina TODAS las asistencias del sistema
+   * @returns {Promise<Object>} Resultado de la eliminación
+   */
+  async eliminarTodasAsistencias() {
+    try {
+      console.log('🗑️ ELIMINACIÓN MASIVA: Eliminando todas las asistencias...');
+      
+      const response = await fetch(`${API_URL}/admin/asistencias/all`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Asistencias eliminadas:', data);
+      
+      return data;
+    } catch (error) {
+      console.error('❌ Error al eliminar todas las asistencias:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina TODOS los registros del sistema
+   * @returns {Promise<Object>} Resultado de la eliminación
+   */
+  async eliminarTodosRegistros() {
+    try {
+      console.log('🗑️ ELIMINACIÓN MASIVA: Eliminando todos los registros...');
+      
+      const response = await fetch(`${API_URL}/admin/registros/all`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Registros eliminados:', data);
+      
+      return data;
+    } catch (error) {
+      console.error('❌ Error al eliminar todos los registros:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina TODOS los usuarios del sistema
+   * @returns {Promise<Object>} Resultado de la eliminación
+   */
+  async eliminarTodosUsuarios() {
+    try {
+      console.log('🗑️ ELIMINACIÓN MASIVA: Eliminando todos los usuarios...');
+      
+      const response = await fetch(`${API_URL}/admin/usuarios/all`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Usuarios eliminados:', data);
+      
+      return data;
+    } catch (error) {
+      console.error('❌ Error al eliminar todos los usuarios:', error);
+      throw error;
+    }
   }
 }
 

@@ -578,6 +578,141 @@ async def verificar_estructura_asistencias():
         print(f"❌ Error verificando estructura: {e}")
         raise HTTPException(status_code=500, detail=f"Error verificando estructura: {str(e)}")
 
+# Endpoints para eliminación masiva (ADMIN ONLY)
+@app.delete("/admin/usuarios/all")
+async def eliminar_todos_usuarios():
+    """Elimina TODOS los usuarios de la base de datos. ¡USO EXTREMO!"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Contar usuarios antes de eliminar
+        cursor.execute("SELECT COUNT(*) FROM usuarios")
+        total_usuarios = cursor.fetchone()[0]
+        
+        if total_usuarios == 0:
+            return {
+                "status": "info",
+                "message": "No hay usuarios para eliminar",
+                "usuarios_eliminados": 0
+            }
+        
+        # Eliminar todos los usuarios
+        cursor.execute("DELETE FROM usuarios")
+        conn.commit()
+        
+        print(f"🗑️ ELIMINACIÓN MASIVA: {total_usuarios} usuarios eliminados")
+        
+        return {
+            "status": "success",
+            "message": f"Todos los usuarios han sido eliminados exitosamente",
+            "usuarios_eliminados": total_usuarios
+        }
+        
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL al eliminar usuarios: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general al eliminar usuarios: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar usuarios: {str(e)}")
+
+@app.delete("/admin/registros/all")
+async def eliminar_todos_registros():
+    """Elimina TODOS los registros de la base de datos. ¡USO EXTREMO!"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Contar registros antes de eliminar
+        cursor.execute("SELECT COUNT(*) FROM registros")
+        total_registros = cursor.fetchone()[0]
+        
+        if total_registros == 0:
+            return {
+                "status": "info",
+                "message": "No hay registros para eliminar",
+                "registros_eliminados": 0
+            }
+        
+        # Eliminar todos los registros
+        cursor.execute("DELETE FROM registros")
+        conn.commit()
+        
+        print(f"🗑️ ELIMINACIÓN MASIVA: {total_registros} registros eliminados")
+        
+        return {
+            "status": "success",
+            "message": f"Todos los registros han sido eliminados exitosamente",
+            "registros_eliminados": total_registros
+        }
+        
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL al eliminar registros: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general al eliminar registros: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar registros: {str(e)}")
+
+@app.delete("/admin/asistencias/all")
+async def eliminar_todas_asistencias():
+    """Elimina TODAS las asistencias de la base de datos. ¡USO EXTREMO!"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Contar asistencias antes de eliminar
+        cursor.execute("SELECT COUNT(*) FROM asistencias")
+        total_asistencias = cursor.fetchone()[0]
+        
+        if total_asistencias == 0:
+            return {
+                "status": "info",
+                "message": "No hay asistencias para eliminar",
+                "asistencias_eliminadas": 0
+            }
+        
+        # Obtener rutas de fotos para eliminar archivos físicos
+        cursor.execute("SELECT foto_entrada_url, foto_salida_url FROM asistencias WHERE foto_entrada_url IS NOT NULL OR foto_salida_url IS NOT NULL")
+        fotos_resultados = cursor.fetchall()
+        
+        fotos_eliminadas = 0
+        for row in fotos_resultados:
+            foto_entrada, foto_salida = row
+            for foto_path in [foto_entrada, foto_salida]:
+                if foto_path and os.path.exists(foto_path):
+                    try:
+                        os.remove(foto_path)
+                        fotos_eliminadas += 1
+                        print(f"📸 Foto eliminada: {foto_path}")
+                    except Exception as e:
+                        print(f"⚠️ No se pudo eliminar la foto {foto_path}: {e}")
+        
+        # Eliminar todas las asistencias
+        cursor.execute("DELETE FROM asistencias")
+        conn.commit()
+        
+        print(f"🗑️ ELIMINACIÓN MASIVA: {total_asistencias} asistencias eliminadas, {fotos_eliminadas} fotos eliminadas")
+        
+        return {
+            "status": "success",
+            "message": f"Todas las asistencias han sido eliminadas exitosamente",
+            "asistencias_eliminadas": total_asistencias,
+            "fotos_eliminadas": fotos_eliminadas
+        }
+        
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL al eliminar asistencias: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general al eliminar asistencias: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar asistencias: {str(e)}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

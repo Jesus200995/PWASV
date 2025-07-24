@@ -40,7 +40,7 @@
         <!-- Registros recientes -->
         <div class="section">
           <div class="section-header">
-            <h2>Registros Recientes</h2>            <button @click="cargarRegistros" class="refresh-btn" :disabled="loading">
+            <h2>Actividad Reciente</h2>            <button @click="cargarTodosLosDatos" class="refresh-btn" :disabled="loading">
               <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10"></polyline>
                 <polyline points="1 20 1 14 7 14"></polyline>
@@ -49,15 +49,48 @@
               {{ loading ? 'Cargando...' : 'Actualizar' }}
             </button>
           </div>
+
+          <!-- Pestañas -->
+          <div class="tabs-container">
+            <div class="tabs-header">
+              <button 
+                @click="activeTab = 'registros'" 
+                :class="['tab-button', { active: activeTab === 'registros' }]"
+              >
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Registros Generales
+              </button>
+              <button 
+                @click="activeTab = 'entradas'" 
+                :class="['tab-button', { active: activeTab === 'entradas' }]"
+              >
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M1 12h13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Entradas Recientes
+              </button>
+              <button 
+                @click="activeTab = 'salidas'" 
+                :class="['tab-button', { active: activeTab === 'salidas' }]"
+              >
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l-5-5 5-5M21 12H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Salidas Recientes
+              </button>
+            </div>
+          </div>
           
-          <div v-if="loading && registros.length === 0" class="loading-container">
+          <div v-if="loading && registros.length === 0 && asistencias.length === 0" class="loading-container">
             <div class="spinner-large"></div>
-            <p>Cargando registros...</p>
+            <p>Cargando datos...</p>
           </div>
           
           <div v-else-if="error" class="error-container">
             <p>{{ error }}</p>
-            <button @click="cargarRegistros" class="retry-btn">
+            <button @click="cargarTodosLosDatos" class="retry-btn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                 <path d="M3 3v5h5"></path>
@@ -67,64 +100,176 @@
               Reintentar
             </button>
           </div>
-            <div v-else-if="registros.length === 0" class="empty-state">
-            <div class="empty-icon">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-              </svg>
+
+          <!-- Contenido de Pestaña: Registros Generales -->
+          <div v-if="activeTab === 'registros'" class="tab-content">
+            <div v-if="registros.length === 0" class="empty-state">
+              <div class="empty-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+              </div>
+              <h3>No hay registros</h3>
+              <p>Aún no se han creado registros en la aplicación.</p>
             </div>
-            <h3>No hay registros</h3>
-            <p>Aún no se han creado registros en la aplicación.</p>
+            
+            <div v-else class="registros-table-container">
+              <table class="registros-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Foto</th>
+                    <th>Ubicación</th>
+                    <th>Descripción</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>                  <tr v-for="registro in registros.slice(0, 10)" :key="registro.id">
+                    <td>#{{ registro.id }}</td>
+                    <td>
+                      <div class="usuario-info">
+                        <strong>{{ registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}` }}</strong>
+                        <small>{{ registro.usuario?.correo || 'No disponible' }}</small>
+                      </div>
+                    </td>
+                    <td>
+                      <img 
+                        v-if="registro.foto_url" 
+                        :src="`${API_URL}/${registro.foto_url}`"
+                        alt="Foto" 
+                        class="foto-mini"
+                        @click="abrirFotoCompleta(registro.foto_url)"
+                      >
+                      <span v-else class="no-foto">Sin foto</span>
+                    </td>
+                    <td class="ubicacion">
+                      {{ parseFloat(registro.latitud).toFixed(6) }},<br>
+                      {{ parseFloat(registro.longitud).toFixed(6) }}
+                    </td>
+                    <td class="descripcion">
+                      {{ registro.descripcion || 'Sin descripción' }}
+                    </td>
+                    <td class="fecha">
+                      {{ formatFecha(registro.fecha_hora) }}
+                    </td>                    <td>
+                      <button @click="verDetalles(registro)" class="btn-ver">
+                        Ver Detalles
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          
-          <div v-else class="registros-table-container">
-            <table class="registros-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Usuario</th>
-                  <th>Foto</th>
-                  <th>Ubicación</th>
-                  <th>Descripción</th>
-                  <th>Fecha</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>                <tr v-for="registro in registros.slice(0, 10)" :key="registro.id">
-                  <td>#{{ registro.id }}</td>
-                  <td>
-                    <div class="usuario-info">
-                      <strong>{{ registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}` }}</strong>
-                      <small>{{ registro.usuario?.correo || 'No disponible' }}</small>
-                    </div>
-                  </td>
-                  <td>
-                    <img 
-                      v-if="registro.foto_url" 
-                      :src="`${API_URL}/${registro.foto_url}`"
-                      alt="Foto" 
-                      class="foto-mini"
-                      @click="abrirFotoCompleta(registro.foto_url)"
-                    >
-                    <span v-else class="no-foto">Sin foto</span>
-                  </td>
-                  <td class="ubicacion">
-                    {{ parseFloat(registro.latitud).toFixed(6) }},<br>
-                    {{ parseFloat(registro.longitud).toFixed(6) }}
-                  </td>
-                  <td class="descripcion">
-                    {{ registro.descripcion || 'Sin descripción' }}
-                  </td>
-                  <td class="fecha">
-                    {{ formatFecha(registro.fecha_hora) }}
-                  </td>                  <td>
-                    <button @click="verDetalles(registro)" class="btn-ver">
-                      Ver Detalles
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+          <!-- Contenido de Pestaña: Entradas Recientes -->
+          <div v-if="activeTab === 'entradas'" class="tab-content">
+            <div v-if="entradasRecientes.length === 0" class="empty-state">
+              <div class="empty-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M1 12h13"/>
+                </svg>
+              </div>
+              <h3>No hay entradas recientes</h3>
+              <p>Aún no se han registrado entradas en el sistema.</p>
+            </div>
+            
+            <div v-else class="registros-table-container">
+              <table class="registros-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Fecha</th>
+                    <th>Hora de Entrada</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="entrada in entradasRecientes.slice(0, 10)" :key="entrada.id">
+                    <td>#{{ entrada.id }}</td>
+                    <td>
+                      <div class="usuario-info">
+                        <strong>{{ entrada.usuario?.nombre_completo || `Usuario ${entrada.usuario_id}` }}</strong>
+                        <small>{{ entrada.usuario?.correo || 'No disponible' }}</small>
+                      </div>
+                    </td>
+                    <td class="fecha">{{ formatFechaSimple(entrada.fecha) }}</td>
+                    <td class="hora-entrada">
+                      <div class="badge-entrada">{{ entrada.hora_entrada }}</div>
+                    </td>
+                    <td>
+                      <span :class="['status-badge', entrada.hora_salida ? 'completed' : 'active']">
+                        {{ entrada.hora_salida ? 'Completado' : 'Presente' }}
+                      </span>
+                    </td>
+                    <td>
+                      <button @click="verDetallesAsistencia(entrada)" class="btn-ver">
+                        Ver Detalles
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Contenido de Pestaña: Salidas Recientes -->
+          <div v-if="activeTab === 'salidas'" class="tab-content">
+            <div v-if="salidasRecientes.length === 0" class="empty-state">
+              <div class="empty-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l-5-5 5-5M21 12H8"/>
+                </svg>
+              </div>
+              <h3>No hay salidas recientes</h3>
+              <p>Aún no se han registrado salidas en el sistema.</p>
+            </div>
+            
+            <div v-else class="registros-table-container">
+              <table class="registros-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Fecha</th>
+                    <th>Hora de Entrada</th>
+                    <th>Hora de Salida</th>
+                    <th>Tiempo Total</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="salida in salidasRecientes.slice(0, 10)" :key="salida.id">
+                    <td>#{{ salida.id }}</td>
+                    <td>
+                      <div class="usuario-info">
+                        <strong>{{ salida.usuario?.nombre_completo || `Usuario ${salida.usuario_id}` }}</strong>
+                        <small>{{ salida.usuario?.correo || 'No disponible' }}</small>
+                      </div>
+                    </td>
+                    <td class="fecha">{{ formatFechaSimple(salida.fecha) }}</td>
+                    <td class="hora-entrada">
+                      <div class="badge-entrada">{{ salida.hora_entrada }}</div>
+                    </td>
+                    <td class="hora-salida">
+                      <div class="badge-salida">{{ salida.hora_salida }}</div>
+                    </td>
+                    <td class="tiempo-total">
+                      <div class="badge-tiempo">{{ calcularTiempoTotal(salida.hora_entrada, salida.hora_salida) }}</div>
+                    </td>
+                    <td>
+                      <button @click="verDetallesAsistencia(salida)" class="btn-ver">
+                        Ver Detalles
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -319,6 +464,7 @@ const usuarios = ref([])
 const asistencias = ref([])
 const loading = ref(false)
 const error = ref('')
+const activeTab = ref('registros') // Nueva variable para las pestañas
 
 const stats = reactive({
   totalRegistros: '-',
@@ -371,14 +517,52 @@ const statCards = computed(() => [
   }
 ])
 
+// Computed properties para las diferentes pestañas
+const entradasRecientes = computed(() => {
+  // Filtrar asistencias que tienen hora de entrada y ordenar por fecha más reciente
+  console.log('Calculando entradas recientes:', asistencias.value)
+  return asistencias.value
+    .filter(asistencia => asistencia.hora_entrada)
+    .sort((a, b) => {
+      // Ordenar por fecha y hora más recientes
+      const fechaA = new Date(`${a.fecha} ${a.hora_entrada}`)
+      const fechaB = new Date(`${b.fecha} ${b.hora_entrada}`)
+      return fechaB - fechaA
+    })
+    .map(asistencia => {
+      // Enriquecer con información del usuario
+      const usuario = usuarios.value.find(u => u.id === asistencia.usuario_id)
+      return { ...asistencia, usuario }
+    })
+})
+
+const salidasRecientes = computed(() => {
+  // Filtrar asistencias que tienen hora de salida y ordenar por fecha más reciente
+  console.log('Calculando salidas recientes:', asistencias.value)
+  return asistencias.value
+    .filter(asistencia => asistencia.hora_salida)
+    .sort((a, b) => {
+      // Ordenar por fecha y hora de salida más recientes
+      const fechaA = new Date(`${a.fecha} ${a.hora_salida}`)
+      const fechaB = new Date(`${b.fecha} ${b.hora_salida}`)
+      return fechaB - fechaA
+    })
+    .map(asistencia => {
+      // Enriquecer con información del usuario
+      const usuario = usuarios.value.find(u => u.id === asistencia.usuario_id)
+      return { ...asistencia, usuario }
+    })
+})
+
 // Detectar cambios de conexión
 window.addEventListener('online', () => { isOnline.value = true })
 window.addEventListener('offline', () => { isOnline.value = false })
 
 onMounted(() => {
-  cargarRegistros()
-  cargarUsuarios() // También cargar usuarios para estadísticas más precisas
-  cargarAsistencias() // Cargar asistencias para estadísticas
+  cargarTodosLosDatos()
+  
+  // Agregar event listener para cerrar lightbox con ESC
+  window.addEventListener('keydown', handleKeyDown)
   
   // Cargar Leaflet desde CDN
   if (!window.L) {
@@ -399,10 +583,6 @@ const handleKeyDown = (event) => {
     cerrarLightbox()
   }
 }
-
-onMounted(() => {
-  window.addEventListener('keydown', handleKeyDown)
-})
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
@@ -507,6 +687,55 @@ const formatFecha = (fechaStr) => {
   } catch (e) {
     return fechaStr
   }
+}
+
+// Nueva función para formato de fecha simple
+const formatFechaSimple = (fechaStr) => {
+  try {
+    return new Date(fechaStr).toLocaleDateString('es-ES')
+  } catch (e) {
+    return fechaStr
+  }
+}
+
+// Nueva función para calcular tiempo total
+const calcularTiempoTotal = (horaEntrada, horaSalida) => {
+  if (!horaEntrada || !horaSalida) return '-'
+  
+  try {
+    const [hEntrada, mEntrada] = horaEntrada.split(':').map(Number)
+    const [hSalida, mSalida] = horaSalida.split(':').map(Number)
+    
+    const entrada = hEntrada * 60 + mEntrada
+    const salida = hSalida * 60 + mSalida
+    
+    const diferencia = salida - entrada
+    
+    if (diferencia < 0) return '-'
+    
+    const horas = Math.floor(diferencia / 60)
+    const minutos = diferencia % 60
+    
+    return `${horas}h ${minutos}m`
+  } catch (e) {
+    return '-'
+  }
+}
+
+// Nueva función para cargar todos los datos
+const cargarTodosLosDatos = async () => {
+  await Promise.all([
+    cargarRegistros(),
+    cargarUsuarios(),
+    cargarAsistencias()
+  ])
+}
+
+// Nueva función para ver detalles de asistencia
+const verDetallesAsistencia = (asistencia) => {
+  selectedRecord.value = asistencia
+  modalType.value = 'asistencia'
+  showModal.value = true
 }
 
 const verDetalles = async (registro) => {
@@ -1976,5 +2205,112 @@ const logout = () => {
     font-size: 12px;
     padding: 8px 16px;
   }
+}
+
+/* Estilos para las pestañas */
+.tabs-container {
+  padding: 0 32px 24px;
+}
+
+.tabs-header {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 24px;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px 12px 0 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.3s ease;
+  position: relative;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(102, 187, 106, 0.08) 100%);
+  color: #4CAF50;
+  transform: translateY(-2px);
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(102, 187, 106, 0.15) 100%);
+  color: #4CAF50;
+  border-bottom-color: #4CAF50;
+  font-weight: 700;
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4CAF50, #66BB6A);
+  border-radius: 2px;
+}
+
+.tab-content {
+  padding: 0;
+  margin-top: -24px;
+}
+
+/* Estilos para badges de entradas y salidas */
+.badge-entrada {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-salida {
+  background: linear-gradient(135deg, #ff5722, #ff7043);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-tiempo {
+  background: linear-gradient(135deg, #2196F3, #42A5F5);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-badge.active {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+}
+
+.status-badge.completed {
+  background: linear-gradient(135deg, #607D8B, #78909C);
+  color: white;
 }
 </style>

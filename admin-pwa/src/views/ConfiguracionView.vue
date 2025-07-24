@@ -152,9 +152,6 @@
             </div>
             
             <div class="danger-actions-grid">
-              <button @click="confirmarEliminarUsuarios" class="danger-btn usuarios-btn" :disabled="eliminandoUsuarios">
-                {{ eliminandoUsuarios ? 'Eliminando...' : '👥 Eliminar TODOS los Usuarios' }}
-              </button>
               <button @click="confirmarEliminarRegistros" class="danger-btn registros-btn" :disabled="eliminandoRegistros">
                 {{ eliminandoRegistros ? 'Eliminando...' : '📋 Eliminar TODOS los Registros' }}
               </button>
@@ -213,7 +210,6 @@ const confirmTitle = ref('')
 const confirmMessage = ref('')
 
 // Variables para las acciones de eliminación masiva
-const eliminandoUsuarios = ref(false)
 const eliminandoRegistros = ref(false)
 const eliminandoAsistencias = ref(false)
 
@@ -420,22 +416,6 @@ const cerrarModal = () => {
 }
 
 // MÉTODOS DE ELIMINACIÓN MASIVA
-const confirmarEliminarUsuarios = () => {
-  showConfirmation(
-    '⚠️ ELIMINAR TODOS LOS USUARIOS',
-    '¿Estás COMPLETAMENTE SEGURO de que quieres eliminar TODOS los usuarios del sistema?<br><br><strong>Esta acción NO SE PUEDE DESHACER</strong> y eliminará:<br>• Todos los perfiles de usuario<br>• Sus datos de acceso<br>• Toda su información personal<br><br>Escribe "CONFIRMAR" para continuar.',
-    async () => {
-      // Segunda confirmación más estricta
-      const confirmacion = prompt('Para confirmar, escribe exactamente: ELIMINAR USUARIOS')
-      if (confirmacion === 'ELIMINAR USUARIOS') {
-        await eliminarTodosUsuarios()
-      } else {
-        mostrarMensaje('Cancelado', 'Eliminación de usuarios cancelada.')
-      }
-    }
-  )
-}
-
 const confirmarEliminarRegistros = () => {
   showConfirmation(
     '⚠️ ELIMINAR TODOS LOS REGISTROS',
@@ -466,27 +446,6 @@ const confirmarEliminarAsistencias = () => {
       }
     }
   )
-}
-
-const eliminarTodosUsuarios = async () => {
-  eliminandoUsuarios.value = true
-  
-  try {
-    const resultado = await asistenciasService.eliminarTodosUsuarios()
-    
-    if (resultado.status === 'success') {
-      mostrarMensaje(
-        '✅ Usuarios Eliminados', 
-        `Se han eliminado ${resultado.usuarios_eliminados} usuarios exitosamente.<br><br><strong>⚠️ El sistema de usuarios ha sido completamente limpiado.</strong>`
-      )
-    } else if (resultado.status === 'info') {
-      mostrarMensaje('ℹ️ Sin Datos', resultado.message)
-    }
-  } catch (error) {
-    mostrarMensaje('❌ Error', 'Error al eliminar usuarios: ' + (error.message || 'Error desconocido'))
-  } finally {
-    eliminandoUsuarios.value = false
-  }
 }
 
 const eliminarTodosRegistros = async () => {
@@ -1001,9 +960,12 @@ const logout = () => {
 
 .danger-actions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
   margin-bottom: 20px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .danger-btn {
@@ -1098,6 +1060,14 @@ const logout = () => {
 }
 
 /* RESPONSIVE ULTRA COMPLETO - USA TODO EL ANCHO */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .danger-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 600px;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
@@ -1157,6 +1127,7 @@ const logout = () => {
   
   .danger-actions-grid {
     grid-template-columns: 1fr;
+    max-width: 100%;
   }
   
   .danger-warning {

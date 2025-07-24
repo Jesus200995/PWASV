@@ -110,9 +110,19 @@
                     </span>
                   </td>
                   <td>
-                    <button @click="verDetalles(usuario)" class="btn-ver">
-                      Ver Detalles
-                    </button>
+                    <div class="actions-container">
+                      <button @click="verDetalles(usuario)" class="btn-ver">
+                        Ver Detalles
+                      </button>
+                      <button @click="confirmarEliminarUsuario(usuario)" class="btn-eliminar" title="Eliminar usuario">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3,6 5,6 21,6"></polyline>
+                          <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+                          <line x1="10" y1="11" x2="10" y2="17"></line>
+                          <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -264,6 +274,63 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de confirmación para eliminar usuario -->
+    <div v-if="showDeleteModal" class="modal-overlay-modern" @click="cancelarEliminar">
+      <div class="modal-content-modern delete-modal" @click.stop>
+        <div class="modal-header-modern delete-header">
+          <div class="modal-title-section">
+            <div class="modal-icon delete-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                <path d="M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </div>
+            <h3 class="modal-title">Confirmar Eliminación</h3>
+          </div>
+          <button @click="cancelarEliminar" class="btn-close-modern">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="modal-body-modern">
+          <div v-if="usuarioAEliminar" class="delete-confirmation">
+            <div class="warning-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+            <h4>¿Estás seguro de que deseas eliminar este usuario?</h4>
+            <div class="user-info-delete">
+              <p><strong>ID:</strong> #{{ usuarioAEliminar.id }}</p>
+              <p><strong>Nombre:</strong> {{ usuarioAEliminar.nombre_completo }}</p>
+              <p><strong>Correo:</strong> {{ usuarioAEliminar.correo }}</p>
+            </div>
+            <p class="warning-text">Esta acción eliminará permanentemente al usuario y todos sus datos asociados. <strong>Esta acción no se puede deshacer.</strong></p>
+          </div>
+        </div>
+        
+        <div class="modal-footer-delete">
+          <button @click="cancelarEliminar" class="btn-cancel">
+            Cancelar
+          </button>
+          <button @click="eliminarUsuario" class="btn-delete" :disabled="eliminandoUsuario">
+            <svg v-if="eliminandoUsuario" class="spinner-small" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 11-6.219-8.56"/>
+            </svg>
+            {{ eliminandoUsuario ? 'Eliminando...' : 'Eliminar Usuario' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -291,6 +358,11 @@ const modalTitle = ref('')
 const modalContent = ref('')
 const usuarioSeleccionado = ref(null)
 const showPassword = ref(false)
+
+// Variables para eliminación de usuarios
+const showDeleteModal = ref(false)
+const usuarioAEliminar = ref(null)
+const eliminandoUsuario = ref(false)
 
 onMounted(() => {
   cargarUsuarios()
@@ -368,6 +440,51 @@ const cerrarModal = () => {
   showModal.value = false
   usuarioSeleccionado.value = null
   showPassword.value = false
+}
+
+const confirmarEliminarUsuario = (usuario) => {
+  usuarioAEliminar.value = usuario
+  showDeleteModal.value = true
+}
+
+const cancelarEliminar = () => {
+  showDeleteModal.value = false
+  usuarioAEliminar.value = null
+  eliminandoUsuario.value = false
+}
+
+const eliminarUsuario = async () => {
+  if (!usuarioAEliminar.value) return
+  
+  eliminandoUsuario.value = true
+  
+  try {
+    console.log('🗑️ Eliminando usuario:', usuarioAEliminar.value)
+    
+    // Llamar al servicio para eliminar el usuario
+    await usuariosService.eliminarUsuario(usuarioAEliminar.value.id)
+    
+    // Eliminar del array local
+    const index = usuarios.value.findIndex(u => u.id === usuarioAEliminar.value.id)
+    if (index !== -1) {
+      usuarios.value.splice(index, 1)
+    }
+    
+    // Actualizar usuarios filtrados
+    filtrarUsuarios()
+    
+    console.log('✅ Usuario eliminado exitosamente')
+    
+    // Cerrar modal
+    cancelarEliminar()
+    
+  } catch (error) {
+    console.error('❌ Error al eliminar usuario:', error)
+    // Aquí podrías mostrar un mensaje de error al usuario
+    alert('Error al eliminar el usuario. Por favor, inténtalo de nuevo.')
+  } finally {
+    eliminandoUsuario.value = false
+  }
 }
 
 const logout = () => {
@@ -1144,6 +1261,172 @@ const logout = () => {
 .btn-ver:active {
   transform: translateY(-1px) scale(1.02);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Estilos para el contenedor de acciones */
+.actions-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Estilos para el botón de eliminar */
+.btn-eliminar {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(244, 67, 54, 0.3);
+}
+
+.btn-eliminar:hover {
+  background: linear-gradient(135deg, #d32f2f, #b71c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+.btn-eliminar:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(244, 67, 54, 0.3);
+}
+
+.btn-eliminar svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.5;
+}
+
+/* Estilos para el modal de eliminación */
+.delete-modal {
+  max-width: 500px !important;
+}
+
+.delete-header {
+  background: linear-gradient(135deg, #ffebee, #fce4ec);
+  border-bottom: 2px solid #f44336;
+}
+
+.delete-icon {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+}
+
+.delete-confirmation {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.warning-icon {
+  margin: 0 auto 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.delete-confirmation h4 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.user-info-delete {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.user-info-delete p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.warning-text {
+  color: #f44336;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 15px;
+  padding: 10px;
+  background: #ffebee;
+  border-radius: 6px;
+  border-left: 4px solid #f44336;
+}
+
+.modal-footer-delete {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d32f2f, #b71c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.btn-delete:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner-small {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Modal Moderno - Diseño Responsivo */

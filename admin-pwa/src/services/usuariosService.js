@@ -177,6 +177,37 @@ class UsuariosService {
     this.cache.clear();
     console.log('🗑️ Cache de usuarios limpiado');
   }
+
+  async eliminarUsuario(id) {
+    try {
+      console.log(`🗑️ Eliminando usuario ${id} desde la API...`);
+      const response = await fetch(`${API_BASE}/usuarios/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.warn(`⚠️ Usuario ${id} no encontrado para eliminar`);
+          throw new Error(`Usuario ${id} no encontrado`);
+        }
+        console.error(`❌ Error HTTP: ${response.status} - ${response.statusText}`);
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      
+      // Eliminar del cache si existe
+      this.cache.delete(id);
+      
+      console.log(`✅ Usuario ${id} eliminado exitosamente`);
+      return true;
+      
+    } catch (error) {
+      console.error(`❌ Error al eliminar usuario ${id}:`, error);
+      throw error; // Propagar el error para manejo en las vistas
+    }
+  }
 }
 
 // Exportar una instancia única del servicio (singleton)

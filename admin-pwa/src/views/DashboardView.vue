@@ -700,24 +700,59 @@ const formatFechaSimple = (fechaStr) => {
 
 // Nueva función para calcular tiempo total
 const calcularTiempoTotal = (horaEntrada, horaSalida) => {
-  if (!horaEntrada || !horaSalida) return '-'
+  if (!horaEntrada || !horaSalida) {
+    console.log('Faltan datos de entrada o salida:', { horaEntrada, horaSalida })
+    return '-'
+  }
   
   try {
-    const [hEntrada, mEntrada] = horaEntrada.split(':').map(Number)
-    const [hSalida, mSalida] = horaSalida.split(':').map(Number)
+    // Limpiar y normalizar las horas (quitar espacios, convertir a string)
+    const entradaStr = String(horaEntrada).trim()
+    const salidaStr = String(horaSalida).trim()
     
-    const entrada = hEntrada * 60 + mEntrada
-    const salida = hSalida * 60 + mSalida
+    console.log('Calculando tiempo:', { entradaStr, salidaStr })
     
-    const diferencia = salida - entrada
+    // Separar horas y minutos
+    const [hEntrada, mEntrada] = entradaStr.split(':').map(num => {
+      const parsed = parseInt(num, 10)
+      return isNaN(parsed) ? 0 : parsed
+    })
     
-    if (diferencia < 0) return '-'
+    const [hSalida, mSalida] = salidaStr.split(':').map(num => {
+      const parsed = parseInt(num, 10)
+      return isNaN(parsed) ? 0 : parsed
+    })
     
+    console.log('Horas parseadas:', { hEntrada, mEntrada, hSalida, mSalida })
+    
+    // Verificar que las horas sean válidas
+    if (isNaN(hEntrada) || isNaN(mEntrada) || isNaN(hSalida) || isNaN(mSalida)) {
+      console.log('Error: Algún valor no es un número válido')
+      return '-'
+    }
+    
+    // Convertir todo a minutos
+    const entradaMinutos = hEntrada * 60 + mEntrada
+    const salidaMinutos = hSalida * 60 + mSalida
+    
+    // Calcular diferencia
+    let diferencia = salidaMinutos - entradaMinutos
+    
+    // Si la diferencia es negativa, podría ser que cruzó medianoche
+    if (diferencia < 0) {
+      diferencia += 24 * 60 // Agregar 24 horas en minutos
+    }
+    
+    // Convertir de vuelta a horas y minutos
     const horas = Math.floor(diferencia / 60)
     const minutos = diferencia % 60
     
-    return `${horas}h ${minutos}m`
+    const resultado = `${horas}h ${minutos.toString().padStart(2, '0')}m`
+    console.log('Resultado calculado:', resultado)
+    
+    return resultado
   } catch (e) {
+    console.error('Error al calcular tiempo total:', e, { horaEntrada, horaSalida })
     return '-'
   }
 }

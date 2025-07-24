@@ -251,17 +251,24 @@ class AsistenciasService {
         headers: {
           'Content-Type': 'application/json',
         },
+        // Timeout de 30 segundos para operaciones masivas
+        signal: AbortSignal.timeout(30000)
       });
 
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Error ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('✅ Asistencias eliminadas:', data);
+      console.log('✅ Asistencias eliminadas exitosamente:', data);
       
       return data;
     } catch (error) {
+      if (error.name === 'TimeoutError') {
+        console.error('❌ Timeout al eliminar asistencias - La operación está tomando demasiado tiempo');
+        throw new Error('La eliminación está tomando demasiado tiempo. Intenta de nuevo en unos momentos.');
+      }
       console.error('❌ Error al eliminar todas las asistencias:', error);
       throw error;
     }
@@ -280,17 +287,24 @@ class AsistenciasService {
         headers: {
           'Content-Type': 'application/json',
         },
+        // Timeout de 30 segundos para operaciones masivas
+        signal: AbortSignal.timeout(30000)
       });
 
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Error ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('✅ Registros eliminados:', data);
+      console.log('✅ Registros eliminados exitosamente:', data);
       
       return data;
     } catch (error) {
+      if (error.name === 'TimeoutError') {
+        console.error('❌ Timeout al eliminar registros');
+        throw new Error('La eliminación está tomando demasiado tiempo. Intenta de nuevo en unos momentos.');
+      }
       console.error('❌ Error al eliminar todos los registros:', error);
       throw error;
     }
@@ -309,17 +323,24 @@ class AsistenciasService {
         headers: {
           'Content-Type': 'application/json',
         },
+        // Timeout de 30 segundos para operaciones masivas
+        signal: AbortSignal.timeout(30000)
       });
 
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Error ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('✅ Usuarios eliminados:', data);
+      console.log('✅ Usuarios eliminados exitosamente:', data);
       
       return data;
     } catch (error) {
+      if (error.name === 'TimeoutError') {
+        console.error('❌ Timeout al eliminar usuarios');
+        throw new Error('La eliminación está tomando demasiado tiempo. Intenta de nuevo en unos momentos.');
+      }
       console.error('❌ Error al eliminar todos los usuarios:', error);
       throw error;
     }

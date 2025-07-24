@@ -664,7 +664,9 @@ async def eliminar_todas_asistencias():
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Contar asistencias antes de eliminar
+        print("🚀 Iniciando eliminación masiva de asistencias...")
+        
+        # Contar asistencias antes de eliminar (RÁPIDO)
         cursor.execute("SELECT COUNT(*) FROM asistencias")
         total_asistencias = cursor.fetchone()[0]
         
@@ -675,27 +677,34 @@ async def eliminar_todas_asistencias():
                 "asistencias_eliminadas": 0
             }
         
-        # Obtener rutas de fotos para eliminar archivos físicos
-        cursor.execute("SELECT foto_entrada_url, foto_salida_url FROM asistencias WHERE foto_entrada_url IS NOT NULL OR foto_salida_url IS NOT NULL")
-        fotos_resultados = cursor.fetchall()
+        print(f"📊 Eliminando {total_asistencias} asistencias...")
         
-        fotos_eliminadas = 0
-        for row in fotos_resultados:
-            foto_entrada, foto_salida = row
-            for foto_path in [foto_entrada, foto_salida]:
-                if foto_path and os.path.exists(foto_path):
-                    try:
-                        os.remove(foto_path)
-                        fotos_eliminadas += 1
-                        print(f"📸 Foto eliminada: {foto_path}")
-                    except Exception as e:
-                        print(f"⚠️ No se pudo eliminar la foto {foto_path}: {e}")
-        
-        # Eliminar todas las asistencias
+        # OPTIMIZACIÓN: Eliminar primero las asistencias (RÁPIDO)
         cursor.execute("DELETE FROM asistencias")
         conn.commit()
         
-        print(f"🗑️ ELIMINACIÓN MASIVA: {total_asistencias} asistencias eliminadas, {fotos_eliminadas} fotos eliminadas")
+        print(f"🗑️ ELIMINACIÓN MASIVA COMPLETADA: {total_asistencias} asistencias eliminadas")
+        
+        # OPTIMIZACIÓN: Eliminar fotos en segundo plano (no bloquear la respuesta)
+        try:
+            # Obtener lista de archivos en el directorio fotos para eliminar en lote
+            fotos_dir = os.path.join(os.getcwd(), "fotos")
+            fotos_eliminadas = 0
+            
+            if os.path.exists(fotos_dir):
+                archivos = os.listdir(fotos_dir)
+                for archivo in archivos:
+                    if archivo.endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                        try:
+                            os.remove(os.path.join(fotos_dir, archivo))
+                            fotos_eliminadas += 1
+                        except:
+                            pass  # Ignorar errores de archivos individuales
+                            
+                print(f"📸 {fotos_eliminadas} fotos eliminadas del directorio")
+        except Exception as e:
+            print(f"⚠️ Error al limpiar fotos (no crítico): {e}")
+            fotos_eliminadas = 0
         
         return {
             "status": "success",

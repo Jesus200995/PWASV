@@ -197,9 +197,9 @@
                         <small>{{ entrada.usuario?.correo || 'No disponible' }}</small>
                       </div>
                     </td>
-                    <td class="fecha">{{ formatFechaSimple(entrada.fecha) }}</td>
+                    <td class="fecha">{{ formatFechaElegante(entrada.fecha) }}</td>
                     <td class="hora-entrada">
-                      <div class="badge-entrada">{{ entrada.hora_entrada }}</div>
+                      <div class="badge-entrada">{{ formatHora12(entrada.hora_entrada) }}</div>
                     </td>
                     <td>
                       <span :class="['status-badge', entrada.hora_salida ? 'completed' : 'active']">
@@ -251,12 +251,12 @@
                         <small>{{ salida.usuario?.correo || 'No disponible' }}</small>
                       </div>
                     </td>
-                    <td class="fecha">{{ formatFechaSimple(salida.fecha) }}</td>
+                    <td class="fecha">{{ formatFechaElegante(salida.fecha) }}</td>
                     <td class="hora-entrada">
-                      <div class="badge-entrada">{{ salida.hora_entrada }}</div>
+                      <div class="badge-entrada">{{ formatHora12(salida.hora_entrada) }}</div>
                     </td>
                     <td class="hora-salida">
-                      <div class="badge-salida">{{ salida.hora_salida }}</div>
+                      <div class="badge-salida">{{ formatHora12(salida.hora_salida) }}</div>
                     </td>
                     <td class="tiempo-total">
                       <div class="badge-tiempo">{{ calcularTiempoTotal(salida.hora_entrada, salida.hora_salida) }}</div>
@@ -521,7 +521,7 @@ const statCards = computed(() => [
 const entradasRecientes = computed(() => {
   // Filtrar asistencias que tienen hora de entrada y ordenar por fecha más reciente
   console.log('Calculando entradas recientes:', asistencias.value)
-  return asistencias.value
+  const resultado = asistencias.value
     .filter(asistencia => asistencia.hora_entrada)
     .sort((a, b) => {
       // Ordenar por fecha y hora más recientes
@@ -532,14 +532,18 @@ const entradasRecientes = computed(() => {
     .map(asistencia => {
       // Enriquecer con información del usuario
       const usuario = usuarios.value.find(u => u.id === asistencia.usuario_id)
+      console.log('Entrada con hora:', asistencia.hora_entrada, 'Usuario:', usuario?.nombre_completo)
       return { ...asistencia, usuario }
     })
+  
+  console.log('Entradas recientes resultado:', resultado.slice(0, 3))
+  return resultado
 })
 
 const salidasRecientes = computed(() => {
   // Filtrar asistencias que tienen hora de salida y ordenar por fecha más reciente
   console.log('Calculando salidas recientes:', asistencias.value)
-  return asistencias.value
+  const resultado = asistencias.value
     .filter(asistencia => asistencia.hora_salida)
     .sort((a, b) => {
       // Ordenar por fecha y hora de salida más recientes
@@ -550,8 +554,16 @@ const salidasRecientes = computed(() => {
     .map(asistencia => {
       // Enriquecer con información del usuario
       const usuario = usuarios.value.find(u => u.id === asistencia.usuario_id)
+      console.log('Salida con horas:', { 
+        entrada: asistencia.hora_entrada, 
+        salida: asistencia.hora_salida, 
+        usuario: usuario?.nombre_completo 
+      })
       return { ...asistencia, usuario }
     })
+  
+  console.log('Salidas recientes resultado:', resultado.slice(0, 3))
+  return resultado
 })
 
 // Detectar cambios de conexión
@@ -692,9 +704,86 @@ const formatFecha = (fechaStr) => {
 // Nueva función para formato de fecha simple
 const formatFechaSimple = (fechaStr) => {
   try {
-    return new Date(fechaStr).toLocaleDateString('es-ES')
+    const fecha = new Date(fechaStr)
+    return fecha.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
   } catch (e) {
     return fechaStr
+  }
+}
+
+// Nueva función para formato de fecha más elegante
+const formatFechaElegante = (fechaStr) => {
+  try {
+    const fecha = new Date(fechaStr)
+    return fecha.toLocaleDateString('es-ES', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    })
+  } catch (e) {
+    return fechaStr
+  }
+}
+
+// Nueva función para formatear hora en formato 12 horas con AM/PM
+const formatHora12 = (horaStr) => {
+  if (!horaStr) return '-'
+  
+  try {
+    console.log('Hora recibida:', horaStr)
+    
+    // Limpiar la hora y convertir a string
+    let horaLimpia = String(horaStr).trim()
+    
+    // Si la hora tiene más de 5 caracteres, podría estar malformada
+    // Buscar el patrón HH:MM
+    const match = horaLimpia.match(/(\d{1,2}):(\d{2})/)
+    if (!match) {
+      console.log('No se pudo hacer match con el patrón de hora')
+      return horaStr
+    }
+    
+    const horas = parseInt(match[1], 10)
+    const minutos = parseInt(match[2], 10)
+    
+    console.log('Horas y minutos parseados:', { horas, minutos })
+    
+    // Verificar que sean números válidos
+    if (isNaN(horas) || isNaN(minutos) || horas < 0 || horas > 23 || minutos < 0 || minutos > 59) {
+      console.log('Horas o minutos inválidos')
+      return horaStr
+    }
+    
+    // Convertir a formato 12 horas
+    let hora12 = horas
+    let periodo = 'AM'
+    
+    if (horas === 0) {
+      hora12 = 12
+      periodo = 'AM'
+    } else if (horas === 12) {
+      hora12 = 12
+      periodo = 'PM'
+    } else if (horas > 12) {
+      hora12 = horas - 12
+      periodo = 'PM'
+    }
+    
+    // Formatear con ceros a la izquierda para minutos
+    const minutosFormateados = minutos.toString().padStart(2, '0')
+    
+    const resultado = `${hora12}:${minutosFormateados} ${periodo}`
+    console.log('Resultado formateado:', resultado)
+    
+    return resultado
+  } catch (e) {
+    console.error('Error al formatear hora:', e, 'Hora original:', horaStr)
+    return horaStr
   }
 }
 
@@ -2304,31 +2393,46 @@ const logout = () => {
 .badge-entrada {
   background: linear-gradient(135deg, #4CAF50, #66BB6A);
   color: white;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   display: inline-block;
+  min-width: 80px;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
 .badge-salida {
   background: linear-gradient(135deg, #ff5722, #ff7043);
   color: white;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   display: inline-block;
+  min-width: 80px;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(255, 87, 34, 0.3);
 }
 
 .badge-tiempo {
   background: linear-gradient(135deg, #2196F3, #42A5F5);
   color: white;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   display: inline-block;
+  min-width: 70px;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
 }
 
 .status-badge {
@@ -2347,5 +2451,29 @@ const logout = () => {
 .status-badge.completed {
   background: linear-gradient(135deg, #607D8B, #78909C);
   color: white;
+}
+
+/* Mejoras para las columnas de fecha y hora */
+.registros-table .fecha {
+  font-weight: 600;
+  color: #555;
+  font-size: 14px;
+}
+
+.registros-table .hora-entrada,
+.registros-table .hora-salida,
+.registros-table .tiempo-total {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.registros-table th {
+  text-align: center;
+  font-weight: 700;
+  color: #333;
+}
+
+.registros-table td {
+  vertical-align: middle;
 }
 </style>

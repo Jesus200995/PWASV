@@ -98,7 +98,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+import { API_URL, getBestApiUrl, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 
 const router = useRouter();
 const email = ref('');
@@ -107,12 +107,21 @@ const loading = ref(false);
 const errorMessage = ref('');
 const formError = ref(false);
 const isOnline = ref(true);
+const currentApiUrl = ref(API_URL);
 
 // Verificar conexión a internet cuando carga el componente
 onMounted(async () => {
   isOnline.value = await checkInternetConnection();
   if (!isOnline.value) {
     errorMessage.value = getOfflineMessage();
+  } else {
+    try {
+      currentApiUrl.value = await getBestApiUrl();
+      console.log(`🌐 Login usando servidor: ${currentApiUrl.value}`);
+    } catch (error) {
+      console.warn('Error detectando servidor, usando URL por defecto:', error);
+      currentApiUrl.value = API_URL;
+    }
   }
 });
 
@@ -137,9 +146,15 @@ async function login() {
     loading.value = false;
     return;
   }
+  
+  // Actualizar URL si es necesario
+  if (!currentApiUrl.value || currentApiUrl.value === API_URL) {
+    currentApiUrl.value = await getBestApiUrl();
+  }
+  
   try {
     // Conectar con la API real
-    const response = await axios.post(`${API_URL}/login`, {
+    const response = await axios.post(`${currentApiUrl.value}/login`, {
       correo: email.value,
       contrasena: password.value
     }, {

@@ -5,6 +5,11 @@
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Crear cuenta
         </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+          Servidor: <span class="font-mono text-xs" :class="currentApiUrl.includes('localhost') ? 'text-blue-600' : 'text-green-600'">
+            {{ currentApiUrl }}
+          </span>
+        </p>
       </div>
       
       <transition name="fade">
@@ -86,8 +91,8 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+import { apiService } from '../services/apiService.js';
+import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 
 const router = useRouter();
 const loading = ref(false);
@@ -95,6 +100,7 @@ const message = reactive({ text: '', type: '' });
 const isOnline = ref(true);
 const curpError = ref('');
 const curpWarning = ref('');
+const currentApiUrl = ref('');
 
 const form = reactive({
   email: '',
@@ -111,6 +117,15 @@ onMounted(async () => {
   if (!isOnline.value) {
     message.text = getOfflineMessage();
     message.type = 'error';
+  } else {
+    // Obtener la URL actual del servicio API
+    try {
+      await apiService.refreshApiUrl();
+      currentApiUrl.value = apiService.getCurrentApiUrl();
+      console.log(`🌐 Usando servidor: ${currentApiUrl.value}`);
+    } catch (error) {
+      console.warn('Error inicializando servicio API:', error);
+    }
   }
 });
 
@@ -142,16 +157,15 @@ async function register() {
     
     console.log('📤 Enviando payload:', payload);
     
-    const response = await axios.post(`${API_URL}/usuarios`, payload, {
-      timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    // Usar el servicio API que maneja automáticamente la mejor URL
+    const response = await apiService.createUser(payload);
     
-    console.log('✅ Respuesta del servidor:', response.data);
+    console.log('✅ Respuesta del servidor:', response);
     
-    message.text = '¡Cuenta creada exitosamente con CURP! Redirigiendo...';
+    // Actualizar la URL mostrada
+    currentApiUrl.value = apiService.getCurrentApiUrl();
+    
+    message.text = `¡Cuenta creada exitosamente con CURP! (Servidor: ${currentApiUrl.value.replace('https://', '').replace('http://', '')}) Redirigiendo...`;
     message.type = 'success';
     
     setTimeout(() => {

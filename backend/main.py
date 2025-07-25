@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import bcrypt
 import re
@@ -175,25 +175,89 @@ async def registrar(
     latitud: float = Form(...),
     longitud: float = Form(...),
     descripcion: str = Form(""),
-    foto: UploadFile = File(...)
+    foto: UploadFile = File(...),
+    client_timestamp: str = Form(None)  # Timestamp del cliente para detectar duplicados
 ):
-    # Guardar la foto en disco
-    ext = os.path.splitext(foto.filename)[1]
-    nombre_archivo = f"{usuario_id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}{ext}"
-    ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
-    with open(ruta_archivo, "wb") as f:
-        contenido = await foto.read()
-        f.write(contenido)
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Validar entrada
+        if not usuario_id or not latitud or not longitud:
+            raise HTTPException(status_code=400, detail="Faltan datos obligatorios")
+        
+        # Convertir timestamp del cliente si se proporciona
+        client_dt = None
+        if client_timestamp:
+            try:
+                client_dt = datetime.fromisoformat(client_timestamp.replace('Z', '+00:00'))
+            except ValueError:
+                pass
+        
+        # Detectar duplicados basados en tiempo y ubicación
+        time_threshold = datetime.utcnow() - timedelta(minutes=5)  # Ventana de 5 minutos
+        cursor.execute(
+            """SELECT id FROM registros 
+               WHERE usuario_id = %s 
+               AND latitud BETWEEN %s AND %s 
+               AND longitud BETWEEN %s AND %s 
+               AND fecha_hora > %s
+               AND descripcion = %s""",
+            (usuario_id, latitud - 0.0001, latitud + 0.0001, 
+             longitud - 0.0001, longitud + 0.0001, time_threshold, descripcion)
+        )
+        duplicado = cursor.fetchone()
+        
+        if duplicado:
+            print(f"🔄 Registro duplicado detectado para usuario {usuario_id}")
+            # Retornar el registro existente en lugar de crear uno nuevo
+            cursor.execute(
+                "SELECT * FROM registros WHERE id = %s",
+                (duplicado[0],)
+            )
+            registro_existente = cursor.fetchone()
+            return {
+                "status": "ok", 
+                "mensaje": "Registro ya existe",
+                "foto_url": registro_existente[5],  # Asumiendo que foto_url está en índice 5
+                "duplicado": True
+            }
 
-    # Guardar registro en la base
-    fecha_hora = datetime.utcnow()
-    cursor.execute(
-        "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora) VALUES (%s, %s, %s, %s, %s, %s)",
-        (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora)
-    )
-    conn.commit()
+        # Guardar la foto en disco
+        ext = os.path.splitext(foto.filename)[1]
+        timestamp_str = client_dt.strftime('%Y%m%d%H%M%S') if client_dt else datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        nombre_archivo = f"{usuario_id}_{timestamp_str}{ext}"
+        ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
+        
+        # Asegurar que el directorio existe
+        os.makedirs(FOTOS_DIR, exist_ok=True)
+        
+        with open(ruta_archivo, "wb") as f:
+            contenido = await foto.read()
+            f.write(contenido)
 
-    return {"status": "ok", "foto_url": ruta_archivo}
+        # Guardar registro en la base
+        fecha_hora = client_dt if client_dt else datetime.utcnow()
+        cursor.execute(
+            "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora) VALUES (%s, %s, %s, %s, %s, %s)",
+            (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora)
+        )
+        conn.commit()
+        
+        print(f"✅ Registro creado para usuario {usuario_id}")
+        return {
+            "status": "ok", 
+            "mensaje": "Registro guardado exitosamente",
+            "foto_url": ruta_archivo,
+            "duplicado": False
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en registrar: {e}")
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al guardar registro: {str(e)}")
 
 # ENDPOINT CORREGIDO - Esta es la parte importante que debe actualizarse
 @app.get("/registros")
@@ -494,7 +558,8 @@ async def marcar_entrada(
     latitud: float = Form(...),
     longitud: float = Form(...),
     descripcion: str = Form(""),
-    foto: UploadFile = File(...)
+    foto: UploadFile = File(...),
+    client_timestamp: str = Form(None)  # Timestamp del cliente
 ):
     try:
         print(f"🔍 ENTRADA - Datos recibidos:")
@@ -503,17 +568,26 @@ async def marcar_entrada(
         print(f"   longitud: {longitud}")
         print(f"   descripcion: {descripcion}")
         print(f"   foto: {foto.filename}")
+        print(f"   client_timestamp: {client_timestamp}")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
             
-        now = datetime.now(CDMX_TZ)
+        # Usar timestamp del cliente si está disponible, sino usar tiempo del servidor
+        if client_timestamp:
+            try:
+                now = datetime.fromisoformat(client_timestamp.replace('Z', '+00:00')).astimezone(CDMX_TZ)
+            except ValueError:
+                now = datetime.now(CDMX_TZ)
+        else:
+            now = datetime.now(CDMX_TZ)
+            
         fecha = now.date()
         hora_entrada = now
 
-        # Revisa si ya existe asistencia para hoy para este usuario específico
+        # Verificar si ya existe asistencia para hoy
         cursor.execute(
-            "SELECT id FROM asistencias WHERE usuario_id = %s AND fecha = %s",
+            "SELECT id, hora_entrada FROM asistencias WHERE usuario_id = %s AND fecha = %s",
             (usuario_id, fecha)
         )
         existe = cursor.fetchone()
@@ -522,15 +596,45 @@ async def marcar_entrada(
         print(f"📊 Resultado de consulta: {existe}")
 
         if existe:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"El usuario {usuario_id} ya tiene registro de entrada para el día {fecha}"
-            )
+            # Si ya existe, verificar si es un intento de reenvío reciente (offline sync)
+            existing_time = existe[1]
+            time_diff = abs((hora_entrada - existing_time).total_seconds())
+            
+            if time_diff < 300:  # Menos de 5 minutos de diferencia - probable reenvío
+                print(f"🔄 Entrada duplicada detectada (reenvío offline) para usuario {usuario_id}")
+                # Obtener datos del registro existente
+                cursor.execute(
+                    """SELECT fecha, hora_entrada, latitud_entrada, longitud_entrada, 
+                              foto_entrada_url, descripcion_entrada 
+                       FROM asistencias WHERE id = %s""",
+                    (existe[0],)
+                )
+                registro_existente = cursor.fetchone()
+                
+                return {
+                    "status": "ok", 
+                    "mensaje": "Entrada ya registrada (reenvío detectado)",
+                    "hora_entrada": str(registro_existente[1]),
+                    "latitud": registro_existente[2],
+                    "longitud": registro_existente[3],
+                    "foto_url": registro_existente[4],
+                    "descripcion": registro_existente[5],
+                    "duplicado": True
+                }
+            else:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"El usuario {usuario_id} ya tiene registro de entrada para el día {fecha}"
+                )
 
         # Guardar la foto en disco
         ext = os.path.splitext(foto.filename)[1]
-        nombre_archivo = f"entrada_{usuario_id}_{datetime.now(CDMX_TZ).strftime('%Y%m%d%H%M%S')}{ext}"
+        timestamp_str = now.strftime('%Y%m%d%H%M%S')
+        nombre_archivo = f"entrada_{usuario_id}_{timestamp_str}{ext}"
         ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
+        
+        # Asegurar que el directorio existe
+        os.makedirs(FOTOS_DIR, exist_ok=True)
         
         with open(ruta_archivo, "wb") as f:
             contenido = await foto.read()
@@ -551,19 +655,16 @@ async def marcar_entrada(
             "latitud": latitud,
             "longitud": longitud,
             "foto_url": ruta_archivo,
-            "descripcion": descripcion
+            "descripcion": descripcion,
+            "duplicado": False
         }
         
     except HTTPException:
         raise
-    except psycopg2.Error as e:
-        conn.rollback()
-        print(f"❌ Error de PostgreSQL en entrada: {e}")
-        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
     except Exception as e:
+        print(f"❌ Error en marcar_entrada: {e}")
         conn.rollback()
-        print(f"❌ Error general en entrada: {e}")
-        raise HTTPException(status_code=500, detail=f"Error al registrar entrada: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al marcar entrada: {str(e)}")
 
 @app.post("/asistencia/salida")
 async def marcar_salida(
@@ -571,7 +672,8 @@ async def marcar_salida(
     latitud: float = Form(...),
     longitud: float = Form(...),
     descripcion: str = Form(""),
-    foto: UploadFile = File(...)
+    foto: UploadFile = File(...),
+    client_timestamp: str = Form(None)  # Timestamp del cliente
 ):
     try:
         print(f"🔍 SALIDA - Datos recibidos:")
@@ -580,14 +682,23 @@ async def marcar_salida(
         print(f"   longitud: {longitud}")
         print(f"   descripcion: {descripcion}")
         print(f"   foto: {foto.filename}")
+        print(f"   client_timestamp: {client_timestamp}")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
             
-        now = datetime.now(CDMX_TZ)
+        # Usar timestamp del cliente si está disponible
+        if client_timestamp:
+            try:
+                now = datetime.fromisoformat(client_timestamp.replace('Z', '+00:00')).astimezone(CDMX_TZ)
+            except ValueError:
+                now = datetime.now(CDMX_TZ)
+        else:
+            now = datetime.now(CDMX_TZ)
+            
         fecha = now.date()
 
-        # Busca el registro de asistencia de hoy para este usuario específico
+        # Buscar el registro de asistencia de hoy
         cursor.execute(
             "SELECT id, hora_salida FROM asistencias WHERE usuario_id = %s AND fecha = %s",
             (usuario_id, fecha)
@@ -602,16 +713,47 @@ async def marcar_salida(
                 status_code=400, 
                 detail=f"El usuario {usuario_id} no tiene registro de entrada para el día {fecha}"
             )
+        
         if registro[1] is not None:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"El usuario {usuario_id} ya registró la salida para el día {fecha}"
-            )
+            # Verificar si es un reenvío (diferencia de tiempo pequeña)
+            existing_time = registro[1]
+            time_diff = abs((now - existing_time).total_seconds())
+            
+            if time_diff < 300:  # Menos de 5 minutos - probable reenvío
+                print(f"🔄 Salida duplicada detectada (reenvío offline) para usuario {usuario_id}")
+                # Obtener datos del registro existente
+                cursor.execute(
+                    """SELECT fecha, hora_salida, latitud_salida, longitud_salida, 
+                              foto_salida_url, descripcion_salida 
+                       FROM asistencias WHERE id = %s""",
+                    (registro[0],)
+                )
+                registro_existente = cursor.fetchone()
+                
+                return {
+                    "status": "ok", 
+                    "mensaje": "Salida ya registrada (reenvío detectado)",
+                    "hora_salida": str(registro_existente[1]),
+                    "latitud": registro_existente[2],
+                    "longitud": registro_existente[3],
+                    "foto_url": registro_existente[4],
+                    "descripcion": registro_existente[5],
+                    "duplicado": True
+                }
+            else:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"El usuario {usuario_id} ya registró la salida para el día {fecha}"
+                )
 
         # Guardar la foto en disco
         ext = os.path.splitext(foto.filename)[1]
-        nombre_archivo = f"salida_{usuario_id}_{datetime.now(CDMX_TZ).strftime('%Y%m%d%H%M%S')}{ext}"
+        timestamp_str = now.strftime('%Y%m%d%H%M%S')
+        nombre_archivo = f"salida_{usuario_id}_{timestamp_str}{ext}"
         ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
+        
+        # Asegurar que el directorio existe
+        os.makedirs(FOTOS_DIR, exist_ok=True)
         
         with open(ruta_archivo, "wb") as f:
             contenido = await foto.read()
@@ -632,19 +774,16 @@ async def marcar_salida(
             "latitud": latitud,
             "longitud": longitud,
             "foto_url": ruta_archivo,
-            "descripcion": descripcion
+            "descripcion": descripcion,
+            "duplicado": False
         }
         
     except HTTPException:
         raise
-    except psycopg2.Error as e:
-        conn.rollback()
-        print(f"❌ Error de PostgreSQL en salida: {e}")
-        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
     except Exception as e:
+        print(f"❌ Error en marcar_salida: {e}")
         conn.rollback()
-        print(f"❌ Error general en salida: {e}")
-        raise HTTPException(status_code=500, detail=f"Error al registrar salida: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al marcar salida: {str(e)}")
 
 @app.get("/asistencias")
 async def obtener_historial_asistencias(usuario_id: int = None):

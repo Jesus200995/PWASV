@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { getBestApiUrl, checkApiConnectivity, connectivityMonitor } from '../utils/network.js';
-import offlineService from './offlineService.js';
+import { getBestApiUrl, checkInternetConnection } from '../utils/network.js';
 
 // Instancia de axios con configuración base
 const api = axios.create({
@@ -67,7 +66,7 @@ api.interceptors.response.use(
   }
 );
 
-// Funciones específicas para cada endpoint con soporte offline
+// Funciones específicas para cada endpoint
 export const apiService = {
   // Usuarios
   async createUser(userData) {
@@ -95,59 +94,14 @@ export const apiService = {
     return response.data;
   },
 
-  // Registros con soporte offline
-  async createRecord(formData, options = {}) {
-    const { forceOffline = false, skipOffline = false } = options;
-    
-    // Si se fuerza offline o no hay conectividad, guardar offline
-    if (forceOffline || (!skipOffline && !(await checkApiConnectivity()))) {
-      console.log('📴 Sin conexión - guardando registro offline');
-      
-      // Convertir FormData a objeto para almacenamiento
-      const recordData = {};
-      for (let [key, value] of formData.entries()) {
-        recordData[key] = value;
+  // Registros
+  async createRecord(formData) {
+    const response = await api.post('/registro', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
-      
-      const offlineId = await offlineService.saveRecordOffline(recordData);
-      
-      return {
-        success: true,
-        offline: true,
-        offlineId,
-        message: 'Sin conexión. Tu registro ha sido guardado localmente y se enviará cuando recuperes conexión.'
-      };
-    }
-
-    try {
-      const response = await api.post('/registro', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      // Si falla por conectividad y no se especifica skipOffline, intentar guardar offline
-      if (!skipOffline && this.isConnectivityError(error)) {
-        console.log('🔄 Error de conexión - guardando registro offline como respaldo');
-        
-        const recordData = {};
-        for (let [key, value] of formData.entries()) {
-          recordData[key] = value;
-        }
-        
-        const offlineId = await offlineService.saveRecordOffline(recordData);
-        
-        return {
-          success: true,
-          offline: true,
-          offlineId,
-          fallback: true,
-          message: 'Error de conexión. Tu registro ha sido guardado localmente y se enviará cuando la conexión sea estable.'
-        };
-      }
-      throw error;
-    }
+    });
+    return response.data;
   },
 
   async getRecords(userId = null) {
@@ -156,155 +110,29 @@ export const apiService = {
     return response.data;
   },
 
-  // Asistencias con soporte offline
-  async markEntry(formData, options = {}) {
-    const { forceOffline = false, skipOffline = false } = options;
-    
-    // Si se fuerza offline o no hay conectividad, guardar offline
-    if (forceOffline || (!skipOffline && !(await checkApiConnectivity()))) {
-      console.log('📴 Sin conexión - guardando entrada offline');
-      
-      // Convertir FormData a objeto para almacenamiento
-      const attendanceData = {
-        attendanceType: 'entrada'
-      };
-      for (let [key, value] of formData.entries()) {
-        attendanceData[key] = value;
+  // Asistencias
+  async markEntry(formData) {
+    const response = await api.post('/asistencia/entrada', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
-      
-      const offlineId = await offlineService.saveAttendanceOffline(attendanceData);
-      
-      return {
-        success: true,
-        offline: true,
-        offlineId,
-        message: 'Sin conexión. Tu entrada ha sido guardada localmente y se enviará cuando recuperes conexión.'
-      };
-    }
-
-    try {
-      const response = await api.post('/asistencia/entrada', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      // Si falla por conectividad, intentar guardar offline
-      if (!skipOffline && this.isConnectivityError(error)) {
-        console.log('🔄 Error de conexión - guardando entrada offline como respaldo');
-        
-        const attendanceData = {
-          attendanceType: 'entrada'
-        };
-        for (let [key, value] of formData.entries()) {
-          attendanceData[key] = value;
-        }
-        
-        const offlineId = await offlineService.saveAttendanceOffline(attendanceData);
-        
-        return {
-          success: true,
-          offline: true,
-          offlineId,
-          fallback: true,
-          message: 'Error de conexión. Tu entrada ha sido guardada localmente y se enviará cuando la conexión sea estable.'
-        };
-      }
-      throw error;
-    }
+    });
+    return response.data;
   },
 
-  async markExit(formData, options = {}) {
-    const { forceOffline = false, skipOffline = false } = options;
-    
-    // Si se fuerza offline o no hay conectividad, guardar offline
-    if (forceOffline || (!skipOffline && !(await checkApiConnectivity()))) {
-      console.log('📴 Sin conexión - guardando salida offline');
-      
-      // Convertir FormData a objeto para almacenamiento
-      const attendanceData = {
-        attendanceType: 'salida'
-      };
-      for (let [key, value] of formData.entries()) {
-        attendanceData[key] = value;
+  async markExit(formData) {
+    const response = await api.post('/asistencia/salida', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
-      
-      const offlineId = await offlineService.saveAttendanceOffline(attendanceData);
-      
-      return {
-        success: true,
-        offline: true,
-        offlineId,
-        message: 'Sin conexión. Tu salida ha sido guardada localmente y se enviará cuando recuperes conexión.'
-      };
-    }
-
-    try {
-      const response = await api.post('/asistencia/salida', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      // Si falla por conectividad, intentar guardar offline
-      if (!skipOffline && this.isConnectivityError(error)) {
-        console.log('🔄 Error de conexión - guardando salida offline como respaldo');
-        
-        const attendanceData = {
-          attendanceType: 'salida'
-        };
-        for (let [key, value] of formData.entries()) {
-          attendanceData[key] = value;
-        }
-        
-        const offlineId = await offlineService.saveAttendanceOffline(attendanceData);
-        
-        return {
-          success: true,
-          offline: true,
-          offlineId,
-          fallback: true,
-          message: 'Error de conexión. Tu salida ha sido guardada localmente y se enviará cuando la conexión sea estable.'
-        };
-      }
-      throw error;
-    }
+    });
+    return response.data;
   },
 
   async getAttendances(userId = null) {
     const url = userId ? `/asistencias?usuario_id=${userId}` : '/asistencias';
     const response = await api.get(url);
     return response.data;
-  },
-
-  // Utilidades para detectar errores de conectividad
-  isConnectivityError(error) {
-    return (
-      error.code === 'ECONNABORTED' ||
-      error.code === 'NETWORK_ERROR' ||
-      error.code === 'ERR_NETWORK' ||
-      !error.response ||
-      (error.response && error.response.status >= 500)
-    );
-  },
-
-  // Funciones de sincronización manual
-  async forceSyncPending() {
-    if (!(await checkApiConnectivity())) {
-      throw new Error('No hay conexión disponible para sincronizar');
-    }
-    
-    return await offlineService.autoSync();
-  },
-
-  async getPendingOfflineItems() {
-    return await offlineService.getPendingItems();
-  },
-
-  async getOfflineStats() {
-    return await offlineService.getStats();
   },
 
   // Debug endpoints
@@ -326,14 +154,6 @@ export const apiService = {
   async refreshApiUrl() {
     currentApiUrl = await getBestApiUrl();
     return currentApiUrl;
-  },
-
-  getConnectivityStatus() {
-    return connectivityMonitor.getStatus();
-  },
-
-  addConnectivityListener(callback) {
-    return connectivityMonitor.addListener(callback);
   }
 };
 

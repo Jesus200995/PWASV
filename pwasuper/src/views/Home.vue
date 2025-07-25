@@ -469,11 +469,9 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { API_URL, checkApiConnectivity, getOfflineMessage, connectivityMonitor } from '../utils/network.js';
+import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 import Modal from '../components/Modal.vue';
 import asistenciasService from '../services/asistenciasService.js';
-import { apiService } from '../services/apiService.js';
-import offlineService from '../services/offlineService.js';
 
 // Referencias y estado para asistencia
 const modoAsistencia = ref(false);
@@ -573,6 +571,13 @@ async function confirmarAsistencia() {
   error.value = null;
   
   try {
+    // Verificar conexión a internet antes de enviar
+    isOnline.value = await checkInternetConnection();
+    if (!isOnline.value) {
+      error.value = getOfflineMessage();
+      return;
+    }
+
     // Crear FormData para enviar al servidor
     const formData = new FormData();
     formData.append("usuario_id", user.value.id.toString());
@@ -580,99 +585,48 @@ async function confirmarAsistencia() {
     formData.append("longitud", longitud.value);
     formData.append("descripcion", descripcion.value);
     formData.append("foto", archivoFoto.value);
-    
-    // Agregar timestamp del cliente para detectar duplicados
-    formData.append("client_timestamp", new Date().toISOString());
 
-    // Determinar endpoint según tipo de asistencia y usar el nuevo servicio con soporte offline
+    // Determinar endpoint según tipo de asistencia y usar el servicio
     let response;
     if (tipoAsistencia.value === 'entrada') {
-      response = await apiService.markEntry(formData);
+      response = await asistenciasService.registrarEntrada(formData);
     } else {
-      response = await apiService.markExit(formData);
+      response = await asistenciasService.registrarSalida(formData);
     }
 
-    // Si la respuesta indica que se guardó offline
-    if (response.offline) {
-      // Simular los datos que se habrían recibido del servidor
-      const horaActual = new Date();
-      const horaFormateada = horaActual.toLocaleTimeString('es-MX', {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'America/Mexico_City'
-      });
-
-      if (tipoAsistencia.value === 'entrada') {
-        entradaMarcada.value = true;
-        datosEntrada.value = {
-          hora: horaFormateada,
-          descripcion: descripcion.value,
-          latitud: latitud.value,
-          longitud: longitud.value,
-          foto_url: null, // Se generará cuando se sincronice
-          offline: true
-        };
-      } else {
-        salidaMarcada.value = true;
-        datosSalida.value = {
-          hora: horaFormateada,
-          descripcion: descripcion.value,
-          latitud: latitud.value,
-          longitud: longitud.value,
-          foto_url: null, // Se generará cuando se sincronice
-          offline: true
-        };
-      }
-
-      // Mostrar mensaje de guardado offline
-      const tipoTexto = tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida';
-      mensajeAsistencia.value = response.message;
-      modalMessage.value = `${tipoTexto} guardada localmente. Se enviará automáticamente cuando recuperes conexión.`;
-      showModal.value = true;
-      
+    // Procesar respuesta exitosa
+    if (tipoAsistencia.value === 'entrada') {
+      entradaMarcada.value = true;
+      datosEntrada.value = {
+        hora: new Date(response.hora_entrada).toLocaleTimeString('es-MX', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'America/Mexico_City'
+        }),
+        descripcion: response.descripcion,
+        latitud: response.latitud,
+        longitud: response.longitud,
+        foto_url: response.foto_url
+      };
     } else {
-      // Procesar respuesta online normal (incluyendo duplicados detectados por el servidor)
-      if (tipoAsistencia.value === 'entrada') {
-        entradaMarcada.value = true;
-        datosEntrada.value = {
-          hora: new Date(response.hora_entrada).toLocaleTimeString('es-MX', {
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'America/Mexico_City'
-          }),
-          descripcion: response.descripcion,
-          latitud: response.latitud,
-          longitud: response.longitud,
-          foto_url: response.foto_url,
-          offline: false
-        };
-      } else {
-        salidaMarcada.value = true;
-        datosSalida.value = {
-          hora: new Date(response.hora_salida).toLocaleTimeString('es-MX', {
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'America/Mexico_City'
-          }),
-          descripcion: response.descripcion,
-          latitud: response.latitud,
-          longitud: response.longitud,
-          foto_url: response.foto_url,
-          offline: false
-        };
-      }
-
-      // Mostrar mensaje apropiado
-      const tipoTexto = tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida';
-      if (response.duplicado) {
-        mensajeAsistencia.value = `${tipoTexto} ya estaba registrada`;
-        modalMessage.value = `${tipoTexto} previamente registrada (${datosEntrada.value?.hora || datosSalida.value?.hora})`;
-      } else {
-        mensajeAsistencia.value = response.mensaje;
-        modalMessage.value = `¡${tipoTexto} registrada exitosamente!`;
-      }
-      showModal.value = true;
+      salidaMarcada.value = true;
+      datosSalida.value = {
+        hora: new Date(response.hora_salida).toLocaleTimeString('es-MX', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'America/Mexico_City'
+        }),
+        descripcion: response.descripcion,
+        latitud: response.latitud,
+        longitud: response.longitud,
+        foto_url: response.foto_url
+      };
     }
+
+    // Mostrar mensaje de éxito
+    mensajeAsistencia.value = response.mensaje;
+    modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida'} registrada exitosamente!`;
+    showModal.value = true;
     
     // Salir del modo asistencia
     modoAsistencia.value = false;
@@ -682,10 +636,8 @@ async function confirmarAsistencia() {
     // Guardar estado en localStorage
     guardarEstadoAsistencia();
     
-    // Verificar asistencia con el backend para actualizar datos (solo si no es offline)
-    if (!response.offline) {
-      await verificarAsistenciaHoy();
-    }
+    // Verificar asistencia con el backend para actualizar datos
+    await verificarAsistenciaHoy();
     
     // Limpiar mensaje después de 5 segundos
     setTimeout(() => {
@@ -693,9 +645,7 @@ async function confirmarAsistencia() {
     }, 5000);
 
   } catch (err) {
-    console.error('Error al procesar asistencia:', err);
-    
-    // Si el error es de conectividad y no se pudo guardar offline, mostrar error
+    console.error('Error al enviar asistencia:', err);
     if (err.response) {
       error.value = "Error del servidor: " + (err.response.data.detail || err.response.statusText);
       
@@ -707,16 +657,13 @@ async function confirmarAsistencia() {
           salidaMarcada.value = true;
         }
         
-        // Actualizar datos desde el servidor si hay conexión
-        const isConnected = await checkApiConnectivity();
-        if (isConnected) {
-          await verificarAsistenciaHoy();
-        }
+        // Actualizar datos desde el servidor
+        await verificarAsistenciaHoy();
       }
     } else if (err.request) {
-      error.value = "No se pudo conectar con el servidor y no se pudo guardar offline.";
+      error.value = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
     } else {
-      error.value = "Error inesperado: " + err.message;
+      error.value = "Error al enviar datos: " + err.message;
     }
   } finally {
     enviandoAsistencia.value = false;
@@ -795,6 +742,13 @@ async function enviarRegistro() {
     return;
   }
 
+  // Verificar conexión a internet antes de enviar
+  isOnline.value = await checkInternetConnection();
+  if (!isOnline.value) {
+    error.value = getOfflineMessage();
+    return;
+  }
+
   enviando.value = true;
   error.value = null;
 
@@ -806,52 +760,28 @@ async function enviarRegistro() {
     formData.append("longitud", longitudRegistro.value);
     formData.append("descripcion", descripcionRegistro.value);
     formData.append("foto", archivoFotoRegistro.value);
-    
-    // Agregar timestamp del cliente para detectar duplicados
-    formData.append("client_timestamp", new Date().toISOString());
 
-    // Usar el nuevo servicio con soporte offline
-    const response = await apiService.createRecord(formData);
+    // Enviar datos al backend
+    const response = await axios.post(`${API_URL}/registro`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 15000,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity
+    });
 
-    // Si la respuesta indica que se guardó offline
-    if (response.offline) {
-      // Mostrar modal indicando guardado offline
-      modalMessage.value = response.message;
-      showModal.value = true;
-      
-      // Agregar al historial local con indicador offline
-      historial.value.unshift({
-        fecha: new Date().toLocaleString(),
-        latitud: latitudRegistro.value,
-        longitud: longitudRegistro.value,
-        descripcion: descripcionRegistro.value,
-        foto: fotoRegistro.value,
-        offline: true,
-        offlineId: response.offlineId,
-        backend: null, // Se completará cuando se sincronice
-      });
-    } else {
-      // Procesar respuesta online normal (incluyendo duplicados detectados)
-      historial.value.unshift({
-        fecha: new Date().toLocaleString(),
-        latitud: latitudRegistro.value,
-        longitud: longitudRegistro.value,
-        descripcion: descripcionRegistro.value,
-        foto: fotoRegistro.value,
-        offline: false,
-        backend: response,
-      });
+    // Guardar en historial local
+    historial.value.unshift({
+      fecha: new Date().toLocaleString(),
+      latitud: latitudRegistro.value,
+      longitud: longitudRegistro.value,
+      descripcion: descripcionRegistro.value,
+      foto: fotoRegistro.value,
+      backend: response.data,
+    });
 
-      // Mostrar mensaje apropiado
-      if (response.duplicado) {
-        modalMessage.value = "Este registro ya existía en el servidor.";
-      } else {
-        modalMessage.value = "¡Registro enviado y guardado correctamente!";
-      }
-      showModal.value = true;
-    }
-
-    // Limpiar campos después del envío exitoso (online u offline)
+    // Limpiar campos
     descripcionRegistro.value = "";
     fotoRegistro.value = null;
     archivoFotoRegistro.value = null;
@@ -862,14 +792,17 @@ async function enviarRegistro() {
       fileInputRegistro.value.value = "";
     }
 
+    // Mostrar modal de éxito
+    modalMessage.value = "¡Registro enviado y guardado correctamente!";
+    showModal.value = true;
   } catch (err) {
-    console.error("Error al procesar registro:", err);
+    console.error("Error al enviar datos:", err);
     if (err.response) {
       error.value = "Error del servidor: " + (err.response.data.detail || err.response.statusText);
     } else if (err.request) {
-      error.value = "No se pudo conectar con el servidor y no se pudo guardar offline.";
+      error.value = "No se pudo conectar con el servidor. Verifica tu conexión a internet.";
     } else {
-      error.value = "Error inesperado: " + err.message;
+      error.value = "Error al enviar datos: " + err.message;
     }
   } finally {
     enviando.value = false;

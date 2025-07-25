@@ -1,203 +1,22 @@
 // Utilidad para verificar conexión a internet
 export function checkInternetConnection() {
   return new Promise((resolve) => {
-    // Verificar primero navigator.onLine
-    if (!navigator.onLine) {
-      resolve(false);
-      return;
-    }
-
     // Intentar hacer una petición a un servicio externo
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
     fetch('https://www.google.com', { 
       mode: 'no-cors',
       cache: 'no-store',
       method: 'HEAD',
-      signal: controller.signal
+      timeout: 5000 
     })
-      .then(() => {
-        clearTimeout(timeoutId);
-        resolve(true);
-      })
-      .catch(() => {
-        clearTimeout(timeoutId);
-        resolve(false);
-      });
+      .then(() => resolve(true))
+      .catch(() => resolve(false));
   });
-}
-
-// Verificación más robusta de conectividad
-export async function checkApiConnectivity() {
-  try {
-    if (!navigator.onLine) return false;
-    
-    const apiUrl = await getBestApiUrl();
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-    const response = await fetch(`${apiUrl}/debug/usuarios-estructura`, {
-      method: 'HEAD',
-      signal: controller.signal,
-      cache: 'no-store'
-    });
-
-    clearTimeout(timeoutId);
-    return response.ok;
-  } catch (error) {
-    console.log('❌ Sin conectividad con API:', error.message);
-    return false;
-  }
 }
 
 // Mensaje de error cuando no hay conexión
 export function getOfflineMessage() {
   return "No hay conexión a internet. Esta función requiere conexión para funcionar correctamente.";
 }
-
-// Estados de conectividad
-export const ConnectionStatus = {
-  ONLINE: 'online',
-  OFFLINE: 'offline',
-  CHECKING: 'checking',
-  LIMITED: 'limited'
-};
-
-// Monitor de conectividad mejorado
-class ConnectivityMonitor {
-  constructor() {
-    this.status = ConnectionStatus.CHECKING;
-    this.listeners = new Set();
-    this.checkInterval = null;
-    this.lastCheck = null;
-    this.consecutiveFailures = 0;
-    
-    this.init();
-  }
-
-  init() {
-    // Verificar estado inicial
-    this.checkConnectivity();
-    
-    // Escuchar eventos de conectividad del navegador
-    window.addEventListener('online', () => {
-      console.log('🌐 Evento: Conexión restaurada');
-      this.handleOnlineEvent();
-    });
-
-    window.addEventListener('offline', () => {
-      console.log('📴 Evento: Conexión perdida');
-      this.handleOfflineEvent();
-    });
-
-    // Verificación periódica más inteligente
-    this.startPeriodicCheck();
-  }
-
-  async checkConnectivity() {
-    this.status = ConnectionStatus.CHECKING;
-    this.notifyListeners();
-
-    try {
-      const isConnected = await checkApiConnectivity();
-      const newStatus = isConnected ? ConnectionStatus.ONLINE : ConnectionStatus.OFFLINE;
-      
-      if (newStatus !== this.status) {
-        console.log(`🔄 Cambio de conectividad: ${this.status} → ${newStatus}`);
-        this.status = newStatus;
-        this.lastCheck = Date.now();
-        
-        if (newStatus === ConnectionStatus.ONLINE) {
-          this.consecutiveFailures = 0;
-        } else {
-          this.consecutiveFailures++;
-        }
-        
-        this.notifyListeners();
-      }
-    } catch (error) {
-      console.error('❌ Error verificando conectividad:', error);
-      this.status = ConnectionStatus.OFFLINE;
-      this.consecutiveFailures++;
-      this.notifyListeners();
-    }
-  }
-
-  handleOnlineEvent() {
-    // Verificar conectividad real cuando el navegador dice que hay conexión
-    setTimeout(() => this.checkConnectivity(), 1000);
-  }
-
-  handleOfflineEvent() {
-    this.status = ConnectionStatus.OFFLINE;
-    this.consecutiveFailures++;
-    this.notifyListeners();
-  }
-
-  startPeriodicCheck() {
-    // Intervalo adaptativo basado en el estado
-    const getInterval = () => {
-      if (this.status === ConnectionStatus.OFFLINE) {
-        // Más frecuente cuando está offline para detectar reconexión rápidamente
-        return Math.min(5000 + (this.consecutiveFailures * 2000), 30000);
-      }
-      // Menos frecuente cuando está online
-      return 30000;
-    };
-
-    const scheduleNext = () => {
-      this.checkInterval = setTimeout(() => {
-        this.checkConnectivity().finally(() => scheduleNext());
-      }, getInterval());
-    };
-
-    scheduleNext();
-  }
-
-  addListener(callback) {
-    this.listeners.add(callback);
-    // Notificar estado actual inmediatamente
-    callback(this.status);
-    
-    return () => this.listeners.delete(callback);
-  }
-
-  notifyListeners() {
-    this.listeners.forEach(callback => {
-      try {
-        callback(this.status);
-      } catch (error) {
-        console.error('❌ Error en listener de conectividad:', error);
-      }
-    });
-  }
-
-  isOnline() {
-    return this.status === ConnectionStatus.ONLINE;
-  }
-
-  getStatus() {
-    return this.status;
-  }
-
-  forceCheck() {
-    return this.checkConnectivity();
-  }
-
-  destroy() {
-    if (this.checkInterval) {
-      clearTimeout(this.checkInterval);
-    }
-    this.listeners.clear();
-  }
-}
-
-// Instancia singleton del monitor
-const connectivityMonitor = new ConnectivityMonitor();
-
-export { connectivityMonitor };
-export { ConnectivityMonitor };
 
 // Configuración de URLs de API
 const API_URLS = {

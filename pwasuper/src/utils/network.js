@@ -18,5 +18,5 @@ export function getOfflineMessage() {
   return "No hay conexión a internet. Esta función requiere conexión para funcionar correctamente.";
 }
 
-// URL de la API - CAMBIADA A PRODUCCIÓN
-export const API_URL = "https://apipwa.sembrandodatos.com";
+// URL de la API - SERVIDOR LOCAL PARA DESARROLLO
+export const API_URL = "http://localhost:8000";

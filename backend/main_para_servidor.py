@@ -50,6 +50,7 @@ class UserCreate(BaseModel):
     cargo: str
     supervisor: str = None
     contrasena: str
+    curp: str  # CURP obligatoria
 
 class UserLogin(BaseModel):
     correo: str
@@ -70,26 +71,48 @@ SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"  # Ca
 @app.post("/usuarios")
 async def crear_usuario(usuario: UserCreate):
     try:
+        # Validación de CURP obligatoria
+        if not usuario.curp or not usuario.curp.strip():
+            raise HTTPException(status_code=400, detail="La CURP es obligatoria")
+        
+        # Convertir CURP a mayúsculas y validar
+        curp_upper = usuario.curp.upper().strip()
+        if len(curp_upper) != 18:
+            raise HTTPException(status_code=400, detail="La CURP debe tener exactamente 18 caracteres")
+        
+        # Validación básica de formato CURP
+        import re
+        if not re.match(r'^[A-Z0-9]{18}$', curp_upper):
+            raise HTTPException(status_code=400, detail="La CURP debe contener solo letras mayúsculas y números")
+        
         # Comprobar si el correo ya existe
         cursor.execute("SELECT id FROM usuarios WHERE correo = %s", (usuario.correo,))
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="El correo ya está registrado")
         
+        # Comprobar si la CURP ya existe
+        cursor.execute("SELECT id FROM usuarios WHERE curp = %s", (curp_upper,))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="La CURP ya está registrada")
+        
         # Hash de la contraseña
         hashed_password = bcrypt.hashpw(usuario.contrasena.encode('utf-8'), bcrypt.gensalt())
         
-        # Insertar usuario
+        # Insertar usuario con CURP
         cursor.execute(
-            "INSERT INTO usuarios (correo, nombre_completo, cargo, supervisor, contrasena) VALUES (%s, %s, %s, %s, %s) RETURNING id",
-            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, hashed_password.decode('utf-8'))
+            "INSERT INTO usuarios (correo, nombre_completo, cargo, supervisor, contrasena, curp) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
+            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, hashed_password.decode('utf-8'), curp_upper)
         )
         
         user_id = cursor.fetchone()[0]
         conn.commit()
         
-        return {"id": user_id, "mensaje": "Usuario creado exitosamente"}
+        return {"id": user_id, "mensaje": "Usuario creado exitosamente", "curp": curp_upper}
+    except HTTPException:
+        raise
     except Exception as e:
         conn.rollback()
+        print(f"❌ Error completo: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error al crear usuario: {str(e)}")
 
 @app.post("/login")

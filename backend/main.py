@@ -7,10 +7,12 @@ from psycopg2.extras import RealDictCursor
 from datetime import datetime
 import os
 import bcrypt
+import re
 from pydantic import BaseModel
 from jose import jwt
 from passlib.context import CryptContext
 import pytz
+import uvicorn
 
 app = FastAPI()
 

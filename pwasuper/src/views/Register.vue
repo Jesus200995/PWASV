@@ -130,61 +130,34 @@ async function register() {
   message.text = '';
   
   try {
-    // Crear payload básico (compatible con servidor actual)
+    // Crear payload con CURP obligatoria
     const payload = {
       correo: form.email,
       nombre_completo: form.nombre,
       cargo: form.cargo,
       supervisor: form.supervisor || null,
-      contrasena: form.password
+      contrasena: form.password,
+      curp: form.curp.toUpperCase().trim()
     };
     
-    // Intentar primero con CURP (servidor actualizado)
-    try {
-      const payloadConCurp = {
-        ...payload,
-        curp: form.curp.toUpperCase().trim()
-      };
-      
-      const response = await axios.post(`${API_URL}/usuarios`, payloadConCurp, {
-        timeout: 10000,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      // Si llega aquí, el servidor soporta CURP
-      message.text = '¡Cuenta creada exitosamente con CURP! Redirigiendo...';
-      message.type = 'success';
-      
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-      
-    } catch (curpError) {
-      // Si falla con CURP, intentar sin CURP (servidor viejo)
-      console.log('Servidor no soporta CURP, reintentando sin CURP...');
-      
-      // Guardar CURP en localStorage para uso futuro
-      if (form.curp && form.curp.trim()) {
-        localStorage.setItem('user_curp_pending', form.curp.toUpperCase().trim());
-        localStorage.setItem('user_email_pending', form.email);
+    console.log('📤 Enviando payload:', payload);
+    
+    const response = await axios.post(`${API_URL}/usuarios`, payload, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
       }
-      
-      const response = await axios.post(`${API_URL}/usuarios`, payload, {
-        timeout: 10000,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      message.text = '¡Cuenta creada exitosamente! (CURP guardada para cuando el sistema se actualice) Redirigiendo...';
-      message.type = 'success';
-      
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-    }
+    });
+    
+    console.log('✅ Respuesta del servidor:', response.data);
+    
+    message.text = '¡Cuenta creada exitosamente con CURP! Redirigiendo...';
+    message.type = 'success';
+    
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000);
+    
     
   } catch (error) {
     console.error('Error de registro:', error);

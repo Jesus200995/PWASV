@@ -96,13 +96,10 @@ async def crear_usuario(usuario: UserCreate):
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="La CURP ya está registrada")
         
-        # Hash de la contraseña
-        hashed_password = bcrypt.hashpw(usuario.contrasena.encode('utf-8'), bcrypt.gensalt())
-        
-        # Insertar usuario con CURP
+        # Insertar usuario con CURP (contraseña sin encriptar)
         cursor.execute(
             "INSERT INTO usuarios (correo, nombre_completo, cargo, supervisor, contrasena, curp) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
-            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, hashed_password.decode('utf-8'), curp_upper)
+            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, usuario.contrasena, curp_upper)
         )
         
         user_id = cursor.fetchone()[0]
@@ -125,8 +122,8 @@ async def login(usuario: UserLogin):
     if not user:
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
     
-    # Verificar contraseña
-    if not bcrypt.checkpw(usuario.contrasena.encode('utf-8'), user[4].encode('utf-8')):
+    # Verificar contraseña (comparación directa sin encriptación)
+    if usuario.contrasena != user[4]:
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
       # Devolver datos del usuario (sin la contraseña)
     return {

@@ -33,6 +33,16 @@
         </div>
         
         <div>
+          <label for="curp" class="block text-sm font-medium text-gray-700">CURP *</label>
+          <input v-model="form.curp" @input="formatCurp" id="curp" name="curp" type="text" required
+            maxlength="18" placeholder="18 caracteres en mayúsculas"
+            class="mt-1 form-input uppercase tracking-wide" />
+          <p v-if="curpError" class="mt-1 text-sm text-red-600">{{ curpError }}</p>
+          <p class="mt-1 text-xs text-gray-500">La CURP debe contener exactamente 18 caracteres en mayúsculas</p>
+          <p v-if="curpWarning" class="mt-1 text-xs text-yellow-600">{{ curpWarning }}</p>
+        </div>
+        
+        <div>
           <label for="supervisor" class="block text-sm font-medium text-gray-700">Supervisor</label>
           <input v-model="form.supervisor" id="supervisor" name="supervisor" type="text" 
             class="mt-1 form-input" />
@@ -83,11 +93,14 @@ const router = useRouter();
 const loading = ref(false);
 const message = reactive({ text: '', type: '' });
 const isOnline = ref(true);
+const curpError = ref('');
+const curpWarning = ref('');
 
 const form = reactive({
   email: '',
   nombre: '',
   cargo: '',
+  curp: '',
   supervisor: '',
   password: '',
   confirmPassword: ''
@@ -117,33 +130,66 @@ async function register() {
   message.text = '';
   
   try {
-    // Conectar con la API real para crear el usuario
-    const response = await axios.post(`${API_URL}/usuarios`, {
+    // Crear payload básico (compatible con servidor actual)
+    const payload = {
       correo: form.email,
       nombre_completo: form.nombre,
       cargo: form.cargo,
-      supervisor: form.supervisor || null, // Enviar null si está vacío
+      supervisor: form.supervisor || null,
       contrasena: form.password
-    }, {
-      timeout: 10000, // 10 segundos de timeout
-      headers: {
-        'Content-Type': 'application/json'
+    };
+    
+    // Intentar primero con CURP (servidor actualizado)
+    try {
+      const payloadConCurp = {
+        ...payload,
+        curp: form.curp.toUpperCase().trim()
+      };
+      
+      const response = await axios.post(`${API_URL}/usuarios`, payloadConCurp, {
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Si llega aquí, el servidor soporta CURP
+      message.text = '¡Cuenta creada exitosamente con CURP! Redirigiendo...';
+      message.type = 'success';
+      
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+      
+    } catch (curpError) {
+      // Si falla con CURP, intentar sin CURP (servidor viejo)
+      console.log('Servidor no soporta CURP, reintentando sin CURP...');
+      
+      // Guardar CURP en localStorage para uso futuro
+      if (form.curp && form.curp.trim()) {
+        localStorage.setItem('user_curp_pending', form.curp.toUpperCase().trim());
+        localStorage.setItem('user_email_pending', form.email);
       }
-    });
+      
+      const response = await axios.post(`${API_URL}/usuarios`, payload, {
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      message.text = '¡Cuenta creada exitosamente! (CURP guardada para cuando el sistema se actualice) Redirigiendo...';
+      message.type = 'success';
+      
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+    }
     
-    // Mostrar mensaje de éxito
-    message.text = '¡Cuenta creada exitosamente! Redirigiendo...';
-    message.type = 'success';
-    
-    // Redirigir después de un breve retraso
-    setTimeout(() => {
-      router.push('/login');
-    }, 2000);
   } catch (error) {
     console.error('Error de registro:', error);
     
     if (error.response) {
-      // Error de respuesta del servidor
       const status = error.response.status;
       if (status === 400) {
         message.text = error.response.data.detail || 'El correo ya está registrado o los datos son inválidos.';
@@ -153,13 +199,10 @@ async function register() {
         message.text = error.response.data.detail || 'Error al crear la cuenta.';
       }
     } else if (error.request) {
-      // Error de conexión
       message.text = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
     } else if (error.code === 'ECONNABORTED') {
-      // Timeout
       message.text = 'La conexión tardó demasiado. Verifica tu conexión a internet.';
     } else {
-      // Error general
       message.text = 'Error al crear la cuenta: ' + error.message;
     }
     
@@ -170,6 +213,36 @@ async function register() {
 }
 
 function validateForm() {
+  // Limpiar errores previos
+  curpError.value = '';
+  curpWarning.value = '';
+  message.text = '';
+  
+  // Verificar CURP obligatoria
+  if (!form.curp || !form.curp.trim()) {
+    curpError.value = 'La CURP es obligatoria';
+    message.text = 'Por favor completa todos los campos obligatorios';
+    message.type = 'error';
+    return false;
+  }
+  
+  const curpClean = form.curp.toUpperCase().trim();
+  if (curpClean.length !== 18) {
+    curpError.value = 'La CURP debe contener exactamente 18 caracteres';
+    message.text = 'La CURP debe contener exactamente 18 caracteres en mayúsculas';
+    message.type = 'error';
+    return false;
+  }
+  
+  // Validación básica de formato CURP (solo letras y números)
+  const curpRegex = /^[A-Z0-9]{18}$/;
+  if (!curpRegex.test(curpClean)) {
+    curpError.value = 'La CURP solo debe contener letras mayúsculas y números';
+    message.text = 'La CURP debe contener solo letras mayúsculas y números';
+    message.type = 'error';
+    return false;
+  }
+  
   // Verificar que las contraseñas coincidan
   if (form.password !== form.confirmPassword) {
     message.text = 'Las contraseñas no coinciden';
@@ -194,6 +267,32 @@ function validateForm() {
   
   return true;
 }
+
+function formatCurp() {
+  // Convertir a mayúsculas automáticamente
+  form.curp = form.curp.toUpperCase();
+  
+  // Limpiar errores cuando el usuario empiece a escribir
+  if (curpError.value) {
+    curpError.value = '';
+  }
+  if (curpWarning.value) {
+    curpWarning.value = '';
+  }
+  
+  // Validación en tiempo real
+  if (form.curp.length > 0 && form.curp.length < 18) {
+    curpError.value = `Faltan ${18 - form.curp.length} caracteres`;
+  } else if (form.curp.length === 18) {
+    const curpRegex = /^[A-Z0-9]{18}$/;
+    if (!curpRegex.test(form.curp)) {
+      curpError.value = 'La CURP solo debe contener letras mayúsculas y números';
+    } else {
+      curpError.value = '';
+      curpWarning.value = 'CURP válida ✓';
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -202,5 +301,13 @@ function validateForm() {
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.tracking-wide {
+  letter-spacing: 0.025em;
 }
 </style>

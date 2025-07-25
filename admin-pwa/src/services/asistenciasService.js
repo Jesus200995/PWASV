@@ -1,5 +1,5 @@
 // Servicio para el manejo de asistencias
-const API_URL = 'http://localhost:8000';
+const API_URL = 'https://apipwa.sembrandodatos.com';
 
 class AsistenciasService {
   /**

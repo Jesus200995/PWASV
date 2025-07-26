@@ -18,17 +18,28 @@ class OfflineService {
    * Inicializa la base de datos IndexedDB
    */
   async initDB() {
+    if (this.db) {
+      return this.db;
+    }
+    
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
-        console.error('❌ Error al abrir la base de datos offline');
+        console.error('❌ Error al abrir la base de datos offline:', request.error);
+        this.db = null;
         reject(request.error);
       };
 
       request.onsuccess = () => {
         this.db = request.result;
         console.log('✅ Base de datos offline inicializada');
+        
+        // Agregar manejador de errores globales
+        this.db.onerror = (event) => {
+          console.error('❌ Error en IndexedDB:', event.target.error);
+        };
+        
         resolve(this.db);
       };
 
@@ -149,7 +160,25 @@ class OfflineService {
    */
   async guardarAsistenciaOffline(usuarioId, tipo, latitud, longitud, descripcion, archivo) {
     try {
-      await this.initDB();
+      console.log(`📝 Intentando guardar asistencia ${tipo} offline para usuario ${usuarioId}`);
+      
+      // Verificar que la DB esté lista
+      if (!this.db) {
+        console.log('⚠️ DB no inicializada, inicializando...');
+        await this.initDB();
+      }
+      
+      if (!this.db) {
+        throw new Error('No se pudo inicializar la base de datos');
+      }
+      
+      // Verificar que el store existe
+      if (!this.db.objectStoreNames.contains(ASISTENCIAS_STORE)) {
+        console.error(`❌ Store ${ASISTENCIAS_STORE} no existe`);
+        throw new Error(`Store ${ASISTENCIAS_STORE} no existe en la base de datos`);
+      }
+      
+      console.log('✅ Base de datos verificada, procediendo a guardar asistencia');
       
       // Convertir archivo a base64 si existe
       const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
@@ -167,6 +196,13 @@ class OfflineService {
         fecha: new Date().toISOString().split('T')[0] // YYYY-MM-DD
       };
 
+      console.log('💾 Datos de asistencia preparados:', {
+        usuario_id: asistencia.usuario_id,
+        tipo: asistencia.tipo,
+        timestamp: asistencia.timestamp,
+        tiene_foto: !!asistencia.foto_base64
+      });
+
       const transaction = this.db.transaction([ASISTENCIAS_STORE], 'readwrite');
       const store = transaction.objectStore(ASISTENCIAS_STORE);
       
@@ -181,6 +217,16 @@ class OfflineService {
         request.onerror = () => {
           console.error(`❌ Error guardando asistencia ${tipo} offline:`, request.error);
           reject(request.error);
+        };
+        
+        transaction.onerror = () => {
+          console.error(`❌ Error en transacción de asistencia ${tipo}:`, transaction.error);
+          reject(transaction.error);
+        };
+        
+        transaction.onabort = () => {
+          console.error(`❌ Transacción abortada para asistencia ${tipo}`);
+          reject(new Error('Transacción abortada'));
         };
       });
     } catch (error) {

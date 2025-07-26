@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'PWAOfflineDB';
-const DB_VERSION = 2; // Incrementar versión para agregar nuevos campos
+const DB_VERSION = 1;
 const REGISTROS_STORE = 'registros_pendientes';
 const ASISTENCIAS_STORE = 'asistencias_pendientes';
 
@@ -364,99 +364,6 @@ class OfflineService {
     } catch (error) {
       console.error('❌ Error contando pendientes:', error);
       return { registros: 0, asistencias: 0, total: 0 };
-    }
-  }
-
-  /**
-   * Guarda un registro general offline con timestamp personalizado (SOLO PARA TESTING)
-   */
-  async guardarRegistroOfflineConTimestamp(usuarioId, latitud, longitud, descripcion, archivo, timestampPersonalizado) {
-    try {
-      await this.initDB();
-      
-      // Convertir archivo a base64 si existe
-      const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
-      
-      const registro = {
-        usuario_id: usuarioId,
-        latitud,
-        longitud,
-        descripcion,
-        foto_base64: fotoBase64,
-        foto_filename: archivo ? archivo.name : null,
-        foto_type: archivo ? archivo.type : null,
-        timestamp: timestampPersonalizado, // Usar timestamp personalizado
-        sync_timestamp: null, // Se completará cuando se sincronice
-        tipo: 'registro_general'
-      };
-
-      const transaction = this.db.transaction([REGISTROS_STORE], 'readwrite');
-      const store = transaction.objectStore(REGISTROS_STORE);
-      
-      return new Promise((resolve, reject) => {
-        const request = store.add(registro);
-        
-        request.onsuccess = () => {
-          console.log('✅ Registro offline guardado con timestamp personalizado:', request.result);
-          console.log('🕐 Timestamp usado:', timestampPersonalizado);
-          resolve(request.result);
-        };
-        
-        request.onerror = () => {
-          console.error('❌ Error guardando registro offline:', request.error);
-          reject(request.error);
-        };
-      });
-    } catch (error) {
-      console.error('❌ Error en guardarRegistroOfflineConTimestamp:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Guarda una asistencia offline con timestamp personalizado (SOLO PARA TESTING)
-   */
-  async guardarAsistenciaOfflineConTimestamp(usuarioId, tipo, latitud, longitud, descripcion, archivo, timestampPersonalizado) {
-    try {
-      await this.initDB();
-      
-      // Convertir archivo a base64 si existe
-      const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
-      
-      const asistencia = {
-        usuario_id: usuarioId,
-        tipo, // 'entrada' o 'salida'
-        latitud,
-        longitud,
-        descripcion,
-        foto_base64: fotoBase64,
-        foto_filename: archivo ? archivo.name : null,
-        foto_type: archivo ? archivo.type : null,
-        timestamp: timestampPersonalizado, // Usar timestamp personalizado
-        sync_timestamp: null, // Se completará cuando se sincronice
-        fecha: timestampPersonalizado.split('T')[0] // YYYY-MM-DD del timestamp personalizado
-      };
-
-      const transaction = this.db.transaction([ASISTENCIAS_STORE], 'readwrite');
-      const store = transaction.objectStore(ASISTENCIAS_STORE);
-      
-      return new Promise((resolve, reject) => {
-        const request = store.add(asistencia);
-        
-        request.onsuccess = () => {
-          console.log(`✅ Asistencia ${tipo} offline guardada con timestamp personalizado:`, request.result);
-          console.log('🕐 Timestamp usado:', timestampPersonalizado);
-          resolve(request.result);
-        };
-        
-        request.onerror = () => {
-          console.error(`❌ Error guardando asistencia ${tipo} offline:`, request.error);
-          reject(request.error);
-        };
-      });
-    } catch (error) {
-      console.error('❌ Error en guardarAsistenciaOfflineConTimestamp:', error);
-      throw error;
     }
   }
 

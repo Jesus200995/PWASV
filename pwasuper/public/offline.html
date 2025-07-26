@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin conexión - PWA Super</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+        
+        .button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .offline-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        .offline-indicator::before {
+            content: "📴";
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            p {
+                font-size: 14px;
+            }
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📱</div>
+        <h1>Sin conexión</h1>
+        <p>
+            No se puede conectar a internet en este momento. 
+            Tus registros se guardarán automáticamente y se enviarán 
+            cuando recuperes la conexión.
+        </p>
+        
+        <button class="button" onclick="tryReconnect()">
+            Intentar de nuevo
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Verificando conexión...
+        </div>
+        
+        <div class="offline-indicator">
+            Modo offline activado
+        </div>
+    </div>
+
+    <script>
+        function tryReconnect() {
+            const button = document.querySelector('.button');
+            const loading = document.getElementById('loading');
+            
+            button.style.display = 'none';
+            loading.style.display = 'block';
+            
+            // Intentar recargar la página después de 2 segundos
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+        
+        // Verificar conexión automáticamente cada 30 segundos
+        setInterval(() => {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }, 30000);
+        
+        // Listener para cuando se recupera la conexión
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

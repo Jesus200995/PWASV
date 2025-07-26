@@ -422,8 +422,19 @@
         <div
           v-for="(r, i) in historial.slice(0, 3)"
           :key="i"
-          class="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow"
+          class="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow relative"
+          :class="{ 'border-orange-300 bg-orange-50': r.offline }"
         >
+          <!-- Indicador de estado offline -->
+          <div v-if="r.offline" class="absolute top-2 right-2">
+            <div class="flex items-center text-orange-600 text-xs">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Pendiente
+            </div>
+          </div>
+          
           <div class="flex">
             <div class="w-20 h-20 bg-gray-100 rounded overflow-hidden mr-3">
               <img
@@ -439,6 +450,9 @@
               </p>
               <p class="text-xs font-mono text-gray-600">
                 Lat: {{ r.latitud }}, Lon: {{ r.longitud }}
+              </p>
+              <p v-if="r.offline" class="text-xs text-orange-600 mt-1 font-medium">
+                ⏳ Se enviará al recuperar conexión
               </p>
             </div>
           </div>
@@ -472,6 +486,8 @@ import axios from "axios";
 import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 import Modal from '../components/Modal.vue';
 import asistenciasService from '../services/asistenciasService.js';
+import offlineService from '../services/offlineService.js';
+import syncService from '../services/syncService.js';
 
 // Referencias y estado para asistencia
 const modoAsistencia = ref(false);
@@ -573,11 +589,73 @@ async function confirmarAsistencia() {
   try {
     // Verificar conexión a internet antes de enviar
     isOnline.value = await checkInternetConnection();
+    
     if (!isOnline.value) {
-      error.value = getOfflineMessage();
+      // **MODO OFFLINE: Guardar datos localmente**
+      console.log('📴 Sin conexión - Guardando asistencia offline');
+      
+      // Guardar en almacenamiento offline usando IndexedDB
+      await offlineService.guardarAsistenciaOffline(
+        user.value.id,
+        tipoAsistencia.value,
+        latitud.value,
+        longitud.value,
+        descripcion.value,
+        archivoFoto.value
+      );
+      
+      // Simular datos de respuesta para el estado local
+      const horaActual = new Date().toLocaleTimeString('es-MX', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Mexico_City'
+      });
+      
+      // Actualizar estado local
+      if (tipoAsistencia.value === 'entrada') {
+        entradaMarcada.value = true;
+        datosEntrada.value = {
+          hora: horaActual,
+          descripcion: descripcion.value,
+          latitud: latitud.value,
+          longitud: longitud.value,
+          foto_url: foto.value // URL local temporal
+        };
+      } else {
+        salidaMarcada.value = true;
+        datosSalida.value = {
+          hora: horaActual,
+          descripcion: descripcion.value,
+          latitud: latitud.value,
+          longitud: longitud.value,
+          foto_url: foto.value // URL local temporal
+        };
+      }
+      
+      // Mostrar mensaje informativo offline
+      mensajeAsistencia.value = `${tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida'} guardada offline. Se enviará automáticamente cuando tengas conexión.`;
+      modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida'} guardada! Se sincronizará cuando recuperes la conexión.`;
+      showModal.value = true;
+      
+      // Salir del modo asistencia
+      modoAsistencia.value = false;
+      tipoAsistencia.value = '';
+      limpiarDatosAsistencia();
+      
+      // Guardar estado en localStorage
+      guardarEstadoAsistencia();
+      
+      // Limpiar mensaje después de 8 segundos (más tiempo para modo offline)
+      setTimeout(() => {
+        mensajeAsistencia.value = '';
+      }, 8000);
+      
       return;
     }
 
+    // **MODO ONLINE: Enviar directamente al servidor**
+    console.log('🌐 Conexión disponible - Enviando asistencia al servidor');
+    
     // Crear FormData para enviar al servidor
     const formData = new FormData();
     formData.append("usuario_id", user.value.id.toString());
@@ -742,17 +820,58 @@ async function enviarRegistro() {
     return;
   }
 
-  // Verificar conexión a internet antes de enviar
-  isOnline.value = await checkInternetConnection();
-  if (!isOnline.value) {
-    error.value = getOfflineMessage();
-    return;
-  }
-
   enviando.value = true;
   error.value = null;
 
   try {
+    // Verificar conexión a internet antes de enviar
+    isOnline.value = await checkInternetConnection();
+    
+    if (!isOnline.value) {
+      // **MODO OFFLINE: Guardar datos localmente**
+      console.log('📴 Sin conexión - Guardando registro offline');
+      
+      // Guardar en almacenamiento offline usando IndexedDB
+      await offlineService.guardarRegistroOffline(
+        user.value.id,
+        latitudRegistro.value,
+        longitudRegistro.value,
+        descripcionRegistro.value,
+        archivoFotoRegistro.value
+      );
+      
+      // Agregar a historial local con indicador offline
+      historial.value.unshift({
+        fecha: new Date().toLocaleString(),
+        latitud: latitudRegistro.value,
+        longitud: longitudRegistro.value,
+        descripcion: descripcionRegistro.value,
+        foto: fotoRegistro.value,
+        offline: true, // Marcador para indicar que está pendiente
+        backend: null,
+      });
+
+      // Limpiar campos
+      descripcionRegistro.value = "";
+      fotoRegistro.value = null;
+      archivoFotoRegistro.value = null;
+      latitudRegistro.value = null;
+      longitudRegistro.value = null;
+
+      if (fileInputRegistro.value) {
+        fileInputRegistro.value.value = "";
+      }
+
+      // Mostrar modal de éxito offline
+      modalMessage.value = "¡Registro guardado offline! Se enviará automáticamente cuando recuperes la conexión.";
+      showModal.value = true;
+      
+      return;
+    }
+
+    // **MODO ONLINE: Enviar directamente al servidor**
+    console.log('🌐 Conexión disponible - Enviando registro al servidor');
+
     // Crear FormData para enviar al servidor
     const formData = new FormData();
     formData.append("usuario_id", user.value.id.toString());
@@ -778,6 +897,7 @@ async function enviarRegistro() {
       longitud: longitudRegistro.value,
       descripcion: descripcionRegistro.value,
       foto: fotoRegistro.value,
+      offline: false, // Enviado exitosamente
       backend: response.data,
     });
 
@@ -795,6 +915,7 @@ async function enviarRegistro() {
     // Mostrar modal de éxito
     modalMessage.value = "¡Registro enviado y guardado correctamente!";
     showModal.value = true;
+    
   } catch (err) {
     console.error("Error al enviar datos:", err);
     if (err.response) {

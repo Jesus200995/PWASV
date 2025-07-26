@@ -290,7 +290,7 @@ function logout() {
     ></div>
 
     <!-- Contenido principal -->
-    <main class="main-content">
+    <main class="main-content" :style="{ paddingTop: isLoggedIn ? '60px' : '0' }">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />

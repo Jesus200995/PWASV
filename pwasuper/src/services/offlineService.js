@@ -11,6 +11,7 @@ const ASISTENCIAS_STORE = 'asistencias_pendientes';
 class OfflineService {
   constructor() {
     this.db = null;
+    this.dbReady = null; // Promise para controlar cuando la DB está lista
     this.initDB();
   }
 
@@ -18,11 +19,17 @@ class OfflineService {
    * Inicializa la base de datos IndexedDB
    */
   async initDB() {
-    return new Promise((resolve, reject) => {
+    // Si ya hay una inicialización en progreso, esperarla
+    if (this.dbReady) {
+      return this.dbReady;
+    }
+
+    this.dbReady = new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
         console.error('❌ Error al abrir la base de datos offline');
+        this.dbReady = null; // Resetear para permitir reintento
         reject(request.error);
       };
 
@@ -59,6 +66,18 @@ class OfflineService {
         console.log('✅ Estructura de base de datos offline creada');
       };
     });
+
+    return this.dbReady;
+  }
+
+  /**
+   * Asegurar que la base de datos está lista antes de cualquier operación
+   */
+  async ensureDBReady() {
+    if (!this.db) {
+      await this.initDB();
+    }
+    return this.db;
   }
 
   /**
@@ -105,7 +124,9 @@ class OfflineService {
    */
   async guardarRegistroOffline(usuarioId, latitud, longitud, descripcion, archivo) {
     try {
-      await this.initDB();
+      console.log('💾 Iniciando guardado de registro offline...');
+      await this.ensureDBReady();
+      console.log('✅ Base de datos lista para guardar registro');
       
       // Convertir archivo a base64 si existe
       const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
@@ -122,6 +143,7 @@ class OfflineService {
         tipo: 'registro_general'
       };
 
+      console.log('🔧 Creando transacción para registro general');
       const transaction = this.db.transaction([REGISTROS_STORE], 'readwrite');
       const store = transaction.objectStore(REGISTROS_STORE);
       
@@ -149,7 +171,9 @@ class OfflineService {
    */
   async guardarAsistenciaOffline(usuarioId, tipo, latitud, longitud, descripcion, archivo) {
     try {
-      await this.initDB();
+      console.log('💾 Iniciando guardado de asistencia offline...');
+      await this.ensureDBReady();
+      console.log('✅ Base de datos lista para guardar asistencia');
       
       // Convertir archivo a base64 si existe
       const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
@@ -167,6 +191,7 @@ class OfflineService {
         fecha: new Date().toISOString().split('T')[0] // YYYY-MM-DD
       };
 
+      console.log('🔧 Creando transacción para asistencia:', tipo);
       const transaction = this.db.transaction([ASISTENCIAS_STORE], 'readwrite');
       const store = transaction.objectStore(ASISTENCIAS_STORE);
       
@@ -194,7 +219,7 @@ class OfflineService {
    */
   async obtenerRegistrosPendientes() {
     try {
-      await this.initDB();
+      await this.ensureDBReady();
       
       const transaction = this.db.transaction([REGISTROS_STORE], 'readonly');
       const store = transaction.objectStore(REGISTROS_STORE);
@@ -221,7 +246,7 @@ class OfflineService {
    */
   async obtenerAsistenciasPendientes() {
     try {
-      await this.initDB();
+      await this.ensureDBReady();
       
       const transaction = this.db.transaction([ASISTENCIAS_STORE], 'readonly');
       const store = transaction.objectStore(ASISTENCIAS_STORE);
@@ -248,7 +273,7 @@ class OfflineService {
    */
   async eliminarRegistro(id) {
     try {
-      await this.initDB();
+      await this.ensureDBReady();
       
       const transaction = this.db.transaction([REGISTROS_STORE], 'readwrite');
       const store = transaction.objectStore(REGISTROS_STORE);
@@ -276,7 +301,7 @@ class OfflineService {
    */
   async eliminarAsistencia(id) {
     try {
-      await this.initDB();
+      await this.ensureDBReady();
       
       const transaction = this.db.transaction([ASISTENCIAS_STORE], 'readwrite');
       const store = transaction.objectStore(ASISTENCIAS_STORE);
@@ -323,7 +348,7 @@ class OfflineService {
    */
   async limpiarTodo() {
     try {
-      await this.initDB();
+      await this.ensureDBReady();
       
       const transaction = this.db.transaction([REGISTROS_STORE, ASISTENCIAS_STORE], 'readwrite');
       

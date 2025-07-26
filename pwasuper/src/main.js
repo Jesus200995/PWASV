@@ -59,6 +59,23 @@ if ('serviceWorker' in navigator) {
   console.warn('⚠️ Service Worker no soportado en este navegador');
 }
 
+// Importar y verificar servicios offline
+import offlineService from './services/offlineService.js'
+
+// Verificar estado de la base de datos offline
+setTimeout(async () => {
+  try {
+    console.log('🔍 Verificando estado de la base de datos offline...');
+    const estado = await offlineService.verificarEstadoDB();
+    if (!estado) {
+      console.warn('⚠️ Base de datos offline tiene problemas, reiniciando...');
+      await offlineService.resetDatabase();
+    }
+  } catch (error) {
+    console.error('❌ Error verificando base de datos offline:', error);
+  }
+}, 2000);
+
 // Crear aplicación
 const app = createApp(App)
 

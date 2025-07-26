@@ -4,14 +4,86 @@
  */
 
 const DB_NAME = 'PWAOfflineDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Incrementar versión para forzar actualización
 const REGISTROS_STORE = 'registros_pendientes';
 const ASISTENCIAS_STORE = 'asistencias_pendientes';
 
 class OfflineService {
   constructor() {
     this.db = null;
-    this.initDB();
+    this.initializeWithRetry();
+  }
+
+  /**
+   * Inicializa la base de datos con reintentos si hay problemas
+   */
+  async initializeWithRetry() {
+    try {
+      console.log('🔄 Iniciando servicio offline...');
+      await this.initDB();
+      
+      // Verificar que todos los stores existen
+      if (this.db && !this.db.objectStoreNames.contains(ASISTENCIAS_STORE)) {
+        console.warn('⚠️ Store de asistencias no encontrado, reiniciando base de datos...');
+        await this.resetDatabase();
+      } else if (this.db) {
+        console.log('✅ Servicio offline inicializado correctamente');
+        await this.verificarEstadoDB();
+      }
+    } catch (error) {
+      console.error('❌ Error inicial, intentando resetear base de datos:', error);
+      try {
+        await this.resetDatabase();
+      } catch (resetError) {
+        console.error('❌ Error crítico al resetear base de datos:', resetError);
+      }
+    }
+  }
+
+  /**
+   * Limpia completamente la base de datos y la recrea
+   */
+  async resetDatabase() {
+    try {
+      console.log('🔄 Reiniciando base de datos completamente...');
+      
+      // Cerrar conexión existente
+      if (this.db) {
+        this.db.close();
+        this.db = null;
+      }
+      
+      // Eliminar la base de datos completamente
+      return new Promise((resolve, reject) => {
+        const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
+        
+        deleteRequest.onsuccess = async () => {
+          console.log('✅ Base de datos eliminada completamente');
+          try {
+            await this.initDB();
+            resolve(this.db);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        
+        deleteRequest.onerror = () => {
+          console.error('❌ Error eliminando base de datos:', deleteRequest.error);
+          reject(deleteRequest.error);
+        };
+        
+        deleteRequest.onblocked = () => {
+          console.warn('⚠️ Eliminación de base de datos bloqueada, intentando forzar...');
+          // Intentar de nuevo después de un breve delay
+          setTimeout(() => {
+            this.resetDatabase().then(resolve).catch(reject);
+          }, 1000);
+        };
+      });
+    } catch (error) {
+      console.error('❌ Error en resetDatabase:', error);
+      throw error;
+    }
   }
 
   /**
@@ -44,10 +116,16 @@ class OfflineService {
       };
 
       request.onupgradeneeded = (event) => {
+        console.log('🔧 Actualizando estructura de base de datos...');
         const db = event.target.result;
+        const oldVersion = event.oldVersion;
+        const newVersion = event.newVersion;
+        
+        console.log(`📊 Upgrade desde versión ${oldVersion} a ${newVersion}`);
 
         // Store para registros generales
         if (!db.objectStoreNames.contains(REGISTROS_STORE)) {
+          console.log(`📦 Creando store: ${REGISTROS_STORE}`);
           const registrosStore = db.createObjectStore(REGISTROS_STORE, {
             keyPath: 'id',
             autoIncrement: true
@@ -56,20 +134,50 @@ class OfflineService {
           registrosStore.createIndex('usuario_id', 'usuario_id', { unique: false });
         }
 
-        // Store para asistencias (entrada/salida)
-        if (!db.objectStoreNames.contains(ASISTENCIAS_STORE)) {
-          const asistenciasStore = db.createObjectStore(ASISTENCIAS_STORE, {
-            keyPath: 'id',
-            autoIncrement: true
-          });
-          asistenciasStore.createIndex('timestamp', 'timestamp', { unique: false });
-          asistenciasStore.createIndex('usuario_id', 'usuario_id', { unique: false });
-          asistenciasStore.createIndex('tipo', 'tipo', { unique: false }); // 'entrada' o 'salida'
+        // Store para asistencias (entrada/salida) - FORZAR RECREACIÓN
+        if (db.objectStoreNames.contains(ASISTENCIAS_STORE)) {
+          console.log(`🗑️ Eliminando store existente: ${ASISTENCIAS_STORE}`);
+          db.deleteObjectStore(ASISTENCIAS_STORE);
         }
+        
+        console.log(`📦 Creando store: ${ASISTENCIAS_STORE}`);
+        const asistenciasStore = db.createObjectStore(ASISTENCIAS_STORE, {
+          keyPath: 'id',
+          autoIncrement: true
+        });
+        asistenciasStore.createIndex('timestamp', 'timestamp', { unique: false });
+        asistenciasStore.createIndex('usuario_id', 'usuario_id', { unique: false });
+        asistenciasStore.createIndex('tipo', 'tipo', { unique: false }); // 'entrada' o 'salida'
 
-        console.log('✅ Estructura de base de datos offline creada');
+        console.log('✅ Estructura de base de datos offline creada/actualizada');
       };
     });
+  }
+
+  /**
+   * Verifica el estado de la base de datos
+   */
+  async verificarEstadoDB() {
+    try {
+      if (!this.db) {
+        console.warn('⚠️ Base de datos no inicializada');
+        return false;
+      }
+      
+      const stores = Array.from(this.db.objectStoreNames);
+      console.log(`📊 Stores disponibles:`, stores);
+      
+      const tieneRegistros = stores.includes(REGISTROS_STORE);
+      const tieneAsistencias = stores.includes(ASISTENCIAS_STORE);
+      
+      console.log(`✅ Store registros: ${tieneRegistros ? 'OK' : 'FALTA'}`);
+      console.log(`✅ Store asistencias: ${tieneAsistencias ? 'OK' : 'FALTA'}`);
+      
+      return tieneRegistros && tieneAsistencias;
+    } catch (error) {
+      console.error('❌ Error verificando estado DB:', error);
+      return false;
+    }
   }
 
   /**
@@ -174,8 +282,12 @@ class OfflineService {
       
       // Verificar que el store existe
       if (!this.db.objectStoreNames.contains(ASISTENCIAS_STORE)) {
-        console.error(`❌ Store ${ASISTENCIAS_STORE} no existe`);
-        throw new Error(`Store ${ASISTENCIAS_STORE} no existe en la base de datos`);
+        console.error(`❌ Store ${ASISTENCIAS_STORE} no existe, reiniciando base de datos...`);
+        await this.resetDatabase();
+        
+        if (!this.db || !this.db.objectStoreNames.contains(ASISTENCIAS_STORE)) {
+          throw new Error(`Store ${ASISTENCIAS_STORE} no se pudo crear correctamente`);
+        }
       }
       
       console.log('✅ Base de datos verificada, procediendo a guardar asistencia');
@@ -396,5 +508,15 @@ class OfflineService {
 
 // Crear instancia singleton
 const offlineService = new OfflineService();
+
+// Exponer globalmente para debugging
+if (typeof window !== 'undefined') {
+  window.offlineService = offlineService;
+  window.debugOffline = {
+    resetDB: () => offlineService.resetDatabase(),
+    checkDB: () => offlineService.verificarEstadoDB(),
+    forceInit: () => offlineService.initializeWithRetry()
+  };
+}
 
 export default offlineService;

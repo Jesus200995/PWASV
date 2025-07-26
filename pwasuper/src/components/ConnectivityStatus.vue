@@ -3,7 +3,7 @@
   <teleport to="body">
     <!-- Overlay para modal cuando hay pendientes -->
     <div 
-      v-if="showModal && pendientes.total > 0" 
+      v-if="props.show && showModal && pendientes.total > 0" 
       class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
       @click="closeModal"
     >
@@ -123,7 +123,7 @@
 
     <!-- Notificación flotante simple para casos mínimos -->
     <div 
-      v-if="!showBanner && !isOnline && !bannerDismissed" 
+      v-if="props.show && !showBanner && !isOnline && !bannerDismissed" 
       class="fixed bottom-4 right-4 z-50 bg-red-500 text-white p-3 rounded-lg shadow-lg flex items-center max-w-sm"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -141,6 +141,14 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import syncService from '../services/syncService.js';
 import { checkInternetConnection } from '../utils/network.js';
+
+// Props para controlar la visibilidad
+const props = defineProps({
+  show: {
+    type: Boolean,
+    default: true
+  }
+});
 
 // Estado reactivo
 const isOnline = ref(true);
@@ -161,10 +169,10 @@ const timeAgoText = computed(() => {
   return `${Math.floor(timeAgo / 3600)}h`;
 });
 
-// Control de visualización - Siempre mostrar banner con estado de red
+// Control de visualización - Solo mostrar si la prop show es true
 const showBanner = computed(() => {
-  // Siempre mostrar el banner para ver el estado de conectividad en tiempo real
-  return true;
+  // Solo mostrar el banner si la prop show es true
+  return props.show;
 });
 
 // Métodos para obtener clases CSS

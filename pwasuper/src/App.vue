@@ -193,7 +193,7 @@ function logout() {
     </transition>
 
     <!-- Indicador de estado de conexión -->
-    <ConnectivityStatus />
+    <ConnectivityStatus :show="route.name === 'Home' && !showMobileMenu" />
 
     <!-- Header móvil con menú hamburguesa -->
     <header v-if="isLoggedIn" class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">

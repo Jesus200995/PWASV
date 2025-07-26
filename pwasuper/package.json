@@ -11,6 +11,7 @@
   "dependencies": {
     "@vueuse/core": "^13.3.0",
     "axios": "^1.9.0",
+    "idb": "^8.0.3",
     "idb-keyval": "^6.2.2",
     "leaflet": "^1.9.4",
     "vue": "^3.5.13",

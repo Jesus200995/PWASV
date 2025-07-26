@@ -2,6 +2,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConnectivityStatus from './components/ConnectivityStatus.vue';
+import { useOfflineSync } from './composables/useOfflineSync.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -9,6 +10,9 @@ const isLoggingOut = ref(false);
 const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
+
+// Composable para manejo offline y sincronización global
+const offlineSync = useOfflineSync();
 
 // Watcher para detectar cambios de ruta y actualizar el estado
 watch(() => route.path, () => {
@@ -193,7 +197,14 @@ function logout() {
     </transition>
 
     <!-- Indicador de estado de conexión -->
-    <ConnectivityStatus />
+    <ConnectivityStatus 
+      :is-online="offlineSync.isOnline.value"
+      :is-syncing="offlineSync.isSyncing.value"
+      :sync-progress="offlineSync.syncProgress.value"
+      :pending-records="offlineSync.pendingRecords.value"
+      :sync-message="offlineSync.syncMessage.value"
+      @force-sync="offlineSync.forceSyncronization"
+    />
 
     <!-- Header móvil con menú hamburguesa -->
     <header v-if="isLoggedIn" class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">

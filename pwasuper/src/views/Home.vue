@@ -1,4 +1,15 @@
 <template>
+  <!-- Componente de estado offline y sincronización -->
+  <OfflineSyncStatus
+    :is-online="offlineSync.isOnline.value"
+    :is-syncing="offlineSync.isSyncing.value"
+    :sync-progress="offlineSync.syncProgress.value"
+    :pending-records="offlineSync.pendingRecords.value"
+    :sync-message="offlineSync.syncMessage.value"
+    @force-sync="offlineSync.forceSyncronization"
+    @clear-records="offlineSync.clearOfflineRecords"
+  />
+
   <div class="page-container py-4">
     <!-- Sistema de Asistencia Integrado -->
     <div class="card mb-6">
@@ -471,7 +482,9 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 import Modal from '../components/Modal.vue';
+import OfflineSyncStatus from '../components/OfflineSyncStatus.vue';
 import asistenciasService from '../services/asistenciasService.js';
+import { useOfflineSync } from '../composables/useOfflineSync.js';
 
 // Referencias y estado para asistencia
 const modoAsistencia = ref(false);
@@ -510,6 +523,9 @@ const router = useRouter();
 const isOnline = ref(true);
 const showModal = ref(false);
 const modalMessage = ref('');
+
+// Composable para manejo offline y sincronización
+const offlineSync = useOfflineSync();
 
 // Obtener información del usuario del localStorage
 const user = computed(() => {
@@ -571,13 +587,6 @@ async function confirmarAsistencia() {
   error.value = null;
   
   try {
-    // Verificar conexión a internet antes de enviar
-    isOnline.value = await checkInternetConnection();
-    if (!isOnline.value) {
-      error.value = getOfflineMessage();
-      return;
-    }
-
     // Crear FormData para enviar al servidor
     const formData = new FormData();
     formData.append("usuario_id", user.value.id.toString());
@@ -586,45 +595,70 @@ async function confirmarAsistencia() {
     formData.append("descripcion", descripcion.value);
     formData.append("foto", archivoFoto.value);
 
-    // Determinar endpoint según tipo de asistencia y usar el servicio
+    // Opciones para manejo offline
+    const offlineOptions = {
+      usuarioId: user.value.id,
+      offlineCallback: tipoAsistencia.value === 'entrada' ? 
+        offlineSync.saveEntradaOffline : 
+        offlineSync.saveSalidaOffline
+    };
+
+    // Determinar endpoint según tipo de asistencia y usar el servicio con soporte offline
     let response;
     if (tipoAsistencia.value === 'entrada') {
-      response = await asistenciasService.registrarEntrada(formData);
+      response = await asistenciasService.registrarEntrada(formData, offlineOptions);
     } else {
-      response = await asistenciasService.registrarSalida(formData);
+      response = await asistenciasService.registrarSalida(formData, offlineOptions);
     }
 
-    // Procesar respuesta exitosa
+    // Verificar si la respuesta es de un guardado offline
+    if (response.success === true && response.message && response.message.includes('automáticamente')) {
+      // Es un guardado offline
+      mensajeAsistencia.value = response.message;
+      modalMessage.value = `${tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida'} guardada offline. Se enviará automáticamente cuando recuperes conexión.`;
+      showModal.value = true;
+      
+      // Salir del modo asistencia
+      modoAsistencia.value = false;
+      tipoAsistencia.value = '';
+      limpiarDatosAsistencia();
+      
+      return;
+    }
+
+    // Procesar respuesta exitosa del servidor
+    const responseData = response.data || response;
+    
     if (tipoAsistencia.value === 'entrada') {
       entradaMarcada.value = true;
       datosEntrada.value = {
-        hora: new Date(response.hora_entrada).toLocaleTimeString('es-MX', {
+        hora: new Date(responseData.hora_entrada).toLocaleTimeString('es-MX', {
           hour: '2-digit',
           minute: '2-digit',
           timeZone: 'America/Mexico_City'
         }),
-        descripcion: response.descripcion,
-        latitud: response.latitud,
-        longitud: response.longitud,
-        foto_url: response.foto_url
+        descripcion: responseData.descripcion,
+        latitud: responseData.latitud,
+        longitud: responseData.longitud,
+        foto_url: responseData.foto_url
       };
     } else {
       salidaMarcada.value = true;
       datosSalida.value = {
-        hora: new Date(response.hora_salida).toLocaleTimeString('es-MX', {
+        hora: new Date(responseData.hora_salida).toLocaleTimeString('es-MX', {
           hour: '2-digit',
           minute: '2-digit',
           timeZone: 'America/Mexico_City'
         }),
-        descripcion: response.descripcion,
-        latitud: response.latitud,
-        longitud: response.longitud,
-        foto_url: response.foto_url
+        descripcion: responseData.descripcion,
+        latitud: responseData.latitud,
+        longitud: responseData.longitud,
+        foto_url: responseData.foto_url
       };
     }
 
     // Mostrar mensaje de éxito
-    mensajeAsistencia.value = response.mensaje;
+    mensajeAsistencia.value = response.message || responseData.mensaje || 'Registro enviado correctamente';
     modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida'} registrada exitosamente!`;
     showModal.value = true;
     

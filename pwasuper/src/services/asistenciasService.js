@@ -1,9 +1,10 @@
 // Servicio para el manejo de asistencias en la app PWA
 import { API_URL } from '../utils/network.js';
+import { checkInternetConnection } from '../utils/network.js';
 import axios from 'axios';
 
 /**
- * Servicio para gestionar asistencias
+ * Servicio para gestionar asistencias con soporte offline
  */
 class AsistenciasService {
   /**
@@ -83,25 +84,39 @@ class AsistenciasService {
   }
 
   /**
-   * Registra la entrada de un usuario
+   * Registra la entrada de un usuario con soporte offline
    * @param {Object} datos - Datos de la entrada (usuario_id, latitud, longitud, etc.)
-   * @returns {Promise<Object>} Respuesta del servidor
+   * @param {Object} options - Opciones adicionales { offlineCallback, usuarioId }
+   * @returns {Promise<Object>} Respuesta del servidor o confirmación offline
    */
-  async registrarEntrada(datos) {
+  async registrarEntrada(datos, options = {}) {
     try {
-      console.log('📝 Registrando entrada para usuario:', datos.usuario_id);
+      // Verificar conectividad antes de intentar el registro
+      const isConnected = await checkInternetConnection();
+      
+      if (!isConnected) {
+        // Si no hay conexión y se proporciona callback offline, usarlo
+        if (options.offlineCallback && options.usuarioId) {
+          console.log('� Sin conexión - guardando entrada offline');
+          return await options.offlineCallback(datos, options.usuarioId);
+        } else {
+          throw new Error('Sin conexión a internet. La entrada no se pudo registrar.');
+        }
+      }
+
+      console.log('�📝 Registrando entrada para usuario:', datos.get ? datos.get('usuario_id') : datos.usuario_id);
       
       // Agregar la fecha actual a la solicitud
       const formData = new FormData();
       // Copiar todos los campos del FormData original
-      for (const [key, value] of Object.entries(datos)) {
-        if (datos instanceof FormData) {
-          // Si es un FormData, iteramos sus entradas
-          for (const [key, value] of datos.entries()) {
-            formData.append(key, value);
-          }
-        } else {
-          // Si es un objeto normal
+      if (datos instanceof FormData) {
+        // Si es un FormData, iteramos sus entradas
+        for (const [key, value] of datos.entries()) {
+          formData.append(key, value);
+        }
+      } else {
+        // Si es un objeto normal
+        for (const [key, value] of Object.entries(datos)) {
           formData.append(key, value);
         }
       }
@@ -112,8 +127,7 @@ class AsistenciasService {
         formData.append('fecha', today);
       }
       
-      const response = await axios.post(`${API_URL}/asistencia/entrada`, 
-        datos instanceof FormData ? datos : formData, {
+      const response = await axios.post(`${API_URL}/asistencia/entrada`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -123,33 +137,58 @@ class AsistenciasService {
       });
       
       console.log('✅ Entrada registrada:', response.data);
-      return response.data;
+      return {
+        success: true,
+        data: response.data,
+        message: 'Entrada registrada correctamente'
+      };
     } catch (error) {
       console.error('❌ Error al registrar entrada:', error);
+      
+      // Si es un error de conectividad y tenemos callback offline, intentar offline
+      if (this._isConnectionError(error) && options.offlineCallback && options.usuarioId) {
+        console.log('📵 Error de conexión - guardando entrada offline');
+        return await options.offlineCallback(datos, options.usuarioId);
+      }
+      
       throw this._procesarError(error);
     }
   }
 
   /**
-   * Registra la salida de un usuario
+   * Registra la salida de un usuario con soporte offline
    * @param {Object} datos - Datos de la salida (usuario_id, latitud, longitud, etc.)
-   * @returns {Promise<Object>} Respuesta del servidor
+   * @param {Object} options - Opciones adicionales { offlineCallback, usuarioId }
+   * @returns {Promise<Object>} Respuesta del servidor o confirmación offline
    */
-  async registrarSalida(datos) {
+  async registrarSalida(datos, options = {}) {
     try {
-      console.log('📝 Registrando salida para usuario:', datos.usuario_id);
+      // Verificar conectividad antes de intentar el registro
+      const isConnected = await checkInternetConnection();
+      
+      if (!isConnected) {
+        // Si no hay conexión y se proporciona callback offline, usarlo
+        if (options.offlineCallback && options.usuarioId) {
+          console.log('� Sin conexión - guardando salida offline');
+          return await options.offlineCallback(datos, options.usuarioId);
+        } else {
+          throw new Error('Sin conexión a internet. La salida no se pudo registrar.');
+        }
+      }
+
+      console.log('�📝 Registrando salida para usuario:', datos.get ? datos.get('usuario_id') : datos.usuario_id);
       
       // Agregar la fecha actual a la solicitud
       const formData = new FormData();
       // Copiar todos los campos del FormData original
-      for (const [key, value] of Object.entries(datos)) {
-        if (datos instanceof FormData) {
-          // Si es un FormData, iteramos sus entradas
-          for (const [key, value] of datos.entries()) {
-            formData.append(key, value);
-          }
-        } else {
-          // Si es un objeto normal
+      if (datos instanceof FormData) {
+        // Si es un FormData, iteramos sus entradas
+        for (const [key, value] of datos.entries()) {
+          formData.append(key, value);
+        }
+      } else {
+        // Si es un objeto normal
+        for (const [key, value] of Object.entries(datos)) {
           formData.append(key, value);
         }
       }
@@ -160,8 +199,7 @@ class AsistenciasService {
         formData.append('fecha', today);
       }
       
-      const response = await axios.post(`${API_URL}/asistencia/salida`, 
-        datos instanceof FormData ? datos : formData, {
+      const response = await axios.post(`${API_URL}/asistencia/salida`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -171,11 +209,37 @@ class AsistenciasService {
       });
       
       console.log('✅ Salida registrada:', response.data);
-      return response.data;
+      return {
+        success: true,
+        data: response.data,
+        message: 'Salida registrada correctamente'
+      };
     } catch (error) {
       console.error('❌ Error al registrar salida:', error);
+      
+      // Si es un error de conectividad y tenemos callback offline, intentar offline
+      if (this._isConnectionError(error) && options.offlineCallback && options.usuarioId) {
+        console.log('📵 Error de conexión - guardando salida offline');
+        return await options.offlineCallback(datos, options.usuarioId);
+      }
+      
       throw this._procesarError(error);
     }
+  }
+
+  /**
+   * Verifica si un error es de conectividad
+   * @private
+   * @param {Error} error - Error a verificar
+   * @returns {boolean} True si es error de conectividad
+   */
+  _isConnectionError(error) {
+    return error.code === 'ECONNABORTED' || 
+           error.code === 'NETWORK_ERROR' || 
+           error.code === 'ERR_NETWORK' ||
+           (error.request && !error.response) ||
+           error.message.includes('Network Error') ||
+           error.message.includes('timeout');
   }
 
   /**
@@ -186,7 +250,7 @@ class AsistenciasService {
    */
   _procesarError(error) {
     // Si es un error de conexión
-    if (error.request && !error.response) {
+    if (this._isConnectionError(error)) {
       return new Error('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
     }
     

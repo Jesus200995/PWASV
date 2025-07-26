@@ -199,13 +199,23 @@ class SyncService {
       // Crear FormData para el envío
       const formData = new FormData();
       formData.append('usuario_id', registro.usuario_id.toString());
-      formData.append('latitud', registro.latitud);
-      formData.append('longitud', registro.longitud);
+      formData.append('latitud', registro.latitud.toString());
+      formData.append('longitud', registro.longitud.toString());
       formData.append('descripcion', registro.descripcion || '');
       
-      // Usar el timestamp original (hora de creación offline) no el de sincronización
-      formData.append('timestamp_offline', registro.timestamp);
-      console.log('📤 Enviando timestamp_offline:', registro.timestamp);
+      // VERIFICAR que el timestamp se esté enviando correctamente
+      if (registro.timestamp) {
+        formData.append('timestamp_offline', registro.timestamp);
+        console.log('📤 ✅ ENVIANDO timestamp_offline:', registro.timestamp);
+      } else {
+        console.log('❌ NO HAY timestamp en el registro:', registro);
+      }
+      
+      // Log de todos los campos del FormData
+      console.log('📋 Campos del FormData:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`   ${key}: ${value}`);
+      }
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (registro.foto_base64) {
@@ -217,10 +227,12 @@ class SyncService {
         
         if (archivo) {
           formData.append('foto', archivo);
+          console.log('📷 Foto agregada al FormData:', archivo.name);
         }
       }
       
       // Enviar al endpoint de registros
+      console.log('🚀 Enviando al servidor...');
       const response = await axios.post(`${API_URL}/registro`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -262,13 +274,23 @@ class SyncService {
       // Crear FormData para el envío
       const formData = new FormData();
       formData.append('usuario_id', asistencia.usuario_id.toString());
-      formData.append('latitud', asistencia.latitud);
-      formData.append('longitud', asistencia.longitud);
+      formData.append('latitud', asistencia.latitud.toString());
+      formData.append('longitud', asistencia.longitud.toString());
       formData.append('descripcion', asistencia.descripcion || '');
       
-      // Usar el timestamp original (hora de creación offline) no el de sincronización
-      formData.append('timestamp_offline', asistencia.timestamp);
-      console.log(`📤 Enviando timestamp_offline para ${asistencia.tipo}:`, asistencia.timestamp);
+      // VERIFICAR que el timestamp se esté enviando correctamente
+      if (asistencia.timestamp) {
+        formData.append('timestamp_offline', asistencia.timestamp);
+        console.log(`📤 ✅ ENVIANDO timestamp_offline para ${asistencia.tipo}:`, asistencia.timestamp);
+      } else {
+        console.log(`❌ NO HAY timestamp en la asistencia ${asistencia.tipo}:`, asistencia);
+      }
+      
+      // Log de todos los campos del FormData
+      console.log(`📋 Campos del FormData para ${asistencia.tipo}:`);
+      for (let [key, value] of formData.entries()) {
+        console.log(`   ${key}: ${value}`);
+      }
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (asistencia.foto_base64) {
@@ -280,11 +302,13 @@ class SyncService {
         
         if (archivo) {
           formData.append('foto', archivo);
+          console.log(`📷 Foto agregada al FormData para ${asistencia.tipo}:`, archivo.name);
         }
       }
       
       // Enviar según el tipo de asistencia
       let response;
+      console.log(`🚀 Enviando ${asistencia.tipo} al servidor...`);
       if (asistencia.tipo === 'entrada') {
         response = await asistenciasService.registrarEntrada(formData);
       } else if (asistencia.tipo === 'salida') {

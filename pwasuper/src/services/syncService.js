@@ -190,34 +190,31 @@ class SyncService {
    */
   async enviarRegistro(registro) {
     try {
-      console.log('📤 Enviando registro offline:', registro.id);
-      console.log('🕐 Timestamp original:', registro.timestamp);
+      console.log('📤 ============ INICIANDO ENVÍO DE REGISTRO ============');
+      console.log('📤 Registro ID:', registro.id);
+      console.log('🕐 Timestamp original del registro:', registro.timestamp);
       
       // Actualizar el timestamp de sincronización antes de enviar
       await offlineService.actualizarTimestampSincronizacion(registro.id, 'registro');
       
       // Crear FormData para el envío
       const formData = new FormData();
-      formData.append('usuario_id', registro.usuario_id.toString());
-      formData.append('latitud', registro.latitud.toString());
-      formData.append('longitud', registro.longitud.toString());
-      formData.append('descripcion', registro.descripcion || '');
       
-      // VERIFICAR que el timestamp se esté enviando correctamente
+      // CAMPOS BÁSICOS
+      formData.append('usuario_id', String(registro.usuario_id));
+      formData.append('latitud', String(registro.latitud));
+      formData.append('longitud', String(registro.longitud));
+      formData.append('descripcion', String(registro.descripcion || ''));
+      
+      // CAMPO CRÍTICO - TIMESTAMP OFFLINE
       if (registro.timestamp) {
-        formData.append('timestamp_offline', registro.timestamp);
-        console.log('📤 ✅ ENVIANDO timestamp_offline:', registro.timestamp);
+        formData.append('timestamp_offline', String(registro.timestamp));
+        console.log('📤 ✅ ✅ ✅ AGREGANDO timestamp_offline al FormData:', registro.timestamp);
       } else {
-        console.log('❌ NO HAY timestamp en el registro:', registro);
+        console.log('❌❌❌ NO HAY timestamp en el registro:', registro);
       }
       
-      // Log de todos los campos del FormData
-      console.log('📋 Campos del FormData:');
-      for (let [key, value] of formData.entries()) {
-        console.log(`   ${key}: ${value}`);
-      }
-      
-      // Convertir foto base64 de vuelta a archivo si existe
+      // FOTO
       if (registro.foto_base64) {
         const archivo = offlineService.base64ToFile(
           registro.foto_base64,
@@ -231,18 +228,31 @@ class SyncService {
         }
       }
       
-      // Enviar al endpoint de registros
-      console.log('🚀 Enviando al servidor...');
+      // VERIFICAR CONTENIDO DEL FORMDATA
+      console.log('📋 ============ CONTENIDO COMPLETO DEL FORMDATA ============');
+      for (let [key, value] of formData.entries()) {
+        if (key === 'foto') {
+          console.log(`   ${key}: [File object] ${value.name}`);
+        } else {
+          console.log(`   ${key}: "${value}" (tipo: ${typeof value})`);
+        }
+      }
+      console.log('📋 ============ FIN CONTENIDO FORMDATA ============');
+      
+      // ENVIAR AL SERVIDOR
+      console.log('🚀 Enviando POST a /registro...');
       const response = await axios.post(`${API_URL}/registro`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 30000, // 30 segundos de timeout
+        timeout: 30000,
         maxContentLength: Infinity,
         maxBodyLength: Infinity
       });
       
+      console.log('✅ ============ RESPUESTA DEL SERVIDOR ============');
       console.log('✅ Registro enviado exitosamente:', response.data);
+      console.log('✅ ============ FIN RESPUESTA ============');
       return response.data;
       
     } catch (error) {

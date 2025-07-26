@@ -178,25 +178,40 @@ async def registrar(
     foto: UploadFile = File(...),
     timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
 ):
-    # Guardar la foto en disco
-    ext = os.path.splitext(foto.filename)[1]
-    nombre_archivo = f"{usuario_id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}{ext}"
-    ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
-    with open(ruta_archivo, "wb") as f:
-        contenido = await foto.read()
-        f.write(contenido)
-
+    print(f"🔍 REGISTRO - Datos recibidos:")
+    print(f"   usuario_id: {usuario_id}")
+    print(f"   latitud: {latitud}")
+    print(f"   longitud: {longitud}")
+    print(f"   descripcion: {descripcion}")
+    print(f"   foto: {foto.filename}")
+    print(f"   timestamp_offline: {timestamp_offline}")
+    
     # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
     if timestamp_offline:
         try:
             # Convertir string ISO a datetime
             fecha_hora = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
-            print(f"📅 Usando timestamp offline: {fecha_hora}")
+            print(f"📅 ✅ Usando timestamp offline: {fecha_hora}")
+            # Usar el timestamp offline también para el nombre del archivo
+            timestamp_for_filename = fecha_hora.strftime('%Y%m%d%H%M%S')
         except Exception as e:
             print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
             fecha_hora = datetime.utcnow()
+            timestamp_for_filename = fecha_hora.strftime('%Y%m%d%H%M%S')
     else:
         fecha_hora = datetime.utcnow()
+        timestamp_for_filename = fecha_hora.strftime('%Y%m%d%H%M%S')
+        print(f"📅 ⏰ Usando timestamp actual: {fecha_hora}")
+
+    # Guardar la foto en disco usando el timestamp correcto
+    ext = os.path.splitext(foto.filename)[1]
+    nombre_archivo = f"{usuario_id}_{timestamp_for_filename}{ext}"
+    ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
+    print(f"📁 Guardando foto como: {nombre_archivo}")
+    
+    with open(ruta_archivo, "wb") as f:
+        contenido = await foto.read()
+        f.write(contenido)
 
     # Guardar registro en la base
     cursor.execute(
@@ -204,6 +219,7 @@ async def registrar(
         (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora)
     )
     conn.commit()
+    print(f"✅ Registro guardado en BD con fecha_hora: {fecha_hora}")
 
     return {"status": "ok", "foto_url": ruta_archivo}
 
@@ -529,15 +545,19 @@ async def marcar_entrada(
                 hora_entrada = fecha_hora_utc.astimezone(CDMX_TZ)
                 fecha = hora_entrada.date()
                 print(f"📅 Usando timestamp offline: {hora_entrada}")
+                # Usar el timestamp offline también para el nombre del archivo
+                timestamp_for_filename = hora_entrada.strftime('%Y%m%d%H%M%S')
             except Exception as e:
                 print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
                 now = datetime.now(CDMX_TZ)
                 fecha = now.date()
                 hora_entrada = now
+                timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
         else:
             now = datetime.now(CDMX_TZ)
             fecha = now.date()
             hora_entrada = now
+            timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
 
         # Revisa si ya existe asistencia para hoy para este usuario específico
         cursor.execute(
@@ -555,9 +575,9 @@ async def marcar_entrada(
                 detail=f"El usuario {usuario_id} ya tiene registro de entrada para el día {fecha}"
             )
 
-        # Guardar la foto en disco
+        # Guardar la foto en disco usando el timestamp correcto
         ext = os.path.splitext(foto.filename)[1]
-        nombre_archivo = f"entrada_{usuario_id}_{datetime.now(CDMX_TZ).strftime('%Y%m%d%H%M%S')}{ext}"
+        nombre_archivo = f"entrada_{usuario_id}_{timestamp_for_filename}{ext}"
         ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
         
         with open(ruta_archivo, "wb") as f:
@@ -622,15 +642,19 @@ async def marcar_salida(
                 hora_salida = fecha_hora_utc.astimezone(CDMX_TZ)
                 fecha = hora_salida.date()
                 print(f"📅 Usando timestamp offline para salida: {hora_salida}")
+                # Usar el timestamp offline también para el nombre del archivo
+                timestamp_for_filename = hora_salida.strftime('%Y%m%d%H%M%S')
             except Exception as e:
                 print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
                 now = datetime.now(CDMX_TZ)
                 fecha = now.date()
                 hora_salida = now
+                timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
         else:
             now = datetime.now(CDMX_TZ)
             fecha = now.date()
             hora_salida = now
+            timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
 
         # Busca el registro de asistencia de hoy para este usuario específico
         cursor.execute(
@@ -653,9 +677,9 @@ async def marcar_salida(
                 detail=f"El usuario {usuario_id} ya registró la salida para el día {fecha}"
             )
 
-        # Guardar la foto en disco
+        # Guardar la foto en disco usando el timestamp correcto
         ext = os.path.splitext(foto.filename)[1]
-        nombre_archivo = f"salida_{usuario_id}_{datetime.now(CDMX_TZ).strftime('%Y%m%d%H%M%S')}{ext}"
+        nombre_archivo = f"salida_{usuario_id}_{timestamp_for_filename}{ext}"
         ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
         
         with open(ruta_archivo, "wb") as f:

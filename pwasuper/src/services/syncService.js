@@ -191,6 +191,7 @@ class SyncService {
   async enviarRegistro(registro) {
     try {
       console.log('📤 Enviando registro offline:', registro.id);
+      console.log('🕐 Timestamp original:', registro.timestamp);
       
       // Actualizar el timestamp de sincronización antes de enviar
       await offlineService.actualizarTimestampSincronizacion(registro.id, 'registro');
@@ -204,6 +205,7 @@ class SyncService {
       
       // Usar el timestamp original (hora de creación offline) no el de sincronización
       formData.append('timestamp_offline', registro.timestamp);
+      console.log('📤 Enviando timestamp_offline:', registro.timestamp);
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (registro.foto_base64) {
@@ -252,6 +254,7 @@ class SyncService {
   async enviarAsistencia(asistencia) {
     try {
       console.log(`📤 Enviando asistencia ${asistencia.tipo} offline:`, asistencia.id);
+      console.log('🕐 Timestamp original:', asistencia.timestamp);
       
       // Actualizar el timestamp de sincronización antes de enviar
       await offlineService.actualizarTimestampSincronizacion(asistencia.id, 'asistencia');
@@ -265,6 +268,7 @@ class SyncService {
       
       // Usar el timestamp original (hora de creación offline) no el de sincronización
       formData.append('timestamp_offline', asistencia.timestamp);
+      console.log(`📤 Enviando timestamp_offline para ${asistencia.tipo}:`, asistencia.timestamp);
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (asistencia.foto_base64) {

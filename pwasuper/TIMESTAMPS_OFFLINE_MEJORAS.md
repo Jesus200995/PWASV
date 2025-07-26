@@ -98,3 +98,38 @@ console.log(resumen);
 ```
 
 Esto mostrará todos los registros pendientes con sus timestamps para facilitar el debugging.
+
+## Script de Prueba
+
+Se incluye un script de prueba completo en `src/test-offline-timestamps.js` que puedes cargar en la consola del navegador para verificar el funcionamiento:
+
+```javascript
+// En la consola del navegador, después de cargar la aplicación:
+
+// Probar registro offline completo
+await debugOffline.probarRegistro();
+
+// Probar asistencia offline completa
+await debugOffline.probarAsistencia();
+
+// Ver datos pendientes
+await debugOffline.verPendientes();
+
+// Sincronizar manualmente
+await debugOffline.sincronizar();
+
+// Limpiar datos offline (solo para testing)
+await debugOffline.limpiarTodo();
+```
+
+## Verificación de Funcionamiento
+
+Para verificar que los timestamps se manejan correctamente:
+
+1. **Crear registro offline**: La consola debe mostrar el timestamp de creación
+2. **Sincronizar**: La consola debe mostrar:
+   - `📤 Enviando timestamp_offline: [timestamp original]`
+   - En el backend: `📅 ✅ Usando timestamp offline: [timestamp convertido]`
+3. **Verificar en BD**: El registro debe tener la fecha/hora original, no la de sincronización
+
+Los logs adicionales permiten rastrear exactamente cómo se procesan los timestamps en cada paso del flujo.

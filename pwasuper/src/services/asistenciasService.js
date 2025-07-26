@@ -84,36 +84,14 @@ class AsistenciasService {
 
   /**
    * Registra la entrada de un usuario
-   * @param {Object} datos - Datos de la entrada (usuario_id, latitud, longitud, etc.)
+   * @param {FormData} formData - FormData con los datos de la entrada
    * @returns {Promise<Object>} Respuesta del servidor
    */
-  async registrarEntrada(datos) {
+  async registrarEntrada(formData) {
     try {
-      console.log('📝 Registrando entrada para usuario:', datos.usuario_id);
+      console.log('📝 Registrando entrada...');
       
-      // Agregar la fecha actual a la solicitud
-      const formData = new FormData();
-      // Copiar todos los campos del FormData original
-      for (const [key, value] of Object.entries(datos)) {
-        if (datos instanceof FormData) {
-          // Si es un FormData, iteramos sus entradas
-          for (const [key, value] of datos.entries()) {
-            formData.append(key, value);
-          }
-        } else {
-          // Si es un objeto normal
-          formData.append(key, value);
-        }
-      }
-      
-      // Añadir fecha actual si no está presente (en formato YYYY-MM-DD)
-      if (!formData.has('fecha')) {
-        const today = new Date().toISOString().split('T')[0];
-        formData.append('fecha', today);
-      }
-      
-      const response = await axios.post(`${API_URL}/asistencia/entrada`, 
-        datos instanceof FormData ? datos : formData, {
+      const response = await axios.post(`${API_URL}/asistencia/entrada`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -132,36 +110,14 @@ class AsistenciasService {
 
   /**
    * Registra la salida de un usuario
-   * @param {Object} datos - Datos de la salida (usuario_id, latitud, longitud, etc.)
+   * @param {FormData} formData - FormData con los datos de la salida
    * @returns {Promise<Object>} Respuesta del servidor
    */
-  async registrarSalida(datos) {
+  async registrarSalida(formData) {
     try {
-      console.log('📝 Registrando salida para usuario:', datos.usuario_id);
+      console.log('📝 Registrando salida...');
       
-      // Agregar la fecha actual a la solicitud
-      const formData = new FormData();
-      // Copiar todos los campos del FormData original
-      for (const [key, value] of Object.entries(datos)) {
-        if (datos instanceof FormData) {
-          // Si es un FormData, iteramos sus entradas
-          for (const [key, value] of datos.entries()) {
-            formData.append(key, value);
-          }
-        } else {
-          // Si es un objeto normal
-          formData.append(key, value);
-        }
-      }
-      
-      // Añadir fecha actual si no está presente (en formato YYYY-MM-DD)
-      if (!formData.has('fecha')) {
-        const today = new Date().toISOString().split('T')[0];
-        formData.append('fecha', today);
-      }
-      
-      const response = await axios.post(`${API_URL}/asistencia/salida`, 
-        datos instanceof FormData ? datos : formData, {
+      const response = await axios.post(`${API_URL}/asistencia/salida`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

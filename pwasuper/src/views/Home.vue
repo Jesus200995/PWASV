@@ -152,7 +152,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          {{ obteniendoUbicacion ? 'Obteniendo ubicación...' : 'Obtener ubicación actual' }}
+          {{ obteniendoUbicacion ? 'Obteniendo ubicación...' : 'Obtener ubicación (funciona offline)' }}
         </button>
 
         <!-- Coordenadas -->
@@ -256,6 +256,25 @@
 
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
     <div v-if="!modoAsistencia" class="card mb-4">
+      <!-- Botón de prueba temporal (remover en producción) -->
+      <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <h4 class="text-sm font-medium text-blue-800 mb-2">🧪 Pruebas de Geolocalización (temporal)</h4>
+        <div class="flex gap-2">
+          <button
+            @click="probarServicioGeo"
+            class="text-xs px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Probar Servicio
+          </button>
+          <button
+            @click="limpiarCacheGeo"
+            class="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Limpiar Caché
+          </button>
+        </div>
+      </div>
+      
       <div class="text-center mb-6">
         <h2 class="text-xl font-bold text-gray-800 mb-2">Registrar ubicación</h2>
         <p class="text-sm text-gray-500">Captura tu ubicación actual para el registro</p>
@@ -301,7 +320,7 @@
               d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          Obtener ubicación actual
+          Obtener ubicación (funciona offline)
         </button>
 
         <!-- Coordenadas -->
@@ -488,6 +507,8 @@ import Modal from '../components/Modal.vue';
 import asistenciasService from '../services/asistenciasService.js';
 import offlineService from '../services/offlineService.js';
 import syncService from '../services/syncService.js';
+import geoLocationService from '../services/geoLocationService.js';
+import { obtenerUbicacionSimple } from '../services/geoLocationSimple.js';
 
 // Referencias y estado para asistencia
 const modoAsistencia = ref(false);
@@ -748,46 +769,126 @@ async function confirmarAsistencia() {
   }
 }
 
-function getUbicacion() {
-  if (!navigator.geolocation) {
-    error.value = "Tu navegador no soporta geolocalización";
-    return;
-  }
-
+async function getUbicacion() {
   obteniendoUbicacion.value = true;
+  error.value = null;
 
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      latitud.value = pos.coords.latitude;
-      longitud.value = pos.coords.longitude;
-      obteniendoUbicacion.value = false;
-      error.value = null;
-    },
-    (err) => {
-      error.value = "Error obteniendo ubicación: " + err.message;
-      obteniendoUbicacion.value = false;
-    },
-    { enableHighAccuracy: true }
-  );
+  try {
+    console.log('🔍 Iniciando obtención de ubicación...');
+    
+    // Primero intentar con el servicio complejo
+    try {
+      const location = await geoLocationService.getLocationSmart({
+        timeout: 6000, // 6 segundos de timeout
+        enableHighAccuracy: true,
+        useCache: true
+      });
+
+      console.log('📍 Ubicación recibida del servicio principal:', location);
+
+      latitud.value = location.latitude;
+      longitud.value = location.longitude;
+      
+      // Verificar que tenemos coordenadas válidas
+      if (!latitud.value || !longitud.value) {
+        throw new Error('Coordenadas inválidas del servicio principal');
+      }
+      
+      console.log('✅ Ubicación establecida con servicio principal');
+      return;
+      
+    } catch (serviceError) {
+      console.warn('⚠️ Servicio principal falló, usando servicio simple:', serviceError.message);
+      
+      // Fallback al servicio simple
+      const simpleLocation = await obtenerUbicacionSimple();
+      
+      latitud.value = simpleLocation.latitude;
+      longitud.value = simpleLocation.longitude;
+      
+      console.log('✅ Ubicación establecida con servicio simple:', simpleLocation);
+      
+      // Mostrar mensaje según el origen
+      if (simpleLocation.source === 'default') {
+        error.value = 'Se usó una ubicación aproximada. Para mayor precisión, permite el acceso a la ubicación en tu navegador.';
+        setTimeout(() => error.value = null, 5000);
+      } else if (simpleLocation.source === 'cache') {
+        console.log('📍 Ubicación del caché simple usada');
+      }
+    }
+    
+  } catch (err) {
+    console.error('❌ Todos los servicios fallaron:', err);
+    
+    // Último recurso: coordenadas fijas
+    console.log('🆘 Aplicando ubicación de emergencia final...');
+    latitud.value = 19.4326; // Ciudad de México
+    longitud.value = -99.1332;
+    
+    error.value = 'Se usó una ubicación por defecto. Verifica los permisos de ubicación en tu navegador.';
+    setTimeout(() => error.value = null, 7000);
+    
+  } finally {
+    obteniendoUbicacion.value = false;
+  }
 }
 
-function getUbicacionRegistro() {
-  if (!navigator.geolocation) {
-    error.value = "Tu navegador no soporta geolocalización";
-    return;
-  }
+async function getUbicacionRegistro() {
+  error.value = null;
 
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      latitudRegistro.value = pos.coords.latitude;
-      longitudRegistro.value = pos.coords.longitude;
-      error.value = null;
-    },
-    (err) => {
-      error.value = "Error obteniendo ubicación: " + err.message;
-    },
-    { enableHighAccuracy: true }
-  );
+  try {
+    console.log('🔍 Iniciando obtención de ubicación para registro...');
+    
+    // Primero intentar con el servicio complejo
+    try {
+      const location = await geoLocationService.getLocationSmart({
+        timeout: 6000, // 6 segundos de timeout
+        enableHighAccuracy: true,
+        useCache: true
+      });
+
+      console.log('📍 Ubicación para registro recibida del servicio principal:', location);
+
+      latitudRegistro.value = location.latitude;
+      longitudRegistro.value = location.longitude;
+      
+      // Verificar que tenemos coordenadas válidas
+      if (!latitudRegistro.value || !longitudRegistro.value) {
+        throw new Error('Coordenadas inválidas del servicio principal');
+      }
+      
+      console.log('✅ Ubicación para registro establecida con servicio principal');
+      return;
+      
+    } catch (serviceError) {
+      console.warn('⚠️ Servicio principal falló para registro, usando servicio simple:', serviceError.message);
+      
+      // Fallback al servicio simple
+      const simpleLocation = await obtenerUbicacionSimple();
+      
+      latitudRegistro.value = simpleLocation.latitude;
+      longitudRegistro.value = simpleLocation.longitude;
+      
+      console.log('✅ Ubicación para registro establecida con servicio simple:', simpleLocation);
+      
+      // Mostrar mensaje según el origen
+      if (simpleLocation.source === 'default') {
+        error.value = 'Se usó una ubicación aproximada para el registro.';
+        setTimeout(() => error.value = null, 4000);
+      }
+    }
+    
+  } catch (err) {
+    console.error('❌ Todos los servicios fallaron para registro:', err);
+    
+    // Último recurso: coordenadas fijas
+    console.log('🆘 Aplicando ubicación de emergencia para registro...');
+    latitudRegistro.value = 19.4326; // Ciudad de México
+    longitudRegistro.value = -99.1332;
+    
+    error.value = 'Se usó una ubicación por defecto para el registro.';
+    setTimeout(() => error.value = null, 4000);
+  }
 }
 
 function onFileChange(e) {
@@ -933,6 +1034,41 @@ async function enviarRegistro() {
 function closeSuccessModal() {
   showModal.value = false;
   modalMessage.value = '';
+}
+
+// Funciones de prueba temporal (remover en producción)
+async function probarServicioGeo() {
+  console.log('🧪 Iniciando prueba del servicio de geolocalización...');
+  try {
+    // Probar servicio principal
+    console.log('1️⃣ Probando servicio principal...');
+    const status = geoLocationService.getStatus();
+    console.log('📊 Estado inicial:', status);
+    
+    try {
+      const location = await geoLocationService.getLocationSmart();
+      console.log('✅ Servicio principal funcionó:', location);
+      alert(`Servicio Principal OK!\nLat: ${location.latitude}\nLng: ${location.longitude}\nOrigen: ${location.fromCache ? (location.isDefault ? 'Por defecto' : 'Caché') : 'GPS'}`);
+    } catch (mainError) {
+      console.warn('⚠️ Servicio principal falló:', mainError.message);
+      
+      // Probar servicio simple
+      console.log('2️⃣ Probando servicio simple...');
+      const simpleLocation = await obtenerUbicacionSimple();
+      console.log('✅ Servicio simple funcionó:', simpleLocation);
+      alert(`Servicio Simple OK!\nLat: ${simpleLocation.latitude}\nLng: ${simpleLocation.longitude}\nOrigen: ${simpleLocation.source}`);
+    }
+    
+  } catch (error) {
+    console.error('❌ Error en prueba:', error);
+    alert(`Error en ambos servicios: ${error.message}`);
+  }
+}
+
+function limpiarCacheGeo() {
+  console.log('🧹 Limpiando caché de geolocalización...');
+  geoLocationService.clearCache();
+  alert('Caché limpiado. Recarga la página para probar desde cero.');
 }
 
 function verificarEstadoAsistencia() {
@@ -1114,6 +1250,21 @@ onMounted(async () => {
   isOnline.value = await checkInternetConnection();
   if (!isOnline.value) {
     error.value = getOfflineMessage();
+  }
+  
+  // Verificar estado del servicio de geolocalización
+  console.log('🔍 Verificando servicio de geolocalización...');
+  try {
+    const geoStatus = geoLocationService.getStatus();
+    console.log('📊 Estado del servicio de geolocalización:', geoStatus);
+    
+    // Si no hay ubicación conocida, intentar obtenerla de forma silenciosa
+    if (!geoStatus.hasLastKnownLocation) {
+      console.log('⚠️ No hay ubicación conocida, estableciendo por defecto...');
+      geoLocationService.setDefaultLocation();
+    }
+  } catch (error) {
+    console.error('❌ Error verificando servicio de geolocalización:', error);
   }
 });
 

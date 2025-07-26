@@ -175,7 +175,8 @@ async def registrar(
     latitud: float = Form(...),
     longitud: float = Form(...),
     descripcion: str = Form(""),
-    foto: UploadFile = File(...)
+    foto: UploadFile = File(...),
+    timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
 ):
     # Guardar la foto en disco
     ext = os.path.splitext(foto.filename)[1]
@@ -185,8 +186,19 @@ async def registrar(
         contenido = await foto.read()
         f.write(contenido)
 
+    # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
+    if timestamp_offline:
+        try:
+            # Convertir string ISO a datetime
+            fecha_hora = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
+            print(f"📅 Usando timestamp offline: {fecha_hora}")
+        except Exception as e:
+            print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
+            fecha_hora = datetime.utcnow()
+    else:
+        fecha_hora = datetime.utcnow()
+
     # Guardar registro en la base
-    fecha_hora = datetime.utcnow()
     cursor.execute(
         "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora) VALUES (%s, %s, %s, %s, %s, %s)",
         (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora)
@@ -494,7 +506,8 @@ async def marcar_entrada(
     latitud: float = Form(...),
     longitud: float = Form(...),
     descripcion: str = Form(""),
-    foto: UploadFile = File(...)
+    foto: UploadFile = File(...),
+    timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
 ):
     try:
         print(f"🔍 ENTRADA - Datos recibidos:")
@@ -503,13 +516,28 @@ async def marcar_entrada(
         print(f"   longitud: {longitud}")
         print(f"   descripcion: {descripcion}")
         print(f"   foto: {foto.filename}")
+        print(f"   timestamp_offline: {timestamp_offline}")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-            
-        now = datetime.now(CDMX_TZ)
-        fecha = now.date()
-        hora_entrada = now
+        
+        # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
+        if timestamp_offline:
+            try:
+                # Convertir string ISO a datetime y ajustar a zona horaria de CDMX
+                fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
+                hora_entrada = fecha_hora_utc.astimezone(CDMX_TZ)
+                fecha = hora_entrada.date()
+                print(f"📅 Usando timestamp offline: {hora_entrada}")
+            except Exception as e:
+                print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
+                now = datetime.now(CDMX_TZ)
+                fecha = now.date()
+                hora_entrada = now
+        else:
+            now = datetime.now(CDMX_TZ)
+            fecha = now.date()
+            hora_entrada = now
 
         # Revisa si ya existe asistencia para hoy para este usuario específico
         cursor.execute(
@@ -571,7 +599,8 @@ async def marcar_salida(
     latitud: float = Form(...),
     longitud: float = Form(...),
     descripcion: str = Form(""),
-    foto: UploadFile = File(...)
+    foto: UploadFile = File(...),
+    timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
 ):
     try:
         print(f"🔍 SALIDA - Datos recibidos:")
@@ -580,12 +609,28 @@ async def marcar_salida(
         print(f"   longitud: {longitud}")
         print(f"   descripcion: {descripcion}")
         print(f"   foto: {foto.filename}")
+        print(f"   timestamp_offline: {timestamp_offline}")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-            
-        now = datetime.now(CDMX_TZ)
-        fecha = now.date()
+        
+        # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
+        if timestamp_offline:
+            try:
+                # Convertir string ISO a datetime y ajustar a zona horaria de CDMX
+                fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
+                hora_salida = fecha_hora_utc.astimezone(CDMX_TZ)
+                fecha = hora_salida.date()
+                print(f"📅 Usando timestamp offline para salida: {hora_salida}")
+            except Exception as e:
+                print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
+                now = datetime.now(CDMX_TZ)
+                fecha = now.date()
+                hora_salida = now
+        else:
+            now = datetime.now(CDMX_TZ)
+            fecha = now.date()
+            hora_salida = now
 
         # Busca el registro de asistencia de hoy para este usuario específico
         cursor.execute(
@@ -620,15 +665,15 @@ async def marcar_salida(
         # Actualizar registro con salida, ubicación y foto
         cursor.execute(
             "UPDATE asistencias SET hora_salida = %s, latitud_salida = %s, longitud_salida = %s, foto_salida_url = %s, descripcion_salida = %s WHERE usuario_id = %s AND fecha = %s",
-            (now, latitud, longitud, ruta_archivo, descripcion, usuario_id, fecha)
+            (hora_salida, latitud, longitud, ruta_archivo, descripcion, usuario_id, fecha)
         )
         conn.commit()
-        print(f"✅ Salida registrada para usuario {usuario_id} a las {now}")
+        print(f"✅ Salida registrada para usuario {usuario_id} a las {hora_salida}")
         
         return {
             "status": "ok", 
             "mensaje": "Salida registrada exitosamente", 
-            "hora_salida": str(now),
+            "hora_salida": str(hora_salida),
             "latitud": latitud,
             "longitud": longitud,
             "foto_url": ruta_archivo,

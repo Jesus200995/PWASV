@@ -192,12 +192,18 @@ class SyncService {
     try {
       console.log('📤 Enviando registro offline:', registro.id);
       
+      // Actualizar el timestamp de sincronización antes de enviar
+      await offlineService.actualizarTimestampSincronizacion(registro.id, 'registro');
+      
       // Crear FormData para el envío
       const formData = new FormData();
       formData.append('usuario_id', registro.usuario_id.toString());
       formData.append('latitud', registro.latitud);
       formData.append('longitud', registro.longitud);
       formData.append('descripcion', registro.descripcion || '');
+      
+      // Usar el timestamp original (hora de creación offline) no el de sincronización
+      formData.append('timestamp_offline', registro.timestamp);
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (registro.foto_base64) {
@@ -247,12 +253,18 @@ class SyncService {
     try {
       console.log(`📤 Enviando asistencia ${asistencia.tipo} offline:`, asistencia.id);
       
+      // Actualizar el timestamp de sincronización antes de enviar
+      await offlineService.actualizarTimestampSincronizacion(asistencia.id, 'asistencia');
+      
       // Crear FormData para el envío
       const formData = new FormData();
       formData.append('usuario_id', asistencia.usuario_id.toString());
       formData.append('latitud', asistencia.latitud);
       formData.append('longitud', asistencia.longitud);
       formData.append('descripcion', asistencia.descripcion || '');
+      
+      // Usar el timestamp original (hora de creación offline) no el de sincronización
+      formData.append('timestamp_offline', asistencia.timestamp);
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (asistencia.foto_base64) {

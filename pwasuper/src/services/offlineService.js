@@ -118,7 +118,8 @@ class OfflineService {
         foto_base64: fotoBase64,
         foto_filename: archivo ? archivo.name : null,
         foto_type: archivo ? archivo.type : null,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString(), // Hora de creación offline
+        sync_timestamp: null, // Se completará cuando se sincronice
         tipo: 'registro_general'
       };
 
@@ -163,7 +164,8 @@ class OfflineService {
         foto_base64: fotoBase64,
         foto_filename: archivo ? archivo.name : null,
         foto_type: archivo ? archivo.type : null,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString(), // Hora de creación offline
+        sync_timestamp: null, // Se completará cuando se sincronice
         fecha: new Date().toISOString().split('T')[0] // YYYY-MM-DD
       };
 
@@ -244,6 +246,53 @@ class OfflineService {
   }
 
   /**
+   * Actualiza el timestamp de sincronización de un registro
+   */
+  async actualizarTimestampSincronizacion(id, tipo = 'registro') {
+    try {
+      await this.initDB();
+      
+      const storeName = tipo === 'asistencia' ? ASISTENCIAS_STORE : REGISTROS_STORE;
+      const transaction = this.db.transaction([storeName], 'readwrite');
+      const store = transaction.objectStore(storeName);
+      
+      return new Promise((resolve, reject) => {
+        // Primero obtener el registro
+        const getRequest = store.get(id);
+        
+        getRequest.onsuccess = () => {
+          const record = getRequest.result;
+          if (record) {
+            // Actualizar con timestamp de sincronización
+            record.sync_timestamp = new Date().toISOString();
+            
+            // Guardar el registro actualizado
+            const putRequest = store.put(record);
+            
+            putRequest.onsuccess = () => {
+              console.log(`✅ Timestamp de sincronización actualizado para ${tipo} ID:`, id);
+              resolve(record);
+            };
+            
+            putRequest.onerror = () => {
+              reject(putRequest.error);
+            };
+          } else {
+            reject(new Error(`${tipo} con ID ${id} no encontrado`));
+          }
+        };
+        
+        getRequest.onerror = () => {
+          reject(getRequest.error);
+        };
+      });
+    } catch (error) {
+      console.error(`❌ Error actualizando timestamp de sincronización para ${tipo}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Elimina un registro después de enviarlo exitosamente
    */
   async eliminarRegistro(id) {
@@ -315,6 +364,45 @@ class OfflineService {
     } catch (error) {
       console.error('❌ Error contando pendientes:', error);
       return { registros: 0, asistencias: 0, total: 0 };
+    }
+  }
+
+  /**
+   * Obtiene información detallada de registros pendientes para debugging
+   */
+  async obtenerResumenPendientes() {
+    try {
+      const registros = await this.obtenerRegistrosPendientes();
+      const asistencias = await this.obtenerAsistenciasPendientes();
+      
+      return {
+        registros: {
+          total: registros.length,
+          items: registros.map(r => ({
+            id: r.id,
+            usuario_id: r.usuario_id,
+            timestamp: r.timestamp,
+            sync_timestamp: r.sync_timestamp,
+            tipo: r.tipo,
+            tiene_foto: !!r.foto_base64
+          }))
+        },
+        asistencias: {
+          total: asistencias.length,
+          items: asistencias.map(a => ({
+            id: a.id,
+            usuario_id: a.usuario_id,
+            tipo: a.tipo,
+            timestamp: a.timestamp,
+            sync_timestamp: a.sync_timestamp,
+            fecha: a.fecha,
+            tiene_foto: !!a.foto_base64
+          }))
+        }
+      };
+    } catch (error) {
+      console.error('❌ Error obteniendo resumen de pendientes:', error);
+      return { registros: { total: 0, items: [] }, asistencias: { total: 0, items: [] } };
     }
   }
 

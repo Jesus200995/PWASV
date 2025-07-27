@@ -152,6 +152,10 @@ class OfflineService {
     try {
       await this.initDB();
       
+      // Obtener timestamp exacto del momento del registro
+      const timestampOffline = new Date().toISOString();
+      console.log(`🕐 Guardando asistencia ${tipo} offline en timestamp: ${timestampOffline}`);
+      
       // Convertir archivo a base64 si existe
       const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
       
@@ -164,10 +168,17 @@ class OfflineService {
         foto_base64: fotoBase64,
         foto_filename: archivo ? archivo.name : null,
         foto_type: archivo ? archivo.type : null,
-        timestamp: new Date().toISOString(), // Hora de creación offline
+        timestamp: timestampOffline, // Hora exacta de creación offline
         sync_timestamp: null, // Se completará cuando se sincronice
         fecha: new Date().toISOString().split('T')[0] // YYYY-MM-DD
       };
+
+      console.log(`📝 Datos de asistencia ${tipo} a guardar offline:`, {
+        usuario_id: asistencia.usuario_id,
+        tipo: asistencia.tipo,
+        timestamp: asistencia.timestamp,
+        fecha: asistencia.fecha
+      });
 
       const transaction = this.db.transaction([ASISTENCIAS_STORE], 'readwrite');
       const store = transaction.objectStore(ASISTENCIAS_STORE);

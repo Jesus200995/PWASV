@@ -544,7 +544,10 @@ async def marcar_entrada(
                 fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
                 hora_entrada = fecha_hora_utc.astimezone(CDMX_TZ)
                 fecha = hora_entrada.date()
-                print(f"📅 Usando timestamp offline: {hora_entrada}")
+                print(f"📅 ENTRADA OFFLINE - Timestamp recibido: {timestamp_offline}")
+                print(f"📅 ENTRADA OFFLINE - Hora UTC parseada: {fecha_hora_utc}")
+                print(f"📅 ENTRADA OFFLINE - Hora CDMX convertida: {hora_entrada}")
+                print(f"📅 ENTRADA OFFLINE - Fecha extraída: {fecha}")
                 # Usar el timestamp offline también para el nombre del archivo
                 timestamp_for_filename = hora_entrada.strftime('%Y%m%d%H%M%S')
             except Exception as e:
@@ -554,6 +557,7 @@ async def marcar_entrada(
                 hora_entrada = now
                 timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
         else:
+            print(f"📅 ENTRADA ONLINE - Usando tiempo actual del servidor")
             now = datetime.now(CDMX_TZ)
             fecha = now.date()
             hora_entrada = now
@@ -641,7 +645,10 @@ async def marcar_salida(
                 fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
                 hora_salida = fecha_hora_utc.astimezone(CDMX_TZ)
                 fecha = hora_salida.date()
-                print(f"📅 Usando timestamp offline para salida: {hora_salida}")
+                print(f"📅 SALIDA OFFLINE - Timestamp recibido: {timestamp_offline}")
+                print(f"📅 SALIDA OFFLINE - Hora UTC parseada: {fecha_hora_utc}")
+                print(f"📅 SALIDA OFFLINE - Hora CDMX convertida: {hora_salida}")
+                print(f"📅 SALIDA OFFLINE - Fecha extraída: {fecha}")
                 # Usar el timestamp offline también para el nombre del archivo
                 timestamp_for_filename = hora_salida.strftime('%Y%m%d%H%M%S')
             except Exception as e:
@@ -651,6 +658,7 @@ async def marcar_salida(
                 hora_salida = now
                 timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
         else:
+            print(f"📅 SALIDA ONLINE - Usando tiempo actual del servidor")
             now = datetime.now(CDMX_TZ)
             fecha = now.date()
             hora_salida = now

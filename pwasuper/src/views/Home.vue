@@ -256,25 +256,6 @@
 
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
     <div v-if="!modoAsistencia" class="card mb-4">
-      <!-- Botón de prueba temporal (remover en producción) -->
-      <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <h4 class="text-sm font-medium text-blue-800 mb-2">🧪 Pruebas de Geolocalización (temporal)</h4>
-        <div class="flex gap-2">
-          <button
-            @click="probarServicioGeo"
-            class="text-xs px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Probar Servicio
-          </button>
-          <button
-            @click="limpiarCacheGeo"
-            class="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            Limpiar Caché
-          </button>
-        </div>
-      </div>
-      
       <div class="text-center mb-6">
         <h2 class="text-xl font-bold text-gray-800 mb-2">Registrar ubicación</h2>
         <p class="text-sm text-gray-500">Captura tu ubicación actual para el registro</p>
@@ -1034,41 +1015,6 @@ async function enviarRegistro() {
 function closeSuccessModal() {
   showModal.value = false;
   modalMessage.value = '';
-}
-
-// Funciones de prueba temporal (remover en producción)
-async function probarServicioGeo() {
-  console.log('🧪 Iniciando prueba del servicio de geolocalización...');
-  try {
-    // Probar servicio principal
-    console.log('1️⃣ Probando servicio principal...');
-    const status = geoLocationService.getStatus();
-    console.log('📊 Estado inicial:', status);
-    
-    try {
-      const location = await geoLocationService.getLocationSmart();
-      console.log('✅ Servicio principal funcionó:', location);
-      alert(`Servicio Principal OK!\nLat: ${location.latitude}\nLng: ${location.longitude}\nOrigen: ${location.fromCache ? (location.isDefault ? 'Por defecto' : 'Caché') : 'GPS'}`);
-    } catch (mainError) {
-      console.warn('⚠️ Servicio principal falló:', mainError.message);
-      
-      // Probar servicio simple
-      console.log('2️⃣ Probando servicio simple...');
-      const simpleLocation = await obtenerUbicacionSimple();
-      console.log('✅ Servicio simple funcionó:', simpleLocation);
-      alert(`Servicio Simple OK!\nLat: ${simpleLocation.latitude}\nLng: ${simpleLocation.longitude}\nOrigen: ${simpleLocation.source}`);
-    }
-    
-  } catch (error) {
-    console.error('❌ Error en prueba:', error);
-    alert(`Error en ambos servicios: ${error.message}`);
-  }
-}
-
-function limpiarCacheGeo() {
-  console.log('🧹 Limpiando caché de geolocalización...');
-  geoLocationService.clearCache();
-  alert('Caché limpiado. Recarga la página para probar desde cero.');
 }
 
 function verificarEstadoAsistencia() {

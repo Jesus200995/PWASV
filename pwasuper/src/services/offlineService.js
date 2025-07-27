@@ -159,14 +159,6 @@ class OfflineService {
       // Convertir archivo a base64 si existe
       const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
       
-      // Obtener la fecha actual en zona horaria de México (CDMX)
-      const now = new Date();
-      const mexicoTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Mexico_City"}));
-      const fechaMexico = mexicoTime.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-      
-      console.log(`🇲🇽 Guardando con fecha México: ${fechaMexico}`);
-      console.log(`🕐 Timestamp offline: ${timestampOffline}`);
-      
       const asistencia = {
         usuario_id: usuarioId,
         tipo, // 'entrada' o 'salida'
@@ -178,7 +170,7 @@ class OfflineService {
         foto_type: archivo ? archivo.type : null,
         timestamp: timestampOffline, // Hora exacta de creación offline
         sync_timestamp: null, // Se completará cuando se sincronice
-        fecha: fechaMexico // YYYY-MM-DD en zona horaria de México
+        fecha: new Date().toISOString().split('T')[0] // YYYY-MM-DD
       };
 
       console.log(`📝 Datos de asistencia ${tipo} a guardar offline:`, {

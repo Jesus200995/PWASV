@@ -144,7 +144,7 @@
           type="button"
           @click="getUbicacion"
           :disabled="obteniendoUbicacion"
-          class="btn btn-secondary w-full mb-4 flex items-center justify-center"
+          class="btn btn-secondary w-full mb-2 flex items-center justify-center"
           :class="{'opacity-50 cursor-not-allowed': obteniendoUbicacion}"
         >
           <div v-if="obteniendoUbicacion" class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-current mr-2"></div>
@@ -152,7 +152,22 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          {{ obteniendoUbicacion ? 'Obteniendo ubicación...' : 'Obtener ubicación (funciona offline)' }}
+          {{ obteniendoUbicacion ? 'Obteniendo ubicación precisa...' : 'Obtener ubicación (máxima precisión)' }}
+        </button>
+        
+        <!-- Botón para máxima precisión -->
+        <button
+          type="button"
+          @click="obtenerUbicacionMaximaPrecision"
+          :disabled="obteniendoUbicacion"
+          class="btn btn-primary w-full mb-4 flex items-center justify-center text-sm"
+          :class="{'opacity-50 cursor-not-allowed': obteniendoUbicacion}"
+        >
+          <div v-if="obteniendoUbicacion" class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current mr-2"></div>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          {{ obteniendoUbicacion ? 'Máxima precisión...' : 'Forzar máxima precisión GPS' }}
         </button>
 
         <!-- Coordenadas -->
@@ -301,7 +316,7 @@
               d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          Obtener ubicación (funciona offline)
+          Obtener ubicación (máxima precisión)
         </button>
 
         <!-- Coordenadas -->
@@ -569,6 +584,10 @@ function iniciarAsistencia(tipo) {
   limpiarDatosAsistencia();
   error.value = null;
   mensajeAsistencia.value = '';
+  
+  // Obtener ubicación automáticamente al iniciar el proceso de asistencia
+  console.log(`🚀 Iniciando proceso de ${tipo}, obteniendo ubicación automáticamente...`);
+  getUbicacion();
 }
 
 function limpiarDatosAsistencia() {
@@ -762,14 +781,15 @@ async function getUbicacion() {
   error.value = null;
 
   try {
-    console.log('🔍 Iniciando obtención de ubicación...');
+    console.log('🔍 Iniciando obtención de ubicación con máxima precisión...');
     
-    // Primero intentar con el servicio complejo
+    // Primero intentar con el servicio complejo con configuración optimizada
     try {
       const location = await geoLocationService.getLocationSmart({
-        timeout: 6000, // 6 segundos de timeout
+        timeout: 20000, // 20 segundos de timeout para mejor precisión
         enableHighAccuracy: true,
-        useCache: true
+        useCache: false, // No usar caché inicial para obtener ubicación fresca
+        maximumAge: 30000 // Solo 30 segundos para ubicación muy fresca
       });
 
       console.log('📍 Ubicación recibida del servicio principal:', location);
@@ -780,6 +800,15 @@ async function getUbicacion() {
       // Verificar que tenemos coordenadas válidas
       if (!latitud.value || !longitud.value) {
         throw new Error('Coordenadas inválidas del servicio principal');
+      }
+      
+      // Verificar precisión si está disponible
+      if (location.accuracy && location.accuracy > 100) {
+        console.warn(`⚠️ Baja precisión detectada: ${location.accuracy}m`);
+        error.value = `Ubicación obtenida con precisión de ${Math.round(location.accuracy)}m. Para mayor precisión, asegúrate de estar en un área abierta.`;
+        setTimeout(() => error.value = null, 6000);
+      } else {
+        console.log('✅ Ubicación con buena precisión obtenida');
       }
       
       console.log('✅ Ubicación establecida con servicio principal');
@@ -798,10 +827,14 @@ async function getUbicacion() {
       
       // Mostrar mensaje según el origen
       if (simpleLocation.source === 'default') {
-        error.value = 'Se usó una ubicación aproximada. Para mayor precisión, permite el acceso a la ubicación en tu navegador.';
-        setTimeout(() => error.value = null, 5000);
+        error.value = 'Se usó una ubicación aproximada. Para mayor precisión, permite el acceso a la ubicación en tu navegador y asegúrate de estar en un área abierta.';
+        setTimeout(() => error.value = null, 8000);
       } else if (simpleLocation.source === 'cache') {
-        console.log('📍 Ubicación del caché simple usada');
+        error.value = 'Se usó ubicación del caché. Para mayor precisión, intenta actualizar la ubicación.';
+        setTimeout(() => error.value = null, 5000);
+      } else if (simpleLocation.accuracy && simpleLocation.accuracy > 100) {
+        error.value = `Ubicación obtenida con precisión de ${Math.round(simpleLocation.accuracy)}m.`;
+        setTimeout(() => error.value = null, 5000);
       }
     }
     
@@ -813,8 +846,8 @@ async function getUbicacion() {
     latitud.value = 19.4326; // Ciudad de México
     longitud.value = -99.1332;
     
-    error.value = 'Se usó una ubicación por defecto. Verifica los permisos de ubicación en tu navegador.';
-    setTimeout(() => error.value = null, 7000);
+    error.value = 'Se usó una ubicación por defecto. Verifica los permisos de ubicación en tu navegador y asegúrate de estar en un área con buena señal GPS.';
+    setTimeout(() => error.value = null, 10000);
     
   } finally {
     obteniendoUbicacion.value = false;
@@ -825,14 +858,15 @@ async function getUbicacionRegistro() {
   error.value = null;
 
   try {
-    console.log('🔍 Iniciando obtención de ubicación para registro...');
+    console.log('🔍 Iniciando obtención de ubicación para registro con máxima precisión...');
     
-    // Primero intentar con el servicio complejo
+    // Primero intentar con el servicio complejo con configuración optimizada
     try {
       const location = await geoLocationService.getLocationSmart({
-        timeout: 6000, // 6 segundos de timeout
+        timeout: 20000, // 20 segundos de timeout para mejor precisión
         enableHighAccuracy: true,
-        useCache: true
+        useCache: false, // No usar caché para obtener ubicación fresca
+        maximumAge: 30000 // Solo 30 segundos para ubicación muy fresca
       });
 
       console.log('📍 Ubicación para registro recibida del servicio principal:', location);
@@ -843,6 +877,15 @@ async function getUbicacionRegistro() {
       // Verificar que tenemos coordenadas válidas
       if (!latitudRegistro.value || !longitudRegistro.value) {
         throw new Error('Coordenadas inválidas del servicio principal');
+      }
+      
+      // Verificar precisión si está disponible
+      if (location.accuracy && location.accuracy > 100) {
+        console.warn(`⚠️ Baja precisión detectada para registro: ${location.accuracy}m`);
+        error.value = `Ubicación obtenida con precisión de ${Math.round(location.accuracy)}m. Para mayor precisión, asegúrate de estar en un área abierta.`;
+        setTimeout(() => error.value = null, 6000);
+      } else {
+        console.log('✅ Ubicación para registro con buena precisión obtenida');
       }
       
       console.log('✅ Ubicación para registro establecida con servicio principal');
@@ -861,8 +904,14 @@ async function getUbicacionRegistro() {
       
       // Mostrar mensaje según el origen
       if (simpleLocation.source === 'default') {
-        error.value = 'Se usó una ubicación aproximada para el registro.';
-        setTimeout(() => error.value = null, 4000);
+        error.value = 'Se usó una ubicación aproximada para el registro. Para mayor precisión, permite el acceso a la ubicación y asegúrate de estar en un área abierta.';
+        setTimeout(() => error.value = null, 8000);
+      } else if (simpleLocation.source === 'cache') {
+        error.value = 'Se usó ubicación del caché para el registro. Para mayor precisión, intenta actualizar la ubicación.';
+        setTimeout(() => error.value = null, 5000);
+      } else if (simpleLocation.accuracy && simpleLocation.accuracy > 100) {
+        error.value = `Ubicación para registro obtenida con precisión de ${Math.round(simpleLocation.accuracy)}m.`;
+        setTimeout(() => error.value = null, 5000);
       }
     }
     
@@ -874,8 +923,86 @@ async function getUbicacionRegistro() {
     latitudRegistro.value = 19.4326; // Ciudad de México
     longitudRegistro.value = -99.1332;
     
-    error.value = 'Se usó una ubicación por defecto para el registro.';
-    setTimeout(() => error.value = null, 4000);
+    error.value = 'Se usó una ubicación por defecto para el registro. Verifica los permisos de ubicación y asegúrate de estar en un área con buena señal GPS.';
+    setTimeout(() => error.value = null, 10000);
+  }
+}
+
+// Función para obtener ubicación con máxima precisión (para casos críticos)
+async function obtenerUbicacionMaximaPrecision() {
+  obteniendoUbicacion.value = true;
+  error.value = null;
+
+  try {
+    console.log('🎯 Iniciando obtención de ubicación con MÁXIMA precisión...');
+    
+    // Múltiples intentos con configuraciones diferentes para máxima precisión
+    const intentos = [
+      {
+        timeout: 30000, // 30 segundos
+        enableHighAccuracy: true,
+        maximumAge: 0 // No aceptar caché, ubicación completamente fresca
+      },
+      {
+        timeout: 25000, // 25 segundos
+        enableHighAccuracy: true,
+        maximumAge: 10000 // Máximo 10 segundos de edad
+      },
+      {
+        timeout: 20000, // 20 segundos
+        enableHighAccuracy: true,
+        maximumAge: 30000 // Máximo 30 segundos de edad
+      }
+    ];
+    
+    for (let i = 0; i < intentos.length; i++) {
+      try {
+        console.log(`🔄 Intento ${i + 1}/${intentos.length} con configuración optimizada...`);
+        
+        const location = await geoLocationService.getCurrentLocation({
+          ...intentos[i],
+          useCache: false // No usar caché para máxima precisión
+        });
+
+        console.log(`✅ Ubicación obtenida en intento ${i + 1}:`, location);
+
+        latitud.value = location.latitude;
+        longitud.value = location.longitude;
+        
+        // Verificar precisión
+        if (location.accuracy) {
+          if (location.accuracy <= 10) {
+            console.log('🎯 Excelente precisión obtenida:', location.accuracy + 'm');
+            error.value = `¡Excelente! Ubicación obtenida con precisión de ${Math.round(location.accuracy)}m.`;
+          } else if (location.accuracy <= 50) {
+            console.log('✅ Buena precisión obtenida:', location.accuracy + 'm');
+            error.value = `Buena precisión: ${Math.round(location.accuracy)}m.`;
+          } else {
+            console.log('⚠️ Precisión aceptable:', location.accuracy + 'm');
+            error.value = `Precisión aceptable: ${Math.round(location.accuracy)}m. Para mejor precisión, muévete a un área más abierta.`;
+          }
+          setTimeout(() => error.value = null, 5000);
+        }
+        
+        return; // Salir si fue exitoso
+        
+      } catch (intentoError) {
+        console.warn(`⚠️ Intento ${i + 1} falló:`, intentoError.message);
+        if (i === intentos.length - 1) {
+          throw intentoError; // Re-lanzar error en el último intento
+        }
+      }
+    }
+    
+  } catch (err) {
+    console.error('❌ Todos los intentos de máxima precisión fallaron:', err);
+    
+    // Fallback al método normal
+    console.log('🔄 Fallback a método normal...');
+    await getUbicacion();
+    
+  } finally {
+    obteniendoUbicacion.value = false;
   }
 }
 
@@ -1211,11 +1338,23 @@ onMounted(async () => {
     const geoStatus = geoLocationService.getStatus();
     console.log('📊 Estado del servicio de geolocalización:', geoStatus);
     
-    // Si no hay ubicación conocida, intentar obtenerla de forma silenciosa
-    if (!geoStatus.hasLastKnownLocation) {
-      console.log('⚠️ No hay ubicación conocida, estableciendo por defecto...');
-      geoLocationService.setDefaultLocation();
-    }
+    // Pre-cargar ubicación de manera silenciosa en segundo plano
+    console.log('🌍 Pre-cargando ubicación en segundo plano...');
+    setTimeout(async () => {
+      try {
+        await geoLocationService.getLocationSmart({
+          timeout: 15000,
+          enableHighAccuracy: true,
+          useCache: true
+        });
+        console.log('✅ Ubicación pre-cargada exitosamente');
+      } catch (error) {
+        console.log('⚠️ No se pudo pre-cargar ubicación:', error.message);
+        // Establecer ubicación por defecto si no se puede obtener
+        geoLocationService.setDefaultLocation();
+      }
+    }, 2000); // Esperar 2 segundos antes de pre-cargar
+    
   } catch (error) {
     console.error('❌ Error verificando servicio de geolocalización:', error);
   }

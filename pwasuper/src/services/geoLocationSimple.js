@@ -21,8 +21,8 @@ export async function obtenerUbicacionSimple() {
           reject,
           {
             enableHighAccuracy: true,
-            timeout: 8000, // 8 segundos
-            maximumAge: 300000 // 5 minutos
+            timeout: 20000, // 20 segundos para mayor precisión
+            maximumAge: 60000 // 1 minuto para ubicación más fresca
           }
         );
       });
@@ -30,10 +30,15 @@ export async function obtenerUbicacionSimple() {
       const result = {
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
         source: 'gps'
       };
 
       console.log('✅ Ubicación GPS obtenida:', result);
+      
+      // Guardar en caché simple para uso futuro
+      guardarUbicacionSimple(result.latitude, result.longitude);
+      
       return result;
     }
   } catch (error) {
@@ -47,14 +52,17 @@ export async function obtenerUbicacionSimple() {
       const parsedCache = JSON.parse(cached);
       const age = Date.now() - parsedCache.timestamp;
       
-      // Si es menor a 24 horas, usarla
-      if (age < 24 * 60 * 60 * 1000) {
-        console.log('✅ Usando ubicación del caché simple:', parsedCache);
+      // Si es menor a 1 hora, usarla (reducido de 24 horas para mayor precisión)
+      if (age < 1 * 60 * 60 * 1000) {
+        console.log('✅ Usando ubicación del caché simple (menos de 1 hora):', parsedCache);
         return {
           latitude: parsedCache.latitude,
           longitude: parsedCache.longitude,
+          accuracy: parsedCache.accuracy || 100,
           source: 'cache'
         };
+      } else {
+        console.log('⏰ Caché simple expirado (más de 1 hora), obteniendo nueva ubicación');
       }
     }
   } catch (error) {
@@ -86,12 +94,14 @@ export async function obtenerUbicacionSimple() {
  * Guardar ubicación en caché simple
  * @param {number} latitude 
  * @param {number} longitude 
+ * @param {number} accuracy - Precisión opcional
  */
-export function guardarUbicacionSimple(latitude, longitude) {
+export function guardarUbicacionSimple(latitude, longitude, accuracy = null) {
   try {
     const data = {
       latitude,
       longitude,
+      accuracy,
       timestamp: Date.now()
     };
     localStorage.setItem('ubicacion_cache_simple', JSON.stringify(data));

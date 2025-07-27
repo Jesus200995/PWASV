@@ -78,9 +78,9 @@ class GeoLocationService {
         this.setDefaultLocation();
       },
       {
-        enableHighAccuracy: false, // Usar menor precisión para ser más rápido
-        timeout: 5000, // Timeout más corto
-        maximumAge: 600000 // Permitir ubicaciones de hasta 10 minutos
+        enableHighAccuracy: true, // Usar alta precisión desde el inicio
+        timeout: 10000, // Timeout más generoso para inicialización
+        maximumAge: 300000 // Permitir ubicaciones de hasta 5 minutos
       }
     );
   }
@@ -109,8 +109,8 @@ class GeoLocationService {
   async getCurrentLocation(options = {}) {
     const defaultOptions = {
       enableHighAccuracy: true,
-      timeout: 15000, // 15 segundos
-      maximumAge: 300000, // 5 minutos
+      timeout: 25000, // 25 segundos para mayor precisión
+      maximumAge: 60000, // 1 minuto para obtener ubicación más fresca
       useCache: true, // Permitir usar caché como fallback
       ...options
     };
@@ -158,7 +158,7 @@ class GeoLocationService {
             console.warn('Geolocalización tardando mucho, usando caché');
             resolveWithCache();
           }
-        }, Math.min(defaultOptions.timeout, 8000)); // Usar caché después de 8 segundos máximo
+        }, Math.min(defaultOptions.timeout, 15000)); // Usar caché después de 15 segundos máximo
       }
 
       // Intentar obtener ubicación actual
@@ -306,9 +306,10 @@ class GeoLocationService {
    */
   async getLocationSmart(options = {}) {
     try {
-      // Intentar obtener ubicación actual primero
+      // Intentar obtener ubicación actual primero con configuración optimizada
       const location = await this.getCurrentLocation({
-        timeout: 8000, // 8 segundos
+        timeout: 20000, // 20 segundos para mayor precisión
+        enableHighAccuracy: true,
         useCache: true,
         ...options
       });

@@ -1026,12 +1026,8 @@ function closeSuccessModal() {
 
 function verificarEstadoAsistencia() {
   try {
-    // Usar zona horaria de México para consistencia
     const ahora = new Date();
-    const mexicoTime = new Date(ahora.toLocaleString("en-US", {timeZone: "America/Mexico_City"}));
-    const fechaHoy = mexicoTime.toISOString().split('T')[0];
-    
-    console.log(`🔍 Verificando estado para fecha México: ${fechaHoy}`);
+    const fechaHoy = ahora.toISOString().split('T')[0];
     
     // Cada día es un nuevo registro, así que primero limpiamos los estados
     entradaMarcada.value = false;
@@ -1048,7 +1044,6 @@ function verificarEstadoAsistencia() {
       salidaMarcada.value = datos.salidaMarcada || false;
       datosEntrada.value = datos.datosEntrada || {};
       datosSalida.value = datos.datosSalida || {};
-      console.log(`✅ Estado recuperado para ${fechaHoy}:`, datos);
     }
 
     // Limpiamos datos de días anteriores para no acumular basura en localStorage
@@ -1066,12 +1061,7 @@ function verificarEstadoAsistencia() {
  */
 function limpiarDatosAntiguos() {
   try {
-    // Usar zona horaria de México para consistencia
-    const ahora = new Date();
-    const mexicoTime = new Date(ahora.toLocaleString("en-US", {timeZone: "America/Mexico_City"}));
-    const hoy = mexicoTime.toISOString().split('T')[0];
-    
-    console.log(`🧹 Limpiando datos anteriores a: ${hoy}`);
+    const hoy = new Date().toISOString().split('T')[0];
     
     // Recorremos todas las claves del localStorage
     for (let i = 0; i < localStorage.length; i++) {
@@ -1101,15 +1091,9 @@ async function verificarAsistenciaHoy() {
       return;
     }
 
-    // Obtener la fecha actual en zona horaria de México (CDMX)
-    const now = new Date();
-    const mexicoTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Mexico_City"}));
-    const fechaActual = mexicoTime.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-    
-    console.log(`🇲🇽 Verificando asistencia para fecha México: ${fechaActual}`);
-
     // Verificar si hay registros pendientes offline antes de consultar el servidor
     const registrosPendientes = await offlineService.obtenerAsistenciasPendientes();
+    const fechaActual = new Date().toISOString().split('T')[0];
     
     // Filtrar registros pendientes del día actual
     const pendientesHoy = registrosPendientes.filter(reg => 
@@ -1234,10 +1218,7 @@ async function verificarAsistenciaHoy() {
     console.error('Error al verificar asistencia de hoy:', error);
     // Si hay error de conexión pero es un nuevo día, reiniciar estados
     const fechaGuardada = localStorage.getItem(`asistencia_ultima_fecha_${user.value.id}`);
-    // Usar zona horaria de México para consistencia
-    const ahora = new Date();
-    const mexicoTime = new Date(ahora.toLocaleString("en-US", {timeZone: "America/Mexico_City"}));
-    const fechaActual = mexicoTime.toISOString().split('T')[0];
+    const fechaActual = new Date().toISOString().split('T')[0];
     
     if (fechaGuardada !== fechaActual) {
       // Es un nuevo día, reiniciar estados incluso sin conexión
@@ -1262,12 +1243,8 @@ function formatearHora(fechaISO) {
 }
 
 function guardarEstadoAsistencia() {
-  // Usar zona horaria de México para consistencia
   const ahora = new Date();
-  const mexicoTime = new Date(ahora.toLocaleString("en-US", {timeZone: "America/Mexico_City"}));
-  const fechaHoy = mexicoTime.toISOString().split('T')[0];
-  
-  console.log(`💾 Guardando estado para fecha México: ${fechaHoy}`);
+  const fechaHoy = ahora.toISOString().split('T')[0];
   
   const estado = {
     entradaMarcada: entradaMarcada.value,

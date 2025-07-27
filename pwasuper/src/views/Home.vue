@@ -152,7 +152,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          {{ obteniendoUbicacion ? 'Obteniendo ubicación...' : 'Obtener ubicación (funciona offline)' }}
+          {{ obteniendoUbicacion ? 'Obteniendo ubicación precisa...' : 'Obtener ubicación (funciona offline)' }}
         </button>
 
         <!-- Coordenadas -->
@@ -301,7 +301,7 @@
               d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          Obtener ubicación (funciona offline)
+          Obtener ubicación (máxima precisión)
         </button>
 
         <!-- Coordenadas -->
@@ -569,6 +569,10 @@ function iniciarAsistencia(tipo) {
   limpiarDatosAsistencia();
   error.value = null;
   mensajeAsistencia.value = '';
+  
+  // Obtener ubicación automáticamente al iniciar el proceso de asistencia
+  console.log(`🚀 Iniciando proceso de ${tipo}, obteniendo ubicación automáticamente...`);
+  getUbicacion();
 }
 
 function limpiarDatosAsistencia() {
@@ -762,59 +766,117 @@ async function getUbicacion() {
   error.value = null;
 
   try {
-    console.log('🔍 Iniciando obtención de ubicación...');
+    console.log('🔍 Iniciando obtención de ubicación con máxima precisión (funciona offline)...');
     
-    // Primero intentar con el servicio complejo
-    try {
-      const location = await geoLocationService.getLocationSmart({
-        timeout: 6000, // 6 segundos de timeout
+    // Estrategia de múltiples intentos para máxima precisión
+    const configuraciones = [
+      {
+        timeout: 30000, // 30 segundos - máxima precisión
         enableHighAccuracy: true,
+        maximumAge: 0, // No usar caché, ubicación fresca
+        useCache: false
+      },
+      {
+        timeout: 20000, // 20 segundos - buena precisión
+        enableHighAccuracy: true,
+        maximumAge: 30000, // Máximo 30 segundos de edad
+        useCache: false
+      },
+      {
+        timeout: 15000, // 15 segundos - precisión estándar
+        enableHighAccuracy: true,
+        maximumAge: 60000, // Máximo 1 minuto de edad
         useCache: true
-      });
-
-      console.log('📍 Ubicación recibida del servicio principal:', location);
-
-      latitud.value = location.latitude;
-      longitud.value = location.longitude;
-      
-      // Verificar que tenemos coordenadas válidas
-      if (!latitud.value || !longitud.value) {
-        throw new Error('Coordenadas inválidas del servicio principal');
       }
-      
-      console.log('✅ Ubicación establecida con servicio principal');
-      return;
-      
-    } catch (serviceError) {
-      console.warn('⚠️ Servicio principal falló, usando servicio simple:', serviceError.message);
-      
-      // Fallback al servicio simple
+    ];
+    
+    // Intentar con cada configuración
+    for (let i = 0; i < configuraciones.length; i++) {
+      try {
+        console.log(`🎯 Intento ${i + 1}/${configuraciones.length} - Buscando máxima precisión...`);
+        
+        const location = await geoLocationService.getCurrentLocation(configuraciones[i]);
+
+        console.log(`✅ Ubicación obtenida en intento ${i + 1}:`, location);
+
+        latitud.value = location.latitude;
+        longitud.value = location.longitude;
+        
+        // Verificar que tenemos coordenadas válidas
+        if (!latitud.value || !longitud.value) {
+          throw new Error('Coordenadas inválidas recibidas');
+        }
+        
+        // Información de precisión para el usuario
+        if (location.accuracy) {
+          if (location.accuracy <= 10) {
+            console.log('🎯 Excelente precisión obtenida:', location.accuracy + 'm');
+            error.value = `¡Excelente! Ubicación obtenida con precisión de ${Math.round(location.accuracy)}m.`;
+          } else if (location.accuracy <= 50) {
+            console.log('✅ Buena precisión obtenida:', location.accuracy + 'm');
+            error.value = `Buena precisión: ${Math.round(location.accuracy)}m.`;
+          } else if (location.accuracy <= 200) {
+            console.log('📍 Precisión aceptable:', location.accuracy + 'm');
+            error.value = `Precisión aceptable: ${Math.round(location.accuracy)}m.`;
+          } else {
+            console.log('⚠️ Baja precisión:', location.accuracy + 'm');
+            error.value = `Precisión baja: ${Math.round(location.accuracy)}m. Intenta moverte a un área más abierta.`;
+          }
+          setTimeout(() => error.value = null, 5000);
+        } else {
+          console.log('✅ Ubicación obtenida exitosamente (precisión no disponible)');
+        }
+        
+        return; // Salir exitosamente
+        
+      } catch (intentoError) {
+        console.warn(`⚠️ Intento ${i + 1} falló:`, intentoError.message);
+        if (i === configuraciones.length - 1) {
+          // Si todos los intentos fallaron, usar fallback
+          throw intentoError;
+        }
+      }
+    }
+    
+  } catch (err) {
+    console.warn('⚠️ Todos los intentos de geolocalización fallaron, usando fallback offline:', err);
+    
+    // Fallback offline: usar servicio simple (funciona sin internet)
+    try {
+      console.log('🔄 Usando servicio simple para funcionalidad offline...');
       const simpleLocation = await obtenerUbicacionSimple();
       
       latitud.value = simpleLocation.latitude;
       longitud.value = simpleLocation.longitude;
       
-      console.log('✅ Ubicación establecida con servicio simple:', simpleLocation);
+      console.log('✅ Ubicación establecida con servicio offline:', simpleLocation);
       
       // Mostrar mensaje según el origen
       if (simpleLocation.source === 'default') {
-        error.value = 'Se usó una ubicación aproximada. Para mayor precisión, permite el acceso a la ubicación en tu navegador.';
-        setTimeout(() => error.value = null, 5000);
+        error.value = 'Se usó ubicación aproximada (modo offline). Para mayor precisión, permite el acceso a ubicación y asegúrate de estar en un área abierta.';
+        setTimeout(() => error.value = null, 8000);
       } else if (simpleLocation.source === 'cache') {
-        console.log('📍 Ubicación del caché simple usada');
+        error.value = 'Se usó ubicación del caché offline. Funciona sin internet.';
+        setTimeout(() => error.value = null, 5000);
+      } else if (simpleLocation.accuracy && simpleLocation.accuracy > 100) {
+        error.value = `Ubicación offline obtenida con precisión de ${Math.round(simpleLocation.accuracy)}m.`;
+        setTimeout(() => error.value = null, 5000);
+      } else {
+        error.value = 'Ubicación obtenida en modo offline.';
+        setTimeout(() => error.value = null, 4000);
       }
+      
+    } catch (offlineError) {
+      console.error('❌ Error en servicio offline:', offlineError);
+      
+      // Último recurso: usar ubicación por defecto (siempre funciona offline)
+      console.log('🆘 Aplicando ubicación de emergencia offline...');
+      latitud.value = 19.4326; // Ciudad de México
+      longitud.value = -99.1332;
+      
+      error.value = 'Se usó ubicación por defecto (modo offline). Verifica los permisos de ubicación para mayor precisión.';
+      setTimeout(() => error.value = null, 10000);
     }
-    
-  } catch (err) {
-    console.error('❌ Todos los servicios fallaron:', err);
-    
-    // Último recurso: coordenadas fijas
-    console.log('🆘 Aplicando ubicación de emergencia final...');
-    latitud.value = 19.4326; // Ciudad de México
-    longitud.value = -99.1332;
-    
-    error.value = 'Se usó una ubicación por defecto. Verifica los permisos de ubicación en tu navegador.';
-    setTimeout(() => error.value = null, 7000);
     
   } finally {
     obteniendoUbicacion.value = false;
@@ -825,57 +887,101 @@ async function getUbicacionRegistro() {
   error.value = null;
 
   try {
-    console.log('🔍 Iniciando obtención de ubicación para registro...');
+    console.log('🔍 Iniciando obtención de ubicación para registro (funciona offline)...');
     
-    // Primero intentar con el servicio complejo
-    try {
-      const location = await geoLocationService.getLocationSmart({
-        timeout: 6000, // 6 segundos de timeout
+    // Usar la misma estrategia optimizada para registros
+    const configuraciones = [
+      {
+        timeout: 25000, // 25 segundos - alta precisión para registros
         enableHighAccuracy: true,
+        maximumAge: 0, // Ubicación fresca para registros importantes
+        useCache: false
+      },
+      {
+        timeout: 20000, // 20 segundos
+        enableHighAccuracy: true,
+        maximumAge: 30000,
+        useCache: false
+      },
+      {
+        timeout: 15000, // 15 segundos fallback
+        enableHighAccuracy: true,
+        maximumAge: 60000,
         useCache: true
-      });
-
-      console.log('📍 Ubicación para registro recibida del servicio principal:', location);
-
-      latitudRegistro.value = location.latitude;
-      longitudRegistro.value = location.longitude;
-      
-      // Verificar que tenemos coordenadas válidas
-      if (!latitudRegistro.value || !longitudRegistro.value) {
-        throw new Error('Coordenadas inválidas del servicio principal');
       }
-      
-      console.log('✅ Ubicación para registro establecida con servicio principal');
-      return;
-      
-    } catch (serviceError) {
-      console.warn('⚠️ Servicio principal falló para registro, usando servicio simple:', serviceError.message);
-      
-      // Fallback al servicio simple
+    ];
+    
+    // Intentar con cada configuración
+    for (let i = 0; i < configuraciones.length; i++) {
+      try {
+        console.log(`🎯 Intento ${i + 1}/${configuraciones.length} para registro - Buscando precisión...`);
+        
+        const location = await geoLocationService.getCurrentLocation(configuraciones[i]);
+
+        console.log(`✅ Ubicación para registro obtenida en intento ${i + 1}:`, location);
+
+        latitudRegistro.value = location.latitude;
+        longitudRegistro.value = location.longitude;
+        
+        // Verificar que tenemos coordenadas válidas
+        if (!latitudRegistro.value || !longitudRegistro.value) {
+          throw new Error('Coordenadas inválidas para registro');
+        }
+        
+        // Información de precisión para registros
+        if (location.accuracy) {
+          if (location.accuracy <= 50) {
+            console.log('✅ Buena precisión para registro:', location.accuracy + 'm');
+          } else {
+            console.log('📍 Precisión aceptable para registro:', location.accuracy + 'm');
+            error.value = `Registro con precisión de ${Math.round(location.accuracy)}m.`;
+            setTimeout(() => error.value = null, 4000);
+          }
+        }
+        
+        return; // Salir exitosamente
+        
+      } catch (intentoError) {
+        console.warn(`⚠️ Intento ${i + 1} falló para registro:`, intentoError.message);
+        if (i === configuraciones.length - 1) {
+          throw intentoError;
+        }
+      }
+    }
+    
+  } catch (err) {
+    console.warn('⚠️ Geolocalización falló para registro, usando fallback offline:', err);
+    
+    // Fallback offline para registros
+    try {
+      console.log('🔄 Usando servicio offline para registro...');
       const simpleLocation = await obtenerUbicacionSimple();
       
       latitudRegistro.value = simpleLocation.latitude;
       longitudRegistro.value = simpleLocation.longitude;
       
-      console.log('✅ Ubicación para registro establecida con servicio simple:', simpleLocation);
+      console.log('✅ Ubicación para registro establecida con servicio offline:', simpleLocation);
       
       // Mostrar mensaje según el origen
       if (simpleLocation.source === 'default') {
-        error.value = 'Se usó una ubicación aproximada para el registro.';
+        error.value = 'Registro con ubicación aproximada (modo offline).';
+        setTimeout(() => error.value = null, 6000);
+      } else if (simpleLocation.source === 'cache') {
+        error.value = 'Registro con ubicación del caché offline.';
         setTimeout(() => error.value = null, 4000);
       }
+      
+    } catch (offlineError) {
+      console.error('❌ Error en servicio offline para registro:', offlineError);
+      
+      // Último recurso para registros
+      console.log('🆘 Aplicando ubicación de emergencia para registro...');
+      latitudRegistro.value = 19.4326; // Ciudad de México
+      longitudRegistro.value = -99.1332;
+      
+      error.value = 'Registro con ubicación por defecto (modo offline).';
+      setTimeout(() => error.value = null, 8000);
     }
-    
-  } catch (err) {
-    console.error('❌ Todos los servicios fallaron para registro:', err);
-    
-    // Último recurso: coordenadas fijas
-    console.log('🆘 Aplicando ubicación de emergencia para registro...');
-    latitudRegistro.value = 19.4326; // Ciudad de México
-    longitudRegistro.value = -99.1332;
-    
-    error.value = 'Se usó una ubicación por defecto para el registro.';
-    setTimeout(() => error.value = null, 4000);
   }
 }
 
@@ -1211,11 +1317,23 @@ onMounted(async () => {
     const geoStatus = geoLocationService.getStatus();
     console.log('📊 Estado del servicio de geolocalización:', geoStatus);
     
-    // Si no hay ubicación conocida, intentar obtenerla de forma silenciosa
-    if (!geoStatus.hasLastKnownLocation) {
-      console.log('⚠️ No hay ubicación conocida, estableciendo por defecto...');
-      geoLocationService.setDefaultLocation();
-    }
+    // Pre-cargar ubicación de manera silenciosa en segundo plano
+    console.log('🌍 Pre-cargando ubicación en segundo plano...');
+    setTimeout(async () => {
+      try {
+        await geoLocationService.getLocationSmart({
+          timeout: 15000,
+          enableHighAccuracy: true,
+          useCache: true
+        });
+        console.log('✅ Ubicación pre-cargada exitosamente');
+      } catch (error) {
+        console.log('⚠️ No se pudo pre-cargar ubicación:', error.message);
+        // Establecer ubicación por defecto si no se puede obtener
+        geoLocationService.setDefaultLocation();
+      }
+    }, 2000); // Esperar 2 segundos antes de pre-cargar
+    
   } catch (error) {
     console.error('❌ Error verificando servicio de geolocalización:', error);
   }

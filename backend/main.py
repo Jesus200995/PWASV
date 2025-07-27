@@ -516,6 +516,80 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
 # Define el timezone de CDMX
 CDMX_TZ = pytz.timezone("America/Mexico_City")
 
+def obtener_fecha_hora_cdmx(timestamp_offline=None):
+    """
+    Función de utilidad para manejar correctamente las fechas y horas en zona CDMX.
+    
+    Args:
+        timestamp_offline (str): Timestamp ISO string opcional desde el cliente
+        
+    Returns:
+        tuple: (fecha_cdmx, hora_cdmx, timestamp_for_filename)
+    """
+    if timestamp_offline:
+        try:
+            print(f"🕐 Procesando timestamp offline: '{timestamp_offline}'")
+            
+            # NUEVA LÓGICA MÁS ROBUSTA PARA PARSEAR TIMESTAMPS
+            fecha_hora_utc = None
+            
+            # Caso 1: Termina con Z (UTC)
+            if timestamp_offline.endswith('Z'):
+                fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
+                print(f"   📝 Formato detectado: UTC con Z")
+                
+            # Caso 2: Ya tiene información de zona horaria (+ o -)
+            elif '+' in timestamp_offline or timestamp_offline.count('-') > 2:
+                fecha_hora_utc = datetime.fromisoformat(timestamp_offline)
+                print(f"   📝 Formato detectado: Con zona horaria")
+                
+            # Caso 3: Solo fecha y hora, asumir UTC
+            else:
+                # Verificar si tiene microsegundos
+                if '.' in timestamp_offline:
+                    # Formato: 2025-07-27T23:30:45.123
+                    fecha_hora_utc = datetime.fromisoformat(timestamp_offline).replace(tzinfo=pytz.UTC)
+                else:
+                    # Formato: 2025-07-27T23:30:45
+                    fecha_hora_utc = datetime.fromisoformat(timestamp_offline).replace(tzinfo=pytz.UTC)
+                print(f"   📝 Formato detectado: Sin zona, asumiendo UTC")
+            
+            print(f"   🌍 Timestamp parseado como UTC: {fecha_hora_utc}")
+            
+            # CLAVE: Convertir a zona horaria de CDMX PRIMERO
+            hora_cdmx = fecha_hora_utc.astimezone(CDMX_TZ)
+            
+            # LUEGO extraer la fecha LOCAL de CDMX (no UTC)
+            fecha_cdmx = hora_cdmx.date()
+            
+            print(f"📅 ✅ Conversión de timestamp completada:")
+            print(f"   🌍 UTC original: {fecha_hora_utc}")
+            print(f"   🇲🇽 CDMX convertido: {hora_cdmx}")
+            print(f"   📆 Fecha LOCAL CDMX: {fecha_cdmx}")
+            print(f"   📊 Día de la semana: {fecha_cdmx.strftime('%A')}")
+            
+            timestamp_for_filename = hora_cdmx.strftime('%Y%m%d%H%M%S')
+            
+            return fecha_cdmx, hora_cdmx, timestamp_for_filename
+            
+        except Exception as e:
+            print(f"⚠️ ERROR parseando timestamp offline '{timestamp_offline}': {e}")
+            print(f"🔄 Fallback a tiempo actual de CDMX")
+            # Fallback a tiempo actual
+            pass
+    
+    # Usar tiempo actual de CDMX
+    now_cdmx = datetime.now(CDMX_TZ)
+    fecha_cdmx = now_cdmx.date()
+    timestamp_for_filename = now_cdmx.strftime('%Y%m%d%H%M%S')
+    
+    print(f"📅 ⏰ Usando timestamp actual CDMX:")
+    print(f"   🇲🇽 Hora CDMX: {now_cdmx}")
+    print(f"   📆 Fecha CDMX: {fecha_cdmx}")
+    print(f"   📊 Día de la semana: {fecha_cdmx.strftime('%A')}")
+    
+    return fecha_cdmx, now_cdmx, timestamp_for_filename
+
 @app.post("/asistencia/entrada")
 async def marcar_entrada(
     usuario_id: int = Form(...),
@@ -538,35 +612,7 @@ async def marcar_entrada(
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
         # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
-        if timestamp_offline:
-            try:
-                # Convertir string ISO a datetime
-                fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
-                
-                # SOLUCIÓN: Convertir a zona horaria de CDMX y LUEGO extraer la fecha local
-                hora_entrada_cdmx = fecha_hora_utc.astimezone(CDMX_TZ)
-                fecha = hora_entrada_cdmx.date()  # Usar la fecha LOCAL de CDMX
-                hora_entrada = hora_entrada_cdmx
-                
-                print(f"📅 ✅ Timestamp offline procesado:")
-                print(f"   UTC original: {fecha_hora_utc}")
-                print(f"   CDMX convertido: {hora_entrada_cdmx}")
-                print(f"   Fecha CDMX: {fecha}")
-                
-                # Usar el timestamp offline también para el nombre del archivo
-                timestamp_for_filename = hora_entrada_cdmx.strftime('%Y%m%d%H%M%S')
-            except Exception as e:
-                print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
-                now = datetime.now(CDMX_TZ)
-                fecha = now.date()
-                hora_entrada = now
-                timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
-        else:
-            now = datetime.now(CDMX_TZ)
-            fecha = now.date()
-            hora_entrada = now
-            timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
-            print(f"📅 ⏰ Usando timestamp actual CDMX: {now}")
+        fecha, hora_entrada, timestamp_for_filename = obtener_fecha_hora_cdmx(timestamp_offline)
 
         # Revisa si ya existe asistencia para hoy para este usuario específico
         cursor.execute(
@@ -644,35 +690,7 @@ async def marcar_salida(
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
         # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
-        if timestamp_offline:
-            try:
-                # Convertir string ISO a datetime
-                fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
-                
-                # SOLUCIÓN: Convertir a zona horaria de CDMX y LUEGO extraer la fecha local
-                hora_salida_cdmx = fecha_hora_utc.astimezone(CDMX_TZ)
-                fecha = hora_salida_cdmx.date()  # Usar la fecha LOCAL de CDMX
-                hora_salida = hora_salida_cdmx
-                
-                print(f"📅 ✅ Timestamp offline procesado para salida:")
-                print(f"   UTC original: {fecha_hora_utc}")
-                print(f"   CDMX convertido: {hora_salida_cdmx}")
-                print(f"   Fecha CDMX: {fecha}")
-                
-                # Usar el timestamp offline también para el nombre del archivo
-                timestamp_for_filename = hora_salida_cdmx.strftime('%Y%m%d%H%M%S')
-            except Exception as e:
-                print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
-                now = datetime.now(CDMX_TZ)
-                fecha = now.date()
-                hora_salida = now
-                timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
-        else:
-            now = datetime.now(CDMX_TZ)
-            fecha = now.date()
-            hora_salida = now
-            timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
-            print(f"📅 ⏰ Usando timestamp actual CDMX: {now}")
+        fecha, hora_salida, timestamp_for_filename = obtener_fecha_hora_cdmx(timestamp_offline)
 
         # Busca el registro de asistencia de hoy para este usuario específico
         cursor.execute(
@@ -794,6 +812,202 @@ async def obtener_historial_asistencias(usuario_id: int = None):
     except Exception as e:
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener historial: {str(e)}")
+
+# Endpoint de test para simular registro de asistencia
+@app.post("/debug/test-asistencia-fecha")
+async def test_asistencia_fecha(
+    timestamp_offline: str = Form(None)
+):
+    """Test para verificar exactamente cómo se procesa una fecha en asistencia"""
+    try:
+        print(f"🧪 TEST ASISTENCIA - Timestamp recibido: {timestamp_offline}")
+        
+        # Usar la misma función que usan las asistencias reales
+        fecha, hora, filename = obtener_fecha_hora_cdmx(timestamp_offline)
+        
+        # Simular lo que haría la base de datos
+        registro_simulado = {
+            "usuario_id": 999,  # ID de test
+            "fecha": fecha.isoformat(),
+            "hora_entrada": hora.isoformat(),
+            "timestamp_filename": filename
+        }
+        
+        # Información actual para comparar
+        ahora_cdmx = datetime.now(CDMX_TZ)
+        
+        result = {
+            "test_resultado": {
+                "timestamp_input": timestamp_offline,
+                "fecha_procesada": fecha.isoformat(),
+                "dia_procesado": fecha.strftime('%A, %d de %B %Y'),
+                "hora_procesada": hora.isoformat(),
+                "filename_generado": filename
+            },
+            
+            "comparacion_fecha": {
+                "fecha_hoy_real": ahora_cdmx.date().isoformat(),
+                "dia_hoy_real": ahora_cdmx.strftime('%A, %d de %B %Y'),
+                "coincide_con_hoy": fecha == ahora_cdmx.date(),
+                "diferencia_dias": (fecha - ahora_cdmx.date()).days
+            },
+            
+            "registro_que_se_guardaria": registro_simulado,
+            
+            "diagnostico_final": {
+                "problema_detectado": fecha != ahora_cdmx.date(),
+                "mensaje": "FECHA CORRECTA ✅" if fecha == ahora_cdmx.date() else f"FECHA INCORRECTA ❌ - Diferencia: {(fecha - ahora_cdmx.date()).days} días"
+            }
+        }
+        
+        print(f"🧪 RESULTADO TEST ASISTENCIA:")
+        print(f"   📅 Fecha que se guardará: {fecha} ({fecha.strftime('%A')})")
+        print(f"   ✅ ¿Es correcto?: {fecha == ahora_cdmx.date()}")
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ Error en test asistencia: {e}")
+        return {"error": f"Error en test: {e}"}
+
+# Endpoint de debugging ESPECÍFICO para el problema de fechas
+@app.get("/debug/problema-fecha-actual")
+async def debug_problema_fecha():
+    """Debugging específico para entender por qué se guarda un día antes"""
+    try:
+        import pytz
+        from datetime import datetime
+        
+        # Hora actual real
+        ahora_utc = datetime.utcnow()
+        ahora_cdmx = datetime.now(CDMX_TZ)
+        
+        # Simular un timestamp que podría venir del frontend
+        timestamp_simulado = ahora_cdmx.isoformat()
+        
+        # Probar nuestra función
+        fecha_resultado, hora_resultado, filename_resultado = obtener_fecha_hora_cdmx(timestamp_simulado)
+        
+        # También probar sin timestamp (tiempo actual)
+        fecha_actual, hora_actual, filename_actual = obtener_fecha_hora_cdmx(None)
+        
+        return {
+            "analisis_completo": {
+                "fecha_esperada_hoy": ahora_cdmx.date().isoformat(),
+                "dia_esperado": ahora_cdmx.strftime('%A, %d de %B %Y'),
+                
+                "con_timestamp_simulado": {
+                    "timestamp_input": timestamp_simulado,
+                    "fecha_obtenida": fecha_resultado.isoformat(),
+                    "dia_obtenido": fecha_resultado.strftime('%A, %d de %B %Y'),
+                    "es_correcto": fecha_resultado == ahora_cdmx.date(),
+                    "diferencia_dias": (fecha_resultado - ahora_cdmx.date()).days
+                },
+                
+                "sin_timestamp_actual": {
+                    "fecha_obtenida": fecha_actual.isoformat(), 
+                    "dia_obtenido": fecha_actual.strftime('%A, %d de %B %Y'),
+                    "es_correcto": fecha_actual == ahora_cdmx.date(),
+                    "diferencia_dias": (fecha_actual - ahora_cdmx.date()).days
+                },
+                
+                "referencias_tiempo": {
+                    "utc_ahora": ahora_utc.isoformat(),
+                    "cdmx_ahora": ahora_cdmx.isoformat(),
+                    "diferencia_horas": (ahora_cdmx - ahora_utc.replace(tzinfo=pytz.UTC)).total_seconds() / 3600
+                }
+            },
+            
+            "diagnostico": {
+                "problema_detectado": fecha_resultado != ahora_cdmx.date() or fecha_actual != ahora_cdmx.date(),
+                "causa_probable": "Conversión de zona horaria incorrecta" if fecha_resultado != ahora_cdmx.date() else "Función trabajando correctamente",
+                "accion_recomendada": "Revisar lógica de conversión de timestamps" if fecha_resultado != ahora_cdmx.date() else "No hay problema"
+            }
+        }
+        
+    except Exception as e:
+        return {"error": f"Error en debugging: {e}"}
+
+# Endpoint de debugging para fechas y zonas horarias
+@app.get("/debug/fecha-zona-horaria")
+async def debug_fecha_zona_horaria():
+    """Endpoint para debugging de zonas horarias y fechas"""
+    try:
+        # Tiempo actual en diferentes zonas
+        utc_now = datetime.utcnow()
+        cdmx_now = datetime.now(CDMX_TZ)
+        
+        # Probar la función de utilidad
+        fecha_util, hora_util, filename_util = obtener_fecha_hora_cdmx()
+        
+        return {
+            "debug_info": {
+                "utc_actual": {
+                    "datetime": utc_now.isoformat(),
+                    "fecha": utc_now.date().isoformat(),
+                    "dia_semana": utc_now.strftime('%A')
+                },
+                "cdmx_actual": {
+                    "datetime": cdmx_now.isoformat(),
+                    "fecha": cdmx_now.date().isoformat(),
+                    "dia_semana": cdmx_now.strftime('%A')
+                },
+                "funcion_utilidad": {
+                    "fecha": fecha_util.isoformat(),
+                    "hora": hora_util.isoformat(),
+                    "filename": filename_util,
+                    "dia_semana": fecha_util.strftime('%A')
+                }
+            },
+            "problema_detectado": {
+                "diferencia_fechas": utc_now.date() != cdmx_now.date(),
+                "diferencia_horas": abs((cdmx_now - utc_now.replace(tzinfo=pytz.UTC)).total_seconds() / 3600),
+                "recomendacion": "Siempre usar la fecha de CDMX para registros"
+            }
+        }
+        
+    except Exception as e:
+        return {"error": f"Error en debug: {e}"}
+
+# Endpoint de test para debugging de asistencias
+@app.post("/debug/test-fecha-asistencia")
+async def test_fecha_asistencia(
+    timestamp_offline: str = Form(None)
+):
+    """Test para verificar cómo se procesan las fechas en asistencias"""
+    try:
+        print(f"🧪 TEST - Timestamp recibido: {timestamp_offline}")
+        
+        # Probar la función de utilidad
+        fecha, hora, filename = obtener_fecha_hora_cdmx(timestamp_offline)
+        
+        # Información detallada
+        result = {
+            "test_info": {
+                "timestamp_input": timestamp_offline,
+                "fecha_procesada": fecha.isoformat(),
+                "hora_procesada": hora.isoformat(),
+                "filename_generado": filename,
+                "dia_semana": fecha.strftime('%A, %d de %B %Y'),
+                "zona_horaria": str(hora.tzinfo)
+            },
+            "verificaciones": {
+                "es_hoy": fecha == datetime.now(CDMX_TZ).date(),
+                "timestamp_valido": timestamp_offline is not None,
+                "zona_correcta": str(hora.tzinfo) == "America/Mexico_City"
+            }
+        }
+        
+        print(f"🧪 RESULTADO DEL TEST:")
+        print(f"   📅 Fecha: {fecha} ({fecha.strftime('%A')})")
+        print(f"   🕐 Hora: {hora}")
+        print(f"   ✅ Es hoy: {result['verificaciones']['es_hoy']}")
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ Error en test: {e}")
+        return {"error": f"Error en test: {e}"}
 
 # Endpoint temporal para verificar la estructura de la tabla asistencias
 @app.get("/debug/asistencias-estructura")

@@ -300,7 +300,7 @@ class GeoLocationService {
 
   /**
    * Obtener ubicación con estrategia inteligente
-   * Garantiza siempre devolver una ubicación válida
+   * Garantiza siempre devolver una ubicación válida (funciona offline)
    * @param {Object} options - Opciones
    * @returns {Promise} Promise con ubicación
    */
@@ -318,9 +318,9 @@ class GeoLocationService {
     } catch (error) {
       console.warn('Error en getCurrentLocation:', error.message);
       
-      // Si hay ubicación en caché, usarla
+      // Si hay ubicación en caché, usarla (funciona offline)
       if (this.lastKnownLocation) {
-        console.log('🔄 Usando ubicación en caché como fallback');
+        console.log('🔄 Usando ubicación en caché como fallback (modo offline)');
         return {
           ...this.lastKnownLocation,
           fromCache: true,
@@ -328,8 +328,8 @@ class GeoLocationService {
         };
       }
       
-      // Si no hay caché, establecer ubicación por defecto y usarla
-      console.log('🆘 Sin caché disponible, estableciendo ubicación por defecto');
+      // Si no hay caché, establecer ubicación por defecto y usarla (siempre funciona)
+      console.log('🆘 Sin caché disponible, estableciendo ubicación por defecto (modo offline)');
       this.setDefaultLocation();
       
       return {

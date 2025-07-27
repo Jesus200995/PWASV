@@ -665,6 +665,10 @@ async function confirmarAsistencia() {
     // **MODO ONLINE: Enviar directamente al servidor**
     console.log('🌐 Conexión disponible - Enviando asistencia al servidor');
     
+    // Crear timestamp de registro (hora exacta en que se hace el registro)
+    const timestampRegistro = new Date().toISOString();
+    console.log('🕐 Timestamp de registro online:', timestampRegistro);
+    
     // Crear FormData para enviar al servidor
     const formData = new FormData();
     formData.append("usuario_id", user.value.id.toString());
@@ -672,6 +676,7 @@ async function confirmarAsistencia() {
     formData.append("longitud", longitud.value);
     formData.append("descripcion", descripcion.value);
     formData.append("foto", archivoFoto.value);
+    formData.append("timestamp_registro", timestampRegistro); // Hora exacta del registro
 
     // Determinar endpoint según tipo de asistencia y usar el servicio
     let response;

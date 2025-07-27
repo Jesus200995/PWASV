@@ -155,6 +155,16 @@ class OfflineService {
       // Convertir archivo a base64 si existe
       const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
       
+      // Crear timestamp con hora exacta de registro offline
+      const ahora = new Date();
+      const timestamp = ahora.toISOString(); // ISO string con milisegundos para máxima precisión
+      const fecha = ahora.toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      console.log(`💾 Guardando asistencia ${tipo} offline:`);
+      console.log('   - Timestamp exacto:', timestamp);
+      console.log('   - Fecha:', fecha);
+      console.log('   - Usuario ID:', usuarioId);
+      
       const asistencia = {
         usuario_id: usuarioId,
         tipo, // 'entrada' o 'salida'
@@ -164,9 +174,11 @@ class OfflineService {
         foto_base64: fotoBase64,
         foto_filename: archivo ? archivo.name : null,
         foto_type: archivo ? archivo.type : null,
-        timestamp: new Date().toISOString(), // Hora de creación offline
+        timestamp: timestamp, // Hora EXACTA de creación offline (ISO string con milisegundos)
         sync_timestamp: null, // Se completará cuando se sincronice
-        fecha: new Date().toISOString().split('T')[0] // YYYY-MM-DD
+        fecha: fecha, // YYYY-MM-DD para la fecha del registro
+        fecha_completa: timestamp, // Fecha y hora completa para referencia
+        es_offline: true // Marcador para identificar registros offline
       };
 
       const transaction = this.db.transaction([ASISTENCIAS_STORE], 'readwrite');
@@ -177,6 +189,7 @@ class OfflineService {
         
         request.onsuccess = () => {
           console.log(`✅ Asistencia ${tipo} guardada offline con ID:`, request.result);
+          console.log(`📅 Timestamp guardado: ${timestamp}`);
           resolve(request.result);
         };
         
@@ -433,6 +446,40 @@ class OfflineService {
       console.error('❌ Error limpiando datos offline:', error);
       throw error;
     }
+  }
+
+  /**
+   * Función de utilidad para crear timestamp preciso
+   */
+  static crearTimestampPreciso() {
+    return new Date().toISOString(); // Incluye milisegundos para máxima precisión
+  }
+
+  /**
+   * Función de utilidad para formatear fecha para display
+   */
+  static formatearFechaDisplay(timestamp) {
+    try {
+      return new Date(timestamp).toLocaleString('es-MX', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'America/Mexico_City'
+      });
+    } catch (error) {
+      console.error('Error formateando fecha:', error);
+      return timestamp;
+    }
+  }
+
+  /**
+   * Función de utilidad para validar que un timestamp sea válido
+   */
+  static validarTimestamp(timestamp) {
+    return timestamp && !isNaN(new Date(timestamp).getTime());
   }
 }
 

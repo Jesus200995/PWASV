@@ -1,6 +1,6 @@
 {
-  "name": "Sembrando Vida: CONTROL",
-  "short_name": "Sembrando Vida",
+  "name": "PWA Super - Sistema de Asistencia",
+  "short_name": "PWA Super",
   "description": "Sistema de registro de asistencia y actividades con funcionalidad offline",
   "start_url": "/",
   "scope": "/",

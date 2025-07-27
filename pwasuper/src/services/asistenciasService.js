@@ -21,13 +21,18 @@ class AsistenciasService {
       
       console.log(`🔍 Consultando asistencias para la fecha: ${today}`);
       
+      // Usar timestamp para evitar cache del navegador
+      const timestamp = new Date().getTime();
+      const cacheBuster = `_t=${timestamp}`;
+      
       // Usar el endpoint de asistencias filtrado por usuario y fecha de hoy exactamente
-      const response = await axios.get(`${API_URL}/asistencias?usuario_id=${usuarioId}&fecha=${today}`, {
+      const response = await axios.get(`${API_URL}/asistencias?usuario_id=${usuarioId}&fecha=${today}&${cacheBuster}`, {
         // Añadir timeout y manejo de cache para asegurar respuestas actualizadas
         timeout: 10000,
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       
@@ -40,7 +45,9 @@ class AsistenciasService {
       const asistenciasHoy = asistencias.filter(a => {
         // Convertir fecha de la asistencia a YYYY-MM-DD para comparar
         const fechaAsistencia = a.fecha ? new Date(a.fecha).toISOString().split('T')[0] : null;
-        return fechaAsistencia === today;
+        const matches = fechaAsistencia === today;
+        console.log(`🔍 Comparando fechas: ${fechaAsistencia} === ${today} ? ${matches}`);
+        return matches;
       });
       
       console.log(`🔍 Asistencias filtradas para hoy (${today}):`, asistenciasHoy);

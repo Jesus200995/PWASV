@@ -723,7 +723,7 @@ async function confirmarAsistencia() {
     // Guardar estado en localStorage
     guardarEstadoAsistencia();
     
-    // Actualizar datos desde el servidor inmediatamente después del registro exitoso
+    // Verificar asistencia con el backend para actualizar datos
     await verificarAsistenciaHoy();
     
     // Limpiar mensaje después de 5 segundos
@@ -736,16 +736,15 @@ async function confirmarAsistencia() {
     if (err.response) {
       error.value = "Error del servidor: " + (err.response.data.detail || err.response.statusText);
       
-      // Si ya existe registro, actualizar estado inmediatamente
+      // Si ya existe registro, actualizar estado
       if (err.response.data.detail && err.response.data.detail.includes('Ya existe')) {
-        console.log('⚠️ Ya existe registro, actualizando estado...');
         if (tipoAsistencia.value === 'entrada') {
           entradaMarcada.value = true;
         } else {
           salidaMarcada.value = true;
         }
         
-        // Actualizar datos desde el servidor inmediatamente
+        // Actualizar datos desde el servidor
         await verificarAsistenciaHoy();
       }
     } else if (err.request) {
@@ -1030,8 +1029,6 @@ function verificarEstadoAsistencia() {
     const ahora = new Date();
     const fechaHoy = ahora.toISOString().split('T')[0];
     
-    console.log('🔍 Verificando estado de asistencia para el día:', fechaHoy);
-    
     // Cada día es un nuevo registro, así que primero limpiamos los estados
     entradaMarcada.value = false;
     salidaMarcada.value = false;
@@ -1043,7 +1040,6 @@ function verificarEstadoAsistencia() {
     
     if (estadoHoy) {
       const datos = JSON.parse(estadoHoy);
-      console.log('📱 Datos de localStorage para hoy:', datos);
       entradaMarcada.value = datos.entradaMarcada || false;
       salidaMarcada.value = datos.salidaMarcada || false;
       datosEntrada.value = datos.datosEntrada || {};
@@ -1053,8 +1049,7 @@ function verificarEstadoAsistencia() {
     // Limpiamos datos de días anteriores para no acumular basura en localStorage
     limpiarDatosAntiguos();
 
-    // SIEMPRE verificar con el backend para obtener datos actualizados
-    // Esto asegura que incluso si hay cache local, obtenemos los datos reales
+    // Después de cargar del localStorage, verificar con el backend
     verificarAsistenciaHoy();
   } catch (error) {
     console.error('Error al verificar estado de asistencia:', error);
@@ -1089,38 +1084,23 @@ function limpiarDatosAntiguos() {
 async function verificarAsistenciaHoy() {
   verificandoAsistencia.value = true;
   try {
-    console.log('🔄 Verificando asistencia del día con el backend...');
-    
     // Verificar conexión a internet antes de consultar
     isOnline.value = await checkInternetConnection();
     if (!isOnline.value) {
-      console.log('📴 Sin conexión, usando datos locales de asistencia');
+      console.log('Sin conexión, usando datos locales de asistencia');
       return;
     }
 
     // Obtener la fecha actual para comparar
     const fechaActual = new Date().toISOString().split('T')[0];
-    console.log('📅 Fecha actual para consulta:', fechaActual);
     
-    // Forzar consulta fresca al backend sin cache
     const datos = await asistenciasService.consultarAsistenciaHoy(user.value.id);
     asistenciaHoy.value = datos;
     
-    console.log('📊 Datos recibidos del backend:', datos);
-    
     // Verificar que los datos correspondan al día actual
     if (datos.fecha && datos.fecha === fechaActual) {
-      console.log('✅ Datos corresponden al día actual');
-      
-      // Resetear estados antes de actualizar
-      entradaMarcada.value = false;
-      salidaMarcada.value = false;
-      datosEntrada.value = {};
-      datosSalida.value = {};
-      
-      // Actualizar estado de entrada según la respuesta del backend
+      // Actualizar estado de botones según la respuesta del backend
       if (datos.entrada) {
-        console.log('✅ Entrada encontrada en backend:', datos.entrada);
         entradaMarcada.value = true;
         datosEntrada.value = {
           hora: formatearHora(datos.entrada),
@@ -1130,14 +1110,12 @@ async function verificarAsistenciaHoy() {
           foto_url: datos.foto_entrada_url
         };
       } else {
-        console.log('❌ No hay entrada registrada hoy en backend');
+        // Si no hay entrada registrada hoy, resetear estado
         entradaMarcada.value = false;
         datosEntrada.value = {};
       }
       
-      // Actualizar estado de salida según la respuesta del backend
       if (datos.salida) {
-        console.log('✅ Salida encontrada en backend:', datos.salida);
         salidaMarcada.value = true;
         datosSalida.value = {
           hora: formatearHora(datos.salida),
@@ -1147,55 +1125,35 @@ async function verificarAsistenciaHoy() {
           foto_url: datos.foto_salida_url
         };
       } else {
-        console.log('❌ No hay salida registrada hoy en backend');
+        // Si no hay salida registrada hoy, resetear estado de salida
         salidaMarcada.value = false;
         datosSalida.value = {};
       }
       
-      console.log('📊 Estados actualizados - Entrada:', entradaMarcada.value, 'Salida:', salidaMarcada.value);
-      
       // Guardar estado actualizado
       guardarEstadoAsistencia();
     } else {
-      console.log('🆕 Sin registros para el día de hoy o fecha incorrecta. Reiniciando estados.');
-      // Es un nuevo día o no hay datos, reiniciar estados
+      console.log('Sin registros para el día de hoy. Reiniciando estados.');
+      // Es un nuevo día, reiniciar estados
       entradaMarcada.value = false;
       salidaMarcada.value = false;
       datosEntrada.value = {};
       datosSalida.value = {};
       guardarEstadoAsistencia();
     }
-    
-    // Limpiar cualquier mensaje de error previo si la consulta fue exitosa
-    if (error.value && error.value.includes('conectar con el servidor')) {
-      error.value = null;
-    }
-    
-  } catch (errorConsulta) {
-    console.error('❌ Error al verificar asistencia de hoy:', errorConsulta);
-    
+  } catch (error) {
+    console.error('Error al verificar asistencia de hoy:', error);
     // Si hay error de conexión pero es un nuevo día, reiniciar estados
     const fechaGuardada = localStorage.getItem(`asistencia_ultima_fecha_${user.value.id}`);
     const fechaActual = new Date().toISOString().split('T')[0];
     
     if (fechaGuardada !== fechaActual) {
-      console.log('🆕 Es un nuevo día y hay error de conexión, reiniciando estados');
       // Es un nuevo día, reiniciar estados incluso sin conexión
       entradaMarcada.value = false;
       salidaMarcada.value = false;
       datosEntrada.value = {};
       datosSalida.value = {};
       guardarEstadoAsistencia();
-    }
-    
-    // Solo mostrar error si es realmente un problema de conectividad
-    if (errorConsulta.message && errorConsulta.message.includes('conectar con el servidor')) {
-      error.value = 'Sin conexión al servidor. Se mostrarán los datos guardados localmente.';
-      setTimeout(() => {
-        if (error.value && error.value.includes('Sin conexión al servidor')) {
-          error.value = null;
-        }
-      }, 5000);
     }
   } finally {
     verificandoAsistencia.value = false;
@@ -1223,8 +1181,6 @@ function guardarEstadoAsistencia() {
     ultimaActualizacion: ahora.toISOString()
   };
   
-  console.log('💾 Guardando estado de asistencia:', estado);
-  
   // Guardar el estado del día actual
   localStorage.setItem(`asistencia_${user.value.id}_${fechaHoy}`, JSON.stringify(estado));
   
@@ -1232,34 +1188,13 @@ function guardarEstadoAsistencia() {
   localStorage.setItem(`asistencia_ultima_fecha_${user.value.id}`, fechaHoy);
 }
 
-/**
- * Función para refrescar manualmente el estado de asistencia
- * Útil para debugging y actualizaciones forzadas
- */
-async function refrescarEstadoAsistencia() {
-  console.log('🔄 Refrescando estado de asistencia manualmente...');
-  verificandoAsistencia.value = true;
-  
-  // Limpiar cache local para forzar consulta fresca
-  const fechaHoy = new Date().toISOString().split('T')[0];
-  localStorage.removeItem(`asistencia_${user.value.id}_${fechaHoy}`);
-  
-  // Verificar estado completo
-  verificarEstadoAsistencia();
-}
-
 // Comprobar si el usuario está autenticado y verificar conexión
 onMounted(async () => {
-  console.log('🚀 Iniciando componente Home...');
-  
   // Verificar si el usuario está autenticado
   if (!user.value.id) {
-    console.log('❌ Usuario no autenticado, redirigiendo a login');
     router.push("/login");
     return;
   }
-  
-  console.log('✅ Usuario autenticado:', user.value.nombre_completo);
   
   // Verificar estado de asistencia del día
   verificarEstadoAsistencia();
@@ -1284,74 +1219,14 @@ onMounted(async () => {
   } catch (error) {
     console.error('❌ Error verificando servicio de geolocalización:', error);
   }
-  
-  // Agregar listener para cuando se vuelve a enfocar la ventana/pestaña
-  // Esto ayuda a refrescar los datos cuando el usuario regresa a la app
-  window.addEventListener('focus', () => {
-    console.log('👁️ Ventana enfocada, refrescando estado de asistencia...');
-    verificarAsistenciaHoy();
-  });
-  
-  // Agregar listener para cambios de conexión
-  window.addEventListener('online', async () => {
-    console.log('🌐 Conexión restablecida, refrescando datos...');
-    isOnline.value = true;
-    error.value = null;
-    // Verificar asistencia cuando se recupera la conexión
-    await verificarAsistenciaHoy();
-  });
-  
-  window.addEventListener('offline', () => {
-    console.log('📴 Conexión perdida');
-    isOnline.value = false;
-    error.value = getOfflineMessage();
-  });
-  
-  console.log('✅ Componente Home inicializado completamente');
 });
 
-// Watcher para guardar cambios de asistencia en localStorage y debug
-watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], (newValues, oldValues) => {
+// Watcher para guardar cambios de asistencia en localStorage
+watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   if (user.value.id) {
-    console.log('📊 Cambio en estado de asistencia detectado:');
-    console.log('- Entrada marcada:', newValues[0], '(antes:', oldValues[0], ')');
-    console.log('- Salida marcada:', newValues[1], '(antes:', oldValues[1], ')');
-    console.log('- Datos entrada:', newValues[2]);
-    console.log('- Datos salida:', newValues[3]);
     guardarEstadoAsistencia();
   }
 }, { deep: true });
-
-// Watcher para verificar asistencia cuando cambia el estado online
-watch(isOnline, async (newValue) => {
-  if (newValue && user.value.id) {
-    console.log('🌐 Conexión restaurada, verificando asistencia...');
-    // Pequeño delay para asegurar que la conexión esté estable
-    setTimeout(() => {
-      verificarAsistenciaHoy();
-    }, 1000);
-  }
-});
-
-// Exponer función de debug en desarrollo
-if (import.meta.env.DEV) {
-  window.debugAsistencia = {
-    refrescar: refrescarEstadoAsistencia,
-    verificar: verificarAsistenciaHoy,
-    estado: () => ({
-      entradaMarcada: entradaMarcada.value,
-      salidaMarcada: salidaMarcada.value,
-      datosEntrada: datosEntrada.value,
-      datosSalida: datosSalida.value,
-      asistenciaHoy: asistenciaHoy.value
-    }),
-    limpiarCache: () => {
-      const fechaHoy = new Date().toISOString().split('T')[0];
-      localStorage.removeItem(`asistencia_${user.value.id}_${fechaHoy}`);
-      console.log('🗑️ Cache de asistencia limpiado');
-    }
-  };
-}
 </script>
 
 <style scoped>

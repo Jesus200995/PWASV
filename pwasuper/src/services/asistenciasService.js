@@ -15,11 +15,14 @@ class AsistenciasService {
     try {
       console.log('🔍 Consultando asistencia del día para usuario:', usuarioId);
       
-      // Obtener la fecha actual en formato YYYY-MM-DD
+      // Obtener la fecha actual en zona horaria de México (CDMX)
       const now = new Date();
-      const today = now.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      const mexicoTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Mexico_City"}));
+      const today = mexicoTime.toISOString().split('T')[0]; // Formato YYYY-MM-DD
       
-      console.log(`🔍 Consultando asistencias para la fecha: ${today}`);
+      console.log(`🔍 Consultando asistencias para la fecha (México): ${today}`);
+      console.log(`🕐 Hora local original: ${now.toISOString()}`);
+      console.log(`🇲🇽 Hora México: ${mexicoTime.toISOString()}`);
       
       // Usar el endpoint de asistencias filtrado por usuario y fecha de hoy exactamente
       const response = await axios.get(`${API_URL}/asistencias?usuario_id=${usuarioId}&fecha=${today}`, {
@@ -39,7 +42,8 @@ class AsistenciasService {
       // Filtramos solo las asistencias de hoy para mayor seguridad
       const asistenciasHoy = asistencias.filter(a => {
         // Convertir fecha de la asistencia a YYYY-MM-DD para comparar
-        const fechaAsistencia = a.fecha ? new Date(a.fecha).toISOString().split('T')[0] : null;
+        const fechaAsistencia = a.fecha ? a.fecha : null;
+        console.log(`🔍 Comparando fechas: asistencia=${fechaAsistencia}, hoy=${today}`);
         return fechaAsistencia === today;
       });
       

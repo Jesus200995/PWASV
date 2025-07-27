@@ -724,34 +724,41 @@ async def marcar_salida(
         raise HTTPException(status_code=500, detail=f"Error al registrar salida: {str(e)}")
 
 @app.get("/asistencias")
-async def obtener_historial_asistencias(usuario_id: int = None):
+async def obtener_historial_asistencias(usuario_id: int = None, fecha: str = None):
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        print(f"🔍 Obteniendo historial de asistencias para usuario: {usuario_id}")
+        print(f"🔍 Obteniendo historial de asistencias para usuario: {usuario_id}, fecha: {fecha}")
+        
+        # Construir la consulta SQL dinámicamente
+        query = """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
+                          latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
+                          foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
+                   FROM asistencias"""
+        
+        params = []
+        where_conditions = []
         
         if usuario_id:
-            cursor.execute(
-                """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
-                          latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
-                          foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
-                   FROM asistencias 
-                   WHERE usuario_id = %s 
-                   ORDER BY fecha DESC, hora_entrada DESC 
-                   LIMIT 50""",
-                (usuario_id,)
-            )
-        else:
-            cursor.execute(
-                """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
-                          latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
-                          foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
-                   FROM asistencias 
-                   ORDER BY fecha DESC, hora_entrada DESC 
-                   LIMIT 50"""
-            )
+            where_conditions.append("usuario_id = %s")
+            params.append(usuario_id)
         
+        if fecha:
+            # Filtrar por fecha específica
+            where_conditions.append("fecha = %s")
+            params.append(fecha)
+            print(f"📅 Filtrando por fecha específica: {fecha}")
+        
+        if where_conditions:
+            query += " WHERE " + " AND ".join(where_conditions)
+        
+        query += " ORDER BY fecha DESC, hora_entrada DESC LIMIT 50"
+        
+        print(f"🔍 Ejecutando consulta: {query}")
+        print(f"🔍 Con parámetros: {params}")
+        
+        cursor.execute(query, params)
         resultados = cursor.fetchall()
         print(f"📊 Encontradas {len(resultados)} asistencias")
         

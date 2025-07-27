@@ -403,14 +403,16 @@
       </form>
     </div>
 
-    <!-- Mensajes de error -->
+    <!-- Mensajes de error/información -->
     <transition name="fade">
       <div
         v-if="error"
-        class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded"
+        :class="isInfoMessage ? 
+          'mb-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded' : 
+          'mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded'"
         role="alert"
       >
-        <p class="font-bold">Error</p>
+        <p class="font-bold">{{ isInfoMessage ? 'Información' : 'Error' }}</p>
         <p>{{ error }}</p>
       </div>
     </transition>
@@ -537,6 +539,11 @@ const user = computed(() => {
     return {};
   }
   return JSON.parse(storedUser);
+});
+
+// Determinar si el mensaje es de tipo información (sin conexión) o error
+const isInfoMessage = computed(() => {
+  return error.value && error.value.includes('Sin conexión');
 });
 
 // Función para obtener las iniciales del usuario

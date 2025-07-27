@@ -1091,15 +1091,24 @@ async function verificarAsistenciaHoy() {
       return;
     }
 
-    // Obtener la fecha actual para comparar
+    // Verificar si hay registros pendientes offline antes de consultar el servidor
+    const registrosPendientes = await offlineService.obtenerAsistenciasPendientes();
     const fechaActual = new Date().toISOString().split('T')[0];
     
+    // Filtrar registros pendientes del día actual
+    const pendientesHoy = registrosPendientes.filter(reg => 
+      reg.fecha === fechaActual && reg.usuario_id === user.value.id
+    );
+    
+    console.log('📋 Registros offline pendientes para hoy:', pendientesHoy);
+
+    // Obtener datos del servidor
     const datos = await asistenciasService.consultarAsistenciaHoy(user.value.id);
     asistenciaHoy.value = datos;
     
     // Verificar que los datos correspondan al día actual
     if (datos.fecha && datos.fecha === fechaActual) {
-      // Actualizar estado de botones según la respuesta del backend
+      // ENTRADA: Priorizar datos del servidor, pero mantener offline si no está sincronizado
       if (datos.entrada) {
         entradaMarcada.value = true;
         datosEntrada.value = {
@@ -1110,11 +1119,26 @@ async function verificarAsistenciaHoy() {
           foto_url: datos.foto_entrada_url
         };
       } else {
-        // Si no hay entrada registrada hoy, resetear estado
-        entradaMarcada.value = false;
-        datosEntrada.value = {};
+        // Verificar si hay entrada offline pendiente
+        const entradaPendiente = pendientesHoy.find(reg => reg.tipo === 'entrada');
+        if (entradaPendiente) {
+          console.log('📥 Manteniendo entrada offline pendiente:', entradaPendiente);
+          entradaMarcada.value = true;
+          datosEntrada.value = {
+            hora: formatearHora(entradaPendiente.timestamp),
+            descripcion: entradaPendiente.descripcion || '',
+            latitud: entradaPendiente.latitud,
+            longitud: entradaPendiente.longitud,
+            foto_url: 'offline_pending', // Indicador de que está pendiente
+            offline: true // Marcar como offline
+          };
+        } else {
+          entradaMarcada.value = false;
+          datosEntrada.value = {};
+        }
       }
       
+      // SALIDA: Priorizar datos del servidor, pero mantener offline si no está sincronizado
       if (datos.salida) {
         salidaMarcada.value = true;
         datosSalida.value = {
@@ -1125,21 +1149,70 @@ async function verificarAsistenciaHoy() {
           foto_url: datos.foto_salida_url
         };
       } else {
-        // Si no hay salida registrada hoy, resetear estado de salida
-        salidaMarcada.value = false;
-        datosSalida.value = {};
+        // Verificar si hay salida offline pendiente
+        const salidaPendiente = pendientesHoy.find(reg => reg.tipo === 'salida');
+        if (salidaPendiente) {
+          console.log('📤 Manteniendo salida offline pendiente:', salidaPendiente);
+          salidaMarcada.value = true;
+          datosSalida.value = {
+            hora: formatearHora(salidaPendiente.timestamp),
+            descripcion: salidaPendiente.descripcion || '',
+            latitud: salidaPendiente.latitud,
+            longitud: salidaPendiente.longitud,
+            foto_url: 'offline_pending', // Indicador de que está pendiente
+            offline: true // Marcar como offline
+          };
+        } else {
+          salidaMarcada.value = false;
+          datosSalida.value = {};
+        }
       }
       
       // Guardar estado actualizado
       guardarEstadoAsistencia();
     } else {
-      console.log('Sin registros para el día de hoy. Reiniciando estados.');
-      // Es un nuevo día, reiniciar estados
-      entradaMarcada.value = false;
-      salidaMarcada.value = false;
-      datosEntrada.value = {};
-      datosSalida.value = {};
-      guardarEstadoAsistencia();
+      console.log('Sin registros del servidor para hoy. Verificando offline...');
+      
+      // Verificar si hay registros offline para hoy
+      if (pendientesHoy.length > 0) {
+        console.log('📱 Usando registros offline del día:', pendientesHoy);
+        
+        const entradaPendiente = pendientesHoy.find(reg => reg.tipo === 'entrada');
+        const salidaPendiente = pendientesHoy.find(reg => reg.tipo === 'salida');
+        
+        if (entradaPendiente) {
+          entradaMarcada.value = true;
+          datosEntrada.value = {
+            hora: formatearHora(entradaPendiente.timestamp),
+            descripcion: entradaPendiente.descripcion || '',
+            latitud: entradaPendiente.latitud,
+            longitud: entradaPendiente.longitud,
+            foto_url: 'offline_pending',
+            offline: true
+          };
+        }
+        
+        if (salidaPendiente) {
+          salidaMarcada.value = true;
+          datosSalida.value = {
+            hora: formatearHora(salidaPendiente.timestamp),
+            descripcion: salidaPendiente.descripcion || '',
+            latitud: salidaPendiente.latitud,
+            longitud: salidaPendiente.longitud,
+            foto_url: 'offline_pending',
+            offline: true
+          };
+        }
+        
+        guardarEstadoAsistencia();
+      } else {
+        // Es un nuevo día, reiniciar estados
+        entradaMarcada.value = false;
+        salidaMarcada.value = false;
+        datosEntrada.value = {};
+        datosSalida.value = {};
+        guardarEstadoAsistencia();
+      }
     }
   } catch (error) {
     console.error('Error al verificar asistencia de hoy:', error);

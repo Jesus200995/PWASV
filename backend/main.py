@@ -523,9 +523,7 @@ async def marcar_entrada(
     longitud: float = Form(...),
     descripcion: str = Form(""),
     foto: UploadFile = File(...),
-    timestamp_offline: str = Form(None),  # Timestamp de registro offline
-    timestamp_registro: str = Form(None),  # Timestamp de registro online
-    fecha_original: str = Form(None)  # Fecha original del registro
+    timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
 ):
     try:
         print(f"🔍 ENTRADA - Datos recibidos:")
@@ -535,52 +533,31 @@ async def marcar_entrada(
         print(f"   descripcion: {descripcion}")
         print(f"   foto: {foto.filename}")
         print(f"   timestamp_offline: {timestamp_offline}")
-        print(f"   timestamp_registro: {timestamp_registro}")
-        print(f"   fecha_original: {fecha_original}")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Función para parsear timestamp ISO
-        def parse_iso_timestamp(timestamp_str):
-            try:
-                if timestamp_str:
-                    # Convertir string ISO a datetime y ajustar a zona horaria de CDMX
-                    if timestamp_str.endswith('Z'):
-                        fecha_hora_utc = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-                    else:
-                        fecha_hora_utc = datetime.fromisoformat(timestamp_str)
-                    return fecha_hora_utc.astimezone(CDMX_TZ)
-                return None
-            except Exception as e:
-                print(f"⚠️ Error parseando timestamp {timestamp_str}: {e}")
-                return None
-        
-        # Determinar el timestamp correcto a usar (prioridad: offline > registro > actual)
-        hora_entrada = None
-        timestamp_origen = "servidor"
-        
+        # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
         if timestamp_offline:
-            # Registro offline - usar hora original de cuando se registró sin conexión
-            hora_entrada = parse_iso_timestamp(timestamp_offline)
-            timestamp_origen = "offline"
-            print(f"📅 Usando timestamp OFFLINE: {hora_entrada}")
-        elif timestamp_registro:
-            # Registro online - usar hora específica del dispositivo
-            hora_entrada = parse_iso_timestamp(timestamp_registro)
-            timestamp_origen = "registro"
-            print(f"📅 Usando timestamp REGISTRO: {hora_entrada}")
-        
-        # Fallback - usar tiempo actual del servidor
-        if not hora_entrada:
-            hora_entrada = datetime.now(CDMX_TZ)
-            timestamp_origen = "servidor"
-            print(f"📅 Usando timestamp SERVIDOR: {hora_entrada}")
-        
-        fecha = hora_entrada.date()
-        timestamp_for_filename = hora_entrada.strftime('%Y%m%d%H%M%S')
-        
-        print(f"✅ Timestamp final para entrada: {hora_entrada} (origen: {timestamp_origen})")
+            try:
+                # Convertir string ISO a datetime y ajustar a zona horaria de CDMX
+                fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
+                hora_entrada = fecha_hora_utc.astimezone(CDMX_TZ)
+                fecha = hora_entrada.date()
+                print(f"📅 Usando timestamp offline: {hora_entrada}")
+                # Usar el timestamp offline también para el nombre del archivo
+                timestamp_for_filename = hora_entrada.strftime('%Y%m%d%H%M%S')
+            except Exception as e:
+                print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
+                now = datetime.now(CDMX_TZ)
+                fecha = now.date()
+                hora_entrada = now
+                timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
+        else:
+            now = datetime.now(CDMX_TZ)
+            fecha = now.date()
+            hora_entrada = now
+            timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
 
         # Revisa si ya existe asistencia para hoy para este usuario específico
         cursor.execute(
@@ -643,9 +620,7 @@ async def marcar_salida(
     longitud: float = Form(...),
     descripcion: str = Form(""),
     foto: UploadFile = File(...),
-    timestamp_offline: str = Form(None),  # Timestamp de registro offline
-    timestamp_registro: str = Form(None),  # Timestamp de registro online
-    fecha_original: str = Form(None)  # Fecha original del registro
+    timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
 ):
     try:
         print(f"🔍 SALIDA - Datos recibidos:")
@@ -655,52 +630,31 @@ async def marcar_salida(
         print(f"   descripcion: {descripcion}")
         print(f"   foto: {foto.filename}")
         print(f"   timestamp_offline: {timestamp_offline}")
-        print(f"   timestamp_registro: {timestamp_registro}")
-        print(f"   fecha_original: {fecha_original}")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Función para parsear timestamp ISO (reutilizada del endpoint de entrada)
-        def parse_iso_timestamp(timestamp_str):
-            try:
-                if timestamp_str:
-                    # Convertir string ISO a datetime y ajustar a zona horaria de CDMX
-                    if timestamp_str.endswith('Z'):
-                        fecha_hora_utc = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-                    else:
-                        fecha_hora_utc = datetime.fromisoformat(timestamp_str)
-                    return fecha_hora_utc.astimezone(CDMX_TZ)
-                return None
-            except Exception as e:
-                print(f"⚠️ Error parseando timestamp {timestamp_str}: {e}")
-                return None
-        
-        # Determinar el timestamp correcto a usar (prioridad: offline > registro > actual)
-        hora_salida = None
-        timestamp_origen = "servidor"
-        
+        # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
         if timestamp_offline:
-            # Registro offline - usar hora original de cuando se registró sin conexión
-            hora_salida = parse_iso_timestamp(timestamp_offline)
-            timestamp_origen = "offline"
-            print(f"📅 Usando timestamp OFFLINE para salida: {hora_salida}")
-        elif timestamp_registro:
-            # Registro online - usar hora específica del dispositivo
-            hora_salida = parse_iso_timestamp(timestamp_registro)
-            timestamp_origen = "registro"
-            print(f"📅 Usando timestamp REGISTRO para salida: {hora_salida}")
-        
-        # Fallback - usar tiempo actual del servidor
-        if not hora_salida:
-            hora_salida = datetime.now(CDMX_TZ)
-            timestamp_origen = "servidor"
-            print(f"📅 Usando timestamp SERVIDOR para salida: {hora_salida}")
-        
-        fecha = hora_salida.date()
-        timestamp_for_filename = hora_salida.strftime('%Y%m%d%H%M%S')
-        
-        print(f"✅ Timestamp final para salida: {hora_salida} (origen: {timestamp_origen})")
+            try:
+                # Convertir string ISO a datetime y ajustar a zona horaria de CDMX
+                fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
+                hora_salida = fecha_hora_utc.astimezone(CDMX_TZ)
+                fecha = hora_salida.date()
+                print(f"📅 Usando timestamp offline para salida: {hora_salida}")
+                # Usar el timestamp offline también para el nombre del archivo
+                timestamp_for_filename = hora_salida.strftime('%Y%m%d%H%M%S')
+            except Exception as e:
+                print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
+                now = datetime.now(CDMX_TZ)
+                fecha = now.date()
+                hora_salida = now
+                timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
+        else:
+            now = datetime.now(CDMX_TZ)
+            fecha = now.date()
+            hora_salida = now
+            timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
 
         # Busca el registro de asistencia de hoy para este usuario específico
         cursor.execute(

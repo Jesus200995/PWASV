@@ -540,13 +540,21 @@ async def marcar_entrada(
         # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
         if timestamp_offline:
             try:
-                # Convertir string ISO a datetime y ajustar a zona horaria de CDMX
+                # Convertir string ISO a datetime
                 fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
-                hora_entrada = fecha_hora_utc.astimezone(CDMX_TZ)
-                fecha = hora_entrada.date()
-                print(f"📅 Usando timestamp offline: {hora_entrada}")
+                
+                # SOLUCIÓN: Convertir a zona horaria de CDMX y LUEGO extraer la fecha local
+                hora_entrada_cdmx = fecha_hora_utc.astimezone(CDMX_TZ)
+                fecha = hora_entrada_cdmx.date()  # Usar la fecha LOCAL de CDMX
+                hora_entrada = hora_entrada_cdmx
+                
+                print(f"📅 ✅ Timestamp offline procesado:")
+                print(f"   UTC original: {fecha_hora_utc}")
+                print(f"   CDMX convertido: {hora_entrada_cdmx}")
+                print(f"   Fecha CDMX: {fecha}")
+                
                 # Usar el timestamp offline también para el nombre del archivo
-                timestamp_for_filename = hora_entrada.strftime('%Y%m%d%H%M%S')
+                timestamp_for_filename = hora_entrada_cdmx.strftime('%Y%m%d%H%M%S')
             except Exception as e:
                 print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
                 now = datetime.now(CDMX_TZ)
@@ -558,6 +566,7 @@ async def marcar_entrada(
             fecha = now.date()
             hora_entrada = now
             timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
+            print(f"📅 ⏰ Usando timestamp actual CDMX: {now}")
 
         # Revisa si ya existe asistencia para hoy para este usuario específico
         cursor.execute(
@@ -637,13 +646,21 @@ async def marcar_salida(
         # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
         if timestamp_offline:
             try:
-                # Convertir string ISO a datetime y ajustar a zona horaria de CDMX
+                # Convertir string ISO a datetime
                 fecha_hora_utc = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
-                hora_salida = fecha_hora_utc.astimezone(CDMX_TZ)
-                fecha = hora_salida.date()
-                print(f"📅 Usando timestamp offline para salida: {hora_salida}")
+                
+                # SOLUCIÓN: Convertir a zona horaria de CDMX y LUEGO extraer la fecha local
+                hora_salida_cdmx = fecha_hora_utc.astimezone(CDMX_TZ)
+                fecha = hora_salida_cdmx.date()  # Usar la fecha LOCAL de CDMX
+                hora_salida = hora_salida_cdmx
+                
+                print(f"📅 ✅ Timestamp offline procesado para salida:")
+                print(f"   UTC original: {fecha_hora_utc}")
+                print(f"   CDMX convertido: {hora_salida_cdmx}")
+                print(f"   Fecha CDMX: {fecha}")
+                
                 # Usar el timestamp offline también para el nombre del archivo
-                timestamp_for_filename = hora_salida.strftime('%Y%m%d%H%M%S')
+                timestamp_for_filename = hora_salida_cdmx.strftime('%Y%m%d%H%M%S')
             except Exception as e:
                 print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
                 now = datetime.now(CDMX_TZ)
@@ -655,6 +672,7 @@ async def marcar_salida(
             fecha = now.date()
             hora_salida = now
             timestamp_for_filename = now.strftime('%Y%m%d%H%M%S')
+            print(f"📅 ⏰ Usando timestamp actual CDMX: {now}")
 
         # Busca el registro de asistencia de hoy para este usuario específico
         cursor.execute(

@@ -13,9 +13,9 @@ export function checkInternetConnection() {
   });
 }
 
-// Mensaje de información cuando no hay conexión
+// Mensaje de error cuando no hay conexión
 export function getOfflineMessage() {
-  return "Sin conexión. Los registros de actividades, entrada y salida se guardarán automáticamente y serán enviados cuando se restablezca la conexión.";
+  return "No hay conexión a internet. Esta función requiere conexión para funcionar correctamente.";
 }
 
 // Configuración de URLs de API

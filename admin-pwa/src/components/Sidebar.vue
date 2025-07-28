@@ -231,7 +231,7 @@
                 <circle cx="12" cy="10" r="3"/>
               </svg>
             </div>
-            <span class="nav-text">Visor de Mapa</span>
+            <span class="nav-text">Visor de Seguimiento</span>
             <div class="nav-glow"></div>
           </router-link>
         </li>

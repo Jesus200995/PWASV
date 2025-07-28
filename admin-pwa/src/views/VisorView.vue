@@ -17,7 +17,7 @@
               </svg>
             </div>
             <div class="header-text">
-              <h1 class="header-title">Visor de Mapa</h1>
+              <h1 class="header-title">Visor de Seguimiento</h1>
               <p class="header-subtitle">Visualiza todas las ubicaciones en tiempo real</p>
             </div>
           </div>
@@ -1795,7 +1795,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(16px, 4vh, 32px) clamp(16px, 4vw, 32px);
+  padding: clamp(8px, 1.5vh, 14px) clamp(16px, 4vw, 32px);
   color: white;
   box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
@@ -1835,10 +1835,10 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .header-icon {
-  width: clamp(32px, 5vw, 48px);
-  height: clamp(32px, 5vw, 48px);
+  width: clamp(28px, 4vw, 40px);
+  height: clamp(28px, 4vw, 40px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(8px, 1.5vw, 12px);
+  border-radius: clamp(6px, 1vw, 10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1848,8 +1848,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .header-icon svg {
-  width: clamp(16px, 3vw, 24px);
-  height: clamp(16px, 3vw, 24px);
+  width: clamp(14px, 2.5vw, 20px);
+  height: clamp(14px, 2.5vw, 20px);
   color: white;
 }
 
@@ -1864,9 +1864,9 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .header-title {
-  font-size: clamp(20px, 4vw, 32px);
+  font-size: clamp(16px, 3vw, 24px);
   font-weight: 700;
-  margin: 0 0 clamp(4px, 1vw, 8px) 0;
+  margin: 0 0 clamp(2px, 0.5vw, 4px) 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1877,7 +1877,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .header-subtitle {
-  font-size: clamp(12px, 2vw, 16px);
+  font-size: clamp(10px, 1.5vw, 13px);
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
   font-weight: 400;
@@ -5289,7 +5289,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   }
   
   .page-header {
-    padding: 16px 20px;
+    padding: 8px 20px;
   }
   
   .header-content {

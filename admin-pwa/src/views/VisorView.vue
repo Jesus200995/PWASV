@@ -1844,18 +1844,12 @@ watch([filtroTipo, filtroPeriodo], () => {
   justify-content: center;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: float 3s ease-in-out infinite;
 }
 
 .header-icon svg {
   width: clamp(14px, 2.5vw, 20px);
   height: clamp(14px, 2.5vw, 20px);
   color: white;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
 }
 
 .header-text {

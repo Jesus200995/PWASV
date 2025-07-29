@@ -327,7 +327,7 @@
                 <span class="detail-label">Contraseña</span>
                 <div class="password-display">
                   <span class="password-value">
-                    {{ showPassword ? (usuarioSeleccionado.password || usuarioSeleccionado.contraseña || 'Sin contraseña') : '••••••••••••' }}
+                    {{ showPassword ? (usuarioSeleccionado.contrasena || usuarioSeleccionado.password || usuarioSeleccionado.contraseña || 'Sin contraseña') : '••••••••••••' }}
                   </span>
                   <button @click="togglePassword" class="password-toggle-btn" type="button">
                     <svg v-if="showPassword" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -554,7 +554,7 @@ const verDetalles = (usuario) => {
   
   // Debug para ver qué datos tiene el usuario
   console.log('🔍 Usuario seleccionado para detalles:', usuario)
-  console.log('🔑 Contraseña disponible:', usuario.password || usuario.contraseña || 'No encontrada')
+  console.log('🔑 Contraseña disponible:', usuario.contrasena || usuario.password || usuario.contraseña || 'No encontrada')
   
   showModal.value = true
 }

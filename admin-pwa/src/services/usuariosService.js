@@ -8,8 +8,8 @@ class UsuariosService {
 
   async obtenerUsuarios() {
     try {
-      console.log('🔍 Obteniendo usuarios desde la API real...');
-      const response = await fetch(`${API_BASE}/usuarios`, {
+      console.log('🔍 Obteniendo usuarios con contraseñas desde la API real...');
+      const response = await fetch(`${API_BASE}/usuarios/exportacion-completa`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -22,7 +22,7 @@ class UsuariosService {
       }
       
       const data = await response.json();
-      console.log('✅ Respuesta de la API:', data);
+      console.log('✅ Respuesta de la API con contraseñas:', data);
       
       // El endpoint devuelve {usuarios: []} según la implementación del backend
       let usuarios = [];
@@ -32,12 +32,12 @@ class UsuariosService {
         usuarios = data;
       }
       
-      // Actualizar cache con los usuarios obtenidos
+      // Actualizar cache con los usuarios obtenidos (incluyendo contraseñas)
       usuarios.forEach(usuario => {
         this.cache.set(usuario.id, usuario);
       });
       
-      console.log(`✅ ${usuarios.length} usuarios obtenidos desde la base de datos`);
+      console.log(`✅ ${usuarios.length} usuarios obtenidos con contraseñas desde la base de datos`);
       return usuarios;
       
     } catch (error) {

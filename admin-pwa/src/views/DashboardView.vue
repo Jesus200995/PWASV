@@ -418,6 +418,152 @@
                 </div>
               </div>
             </div>
+
+            <!-- Vista de detalles de asistencia -->
+            <div v-else-if="modalType === 'asistencia' && selectedRecord" class="asistencia-detalles">
+              <div class="detail-grid asistencia-grid">
+                <!-- Información del Usuario -->
+                <div class="detail-section user-section">
+                  <div class="section-header">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    <h4>Información del Usuario</h4>
+                  </div>
+                  
+                  <div class="detail-item">
+                    <div class="detail-icon">
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content">
+                      <span class="detail-label">ID Usuario</span>
+                      <span class="detail-value highlight">#{{ selectedRecord.usuario_id }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-item">
+                    <div class="detail-icon">
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content">
+                      <span class="detail-label">Nombre Completo</span>
+                      <span class="detail-value">{{ selectedRecord.usuario?.nombre_completo || 'Usuario ' + selectedRecord.usuario_id }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-item">
+                    <div class="detail-icon">
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content">
+                      <span class="detail-label">Correo</span>
+                      <span class="detail-value">{{ selectedRecord.usuario?.correo || 'No disponible' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Información de Asistencia -->
+                <div class="detail-section attendance-section">
+                  <div class="section-header">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <h4>Detalles de Asistencia</h4>
+                  </div>
+
+                  <div class="detail-item">
+                    <div class="detail-icon">
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content">
+                      <span class="detail-label">Hora de Entrada</span>
+                      <span class="detail-value time-value">{{ selectedRecord.hora_entrada || 'No registrada' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-item">
+                    <div class="detail-icon">
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content">
+                      <span class="detail-label">Hora de Salida</span>
+                      <span class="detail-value time-value">{{ selectedRecord.hora_salida || 'No registrada' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-item">
+                    <div class="detail-icon">
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content">
+                      <span class="detail-label">Fecha</span>
+                      <span class="detail-value">{{ formatFecha(selectedRecord.fecha) }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-item">
+                    <div class="detail-icon">
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content">
+                      <span class="detail-label">Estado</span>
+                      <span :class="['detail-value', 'status-badge', selectedRecord.hora_salida ? 'completed' : 'active']">
+                        {{ selectedRecord.hora_salida ? 'Completado' : 'Presente' }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div v-if="selectedRecord.hora_entrada && selectedRecord.hora_salida" class="detail-item">
+                    <div class="detail-icon">
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M15,1H9V3H15M19,8H17V6H7V8H5V6A2,2 0 0,1 7,4H17A2,2 0 0,1 19,6M9,11H15V9H9M19,19H5L3,17V9A2,2 0 0,1 5,7H19A2,2 0 0,1 21,9V17L19,19Z"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content">
+                      <span class="detail-label">Tiempo Trabajado</span>
+                      <span class="detail-value time-worked">{{ calcularTiempoTotal(selectedRecord.hora_entrada, selectedRecord.hora_salida) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Imagen de la asistencia -->
+                <div v-if="selectedRecord.foto_url" class="detail-section photo-section">
+                  <div class="section-header">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd"/>
+                    </svg>
+                    <h4>Fotografía de Registro</h4>
+                  </div>
+                  
+                  <div class="photo-container-large">
+                    <img 
+                      :src="`${API_URL}/${selectedRecord.foto_url}`" 
+                      alt="Foto de asistencia" 
+                      class="detail-photo-large"
+                      @click="abrirFotoCompleta(selectedRecord.foto_url)"
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Footer del modal -->
@@ -1826,6 +1972,14 @@ const logout = () => {
   animation: modalSlideIn 0.3s ease-out;
 }
 
+/* Modal cuadrado para asistencia */
+.modal-content:has(.asistencia-detalles) {
+  max-width: 800px;
+  width: 90vw;
+  max-height: 90vh;
+  aspect-ratio: unset;
+}
+
 @keyframes modalSlideIn {
   from {
     transform: translateY(30px) scale(0.95);
@@ -2087,6 +2241,117 @@ const logout = () => {
   height: 0;
 }
 
+/* Estilos específicos para el modal de asistencia */
+.asistencia-detalles .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  grid-template-areas: 
+    "user attendance"
+    "photo photo";
+}
+
+.detail-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
+  border: 2px solid rgba(76, 175, 80, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.detail-section:hover {
+  border-color: rgba(76, 175, 80, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.1);
+}
+
+.user-section {
+  grid-area: user;
+}
+
+.attendance-section {
+  grid-area: attendance;
+}
+
+.photo-section {
+  grid-area: photo;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(76, 175, 80, 0.1);
+}
+
+.section-header svg {
+  color: #4CAF50;
+}
+
+.section-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2E7D32;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.asistencia-detalles .detail-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  transition: all 0.3s ease;
+}
+
+.asistencia-detalles .detail-item:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(76, 175, 80, 0.2);
+  transform: translateX(4px);
+}
+
+.time-value {
+  color: #2E7D32 !important;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.time-worked {
+  color: #1B5E20 !important;
+  font-weight: 700;
+  font-size: 16px;
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.photo-container-large {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.detail-photo-large {
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 3px solid rgba(76, 175, 80, 0.1);
+}
+
+.detail-photo-large:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 40px rgba(76, 175, 80, 0.3);
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
 /* Responsividad */
 @media (max-width: 768px) {
   .main-content {
@@ -2169,6 +2434,24 @@ const logout = () => {
   
   .modal-footer {
     display: none;
+  }
+  
+  /* Modal de asistencia responsive */
+  .asistencia-detalles .detail-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: 
+      "user"
+      "attendance"
+      "photo";
+    gap: 16px;
+  }
+  
+  .detail-section {
+    padding: 16px;
+  }
+  
+  .section-header h4 {
+    font-size: 14px;
   }
 }
 

@@ -178,6 +178,46 @@ class UsuariosService {
     console.log('🗑️ Cache de usuarios limpiado');
   }
 
+  async actualizarUsuario(id, datosUsuario) {
+    try {
+      console.log(`✏️ Actualizando usuario ${id} en la API...`, datosUsuario);
+      const response = await fetch(`${API_BASE}/usuarios/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datosUsuario)
+      });
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.warn(`⚠️ Usuario ${id} no encontrado para actualizar`);
+          throw new Error(`Usuario ${id} no encontrado`);
+        }
+        if (response.status === 400) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Datos inválidos');
+        }
+        console.error(`❌ Error HTTP: ${response.status} - ${response.statusText}`);
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      
+      const resultado = await response.json();
+      console.log(`✅ Usuario ${id} actualizado exitosamente:`, resultado);
+      
+      // Actualizar cache con el usuario actualizado
+      if (resultado.usuario) {
+        this.cache.set(id, resultado.usuario);
+      }
+      
+      return resultado;
+      
+    } catch (error) {
+      console.error(`❌ Error al actualizar usuario ${id}:`, error);
+      throw error; // Propagar el error para manejo en las vistas
+    }
+  }
+
   async eliminarUsuario(id) {
     try {
       console.log(`🗑️ Eliminando usuario ${id} desde la API...`);

@@ -389,6 +389,85 @@ async def obtener_usuario(user_id: int):
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener usuario: {str(e)}")
 
+# Endpoint para actualizar un usuario específico
+@app.put("/usuarios/{user_id}")
+async def actualizar_usuario(user_id: int, usuario: UserCreate):
+    """Actualiza los datos de un usuario específico"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"✏️ Actualizando usuario {user_id}...")
+        
+        # Validación de CURP si se proporciona
+        if usuario.curp and usuario.curp.strip():
+            curp_upper = usuario.curp.upper().strip()
+            if len(curp_upper) != 18:
+                raise HTTPException(status_code=400, detail="La CURP debe tener exactamente 18 caracteres")
+            
+            if not re.match(r'^[A-Z0-9]{18}$', curp_upper):
+                raise HTTPException(status_code=400, detail="La CURP tiene un formato inválido")
+            
+            # Verificar que la CURP no esté en uso por otro usuario
+            cursor.execute("SELECT id FROM usuarios WHERE curp = %s AND id != %s", (curp_upper, user_id))
+            if cursor.fetchone():
+                raise HTTPException(status_code=400, detail="Esta CURP ya está registrada por otro usuario")
+        else:
+            curp_upper = None
+        
+        # Verificar que el correo no esté en uso por otro usuario
+        cursor.execute("SELECT id FROM usuarios WHERE correo = %s AND id != %s", (usuario.correo, user_id))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="Este correo ya está registrado por otro usuario")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (user_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Actualizar usuario (contraseña sin encriptar)
+        cursor.execute(
+            """UPDATE usuarios 
+               SET correo = %s, nombre_completo = %s, cargo = %s, 
+                   supervisor = %s, contrasena = %s, curp = %s 
+               WHERE id = %s""",
+            (usuario.correo, usuario.nombre_completo, usuario.cargo, 
+             usuario.supervisor, usuario.contrasena, curp_upper, user_id)
+        )
+        
+        conn.commit()
+        
+        # Obtener usuario actualizado
+        cursor.execute(
+            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp FROM usuarios WHERE id = %s",
+            (user_id,)
+        )
+        
+        resultado = cursor.fetchone()
+        usuario_actualizado = {
+            "id": resultado[0],
+            "correo": resultado[1],
+            "nombre_completo": resultado[2],
+            "cargo": resultado[3],
+            "supervisor": resultado[4],
+            "contrasena": resultado[5],
+            "curp": resultado[6]
+        }
+        
+        print(f"✅ Usuario {user_id} actualizado exitosamente")
+        return {"mensaje": "Usuario actualizado exitosamente", "usuario": usuario_actualizado}
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al actualizar usuario: {str(e)}")
+
 # Endpoint para eliminar un usuario específico con todos sus datos
 @app.delete("/usuarios/{user_id}")
 async def eliminar_usuario(user_id: int):

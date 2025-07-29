@@ -782,29 +782,29 @@ const guardarEdicion = async () => {
   try {
     console.log('✏️ Editando usuario:', usuarioAEditar.value.id, datosEdicion.value)
     
-    // Aquí implementarías la llamada al backend para actualizar el usuario
-    // await usuariosService.actualizarUsuario(usuarioAEditar.value.id, datosEdicion.value)
+    // Llamar al servicio para actualizar el usuario en la base de datos
+    const resultado = await usuariosService.actualizarUsuario(usuarioAEditar.value.id, datosEdicion.value)
     
-    // Por ahora, solo actualizamos en el array local
+    // Actualizar el usuario en el array local con los datos devueltos por el servidor
     const index = usuarios.value.findIndex(u => u.id === usuarioAEditar.value.id)
     if (index !== -1) {
-      usuarios.value[index] = {
-        ...usuarios.value[index],
-        ...datosEdicion.value
-      }
+      usuarios.value[index] = resultado.usuario
     }
     
     // Actualizar usuarios filtrados
     filtrarUsuarios()
     
-    console.log('✅ Usuario editado exitosamente')
+    console.log('✅ Usuario editado exitosamente en la base de datos')
     
     // Cerrar modal
     cancelarEdicion()
     
+    // Mostrar mensaje de éxito
+    alert('Usuario actualizado exitosamente en la base de datos')
+    
   } catch (error) {
     console.error('❌ Error al editar usuario:', error)
-    alert('Error al editar el usuario. Por favor, inténtalo de nuevo.')
+    alert(`Error al editar el usuario: ${error.message}`)
   } finally {
     editandoUsuario.value = false
   }

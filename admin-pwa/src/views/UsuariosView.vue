@@ -157,8 +157,11 @@
                   </td>
                   <td>
                     <div class="actions-container">
-                      <button @click="verDetalles(usuario)" class="btn-ver">
-                        Ver Detalles
+                      <button @click="verDetalles(usuario)" class="btn-ver" title="Ver detalles del usuario">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
                       </button>
                       <button @click="confirmarEliminarUsuario(usuario)" class="btn-eliminar" title="Eliminar usuario">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1506,26 +1509,22 @@ const logout = () => {
 }
 
 .btn-ver {
-  padding: clamp(4px, 0.8vw, 6px) clamp(6px, 1.2vw, 8px);
+  width: clamp(32px, 6vw, 36px);
+  height: clamp(32px, 6vw, 36px);
+  padding: 0;
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
   border: none;
-  border-radius: clamp(8px, 2vw, 12px);
+  border-radius: 50%;
   cursor: pointer;
-  font-size: clamp(8px, 1.5vw, 10px);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
   position: relative;
   overflow: hidden;
-  white-space: nowrap;
-  min-width: clamp(50px, 10vw, 70px);
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
+  flex-shrink: 0;
 }
 
 .btn-ver::before {
@@ -1545,16 +1544,25 @@ const logout = () => {
 
 .btn-ver:hover {
   background: linear-gradient(135deg, #43A047, #388E3C);
-  transform: translateY(-2px) scale(1.05);
+  transform: translateY(-2px) scale(1.1);
   box-shadow: 
-    0 8px 20px rgba(76, 175, 80, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 6px 16px rgba(76, 175, 80, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-ver:active {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+}
+
+.btn-ver svg {
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
+  transition: all 0.3s ease;
+}
+
+.btn-ver:hover svg {
+  transform: scale(1.1);
 }
 
 /* Estilos para el contenedor de acciones */
@@ -1562,7 +1570,7 @@ const logout = () => {
   display: flex;
   gap: 8px;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 /* Estilos para el botón de eliminar */

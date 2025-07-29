@@ -131,9 +131,9 @@
             <table class="usuarios-table">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th class="col-id">ID</th>
+                  <th class="col-nombre">Nombre Completo</th>
                   <th>Correo</th>
-                  <th>Nombre Completo</th>
                   <th>Cargo</th>
                   <th>Supervisor</th>
                   <th>Fecha de Registro</th>
@@ -142,9 +142,11 @@
                 </tr>
               </thead>
               <tbody>                <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
-                  <td>#{{ usuario.id }}</td>
+                  <td class="col-id">#{{ usuario.id }}</td>
+                  <td class="col-nombre">
+                    <span class="nombre-animado">{{ usuario.nombre_completo }}</span>
+                  </td>
                   <td>{{ usuario.correo }}</td>
-                  <td>{{ usuario.nombre_completo }}</td>
                   <td>{{ usuario.cargo }}</td>
                   <td>{{ usuario.supervisor }}</td>
                   <td>{{ formatFecha(usuario.created_at || new Date()) }}</td>
@@ -1292,6 +1294,22 @@ const logout = () => {
   text-overflow: ellipsis;
 }
 
+/* Headers específicos */
+.usuarios-table th.col-id {
+  width: 5%;
+  min-width: 40px;
+  font-size: clamp(7px, 1.2vw, 9px);
+  padding: clamp(8px, 1.5vw, 12px) clamp(2px, 0.5vw, 4px);
+}
+
+.usuarios-table th.col-nombre {
+  width: 20%;
+  text-align: left;
+  padding-left: clamp(8px, 2vw, 12px);
+  color: #4CAF50;
+  font-weight: 700;
+}
+
 .usuarios-table td {
   padding: clamp(6px, 1.2vw, 10px) clamp(3px, 0.8vw, 6px);
   border-bottom: 1px solid rgba(224, 224, 224, 0.6);
@@ -1306,18 +1324,19 @@ const logout = () => {
   text-align: center;
 }
 
-.usuarios-table td:nth-child(1) { /* ID */
-  width: 8%;
+.usuarios-table td:nth-child(1) { /* ID - Más pequeño */
+  width: 5%;
   text-align: center;
 }
 
-.usuarios-table td:nth-child(2) { /* Correo */
+.usuarios-table td:nth-child(2) { /* Nombre - Ahora segunda columna */
+  width: 20%;
+  text-align: left;
+  padding-left: clamp(8px, 2vw, 12px);
+}
+
+.usuarios-table td:nth-child(3) { /* Correo */
   width: 22%;
-  text-align: center;
-}
-
-.usuarios-table td:nth-child(3) { /* Nombre */
-  width: 18%;
   text-align: center;
 }
 
@@ -1344,6 +1363,79 @@ const logout = () => {
 .usuarios-table td:nth-child(8) { /* Acciones */
   width: 15%;
   text-align: center;
+}
+
+/* Estilos específicos para columnas */
+.col-id {
+  width: 5% !important;
+  min-width: 40px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #666;
+  font-size: clamp(9px, 1.5vw, 11px) !important;
+}
+
+.col-nombre {
+  width: 20% !important;
+  text-align: left !important;
+  padding-left: clamp(8px, 2vw, 12px) !important;
+}
+
+/* Animación para el nombre */
+.nombre-animado {
+  display: inline-block;
+  color: #2E7D32;
+  font-weight: 700;
+  font-size: clamp(10px, 2vw, 13px);
+  position: relative;
+  overflow: hidden;
+  animation: nombreEntrada 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transition: all 0.3s ease;
+}
+
+.nombre-animado::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.2), transparent);
+  animation: nombreBrillo 1.5s ease-in-out infinite;
+}
+
+.nombre-animado:hover {
+  color: #1B5E20;
+  transform: translateX(2px);
+  text-shadow: 0 2px 4px rgba(46, 125, 50, 0.3);
+}
+
+/* Animaciones */
+@keyframes nombreEntrada {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(2px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes nombreBrillo {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 .usuarios-table tbody tr {

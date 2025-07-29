@@ -36,19 +36,63 @@
       </header>
 
       <div class="page-content">
-        <!-- Barra de búsqueda -->        <div class="search-section">
-          <div class="search-box">
-            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
-            <input 
-              v-model="searchTerm" 
-              type="text" 
-              placeholder="Buscar por nombre o correo..." 
-              class="search-input"
-              @input="filtrarUsuarios"
-            >
+        <!-- Búsqueda y Filtros -->
+        <div class="search-section">
+          <div class="controls-row">
+            <!-- Barra de búsqueda -->
+            <div class="search-group">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+              <input 
+                v-model="searchTerm" 
+                type="text" 
+                placeholder="Buscar..." 
+                class="search-input"
+                @input="filtrarUsuarios"
+              >
+            </div>
+
+            <!-- Ordenamiento -->
+            <div class="sort-group">
+              <label>Ordenar:</label>
+              <div class="sort-buttons">
+                <button 
+                  @click="ordenarPor('id')"
+                  :class="['sort-btn', { active: campoOrdenamiento === 'id' }]"
+                  title="Ordenar por ID"
+                >
+                  ID
+                  <svg v-if="campoOrdenamiento === 'id'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                    <path v-else d="m7 9 5-5 5 5"/>
+                  </svg>
+                </button>
+                <button 
+                  @click="ordenarPor('nombre')"
+                  :class="['sort-btn', { active: campoOrdenamiento === 'nombre' }]"
+                  title="Ordenar por Nombre"
+                >
+                  Nombre
+                  <svg v-if="campoOrdenamiento === 'nombre'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                    <path v-else d="m7 9 5-5 5 5"/>
+                  </svg>
+                </button>
+                <button 
+                  @click="ordenarPor('fecha')"
+                  :class="['sort-btn', { active: campoOrdenamiento === 'fecha' }]"
+                  title="Ordenar por Fecha de Registro"
+                >
+                  Fecha
+                  <svg v-if="campoOrdenamiento === 'fecha'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                    <path v-else d="m7 9 5-5 5 5"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -370,6 +414,10 @@ const loading = ref(false)
 const error = ref('')
 const searchTerm = ref('')
 
+// Variables para ordenamiento
+const campoOrdenamiento = ref('fecha') // Por defecto ordenar por fecha
+const direccionOrdenamiento = ref('desc') // Por defecto más reciente primero
+
 const showModal = ref(false)
 const modalTitle = ref('')
 const modalContent = ref('')
@@ -403,6 +451,9 @@ const cargarUsuarios = async () => {
     usuarios.value = await usuariosService.obtenerUsuarios()
     usuariosFiltrados.value = usuarios.value
     
+    // Aplicar ordenamiento inicial
+    aplicarOrdenamiento()
+    
     console.log('✅ Usuarios reales cargados desde la base de datos:', usuarios.value)
   } catch (err) {
     console.error('❌ Error al cargar usuarios desde la base de datos:', err)
@@ -417,16 +468,64 @@ const cargarUsuarios = async () => {
 const filtrarUsuarios = () => {
   if (!searchTerm.value.trim()) {
     usuariosFiltrados.value = usuarios.value
-    return
+  } else {
+    const termino = searchTerm.value.toLowerCase()
+    usuariosFiltrados.value = usuarios.value.filter(usuario => 
+      usuario.correo.toLowerCase().includes(termino) ||
+      (usuario.nombre_completo && usuario.nombre_completo.toLowerCase().includes(termino)) ||
+      (usuario.cargo && usuario.cargo.toLowerCase().includes(termino)) ||
+      (usuario.supervisor && usuario.supervisor.toLowerCase().includes(termino))
+    )
   }
-  
-  const termino = searchTerm.value.toLowerCase()
-  usuariosFiltrados.value = usuarios.value.filter(usuario => 
-    usuario.correo.toLowerCase().includes(termino) ||
-    (usuario.nombre_completo && usuario.nombre_completo.toLowerCase().includes(termino)) ||
-    (usuario.cargo && usuario.cargo.toLowerCase().includes(termino)) ||
-    (usuario.supervisor && usuario.supervisor.toLowerCase().includes(termino))
-  )
+  aplicarOrdenamiento()
+}
+
+// Funciones de ordenamiento
+const ordenarPor = (campo) => {
+  if (campoOrdenamiento.value === campo) {
+    // Si es el mismo campo, cambiar dirección
+    direccionOrdenamiento.value = direccionOrdenamiento.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    // Si es un campo diferente, establecer nuevo campo y dirección por defecto
+    campoOrdenamiento.value = campo
+    direccionOrdenamiento.value = campo === 'fecha' ? 'desc' : 'asc' // Fecha descendente por defecto, otros ascendente
+  }
+  aplicarOrdenamiento()
+}
+
+const aplicarOrdenamiento = () => {
+  if (!usuariosFiltrados.value.length) return
+
+  usuariosFiltrados.value.sort((a, b) => {
+    let valorA, valorB
+
+    switch (campoOrdenamiento.value) {
+      case 'id':
+        valorA = parseInt(a.id)
+        valorB = parseInt(b.id)
+        break
+      case 'nombre':
+        valorA = (a.nombre_completo || '').toLowerCase()
+        valorB = (b.nombre_completo || '').toLowerCase()
+        break
+      case 'fecha':
+        valorA = new Date(a.fecha_registro)
+        valorB = new Date(b.fecha_registro)
+        break
+      default:
+        return 0
+    }
+
+    if (direccionOrdenamiento.value === 'asc') {
+      if (valorA < valorB) return -1
+      if (valorA > valorB) return 1
+      return 0
+    } else {
+      if (valorA > valorB) return -1
+      if (valorA < valorB) return 1
+      return 0
+    }
+  })
 }
 
 const formatFecha = (fechaStr) => {
@@ -845,8 +944,104 @@ const logout = () => {
 }
 
 .search-section {
-  margin-bottom: clamp(20px, 5vh, 32px);
+  margin-bottom: 16px;
   animation: slideInRight 0.6s ease-out;
+  background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
+  border: 2px solid #4CAF50;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 
+    0 6px 24px rgba(76, 175, 80, 0.12),
+    0 3px 12px rgba(76, 175, 80, 0.08);
+  transition: all 0.3s ease;
+}
+
+.search-section:hover {
+  border-color: #45a049;
+  box-shadow: 
+    0 8px 32px rgba(76, 175, 80, 0.15),
+    0 4px 16px rgba(76, 175, 80, 0.1);
+  transform: translateY(-1px);
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.search-group, .sort-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-group {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.sort-group label {
+  font-weight: 600;
+  color: #4CAF50;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-size: 11px;
+  min-width: fit-content;
+}
+
+.sort-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  color: #4CAF50;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(76, 175, 80, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  min-width: fit-content;
+}
+
+.sort-btn:hover {
+  border-color: rgba(76, 175, 80, 0.5);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.02) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+}
+
+.sort-btn.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border-color: #4CAF50;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  transform: translateY(-1px);
+}
+
+.sort-btn.active:hover {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.4);
+}
+
+.sort-btn svg {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 @keyframes slideInRight {
@@ -854,55 +1049,45 @@ const logout = () => {
   100% { transform: translateX(0); opacity: 1; }
 }
 
-.search-box {
-  position: relative;
-  max-width: clamp(300px, 60vw, 500px);
-  width: 100%;
-}
-
 .search-input {
   width: 100%;
-  padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px) clamp(12px, 3vw, 16px) clamp(44px, 10vw, 52px);
-  border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: clamp(20px, 5vw, 25px);
-  font-size: clamp(14px, 3vw, 16px);
+  padding: 6px 12px 6px 32px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 16px;
+  font-size: 12px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 
-    0 4px 16px rgba(76, 175, 80, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 4px rgba(76, 175, 80, 0.1);
   font-weight: 500;
   box-sizing: border-box;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #4CAF50;
-  box-shadow: 
-    0 0 0 4px rgba(76, 175, 80, 0.15),
-    0 8px 24px rgba(76, 175, 80, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  background: linear-gradient(135deg, #ffffff 0%, #f0fff0 100%);
-  transform: translateY(-2px);
+  color: #333;
 }
 
 .search-input::placeholder {
   color: #999;
   font-weight: 400;
+  font-size: 11px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+  transform: translateY(-1px);
+}
+
+.search-input:hover {
+  border-color: rgba(76, 175, 80, 0.5);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.15);
 }
 
 .search-icon {
   position: absolute;
-  left: clamp(14px, 3vw, 18px);
+  left: 8px;
   top: 50%;
   transform: translateY(-50%);
   color: #4CAF50;
-  transition: all 0.3s ease;
-}
-
-.search-input:focus + .search-icon {
-  color: #45a049;
-  transform: translateY(-50%) scale(1.1);
+  z-index: 1;
 }
 
 .usuarios-section {

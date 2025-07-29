@@ -1921,7 +1921,8 @@ const logout = () => {
 .registros-table th,
 .registros-table td {
   padding: 16px 12px;
-  text-align: left;
+  text-align: center;
+  vertical-align: middle;
   border-bottom: 1px solid rgba(224, 224, 224, 0.6);
   transition: all 0.3s ease;
 }
@@ -1962,6 +1963,8 @@ const logout = () => {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   border: 2px solid rgba(76, 175, 80, 0.2);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: block;
+  margin: 0 auto;
 }
 
 .foto-mini:hover {
@@ -1973,6 +1976,8 @@ const logout = () => {
 .no-foto {
   color: #999;
   font-size: 12px;
+  text-align: center;
+  display: block;
 }
 
 .ubicacion, .fecha {
@@ -3263,6 +3268,7 @@ const logout = () => {
   font-weight: 600;
   color: #555;
   font-size: 14px;
+  text-align: center;
 }
 
 .registros-table .hora-entrada,
@@ -3280,5 +3286,29 @@ const logout = () => {
 
 .registros-table td {
   vertical-align: middle;
+  text-align: center;
+}
+
+/* Centrar contenido específico de usuario */
+.registros-table .usuario-info {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Centrar ubicación */
+.registros-table .ubicacion {
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+/* Centrar descripción */
+.registros-table .descripcion {
+  text-align: center;
+  max-width: 200px;
+  margin: 0 auto;
 }
 </style>

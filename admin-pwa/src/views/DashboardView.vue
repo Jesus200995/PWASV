@@ -154,8 +154,11 @@
                     <td class="fecha">
                       {{ formatFecha(registro.fecha_hora) }}
                     </td>                    <td>
-                      <button @click="verDetalles(registro)" class="btn-ver">
-                        Ver Detalles
+                      <button @click="verDetalles(registro)" class="btn-ver" title="Ver detalles del registro">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                       </button>
                     </td>
                   </tr>
@@ -212,8 +215,11 @@
                       </span>
                     </td>
                     <td>
-                      <button @click="verDetallesAsistencia(entrada, 'entrada')" class="btn-ver">
-                        Ver Detalles
+                      <button @click="verDetallesAsistencia(entrada, 'entrada')" class="btn-ver" title="Ver detalles de entrada">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                       </button>
                     </td>
                   </tr>
@@ -267,8 +273,11 @@
                       <div class="badge-tiempo">{{ calcularTiempoTotal(salida.hora_entrada, salida.hora_salida) }}</div>
                     </td>
                     <td>
-                      <button @click="verDetallesAsistencia(salida, 'salida')" class="btn-ver">
-                        Ver Detalles
+                      <button @click="verDetallesAsistencia(salida, 'salida')" class="btn-ver" title="Ver detalles de salida">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                       </button>
                     </td>
                   </tr>
@@ -1996,30 +2005,60 @@ const logout = () => {
 }
 
 .btn-ver {
-  padding: 8px 16px;
+  width: clamp(32px, 6vw, 36px);
+  height: clamp(32px, 6vw, 36px);
+  padding: 0;
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: 50%;
   cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-ver::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-ver:hover::before {
+  left: 100%;
 }
 
 .btn-ver:hover {
   background: linear-gradient(135deg, #43A047, #388E3C);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(76, 175, 80, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-ver:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(76, 175, 80, 0.3);
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+}
+
+.btn-ver svg {
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
+  transition: all 0.3s ease;
+}
+
+.btn-ver:hover svg {
+  transform: scale(1.1);
 }
 
 /* Estilos del modal mejorados */

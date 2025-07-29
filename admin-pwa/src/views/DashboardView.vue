@@ -2255,6 +2255,10 @@ const logout = () => {
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+  /* Remover todas las animaciones y transiciones */
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
 }
 
 .user-avatar {
@@ -2266,6 +2270,10 @@ const logout = () => {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
+  /* Sin animaciones */
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
 }
 
 .user-avatar svg {
@@ -2279,6 +2287,10 @@ const logout = () => {
   font-size: 18px;
   font-weight: 600;
   color: white;
+  /* Sin animaciones */
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
 }
 
 .user-info-main p {
@@ -2286,6 +2298,10 @@ const logout = () => {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
+  /* Sin animaciones */
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
 }
 
 .user-email {
@@ -2295,6 +2311,10 @@ const logout = () => {
   padding: 4px 8px;
   border-radius: 6px;
   display: inline-block;
+  /* Sin animaciones */
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
 }
 
 /* Grid moderno de detalles */

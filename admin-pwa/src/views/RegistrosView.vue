@@ -212,9 +212,15 @@
                     {{ formatFecha(registro.fecha_hora) }}
                   </td>
                   <td>
-                    <button @click="verDetalles(registro)" class="btn-ver">
-                      Ver Detalles
-                    </button>
+                    <div class="action-container">
+                      <button @click="verDetalles(registro)" class="btn-ver" title="Ver detalles del registro">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </button>
+                      <span class="btn-label">Detalles</span>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -1525,7 +1531,7 @@ const logout = () => {
 .registros-table th {
   background: linear-gradient(135deg, #f8f9fa 0%, #f0f8f0 100%);
   padding: clamp(12px, 3vw, 16px) clamp(8px, 2vw, 12px);
-  text-align: left;
+  text-align: center;
   font-weight: 700;
   color: #4CAF50;
   text-transform: uppercase;
@@ -1547,6 +1553,8 @@ const logout = () => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 0;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .registros-table tbody tr {
@@ -1622,25 +1630,86 @@ const logout = () => {
 }
 
 .btn-ver {
-  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px);
+  width: clamp(32px, 6vw, 36px);
+  height: clamp(32px, 6vw, 36px);
+  padding: 0;
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
   border: none;
-  border-radius: clamp(16px, 4vw, 20px);
+  border-radius: 50%;
   cursor: pointer;
-  font-size: clamp(9px, 2vw, 11px);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-ver::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-ver:hover::before {
+  left: 100%;
 }
 
 .btn-ver:hover {
   background: linear-gradient(135deg, #43A047, #388E3C);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(76, 175, 80, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-ver:active {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+}
+
+.btn-ver svg {
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
+  transition: all 0.3s ease;
+}
+
+.btn-ver:hover svg {
+  transform: scale(1.1);
+}
+
+/* Contenedor de acción centrado */
+.action-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+/* Label pequeño debajo del botón */
+.btn-label {
+  font-size: 10px;
+  color: #4CAF50;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.action-container:hover .btn-label {
+  opacity: 1;
+  color: #43A047;
 }
 
 /* Modal styles modernos */

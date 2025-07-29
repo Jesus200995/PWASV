@@ -37,7 +37,7 @@
       </header>
 
       <div class="page-content">
-        <!-- Filtros -->
+        <!-- Filtros y Ordenamiento -->
         <div class="filters-section">
           <div class="filter-box">
             <label for="usuario-filter">Filtrar por Usuario:</label>
@@ -92,6 +92,46 @@
               </svg>
               Limpiar
             </button>
+          </div>
+
+          <!-- Controles de Ordenamiento -->
+          <div class="sort-controls">
+            <label>Ordenar por:</label>
+            <div class="sort-buttons">
+              <button 
+                @click="ordenarPor('id')"
+                :class="['sort-btn', { active: campoOrdenamiento === 'id' }]"
+                title="Ordenar por ID"
+              >
+                ID
+                <svg v-if="campoOrdenamiento === 'id'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                  <path v-else d="m7 9 5-5 5 5"/>
+                </svg>
+              </button>
+              <button 
+                @click="ordenarPor('usuario')"
+                :class="['sort-btn', { active: campoOrdenamiento === 'usuario' }]"
+                title="Ordenar por Usuario"
+              >
+                Usuario
+                <svg v-if="campoOrdenamiento === 'usuario'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                  <path v-else d="m7 9 5-5 5 5"/>
+                </svg>
+              </button>
+              <button 
+                @click="ordenarPor('fecha')"
+                :class="['sort-btn', { active: campoOrdenamiento === 'fecha' }]"
+                title="Ordenar por Fecha"
+              >
+                Fecha
+                <svg v-if="campoOrdenamiento === 'fecha'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                  <path v-else d="m7 9 5-5 5 5"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -375,6 +415,10 @@ const filtroUsuario = ref('')
 const filtroUsuarioTexto = ref('')
 const mostrarSugerencias = ref(false)
 
+// Variables para ordenamiento
+const campoOrdenamiento = ref('fecha') // Por defecto ordenar por fecha
+const direccionOrdenamiento = ref('desc') // Por defecto más reciente primero
+
 const showModal = ref(false)
 const modalTitle = ref('')
 const modalType = ref('')
@@ -444,6 +488,9 @@ const cargarRegistros = async () => {
     registros.value = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
     registrosFiltrados.value = registros.value
     
+    // Aplicar ordenamiento inicial
+    aplicarOrdenamiento()
+    
     // Extraer usuarios únicos para el filtro (con información completa)
     const usuariosUnicos = []
     const usuariosVistos = new Set()
@@ -486,6 +533,7 @@ const filtrarRegistros = () => {
   }
 
   registrosFiltrados.value = registrosFiltrar
+  aplicarOrdenamiento()
 }
 
 const buscarUsuarios = () => {
@@ -548,6 +596,55 @@ const limpiarFiltros = () => {
   mostrarSugerencias.value = false
   usuariosFiltrados.value = usuariosDisponibles.value
   registrosFiltrados.value = registros.value
+  aplicarOrdenamiento()
+}
+
+// Funciones de ordenamiento
+const ordenarPor = (campo) => {
+  if (campoOrdenamiento.value === campo) {
+    // Si es el mismo campo, cambiar dirección
+    direccionOrdenamiento.value = direccionOrdenamiento.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    // Si es un campo diferente, establecer nuevo campo y dirección por defecto
+    campoOrdenamiento.value = campo
+    direccionOrdenamiento.value = campo === 'fecha' ? 'desc' : 'asc' // Fecha descendente por defecto, otros ascendente
+  }
+  aplicarOrdenamiento()
+}
+
+const aplicarOrdenamiento = () => {
+  if (!registrosFiltrados.value.length) return
+
+  registrosFiltrados.value.sort((a, b) => {
+    let valorA, valorB
+
+    switch (campoOrdenamiento.value) {
+      case 'id':
+        valorA = parseInt(a.id)
+        valorB = parseInt(b.id)
+        break
+      case 'usuario':
+        valorA = (a.usuario?.nombre_completo || `Usuario ${a.usuario_id}`).toLowerCase()
+        valorB = (b.usuario?.nombre_completo || `Usuario ${b.usuario_id}`).toLowerCase()
+        break
+      case 'fecha':
+        valorA = new Date(a.fecha_hora)
+        valorB = new Date(b.fecha_hora)
+        break
+      default:
+        return 0
+    }
+
+    if (direccionOrdenamiento.value === 'asc') {
+      if (valorA < valorB) return -1
+      if (valorA > valorB) return 1
+      return 0
+    } else {
+      if (valorA > valorB) return -1
+      if (valorA < valorB) return 1
+      return 0
+    }
+  })
 }
 
 const formatFecha = (fechaStr) => {
@@ -979,6 +1076,82 @@ const logout = () => {
   align-items: center;
   gap: clamp(12px, 3vw, 20px);
   flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+/* Estilos para los controles de ordenamiento */
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 3vw, 16px);
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.sort-controls label {
+  font-weight: 600;
+  color: #4CAF50;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: clamp(11px, 2.5vw, 13px);
+  min-width: fit-content;
+}
+
+.sort-buttons {
+  display: flex;
+  gap: clamp(8px, 2vw, 12px);
+  flex-wrap: wrap;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px);
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  border-radius: clamp(16px, 4vw, 20px);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  color: #4CAF50;
+  font-size: clamp(11px, 2.5vw, 13px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: fit-content;
+}
+
+.sort-btn:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.02) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.sort-btn.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border-color: #4CAF50;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+  transform: translateY(-1px);
+}
+
+.sort-btn.active:hover {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.sort-btn svg {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.sort-btn.active svg {
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
 
 .filter-box label {

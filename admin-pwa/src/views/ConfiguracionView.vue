@@ -406,7 +406,7 @@ const descargarBaseDatos = async () => {
     // Insertar datos de usuarios
     if (usuariosData.length > 0) {
       sqlContent += `-- Datos de usuarios (${usuariosData.length} registros)\n`
-      sqlContent += `INSERT INTO usuarios (id, correo, nombre_completo, cargo, supervisor, curp) VALUES\n`
+      sqlContent += `INSERT INTO usuarios (id, correo, nombre_completo, cargo, supervisor, contrasena, curp) VALUES\n`
       
       const usuariosInserts = usuariosData.map((usuario, index) => {
         const id = usuario.id || index + 1
@@ -414,9 +414,10 @@ const descargarBaseDatos = async () => {
         const nombre = (usuario.nombre_completo || usuario.nombre || '').replace(/'/g, "''")
         const cargo = (usuario.cargo || '').replace(/'/g, "''")
         const supervisor = (usuario.supervisor || '').replace(/'/g, "''")
+        const contrasena = (usuario.contrasena || usuario.password || 'sin_contrasena').replace(/'/g, "''")
         const curp = (usuario.curp || '').replace(/'/g, "''")
         
-        return `(${id}, '${correo}', '${nombre}', '${cargo}', '${supervisor}', '${curp}')`
+        return `(${id}, '${correo}', '${nombre}', '${cargo}', '${supervisor}', '${contrasena}', '${curp}')`
       })
       
       sqlContent += usuariosInserts.join(',\n') + ';\n\n'

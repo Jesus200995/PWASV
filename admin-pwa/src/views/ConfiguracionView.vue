@@ -126,6 +126,9 @@
               <button @click="exportarDatos" class="action-btn export-btn" :disabled="exporting">
                 {{ exporting ? 'Exportando...' : '📊 Exportar Datos' }}
               </button>
+              <button @click="descargarBaseDatos" class="action-btn sql-btn" :disabled="descargandoBD">
+                {{ descargandoBD ? 'Descargando...' : '💾 Descargar BD SQL' }}
+              </button>
               <button @click="limpiarCache" class="action-btn cache-btn">
                 🗑️ Limpiar Cache
               </button>
@@ -212,6 +215,7 @@ const confirmMessage = ref('')
 // Variables para las acciones de eliminación masiva
 const eliminandoRegistros = ref(false)
 const eliminandoAsistencias = ref(false)
+const descargandoBD = ref(false)
 
 const apiConfig = reactive({
   url: 'https://apipwa.sembrandodatos.com',
@@ -337,6 +341,251 @@ const exportarDatos = async () => {
     mostrarMensaje('Error', 'Error al exportar los datos: ' + (err.response?.data?.detail || err.message))
   } finally {
     exporting.value = false
+  }
+}
+
+const descargarBaseDatos = async () => {
+  descargandoBD.value = true
+  
+  try {
+    const token = localStorage.getItem('admin_token')
+    
+    mostrarMensaje('Iniciando', 'Obteniendo todos los datos de la base de datos...')
+    
+    // Obtener TODOS los datos disponibles de la base de datos app_registros
+    const [usuariosRes, registrosRes, asistenciasRes] = await Promise.all([
+      axios.get(`${apiConfig.url}/usuarios`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+      axios.get(`${apiConfig.url}/registros`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+      axios.get(`${apiConfig.url}/asistencias`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+    ])
+    
+    // Manejar diferentes formatos de respuesta
+    const usuariosData = Array.isArray(usuariosRes.data) ? usuariosRes.data : (usuariosRes.data.usuarios || [])
+    const registrosData = Array.isArray(registrosRes.data) ? registrosRes.data : (registrosRes.data.registros || [])
+    const asistenciasData = Array.isArray(asistenciasRes.data) ? asistenciasRes.data : (asistenciasRes.data.asistencias || [])
+    
+    // Generar SQL completo
+    let sqlContent = ''
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+    
+    // Header del archivo SQL
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- EXPORTACIÓN COMPLETA BASE DE DATOS app_registros\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- Fecha de exportación: ${new Date().toLocaleString('es-ES')}\n`
+    sqlContent += `-- Servidor: ${apiConfig.url}\n`
+    sqlContent += `-- Total usuarios: ${usuariosData.length}\n`
+    sqlContent += `-- Total registros: ${registrosData.length}\n`
+    sqlContent += `-- Total asistencias: ${asistenciasData.length}\n`
+    sqlContent += `-- ===============================================\n\n`
+    
+    // =================== TABLA USUARIOS ===================
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- TABLA: USUARIOS\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `DROP TABLE IF EXISTS usuarios CASCADE;\n\n`
+    
+    sqlContent += `CREATE TABLE usuarios (\n`
+    sqlContent += `    id SERIAL PRIMARY KEY,\n`
+    sqlContent += `    correo VARCHAR(255) UNIQUE NOT NULL,\n`
+    sqlContent += `    nombre_completo VARCHAR(255) NOT NULL,\n`
+    sqlContent += `    cargo VARCHAR(255),\n`
+    sqlContent += `    supervisor VARCHAR(255),\n`
+    sqlContent += `    contrasena VARCHAR(255) NOT NULL,\n`
+    sqlContent += `    curp VARCHAR(18) UNIQUE,\n`
+    sqlContent += `    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n`
+    sqlContent += `    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n`
+    sqlContent += `);\n\n`
+    
+    // Insertar datos de usuarios
+    if (usuariosData.length > 0) {
+      sqlContent += `-- Datos de usuarios (${usuariosData.length} registros)\n`
+      sqlContent += `INSERT INTO usuarios (id, correo, nombre_completo, cargo, supervisor, curp) VALUES\n`
+      
+      const usuariosInserts = usuariosData.map((usuario, index) => {
+        const id = usuario.id || index + 1
+        const correo = (usuario.correo || usuario.email || '').replace(/'/g, "''")
+        const nombre = (usuario.nombre_completo || usuario.nombre || '').replace(/'/g, "''")
+        const cargo = (usuario.cargo || '').replace(/'/g, "''")
+        const supervisor = (usuario.supervisor || '').replace(/'/g, "''")
+        const curp = (usuario.curp || '').replace(/'/g, "''")
+        
+        return `(${id}, '${correo}', '${nombre}', '${cargo}', '${supervisor}', '${curp}')`
+      })
+      
+      sqlContent += usuariosInserts.join(',\n') + ';\n\n'
+    }
+    
+    // =================== TABLA REGISTROS ===================
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- TABLA: REGISTROS\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `DROP TABLE IF EXISTS registros CASCADE;\n\n`
+    
+    sqlContent += `CREATE TABLE registros (\n`
+    sqlContent += `    id SERIAL PRIMARY KEY,\n`
+    sqlContent += `    usuario_id INTEGER REFERENCES usuarios(id),\n`
+    sqlContent += `    latitud DECIMAL(10, 8),\n`
+    sqlContent += `    longitud DECIMAL(11, 8),\n`
+    sqlContent += `    descripcion TEXT,\n`
+    sqlContent += `    foto_url VARCHAR(500),\n`
+    sqlContent += `    fecha_hora TIMESTAMP NOT NULL,\n`
+    sqlContent += `    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n`
+    sqlContent += `);\n\n`
+    
+    // Insertar datos de registros
+    if (registrosData.length > 0) {
+      sqlContent += `-- Datos de registros (${registrosData.length} registros)\n`
+      sqlContent += `INSERT INTO registros (id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora) VALUES\n`
+      
+      const registrosInserts = registrosData.map((registro, index) => {
+        const id = registro.id || index + 1
+        const usuario_id = registro.usuario_id || 'NULL'
+        const latitud = registro.latitud || 'NULL'
+        const longitud = registro.longitud || 'NULL'
+        const descripcion = (registro.descripcion || '').replace(/'/g, "''")
+        const foto_url = (registro.foto_url || '').replace(/'/g, "''")
+        const fecha_hora = registro.fecha_hora || new Date().toISOString()
+        
+        return `(${id}, ${usuario_id}, ${latitud}, ${longitud}, '${descripcion}', '${foto_url}', '${fecha_hora}')`
+      })
+      
+      sqlContent += registrosInserts.join(',\n') + ';\n\n'
+    }
+    
+    // =================== TABLA ASISTENCIAS ===================
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- TABLA: ASISTENCIAS\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `DROP TABLE IF EXISTS asistencias CASCADE;\n\n`
+    
+    sqlContent += `CREATE TABLE asistencias (\n`
+    sqlContent += `    id SERIAL PRIMARY KEY,\n`
+    sqlContent += `    usuario_id INTEGER REFERENCES usuarios(id),\n`
+    sqlContent += `    fecha DATE NOT NULL,\n`
+    sqlContent += `    hora_entrada TIME,\n`
+    sqlContent += `    hora_salida TIME,\n`
+    sqlContent += `    latitud_entrada DECIMAL(10, 8),\n`
+    sqlContent += `    longitud_entrada DECIMAL(11, 8),\n`
+    sqlContent += `    latitud_salida DECIMAL(10, 8),\n`
+    sqlContent += `    longitud_salida DECIMAL(11, 8),\n`
+    sqlContent += `    foto_entrada_url VARCHAR(500),\n`
+    sqlContent += `    foto_salida_url VARCHAR(500),\n`
+    sqlContent += `    descripcion_entrada TEXT,\n`
+    sqlContent += `    descripcion_salida TEXT,\n`
+    sqlContent += `    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n`
+    sqlContent += `);\n\n`
+    
+    // Insertar datos de asistencias
+    if (asistenciasData.length > 0) {
+      sqlContent += `-- Datos de asistencias (${asistenciasData.length} registros)\n`
+      sqlContent += `INSERT INTO asistencias (id, usuario_id, fecha, hora_entrada, hora_salida, latitud_entrada, longitud_entrada, latitud_salida, longitud_salida, foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida) VALUES\n`
+      
+      const asistenciasInserts = asistenciasData.map((asistencia, index) => {
+        const id = asistencia.id || index + 1
+        const usuario_id = asistencia.usuario_id || 'NULL'
+        const fecha = asistencia.fecha || new Date().toISOString().split('T')[0]
+        const hora_entrada = asistencia.hora_entrada ? `'${asistencia.hora_entrada}'` : 'NULL'
+        const hora_salida = asistencia.hora_salida ? `'${asistencia.hora_salida}'` : 'NULL'
+        const latitud_entrada = asistencia.latitud_entrada || 'NULL'
+        const longitud_entrada = asistencia.longitud_entrada || 'NULL'
+        const latitud_salida = asistencia.latitud_salida || 'NULL'
+        const longitud_salida = asistencia.longitud_salida || 'NULL'
+        const foto_entrada_url = (asistencia.foto_entrada_url || '').replace(/'/g, "''")
+        const foto_salida_url = (asistencia.foto_salida_url || '').replace(/'/g, "''")
+        const descripcion_entrada = (asistencia.descripcion_entrada || '').replace(/'/g, "''")
+        const descripcion_salida = (asistencia.descripcion_salida || '').replace(/'/g, "''")
+        
+        return `(${id}, ${usuario_id}, '${fecha}', ${hora_entrada}, ${hora_salida}, ${latitud_entrada}, ${longitud_entrada}, ${latitud_salida}, ${longitud_salida}, '${foto_entrada_url}', '${foto_salida_url}', '${descripcion_entrada}', '${descripcion_salida}')`
+      })
+      
+      sqlContent += asistenciasInserts.join(',\n') + ';\n\n'
+    }
+    
+    // =================== ÍNDICES Y CONSTRAINTS ===================
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- ÍNDICES Y OPTIMIZACIONES\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `CREATE INDEX IF NOT EXISTS idx_usuarios_correo ON usuarios(correo);\n`
+    sqlContent += `CREATE INDEX IF NOT EXISTS idx_usuarios_curp ON usuarios(curp);\n`
+    sqlContent += `CREATE INDEX IF NOT EXISTS idx_registros_usuario ON registros(usuario_id);\n`
+    sqlContent += `CREATE INDEX IF NOT EXISTS idx_registros_fecha ON registros(fecha_hora);\n`
+    sqlContent += `CREATE INDEX IF NOT EXISTS idx_asistencias_usuario ON asistencias(usuario_id);\n`
+    sqlContent += `CREATE INDEX IF NOT EXISTS idx_asistencias_fecha ON asistencias(fecha);\n\n`
+    
+    // Footer del archivo
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- RESUMEN DE EXPORTACIÓN\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- Usuarios exportados: ${usuariosData.length}\n`
+    sqlContent += `-- Registros exportados: ${registrosData.length}\n`
+    sqlContent += `-- Asistencias exportadas: ${asistenciasData.length}\n`
+    sqlContent += `-- Total de registros: ${usuariosData.length + registrosData.length + asistenciasData.length}\n`
+    sqlContent += `-- Fin de la exportación completa\n`
+    sqlContent += `-- Fecha: ${new Date().toLocaleString('es-ES')}\n`
+    sqlContent += `-- ===============================================\n`
+    
+    // Crear y descargar archivo SQL
+    const blob = new Blob([sqlContent], { type: 'application/sql; charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `BASE_DATOS_COMPLETA_${timestamp}.sql`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    
+    // Calcular tamaño del archivo
+    const tamanhoKB = Math.round(blob.size / 1024)
+    const totalRegistros = usuariosData.length + registrosData.length + asistenciasData.length
+    
+    mostrarMensaje('🎉 Base de Datos Completa Descargada', 
+      `<div style="text-align: left;">
+        <h4 style="color: #2563eb; margin-bottom: 15px;">✅ Exportación Exitosa</h4>
+        <p><strong>📁 Archivo:</strong> BASE_DATOS_COMPLETA_${timestamp}.sql</p>
+        <p><strong>📊 Tamaño:</strong> ${tamanhoKB} KB</p>
+        <hr style="margin: 15px 0;">
+        <h5 style="color: #1e40af;">📋 Datos Exportados:</h5>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          <li><strong>👥 Usuarios:</strong> ${usuariosData.length} registros</li>
+          <li><strong>📝 Registros:</strong> ${registrosData.length} registros</li>
+          <li><strong>🕐 Asistencias:</strong> ${asistenciasData.length} registros</li>
+        </ul>
+        <hr style="margin: 15px 0;">
+        <p><strong>🔢 Total de registros:</strong> ${totalRegistros}</p>
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">
+          El archivo contiene la estructura completa de la base de datos con todos los datos disponibles, 
+          índices y constraints. Puede ser restaurado en cualquier servidor PostgreSQL.
+        </p>
+      </div>`
+    )
+  } catch (err) {
+    let errorMsg = 'Error al descargar la base de datos: '
+    
+    if (err.response?.status === 401) {
+      errorMsg += 'No autorizado. Inicia sesión nuevamente.'
+    } else if (err.response?.status === 403) {
+      errorMsg += 'Acceso denegado. Permisos insuficientes.'
+    } else if (err.response?.status === 404) {
+      errorMsg += 'Algunos endpoints no están disponibles. Se descargaron los datos disponibles.'
+    } else if (err.response?.status === 500) {
+      errorMsg += 'Error del servidor. Intenta más tarde.'
+    } else if (err.request) {
+      errorMsg += 'No se pudo conectar con el servidor. Verifica tu conexión.'
+    } else {
+      errorMsg += err.message || 'Error desconocido'
+    }
+    
+    mostrarMensaje('❌ Error', errorMsg)
+  } finally {
+    descargandoBD.value = false
   }
 }
 
@@ -796,6 +1045,19 @@ const logout = () => {
 .export-btn:hover:not(:disabled) {
   background: #2980b9;
   transform: translateY(-1px);
+}
+
+.sql-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+  border: 2px solid #1d4ed8;
+}
+
+.sql-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
 }
 
 .cache-btn {

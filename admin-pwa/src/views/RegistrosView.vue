@@ -39,99 +39,103 @@
       <div class="page-content">
         <!-- Filtros y Ordenamiento -->
         <div class="filters-section">
-          <div class="filter-box">
-            <label for="usuario-filter">Filtrar por Usuario:</label>
-            <div class="autocomplete-container">
-              <input 
-                id="usuario-filter"
-                v-model="filtroUsuarioTexto"
-                @input="buscarUsuarios"
-                @focus="mostrarSugerencias = true"
-                @blur="ocultarSugerencias"
-                type="text"
-                placeholder="Escribir nombre de usuario..."
-                class="filter-input"
-                autocomplete="off"
-              >
-              <div v-if="mostrarSugerencias && usuariosFiltrados.length > 0" class="suggestions-dropdown">
-                <div 
-                  v-for="usuario in usuariosFiltrados.slice(0, 10)" 
-                  :key="usuario.id"
-                  @mousedown="seleccionarUsuario(usuario)"
-                  class="suggestion-item"
+          <div class="controls-row">
+            <!-- Filtros -->
+            <div class="filter-group">
+              <label for="usuario-filter">Filtrar:</label>
+              <div class="autocomplete-container">
+                <input 
+                  id="usuario-filter"
+                  v-model="filtroUsuarioTexto"
+                  @input="buscarUsuarios"
+                  @focus="mostrarSugerencias = true"
+                  @blur="ocultarSugerencias"
+                  type="text"
+                  placeholder="Usuario..."
+                  class="filter-input"
+                  autocomplete="off"
                 >
-                  {{ usuario.nombre_completo || `Usuario ${usuario.id}` }}
+                <div v-if="mostrarSugerencias && usuariosFiltrados.length > 0" class="suggestions-dropdown">
+                  <div 
+                    v-for="usuario in usuariosFiltrados.slice(0, 10)" 
+                    :key="usuario.id"
+                    @mousedown="seleccionarUsuario(usuario)"
+                    class="suggestion-item"
+                  >
+                    {{ usuario.nombre_completo || `Usuario ${usuario.id}` }}
+                  </div>
+                  <div v-if="usuariosFiltrados.length > 10" class="suggestion-more">
+                    Y {{ usuariosFiltrados.length - 10 }} más...
+                  </div>
                 </div>
-                <div v-if="usuariosFiltrados.length > 10" class="suggestion-more">
-                  Y {{ usuariosFiltrados.length - 10 }} más...
-                </div>
+                <button 
+                  v-if="filtroUsuario"
+                  @click="limpiarFiltroUsuario"
+                  class="clear-user-btn"
+                  type="button"
+                  title="Limpiar filtro de usuario"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               </div>
-              <button 
-                v-if="filtroUsuario"
-                @click="limpiarFiltroUsuario"
-                class="clear-user-btn"
-                type="button"
-                title="Limpiar filtro de usuario"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
             </div>
 
+            <!-- Ordenamiento -->
+            <div class="sort-group">
+              <label>Ordenar:</label>
+              <div class="sort-buttons">
+                <button 
+                  @click="ordenarPor('id')"
+                  :class="['sort-btn', { active: campoOrdenamiento === 'id' }]"
+                  title="Ordenar por ID"
+                >
+                  ID
+                  <svg v-if="campoOrdenamiento === 'id'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                    <path v-else d="m7 9 5-5 5 5"/>
+                  </svg>
+                </button>
+                <button 
+                  @click="ordenarPor('usuario')"
+                  :class="['sort-btn', { active: campoOrdenamiento === 'usuario' }]"
+                  title="Ordenar por Usuario"
+                >
+                  Usuario
+                  <svg v-if="campoOrdenamiento === 'usuario'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                    <path v-else d="m7 9 5-5 5 5"/>
+                  </svg>
+                </button>
+                <button 
+                  @click="ordenarPor('fecha')"
+                  :class="['sort-btn', { active: campoOrdenamiento === 'fecha' }]"
+                  title="Ordenar por Fecha"
+                >
+                  Fecha
+                  <svg v-if="campoOrdenamiento === 'fecha'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                    <path v-else d="m7 9 5-5 5 5"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Botón de limpiar -->
             <button 
               v-if="filtroUsuario || filtroUsuarioTexto" 
               @click="limpiarFiltros" 
               class="clear-filters-btn"
               title="Limpiar filtros"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
               Limpiar
             </button>
-          </div>
-
-          <!-- Controles de Ordenamiento -->
-          <div class="sort-controls">
-            <label>Ordenar por:</label>
-            <div class="sort-buttons">
-              <button 
-                @click="ordenarPor('id')"
-                :class="['sort-btn', { active: campoOrdenamiento === 'id' }]"
-                title="Ordenar por ID"
-              >
-                ID
-                <svg v-if="campoOrdenamiento === 'id'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
-                  <path v-else d="m7 9 5-5 5 5"/>
-                </svg>
-              </button>
-              <button 
-                @click="ordenarPor('usuario')"
-                :class="['sort-btn', { active: campoOrdenamiento === 'usuario' }]"
-                title="Ordenar por Usuario"
-              >
-                Usuario
-                <svg v-if="campoOrdenamiento === 'usuario'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
-                  <path v-else d="m7 9 5-5 5 5"/>
-                </svg>
-              </button>
-              <button 
-                @click="ordenarPor('fecha')"
-                :class="['sort-btn', { active: campoOrdenamiento === 'fecha' }]"
-                title="Ordenar por Fecha"
-              >
-                Fecha
-                <svg v-if="campoOrdenamiento === 'fecha'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
-                  <path v-else d="m7 9 5-5 5 5"/>
-                </svg>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -1049,14 +1053,14 @@ const logout = () => {
 
 .filters-section {
   background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
-  border-radius: clamp(12px, 3vw, 20px);
+  border-radius: 12px;
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 16px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 1px 8px rgba(0, 0, 0, 0.03),
     inset 0 1px 0 rgba(255,255,255,0.8);
   border: 1px solid rgba(76, 175, 80, 0.1);
-  margin-bottom: clamp(16px, 4vw, 24px);
-  padding: clamp(16px, 4vw, 24px);
+  margin-bottom: 16px;
+  padding: 12px 16px;
   transition: all 0.3s ease;
   position: relative;
   z-index: 10;
@@ -1064,154 +1068,52 @@ const logout = () => {
 }
 
 .filters-section:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.12),
-    0 4px 20px rgba(0, 0, 0, 0.06),
+    0 6px 20px rgba(0, 0, 0, 0.08),
+    0 2px 12px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
-.filter-box {
+.controls-row {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 3vw, 20px);
+  gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  justify-content: space-between;
 }
 
-/* Estilos para los controles de ordenamiento */
-.sort-controls {
+.filter-group, .sort-group {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 3vw, 16px);
-  flex-wrap: wrap;
-  padding-top: 16px;
-  border-top: 1px solid rgba(76, 175, 80, 0.1);
+  gap: 8px;
 }
 
-.sort-controls label {
+.filter-group, .sort-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group label, .sort-group label {
   font-weight: 600;
   color: #4CAF50;
   white-space: nowrap;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: clamp(11px, 2.5vw, 13px);
+  letter-spacing: 0.3px;
+  font-size: 11px;
   min-width: fit-content;
-}
-
-.sort-buttons {
-  display: flex;
-  gap: clamp(8px, 2vw, 12px);
-  flex-wrap: wrap;
-}
-
-.sort-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px);
-  border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: clamp(16px, 4vw, 20px);
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  color: #4CAF50;
-  font-size: clamp(11px, 2.5vw, 13px);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  min-width: fit-content;
-}
-
-.sort-btn:hover {
-  border-color: rgba(76, 175, 80, 0.4);
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.02) 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
-}
-
-.sort-btn.active {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  color: white;
-  border-color: #4CAF50;
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
-  transform: translateY(-1px);
-}
-
-.sort-btn.active:hover {
-  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-}
-
-.sort-btn svg {
-  transition: transform 0.2s ease;
-  flex-shrink: 0;
-}
-
-.sort-btn.active svg {
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
-}
-
-.filter-box label {
-  font-weight: 600;
-  color: #4CAF50;
-  white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: clamp(11px, 2.5vw, 13px);
-  min-width: fit-content;
-}
-
-.filter-select {
-  padding: clamp(10px, 2.5vw, 12px) clamp(40px, 8vw, 48px) clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 20px);
-  border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: clamp(20px, 8vw, 50px);
-  font-size: clamp(12px, 3vw, 14px);
-  min-width: clamp(180px, 25vw, 250px);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
-  cursor: pointer;
-  font-weight: 500;
-  color: #333;
-  
-  /* Ocultar flecha nativa del select */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  
-  /* Agregar flecha personalizada */
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%234CAF50' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 16px center;
-  background-repeat: no-repeat;
-  background-size: 16px;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.25);
-  transform: translateY(-1px);
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23388E3C' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-}
-
-.filter-select:hover {
-  border-color: rgba(76, 175, 80, 0.4);
-  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.15);
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23388E3C' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
 
 .filter-input {
-  padding: clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 20px);
-  border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: clamp(20px, 8vw, 50px);
-  font-size: clamp(12px, 3vw, 14px);
-  min-width: clamp(180px, 25vw, 280px);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  padding: 6px 12px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 16px;
+  font-size: 12px;
+  min-width: 180px;
+  transition: all 0.3s ease;
   background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 1px 4px rgba(76, 175, 80, 0.1);
   font-weight: 500;
   color: #333;
   box-sizing: border-box;
@@ -1220,25 +1122,126 @@ const logout = () => {
 .filter-input::placeholder {
   color: #999;
   font-weight: 400;
+  font-size: 11px;
 }
 
 .filter-input:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.25);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
   transform: translateY(-1px);
 }
 
 .filter-input:hover {
-  border-color: rgba(76, 175, 80, 0.4);
-  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.15);
+  border-color: rgba(76, 175, 80, 0.5);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.15);
 }
 
 .autocomplete-container {
   position: relative;
   display: inline-block;
-  min-width: clamp(180px, 25vw, 280px);
+  min-width: 180px;
   z-index: 100;
+}
+
+.clear-user-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(108, 117, 125, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.clear-user-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.sort-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  color: #4CAF50;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(76, 175, 80, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  min-width: fit-content;
+}
+
+.sort-btn:hover {
+  border-color: rgba(76, 175, 80, 0.5);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.02) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+}
+
+.sort-btn.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border-color: #4CAF50;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  transform: translateY(-1px);
+}
+
+.sort-btn.active:hover {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.4);
+}
+
+.sort-btn svg {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.clear-filters-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #fef8f8 100%);
+  color: #dc3545;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(220, 53, 69, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-left: auto;
+}
+
+.clear-filters-btn:hover {
+  border-color: rgba(220, 53, 69, 0.5);
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.02) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
 }
 
 .suggestions-dropdown {
@@ -1247,14 +1250,14 @@ const logout = () => {
   left: 0;
   right: 0;
   background: white;
-  border: 2px solid rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.3);
   border-top: none;
-  border-radius: 0 0 clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px);
+  border-radius: 0 0 8px 8px;
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 4px 16px rgba(76, 175, 80, 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.1);
-  max-height: clamp(150px, 20vh, 200px);
+    0 6px 20px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(76, 175, 80, 0.15),
+    0 1px 4px rgba(0, 0, 0, 0.08);
+  max-height: 150px;
   overflow-y: auto;
   z-index: 9999;
   animation: fadeInDown 0.2s ease-out;
@@ -1263,7 +1266,7 @@ const logout = () => {
 @keyframes fadeInDown {
   0% {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-5px);
   }
   100% {
     opacity: 1;
@@ -1272,9 +1275,9 @@ const logout = () => {
 }
 
 .suggestion-item {
-  padding: 12px 16px;
+  padding: 8px 12px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   color: #333;
   transition: all 0.2s ease;
   border-bottom: 1px solid rgba(224, 224, 224, 0.3);
@@ -1291,14 +1294,14 @@ const logout = () => {
 }
 
 .suggestion-more {
-  padding: 8px 16px;
-  font-size: 12px;
+  padding: 6px 12px;
+  font-size: 10px;
   color: #666;
   font-style: italic;
   text-align: center;
   background: rgba(246, 246, 246, 0.8);
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .clear-user-btn {
@@ -1330,38 +1333,6 @@ const logout = () => {
 }
 
 .clear-user-btn:hover svg {
-  transform: rotate(90deg);
-}
-
-.clear-filters-btn {
-  display: flex;
-  align-items: center;
-  gap: clamp(6px, 1.5vw, 8px);
-  padding: clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 20px);
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-  color: white;
-  border: none;
-  border-radius: clamp(20px, 8vw, 50px);
-  cursor: pointer;
-  font-size: clamp(12px, 3vw, 14px);
-  font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
-  white-space: nowrap;
-  box-sizing: border-box;
-}
-
-.clear-filters-btn:hover {
-  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
-}
-
-.clear-filters-btn svg {
-  transition: transform 0.2s ease;
-}
-
-.clear-filters-btn:hover svg {
   transform: rotate(90deg);
 }
 

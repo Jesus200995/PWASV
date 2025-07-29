@@ -157,20 +157,26 @@
                   </td>
                   <td>
                     <div class="actions-container">
-                      <button @click="verDetalles(usuario)" class="btn-ver" title="Ver detalles del usuario">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                      </button>
-                      <button @click="confirmarEliminarUsuario(usuario)" class="btn-eliminar" title="Eliminar usuario">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="3,6 5,6 21,6"></polyline>
-                          <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
-                          <line x1="10" y1="11" x2="10" y2="17"></line>
-                          <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
-                      </button>
+                      <div class="action-container">
+                        <button @click="verDetalles(usuario)" class="btn-ver" title="Ver detalles del usuario">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                        </button>
+                        <span class="btn-label">Detalles</span>
+                      </div>
+                      <div class="action-container">
+                        <button @click="confirmarEliminarUsuario(usuario)" class="btn-eliminar" title="Eliminar usuario">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3,6 5,6 21,6"></polyline>
+                            <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
+                        </button>
+                        <span class="btn-label-eliminar">Eliminar</span>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -1565,49 +1571,112 @@ const logout = () => {
   transform: scale(1.1);
 }
 
-/* Estilos para el contenedor de acciones */
+/* Estilos para contenedores de acciones */
 .actions-container {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
+}
+
+/* Contenedor de acción individual */
+.action-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 0;
 }
 
 /* Estilos para el botón de eliminar */
 .btn-eliminar {
+  width: clamp(32px, 6vw, 36px);
+  height: clamp(32px, 6vw, 36px);
+  padding: 0;
   background: linear-gradient(135deg, #f44336, #d32f2f);
   color: white;
   border: none;
-  padding: 8px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  width: 36px;
-  height: 36px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.25);
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  box-shadow: 0 2px 6px rgba(244, 67, 54, 0.3);
+  flex-shrink: 0;
+}
+
+.btn-eliminar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-eliminar:hover::before {
+  left: 100%;
 }
 
 .btn-eliminar:hover {
   background: linear-gradient(135deg, #d32f2f, #b71c1c);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(244, 67, 54, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-eliminar:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(244, 67, 54, 0.3);
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
 }
 
 .btn-eliminar svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2.5;
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
+  transition: all 0.3s ease;
+}
+
+.btn-eliminar:hover svg {
+  transform: scale(1.1);
+}
+
+/* Label para botón ver/detalles (verde) */
+.btn-label {
+  font-size: 10px;
+  color: #4CAF50;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.action-container:hover .btn-label {
+  opacity: 1;
+  color: #43A047;
+}
+
+/* Label para botón eliminar (rojo) */
+.btn-label-eliminar {
+  font-size: 10px;
+  color: #f44336;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.action-container:hover .btn-label-eliminar {
+  opacity: 1;
+  color: #d32f2f;
 }
 
 /* Estilos para el modal de eliminación */

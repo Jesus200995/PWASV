@@ -2120,18 +2120,29 @@ watch([filtroTipo, filtroPeriodo], () => {
   grid-template-columns: 1fr 1fr minmax(280px, 1fr) minmax(200px, 300px);
   grid-template-areas: "filter1 filter2 search legend";
   gap: clamp(8px, 1.5vw, 12px);
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid #4CAF50;
   border-radius: clamp(12px, 2vw, 16px);
   padding: clamp(10px, 2vw, 16px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(76, 175, 80, 0.15),
+    0 4px 16px rgba(76, 175, 80, 0.1);
   position: relative;
   overflow: visible;
   width: 100%;
   box-sizing: border-box;
   align-items: center;
+  transition: all 0.3s ease;
+}
+
+.filter-group:hover {
+  border-color: #45a049;
+  box-shadow: 
+    0 12px 40px rgba(76, 175, 80, 0.18),
+    0 6px 20px rgba(76, 175, 80, 0.12);
+  transform: translateY(-1px);
 }
 
 /* Layout responsivo con breakpoints específicos */

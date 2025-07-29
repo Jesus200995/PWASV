@@ -967,15 +967,28 @@ export default {
 
 /* HEADER ULTRA RESPONSIVE */
 .page-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  border-bottom: none;
   padding: clamp(0.75rem, 2vw, 1.25rem);
   position: sticky;
   top: 0;
   z-index: 100;
   width: 100%;
   box-sizing: border-box;
+  color: white;
+  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
+  overflow: hidden;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
 }
 
 .header-content {
@@ -987,6 +1000,8 @@ export default {
   gap: clamp(0.5rem, 2vw, 1rem);
   flex-wrap: wrap;
   width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .header-main {
@@ -1000,13 +1015,20 @@ export default {
 .header-icon {
   width: clamp(36px, 5vw, 48px);
   height: clamp(36px, 5vw, 48px);
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: clamp(8px, 1.5vw, 12px);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 24px rgba(76, 175, 80, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
 }
 
 .header-icon svg {
@@ -1019,19 +1041,23 @@ export default {
   margin: 0;
   font-size: clamp(1.1rem, 3vw, 1.5rem);
   font-weight: 700;
-  color: #2d3748;
-  background: linear-gradient(135deg, #4CAF50, #2196F3);
-  background-clip: text;
+  color: white;
+  background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  letter-spacing: -0.5px;
   line-height: 1.2;
 }
 
 .header-text p {
   margin: clamp(0.15rem, 0.5vw, 0.25rem) 0 0 0;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.9);
   font-size: clamp(0.7rem, 1.5vw, 0.85rem);
   line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
 
 .header-actions {
@@ -1051,16 +1077,19 @@ export default {
   font-size: clamp(0.65rem, 1.5vw, 0.75rem);
   font-weight: 500;
   white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .connection-status.online {
-  background: rgba(76, 175, 80, 0.1);
-  color: #4CAF50;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .connection-status.offline {
-  background: rgba(244, 67, 54, 0.1);
-  color: #f44336;
+  background: rgba(244, 67, 54, 0.2);
+  color: #fff2f0;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
 }
 
 .status-indicator {
@@ -1076,21 +1105,23 @@ export default {
   align-items: center;
   gap: clamp(0.25rem, 0.8vw, 0.35rem);
   padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.75rem, 2vw, 1rem);
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: clamp(6px, 1.5vw, 8px);
   font-weight: 500;
   font-size: clamp(0.65rem, 1.5vw, 0.75rem);
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   white-space: nowrap;
+  backdrop-filter: blur(10px);
 }
 
 .refresh-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4);
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .refresh-btn:disabled {

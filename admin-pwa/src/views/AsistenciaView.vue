@@ -1118,15 +1118,26 @@ export default {
 
 /* FILTROS AVANZADOS ULTRA RESPONSIVE */
 .advanced-filters {
-  background: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid #4CAF50;
   border-radius: clamp(8px, 2vw, 12px);
   padding: clamp(0.75rem, 2vw, 1rem);
   margin-bottom: clamp(1rem, 2vw, 1.25rem);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 6px 24px rgba(76, 175, 80, 0.12),
+    0 3px 12px rgba(76, 175, 80, 0.08);
   width: 100%;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.advanced-filters:hover {
+  border-color: #45a049;
+  box-shadow: 
+    0 8px 32px rgba(76, 175, 80, 0.15),
+    0 4px 16px rgba(76, 175, 80, 0.1);
+  transform: translateY(-1px);
 }
 
 .filters-main {

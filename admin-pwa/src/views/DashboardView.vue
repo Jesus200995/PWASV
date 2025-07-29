@@ -485,6 +485,27 @@
                     </div>
                   </div>
 
+                  <!-- Ubicación -->
+                  <div class="detail-card location-card">
+                    <div class="detail-icon-modern">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content-modern">
+                      <span class="detail-label-modern">
+                        Ubicación de {{ selectedRecord.tipoRegistro === 'entrada' ? 'Entrada' : 'Salida' }}
+                      </span>
+                      <div class="location-info-modern">
+                        <span class="coordinates-modern">
+                          {{ parseFloat(selectedRecord.latitud || selectedRecord.latitud_entrada || selectedRecord.latitud_salida).toFixed(6) }}, 
+                          {{ parseFloat(selectedRecord.longitud || selectedRecord.longitud_entrada || selectedRecord.longitud_salida).toFixed(6) }}
+                        </span>
+                        <div class="map-container-small" :id="`map-asistencia-${selectedRecord.id}`"></div>
+                      </div>
+                    </div>
+                  </div>
+
                   <!-- Fotografía -->
                   <div class="detail-card photo-card">
                     <div class="photo-header-modern">
@@ -982,7 +1003,7 @@ const cargarTodosLosDatos = async () => {
 }
 
 // Nueva función para ver detalles de asistencia
-const verDetallesAsistencia = (asistencia, tipo = null) => {
+const verDetallesAsistencia = async (asistencia, tipo = null) => {
   selectedRecord.value = asistencia
   
   // Determinar el tipo de registro basado en qué tab está activo o parámetro directo
@@ -1001,6 +1022,14 @@ const verDetallesAsistencia = (asistencia, tipo = null) => {
   selectedRecord.value.tipoRegistro = tipoRegistro
   modalType.value = 'asistencia'
   showModal.value = true
+
+  // Esperar a que el modal se renderice
+  await nextTick()
+  
+  // Inicializar el mapa pequeño después de un breve delay
+  setTimeout(() => {
+    initMapAsistencia(asistencia)
+  }, 150)
 }
 
 const verDetalles = async (registro) => {
@@ -1047,6 +1076,77 @@ const initMap = (lat, lng) => {
   }
 }
 
+// Variable para el mapa de asistencia
+let mapAsistencia = null
+
+const initMapAsistencia = (asistencia) => {
+  // Limpiar mapa anterior si existe
+  if (mapAsistencia) {
+    mapAsistencia.remove()
+    mapAsistencia = null
+  }
+  
+  const mapElementId = `map-asistencia-${asistencia.id}`
+  const mapElement = document.getElementById(mapElementId)
+  if (!mapElement) {
+    console.warn('Elemento del mapa de asistencia no encontrado:', mapElementId)
+    return
+  }
+  
+  // Verificar que Leaflet esté cargado
+  if (!window.L) {
+    console.error('Leaflet no está cargado')
+    return
+  }
+  
+  // Obtener coordenadas según el tipo de registro
+  let lat, lng
+  if (asistencia.tipoRegistro === 'entrada') {
+    lat = asistencia.latitud_entrada || asistencia.latitud
+    lng = asistencia.longitud_entrada || asistencia.longitud
+  } else {
+    lat = asistencia.latitud_salida || asistencia.latitud
+    lng = asistencia.longitud_salida || asistencia.longitud
+  }
+  
+  if (!lat || !lng) {
+    console.warn('Coordenadas no disponibles para el mapa de asistencia')
+    mapElement.innerHTML = '<div class="no-location-modern">📍 Ubicación no disponible</div>'
+    return
+  }
+  
+  try {
+    mapAsistencia = window.L.map(mapElementId, {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      touchZoom: false,
+      doubleClickZoom: false,
+      scrollWheelZoom: false,
+      boxZoom: false,
+      keyboard: false
+    }).setView([parseFloat(lat), parseFloat(lng)], 16)
+    
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: false
+    }).addTo(mapAsistencia)
+    
+    // Agregar marcador con diferente color según el tipo
+    const iconColor = asistencia.tipoRegistro === 'entrada' ? '#4CAF50' : '#FF9800'
+    const popupText = `${asistencia.tipoRegistro === 'entrada' ? 'Entrada' : 'Salida'} registrada<br>
+                      Usuario: ${asistencia.usuario?.nombre_completo || 'Usuario ' + asistencia.usuario_id}<br>
+                      Lat: ${parseFloat(lat).toFixed(6)}<br>
+                      Lng: ${parseFloat(lng).toFixed(6)}`
+    
+    window.L.marker([parseFloat(lat), parseFloat(lng)])
+      .addTo(mapAsistencia)
+      .bindPopup(popupText)
+  } catch (error) {
+    console.error('Error al inicializar el mapa de asistencia:', error)
+    mapElement.innerHTML = '<div class="map-error-modern">❌ Error al cargar el mapa</div>'
+  }
+}
+
 const abrirFotoCompleta = (fotoUrl) => {
   lightboxImageUrl.value = `${API_URL}/${fotoUrl}`
   showLightbox.value = true
@@ -1068,6 +1168,10 @@ const cerrarModal = () => {
   if (map) {
     map.remove()
     map = null
+  }
+  if (mapAsistencia) {
+    mapAsistencia.remove()
+    mapAsistencia = null
   }
 }
 
@@ -2413,6 +2517,53 @@ const logout = () => {
   border: 1px solid rgba(255, 152, 0, 0.3);
 }
 
+/* Tarjeta de ubicación */
+.location-card {
+  grid-column: span 2;
+  min-height: 180px;
+}
+
+.location-info-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.coordinates-modern {
+  font-size: 14px;
+  color: #666;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.map-container-small {
+  width: 100%;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  background: #f8f9fa;
+  position: relative;
+}
+
+.no-location-modern,
+.map-error-modern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 14px;
+  text-align: center;
+}
+
+.map-error-modern {
+  color: #e74c3c;
+}
+
 /* Tarjeta de foto especial */
 .photo-card {
   grid-column: span 2;
@@ -2477,7 +2628,8 @@ const logout = () => {
     grid-template-columns: 1fr;
   }
   
-  .photo-card {
+  .photo-card,
+  .location-card {
     grid-column: span 1;
   }
   
@@ -2521,6 +2673,10 @@ const logout = () => {
   
   .photo-container-modern {
     min-height: 100px;
+  }
+  
+  .map-container-small {
+    height: 100px;
   }
 }
 

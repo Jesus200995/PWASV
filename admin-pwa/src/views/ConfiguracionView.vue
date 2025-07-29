@@ -218,7 +218,7 @@ const eliminandoAsistencias = ref(false)
 const descargandoBD = ref(false)
 
 const apiConfig = reactive({
-  url: 'https://apipwa.sembrandodatos.com',
+  url: 'http://localhost:8000',
   timeout: 30
 })
 
@@ -354,7 +354,7 @@ const descargarBaseDatos = async () => {
     
     // Obtener TODOS los datos disponibles de la base de datos app_registros
     const [usuariosRes, registrosRes, asistenciasRes] = await Promise.all([
-      axios.get(`${apiConfig.url}/usuarios`, {
+      axios.get(`${apiConfig.url}/usuarios/exportacion-completa`, {
         headers: { 'Authorization': `Bearer ${token}` }
       }),
       axios.get(`${apiConfig.url}/registros`, {
@@ -369,6 +369,13 @@ const descargarBaseDatos = async () => {
     const usuariosData = Array.isArray(usuariosRes.data) ? usuariosRes.data : (usuariosRes.data.usuarios || [])
     const registrosData = Array.isArray(registrosRes.data) ? registrosRes.data : (registrosRes.data.registros || [])
     const asistenciasData = Array.isArray(asistenciasRes.data) ? asistenciasRes.data : (asistenciasRes.data.asistencias || [])
+    
+    // DEBUG: Mostrar datos de usuarios para verificar campos disponibles
+    console.log('🔍 DEBUG - Datos de usuarios recibidos:', usuariosData)
+    if (usuariosData.length > 0) {
+      console.log('🔍 DEBUG - Primer usuario completo:', usuariosData[0])
+      console.log('🔍 DEBUG - Campos disponibles:', Object.keys(usuariosData[0]))
+    }
     
     // Generar SQL completo
     let sqlContent = ''
@@ -414,8 +421,13 @@ const descargarBaseDatos = async () => {
         const nombre = (usuario.nombre_completo || usuario.nombre || '').replace(/'/g, "''")
         const cargo = (usuario.cargo || '').replace(/'/g, "''")
         const supervisor = (usuario.supervisor || '').replace(/'/g, "''")
-        const contrasena = (usuario.contrasena || usuario.password || 'sin_contrasena').replace(/'/g, "''")
+        
+        // Obtener la contraseña real del nuevo endpoint
+        const contrasena = (usuario.contrasena || 'sin_contrasena').replace(/'/g, "''")
         const curp = (usuario.curp || '').replace(/'/g, "''")
+        
+        // DEBUG: Log de cada usuario para verificar contraseña
+        console.log(`🔍 Usuario ${id}: contrasena="${contrasena}"`)
         
         return `(${id}, '${correo}', '${nombre}', '${cargo}', '${supervisor}', '${contrasena}', '${curp}')`
       })

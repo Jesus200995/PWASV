@@ -308,6 +308,49 @@ async def obtener_usuarios():
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener usuarios: {str(e)}")
 
+# NUEVO ENDPOINT PARA EXPORTACIÓN COMPLETA CON CONTRASEÑAS
+@app.get("/usuarios/exportacion-completa")
+async def obtener_usuarios_exportacion_completa():
+    """
+    Endpoint especial para exportar usuarios con contraseñas incluidas.
+    Solo para uso en exportación de base de datos completa.
+    """
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Obtener TODOS los campos de usuarios incluyendo contraseñas
+        cursor.execute(
+            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp FROM usuarios ORDER BY id DESC"
+        )
+        
+        resultados = cursor.fetchall()
+        print(f"📊 Exportación completa: {len(resultados)} usuarios con contraseñas")
+        
+        # Convertir tuplas a diccionarios manualmente
+        usuarios = []
+        for row in resultados:
+            usuario = {
+                "id": row[0],
+                "correo": row[1],
+                "nombre_completo": row[2],
+                "cargo": row[3],
+                "supervisor": row[4],
+                "contrasena": row[5],  # INCLUIR LA CONTRASEÑA REAL
+                "curp": row[6]
+            }
+            usuarios.append(usuario)
+        
+        print(f"✅ Exportación completa procesada correctamente")
+        return {"usuarios": usuarios}
+        
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuarios para exportación: {str(e)}")
+
 # Endpoint para obtener un usuario específico por ID
 @app.get("/usuarios/{user_id}")
 async def obtener_usuario(user_id: int):

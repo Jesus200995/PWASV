@@ -19,9 +19,9 @@ app = FastAPI()
 # Permitir requests desde el frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ¡ajusta esto en producción!
+    allow_origins=["http://localhost:3003", "http://127.0.0.1:3003", "*"],  # Incluir puertos específicos
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -1247,6 +1247,239 @@ async def verificar_estructura_usuarios():
     except Exception as e:
         print(f"❌ Error verificando estructura: {e}")
         raise HTTPException(status_code=500, detail=f"Error verificando estructura: {str(e)}")
+
+# ================== ENDPOINTS PARA HISTORIAL ==================
+
+class HistorialCreate(BaseModel):
+    usuario_id: int
+    tipo: str  # 'entrada', 'salida', 'actividad'
+    descripcion: str
+    fecha: str = None  # Si no se proporciona, usa la fecha actual
+    hora: str = None   # Si no se proporciona, usa la hora actual
+    detalles: dict = None  # Para guardar ubicación, foto_url, etc.
+
+@app.post("/historial")
+async def crear_historial(historial: HistorialCreate):
+    """Crear un nuevo registro en el historial"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (historial.usuario_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Usar fecha y hora actuales si no se proporcionan
+        fecha_actual = historial.fecha or datetime.now().date()
+        hora_actual = historial.hora or datetime.now().time()
+        
+        cursor.execute("""
+            INSERT INTO historial (usuario_id, tipo, descripcion, fecha, hora, detalles)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (
+            historial.usuario_id,
+            historial.tipo,
+            historial.descripcion,
+            fecha_actual,
+            hora_actual,
+            historial.detalles
+        ))
+        
+        historial_id = cursor.fetchone()[0]
+        conn.commit()
+        
+        print(f"✅ Historial creado con ID: {historial_id}")
+        return {"id": historial_id, "message": "Historial creado exitosamente"}
+        
+    except Exception as e:
+        print(f"❌ Error creando historial: {e}")
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error creando historial: {str(e)}")
+
+@app.get("/historial/{usuario_id}")
+async def obtener_historial_usuario(
+    usuario_id: int,
+    fecha_inicio: str = None,
+    fecha_fin: str = None,
+    tipo: str = None,
+    limit: int = 100
+):
+    """Obtener historial de un usuario con filtros opcionales"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, nombre_completo FROM usuarios WHERE id = %s", (usuario_id,))
+        usuario = cursor.fetchone()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Construir consulta con filtros
+        query = """
+            SELECT h.id, h.usuario_id, h.tipo, h.descripcion, h.fecha, h.hora, h.detalles, h.creado_en,
+                   u.nombre_completo, u.correo
+            FROM historial h
+            JOIN usuarios u ON h.usuario_id = u.id
+            WHERE h.usuario_id = %s
+        """
+        params = [usuario_id]
+        
+        if fecha_inicio:
+            query += " AND h.fecha >= %s"
+            params.append(fecha_inicio)
+        
+        if fecha_fin:
+            query += " AND h.fecha <= %s"
+            params.append(fecha_fin)
+        
+        if tipo:
+            query += " AND h.tipo = %s"
+            params.append(tipo)
+        
+        query += " ORDER BY h.fecha DESC, h.hora DESC LIMIT %s"
+        params.append(limit)
+        
+        cursor.execute(query, params)
+        resultados = cursor.fetchall()
+        
+        historial = []
+        for row in resultados:
+            registro = {
+                "id": row[0],
+                "usuario_id": row[1],
+                "tipo": row[2],
+                "descripcion": row[3],
+                "fecha": row[4].isoformat() if row[4] else None,
+                "hora": str(row[5]) if row[5] else None,
+                "detalles": row[6],
+                "creado_en": row[7].isoformat() if row[7] else None,
+                "usuario_nombre": row[8],
+                "usuario_correo": row[9]
+            }
+            historial.append(registro)
+        
+        return {
+            "historial": historial,
+            "total": len(historial),
+            "usuario": {
+                "id": usuario[0],
+                "nombre": usuario[1]
+            }
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo historial: {e}")
+        raise HTTPException(status_code=500, detail=f"Error obteniendo historial: {str(e)}")
+
+@app.get("/historial")
+async def obtener_todos_historiales():
+    """Obtener todos los historiales para propósitos de depuración"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        cursor.execute("""
+            SELECT h.id, h.usuario_id, h.tipo, h.descripcion, h.fecha, h.hora, h.detalles, h.creado_en,
+                   u.nombre_completo, u.correo
+            FROM historial h
+            JOIN usuarios u ON h.usuario_id = u.id
+            ORDER BY h.fecha DESC, h.hora DESC 
+            LIMIT 50
+        """)
+        resultados = cursor.fetchall()
+        
+        historial = []
+        for row in resultados:
+            registro = {
+                "id": row[0],
+                "usuario_id": row[1],
+                "tipo": row[2],
+                "descripcion": row[3],
+                "fecha": row[4].isoformat() if row[4] else None,
+                "hora": str(row[5]) if row[5] else None,
+                "detalles": row[6],
+                "creado_en": row[7].isoformat() if row[7] else None,
+                "usuario_nombre": row[8],
+                "usuario_correo": row[9]
+            }
+            historial.append(registro)
+        
+        return {
+            "historial": historial,
+            "total": len(historial)
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo todos los historiales: {e}")
+        raise HTTPException(status_code=500, detail=f"Error obteniendo historiales: {str(e)}")
+
+@app.get("/historial/resumen/{usuario_id}")
+async def obtener_resumen_historial(usuario_id: int):
+    """Obtener resumen del historial de un usuario (estadísticas)"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT nombre_completo FROM usuarios WHERE id = %s", (usuario_id,))
+        usuario = cursor.fetchone()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Obtener estadísticas
+        cursor.execute("""
+            SELECT 
+                COUNT(*) as total_registros,
+                COUNT(CASE WHEN tipo = 'entrada' THEN 1 END) as entradas,
+                COUNT(CASE WHEN tipo = 'salida' THEN 1 END) as salidas,
+                COUNT(CASE WHEN tipo = 'actividad' THEN 1 END) as actividades,
+                MIN(fecha) as primera_fecha,
+                MAX(fecha) as ultima_fecha
+            FROM historial 
+            WHERE usuario_id = %s
+        """, (usuario_id,))
+        
+        stats = cursor.fetchone()
+        
+        # Obtener actividad por mes (últimos 12 meses)
+        cursor.execute("""
+            SELECT 
+                DATE_TRUNC('month', fecha) as mes,
+                COUNT(*) as cantidad
+            FROM historial 
+            WHERE usuario_id = %s 
+            AND fecha >= CURRENT_DATE - INTERVAL '12 months'
+            GROUP BY DATE_TRUNC('month', fecha)
+            ORDER BY mes DESC
+        """, (usuario_id,))
+        
+        actividad_mensual = cursor.fetchall()
+        
+        return {
+            "usuario_nombre": usuario[0],
+            "estadisticas": {
+                "total_registros": stats[0] or 0,
+                "entradas": stats[1] or 0,
+                "salidas": stats[2] or 0,
+                "actividades": stats[3] or 0,
+                "primera_fecha": stats[4].isoformat() if stats[4] else None,
+                "ultima_fecha": stats[5].isoformat() if stats[5] else None
+            },
+            "actividad_mensual": [
+                {
+                    "mes": row[0].isoformat() if row[0] else None,
+                    "cantidad": row[1]
+                }
+                for row in actividad_mensual
+            ]
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo resumen de historial: {e}")
+        raise HTTPException(status_code=500, detail=f"Error obteniendo resumen: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,5 +1,5 @@
 // Servicio para manejo de usuarios usando la API real con endpoints GET
-const API_BASE = 'https://apipwa.sembrandodatos.com'; // Servidor de producción
+const API_BASE = 'http://localhost:8000'; // Usar localhost para desarrollo
 
 class UsuariosService {
   constructor() {

@@ -212,7 +212,7 @@
                       </span>
                     </td>
                     <td>
-                      <button @click="verDetallesAsistencia(entrada)" class="btn-ver">
+                      <button @click="verDetallesAsistencia(entrada, 'entrada')" class="btn-ver">
                         Ver Detalles
                       </button>
                     </td>
@@ -267,7 +267,7 @@
                       <div class="badge-tiempo">{{ calcularTiempoTotal(salida.hora_entrada, salida.hora_salida) }}</div>
                     </td>
                     <td>
-                      <button @click="verDetallesAsistencia(salida)" class="btn-ver">
+                      <button @click="verDetallesAsistencia(salida, 'salida')" class="btn-ver">
                         Ver Detalles
                       </button>
                     </td>
@@ -294,7 +294,9 @@
                 </svg>
               </div>
               <h3 class="modal-title">
-                Detalles del Registro
+                {{ modalType === 'asistencia' && selectedRecord?.tipoRegistro 
+                   ? `Detalles de ${selectedRecord.tipoRegistro.charAt(0).toUpperCase() + selectedRecord.tipoRegistro.slice(1)}` 
+                   : 'Detalles del Registro' }}
               </h3>
             </div>
             <button @click="cerrarModal" class="btn-close">
@@ -421,145 +423,114 @@
 
             <!-- Vista de detalles de asistencia -->
             <div v-else-if="modalType === 'asistencia' && selectedRecord" class="asistencia-detalles">
-              <div class="detail-grid asistencia-grid">
-                <!-- Información del Usuario -->
-                <div class="detail-section user-section">
-                  <div class="section-header">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+              <div class="modal-body-modern">
+                <!-- Sección Principal del Usuario -->
+                <div class="user-card-main">
+                  <div class="user-avatar">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>
-                    <h4>Información del Usuario</h4>
                   </div>
-                  
-                  <div class="detail-item">
-                    <div class="detail-icon">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                      </svg>
-                    </div>
-                    <div class="detail-content">
-                      <span class="detail-label">ID Usuario</span>
-                      <span class="detail-value highlight">#{{ selectedRecord.usuario_id }}</span>
-                    </div>
-                  </div>
-
-                  <div class="detail-item">
-                    <div class="detail-icon">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                      </svg>
-                    </div>
-                    <div class="detail-content">
-                      <span class="detail-label">Nombre Completo</span>
-                      <span class="detail-value">{{ selectedRecord.usuario?.nombre_completo || 'Usuario ' + selectedRecord.usuario_id }}</span>
-                    </div>
-                  </div>
-
-                  <div class="detail-item">
-                    <div class="detail-icon">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                        <polyline points="22,6 12,13 2,6"/>
-                      </svg>
-                    </div>
-                    <div class="detail-content">
-                      <span class="detail-label">Correo</span>
-                      <span class="detail-value">{{ selectedRecord.usuario?.correo || 'No disponible' }}</span>
-                    </div>
+                  <div class="user-info-main">
+                    <h3>{{ selectedRecord.usuario?.nombre_completo || 'Usuario ' + selectedRecord.usuario_id }}</h3>
+                    <p>ID: #{{ selectedRecord.usuario_id }}</p>
+                    <span class="user-email">{{ selectedRecord.usuario?.correo || 'No disponible' }}</span>
                   </div>
                 </div>
 
-                <!-- Información de Asistencia -->
-                <div class="detail-section attendance-section">
-                  <div class="section-header">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
-                    <h4>Detalles de Asistencia</h4>
-                  </div>
-
-                  <div class="detail-item">
-                    <div class="detail-icon">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
-                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                <!-- Grid de Detalles -->
+                <div class="details-grid-modern">
+                  <!-- Hora Principal -->
+                  <div class="detail-card time-card">
+                    <div class="detail-icon-modern">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
                       </svg>
                     </div>
-                    <div class="detail-content">
-                      <span class="detail-label">Hora de Entrada</span>
-                      <span class="detail-value time-value">{{ selectedRecord.hora_entrada || 'No registrada' }}</span>
-                    </div>
-                  </div>
-
-                  <div class="detail-item">
-                    <div class="detail-icon">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
-                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-                      </svg>
-                    </div>
-                    <div class="detail-content">
-                      <span class="detail-label">Hora de Salida</span>
-                      <span class="detail-value time-value">{{ selectedRecord.hora_salida || 'No registrada' }}</span>
-                    </div>
-                  </div>
-
-                  <div class="detail-item">
-                    <div class="detail-icon">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
-                      </svg>
-                    </div>
-                    <div class="detail-content">
-                      <span class="detail-label">Fecha</span>
-                      <span class="detail-value">{{ formatFecha(selectedRecord.fecha) }}</span>
-                    </div>
-                  </div>
-
-                  <div class="detail-item">
-                    <div class="detail-icon">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                    </div>
-                    <div class="detail-content">
-                      <span class="detail-label">Estado</span>
-                      <span :class="['detail-value', 'status-badge', selectedRecord.hora_salida ? 'completed' : 'active']">
-                        {{ selectedRecord.hora_salida ? 'Completado' : 'Presente' }}
+                    <div class="detail-content-modern">
+                      <span class="detail-label-modern">
+                        {{ selectedRecord.tipoRegistro === 'entrada' ? 'Hora de Entrada' : 'Hora de Salida' }}
+                      </span>
+                      <span class="detail-value-modern time-value-modern">
+                        {{ formatHora12(selectedRecord.tipoRegistro === 'entrada' ? selectedRecord.hora_entrada : selectedRecord.hora_salida) }}
                       </span>
                     </div>
                   </div>
 
-                  <div v-if="selectedRecord.hora_entrada && selectedRecord.hora_salida" class="detail-item">
-                    <div class="detail-icon">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M15,1H9V3H15M19,8H17V6H7V8H5V6A2,2 0 0,1 7,4H17A2,2 0 0,1 19,6M9,11H15V9H9M19,19H5L3,17V9A2,2 0 0,1 5,7H19A2,2 0 0,1 21,9V17L19,19Z"/>
+                  <!-- Fecha -->
+                  <div class="detail-card date-card">
+                    <div class="detail-icon-modern">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
                       </svg>
                     </div>
-                    <div class="detail-content">
-                      <span class="detail-label">Tiempo Trabajado</span>
-                      <span class="detail-value time-worked">{{ calcularTiempoTotal(selectedRecord.hora_entrada, selectedRecord.hora_salida) }}</span>
+                    <div class="detail-content-modern">
+                      <span class="detail-label-modern">Fecha</span>
+                      <span class="detail-value-modern">{{ formatFechaElegante(selectedRecord.fecha) }}</span>
                     </div>
                   </div>
-                </div>
 
-                <!-- Imagen de la asistencia -->
-                <div v-if="selectedRecord.foto_url" class="detail-section photo-section">
-                  <div class="section-header">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                      <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd"/>
-                    </svg>
-                    <h4>Fotografía de Registro</h4>
+                  <!-- Estado -->
+                  <div class="detail-card status-card">
+                    <div class="detail-icon-modern">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    </div>
+                    <div class="detail-content-modern">
+                      <span class="detail-label-modern">Estado</span>
+                      <span :class="['detail-value-modern', 'status-badge-modern', selectedRecord.tipoRegistro]">
+                        {{ selectedRecord.tipoRegistro === 'entrada' ? 'Entrada Registrada' : 'Salida Registrada' }}
+                      </span>
+                    </div>
                   </div>
-                  
-                  <div class="photo-container-large">
-                    <img 
-                      :src="`${API_URL}/${selectedRecord.foto_url}`" 
-                      alt="Foto de asistencia" 
-                      class="detail-photo-large"
-                      @click="abrirFotoCompleta(selectedRecord.foto_url)"
-                    >
+
+                  <!-- Fotografía -->
+                  <div class="detail-card photo-card">
+                    <div class="photo-header-modern">
+                      <div class="detail-icon-modern">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                          <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd"/>
+                        </svg>
+                      </div>
+                      <span class="detail-label-modern">
+                        Fotografía de {{ selectedRecord.tipoRegistro === 'entrada' ? 'Entrada' : 'Salida' }}
+                      </span>
+                    </div>
+                    
+                    <div class="photo-container-modern">
+                      <!-- Foto de Entrada -->
+                      <img 
+                        v-if="selectedRecord.tipoRegistro === 'entrada' && selectedRecord.foto_entrada_url"
+                        :src="`${API_URL}/${selectedRecord.foto_entrada_url}`" 
+                        alt="Foto de entrada" 
+                        class="detail-photo-modern"
+                        @click="abrirFotoCompleta(selectedRecord.foto_entrada_url)"
+                      >
+                      <!-- Foto de Salida -->
+                      <img 
+                        v-else-if="selectedRecord.tipoRegistro === 'salida' && selectedRecord.foto_salida_url"
+                        :src="`${API_URL}/${selectedRecord.foto_salida_url}`" 
+                        alt="Foto de salida" 
+                        class="detail-photo-modern"
+                        @click="abrirFotoCompleta(selectedRecord.foto_salida_url)"
+                      >
+                      <!-- Foto única (compatibilidad) -->
+                      <img 
+                        v-else-if="selectedRecord.foto_url"
+                        :src="`${API_URL}/${selectedRecord.foto_url}`" 
+                        alt="Foto de registro" 
+                        class="detail-photo-modern"
+                        @click="abrirFotoCompleta(selectedRecord.foto_url)"
+                      >
+                      <!-- Sin foto -->
+                      <div v-else class="no-photo-modern">
+                        <svg width="32" height="32" fill="rgba(76, 175, 80, 0.3)" viewBox="0 0 24 24">
+                          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                        <p>Sin fotografía</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1011,8 +982,23 @@ const cargarTodosLosDatos = async () => {
 }
 
 // Nueva función para ver detalles de asistencia
-const verDetallesAsistencia = (asistencia) => {
+const verDetallesAsistencia = (asistencia, tipo = null) => {
   selectedRecord.value = asistencia
+  
+  // Determinar el tipo de registro basado en qué tab está activo o parámetro directo
+  let tipoRegistro = tipo
+  if (!tipoRegistro) {
+    if (activeTab.value === 'entradas') {
+      tipoRegistro = 'entrada'
+    } else if (activeTab.value === 'salidas') {
+      tipoRegistro = 'salida'
+    } else {
+      // Si no hay tab activo, determinar por la presencia de datos
+      tipoRegistro = asistencia.hora_salida ? 'salida' : 'entrada'
+    }
+  }
+  
+  selectedRecord.value.tipoRegistro = tipoRegistro
   modalType.value = 'asistencia'
   showModal.value = true
 }
@@ -1964,19 +1950,22 @@ const logout = () => {
   background: white;
   border-radius: 16px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-  max-width: 600px;
-  width: 100%;
-  max-height: 85vh;
+  max-width: 850px;
+  width: 95vw;
+  max-height: 90vh;
+  height: 80vh;
   overflow: hidden;
   position: relative;
   animation: modalSlideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Modal cuadrado para asistencia */
+/* Modal optimizado para asistencia */
 .modal-content:has(.asistencia-detalles) {
-  max-width: 800px;
-  width: 90vw;
-  max-height: 90vh;
+  max-width: 900px;
+  width: 95vw;
+  max-height: 85vh;
   aspect-ratio: unset;
 }
 
@@ -2065,9 +2054,10 @@ const logout = () => {
 }
 
 .modal-body {
-  padding: 24px;
-  max-height: 55vh;
+  padding: 16px;
+  flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .modal-body::-webkit-scrollbar {
@@ -2241,83 +2231,277 @@ const logout = () => {
   height: 0;
 }
 
-/* Estilos específicos para el modal de asistencia */
-.asistencia-detalles .detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  grid-template-areas: 
-    "user attendance"
-    "photo photo";
+/* Estilos modernos para el modal de asistencia */
+.asistencia-detalles {
+  width: 100%;
+  height: 100%;
 }
 
-.detail-section {
-  background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
-  border: 2px solid rgba(76, 175, 80, 0.1);
-  border-radius: 16px;
-  padding: 20px;
-  transition: all 0.3s ease;
+.modal-body-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0;
+  height: 100%;
 }
 
-.detail-section:hover {
-  border-color: rgba(76, 175, 80, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.1);
-}
-
-.user-section {
-  grid-area: user;
-}
-
-.attendance-section {
-  grid-area: attendance;
-}
-
-.photo-section {
-  grid-area: photo;
-}
-
-.section-header {
+/* Tarjeta principal del usuario */
+.user-card-main {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid rgba(76, 175, 80, 0.1);
+  gap: 16px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
 }
 
-.section-header svg {
-  color: #4CAF50;
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
 }
 
-.section-header h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #2E7D32;
+.user-avatar svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.user-info-main h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
+.user-info-main p {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.user-email {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* Grid moderno de detalles */
+.details-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  flex: 1;
+}
+
+/* Tarjetas de detalle modernas */
+.detail-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  border: 2px solid rgba(76, 175, 80, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+}
+
+.detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.15);
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.detail-icon-modern {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.detail-icon-modern svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.detail-content-modern {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label-modern {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: 4px;
 }
 
-.asistencia-detalles .detail-item {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
-  border: 1px solid rgba(76, 175, 80, 0.1);
-  transition: all 0.3s ease;
-}
-
-.asistencia-detalles .detail-item:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(76, 175, 80, 0.2);
-  transform: translateX(4px);
-}
-
-.time-value {
-  color: #2E7D32 !important;
+.detail-value-modern {
+  font-size: 16px;
   font-weight: 600;
-  font-size: 15px;
+  color: #2E7D32;
+  line-height: 1.3;
+}
+
+/* Valores especiales */
+.time-value-modern {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1B5E20;
+  text-shadow: 0 1px 2px rgba(76, 175, 80, 0.1);
+}
+
+.status-badge-modern {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-badge-modern.entrada {
+  background: linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%);
+  color: #1B5E20;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-badge-modern.salida {
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  color: #E65100;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+/* Tarjeta de foto especial */
+.photo-card {
+  grid-column: span 2;
+  min-height: 200px;
+}
+
+.photo-header-modern {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.photo-container-modern {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 140px;
+}
+
+.detail-photo-modern {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.detail-photo-modern:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.no-photo-modern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #999;
+  min-height: 120px;
+}
+
+.no-photo-modern svg {
+  opacity: 0.5;
+}
+
+.no-photo-modern p {
+  margin: 0;
+  font-size: 14px;
+  color: #999;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .details-grid-modern {
+    grid-template-columns: 1fr;
+  }
+  
+  .photo-card {
+    grid-column: span 1;
+  }
+  
+  .user-card-main {
+    padding: 16px;
+  }
+  
+  .user-info-main h3 {
+    font-size: 16px;
+  }
+  
+  .detail-card {
+    padding: 12px;
+    min-height: 100px;
+  }
+  
+  .detail-icon-modern {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .time-value-modern {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-body-modern {
+    gap: 16px;
+  }
+  
+  .user-card-main {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .detail-card {
+    padding: 12px;
+  }
+  
+  .photo-container-modern {
+    min-height: 100px;
+  }
 }
 
 .time-worked {
@@ -2331,25 +2515,119 @@ const logout = () => {
 }
 
 .photo-container-large {
-  text-align: center;
-  margin-top: 12px;
+  width: 100%;
+  height: 140px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.photo-container-single {
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  background: rgba(76, 175, 80, 0.05);
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
 }
 
 .detail-photo-large {
-  max-width: 100%;
-  height: auto;
-  max-height: 300px;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.2);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 3px solid rgba(76, 175, 80, 0.1);
+  transition: transform 0.3s ease;
 }
 
-.detail-photo-large:hover {
-  transform: scale(1.02);
-  box-shadow: 0 12px 40px rgba(76, 175, 80, 0.3);
-  border-color: rgba(76, 175, 80, 0.3);
+.detail-photo-single {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.detail-photo-large:hover,
+.detail-photo-single:hover {
+  transform: scale(1.05);
+}
+
+/* Sección de fotos */
+.photo-section {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.photo-item {
+  margin-bottom: 12px;
+}
+
+.photo-item:last-child {
+  margin-bottom: 0;
+}
+
+.photo-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2e7d32;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.photo-container-small {
+  width: 100%;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.detail-photo-small {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.detail-photo-small:hover {
+  transform: scale(1.05);
+}
+
+.no-photos {
+  text-align: center;
+  padding: 20px;
+  color: rgba(76, 175, 80, 0.6);
+  font-size: 0.85rem;
+}
+
+.no-photos svg {
+  margin-bottom: 8px;
+}
+
+.no-photos p {
+  margin: 0;
+  font-style: italic;
+}
+
+/* Nuevos estilos para badges de estado específicos */
+.status-badge.entrada {
+  background: linear-gradient(135deg, #66BB6A, #4CAF50);
+  color: white;
+  border: 1px solid #4CAF50;
+}
+
+.status-badge.salida {
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+  color: white;
+  border: 1px solid #FF9800;
 }
 
 /* Responsividad */
@@ -2443,15 +2721,19 @@ const logout = () => {
       "user"
       "attendance"
       "photo";
-    gap: 16px;
+    gap: 12px;
   }
   
   .detail-section {
-    padding: 16px;
+    padding: 12px;
   }
   
   .section-header h4 {
-    font-size: 14px;
+    font-size: 11px;
+  }
+  
+  .detail-photo-large {
+    max-height: 150px;
   }
 }
 

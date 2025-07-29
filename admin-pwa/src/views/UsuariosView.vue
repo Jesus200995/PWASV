@@ -167,6 +167,15 @@
                         <span class="btn-label">Detalles</span>
                       </div>
                       <div class="action-container">
+                        <button @click="editarUsuario(usuario)" class="btn-editar" title="Editar usuario">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
+                        <span class="btn-label-editar">Editar</span>
+                      </div>
+                      <div class="action-container">
                         <button @click="confirmarEliminarUsuario(usuario)" class="btn-eliminar" title="Eliminar usuario">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3,6 5,6 21,6"></polyline>
@@ -403,6 +412,114 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de edición de usuario -->
+    <div v-if="showEditModal" class="modal-overlay-modern" @click="cancelarEdicion">
+      <div class="modal-content-modern edit-modal" @click.stop>
+        <div class="modal-header-modern edit-header">
+          <div class="modal-title-section">
+            <div class="modal-icon edit-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Editar Usuario</h3>
+          </div>
+          <button @click="cancelarEdicion" class="btn-close-modern">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="modal-body-modern">
+          <div v-if="usuarioAEditar" class="edit-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="edit-correo">Correo Electrónico</label>
+                <input 
+                  id="edit-correo"
+                  v-model="datosEdicion.correo" 
+                  type="email" 
+                  class="form-input"
+                  placeholder="correo@ejemplo.com"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="edit-nombre">Nombre Completo</label>
+                <input 
+                  id="edit-nombre"
+                  v-model="datosEdicion.nombre_completo" 
+                  type="text" 
+                  class="form-input"
+                  placeholder="Nombre completo del usuario"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="edit-cargo">Cargo</label>
+                <input 
+                  id="edit-cargo"
+                  v-model="datosEdicion.cargo" 
+                  type="text" 
+                  class="form-input"
+                  placeholder="Cargo o puesto"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="edit-supervisor">Supervisor</label>
+                <input 
+                  id="edit-supervisor"
+                  v-model="datosEdicion.supervisor" 
+                  type="text" 
+                  class="form-input"
+                  placeholder="Nombre del supervisor"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="edit-contrasena">Contraseña</label>
+                <input 
+                  id="edit-contrasena"
+                  v-model="datosEdicion.contrasena" 
+                  type="password" 
+                  class="form-input"
+                  placeholder="Nueva contraseña (opcional)"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="edit-curp">CURP</label>
+                <input 
+                  id="edit-curp"
+                  v-model="datosEdicion.curp" 
+                  type="text" 
+                  class="form-input"
+                  placeholder="CURP de 18 caracteres"
+                  maxlength="18"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer-edit">
+          <button @click="cancelarEdicion" class="btn-cancel">
+            Cancelar
+          </button>
+          <button @click="guardarEdicion" class="btn-save" :disabled="editandoUsuario">
+            <svg v-if="editandoUsuario" class="spinner-small" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 11-6.219-8.56"/>
+            </svg>
+            {{ editandoUsuario ? 'Guardando...' : 'Guardar Cambios' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -439,6 +556,19 @@ const showPassword = ref(false)
 const showDeleteModal = ref(false)
 const usuarioAEliminar = ref(null)
 const eliminandoUsuario = ref(false)
+
+// Variables para edición de usuarios
+const showEditModal = ref(false)
+const usuarioAEditar = ref(null)
+const editandoUsuario = ref(false)
+const datosEdicion = ref({
+  correo: '',
+  nombre_completo: '',
+  cargo: '',
+  supervisor: '',
+  contrasena: '',
+  curp: ''
+})
 
 onMounted(() => {
   cargarUsuarios()
@@ -611,6 +741,72 @@ const eliminarUsuario = async () => {
     alert('Error al eliminar el usuario. Por favor, inténtalo de nuevo.')
   } finally {
     eliminandoUsuario.value = false
+  }
+}
+
+// Funciones para edición de usuarios
+const editarUsuario = (usuario) => {
+  usuarioAEditar.value = usuario
+  // Llenar el formulario con los datos del usuario
+  datosEdicion.value = {
+    correo: usuario.correo || '',
+    nombre_completo: usuario.nombre_completo || '',
+    cargo: usuario.cargo || '',
+    supervisor: usuario.supervisor || '',
+    contrasena: usuario.contrasena || '',
+    curp: usuario.curp || ''
+  }
+  showEditModal.value = true
+}
+
+const cancelarEdicion = () => {
+  showEditModal.value = false
+  usuarioAEditar.value = null
+  editandoUsuario.value = false
+  // Limpiar formulario
+  datosEdicion.value = {
+    correo: '',
+    nombre_completo: '',
+    cargo: '',
+    supervisor: '',
+    contrasena: '',
+    curp: ''
+  }
+}
+
+const guardarEdicion = async () => {
+  if (!usuarioAEditar.value) return
+  
+  editandoUsuario.value = true
+  
+  try {
+    console.log('✏️ Editando usuario:', usuarioAEditar.value.id, datosEdicion.value)
+    
+    // Aquí implementarías la llamada al backend para actualizar el usuario
+    // await usuariosService.actualizarUsuario(usuarioAEditar.value.id, datosEdicion.value)
+    
+    // Por ahora, solo actualizamos en el array local
+    const index = usuarios.value.findIndex(u => u.id === usuarioAEditar.value.id)
+    if (index !== -1) {
+      usuarios.value[index] = {
+        ...usuarios.value[index],
+        ...datosEdicion.value
+      }
+    }
+    
+    // Actualizar usuarios filtrados
+    filtrarUsuarios()
+    
+    console.log('✅ Usuario editado exitosamente')
+    
+    // Cerrar modal
+    cancelarEdicion()
+    
+  } catch (error) {
+    console.error('❌ Error al editar usuario:', error)
+    alert('Error al editar el usuario. Por favor, inténtalo de nuevo.')
+  } finally {
+    editandoUsuario.value = false
   }
 }
 
@@ -1647,6 +1843,64 @@ const logout = () => {
   transform: scale(1.1);
 }
 
+/* Estilos para el botón de editar */
+.btn-editar {
+  width: clamp(32px, 6vw, 36px);
+  height: clamp(32px, 6vw, 36px);
+  padding: 0;
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-editar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-editar:hover::before {
+  left: 100%;
+}
+
+.btn-editar:hover {
+  background: linear-gradient(135deg, #f57c00, #e65100);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(255, 152, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-editar:active {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+}
+
+.btn-editar svg {
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
+  transition: all 0.3s ease;
+}
+
+.btn-editar:hover svg {
+  transform: scale(1.1);
+}
+
 /* Label para botón ver/detalles (verde) */
 .btn-label {
   font-size: 10px;
@@ -1677,6 +1931,22 @@ const logout = () => {
 .action-container:hover .btn-label-eliminar {
   opacity: 1;
   color: #d32f2f;
+}
+
+/* Label para botón editar (naranja) */
+.btn-label-editar {
+  font-size: 10px;
+  color: #ff9800;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.action-container:hover .btn-label-editar {
+  opacity: 1;
+  color: #f57c00;
 }
 
 /* Estilos para el modal de eliminación */
@@ -1798,6 +2068,106 @@ const logout = () => {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Estilos para el modal de edición */
+.edit-modal {
+  max-width: 600px !important;
+}
+
+.edit-header {
+  background: linear-gradient(135deg, #fff8e1, #ffecb3);
+  border-bottom: 2px solid #ff9800;
+}
+
+.edit-icon {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+}
+
+.edit-form {
+  padding: 20px 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.form-input {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: white;
+  color: #333;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #ff9800;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.form-input:hover:not(:focus) {
+  border-color: #bbb;
+}
+
+.form-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.modal-footer-edit {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 30px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f57c00, #e65100);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+}
+
+.btn-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Modal Moderno - Diseño Responsivo */
@@ -2365,6 +2735,27 @@ const logout = () => {
   .modal-content {
     margin: clamp(5px, 2vw, 10px);
     max-width: calc(100vw - clamp(10px, 4vw, 20px));
+  }
+  
+  /* Estilos responsivos para modal de edición */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .edit-modal {
+    max-width: 90vw !important;
+  }
+  
+  .modal-footer-edit {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-save, .btn-cancel {
+    width: 100%;
+    justify-content: center;
   }
 }
 

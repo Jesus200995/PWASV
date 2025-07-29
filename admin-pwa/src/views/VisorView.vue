@@ -25,13 +25,26 @@
             <div class="connection-status" :class="{ 'online': isOnline, 'offline': !isOnline }">
               <div class="status-indicator"></div>
               <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
-            </div>            <button @click="recargarMapa" class="refresh-btn" :disabled="loading">
-              <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            </div>
+            
+            <!-- Animación de carga automática -->
+            <div class="auto-refresh-animation">
+              <div class="loading-dots">
+                <span class="loading-text">Actualizando</span>
+                <div class="dots-container">
+                  <div class="dot dot-1"></div>
+                  <div class="dot dot-2"></div>
+                  <div class="dot dot-3"></div>
+                </div>
+              </div>
+            </div>
+            
+            <button @click="recargarMapa" class="refresh-btn-icon" :disabled="loading" title="Actualizar manualmente">
+              <svg class="refresh-icon" :class="{ spinning: loading }" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10"></polyline>
                 <polyline points="1 20 1 14 7 14"></polyline>
                 <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
               </svg>
-              {{ loading ? 'Cargando...' : 'Actualizar' }}
             </button>
           </div>
         </div>
@@ -435,6 +448,11 @@ const ultimasActividades = ref([])
 const mostrarSugerencias = ref(false)
 const sugerenciasUsuarios = ref([])
 const sugerenciaSeleccionada = ref(-1)
+
+// Auto-refresh
+const autoRefreshInterval = ref(null)
+const nextUpdateTime = ref(null)
+const timeRemaining = ref(120) // 2 minutos en segundos
 const timeoutSugerencias = ref(null)
 
 // Registro seleccionado y estado del panel de detalles
@@ -1714,10 +1732,32 @@ const manejarTeclaEscape = (event) => {
   }
 }
 
+// Funciones de auto-refresh
+const iniciarAutoRefresh = () => {
+  // Actualizar cada 2 minutos (120000 ms)
+  autoRefreshInterval.value = setInterval(() => {
+    console.log('🌱 Auto-actualizando mapa...')
+    cargarRegistros()
+  }, 120000) // 2 minutos
+  
+  // Establecer próxima actualización
+  nextUpdateTime.value = new Date(Date.now() + 120000)
+}
+
+const detenerAutoRefresh = () => {
+  if (autoRefreshInterval.value) {
+    clearInterval(autoRefreshInterval.value)
+    autoRefreshInterval.value = null
+  }
+}
+
 // Ciclo de vida
 onMounted(() => {
   // Cargar registros y después inicializar el mapa
   cargarRegistros()
+  
+  // Iniciar auto-refresh
+  iniciarAutoRefresh()
   
   // Agregar listener para tecla Escape
   document.addEventListener('keydown', manejarTeclaEscape)
@@ -1733,6 +1773,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  // Detener auto-refresh
+  detenerAutoRefresh()
+  
   // Limpiar listeners de redimensionamiento
   window.removeEventListener('resize', recalcularPalitos)
   
@@ -2026,6 +2069,155 @@ watch([filtroTipo, filtroPeriodo], () => {
 .refresh-icon {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+
+/* Nuevo botón solo con icono */
+.refresh-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(8px, 2vw, 12px);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: clamp(8px, 2vw, 12px);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  width: clamp(40px, 8vw, 48px);
+  height: clamp(40px, 8vw, 48px);
+}
+
+.refresh-btn-icon:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+}
+
+.refresh-btn-icon:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.refresh-btn-icon:active {
+  transform: translateY(-1px) scale(1.05);
+  transition: all 0.1s ease;
+}
+
+/* Animación de carga automática */
+.auto-refresh-animation {
+  display: flex;
+  align-items: center;
+  padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 20px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: clamp(20px, 5vw, 24px);
+  backdrop-filter: blur(10px);
+  animation: containerPulse 3s ease-in-out infinite;
+}
+
+.loading-dots {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 2vw, 12px);
+}
+
+.loading-text {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: clamp(11px, 2.5vw, 13px);
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.dots-container {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 1vw, 6px);
+}
+
+.dot {
+  width: clamp(6px, 1.5vw, 8px);
+  height: clamp(6px, 1.5vw, 8px);
+  border-radius: 50% 0%;
+  background: linear-gradient(45deg, #4CAF50, #81C784, #A5D6A7);
+  position: relative;
+  animation: leafFloat 1.5s ease-in-out infinite;
+  transform-origin: center;
+  box-shadow: 
+    0 2px 4px rgba(76, 175, 80, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.dot-1 {
+  animation-delay: 0s;
+  background: linear-gradient(45deg, #4CAF50, #66BB6A);
+}
+
+.dot-2 {
+  animation-delay: 0.5s;
+  background: linear-gradient(45deg, #8BC34A, #AED581);
+  border-radius: 0% 50%;
+}
+
+.dot-3 {
+  animation-delay: 1s;
+  background: linear-gradient(45deg, #2E7D32, #4CAF50);
+  border-radius: 50%;
+}
+
+/* Animaciones */
+@keyframes containerPulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+  }
+  50% { 
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.25);
+  }
+}
+
+@keyframes leafFloat {
+  0% { 
+    transform: translateY(0px) rotate(0deg) scale(1);
+    opacity: 0.7;
+  }
+  25% { 
+    transform: translateY(-3px) rotate(-5deg) scale(1.1);
+    opacity: 1;
+  }
+  50% { 
+    transform: translateY(-6px) rotate(0deg) scale(1.2);
+    opacity: 0.9;
+    box-shadow: 
+      0 4px 8px rgba(76, 175, 80, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  75% { 
+    transform: translateY(-3px) rotate(5deg) scale(1.1);
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(0px) rotate(0deg) scale(1);
+    opacity: 0.7;
+  }
 }
 
 .refresh-icon.spinning {

@@ -1052,13 +1052,13 @@ const logout = () => {
 }
 
 .filters-section {
-  background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
+  background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
   border-radius: 12px;
   box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    0 1px 8px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255,255,255,0.8);
-  border: 1px solid rgba(76, 175, 80, 0.1);
+    0 4px 16px rgba(76, 175, 80, 0.12),
+    0 1px 8px rgba(76, 175, 80, 0.08),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  border: 2px solid #4CAF50;
   margin-bottom: 16px;
   padding: 12px 16px;
   transition: all 0.3s ease;
@@ -1070,9 +1070,10 @@ const logout = () => {
 .filters-section:hover {
   transform: translateY(-1px);
   box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.08),
-    0 2px 12px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255,255,255,0.9);
+    0 6px 20px rgba(76, 175, 80, 0.16),
+    0 2px 12px rgba(76, 175, 80, 0.12),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+  border-color: #45a049;
 }
 
 .controls-row {

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import UsuariosView from '../views/UsuariosView.vue'
+import HistorialesView from '../views/HistorialesView.vue'
 import RegistrosView from '../views/RegistrosView.vue'
 import ConfiguracionView from '../views/ConfiguracionView.vue'
 import VisorView from '../views/VisorView.vue'
@@ -27,6 +28,12 @@ const routes = [
     path: '/usuarios',
     name: 'Usuarios',
     component: UsuariosView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/historiales',
+    name: 'Historiales',
+    component: HistorialesView,
     meta: { requiresAuth: true }
   },
   {

@@ -521,6 +521,24 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de Éxito -->
+  <div v-if="showSuccessModal" class="modal-overlay-success" @click="cerrarSuccessModal">
+    <div class="modal-content-success" @click.stop>
+      <div class="success-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20,6 9,17 4,12"></polyline>
+        </svg>
+      </div>
+      
+      <h3>¡Usuario actualizado!</h3>
+      <p>Los cambios se guardaron exitosamente en la base de datos.</p>
+      
+      <button @click="cerrarSuccessModal" class="btn-success-ok">
+        Aceptar
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -569,6 +587,9 @@ const datosEdicion = ref({
   contrasena: '',
   curp: ''
 })
+
+// Variables para modal de éxito
+const showSuccessModal = ref(false)
 
 onMounted(() => {
   cargarUsuarios()
@@ -796,11 +817,11 @@ const guardarEdicion = async () => {
     
     console.log('✅ Usuario editado exitosamente en la base de datos')
     
-    // Cerrar modal
+    // Cerrar modal de edición
     cancelarEdicion()
     
-    // Mostrar mensaje de éxito
-    alert('Usuario actualizado exitosamente en la base de datos')
+    // Mostrar modal de éxito
+    showSuccessModal.value = true
     
   } catch (error) {
     console.error('❌ Error al editar usuario:', error)
@@ -808,6 +829,11 @@ const guardarEdicion = async () => {
   } finally {
     editandoUsuario.value = false
   }
+}
+
+// Función para cerrar modal de éxito
+const cerrarSuccessModal = () => {
+  showSuccessModal.value = false
 }
 
 const logout = () => {
@@ -3050,6 +3076,131 @@ const logout = () => {
   .password-toggle-btn svg {
     width: clamp(10px, 2.2vw, 12px);
     height: clamp(10px, 2.2vw, 12px);
+  }
+}
+
+/* Estilos para Modal de Éxito */
+.modal-overlay-success {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content-success {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  animation: slideUp 0.3s ease-out;
+  text-align: center;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.success-icon {
+  width: 48px;
+  height: 48px;
+  background: #22c55e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: white;
+}
+
+.modal-content-success h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.modal-content-success p {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.btn-success-ok {
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.btn-success-ok:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
+}
+
+.btn-success-ok:active {
+  transform: translateY(0);
+}
+
+/* Responsive para Modal de Éxito */
+@media (max-width: 768px) {
+  .modal-content-success {
+    width: 95%;
+    padding: 20px;
+    max-width: 280px;
+  }
+  
+  .success-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+  }
+  
+  .success-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .modal-content-success h3 {
+    font-size: 16px;
+  }
+  
+  .modal-content-success p {
+    font-size: 13px;
+  }
+  
+  .btn-success-ok {
+    padding: 8px 20px;
+    font-size: 13px;
   }
 }
 </style>

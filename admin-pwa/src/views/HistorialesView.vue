@@ -291,6 +291,7 @@
               <table class="historial-table">
                 <thead>
                   <tr>
+                    <th>Origen</th>
                     <th>Tipo</th>
                     <th>Descripción</th>
                     <th>Fecha</th>
@@ -300,6 +301,11 @@
                 </thead>
                 <tbody>
                   <tr v-for="registro in historial" :key="registro.id" class="registro-row">
+                    <td>
+                      <span :class="['origen-badge', registro.origen]">
+                        {{ formatearOrigen(registro.origen) }}
+                      </span>
+                    </td>
                     <td>
                       <span :class="['tipo-badge', registro.tipo]">
                         {{ formatearTipo(registro.tipo) }}
@@ -466,8 +472,8 @@ export default {
     const cargarUsuarios = async () => {
       try {
         console.log('🔍 Cargando usuarios...')
-        const usuariosData = await usuariosService.obtenerUsuarios()
-        usuarios.value = usuariosData || []
+        const usuariosData = await historialService.obtenerUsuarios()
+        usuarios.value = usuariosData.usuarios || usuariosData || []
         console.log(`✅ ${usuarios.value.length} usuarios cargados`)
       } catch (err) {
         console.error('❌ Error al cargar usuarios:', err)
@@ -486,16 +492,27 @@ export default {
       
       try {
         const userId = parseInt(usuarioSeleccionado.value)
-        console.log('🔍 Cargando historial para usuario ID:', userId)
+        console.log('🔍 Cargando historial completo para usuario ID:', userId)
         console.log('🔍 Filtros aplicados:', filtros.value)
         
         const filtrosAPI = construirFiltrosAPI()
         console.log('🔍 Filtros API:', filtrosAPI)
         
-        const data = await historialService.obtenerHistorial(userId, filtrosAPI)
+        // Usar el nuevo método de historial completo
+        const data = await historialService.obtenerHistorialCompleto(userId, filtrosAPI)
         
         historial.value = data.historial || []
-        console.log(`✅ ${historial.value.length} registros de historial cargados`)
+        resumen.value = {
+          estadisticas: data.estadisticas || {
+            total_registros: 0,
+            entradas: 0,
+            salidas: 0,
+            actividades: 0
+          }
+        }
+        
+        console.log(`✅ ${historial.value.length} registros de historial completo cargados`)
+        console.log('📊 Estadísticas:', resumen.value.estadisticas)
         
         if (historial.value.length === 0) {
           console.log('⚠️ No se encontraron registros para este usuario con los filtros aplicados')
@@ -505,6 +522,7 @@ export default {
         console.error('❌ Error al cargar historial:', err)
         error.value = err.message || 'Error al cargar el historial'
         historial.value = []
+        resumen.value = null
         
         // Si es error 404, mostrar mensaje más amigable
         if (err.message.includes('404') || err.message.includes('no encontrado')) {
@@ -516,19 +534,9 @@ export default {
     }
 
     const cargarResumen = async () => {
-      if (!usuarioSeleccionado.value) return
-
-      try {
-        const userId = parseInt(usuarioSeleccionado.value)
-        console.log('📊 Cargando resumen para usuario ID:', userId)
-        const data = await historialService.obtenerResumen(userId)
-        resumen.value = data
-        console.log('✅ Resumen cargado:', data)
-      } catch (err) {
-        console.error('❌ Error al cargar resumen:', err)
-        // No mostrar error aquí, el resumen es opcional
-        resumen.value = null
-      }
+      // Ya no necesitamos cargar resumen por separado
+      // El historial completo ya incluye las estadísticas
+      console.log('📊 Resumen incluido en historial completo')
     }
 
     const construirFiltrosAPI = () => {
@@ -641,6 +649,15 @@ export default {
     }
 
     // Métodos de formato
+    const formatearOrigen = (origen) => {
+      const origenes = {
+        historial: 'Historial',
+        registros: 'Actividades',
+        asistencias: 'Asistencia'
+      }
+      return origenes[origen] || origen
+    }
+
     const formatearTipo = (tipo) => {
       return historialService.formatearTipo(tipo)
     }
@@ -792,6 +809,7 @@ export default {
       aplicarFiltros,
       
       // Métodos de formato
+      formatearOrigen,
       formatearTipo,
       formatearFecha,
       formatearHora,
@@ -1503,6 +1521,36 @@ export default {
   background: rgba(52, 152, 219, 0.1);
   color: #3498db;
   border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.origen-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: clamp(3px, 0.6vw, 5px) clamp(6px, 1.2vw, 8px);
+  border-radius: clamp(10px, 2vw, 12px);
+  font-size: clamp(10px, 1.8vw, 11px);
+  font-weight: 500;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.origen-badge.historial {
+  background: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+  border: 1px solid rgba(156, 39, 176, 0.2);
+}
+
+.origen-badge.registros {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ff9800;
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.origen-badge.asistencias {
+  background: rgba(103, 58, 183, 0.1);
+  color: #673ab7;
+  border: 1px solid rgba(103, 58, 183, 0.2);
 }
 
 .descripcion-cell {

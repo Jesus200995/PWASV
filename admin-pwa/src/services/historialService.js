@@ -1,9 +1,238 @@
-// Servicio para manejo de historial de usuarios
-const API_BASE = 'https://apipwa.sembrandodatos.com'; // API de producción
+// Servicio para manejo de historial completo de usuarios
+const API_CONFIG = {
+  local: 'http://localhost:8000',
+  production: 'https://apipwa.sembrandodatos.com'
+};
+
+// Configuración flexible para desarrollo y producción
+const API_BASE = API_CONFIG.production; // Cambiar a API_CONFIG.local para desarrollo
 
 class HistorialService {
   constructor() {
     this.cache = new Map(); // Cache para mejorar performance
+  }
+
+  /**
+   * Obtener historial completo de un usuario (historial + registros + asistencias)
+   */
+  async obtenerHistorialCompleto(usuarioId, filtros = {}) {
+    try {
+      console.log('🔍 Obteniendo historial completo para usuario:', usuarioId, 'con filtros:', filtros);
+
+      // Ejecutar todas las consultas en paralelo
+      const [historialResp, registrosResp, asistenciasResp] = await Promise.all([
+        this.obtenerHistorial(usuarioId, filtros),
+        this.obtenerRegistros(usuarioId),
+        this.obtenerAsistencias(usuarioId)
+      ]);
+
+      console.log('📊 Datos obtenidos:', {
+        historial: historialResp?.historial?.length || 0,
+        registros: registrosResp?.registros?.length || 0,
+        asistencias: asistenciasResp?.asistencias?.length || 0
+      });
+
+      // Convertir todos los datos a un formato unificado
+      const historialUnificado = [];
+
+      // Agregar registros del historial
+      if (historialResp?.historial) {
+        historialResp.historial.forEach(item => {
+          historialUnificado.push({
+            id: `hist_${item.id}`,
+            tipo: item.tipo,
+            descripcion: item.descripcion,
+            fecha: item.fecha,
+            hora: item.hora,
+            detalles: item.detalles,
+            creado_en: item.creado_en,
+            fecha_hora_combinada: this.combinarFechaHora(item.fecha, item.hora),
+            origen: 'historial'
+          });
+        });
+      }
+
+      // Agregar registros de actividades
+      if (registrosResp?.registros) {
+        registrosResp.registros.forEach(item => {
+          historialUnificado.push({
+            id: `reg_${item.id}`,
+            tipo: 'actividad',
+            descripcion: item.descripcion || 'Registro de actividad',
+            fecha: item.fecha_hora ? item.fecha_hora.split('T')[0] : null,
+            hora: item.fecha_hora ? item.fecha_hora.split('T')[1]?.substring(0, 8) : null,
+            detalles: JSON.stringify({
+              latitud: item.latitud,
+              longitud: item.longitud,
+              foto_url: item.foto_url
+            }),
+            creado_en: item.fecha_hora,
+            fecha_hora_combinada: item.fecha_hora,
+            origen: 'registros'
+          });
+        });
+      }
+
+      // Agregar asistencias (entradas y salidas)
+      if (asistenciasResp?.asistencias) {
+        asistenciasResp.asistencias.forEach(item => {
+          // Agregar entrada si existe
+          if (item.hora_entrada) {
+            historialUnificado.push({
+              id: `asist_entrada_${item.id}`,
+              tipo: 'entrada',
+              descripcion: item.descripcion_entrada || 'Entrada registrada',
+              fecha: item.fecha,
+              hora: item.hora_entrada,
+              detalles: JSON.stringify({
+                latitud: item.latitud_entrada,
+                longitud: item.longitud_entrada,
+                foto_url: item.foto_entrada_url
+              }),
+              creado_en: this.combinarFechaHora(item.fecha, item.hora_entrada),
+              fecha_hora_combinada: this.combinarFechaHora(item.fecha, item.hora_entrada),
+              origen: 'asistencias'
+            });
+          }
+
+          // Agregar salida si existe
+          if (item.hora_salida) {
+            historialUnificado.push({
+              id: `asist_salida_${item.id}`,
+              tipo: 'salida',
+              descripcion: item.descripcion_salida || 'Salida registrada',
+              fecha: item.fecha,
+              hora: item.hora_salida,
+              detalles: JSON.stringify({
+                latitud: item.latitud_salida,
+                longitud: item.longitud_salida,
+                foto_url: item.foto_salida_url
+              }),
+              creado_en: this.combinarFechaHora(item.fecha, item.hora_salida),
+              fecha_hora_combinada: this.combinarFechaHora(item.fecha, item.hora_salida),
+              origen: 'asistencias'
+            });
+          }
+        });
+      }
+
+      // Aplicar filtros
+      let historialFiltrado = historialUnificado;
+
+      if (filtros.tipo) {
+        historialFiltrado = historialFiltrado.filter(item => item.tipo === filtros.tipo);
+      }
+
+      if (filtros.fechaInicio) {
+        historialFiltrado = historialFiltrado.filter(item => item.fecha >= filtros.fechaInicio);
+      }
+
+      if (filtros.fechaFin) {
+        historialFiltrado = historialFiltrado.filter(item => item.fecha <= filtros.fechaFin);
+      }
+
+      // Ordenar por fecha y hora más reciente primero
+      historialFiltrado.sort((a, b) => {
+        const fechaA = new Date(a.fecha_hora_combinada || a.creado_en);
+        const fechaB = new Date(b.fecha_hora_combinada || b.creado_en);
+        return fechaB - fechaA;
+      });
+
+      // Calcular estadísticas
+      const estadisticas = {
+        total_registros: historialFiltrado.length,
+        entradas: historialFiltrado.filter(item => item.tipo === 'entrada').length,
+        salidas: historialFiltrado.filter(item => item.tipo === 'salida').length,
+        actividades: historialFiltrado.filter(item => item.tipo === 'actividad').length
+      };
+
+      console.log('✅ Historial completo procesado:', {
+        total: historialFiltrado.length,
+        estadisticas
+      });
+
+      return {
+        historial: historialFiltrado,
+        total: historialFiltrado.length,
+        usuario: historialResp?.usuario || { id: usuarioId },
+        estadisticas
+      };
+
+    } catch (error) {
+      console.error('❌ Error al obtener historial completo:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener registros de actividades
+   */
+  async obtenerRegistros(usuarioId) {
+    try {
+      const url = `${API_BASE}/registros?usuario_id=${usuarioId}`;
+      console.log('🔍 Obteniendo registros desde:', url);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Registros obtenidos:', data);
+      return data;
+
+    } catch (error) {
+      console.error('❌ Error al obtener registros:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener asistencias (entradas/salidas)
+   */
+  async obtenerAsistencias(usuarioId) {
+    try {
+      const url = `${API_BASE}/asistencias?usuario_id=${usuarioId}`;
+      console.log('🔍 Obteniendo asistencias desde:', url);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Asistencias obtenidas:', data);
+      return data;
+
+    } catch (error) {
+      console.error('❌ Error al obtener asistencias:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Combinar fecha y hora en formato ISO
+   */
+  combinarFechaHora(fecha, hora) {
+    if (!fecha) return null;
+    
+    if (hora) {
+      return `${fecha}T${hora}`;
+    } else {
+      return `${fecha}T00:00:00`;
+    }
   }
 
   /**
@@ -253,6 +482,35 @@ class HistorialService {
   }
 
   /**
+   * Obtener lista de usuarios
+   */
+  async obtenerUsuarios() {
+    try {
+      const url = `${API_BASE}/usuarios`;
+      console.log('🔍 Obteniendo usuarios desde:', url);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Usuarios obtenidos:', data);
+      return data;
+
+    } catch (error) {
+      console.error('❌ Error al obtener usuarios:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Probar conectividad con el backend
    */
   async probarConectividad() {
@@ -278,6 +536,95 @@ class HistorialService {
       console.error('❌ Error de conectividad:', error);
       throw error;
     }
+  }
+
+  /**
+   * Formatear tipo de actividad
+   */
+  formatearTipo(tipo) {
+    const tipos = {
+      entrada: 'Entrada',
+      salida: 'Salida',
+      actividad: 'Actividad',
+      registro: 'Registro'
+    }
+    return tipos[tipo] || tipo
+  }
+
+  /**
+   * Formatear fecha
+   */
+  formatearFecha(fecha) {
+    if (!fecha) return 'N/A'
+    
+    try {
+      const fechaObj = new Date(fecha)
+      return fechaObj.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      })
+    } catch (error) {
+      return fecha
+    }
+  }
+
+  /**
+   * Formatear hora
+   */
+  formatearHora(hora) {
+    if (!hora) return 'N/A'
+    
+    try {
+      // Si la hora viene con formato completo ISO, extraer solo la parte de hora
+      if (hora.includes('T')) {
+        hora = hora.split('T')[1]
+      }
+      
+      // Tomar solo HH:mm:ss o HH:mm
+      const partes = hora.split(':')
+      if (partes.length >= 2) {
+        return `${partes[0]}:${partes[1]}`
+      }
+      
+      return hora
+    } catch (error) {
+      return hora
+    }
+  }
+
+  /**
+   * Generar datos para Excel
+   */
+  generarDatosExcel(historial, nombreUsuario) {
+    const fecha = new Date()
+    const fechaStr = fecha.toISOString().split('T')[0]
+    
+    return {
+      datos: historial.map(registro => ({
+        ID: registro.id,
+        Origen: this.formatearOrigen(registro.origen),
+        Tipo: this.formatearTipo(registro.tipo),
+        Descripcion: registro.descripcion || 'Sin descripción',
+        Fecha: this.formatearFecha(registro.fecha),
+        Hora: this.formatearHora(registro.hora),
+        'Creado en': registro.creado_en
+      })),
+      nombreArchivo: `historial_${nombreUsuario.replace(/\s+/g, '_')}_${fechaStr}.xlsx`,
+      nombreHoja: 'Historial'
+    }
+  }
+
+  /**
+   * Formatear origen de datos
+   */
+  formatearOrigen(origen) {
+    const origenes = {
+      historial: 'Historial',
+      registros: 'Actividades',
+      asistencias: 'Asistencia'
+    }
+    return origenes[origen] || origen
   }
 
   /**

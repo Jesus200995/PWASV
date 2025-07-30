@@ -249,7 +249,7 @@
           </router-link>
         </li>
 
-        <!-- <li class="nav-item" :class="{ active: $route.name === 'Historiales' }">
+        <li class="nav-item" :class="{ active: $route.name === 'Historiales' }">
           <router-link to="/historiales" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -259,7 +259,7 @@
             <span class="nav-text">Historiales</span>
             <div class="nav-glow"></div>
           </router-link>
-        </li> -->
+        </li>
         
         <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }">
           <router-link to="/configuracion" class="nav-link">

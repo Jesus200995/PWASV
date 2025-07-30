@@ -218,7 +218,7 @@ const eliminandoAsistencias = ref(false)
 const descargandoBD = ref(false)
 
 const apiConfig = reactive({
-  url: 'http://localhost:8000',
+  url: 'https://apipwa.sembrandodatos.com',
   timeout: 30
 })
 

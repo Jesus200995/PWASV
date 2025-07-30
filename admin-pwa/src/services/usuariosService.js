@@ -1,5 +1,5 @@
 // Servicio para manejo de usuarios usando la API real con endpoints GET
-const API_BASE = 'http://localhost:8000'; // Usar localhost para desarrollo
+const API_BASE = 'https://apipwa.sembrandodatos.com'; // API de producción
 
 class UsuariosService {
   constructor() {
@@ -8,8 +8,8 @@ class UsuariosService {
 
   async obtenerUsuarios() {
     try {
-      console.log('🔍 Obteniendo usuarios con contraseñas desde la API real...');
-      const response = await fetch(`${API_BASE}/usuarios/exportacion-completa`, {
+      console.log('🔍 Obteniendo usuarios desde la API real...');
+      const response = await fetch(`${API_BASE}/usuarios`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -22,7 +22,7 @@ class UsuariosService {
       }
       
       const data = await response.json();
-      console.log('✅ Respuesta de la API con contraseñas:', data);
+      console.log('✅ Respuesta de la API:', data);
       
       // El endpoint devuelve {usuarios: []} según la implementación del backend
       let usuarios = [];
@@ -32,12 +32,12 @@ class UsuariosService {
         usuarios = data;
       }
       
-      // Actualizar cache con los usuarios obtenidos (incluyendo contraseñas)
+      // Actualizar cache con los usuarios obtenidos
       usuarios.forEach(usuario => {
         this.cache.set(usuario.id, usuario);
       });
       
-      console.log(`✅ ${usuarios.length} usuarios obtenidos con contraseñas desde la base de datos`);
+      console.log(`✅ ${usuarios.length} usuarios obtenidos desde la base de datos`);
       return usuarios;
       
     } catch (error) {

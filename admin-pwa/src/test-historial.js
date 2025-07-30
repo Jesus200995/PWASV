@@ -2,7 +2,7 @@
 console.log('🧪 Iniciando pruebas del sistema de historial...');
 
 // Probar conectividad con usuarios
-fetch('http://localhost:8000/usuarios')
+fetch('https://apipwa.sembrandodatos.com/usuarios')
   .then(response => response.json())
   .then(data => {
     console.log('✅ Usuarios obtenidos:', data);
@@ -12,7 +12,7 @@ fetch('http://localhost:8000/usuarios')
       console.log('🧪 Probando historial para usuario:', primerUsuario.id);
       
       // Probar historial del primer usuario
-      return fetch(`http://localhost:8000/historial/${primerUsuario.id}`);
+      return fetch(`https://apipwa.sembrandodatos.com/historial/${primerUsuario.id}`);
     } else {
       throw new Error('No hay usuarios disponibles');
     }
@@ -27,7 +27,7 @@ fetch('http://localhost:8000/usuarios')
   });
 
 // Probar endpoint de historial general
-fetch('http://localhost:8000/historial')
+fetch('https://apipwa.sembrandodatos.com/historial')
   .then(response => response.json())
   .then(data => {
     console.log('✅ Historial general obtenido:', data);

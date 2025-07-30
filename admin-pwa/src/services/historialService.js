@@ -1,5 +1,5 @@
 // Servicio para manejo de historial de usuarios
-const API_BASE = 'http://localhost:8000'; // Usar localhost para desarrollo
+const API_BASE = 'https://apipwa.sembrandodatos.com'; // API de producción
 
 class HistorialService {
   constructor() {

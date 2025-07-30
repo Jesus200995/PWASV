@@ -277,9 +277,9 @@ async def obtener_usuarios():
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Obtener todos los usuarios con CURP
+        # Obtener todos los usuarios con CURP y contraseña
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, curp FROM usuarios ORDER BY id DESC"
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena FROM usuarios ORDER BY id DESC"
         )
         
         resultados = cursor.fetchall()
@@ -294,7 +294,8 @@ async def obtener_usuarios():
                 "nombre_completo": row[2],
                 "cargo": row[3],
                 "supervisor": row[4],
-                "curp": row[5]
+                "curp": row[5],
+                "contrasena": row[6]  # Incluir contraseña
             }
             usuarios.append(usuario)
         
@@ -358,9 +359,9 @@ async def obtener_usuario(user_id: int):
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Buscar usuario por ID con CURP
+        # Buscar usuario por ID con CURP y contraseña
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, curp FROM usuarios WHERE id = %s",
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena FROM usuarios WHERE id = %s",
             (user_id,)
         )
         
@@ -374,10 +375,11 @@ async def obtener_usuario(user_id: int):
             "nombre_completo": resultado[2],
             "cargo": resultado[3],
             "supervisor": resultado[4],
-            "curp": resultado[5]
+            "curp": resultado[5],
+            "contrasena": resultado[6]  # Incluir contraseña
         }
         
-        print(f"✅ Usuario {user_id} encontrado correctamente")
+        print(f"✅ Usuario {user_id} obtenido correctamente")
         return usuario
         
     except HTTPException:

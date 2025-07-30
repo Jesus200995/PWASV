@@ -336,7 +336,7 @@
                 <span class="detail-label">Contraseña</span>
                 <div class="password-display">
                   <span class="password-value">
-                    {{ showPassword ? (usuarioSeleccionado.contrasena || usuarioSeleccionado.password || usuarioSeleccionado.contraseña || 'Sin contraseña') : '••••••••••••' }}
+                    {{ showPassword ? obtenerContrasenaUsuario(usuarioSeleccionado) : '••••••••••••' }}
                   </span>
                   <button @click="togglePassword" class="password-toggle-btn" type="button">
                     <svg v-if="showPassword" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -712,6 +712,20 @@ const verDetalles = (usuario) => {
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
+}
+
+// Función helper para obtener la contraseña del usuario
+const obtenerContrasenaUsuario = (usuario) => {
+  if (!usuario) return 'Sin contraseña'
+  
+  // Verificar diferentes posibles nombres del campo contraseña
+  const contraseña = usuario.contrasena || usuario.password || usuario.contraseña || usuario.pwd
+  
+  console.log('🔍 Buscando contraseña en usuario:', usuario)
+  console.log('🔑 Contraseña encontrada:', contraseña)
+  console.log('📋 Propiedades del usuario:', Object.keys(usuario))
+  
+  return contraseña || 'Sin contraseña'
 }
 
 const cerrarModal = () => {

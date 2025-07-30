@@ -264,6 +264,311 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         print(f"❌ Error en admin login: {e}")
         raise HTTPException(status_code=500, detail=f"Error en autenticación: {str(e)}")
 
+# Nuevo endpoint para obtener usuarios (para el panel de administración)
+@app.get("/usuarios")
+async def obtener_usuarios():
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Obtener todos los usuarios con CURP y contraseña
+        cursor.execute(
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena FROM usuarios ORDER BY id DESC"
+        )
+        
+        resultados = cursor.fetchall()
+        print(f"📊 Encontrados {len(resultados)} usuarios")
+        
+        # Convertir tuplas a diccionarios manualmente
+        usuarios = []
+        for row in resultados:
+            usuario = {
+                "id": row[0],
+                "correo": row[1],
+                "nombre_completo": row[2],
+                "cargo": row[3],
+                "supervisor": row[4],
+                "curp": row[5],
+                "contrasena": row[6]  # Incluir contraseña
+            }
+            usuarios.append(usuario)
+        
+        print(f"✅ Usuarios procesados correctamente")
+        return {"usuarios": usuarios}
+        
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuarios: {str(e)}")
+
+# NUEVO ENDPOINT PARA EXPORTACIÓN COMPLETA CON CONTRASEÑAS
+@app.get("/usuarios/exportacion-completa")
+async def obtener_usuarios_exportacion_completa():
+    """
+    Endpoint especial para exportar usuarios con contraseñas incluidas.
+    Solo para uso en exportación de base de datos completa.
+    """
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Obtener TODOS los campos de usuarios incluyendo contraseñas
+        cursor.execute(
+            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp FROM usuarios ORDER BY id DESC"
+        )
+        
+        resultados = cursor.fetchall()
+        print(f"📊 Exportación completa: {len(resultados)} usuarios con contraseñas")
+        
+        # Convertir tuplas a diccionarios manualmente
+        usuarios = []
+        for row in resultados:
+            usuario = {
+                "id": row[0],
+                "correo": row[1],
+                "nombre_completo": row[2],
+                "cargo": row[3],
+                "supervisor": row[4],
+                "contrasena": row[5],  # INCLUIR LA CONTRASEÑA REAL
+                "curp": row[6]
+            }
+            usuarios.append(usuario)
+        
+        print(f"✅ Exportación completa procesada correctamente")
+        return {"usuarios": usuarios}
+        
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuarios para exportación: {str(e)}")
+
+# Endpoint para obtener un usuario específico
+@app.get("/usuarios/{user_id}")
+async def obtener_usuario(user_id: int):
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Obtener usuario específico con contraseña
+        cursor.execute(
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena FROM usuarios WHERE id = %s",
+            (user_id,)
+        )
+        
+        resultado = cursor.fetchone()
+        
+        if not resultado:
+            raise HTTPException(status_code=404, detail=f"Usuario {user_id} no encontrado")
+        
+        # Convertir tupla a diccionario
+        usuario = {
+            "id": resultado[0],
+            "correo": resultado[1],
+            "nombre_completo": resultado[2],
+            "cargo": resultado[3],
+            "supervisor": resultado[4],
+            "curp": resultado[5],
+            "contrasena": resultado[6]  # Incluir contraseña
+        }
+        
+        print(f"✅ Usuario {user_id} obtenido correctamente")
+        return usuario
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuario: {str(e)}")
+
+@app.put("/usuarios/{user_id}")
+async def actualizar_usuario(user_id: int, usuario: UserCreate):
+    """Actualiza los datos de un usuario específico"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"✏️ Actualizando usuario {user_id}...")
+        
+        # Validación de CURP si se proporciona
+        if usuario.curp and usuario.curp.strip():
+            curp_upper = usuario.curp.upper().strip()
+            if len(curp_upper) != 18:
+                raise HTTPException(status_code=400, detail="La CURP debe tener exactamente 18 caracteres")
+            
+            import re
+            if not re.match(r'^[A-Z0-9]{18}$', curp_upper):
+                raise HTTPException(status_code=400, detail="La CURP tiene un formato inválido")
+            
+            # Verificar que la CURP no esté en uso por otro usuario
+            cursor.execute("SELECT id FROM usuarios WHERE curp = %s AND id != %s", (curp_upper, user_id))
+            if cursor.fetchone():
+                raise HTTPException(status_code=400, detail="Esta CURP ya está registrada por otro usuario")
+        else:
+            curp_upper = None
+        
+        # Verificar que el correo no esté en uso por otro usuario
+        cursor.execute("SELECT id FROM usuarios WHERE correo = %s AND id != %s", (usuario.correo, user_id))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="Este correo ya está registrado por otro usuario")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (user_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Actualizar usuario (contraseña sin encriptar)
+        cursor.execute(
+            """UPDATE usuarios SET 
+               correo = %s, 
+               nombre_completo = %s, 
+               cargo = %s, 
+               supervisor = %s, 
+               contrasena = %s, 
+               curp = %s 
+               WHERE id = %s""",
+            (usuario.correo, usuario.nombre_completo, usuario.cargo, 
+             usuario.supervisor, usuario.contrasena, curp_upper, user_id)
+        )
+        
+        conn.commit()
+        
+        # Obtener el usuario actualizado
+        cursor.execute(
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena FROM usuarios WHERE id = %s",
+            (user_id,)
+        )
+        resultado = cursor.fetchone()
+        
+        usuario_actualizado = {
+            "id": resultado[0],
+            "correo": resultado[1],
+            "nombre_completo": resultado[2],
+            "cargo": resultado[3],
+            "supervisor": resultado[4],
+            "curp": resultado[5],
+            "contrasena": resultado[6]
+        }
+        
+        print(f"✅ Usuario {user_id} actualizado exitosamente")
+        return {
+            "success": True,
+            "message": "Usuario actualizado exitosamente",
+            "usuario": usuario_actualizado
+        }
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al actualizar usuario: {str(e)}")
+
+@app.delete("/usuarios/{user_id}")
+async def eliminar_usuario(user_id: int):
+    """Elimina completamente un usuario y todos sus datos asociados"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🗑️ Iniciando eliminación completa del usuario {user_id}...")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, correo, nombre_completo FROM usuarios WHERE id = %s", (user_id,))
+        usuario = cursor.fetchone()
+        
+        if not usuario:
+            raise HTTPException(status_code=404, detail=f"Usuario {user_id} no encontrado")
+        
+        usuario_info = {
+            "id": usuario[0],
+            "correo": usuario[1], 
+            "nombre_completo": usuario[2]
+        }
+        
+        print(f"👤 Usuario encontrado: {usuario_info}")
+        
+        # Contadores para el reporte
+        registros_eliminados = 0
+        asistencias_eliminadas = 0
+        fotos_eliminadas = 0
+        
+        # 1. Obtener y eliminar fotos asociadas a registros del usuario
+        try:
+            cursor.execute("SELECT foto_url FROM registros WHERE usuario_id = %s AND foto_url IS NOT NULL", (user_id,))
+            fotos_registros = cursor.fetchall()
+            
+            for foto_row in fotos_registros:
+                foto_path = foto_row[0]
+                if foto_path and os.path.exists(foto_path):
+                    try:
+                        os.remove(foto_path)
+                        fotos_eliminadas += 1
+                        print(f"📸 Foto eliminada: {foto_path}")
+                    except Exception as e:
+                        print(f"⚠️ Error eliminando foto {foto_path}: {e}")
+                        
+        except Exception as e:
+            print(f"⚠️ Error obteniendo fotos de registros: {e}")
+        
+        # 2. Eliminar registros del usuario
+        try:
+            cursor.execute("DELETE FROM registros WHERE usuario_id = %s", (user_id,))
+            registros_eliminados = cursor.rowcount
+            print(f"📋 {registros_eliminados} registros eliminados")
+        except Exception as e:
+            print(f"⚠️ Error eliminando registros: {e}")
+        
+        # 3. Eliminar asistencias del usuario
+        try:
+            cursor.execute("DELETE FROM asistencias WHERE usuario_id = %s", (user_id,))
+            asistencias_eliminadas = cursor.rowcount
+            print(f"⏰ {asistencias_eliminadas} asistencias eliminadas")
+        except Exception as e:
+            print(f"⚠️ Error eliminando asistencias: {e}")
+        
+        # 4. Finalmente eliminar el usuario
+        cursor.execute("DELETE FROM usuarios WHERE id = %s", (user_id,))
+        
+        conn.commit()
+        
+        reporte = {
+            "success": True,
+            "message": f"Usuario {user_id} eliminado completamente",
+            "usuario_eliminado": usuario_info,
+            "estadisticas": {
+                "registros_eliminados": registros_eliminados,
+                "asistencias_eliminadas": asistencias_eliminadas,
+                "fotos_eliminadas": fotos_eliminadas
+            }
+        }
+        
+        print(f"✅ Usuario {user_id} eliminado exitosamente")
+        print(f"📊 Estadísticas: {reporte['estadisticas']}")
+        
+        return reporte
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar usuario: {str(e)}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

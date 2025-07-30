@@ -1,5 +1,14 @@
 // Servicio para manejo de usuarios usando la API real con endpoints GET
-const API_BASE = 'https://apipwa.sembrandodatos.com'; // API de producción
+// Configuración de API - cambia aquí para alternar entre local y producción
+const API_CONFIG = {
+  production: 'https://apipwa.sembrandodatos.com',
+  local: 'http://localhost:8000'
+};
+
+// Usar producción por defecto, cambiar a 'local' para desarrollo
+const API_BASE = API_CONFIG.production; // Cambiar entre 'production' y 'local'
+
+console.log(`🌐 Usando API: ${API_BASE}`);
 
 class UsuariosService {
   constructor() {
@@ -31,6 +40,17 @@ class UsuariosService {
       } else if (Array.isArray(data)) {
         usuarios = data;
       }
+      
+      // Debug: verificar contraseñas en los datos recibidos
+      console.log('🔍 Verificando contraseñas en usuarios recibidos:');
+      usuarios.forEach((usuario, index) => {
+        console.log(`Usuario ${index + 1}:`, {
+          id: usuario.id,
+          nombre: usuario.nombre_completo,
+          contraseña: usuario.contrasena || 'NO FOUND',
+          propiedades: Object.keys(usuario)
+        });
+      });
       
       // Actualizar cache con los usuarios obtenidos
       usuarios.forEach(usuario => {

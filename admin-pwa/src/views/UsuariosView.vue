@@ -93,6 +93,27 @@
                 </button>
               </div>
             </div>
+
+            <!-- Botones de exportación -->
+            <div class="export-group">
+              <button @click="imprimirUsuarios" class="export-btn print-btn" title="Imprimir Lista">
+                <svg class="export-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6,9 6,2 18,2 18,9"></polyline>
+                  <path d="M6,18H4a2,2 0 0,1 -2,-2v-5a2,2 0 0,1 2,-2H20a2,2 0 0,1 2,2v5a2,2 0 0,1 -2,2H18"></path>
+                  <polyline points="6,14 6,22 18,22 18,14"></polyline>
+                </svg>
+                Imprimir
+              </button>
+              <button @click="exportarExcel" class="export-btn excel-btn" title="Exportar a Excel">
+                <svg class="export-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <path d="M7 7h10"></path>
+                  <path d="M7 12h10"></path>
+                  <path d="M7 17h10"></path>
+                </svg>
+                Excel
+              </button>
+            </div>
           </div>
         </div>
 
@@ -627,6 +648,272 @@ const cargarUsuarios = async () => {
   }
 }
 
+// Funciones de exportación
+const imprimirUsuarios = () => {
+  const ventanaImpresion = window.open('', '_blank')
+  
+  const estilosImpresion = `
+    <style>
+      @media print {
+        body { 
+          font-family: Arial, sans-serif; 
+          font-size: 10px; 
+          margin: 0; 
+          padding: 15px;
+        }
+        .header { 
+          text-align: center; 
+          margin-bottom: 25px; 
+          border-bottom: 2px solid #4CAF50;
+          padding-bottom: 12px;
+        }
+        .header h1 { 
+          color: #4CAF50; 
+          margin: 0; 
+          font-size: 22px;
+        }
+        .header p { 
+          margin: 4px 0; 
+          color: #666;
+          font-size: 11px;
+        }
+        table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin-top: 15px;
+          font-size: 9px;
+        }
+        th, td { 
+          border: 1px solid #ddd; 
+          padding: 6px 4px; 
+          text-align: left;
+          word-wrap: break-word;
+        }
+        th { 
+          background-color: #4CAF50; 
+          color: white; 
+          font-weight: bold;
+          font-size: 8px;
+          text-align: center;
+        }
+        tr:nth-child(even) { 
+          background-color: #f8f9fa; 
+        }
+        .col-id { width: 8%; text-align: center; }
+        .col-correo { width: 25%; }
+        .col-nombre { width: 20%; }
+        .col-cargo { width: 15%; }
+        .col-supervisor { width: 15%; }
+        .col-curp { width: 17%; font-family: monospace; }
+        .estado-activo { 
+          color: #28a745; 
+          font-weight: bold; 
+        }
+        .estado-inactivo { 
+          color: #dc3545; 
+          font-weight: bold; 
+        }
+        .footer {
+          margin-top: 25px;
+          text-align: center;
+          font-size: 9px;
+          color: #666;
+          border-top: 1px solid #ddd;
+          padding-top: 12px;
+        }
+        @page {
+          margin: 0.5in;
+          size: A4 landscape;
+        }
+      }
+    </style>
+  `
+  
+  const fecha = new Date().toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+  
+  const obtenerEstadoUsuario = (usuario) => {
+    // Determinar estado basado en si tiene datos completos (sin contar contraseña)
+    const tieneCorreo = usuario.correo && usuario.correo.trim() !== ''
+    const tieneNombre = usuario.nombre_completo && usuario.nombre_completo.trim() !== ''
+    const tieneCargo = usuario.cargo && usuario.cargo.trim() !== ''
+    const tieneCurp = usuario.curp && usuario.curp.trim() !== ''
+    
+    return (tieneCorreo && tieneNombre && tieneCargo && tieneCurp) ? 'Activo' : 'Incompleto'
+  }
+  
+  const obtenerFechaRegistro = (usuario) => {
+    // Usar fecha real si está disponible, sino simular basada en ID
+    if (usuario.fecha_registro) {
+      return formatFecha(usuario.fecha_registro)
+    } else if (usuario.created_at) {
+      return formatFecha(usuario.created_at)
+    } else {
+      // Simular fecha basada en ID (usuarios más recientes tienen ID mayor)
+      const baseDate = new Date('2024-01-01')
+      const daysToAdd = (usuario.id || 1) * 2 // 2 días por ID para espaciar
+      const fechaSimulada = new Date(baseDate.getTime() + (daysToAdd * 24 * 60 * 60 * 1000))
+      return fechaSimulada.toLocaleDateString('es-ES')
+    }
+  }
+  
+  const contenidoHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Lista Completa de Usuarios - ${fecha}</title>
+      ${estilosImpresion}
+    </head>
+    <body>
+      <div class="header">
+        <h1>📋 Lista de Usuarios del Sistema</h1>
+        <p>Generado el: ${fecha}</p>
+        <p>Total de usuarios: ${usuariosFiltrados.value.length}</p>
+        <p><strong>Información administrativa del sistema</strong></p>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th class="col-correo">Correo Electrónico</th>
+            <th class="col-nombre">Nombre Completo</th>
+            <th class="col-cargo">Cargo</th>
+            <th class="col-supervisor">Supervisor</th>
+            <th class="col-curp">CURP</th>
+            <th class="col-estado">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${usuariosFiltrados.value.map(usuario => {
+            const estado = obtenerEstadoUsuario(usuario)
+            const claseEstado = estado === 'Activo' ? 'estado-activo' : 'estado-inactivo'
+            
+            return `
+            <tr>
+              <td class="col-id">${usuario.id}</td>
+              <td class="col-correo">${usuario.correo || 'No especificado'}</td>
+              <td class="col-nombre">${usuario.nombre_completo || 'Sin nombre'}</td>
+              <td class="col-cargo">${usuario.cargo || 'Sin cargo'}</td>
+              <td class="col-supervisor">${usuario.supervisor || 'Sin supervisor'}</td>
+              <td class="col-curp">${usuario.curp || 'Sin CURP'}</td>
+              <td class="col-estado"><span class="${claseEstado}">${estado}</span></td>
+            </tr>
+            `
+          }).join('')}
+        </tbody>
+      </table>
+      
+      <div class="footer">
+        <p><strong>Sistema de Gestión de Usuarios PWA</strong></p>
+        <p>Documento generado automáticamente</p>
+        <p>Total de registros: ${usuariosFiltrados.value.length} usuarios</p>
+      </div>
+    </body>
+    </html>
+  `
+  
+  ventanaImpresion.document.write(contenidoHTML)
+  ventanaImpresion.document.close()
+  
+  // Esperar un momento antes de imprimir para que se carguen los estilos
+  setTimeout(() => {
+    ventanaImpresion.print()
+  }, 250)
+}
+
+const exportarExcel = () => {
+  // Headers completos con todos los campos (sin contraseña ni fecha)
+  const headers = [
+    'ID Usuario',
+    'Correo Electrónico', 
+    'Nombre Completo', 
+    'Cargo', 
+    'Supervisor', 
+    'CURP', 
+    'Estado'
+  ]
+  
+  const obtenerEstadoUsuario = (usuario) => {
+    const tieneCorreo = usuario.correo && usuario.correo.trim() !== ''
+    const tieneNombre = usuario.nombre_completo && usuario.nombre_completo.trim() !== ''
+    const tieneCargo = usuario.cargo && usuario.cargo.trim() !== ''
+    const tieneCurp = usuario.curp && usuario.curp.trim() !== ''
+    
+    return (tieneCorreo && tieneNombre && tieneCargo && tieneCurp) ? 'Activo' : 'Incompleto'
+  }
+  
+  const obtenerFechaRegistro = (usuario) => {
+    if (usuario.fecha_registro) {
+      return formatFecha(usuario.fecha_registro)
+    } else if (usuario.created_at) {
+      return formatFecha(usuario.created_at)
+    } else {
+      // Simular fecha basada en ID
+      const baseDate = new Date('2024-01-01')
+      const daysToAdd = (usuario.id || 1) * 2
+      const fechaSimulada = new Date(baseDate.getTime() + (daysToAdd * 24 * 60 * 60 * 1000))
+      return fechaSimulada.toLocaleDateString('es-ES')
+    }
+  }
+  
+  const csvData = usuariosFiltrados.value.map(usuario => [
+    usuario.id || '',
+    usuario.correo || 'No especificado',
+    usuario.nombre_completo || 'Sin nombre',
+    usuario.cargo || 'Sin cargo',
+    usuario.supervisor || 'Sin supervisor',
+    usuario.curp || 'Sin CURP',
+    obtenerEstadoUsuario(usuario)
+  ])
+  
+  // Crear contenido CSV con información adicional
+  let csvContent = `"SISTEMA DE GESTIÓN DE USUARIOS PWA"\n`
+  csvContent += `"Exportación generada el: ${new Date().toLocaleDateString('es-ES', { 
+    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+  })}"\n`
+  csvContent += `"Total de usuarios: ${usuariosFiltrados.value.length}"\n`
+  csvContent += `"Información administrativa del sistema"\n\n`
+  
+  // Agregar headers
+  csvContent += headers.join(',') + '\n'
+  
+  // Agregar datos
+  csvData.forEach(row => {
+    csvContent += row.map(field => `"${field}"`).join(',') + '\n'
+  })
+  
+  // Agregar información adicional al final
+  csvContent += `\n"Notas:"\n`
+  csvContent += `"- Estado 'Activo': Usuario tiene correo, nombre, cargo y CURP completados"\n`
+  csvContent += `"- Estado 'Incompleto': Faltan datos en campos importantes"\n`
+  csvContent += `"- Información de contraseñas y fechas excluida por seguridad"\n`
+  
+  // Agregar BOM para caracteres especiales en Excel
+  const BOM = '\uFEFF'
+  const csvWithBOM = BOM + csvContent
+  
+  // Crear y descargar el archivo
+  const blob = new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  
+  if (link.download !== undefined) {
+    const fecha = new Date().toISOString().split('T')[0]
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `usuarios_${fecha}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+}
+
 const filtrarUsuarios = () => {
   if (!searchTerm.value.trim()) {
     usuariosFiltrados.value = usuarios.value
@@ -1090,7 +1377,7 @@ const logout = () => {
   justify-content: space-between;
 }
 
-.search-group, .sort-group {
+.search-group, .sort-group, .export-group {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1155,6 +1442,79 @@ const logout = () => {
   background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
   transform: translateY(-1px);
   box-shadow: 0 3px 10px rgba(76, 175, 80, 0.4);
+}
+
+/* Estilos para botones de exportación */
+.export-group {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.25rem, 1vw, 0.5rem);
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+  border: none;
+  border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.export-btn:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.export-btn:hover:before {
+  left: 100%;
+}
+
+.print-btn {
+  background: linear-gradient(135deg, #6c5ce7 0%, #5a48d1 100%);
+  color: white;
+  border: 1px solid rgba(108, 92, 231, 0.3);
+}
+
+.print-btn:hover {
+  background: linear-gradient(135deg, #5a48d1 0%, #4834d4 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.excel-btn {
+  background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+  color: white;
+  border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+.excel-btn:hover {
+  background: linear-gradient(135deg, #00a085 0%, #008f75 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+}
+
+.export-icon {
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.export-btn:hover .export-icon {
+  transform: scale(1.1);
 }
 
 .sort-btn svg {

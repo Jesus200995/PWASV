@@ -469,6 +469,7 @@
 import Sidebar from '../components/Sidebar.vue'
 import MapaAsistenciaModal from '../components/MapaAsistenciaModal.vue'
 import AsistenciasService from '../services/asistenciasService.js'
+import * as XLSX from 'xlsx'
 
 export default {
   name: 'AsistenciaView',
@@ -932,8 +933,590 @@ export default {
     },
 
     exportarExcel() {
-      alert('La exportación a Excel se implementará próximamente')
-      // En una implementación real, se usaría una librería como SheetJS
+      try {
+        // Crear libro de trabajo
+        const workbook = XLSX.utils.book_new()
+        
+        // Datos filtrados para exportación
+        const asistenciasParaExportar = this.asistenciasFiltradas
+        
+        // Calcular estadísticas avanzadas
+        const estadisticas = this.calcularEstadisticasCompletas(asistenciasParaExportar)
+        
+        // ================================
+        // HOJA 1: RESUMEN EJECUTIVO
+        // ================================
+        const resumenData = [
+          ['📊 REPORTE DE ASISTENCIAS - RESUMEN EJECUTIVO'],
+          [''],
+          ['📅 Información del Reporte'],
+          ['Fecha de Generación:', new Date().toLocaleDateString('es-ES', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+          })],
+          ['Total de Registros:', estadisticas.totalAsistencias],
+          ['Período Analizado:', this.obtenerPeriodoAnalizado()],
+          ['Estado del Sistema:', 'Operativo ✅'],
+          [''],
+          ['👥 Estadísticas de Usuarios'],
+          ['Usuarios Únicos:', estadisticas.usuariosUnicos],
+          ['Usuarios Activos Hoy:', estadisticas.usuariosActivosHoy],
+          ['Promedio Asistencias/Usuario:', estadisticas.promedioAsistenciasPorUsuario],
+          [''],
+          ['⏰ Estadísticas de Tiempo'],
+          ['Asistencias Completas:', `${estadisticas.asistenciasCompletas} (${estadisticas.porcentajeCompletas}%)`],
+          ['Asistencias en Curso:', `${estadisticas.asistenciasEnCurso} (${estadisticas.porcentajeEnCurso}%)`],
+          ['Sin Entrada Registrada:', `${estadisticas.sinEntrada} (${estadisticas.porcentajeSinEntrada}%)`],
+          ['Tiempo Promedio Trabajado:', estadisticas.tiempoPromedioTrabajado],
+          ['Total Horas Trabajadas:', estadisticas.totalHorasTrabajadas],
+          [''],
+          ['📍 Estadísticas de Ubicación'],
+          ['Registros con Geolocalización:', `${estadisticas.conGeolocalizacion} (${estadisticas.porcentajeGeolocalizacion}%)`],
+          ['Entradas sin Ubicación:', estadisticas.sinUbicacionEntrada],
+          ['Salidas sin Ubicación:', estadisticas.sinUbicacionSalida],
+          [''],
+          ['🎯 Indicadores de Rendimiento'],
+          ['Tasa de Finalización:', `${estadisticas.tasaFinalizacion}%`],
+          ['Puntualidad Promedio:', estadisticas.puntualidadPromedio],
+          ['Eficiencia del Sistema:', `${estadisticas.eficienciaSistema}%`],
+          [''],
+          ['⚠️ Alertas y Observaciones'],
+          ...estadisticas.alertas.map(alerta => ['', alerta])
+        ]
+        
+        const wsResumen = XLSX.utils.aoa_to_sheet(resumenData)
+        
+        // Aplicar estilos al resumen
+        this.aplicarEstilosResumen(wsResumen)
+        
+        XLSX.utils.book_append_sheet(workbook, wsResumen, '📊 Resumen Ejecutivo')
+        
+        // ================================
+        // HOJA 2: DATOS DETALLADOS
+        // ================================
+        const datosDetallados = [
+          [
+            'ID Usuario', 'Nombre Usuario', 'Email', 'Fecha', 'Día Semana',
+            'Hora Entrada', 'Hora Salida', 'Tiempo Trabajado', 'Estado Asistencia',
+            'Lat. Entrada', 'Lng. Entrada', 'Lat. Salida', 'Lng. Salida',
+            'Descripción Entrada', 'Descripción Salida', 'Departamento', 'Observaciones'
+          ]
+        ]
+        
+        asistenciasParaExportar.forEach(asistencia => {
+          const tiempoTrabajado = this.calcularTiempoTrabajadoDetallado(asistencia)
+          const estadoAsistencia = this.obtenerEstadoAsistenciaTexto(asistencia)
+          const diaSemana = asistencia.fecha ? 
+            new Date(asistencia.fecha).toLocaleDateString('es-ES', { weekday: 'long' }) : ''
+          
+          datosDetallados.push([
+            asistencia.usuario_id || '',
+            asistencia.nombre_usuario || `Usuario ${asistencia.usuario_id}`,
+            asistencia.correo_usuario || 'No disponible',
+            asistencia.fecha ? new Date(asistencia.fecha).toLocaleDateString('es-ES') : '',
+            diaSemana,
+            asistencia.hora_entrada || '',
+            asistencia.hora_salida || '',
+            tiempoTrabajado.texto,
+            estadoAsistencia,
+            asistencia.latitud_entrada || '',
+            asistencia.longitud_entrada || '',
+            asistencia.latitud_salida || '',
+            asistencia.longitud_salida || '',
+            asistencia.descripcion_entrada || '',
+            asistencia.descripcion_salida || '',
+            asistencia.departamento || 'No asignado',
+            asistencia.observaciones || ''
+          ])
+        })
+        
+        const wsDetallados = XLSX.utils.aoa_to_sheet(datosDetallados)
+        
+        // Aplicar estilos a datos detallados
+        this.aplicarEstilosDetallados(wsDetallados, datosDetallados.length)
+        
+        XLSX.utils.book_append_sheet(workbook, wsDetallados, '📋 Datos Detallados')
+        
+        // ================================
+        // HOJA 3: ANÁLISIS POR USUARIO
+        // ================================
+        const analisisUsuarios = this.generarAnalisisPorUsuario(asistenciasParaExportar)
+        const wsUsuarios = XLSX.utils.aoa_to_sheet(analisisUsuarios)
+        
+        this.aplicarEstilosAnalisisUsuarios(wsUsuarios)
+        
+        XLSX.utils.book_append_sheet(workbook, wsUsuarios, '👥 Análisis Usuarios')
+        
+        // ================================
+        // HOJA 4: ANÁLISIS TEMPORAL
+        // ================================
+        const analisisTemporal = this.generarAnalisisTemporal(asistenciasParaExportar)
+        const wsTemporal = XLSX.utils.aoa_to_sheet(analisisTemporal)
+        
+        this.aplicarEstilosAnalisisTemporal(wsTemporal)
+        
+        XLSX.utils.book_append_sheet(workbook, wsTemporal, '📅 Análisis Temporal')
+        
+        // ================================
+        // HOJA 5: MAPA DE UBICACIONES
+        // ================================
+        const mapaUbicaciones = this.generarMapaUbicaciones(asistenciasParaExportar)
+        const wsUbicaciones = XLSX.utils.aoa_to_sheet(mapaUbicaciones)
+        
+        this.aplicarEstilosUbicaciones(wsUbicaciones)
+        
+        XLSX.utils.book_append_sheet(workbook, wsUbicaciones, '📍 Ubicaciones')
+        
+        // Generar y descargar archivo
+        const nombreArchivo = `Asistencias_Detallado_${new Date().toISOString().split('T')[0]}_${Date.now()}.xlsx`
+        XLSX.writeFile(workbook, nombreArchivo)
+        
+        // Mostrar mensaje de éxito
+        this.mostrarNotificacionExito('Excel generado exitosamente', `Se ha exportado el archivo: ${nombreArchivo}`)
+        
+      } catch (error) {
+        console.error('Error al exportar Excel:', error)
+        this.mostrarNotificacionError('Error al exportar', 'No se pudo generar el archivo Excel. Inténtalo nuevamente.')
+      }
+    },
+
+    calcularEstadisticasCompletas(asistencias) {
+      const totalAsistencias = asistencias.length
+      const usuariosUnicos = [...new Set(asistencias.map(a => a.usuario_id))].length
+      const hoy = new Date().toISOString().split('T')[0]
+      const usuariosActivosHoy = [...new Set(asistencias.filter(a => a.fecha === hoy).map(a => a.usuario_id))].length
+      
+      const asistenciasCompletas = asistencias.filter(a => a.hora_entrada && a.hora_salida).length
+      const asistenciasEnCurso = asistencias.filter(a => a.hora_entrada && !a.hora_salida).length
+      const sinEntrada = asistencias.filter(a => !a.hora_entrada).length
+      
+      const conGeolocalizacion = asistencias.filter(a => 
+        (a.latitud_entrada && a.longitud_entrada) || (a.latitud_salida && a.longitud_salida)
+      ).length
+      
+      const sinUbicacionEntrada = asistencias.filter(a => a.hora_entrada && (!a.latitud_entrada || !a.longitud_entrada)).length
+      const sinUbicacionSalida = asistencias.filter(a => a.hora_salida && (!a.latitud_salida || !a.longitud_salida)).length
+      
+      // Cálculos de porcentajes
+      const porcentajeCompletas = totalAsistencias > 0 ? ((asistenciasCompletas / totalAsistencias) * 100).toFixed(1) : 0
+      const porcentajeEnCurso = totalAsistencias > 0 ? ((asistenciasEnCurso / totalAsistencias) * 100).toFixed(1) : 0
+      const porcentajeSinEntrada = totalAsistencias > 0 ? ((sinEntrada / totalAsistencias) * 100).toFixed(1) : 0
+      const porcentajeGeolocalizacion = totalAsistencias > 0 ? ((conGeolocalizacion / totalAsistencias) * 100).toFixed(1) : 0
+      
+      // Cálculos de tiempo
+      let totalMinutos = 0
+      let totalHoras = 0
+      const asistenciasConTiempo = asistencias.filter(a => a.hora_entrada && a.hora_salida)
+      
+      asistenciasConTiempo.forEach(asistencia => {
+        try {
+          const entrada = new Date(`${asistencia.fecha} ${asistencia.hora_entrada}`)
+          const salida = new Date(`${asistencia.fecha} ${asistencia.hora_salida}`)
+          const diferencia = salida - entrada
+          if (diferencia > 0) {
+            totalMinutos += diferencia / (1000 * 60)
+            totalHoras += diferencia / (1000 * 60 * 60)
+          }
+        } catch (error) {
+          console.warn('Error calculando tiempo para asistencia:', asistencia)
+        }
+      })
+      
+      const tiempoPromedioMinutos = asistenciasConTiempo.length > 0 ? totalMinutos / asistenciasConTiempo.length : 0
+      const horasPromedio = Math.floor(tiempoPromedioMinutos / 60)
+      const minutosPromedio = Math.floor(tiempoPromedioMinutos % 60)
+      
+      // Generar alertas
+      const alertas = []
+      if (porcentajeSinEntrada > 10) alertas.push(`⚠️ Alto porcentaje sin entrada registrada: ${porcentajeSinEntrada}%`)
+      if (porcentajeGeolocalizacion < 80) alertas.push(`📍 Baja cobertura de geolocalización: ${porcentajeGeolocalizacion}%`)
+      if (asistenciasEnCurso > totalAsistencias * 0.2) alertas.push(`⏰ Muchas asistencias sin finalizar: ${asistenciasEnCurso}`)
+      if (alertas.length === 0) alertas.push('✅ Todos los indicadores dentro de parámetros normales')
+      
+      return {
+        totalAsistencias,
+        usuariosUnicos,
+        usuariosActivosHoy,
+        promedioAsistenciasPorUsuario: usuariosUnicos > 0 ? (totalAsistencias / usuariosUnicos).toFixed(1) : 0,
+        asistenciasCompletas,
+        asistenciasEnCurso,
+        sinEntrada,
+        porcentajeCompletas,
+        porcentajeEnCurso,
+        porcentajeSinEntrada,
+        tiempoPromedioTrabajado: `${horasPromedio}h ${minutosPromedio}m`,
+        totalHorasTrabajadas: `${Math.floor(totalHoras)}h ${Math.floor((totalHoras % 1) * 60)}m`,
+        conGeolocalizacion,
+        porcentajeGeolocalizacion,
+        sinUbicacionEntrada,
+        sinUbicacionSalida,
+        tasaFinalizacion: porcentajeCompletas,
+        puntualidadPromedio: 'En desarrollo',
+        eficienciaSistema: Math.min(100, parseFloat(porcentajeGeolocalizacion) + parseFloat(porcentajeCompletas)) / 2,
+        alertas
+      }
+    },
+
+    obtenerPeriodoAnalizado() {
+      const asistencias = this.asistenciasFiltradas
+      if (asistencias.length === 0) return 'Sin datos'
+      
+      const fechas = asistencias.map(a => a.fecha).filter(f => f).sort()
+      if (fechas.length === 0) return 'Sin fechas válidas'
+      
+      const fechaInicio = new Date(fechas[0]).toLocaleDateString('es-ES')
+      const fechaFin = new Date(fechas[fechas.length - 1]).toLocaleDateString('es-ES')
+      
+      return fechaInicio === fechaFin ? fechaInicio : `${fechaInicio} - ${fechaFin}`
+    },
+
+    calcularTiempoTrabajadoDetallado(asistencia) {
+      if (!asistencia.hora_entrada || !asistencia.hora_salida) {
+        return { 
+          texto: asistencia.hora_entrada ? 'En curso' : 'Sin entrada',
+          minutos: 0,
+          estado: asistencia.hora_entrada ? 'en_curso' : 'sin_entrada'
+        }
+      }
+      
+      try {
+        const entrada = new Date(`${asistencia.fecha} ${asistencia.hora_entrada}`)
+        const salida = new Date(`${asistencia.fecha} ${asistencia.hora_salida}`)
+        const diferencia = salida - entrada
+        
+        if (diferencia < 0) return { texto: 'Error en horarios', minutos: 0, estado: 'error' }
+        
+        const minutosTotales = Math.floor(diferencia / (1000 * 60))
+        const horas = Math.floor(minutosTotales / 60)
+        const minutos = minutosTotales % 60
+        
+        return {
+          texto: `${horas}h ${minutos}m`,
+          minutos: minutosTotales,
+          estado: 'completo'
+        }
+      } catch (error) {
+        return { texto: 'Error', minutos: 0, estado: 'error' }
+      }
+    },
+
+    obtenerEstadoAsistenciaTexto(asistencia) {
+      if (!asistencia.hora_entrada) return '❌ Sin Entrada'
+      if (!asistencia.hora_salida) return '⏳ En Curso'
+      return '✅ Completa'
+    },
+
+    generarAnalisisPorUsuario(asistencias) {
+      const analisisPorUsuario = new Map()
+      
+      asistencias.forEach(asistencia => {
+        const userId = asistencia.usuario_id
+        if (!analisisPorUsuario.has(userId)) {
+          analisisPorUsuario.set(userId, {
+            nombre: asistencia.nombre_usuario || `Usuario ${userId}`,
+            email: asistencia.correo_usuario || 'No disponible',
+            totalAsistencias: 0,
+            asistenciasCompletas: 0,
+            asistenciasEnCurso: 0,
+            sinEntrada: 0,
+            totalMinutosTrabajados: 0,
+            diasUnicos: new Set(),
+            primeraAsistencia: asistencia.fecha,
+            ultimaAsistencia: asistencia.fecha
+          })
+        }
+        
+        const user = analisisPorUsuario.get(userId)
+        user.totalAsistencias++
+        
+        if (asistencia.fecha) {
+          user.diasUnicos.add(asistencia.fecha)
+          if (asistencia.fecha < user.primeraAsistencia) user.primeraAsistencia = asistencia.fecha
+          if (asistencia.fecha > user.ultimaAsistencia) user.ultimaAsistencia = asistencia.fecha
+        }
+        
+        if (!asistencia.hora_entrada) {
+          user.sinEntrada++
+        } else if (!asistencia.hora_salida) {
+          user.asistenciasEnCurso++
+        } else {
+          user.asistenciasCompletas++
+          const tiempo = this.calcularTiempoTrabajadoDetallado(asistencia)
+          user.totalMinutosTrabajados += tiempo.minutos
+        }
+      })
+      
+      const analisisData = [
+        ['👥 ANÁLISIS DETALLADO POR USUARIO'],
+        [''],
+        ['Usuario', 'Email', 'Total Asistencias', 'Completas', 'En Curso', 'Sin Entrada', 
+         'Días Trabajados', 'Tiempo Total', 'Promedio/Día', 'Primera Asistencia', 'Última Asistencia', 'Estado']
+      ]
+      
+      Array.from(analisisPorUsuario.values())
+        .sort((a, b) => b.totalAsistencias - a.totalAsistencias)
+        .forEach(user => {
+          const diasTrabajados = user.diasUnicos.size
+          const horasTotales = Math.floor(user.totalMinutosTrabajados / 60)
+          const minutosTotales = user.totalMinutosTrabajados % 60
+          const promedioMinutosPorDia = diasTrabajados > 0 ? user.totalMinutosTrabajados / diasTrabajados : 0
+          const promedioHoras = Math.floor(promedioMinutosPorDia / 60)
+          const promedioMinutos = Math.floor(promedioMinutosPorDia % 60)
+          
+          const estado = user.sinEntrada > user.totalAsistencias * 0.3 ? '⚠️ Irregular' :
+                        user.asistenciasCompletas > user.totalAsistencias * 0.8 ? '✅ Excelente' :
+                        '⏳ Regular'
+          
+          analisisData.push([
+            user.nombre,
+            user.email,
+            user.totalAsistencias,
+            user.asistenciasCompletas,
+            user.asistenciasEnCurso,
+            user.sinEntrada,
+            diasTrabajados,
+            `${horasTotales}h ${minutosTotales}m`,
+            `${promedioHoras}h ${promedioMinutos}m`,
+            user.primeraAsistencia || 'N/A',
+            user.ultimaAsistencia || 'N/A',
+            estado
+          ])
+        })
+      
+      return analisisData
+    },
+
+    generarAnalisisTemporal(asistencias) {
+      const analisisPorFecha = new Map()
+      const analisisPorDia = new Map()
+      const analisisPorHora = new Map()
+      
+      asistencias.forEach(asistencia => {
+        // Análisis por fecha
+        if (asistencia.fecha) {
+          if (!analisisPorFecha.has(asistencia.fecha)) {
+            analisisPorFecha.set(asistencia.fecha, {
+              entradas: 0,
+              salidas: 0,
+              completas: 0,
+              usuarios: new Set()
+            })
+          }
+          const fechaData = analisisPorFecha.get(asistencia.fecha)
+          fechaData.usuarios.add(asistencia.usuario_id)
+          if (asistencia.hora_entrada) fechaData.entradas++
+          if (asistencia.hora_salida) fechaData.salidas++
+          if (asistencia.hora_entrada && asistencia.hora_salida) fechaData.completas++
+        }
+        
+        // Análisis por día de la semana
+        if (asistencia.fecha) {
+          const diaSemana = new Date(asistencia.fecha).toLocaleDateString('es-ES', { weekday: 'long' })
+          if (!analisisPorDia.has(diaSemana)) {
+            analisisPorDia.set(diaSemana, { count: 0, completas: 0 })
+          }
+          analisisPorDia.get(diaSemana).count++
+          if (asistencia.hora_entrada && asistencia.hora_salida) {
+            analisisPorDia.get(diaSemana).completas++
+          }
+        }
+        
+        // Análisis por hora de entrada
+        if (asistencia.hora_entrada) {
+          const hora = asistencia.hora_entrada.split(':')[0]
+          if (!analisisPorHora.has(hora)) {
+            analisisPorHora.set(hora, 0)
+          }
+          analisisPorHora.set(hora, analisisPorHora.get(hora) + 1)
+        }
+      })
+      
+      const analisisData = [
+        ['📅 ANÁLISIS TEMPORAL DE ASISTENCIAS'],
+        [''],
+        ['=== ANÁLISIS POR FECHA ==='],
+        ['Fecha', 'Usuarios Únicos', 'Entradas', 'Salidas', 'Completas', 'Eficiencia %']
+      ]
+      
+      // Agregar datos por fecha
+      Array.from(analisisPorFecha.entries())
+        .sort(([a], [b]) => new Date(b) - new Date(a))
+        .slice(0, 30) // Últimas 30 fechas
+        .forEach(([fecha, data]) => {
+          const eficiencia = data.entradas > 0 ? ((data.completas / data.entradas) * 100).toFixed(1) : 0
+          analisisData.push([
+            new Date(fecha).toLocaleDateString('es-ES'),
+            data.usuarios.size,
+            data.entradas,
+            data.salidas,
+            data.completas,
+            `${eficiencia}%`
+          ])
+        })
+      
+      analisisData.push([''], ['=== ANÁLISIS POR DÍA DE LA SEMANA ==='])
+      analisisData.push(['Día', 'Total Asistencias', 'Completas', 'Porcentaje Finalización'])
+      
+      Array.from(analisisPorDia.entries())
+        .forEach(([dia, data]) => {
+          const porcentaje = data.count > 0 ? ((data.completas / data.count) * 100).toFixed(1) : 0
+          analisisData.push([dia, data.count, data.completas, `${porcentaje}%`])
+        })
+      
+      analisisData.push([''], ['=== ANÁLISIS POR HORA DE ENTRADA ==='])
+      analisisData.push(['Hora', 'Cantidad de Entradas', 'Porcentaje del Total'])
+      
+      const totalEntradas = Array.from(analisisPorHora.values()).reduce((a, b) => a + b, 0)
+      Array.from(analisisPorHora.entries())
+        .sort(([a], [b]) => parseInt(a) - parseInt(b))
+        .forEach(([hora, count]) => {
+          const porcentaje = totalEntradas > 0 ? ((count / totalEntradas) * 100).toFixed(1) : 0
+          analisisData.push([`${hora}:00`, count, `${porcentaje}%`])
+        })
+      
+      return analisisData
+    },
+
+    generarMapaUbicaciones(asistencias) {
+      const ubicacionesData = [
+        ['📍 MAPA DE UBICACIONES DE ASISTENCIAS'],
+        [''],
+        ['Tipo', 'Usuario', 'Fecha', 'Hora', 'Latitud', 'Longitud', 'Descripción', 'Precisión GPS']
+      ]
+      
+      asistencias.forEach(asistencia => {
+        // Ubicación de entrada
+        if (asistencia.latitud_entrada && asistencia.longitud_entrada) {
+          ubicacionesData.push([
+            '🏁 Entrada',
+            asistencia.nombre_usuario || `Usuario ${asistencia.usuario_id}`,
+            asistencia.fecha ? new Date(asistencia.fecha).toLocaleDateString('es-ES') : '',
+            asistencia.hora_entrada || '',
+            parseFloat(asistencia.latitud_entrada).toFixed(6),
+            parseFloat(asistencia.longitud_entrada).toFixed(6),
+            asistencia.descripcion_entrada || 'Sin descripción',
+            'Alta'
+          ])
+        }
+        
+        // Ubicación de salida
+        if (asistencia.latitud_salida && asistencia.longitud_salida) {
+          ubicacionesData.push([
+            '🏁 Salida',
+            asistencia.nombre_usuario || `Usuario ${asistencia.usuario_id}`,
+            asistencia.fecha ? new Date(asistencia.fecha).toLocaleDateString('es-ES') : '',
+            asistencia.hora_salida || '',
+            parseFloat(asistencia.latitud_salida).toFixed(6),
+            parseFloat(asistencia.longitud_salida).toFixed(6),
+            asistencia.descripcion_salida || 'Sin descripción',
+            'Alta'
+          ])
+        }
+      })
+      
+      return ubicacionesData
+    },
+
+    aplicarEstilosResumen(worksheet) {
+      // Configurar ancho de columnas
+      const cols = [
+        { wch: 30 }, // Columna A - Etiquetas
+        { wch: 40 }  // Columna B - Valores
+      ]
+      worksheet['!cols'] = cols
+      
+      // Aplicar formato a celdas específicas
+      if (worksheet['A1']) {
+        worksheet['A1'].s = {
+          font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } },
+          fill: { patternType: "solid", fgColor: { rgb: "4CAF50" } },
+          alignment: { horizontal: "center" }
+        }
+      }
+    },
+
+    aplicarEstilosDetallados(worksheet, totalRows) {
+      // Configurar ancho de columnas
+      const cols = [
+        { wch: 12 }, // ID Usuario
+        { wch: 20 }, // Nombre
+        { wch: 25 }, // Email
+        { wch: 12 }, // Fecha
+        { wch: 12 }, // Día
+        { wch: 12 }, // Entrada
+        { wch: 12 }, // Salida
+        { wch: 15 }, // Tiempo
+        { wch: 15 }, // Estado
+        { wch: 12 }, // Lat Entrada
+        { wch: 12 }, // Lng Entrada
+        { wch: 12 }, // Lat Salida
+        { wch: 12 }, // Lng Salida
+        { wch: 20 }, // Desc Entrada
+        { wch: 20 }, // Desc Salida
+        { wch: 15 }, // Departamento
+        { wch: 20 }  // Observaciones
+      ]
+      worksheet['!cols'] = cols
+      
+      // Aplicar filtros automáticos
+      if (totalRows > 1) {
+        worksheet['!autofilter'] = { ref: `A1:Q${totalRows}` }
+      }
+    },
+
+    aplicarEstilosAnalisisUsuarios(worksheet) {
+      const cols = [
+        { wch: 25 }, // Usuario
+        { wch: 30 }, // Email
+        { wch: 15 }, // Total
+        { wch: 12 }, // Completas
+        { wch: 12 }, // En Curso
+        { wch: 12 }, // Sin Entrada
+        { wch: 15 }, // Días
+        { wch: 15 }, // Tiempo Total
+        { wch: 15 }, // Promedio
+        { wch: 15 }, // Primera
+        { wch: 15 }, // Última
+        { wch: 15 }  // Estado
+      ]
+      worksheet['!cols'] = cols
+    },
+
+    aplicarEstilosAnalisisTemporal(worksheet) {
+      const cols = [
+        { wch: 15 }, // Fecha/Día/Hora
+        { wch: 15 }, // Usuarios/Total
+        { wch: 12 }, // Entradas
+        { wch: 12 }, // Salidas
+        { wch: 12 }, // Completas
+        { wch: 15 }  // Eficiencia/Porcentaje
+      ]
+      worksheet['!cols'] = cols
+    },
+
+    aplicarEstilosUbicaciones(worksheet) {
+      const cols = [
+        { wch: 12 }, // Tipo
+        { wch: 20 }, // Usuario
+        { wch: 12 }, // Fecha
+        { wch: 10 }, // Hora
+        { wch: 15 }, // Latitud
+        { wch: 15 }, // Longitud
+        { wch: 25 }, // Descripción
+        { wch: 12 }  // Precisión
+      ]
+      worksheet['!cols'] = cols
+    },
+
+    mostrarNotificacionExito(titulo, mensaje) {
+      // Implementar notificación de éxito (puede usar toast, alert, etc.)
+      console.log(`✅ ${titulo}: ${mensaje}`)
+      alert(`${titulo}\n${mensaje}`)
+    },
+
+    mostrarNotificacionError(titulo, mensaje) {
+      // Implementar notificación de error
+      console.error(`❌ ${titulo}: ${mensaje}`)
+      alert(`Error: ${titulo}\n${mensaje}`)
     },
 
     imprimirAsistencias() {

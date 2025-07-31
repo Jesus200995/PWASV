@@ -779,7 +779,7 @@ const logout = () => {
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(1.5rem, 4vw, 2rem);
+  padding: clamp(0.75rem, 2vw, 1.25rem);
   color: white;
   box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
@@ -819,21 +819,22 @@ const logout = () => {
 }
 
 .header-icon {
-  width: 48px;
-  height: 48px;
+  width: clamp(36px, 5vw, 48px);
+  height: clamp(36px, 5vw, 48px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  border-radius: clamp(8px, 1.5vw, 12px);
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
   animation: float 3s ease-in-out infinite;
 }
 
 .header-icon svg {
-  width: 24px;
-  height: 24px;
+  width: clamp(16px, 3vw, 24px);
+  height: clamp(16px, 3vw, 24px);
   color: white;
 }
 
@@ -847,21 +848,23 @@ const logout = () => {
 }
 
 .header-title {
-  font-size: 32px;
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
   font-weight: 700;
-  margin: 0 0 8px 0;
+  margin: 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   letter-spacing: -0.5px;
+  line-height: 1.2;
 }
 
 .header-subtitle {
-  font-size: 16px;
+  margin: clamp(0.15rem, 0.5vw, 0.25rem) 0 0 0;
   color: rgba(255, 255, 255, 0.9);
-  margin: 0;
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  line-height: 1.3;
   font-weight: 400;
   letter-spacing: 0.2px;
 }

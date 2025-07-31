@@ -863,7 +863,7 @@ export default {
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(16px, 4vh, 32px) clamp(16px, 4vw, 32px);
+  padding: clamp(0.75rem, 2vw, 1.25rem);
   color: white;
   box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
   position: relative;
@@ -905,8 +905,8 @@ export default {
 }
 
 .header-icon {
-  width: clamp(40px, 6vw, 48px);
-  height: clamp(40px, 6vw, 48px);
+  width: clamp(2rem, 4vw, 2.5rem);
+  height: clamp(2rem, 4vw, 2.5rem);
   background: rgba(255, 255, 255, 0.15);
   border-radius: clamp(8px, 2vw, 12px);
   display: flex;
@@ -918,8 +918,8 @@ export default {
 }
 
 .header-icon svg {
-  width: clamp(20px, 3vw, 24px);
-  height: clamp(20px, 3vw, 24px);
+  width: clamp(1rem, 2vw, 1.25rem);
+  height: clamp(1rem, 2vw, 1.25rem);
   color: white;
 }
 
@@ -934,7 +934,7 @@ export default {
 }
 
 .header-title {
-  font-size: clamp(20px, 5vw, 32px);
+  font-size: clamp(1rem, 3vw, 1.5rem);
   font-weight: 700;
   margin: 0 0 clamp(4px, 1vh, 8px) 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
@@ -947,7 +947,7 @@ export default {
 }
 
 .header-subtitle {
-  font-size: clamp(12px, 2.5vw, 16px);
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
   font-weight: 400;

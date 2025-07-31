@@ -937,7 +937,525 @@ export default {
     },
 
     imprimirAsistencias() {
-      window.print()
+      // Crear ventana de impresión
+      const printWindow = window.open('', '_blank', 'width=800,height=600')
+      
+      // Obtener datos filtrados
+      const asistenciasParaImprimir = this.asistenciasFiltradas
+      
+      // Calcular estadísticas
+      const estadisticas = {
+        totalAsistencias: asistenciasParaImprimir.length,
+        usuariosUnicos: [...new Set(asistenciasParaImprimir.map(a => a.usuario_id))].length,
+        conEntrada: asistenciasParaImprimir.filter(a => a.hora_entrada).length,
+        conSalida: asistenciasParaImprimir.filter(a => a.hora_salida).length,
+        sinSalida: asistenciasParaImprimir.filter(a => a.hora_entrada && !a.hora_salida).length,
+        horasPromedio: this.calcularHorasPromedio(asistenciasParaImprimir)
+      }
+      
+      // Generar HTML para impresión
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reporte de Asistencias - ${new Date().toLocaleDateString('es-ES')}</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    background: white;
+                    font-size: 12px;
+                }
+                
+                .print-header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    padding: 20px 0;
+                    border-bottom: 3px solid #4CAF50;
+                    page-break-inside: avoid;
+                }
+                
+                .print-header h1 {
+                    color: #4CAF50;
+                    font-size: 28px;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+                
+                .print-header .subtitle {
+                    color: #666;
+                    font-size: 14px;
+                    margin-bottom: 15px;
+                }
+                
+                .print-header .date-range {
+                    color: #333;
+                    font-weight: 600;
+                    font-size: 13px;
+                    background: #f8f9fa;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    display: inline-block;
+                    border: 1px solid #e9ecef;
+                }
+                
+                .summary-stats {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                    gap: 15px;
+                    margin: 20px 0;
+                    padding: 15px;
+                    background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
+                    border-radius: 10px;
+                    border: 1px solid #4CAF50;
+                    page-break-inside: avoid;
+                }
+                
+                .stat-item {
+                    text-align: center;
+                    padding: 10px;
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                .stat-number {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #4CAF50;
+                    display: block;
+                }
+                
+                .stat-label {
+                    font-size: 10px;
+                    color: #666;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-top: 5px;
+                }
+                
+                .asistencias-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                    background: white;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    border-radius: 8px;
+                    overflow: hidden;
+                    font-size: 10px;
+                }
+                
+                .asistencias-table th {
+                    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                    color: white;
+                    padding: 10px 6px;
+                    text-align: left;
+                    font-weight: 600;
+                    font-size: 9px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    border-bottom: 2px solid #388e3c;
+                }
+                
+                .asistencias-table td {
+                    padding: 8px 6px;
+                    border-bottom: 1px solid #eee;
+                    font-size: 9px;
+                    vertical-align: top;
+                }
+                
+                .asistencias-table tbody tr:nth-child(even) {
+                    background-color: #f8f9fa;
+                }
+                
+                .asistencias-table tbody tr:hover {
+                    background-color: #e8f5e8;
+                }
+                
+                .usuario-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                }
+                
+                .usuario-nombre {
+                    font-weight: 600;
+                    color: #333;
+                    font-size: 9px;
+                }
+                
+                .usuario-email {
+                    color: #666;
+                    font-size: 8px;
+                    font-style: italic;
+                }
+                
+                .fecha-cell {
+                    white-space: nowrap;
+                    font-size: 9px;
+                    line-height: 1.3;
+                    text-align: center;
+                }
+                
+                .hora-cell {
+                    font-family: 'Courier New', monospace;
+                    font-size: 8px;
+                    font-weight: bold;
+                    text-align: center;
+                    line-height: 1.4;
+                }
+                
+                .hora-entrada {
+                    color: #28a745;
+                }
+                
+                .hora-salida {
+                    color: #dc3545;
+                }
+                
+                .sin-hora {
+                    color: #6c757d;
+                    font-style: italic;
+                }
+                
+                .ubicacion-cell {
+                    font-family: 'Courier New', monospace;
+                    font-size: 7px;
+                    color: #555;
+                    line-height: 1.2;
+                }
+                
+                .descripcion-cell {
+                    max-width: 150px;
+                    word-wrap: break-word;
+                    font-size: 8px;
+                    line-height: 1.3;
+                }
+                
+                .estado-asistencia {
+                    display: inline-block;
+                    padding: 2px 6px;
+                    border-radius: 8px;
+                    font-size: 7px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
+                    text-align: center;
+                }
+                
+                .completa {
+                    background: #d4edda;
+                    color: #155724;
+                    border: 1px solid #c3e6cb;
+                }
+                
+                .incompleta {
+                    background: #fff3cd;
+                    color: #856404;
+                    border: 1px solid #ffeaa7;
+                }
+                
+                .sin-entrada {
+                    background: #f8d7da;
+                    color: #721c24;
+                    border: 1px solid #f5c6cb;
+                }
+                
+                .tiempo-trabajado {
+                    font-family: 'Courier New', monospace;
+                    font-weight: bold;
+                    font-size: 8px;
+                    color: #495057;
+                    text-align: center;
+                }
+                
+                .print-footer {
+                    margin-top: 30px;
+                    padding: 20px 0;
+                    border-top: 2px solid #4CAF50;
+                    text-align: center;
+                    color: #666;
+                    font-size: 10px;
+                    page-break-inside: avoid;
+                }
+                
+                .print-footer .generated-info {
+                    margin-bottom: 10px;
+                    font-weight: 600;
+                }
+                
+                .print-footer .company-info {
+                    color: #999;
+                    font-style: italic;
+                }
+                
+                /* Estilos específicos para impresión */
+                @media print {
+                    body {
+                        font-size: 9px;
+                    }
+                    
+                    .print-header h1 {
+                        font-size: 22px;
+                    }
+                    
+                    .asistencias-table {
+                        box-shadow: none;
+                        font-size: 8px;
+                    }
+                    
+                    .asistencias-table th {
+                        background: #4CAF50 !important;
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                    
+                    .summary-stats {
+                        background: #e8f5e8 !important;
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                    
+                    .asistencias-table tbody tr:nth-child(even) {
+                        background-color: #f8f9fa !important;
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                    
+                    .stat-item {
+                        background: white !important;
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                    
+                    .completa {
+                        background: #d4edda !important;
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                    
+                    .incompleta {
+                        background: #fff3cd !important;
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                    
+                    .sin-entrada {
+                        background: #f8d7da !important;
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                    }
+                    
+                    /* Evitar quiebres de página en elementos importantes */
+                    .print-header,
+                    .summary-stats,
+                    .asistencias-table thead {
+                        page-break-inside: avoid;
+                    }
+                    
+                    .asistencias-table tbody tr {
+                        page-break-inside: avoid;
+                    }
+                }
+                
+                @page {
+                    margin: 1.5cm;
+                    size: A4;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="print-header">
+                <h1>⏰ Reporte de Asistencias</h1>
+                <div class="subtitle">Sistema de Control de Asistencia - PWA Sembrando Vida</div>
+                <div class="date-range">
+                    📅 Generado el ${new Date().toLocaleDateString('es-ES', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                </div>
+            </div>
+            
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <span class="stat-number">${estadisticas.totalAsistencias}</span>
+                    <span class="stat-label">Total Asistencias</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${estadisticas.usuariosUnicos}</span>
+                    <span class="stat-label">Usuarios Únicos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${estadisticas.conEntrada}</span>
+                    <span class="stat-label">Con Entrada</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${estadisticas.conSalida}</span>
+                    <span class="stat-label">Con Salida</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${estadisticas.sinSalida}</span>
+                    <span class="stat-label">Sin Salida</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${estadisticas.horasPromedio}</span>
+                    <span class="stat-label">Hrs Promedio</span>
+                </div>
+            </div>
+            
+            <table class="asistencias-table">
+                <thead>
+                    <tr>
+                        <th style="width: 18%;">Usuario</th>
+                        <th style="width: 10%;">Fecha</th>
+                        <th style="width: 10%;">Entrada</th>
+                        <th style="width: 10%;">Salida</th>
+                        <th style="width: 10%;">Tiempo</th>
+                        <th style="width: 15%;">Ubicación Entrada</th>
+                        <th style="width: 15%;">Ubicación Salida</th>
+                        <th style="width: 12%;">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${asistenciasParaImprimir.map(asistencia => {
+                        const tiempoTrabajado = this.calcularTiempoTrabajado(asistencia)
+                        const estadoAsistencia = this.obtenerEstadoAsistencia(asistencia)
+                        
+                        return `
+                            <tr>
+                                <td>
+                                    <div class="usuario-info">
+                                        <span class="usuario-nombre">${asistencia.nombre_usuario || `Usuario ${asistencia.usuario_id}`}</span>
+                                        <span class="usuario-email">${asistencia.correo_usuario || 'No disponible'}</span>
+                                    </div>
+                                </td>
+                                <td class="fecha-cell">
+                                    ${asistencia.fecha ? new Date(asistencia.fecha).toLocaleDateString('es-ES') : 'No disponible'}
+                                </td>
+                                <td class="hora-cell">
+                                    <span class="${asistencia.hora_entrada ? 'hora-entrada' : 'sin-hora'}">
+                                        ${asistencia.hora_entrada || 'Sin entrada'}
+                                    </span>
+                                </td>
+                                <td class="hora-cell">
+                                    <span class="${asistencia.hora_salida ? 'hora-salida' : 'sin-hora'}">
+                                        ${asistencia.hora_salida || 'Sin salida'}
+                                    </span>
+                                </td>
+                                <td class="tiempo-trabajado">
+                                    ${tiempoTrabajado}
+                                </td>
+                                <td class="ubicacion-cell">
+                                    ${asistencia.latitud_entrada && asistencia.longitud_entrada ? 
+                                        `${parseFloat(asistencia.latitud_entrada).toFixed(4)}, ${parseFloat(asistencia.longitud_entrada).toFixed(4)}` : 
+                                        'No disponible'}
+                                </td>
+                                <td class="ubicacion-cell">
+                                    ${asistencia.latitud_salida && asistencia.longitud_salida ? 
+                                        `${parseFloat(asistencia.latitud_salida).toFixed(4)}, ${parseFloat(asistencia.longitud_salida).toFixed(4)}` : 
+                                        'No disponible'}
+                                </td>
+                                <td>
+                                    <span class="estado-asistencia ${estadoAsistencia.clase}">
+                                        ${estadoAsistencia.texto}
+                                    </span>
+                                </td>
+                            </tr>
+                        `
+                    }).join('')}
+                </tbody>
+            </table>
+            
+            <div class="print-footer">
+                <div class="generated-info">
+                    🖨️ Documento generado automáticamente por el Sistema de Control de Asistencia PWA
+                </div>
+                <div class="company-info">
+                    Este reporte contiene información confidencial - Página 1 de 1
+                </div>
+            </div>
+        </body>
+        </html>
+      `
+      
+      // Escribir contenido en la ventana de impresión
+      printWindow.document.write(htmlContent)
+      printWindow.document.close()
+      
+      // Esperar a que se cargue el contenido y abrir diálogo de impresión
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.focus()
+          printWindow.print()
+          
+          // Cerrar ventana después de imprimir (opcional)
+          printWindow.onafterprint = () => {
+            printWindow.close()
+          }
+        }, 500)
+      }
+    },
+
+    calcularHorasPromedio(asistencias) {
+      const asistenciasCompletas = asistencias.filter(a => a.hora_entrada && a.hora_salida)
+      if (asistenciasCompletas.length === 0) return '0.0'
+      
+      let totalMinutos = 0
+      asistenciasCompletas.forEach(asistencia => {
+        const entrada = new Date(`${asistencia.fecha} ${asistencia.hora_entrada}`)
+        const salida = new Date(`${asistencia.fecha} ${asistencia.hora_salida}`)
+        const diferencia = salida - entrada
+        totalMinutos += diferencia / (1000 * 60)
+      })
+      
+      const promedioHoras = totalMinutos / asistenciasCompletas.length / 60
+      return promedioHoras.toFixed(1)
+    },
+
+    calcularTiempoTrabajado(asistencia) {
+      if (!asistencia.hora_entrada || !asistencia.hora_salida) {
+        return asistencia.hora_entrada ? 'En curso' : '--'
+      }
+      
+      try {
+        const entrada = new Date(`${asistencia.fecha} ${asistencia.hora_entrada}`)
+        const salida = new Date(`${asistencia.fecha} ${asistencia.hora_salida}`)
+        const diferencia = salida - entrada
+        
+        if (diferencia < 0) return 'Error'
+        
+        const horas = Math.floor(diferencia / (1000 * 60 * 60))
+        const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60))
+        
+        return `${horas}h ${minutos}m`
+      } catch (error) {
+        return 'Error'
+      }
+    },
+
+    obtenerEstadoAsistencia(asistencia) {
+      if (!asistencia.hora_entrada) {
+        return { clase: 'sin-entrada', texto: '❌ Sin Entrada' }
+      } else if (!asistencia.hora_salida) {
+        return { clase: 'incompleta', texto: '⏳ En Curso' }
+      } else {
+        return { clase: 'completa', texto: '✅ Completa' }
+      }
     },
 
     formatearFechaCorta(fechaStr) {

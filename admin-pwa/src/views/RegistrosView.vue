@@ -527,6 +527,7 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import * as XLSX from 'xlsx'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
 
@@ -943,7 +944,229 @@ const exportarCSV = () => {
 }
 
 const exportarExcel = () => {
-  alert('La exportación a Excel se implementará próximamente')
+  try {
+    // Crear un nuevo libro de trabajo
+    const workbook = XLSX.utils.book_new()
+    
+    // Obtener datos filtrados
+    const registrosParaExportar = registrosFiltrados.value
+    
+    // Estadísticas generales
+    const estadisticas = {
+      totalRegistros: registrosParaExportar.length,
+      usuariosUnicos: [...new Set(registrosParaExportar.map(r => r.usuario_id))].length,
+      conFotografia: registrosParaExportar.filter(r => r.foto_url).length,
+      conDescripcion: registrosParaExportar.filter(r => r.descripcion && r.descripcion.trim()).length
+    }
+    
+    // === HOJA 1: RESUMEN EJECUTIVO ===
+    const resumenData = [
+      ['REPORTE DE REGISTROS - SISTEMA PWA SEMBRANDO VIDA'],
+      [''],
+      ['📊 RESUMEN EJECUTIVO'],
+      [''],
+      ['Fecha de Generación:', new Date().toLocaleDateString('es-ES', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })],
+      ['Hora de Generación:', new Date().toLocaleTimeString('es-ES')],
+      [''],
+      ['📈 ESTADÍSTICAS GENERALES'],
+      [''],
+      ['Métrica', 'Valor', 'Descripción'],
+      ['Total de Registros', estadisticas.totalRegistros, 'Cantidad total de registros en el reporte'],
+      ['Usuarios Únicos', estadisticas.usuariosUnicos, 'Número de usuarios diferentes que han creado registros'],
+      ['Registros con Fotografía', estadisticas.conFotografia, 'Registros que incluyen archivo de imagen'],
+      ['Registros con Descripción', estadisticas.conDescripcion, 'Registros que incluyen texto descriptivo'],
+      ['Porcentaje con Foto', `${((estadisticas.conFotografia / estadisticas.totalRegistros) * 100).toFixed(1)}%`, 'Porcentaje de registros que incluyen fotografía'],
+      ['Porcentaje con Descripción', `${((estadisticas.conDescripcion / estadisticas.totalRegistros) * 100).toFixed(1)}%`, 'Porcentaje de registros con información descriptiva'],
+      [''],
+      ['🔍 FILTROS APLICADOS'],
+      [''],
+      ['Filtro', 'Estado'],
+      ['Búsqueda por texto', searchTerm.value || 'Sin filtro'],
+      ['Filtro de fecha', (filtroFechaInicio.value && filtroFechaFin.value) ? `${filtroFechaInicio.value} - ${filtroFechaFin.value}` : filtroRapido.value || 'Sin filtro'],
+      ['Usuario específico', filtroUsuario.value ? usuariosUnicos.value.find(u => u.id === parseInt(filtroUsuario.value))?.nombre_completo || 'Usuario no encontrado' : 'Todos los usuarios'],
+      ['Con fotografía', filtroConFoto.value ? 'Sí' : 'Sin filtro'],
+      ['Sin fotografía', filtroSinFoto.value ? 'Sí' : 'Sin filtro'],
+      ['Con descripción', filtroConDescripcion.value ? 'Sí' : 'Sin filtro'],
+    ]
+    
+    // === HOJA 2: DATOS DETALLADOS ===
+    const datosDetallados = [
+      ['ID', 'Usuario', 'Email', 'Fecha y Hora', 'Latitud', 'Longitud', 'Descripción', 'Estado Foto', 'URL Foto']
+    ]
+    
+    registrosParaExportar.forEach(registro => {
+      datosDetallados.push([
+        `REG-${registro.id.toString().padStart(5, '0')}`,
+        registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`,
+        registro.usuario?.correo || 'No disponible',
+        formatFecha(registro.fecha_hora),
+        parseFloat(registro.latitud).toFixed(6),
+        parseFloat(registro.longitud).toFixed(6),
+        registro.descripcion || 'Sin descripción',
+        registro.foto_url ? 'Con Fotografía' : 'Sin Fotografía',
+        registro.foto_url ? `${API_URL}/${registro.foto_url}` : 'No disponible'
+      ])
+    })
+    
+    // === HOJA 3: ANÁLISIS POR USUARIO ===
+    const usuariosAnalisis = [
+      ['👤 ANÁLISIS POR USUARIO'],
+      [''],
+      ['Usuario', 'ID Usuario', 'Total Registros', 'Con Foto', 'Con Descripción', 'Último Registro']
+    ]
+    
+    const analisisPorUsuario = new Map()
+    
+    registrosParaExportar.forEach(registro => {
+      const usuarioId = registro.usuario_id
+      if (!analisisPorUsuario.has(usuarioId)) {
+        analisisPorUsuario.set(usuarioId, {
+          nombre: registro.usuario?.nombre_completo || `Usuario ${usuarioId}`,
+          id: usuarioId,
+          total: 0,
+          conFoto: 0,
+          conDescripcion: 0,
+          ultimoRegistro: null
+        })
+      }
+      
+      const usuario = analisisPorUsuario.get(usuarioId)
+      usuario.total++
+      if (registro.foto_url) usuario.conFoto++
+      if (registro.descripcion && registro.descripcion.trim()) usuario.conDescripcion++
+      
+      const fechaRegistro = new Date(registro.fecha_hora)
+      if (!usuario.ultimoRegistro || fechaRegistro > new Date(usuario.ultimoRegistro)) {
+        usuario.ultimoRegistro = registro.fecha_hora
+      }
+    })
+    
+    Array.from(analisisPorUsuario.values())
+      .sort((a, b) => b.total - a.total)
+      .forEach(usuario => {
+        usuariosAnalisis.push([
+          usuario.nombre,
+          usuario.id,
+          usuario.total,
+          usuario.conFoto,
+          usuario.conDescripcion,
+          formatFecha(usuario.ultimoRegistro)
+        ])
+      })
+    
+    // === HOJA 4: ANÁLISIS TEMPORAL ===
+    const analisisTemporal = [
+      ['📅 ANÁLISIS TEMPORAL'],
+      [''],
+      ['Fecha', 'Registros del Día', 'Usuarios Activos', 'Con Foto', 'Con Descripción']
+    ]
+    
+    const registrosPorFecha = new Map()
+    
+    registrosParaExportar.forEach(registro => {
+      const fecha = new Date(registro.fecha_hora).toISOString().split('T')[0]
+      if (!registrosPorFecha.has(fecha)) {
+        registrosPorFecha.set(fecha, {
+          total: 0,
+          usuarios: new Set(),
+          conFoto: 0,
+          conDescripcion: 0
+        })
+      }
+      
+      const dia = registrosPorFecha.get(fecha)
+      dia.total++
+      dia.usuarios.add(registro.usuario_id)
+      if (registro.foto_url) dia.conFoto++
+      if (registro.descripcion && registro.descripcion.trim()) dia.conDescripcion++
+    })
+    
+    Array.from(registrosPorFecha.entries())
+      .sort(([a], [b]) => b.localeCompare(a))
+      .forEach(([fecha, datos]) => {
+        analisisTemporal.push([
+          new Date(fecha).toLocaleDateString('es-ES'),
+          datos.total,
+          datos.usuarios.size,
+          datos.conFoto,
+          datos.conDescripcion
+        ])
+      })
+    
+    // Crear las hojas de trabajo
+    const hojaResumen = XLSX.utils.aoa_to_sheet(resumenData)
+    const hojaDatos = XLSX.utils.aoa_to_sheet(datosDetallados)
+    const hojaUsuarios = XLSX.utils.aoa_to_sheet(usuariosAnalisis)
+    const hojaTemporal = XLSX.utils.aoa_to_sheet(analisisTemporal)
+    
+    // === APLICAR ESTILOS Y FORMATO ===
+    
+    // Configurar anchos de columna para la hoja de resumen
+    hojaResumen['!cols'] = [
+      { width: 25 }, // Columna A
+      { width: 20 }, // Columna B
+      { width: 40 }  // Columna C
+    ]
+    
+    // Configurar anchos de columna para la hoja de datos
+    hojaDatos['!cols'] = [
+      { width: 12 }, // ID
+      { width: 25 }, // Usuario
+      { width: 30 }, // Email
+      { width: 20 }, // Fecha
+      { width: 12 }, // Latitud
+      { width: 12 }, // Longitud
+      { width: 40 }, // Descripción
+      { width: 15 }, // Estado Foto
+      { width: 50 }  // URL Foto
+    ]
+    
+    // Configurar anchos de columna para la hoja de usuarios
+    hojaUsuarios['!cols'] = [
+      { width: 25 }, // Usuario
+      { width: 12 }, // ID Usuario
+      { width: 15 }, // Total
+      { width: 12 }, // Con Foto
+      { width: 18 }, // Con Descripción
+      { width: 20 }  // Último Registro
+    ]
+    
+    // Configurar anchos de columna para la hoja temporal
+    hojaTemporal['!cols'] = [
+      { width: 15 }, // Fecha
+      { width: 18 }, // Registros
+      { width: 18 }, // Usuarios Activos
+      { width: 12 }, // Con Foto
+      { width: 18 }  // Con Descripción
+    ]
+    
+    // Agregar las hojas al libro
+    XLSX.utils.book_append_sheet(workbook, hojaResumen, '📊 Resumen Ejecutivo')
+    XLSX.utils.book_append_sheet(workbook, hojaDatos, '📋 Datos Detallados')
+    XLSX.utils.book_append_sheet(workbook, hojaUsuarios, '👤 Análisis Usuarios')
+    XLSX.utils.book_append_sheet(workbook, hojaTemporal, '📅 Análisis Temporal')
+    
+    // Generar nombre de archivo con timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+    const nombreArchivo = `Registros_PWA_SembrandoVida_${timestamp}.xlsx`
+    
+    // Descargar el archivo
+    XLSX.writeFile(workbook, nombreArchivo)
+    
+    // Mostrar mensaje de éxito
+    alert(`✅ Excel generado exitosamente!\n\n📊 ${estadisticas.totalRegistros} registros exportados\n👥 ${estadisticas.usuariosUnicos} usuarios únicos\n📷 ${estadisticas.conFotografia} con fotografía\n📝 ${estadisticas.conDescripcion} con descripción\n\n📁 Archivo: ${nombreArchivo}`)
+    
+  } catch (error) {
+    console.error('Error al exportar a Excel:', error)
+    alert('❌ Error al generar el archivo Excel. Por favor, inténtalo de nuevo.')
+  }
 }
 
 const imprimirRegistros = () => {

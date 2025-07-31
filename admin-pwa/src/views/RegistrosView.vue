@@ -947,7 +947,400 @@ const exportarExcel = () => {
 }
 
 const imprimirRegistros = () => {
-  window.print()
+  // Crear ventana de impresión
+  const printWindow = window.open('', '_blank', 'width=800,height=600')
+  
+  // Obtener datos filtrados
+  const registrosParaImprimir = registrosFiltrados.value
+  
+  // Generar HTML para impresión
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reporte de Registros - ${new Date().toLocaleDateString('es-ES')}</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                background: white;
+                font-size: 12px;
+            }
+            
+            .print-header {
+                text-align: center;
+                margin-bottom: 30px;
+                padding: 20px 0;
+                border-bottom: 3px solid #4CAF50;
+                page-break-inside: avoid;
+            }
+            
+            .print-header h1 {
+                color: #4CAF50;
+                font-size: 28px;
+                font-weight: bold;
+                margin-bottom: 10px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            
+            .print-header .subtitle {
+                color: #666;
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+            
+            .print-header .date-range {
+                color: #333;
+                font-weight: 600;
+                font-size: 13px;
+                background: #f8f9fa;
+                padding: 8px 16px;
+                border-radius: 20px;
+                display: inline-block;
+                border: 1px solid #e9ecef;
+            }
+            
+            .summary-stats {
+                display: flex;
+                justify-content: space-around;
+                margin: 20px 0;
+                padding: 15px;
+                background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
+                border-radius: 10px;
+                border: 1px solid #4CAF50;
+                page-break-inside: avoid;
+            }
+            
+            .stat-item {
+                text-align: center;
+                flex: 1;
+            }
+            
+            .stat-number {
+                font-size: 24px;
+                font-weight: bold;
+                color: #4CAF50;
+                display: block;
+            }
+            
+            .stat-label {
+                font-size: 11px;
+                color: #666;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-top: 5px;
+            }
+            
+            .registros-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            
+            .registros-table th {
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                color: white;
+                padding: 12px 8px;
+                text-align: left;
+                font-weight: 600;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 2px solid #388e3c;
+            }
+            
+            .registros-table td {
+                padding: 10px 8px;
+                border-bottom: 1px solid #eee;
+                font-size: 11px;
+                vertical-align: top;
+            }
+            
+            .registros-table tbody tr:nth-child(even) {
+                background-color: #f8f9fa;
+            }
+            
+            .registros-table tbody tr:hover {
+                background-color: #e8f5e8;
+            }
+            
+            .usuario-info {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            
+            .usuario-nombre {
+                font-weight: 600;
+                color: #333;
+                font-size: 11px;
+            }
+            
+            .usuario-email {
+                color: #666;
+                font-size: 10px;
+                font-style: italic;
+            }
+            
+            .registro-id {
+                font-weight: bold;
+                color: #4CAF50;
+                background: #e8f5e8;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 10px;
+            }
+            
+            .fecha-cell {
+                white-space: nowrap;
+                font-size: 10px;
+                line-height: 1.3;
+            }
+            
+            .ubicacion-cell {
+                font-family: 'Courier New', monospace;
+                font-size: 9px;
+                color: #555;
+                line-height: 1.2;
+            }
+            
+            .descripcion-cell {
+                max-width: 200px;
+                word-wrap: break-word;
+                font-size: 10px;
+                line-height: 1.3;
+            }
+            
+            .estado-foto {
+                display: inline-block;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+            }
+            
+            .con-foto {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
+            .sin-foto {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            
+            .print-footer {
+                margin-top: 30px;
+                padding: 20px 0;
+                border-top: 2px solid #4CAF50;
+                text-align: center;
+                color: #666;
+                font-size: 10px;
+                page-break-inside: avoid;
+            }
+            
+            .print-footer .generated-info {
+                margin-bottom: 10px;
+                font-weight: 600;
+            }
+            
+            .print-footer .company-info {
+                color: #999;
+                font-style: italic;
+            }
+            
+            /* Estilos específicos para impresión */
+            @media print {
+                body {
+                    font-size: 10px;
+                }
+                
+                .print-header h1 {
+                    font-size: 24px;
+                }
+                
+                .registros-table {
+                    box-shadow: none;
+                }
+                
+                .registros-table th {
+                    background: #4CAF50 !important;
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                }
+                
+                .summary-stats {
+                    background: #e8f5e8 !important;
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                }
+                
+                .registros-table tbody tr:nth-child(even) {
+                    background-color: #f8f9fa !important;
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                }
+                
+                .con-foto {
+                    background: #d4edda !important;
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                }
+                
+                .sin-foto {
+                    background: #f8d7da !important;
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                }
+                
+                .registro-id {
+                    background: #e8f5e8 !important;
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                }
+                
+                /* Evitar quiebres de página en elementos importantes */
+                .print-header,
+                .summary-stats,
+                .registros-table thead {
+                    page-break-inside: avoid;
+                }
+                
+                .registros-table tbody tr {
+                    page-break-inside: avoid;
+                }
+            }
+            
+            @page {
+                margin: 1.5cm;
+                size: A4;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="print-header">
+            <h1>📋 Reporte de Registros</h1>
+            <div class="subtitle">Sistema de Gestión PWA - Sembrando Vida</div>
+            <div class="date-range">
+                📅 Generado el ${new Date().toLocaleDateString('es-ES', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
+            </div>
+        </div>
+        
+        <div class="summary-stats">
+            <div class="stat-item">
+                <span class="stat-number">${registrosParaImprimir.length}</span>
+                <span class="stat-label">Total Registros</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">${[...new Set(registrosParaImprimir.map(r => r.usuario_id))].length}</span>
+                <span class="stat-label">Usuarios Únicos</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">${registrosParaImprimir.filter(r => r.foto_url).length}</span>
+                <span class="stat-label">Con Fotografía</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">${registrosParaImprimir.filter(r => r.descripcion && r.descripcion.trim()).length}</span>
+                <span class="stat-label">Con Descripción</span>
+            </div>
+        </div>
+        
+        <table class="registros-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">ID</th>
+                    <th style="width: 20%;">Usuario</th>
+                    <th style="width: 15%;">Fecha y Hora</th>
+                    <th style="width: 18%;">Ubicación</th>
+                    <th style="width: 25%;">Descripción</th>
+                    <th style="width: 14%;">Estado Foto</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${registrosParaImprimir.map(registro => `
+                    <tr>
+                        <td>
+                            <span class="registro-id">#${registro.id}</span>
+                        </td>
+                        <td>
+                            <div class="usuario-info">
+                                <span class="usuario-nombre">${registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`}</span>
+                                <span class="usuario-email">${registro.usuario?.correo || 'No disponible'}</span>
+                            </div>
+                        </td>
+                        <td class="fecha-cell">
+                            ${formatFecha(registro.fecha_hora)}
+                        </td>
+                        <td class="ubicacion-cell">
+                            Lat: ${parseFloat(registro.latitud).toFixed(6)}<br>
+                            Lng: ${parseFloat(registro.longitud).toFixed(6)}
+                        </td>
+                        <td class="descripcion-cell">
+                            ${registro.descripcion || '<em>Sin descripción</em>'}
+                        </td>
+                        <td>
+                            <span class="estado-foto ${registro.foto_url ? 'con-foto' : 'sin-foto'}">
+                                ${registro.foto_url ? '📷 Con Foto' : '❌ Sin Foto'}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+        
+        <div class="print-footer">
+            <div class="generated-info">
+                🖨️ Documento generado automáticamente por el Sistema PWA Sembrando Vida
+            </div>
+            <div class="company-info">
+                Este reporte contiene información confidencial - Página 1 de 1
+            </div>
+        </div>
+    </body>
+    </html>
+  `
+  
+  // Escribir contenido en la ventana de impresión
+  printWindow.document.write(htmlContent)
+  printWindow.document.close()
+  
+  // Esperar a que se cargue el contenido y abrir diálogo de impresión
+  printWindow.onload = () => {
+    setTimeout(() => {
+      printWindow.focus()
+      printWindow.print()
+      
+      // Cerrar ventana después de imprimir (opcional)
+      printWindow.onafterprint = () => {
+        printWindow.close()
+      }
+    }, 500)
+  }
 }
 
 const buscarUsuarios = () => {

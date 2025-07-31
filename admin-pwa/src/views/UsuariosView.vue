@@ -655,76 +655,129 @@ const imprimirUsuarios = () => {
   
   const estilosImpresion = `
     <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
+      body { 
+        font-family: Arial, sans-serif; 
+        font-size: 10px; 
+        margin: 0; 
+        padding: 15px;
+        background: white;
+        color: #333;
+      }
+      
+      .header { 
+        text-align: center; 
+        margin-bottom: 25px; 
+        border-bottom: 2px solid #4CAF50;
+        padding-bottom: 12px;
+      }
+      
+      .header h1 { 
+        color: #4CAF50; 
+        margin: 0; 
+        font-size: 22px;
+        font-weight: bold;
+      }
+      
+      .header p { 
+        margin: 4px 0; 
+        color: #666;
+        font-size: 11px;
+      }
+      
+      table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 15px;
+        font-size: 9px;
+        border: 2px solid #4CAF50;
+      }
+      
+      th, td { 
+        border: 1px solid #ddd; 
+        padding: 6px 4px; 
+        text-align: left;
+        word-wrap: break-word;
+        vertical-align: top;
+      }
+      
+      th { 
+        background-color: #4CAF50 !important; 
+        color: white !important; 
+        font-weight: bold;
+        font-size: 8px;
+        text-align: center;
+      }
+      
+      tr:nth-child(even) { 
+        background-color: #f8f9fa !important; 
+      }
+      
+      tr:nth-child(odd) { 
+        background-color: white !important; 
+      }
+      
+      .col-id { width: 8%; text-align: center; }
+      .col-correo { width: 25%; }
+      .col-nombre { width: 20%; }
+      .col-cargo { width: 15%; }
+      .col-supervisor { width: 15%; }
+      .col-curp { width: 17%; font-family: monospace; font-size: 8px; }
+      .col-estado { width: 10%; text-align: center; }
+      
+      .estado-activo { 
+        color: #28a745 !important; 
+        font-weight: bold; 
+      }
+      
+      .estado-inactivo { 
+        color: #dc3545 !important; 
+        font-weight: bold; 
+      }
+      
+      .footer {
+        margin-top: 25px;
+        text-align: center;
+        font-size: 9px;
+        color: #666;
+        border-top: 1px solid #ddd;
+        padding-top: 12px;
+      }
+      
       @media print {
         body { 
           font-family: Arial, sans-serif; 
           font-size: 10px; 
           margin: 0; 
           padding: 15px;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
-        .header { 
-          text-align: center; 
-          margin-bottom: 25px; 
-          border-bottom: 2px solid #4CAF50;
-          padding-bottom: 12px;
+        
+        table {
+          page-break-inside: auto;
         }
-        .header h1 { 
-          color: #4CAF50; 
-          margin: 0; 
-          font-size: 22px;
+        
+        tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
         }
-        .header p { 
-          margin: 4px 0; 
-          color: #666;
-          font-size: 11px;
-        }
-        table { 
-          width: 100%; 
-          border-collapse: collapse; 
-          margin-top: 15px;
-          font-size: 9px;
-        }
-        th, td { 
-          border: 1px solid #ddd; 
-          padding: 6px 4px; 
-          text-align: left;
-          word-wrap: break-word;
-        }
-        th { 
-          background-color: #4CAF50; 
-          color: white; 
-          font-weight: bold;
-          font-size: 8px;
-          text-align: center;
-        }
-        tr:nth-child(even) { 
-          background-color: #f8f9fa; 
-        }
-        .col-id { width: 8%; text-align: center; }
-        .col-correo { width: 25%; }
-        .col-nombre { width: 20%; }
-        .col-cargo { width: 15%; }
-        .col-supervisor { width: 15%; }
-        .col-curp { width: 17%; font-family: monospace; }
-        .estado-activo { 
-          color: #28a745; 
-          font-weight: bold; 
-        }
-        .estado-inactivo { 
-          color: #dc3545; 
-          font-weight: bold; 
-        }
-        .footer {
-          margin-top: 25px;
-          text-align: center;
-          font-size: 9px;
-          color: #666;
-          border-top: 1px solid #ddd;
-          padding-top: 12px;
-        }
+        
         @page {
           margin: 0.5in;
           size: A4 landscape;
+        }
+      }
+      
+      @media screen {
+        body {
+          max-width: 1200px;
+          margin: 0 auto;
         }
       }
     </style>
@@ -765,8 +818,10 @@ const imprimirUsuarios = () => {
   
   const contenidoHTML = `
     <!DOCTYPE html>
-    <html>
+    <html lang="es">
     <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Lista Completa de Usuarios - ${fecha}</title>
       ${estilosImpresion}
     </head>
@@ -819,13 +874,24 @@ const imprimirUsuarios = () => {
     </html>
   `
   
+  // Escribir el contenido y asegurar carga completa
+  ventanaImpresion.document.open()
   ventanaImpresion.document.write(contenidoHTML)
   ventanaImpresion.document.close()
   
-  // Esperar un momento antes de imprimir para que se carguen los estilos
+  // Esperar a que se carguen completamente los estilos antes de imprimir
+  ventanaImpresion.onload = function() {
+    setTimeout(() => {
+      ventanaImpresion.print()
+    }, 500)
+  }
+  
+  // Fallback por si onload no se dispara
   setTimeout(() => {
-    ventanaImpresion.print()
-  }, 250)
+    if (ventanaImpresion.document.readyState === 'complete') {
+      ventanaImpresion.print()
+    }
+  }, 750)
 }
 
 const exportarExcel = () => {

@@ -2340,44 +2340,39 @@ const logout = () => {
 .export-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.35rem, 1vw, 0.5rem);
-  padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.75rem, 2vw, 1rem);
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  gap: clamp(0.25rem, 0.8vw, 0.35rem);
+  padding: clamp(0.35rem, 0.9vw, 0.45rem) clamp(0.6rem, 1.5vw, 0.8rem);
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
   border: none;
-  border-radius: clamp(6px, 1.5vw, 8px);
-  color: white;
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  border-radius: clamp(4px, 1vw, 6px);
   font-weight: 500;
+  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
 }
 
 .export-btn:hover {
-  background: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  background: rgba(33, 150, 243, 0.2);
 }
 
 .export-btn.excel {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
 }
 
 .export-btn.excel:hover {
-  background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  background: rgba(76, 175, 80, 0.2);
 }
 
 .export-btn.print {
-  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+  background: rgba(156, 39, 176, 0.1);
+  color: #9C27B0;
 }
 
 .export-btn.print:hover {
-  background: linear-gradient(135deg, #F57C00 0%, #FF9800 100%);
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+  background: rgba(156, 39, 176, 0.2);
 }
 
 .toggle-filters-btn {

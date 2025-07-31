@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <defs>
+    <style>
+      .flower-group {
+        transform-origin: 8px 8px;
+        animation: spin 4s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(90deg); }
+        50% { transform: rotate(180deg); }
+        75% { transform: rotate(270deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .petal {
+        fill: #4ade80;
+        opacity: 0.95;
+      }
+      .petal-accent {
+        fill: #22c55e;
+        opacity: 0.8;
+      }
+      .center {
+        fill: #ffffff;
+        stroke: #16a34a;
+        stroke-width: 0.3;
+      }
+      .center-dot {
+        fill: #16a34a;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .flower-group {
+          animation: none;
+        }
+      }
+    </style>
+  </defs>
+  
+  <g class="flower-group">
+    <!-- Pétalos principales -->
+    <ellipse class="petal" cx="8" cy="4" rx="1.5" ry="3" />
+    <ellipse class="petal" cx="12" cy="8" rx="3" ry="1.5" />
+    <ellipse class="petal" cx="8" cy="12" rx="1.5" ry="3" />
+    <ellipse class="petal" cx="4" cy="8" rx="3" ry="1.5" />
+    
+    <!-- Pétalos diagonales -->
+    <ellipse class="petal-accent" cx="11.3" cy="4.7" rx="1.2" ry="2.5" transform="rotate(45 11.3 4.7)" />
+    <ellipse class="petal-accent" cx="11.3" cy="11.3" rx="1.2" ry="2.5" transform="rotate(135 11.3 11.3)" />
+    <ellipse class="petal-accent" cx="4.7" cy="11.3" rx="1.2" ry="2.5" transform="rotate(225 4.7 11.3)" />
+    <ellipse class="petal-accent" cx="4.7" cy="4.7" rx="1.2" ry="2.5" transform="rotate(315 4.7 4.7)" />
+    
+    <!-- Centro de la flor -->
+    <circle class="center" cx="8" cy="8" r="2" />
+    <circle class="center-dot" cx="8" cy="8" r="0.8" />
+  </g>
+</svg>

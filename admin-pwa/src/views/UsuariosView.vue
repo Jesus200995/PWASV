@@ -95,23 +95,24 @@
             </div>
 
             <!-- Botones de exportación -->
-            <div class="export-group">
-              <button @click="imprimirUsuarios" class="export-btn print-btn" title="Imprimir Lista">
-                <svg class="export-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="6,9 6,2 18,2 18,9"></polyline>
-                  <path d="M6,18H4a2,2 0 0,1 -2,-2v-5a2,2 0 0,1 2,-2H20a2,2 0 0,1 2,2v5a2,2 0 0,1 -2,2H18"></path>
-                  <polyline points="6,14 6,22 18,22 18,14"></polyline>
-                </svg>
-                Imprimir
-              </button>
-              <button @click="exportarExcel" class="export-btn excel-btn" title="Exportar a Excel">
-                <svg class="export-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <path d="M7 7h10"></path>
-                  <path d="M7 12h10"></path>
-                  <path d="M7 17h10"></path>
+            <div class="export-actions">
+              <button @click="exportarExcel" class="export-btn excel">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
                 Excel
+              </button>
+              <button @click="imprimirUsuarios" class="export-btn print">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Imprimir
               </button>
             </div>
           </div>
@@ -1377,7 +1378,7 @@ const logout = () => {
   justify-content: space-between;
 }
 
-.search-group, .sort-group, .export-group {
+.search-group, .sort-group, .export-actions {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1445,7 +1446,11 @@ const logout = () => {
 }
 
 /* Estilos para botones de exportación */
-.export-group {
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.5rem, 1.5vw, 0.75rem);
+  justify-content: flex-end;
   margin-left: auto;
   flex-shrink: 0;
 }
@@ -1453,68 +1458,39 @@ const logout = () => {
 .export-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 1vw, 0.5rem);
-  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.2rem, 0.6vw, 0.3rem);
+  padding: clamp(0.25rem, 0.7vw, 0.35rem) clamp(0.45rem, 1.2vw, 0.6rem);
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
   border: none;
-  border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  font-weight: 600;
+  border-radius: clamp(3px, 0.8vw, 5px);
+  font-weight: 500;
+  font-size: clamp(0.55rem, 1.1vw, 0.65rem);
   cursor: pointer;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  position: relative;
-  overflow: hidden;
+  white-space: nowrap;
 }
 
-.export-btn:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
+.export-btn:hover {
+  background: rgba(33, 150, 243, 0.2);
 }
 
-.export-btn:hover:before {
-  left: 100%;
+.export-btn.excel {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
 }
 
-.print-btn {
-  background: linear-gradient(135deg, #6c5ce7 0%, #5a48d1 100%);
-  color: white;
-  border: 1px solid rgba(108, 92, 231, 0.3);
+.export-btn.excel:hover {
+  background: rgba(76, 175, 80, 0.2);
 }
 
-.print-btn:hover {
-  background: linear-gradient(135deg, #5a48d1 0%, #4834d4 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+.export-btn.print {
+  background: rgba(156, 39, 176, 0.1);
+  color: #9C27B0;
 }
 
-.excel-btn {
-  background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
-  color: white;
-  border: 1px solid rgba(0, 184, 148, 0.3);
-}
-
-.excel-btn:hover {
-  background: linear-gradient(135deg, #00a085 0%, #008f75 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
-}
-
-.export-icon {
-  flex-shrink: 0;
-  transition: transform 0.3s ease;
-}
-
-.export-btn:hover .export-icon {
-  transform: scale(1.1);
+.export-btn.print:hover {
+  background: rgba(156, 39, 176, 0.2);
 }
 
 .sort-btn svg {

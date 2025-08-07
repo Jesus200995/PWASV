@@ -1006,13 +1006,13 @@ export default {
           const tiempoTrabajado = this.calcularTiempoTrabajadoDetallado(asistencia)
           const estadoAsistencia = this.obtenerEstadoAsistenciaTexto(asistencia)
           const diaSemana = asistencia.fecha ? 
-            new Date(asistencia.fecha).toLocaleDateString('es-ES', { weekday: 'long' }) : ''
+            this.formatearFechaConDia(asistencia.fecha) : ''
           
           datosDetallados.push([
             asistencia.usuario_id || '',
             asistencia.nombre_usuario || `Usuario ${asistencia.usuario_id}`,
             asistencia.correo_usuario || 'No disponible',
-            asistencia.fecha ? new Date(asistencia.fecha).toLocaleDateString('es-ES') : '',
+            asistencia.fecha ? this.formatearFechaSimple(asistencia.fecha) : '',
             diaSemana,
             asistencia.hora_entrada || '',
             asistencia.hora_salida || '',
@@ -1163,8 +1163,8 @@ export default {
       const fechas = asistencias.map(a => a.fecha).filter(f => f).sort()
       if (fechas.length === 0) return 'Sin fechas válidas'
       
-      const fechaInicio = new Date(fechas[0]).toLocaleDateString('es-ES')
-      const fechaFin = new Date(fechas[fechas.length - 1]).toLocaleDateString('es-ES')
+      const fechaInicio = this.formatearFechaSimple(fechas[0])
+      const fechaFin = this.formatearFechaSimple(fechas[fechas.length - 1])
       
       return fechaInicio === fechaFin ? fechaInicio : `${fechaInicio} - ${fechaFin}`
     },
@@ -1310,7 +1310,7 @@ export default {
         
         // Análisis por día de la semana
         if (asistencia.fecha) {
-          const diaSemana = new Date(asistencia.fecha).toLocaleDateString('es-ES', { weekday: 'long' })
+          const diaSemana = this.formatearFechaConDia(asistencia.fecha)
           if (!analisisPorDia.has(diaSemana)) {
             analisisPorDia.set(diaSemana, { count: 0, completas: 0 })
           }
@@ -1344,7 +1344,7 @@ export default {
         .forEach(([fecha, data]) => {
           const eficiencia = data.entradas > 0 ? ((data.completas / data.entradas) * 100).toFixed(1) : 0
           analisisData.push([
-            new Date(fecha).toLocaleDateString('es-ES'),
+            this.formatearFechaSimple(fecha),
             data.usuarios.size,
             data.entradas,
             data.salidas,
@@ -1389,7 +1389,7 @@ export default {
           ubicacionesData.push([
             '🏁 Entrada',
             asistencia.nombre_usuario || `Usuario ${asistencia.usuario_id}`,
-            asistencia.fecha ? new Date(asistencia.fecha).toLocaleDateString('es-ES') : '',
+            asistencia.fecha ? this.formatearFechaSimple(asistencia.fecha) : '',
             asistencia.hora_entrada || '',
             parseFloat(asistencia.latitud_entrada).toFixed(6),
             parseFloat(asistencia.longitud_entrada).toFixed(6),
@@ -1403,7 +1403,7 @@ export default {
           ubicacionesData.push([
             '🏁 Salida',
             asistencia.nombre_usuario || `Usuario ${asistencia.usuario_id}`,
-            asistencia.fecha ? new Date(asistencia.fecha).toLocaleDateString('es-ES') : '',
+            asistencia.fecha ? this.formatearFechaSimple(asistencia.fecha) : '',
             asistencia.hora_salida || '',
             parseFloat(asistencia.latitud_salida).toFixed(6),
             parseFloat(asistencia.longitud_salida).toFixed(6),
@@ -1543,7 +1543,7 @@ export default {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Reporte de Asistencias - ${new Date().toLocaleDateString('es-ES')}</title>
+            <title>Reporte de Asistencias - ${this.formatearFechaSimple(new Date().toISOString())}</title>
             <style>
                 * {
                     margin: 0;
@@ -1864,6 +1864,7 @@ export default {
                 <div class="subtitle">Sistema de Control de Asistencia - PWA Sembrando Vida</div>
                 <div class="date-range">
                     📅 Generado el ${new Date().toLocaleDateString('es-ES', { 
+                        timeZone: 'America/Mexico_City',
                         weekday: 'long', 
                         year: 'numeric', 
                         month: 'long', 
@@ -1928,7 +1929,7 @@ export default {
                                     </div>
                                 </td>
                                 <td class="fecha-cell">
-                                    ${asistencia.fecha ? new Date(asistencia.fecha).toLocaleDateString('es-ES') : 'No disponible'}
+                                    ${asistencia.fecha ? this.formatearFechaSimple(asistencia.fecha) : 'No disponible'}
                                 </td>
                                 <td class="hora-cell">
                                     <span class="${asistencia.hora_entrada ? 'hora-entrada' : 'sin-hora'}">
@@ -2043,8 +2044,94 @@ export default {
 
     formatearFechaCorta(fechaStr) {
       if (!fechaStr) return ''
-      const fecha = new Date(fechaStr)
-      return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      
+      try {
+        // Si viene una fecha ISO completa (con T), la procesamos con zona horaria
+        if (typeof fechaStr === 'string' && fechaStr.includes('T')) {
+          return new Date(fechaStr).toLocaleDateString('es-ES', {
+            timeZone: 'America/Mexico_City', // Forzar zona horaria de México
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })
+        }
+        
+        // Si viene solo una fecha (YYYY-MM-DD), crear la fecha sin zona horaria
+        if (typeof fechaStr === 'string' && fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10))
+          const fecha = new Date(year, month - 1, day) // month - 1 porque los meses en JS van de 0-11
+          
+          return fecha.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })
+        }
+        
+        // Para otros casos, usar el método estándar
+        const fecha = new Date(fechaStr)
+        return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      } catch (e) {
+        console.error('Error al formatear fecha corta:', e, 'Fecha original:', fechaStr)
+        return fechaStr
+      }
+    },
+
+    // Nueva función utilitaria para formatear fechas con día de la semana
+    formatearFechaConDia(fechaStr) {
+      if (!fechaStr) return ''
+      
+      try {
+        // Si viene una fecha ISO completa (con T), la procesamos con zona horaria
+        if (typeof fechaStr === 'string' && fechaStr.includes('T')) {
+          return new Date(fechaStr).toLocaleDateString('es-ES', {
+            timeZone: 'America/Mexico_City', // Forzar zona horaria de México
+            weekday: 'long'
+          })
+        }
+        
+        // Si viene solo una fecha (YYYY-MM-DD), crear la fecha sin zona horaria
+        if (typeof fechaStr === 'string' && fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10))
+          const fecha = new Date(year, month - 1, day) // month - 1 porque los meses en JS van de 0-11
+          
+          return fecha.toLocaleDateString('es-ES', { weekday: 'long' })
+        }
+        
+        // Para otros casos, usar el método estándar
+        return new Date(fechaStr).toLocaleDateString('es-ES', { weekday: 'long' })
+      } catch (e) {
+        console.error('Error al formatear fecha con día:', e, 'Fecha original:', fechaStr)
+        return fechaStr
+      }
+    },
+
+    // Nueva función utilitaria para formatear fechas simples (DD/MM/YYYY)
+    formatearFechaSimple(fechaStr) {
+      if (!fechaStr) return ''
+      
+      try {
+        // Si viene una fecha ISO completa (con T), la procesamos con zona horaria
+        if (typeof fechaStr === 'string' && fechaStr.includes('T')) {
+          return new Date(fechaStr).toLocaleDateString('es-ES', {
+            timeZone: 'America/Mexico_City' // Forzar zona horaria de México
+          })
+        }
+        
+        // Si viene solo una fecha (YYYY-MM-DD), crear la fecha sin zona horaria
+        if (typeof fechaStr === 'string' && fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10))
+          const fecha = new Date(year, month - 1, day) // month - 1 porque los meses en JS van de 0-11
+          
+          return fecha.toLocaleDateString('es-ES')
+        }
+        
+        // Para otros casos, usar el método estándar
+        return new Date(fechaStr).toLocaleDateString('es-ES')
+      } catch (e) {
+        console.error('Error al formatear fecha simple:', e, 'Fecha original:', fechaStr)
+        return fechaStr
+      }
     },
   }
 }

@@ -258,9 +258,11 @@
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
     <div v-if="!modoAsistencia" class="card mb-4">
       <div class="text-center mb-6">
-        <h2 class="text-lg font-bold text-blue-600 mb-2" style="text-shadow: 0 0 8px rgba(135, 206, 235, 0.8), 0 0 15px rgba(135, 206, 235, 0.6), 0 0 20px rgba(135, 206, 235, 0.4);">
-          Registrar Actividades
+        <h2 class="text-lg font-bold text-gray-800 mb-3">
+          Registra tus actividades
         </h2>
+        <!-- Línea tipo marcatextos -->
+        <div class="w-full h-1 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 rounded-full shadow-sm border border-orange-300 mb-3"></div>
         <p class="text-sm text-gray-500">Captura tu ubicación actual para el registro</p>
       </div>
       

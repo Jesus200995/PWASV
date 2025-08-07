@@ -421,9 +421,34 @@ async function cargarAsistencias() {
     
     console.log('Respuesta del servidor (asistencias):', response.data);
     
-    asistencias.value = response.data.asistencias || [];
+    // Procesar asistencias y mostrar información de debug para fechas
+    const asistenciasRaw = response.data.asistencias || [];
     
-    console.log('Asistencias procesadas:', asistencias.value.length);
+    asistenciasRaw.forEach((asistencia, index) => {
+      console.log(`📅 Asistencia ${index + 1}:`);
+      console.log('  - Fecha original de BD:', asistencia.fecha);
+      console.log('  - Hora entrada original:', asistencia.hora_entrada);
+      console.log('  - Hora salida original:', asistencia.hora_salida);
+      
+      if (asistencia.fecha) {
+        const fechaFormateada = formatFecha(asistencia.fecha);
+        console.log('  - Fecha formateada:', fechaFormateada);
+      }
+      
+      if (asistencia.hora_entrada) {
+        const entradaFormateada = formatHora(asistencia.hora_entrada);
+        console.log('  - Entrada formateada:', entradaFormateada);
+      }
+      
+      if (asistencia.hora_salida) {
+        const salidaFormateada = formatHora(asistencia.hora_salida);
+        console.log('  - Salida formateada:', salidaFormateada);
+      }
+    });
+    
+    asistencias.value = asistenciasRaw;
+    
+    console.log('✅ Total de asistencias procesadas:', asistencias.value.length);
   } catch (err) {
     console.error('Error al cargar asistencias:', err);
     
@@ -448,9 +473,33 @@ async function cargarAsistencias() {
 
 function formatFecha(fechaStr) {
   try {
-    const fecha = new Date(fechaStr);
-    return fecha.toLocaleDateString();
+    if (!fechaStr) return '';
+    
+    let fecha;
+    
+    // Si es solo una fecha YYYY-MM-DD, evitamos problemas de zona horaria
+    if (fechaStr.includes('T') || fechaStr.includes(' ')) {
+      // Fecha con hora, usar constructor normal
+      fecha = new Date(fechaStr);
+    } else {
+      // Solo fecha YYYY-MM-DD, usar constructor con zona horaria local
+      const partesFecha = fechaStr.split('-');
+      if (partesFecha.length === 3) {
+        fecha = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+      } else {
+        fecha = new Date(fechaStr);
+      }
+    }
+    
+    // Formatear fecha en español mexicano
+    return fecha.toLocaleDateString('es-MX', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   } catch (e) {
+    console.error('Error al formatear fecha:', e, fechaStr);
     return fechaStr;
   }
 }
@@ -459,20 +508,15 @@ function formatHora(fechaStr) {
   try {
     const fecha = new Date(fechaStr);
     
-    // Formato personalizado para hora de 12 horas con am/pm en español
-    const hora = fecha.getHours();
-    const minutos = fecha.getMinutes();
-    
-    // Convertir a formato 12 horas
-    const hora12 = hora % 12 || 12;
-    const ampm = hora >= 12 ? 'pm' : 'am';
-    
-    // Asegurar que tanto horas como minutos tengan siempre dos dígitos
-    const horaStr = hora12 < 10 ? `0${hora12}` : hora12;
-    const minutosStr = minutos < 10 ? `0${minutos}` : minutos;
-    
-    return `${horaStr}:${minutosStr} ${ampm}`;
+    // Usar toLocaleTimeString con configuración específica para México
+    return fecha.toLocaleTimeString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   } catch (e) {
+    console.error('Error al formatear hora:', e, fechaStr);
     return fechaStr;
   }
 }

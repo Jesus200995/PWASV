@@ -12,8 +12,41 @@
         </p>
       </div>
       
+      <!-- Modal de éxito -->
+      <transition name="modal">
+        <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.5);">
+          <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+            <div class="p-6 text-center">
+              <!-- Icono de éxito animado -->
+              <div class="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center animate-bounce">
+                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              
+              <!-- Título -->
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">¡Registro Exitoso!</h3>
+              
+              <!-- Mensaje -->
+              <p class="text-gray-600 mb-4">Tu cuenta ha sido creada correctamente. Serás redirigido al login en unos segundos.</p>
+              
+              <!-- Barra de progreso -->
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                <div class="bg-green-500 h-2 rounded-full animate-progress" style="animation-duration: 3s;"></div>
+              </div>
+              
+              <!-- Botón opcional -->
+              <button @click="goToLogin" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                Ir al Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <!-- Mensajes de error (solo errores ahora) -->
       <transition name="fade">
-        <div v-if="message.text" :class="['border-l-4 p-4 rounded', message.type === 'error' ? 'bg-red-100 border-red-500 text-red-700' : 'bg-green-100 border-green-500 text-green-700']" role="alert">
+        <div v-if="message.text && message.type === 'error'" class="border-l-4 p-4 rounded bg-red-100 border-red-500 text-red-700" role="alert">
           <p>{{ message.text }}</p>
         </div>
       </transition>
@@ -183,6 +216,7 @@ const curpWarning = ref('');
 const currentApiUrl = ref('');
 const termsAccepted = ref(false);
 const termsError = ref('');
+const showSuccessModal = ref(false);
 
 const form = reactive({
   email: '',
@@ -250,9 +284,10 @@ async function register() {
     // Actualizar la URL mostrada
     currentApiUrl.value = apiService.getCurrentApiUrl();
     
-    message.text = `¡Cuenta creada exitosamente! Los términos y condiciones han sido aceptados. (Servidor: ${currentApiUrl.value.replace('https://', '').replace('http://', '')}) Redirigiendo...`;
-    message.type = 'success';
+    // Mostrar modal de éxito en lugar del mensaje
+    showSuccessModal.value = true;
     
+    // Redirigir después de 3 segundos
     setTimeout(() => {
       router.push('/login');
     }, 3000);
@@ -403,6 +438,11 @@ function handleEnterKey(event) {
     message.type = 'error';
   }
 }
+
+function goToLogin() {
+  showSuccessModal.value = false;
+  router.push('/login');
+}
 </script>
 
 <style scoped>
@@ -449,5 +489,51 @@ input[type="checkbox"]:checked {
 /* Transiciones para botón deshabilitado */
 button {
   transition: all 0.2s ease-in-out;
+}
+
+/* Animaciones para el modal */
+.modal-enter-active, .modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+.modal-enter-from, .modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .bg-white, .modal-leave-active .bg-white {
+  transition: all 0.3s ease;
+}
+.modal-enter-from .bg-white, .modal-leave-to .bg-white {
+  transform: scale(0.8) translateY(-50px);
+  opacity: 0;
+}
+
+/* Animación de la barra de progreso */
+@keyframes progress {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+.animate-progress {
+  animation: progress 3s linear forwards;
+}
+
+/* Animación del bounce mejorada */
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -15px, 0);
+  }
+  70% {
+    transform: translate3d(0, -7px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
 }
 </style>

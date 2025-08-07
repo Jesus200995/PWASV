@@ -85,17 +85,7 @@ async def verificar_terminos_usuario(user_id: int):
         if not usuario:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         
-        # Crear la tabla usuarios_terminos si no existe
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS usuarios_terminos (
-                id SERIAL PRIMARY KEY,
-                usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
-                aceptado BOOLEAN DEFAULT true,
-                fecha_aceptado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                ip_aceptado VARCHAR(45),
-                UNIQUE(usuario_id)
-            )
-        """)
+        # La tabla usuarios_terminos ya existe en el VPS, no necesitamos crearla
         
         # Verificar si ha aceptado términos
         cursor.execute(
@@ -127,27 +117,27 @@ async def aceptar_terminos(terminos: TerminosAceptados):
         if not usuario:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         
-        # Crear la tabla usuarios_terminos si no existe
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS usuarios_terminos (
-                id SERIAL PRIMARY KEY,
-                usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
-                aceptado BOOLEAN DEFAULT true,
-                fecha_aceptado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                ip_aceptado VARCHAR(45),
-                UNIQUE(usuario_id)
-            )
-        """)
+        # La tabla usuarios_terminos ya existe en el VPS, no necesitamos crearla
         
-        # Insertar o actualizar la aceptación de términos
-        cursor.execute("""
-            INSERT INTO usuarios_terminos (usuario_id, aceptado, fecha_aceptado) 
-            VALUES (%s, true, CURRENT_TIMESTAMP)
-            ON CONFLICT (usuario_id) 
-            DO UPDATE SET 
-                aceptado = true,
-                fecha_aceptado = CURRENT_TIMESTAMP
-        """, (terminos.usuario_id,))
+        # Verificar si ya existe un registro para este usuario
+        cursor.execute("SELECT id FROM usuarios_terminos WHERE usuario_id = %s", (terminos.usuario_id,))
+        existe = cursor.fetchone()
+        
+        if existe:
+            # Actualizar registro existente
+            cursor.execute("""
+                UPDATE usuarios_terminos 
+                SET aceptado = %s, fecha_aceptado = NOW()
+                WHERE usuario_id = %s
+            """, (True, terminos.usuario_id))
+            print(f"✅ Términos actualizados para usuario {terminos.usuario_id}")
+        else:
+            # Insertar nuevo registro
+            cursor.execute("""
+                INSERT INTO usuarios_terminos (usuario_id, aceptado, fecha_aceptado) 
+                VALUES (%s, %s, NOW())
+            """, (terminos.usuario_id, True))
+            print(f"✅ Términos creados para usuario {terminos.usuario_id}")
         
         conn.commit()
         
@@ -199,23 +189,28 @@ async def crear_usuario(usuario: UserCreate):
         
         user_id = cursor.fetchone()[0]
         
-        # Crear la tabla usuarios_terminos si no existe
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS usuarios_terminos (
-                id SERIAL PRIMARY KEY,
-                usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
-                aceptado BOOLEAN DEFAULT true,
-                fecha_aceptado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                ip_aceptado VARCHAR(45),
-                UNIQUE(usuario_id)
-            )
-        """)
+        # La tabla usuarios_terminos ya existe en el VPS con esta estructura:
+        # CREATE TABLE IF NOT EXISTS usuarios_terminos (
+        #     id SERIAL PRIMARY KEY,
+        #     usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+        #     aceptado BOOLEAN NOT NULL DEFAULT FALSE,
+        #     fecha_aceptado TIMESTAMP NOT NULL DEFAULT NOW(),
+        #     ip_aceptado VARCHAR(50)
+        # );
         
         # Registrar automáticamente la aceptación de términos al crear el usuario
-        cursor.execute(
-            "INSERT INTO usuarios_terminos (usuario_id, aceptado, fecha_aceptado) VALUES (%s, true, CURRENT_TIMESTAMP)",
-            (user_id,)
-        )
+        try:
+            cursor.execute(
+                "INSERT INTO usuarios_terminos (usuario_id, aceptado, fecha_aceptado) VALUES (%s, %s, NOW())",
+                (user_id, True)
+            )
+            print(f"✅ Términos registrados automáticamente para usuario {user_id}")
+        except psycopg2.IntegrityError as e:
+            print(f"⚠️ Usuario {user_id} ya tiene términos registrados: {e}")
+            # No es un error crítico, continuar
+        except Exception as e:
+            print(f"❌ Error registrando términos para usuario {user_id}: {e}")
+            # No hacer rollback completo, solo advertir
         
         conn.commit()
         

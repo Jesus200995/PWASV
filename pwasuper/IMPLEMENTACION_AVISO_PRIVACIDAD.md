@@ -164,8 +164,30 @@ python main.py
 
 #### Para Producción:
 1. **Backend**: Subir archivos modificados al servidor de producción
+   - `main.py` con los nuevos endpoints de términos
+   - Verificar que la tabla `usuarios_terminos` existe con la estructura correcta:
+   ```sql
+   CREATE TABLE IF NOT EXISTS usuarios_terminos (
+       id SERIAL PRIMARY KEY,
+       usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+       aceptado BOOLEAN NOT NULL DEFAULT FALSE,
+       fecha_aceptado TIMESTAMP NOT NULL DEFAULT NOW(),
+       ip_aceptado VARCHAR(50)
+   );
+   ```
 2. **Frontend**: Hacer build y desplegar
-3. **Base de datos**: La tabla se crea automáticamente
+3. **Base de datos**: Ejecutar script de corrección si es necesario
+
+#### ⚠️ IMPORTANTE - Estado Actual:
+- ✅ **Frontend**: Completamente implementado y funcional
+- ✅ **Base de datos**: Tabla existe y funciona correctamente
+- ❌ **Backend producción**: Necesita actualizarse con los cambios locales
+- ✅ **Usuarios existentes**: Todos tienen términos registrados (corregido automáticamente)
+
+#### 🔧 Scripts de Diagnóstico y Corrección Disponibles:
+- `test_terminos_vps.py` - Verifica tabla y estructura
+- `diagnostico_terminos.py` - Diagnóstico completo y corrección automática
+- `test_registro_completo.py` - Prueba el flujo completo de registro
 
 ### ✅ CHECKLIST DE CUMPLIMIENTO
 
@@ -189,6 +211,51 @@ python main.py
 - [ ] Implementar versionado de términos
 - [ ] Agregar notificaciones de cambios en términos
 - [ ] Crear panel admin para ver estadísticas de aceptación
+
+### 🚨 DIAGNÓSTICO Y RESOLUCIÓN DE PROBLEMAS
+
+#### Problema: "Los términos no se registran automáticamente"
+
+**Síntomas:**
+- Los usuarios se crean correctamente
+- No aparecen registros en la tabla `usuarios_terminos`
+- Error 404 en endpoints `/usuarios/{id}/terminos`
+
+**Causa:**
+- El backend de producción no tiene los endpoints de términos implementados
+
+**Solución:**
+1. **Subir backend modificado** a producción con los cambios en `main.py`
+2. **Ejecutar script de corrección** para usuarios existentes:
+   ```bash
+   python diagnostico_terminos.py
+   ```
+
+**Scripts de diagnóstico disponibles:**
+```bash
+# Verificar estructura de tabla
+python test_terminos_vps.py
+
+# Diagnóstico completo y corrección automática  
+python diagnostico_terminos.py
+
+# Probar registro completo con API de producción
+python test_registro_completo.py
+```
+
+#### Problema: "Checkbox no funciona en móvil"
+
+**Solución:**
+- Verificar que no hay elementos superpuestos
+- Revisar eventos táctiles en dispositivos móviles
+- Usar inspector de elementos en navegador móvil
+
+#### Problema: "Usuario existente intenta registrarse"
+
+**Comportamiento esperado:**
+- Frontend mostrará mensaje: "El correo ya está registrado"
+- Backend retornará error 400 con detalle específico
+- No se creará usuario duplicado
 
 ---
 

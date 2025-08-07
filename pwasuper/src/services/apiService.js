@@ -74,6 +74,16 @@ export const apiService = {
     return response.data;
   },
 
+  async acceptTerms(userId) {
+    const response = await api.post('/usuarios/aceptar_terminos', { usuario_id: userId });
+    return response.data;
+  },
+
+  async checkUserTerms(userId) {
+    const response = await api.get(`/usuarios/${userId}/terminos`);
+    return response.data;
+  },
+
   async login(credentials) {
     const response = await api.post('/login', credentials);
     return response.data;

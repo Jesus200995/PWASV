@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba - Aviso de Privacidad</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .privacy-notice { border: 1px solid #ccc; padding: 15px; margin: 20px 0; max-height: 300px; overflow-y: auto; background-color: #f9f9f9; }
+        .checkbox-container { margin: 20px 0; }
+        .submit-btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .error { color: red; margin: 10px 0; }
+        .success { color: green; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <h1>Prueba del Aviso de Privacidad</h1>
+            
+            <form @submit.prevent="submitForm">
+                <div>
+                    <label>Nombre:</label>
+                    <input v-model="form.name" type="text" style="width: 100%; padding: 5px; margin: 5px 0;" required>
+                </div>
+                
+                <div>
+                    <label>Email:</label>
+                    <input v-model="form.email" type="email" style="width: 100%; padding: 5px; margin: 5px 0;" required>
+                </div>
+                
+                <!-- AVISO DE PRIVACIDAD -->
+                <div class="privacy-notice">
+                    <h3>AVISO DE PRIVACIDAD PARA EL REGISTRO Y USO DE INFORMACIÓN DE LOS TÉCNICOS DEL PROGRAMA SEMBRANDO VIDA</h3>
+                    <p>En cumplimiento con lo dispuesto por la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)...</p>
+                    <p><strong>1. Identidad y domicilio del responsable</strong></p>
+                    <p>El responsable del tratamiento de los datos personales es la Secretaría de Bienestar...</p>
+                    <p><strong>2. Datos personales que se recaban</strong></p>
+                    <ul>
+                        <li>Nombre completo</li>
+                        <li>CURP</li>
+                        <li>Correo electrónico</li>
+                        <li>Cargo y supervisor asignado</li>
+                    </ul>
+                    <p><strong>Fecha de última actualización: 05 de agosto del 2025.</strong></p>
+                </div>
+                
+                <!-- CHECKBOX OBLIGATORIO -->
+                <div class="checkbox-container">
+                    <label>
+                        <input v-model="termsAccepted" type="checkbox" @change="clearError"> 
+                        He leído y acepto el Aviso de Privacidad y los Términos y Condiciones. *
+                    </label>
+                    <div v-if="error" class="error">{{ error }}</div>
+                </div>
+                
+                <button type="submit" :disabled="!termsAccepted" class="submit-btn">
+                    {{ termsAccepted ? 'Registrarme' : 'Debe aceptar términos' }}
+                </button>
+                
+                <div v-if="success" class="success">{{ success }}</div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    form: {
+                        name: '',
+                        email: ''
+                    },
+                    termsAccepted: false,
+                    error: '',
+                    success: ''
+                };
+            },
+            methods: {
+                submitForm() {
+                    this.error = '';
+                    this.success = '';
+                    
+                    if (!this.termsAccepted) {
+                        this.error = 'Debes aceptar el Aviso de Privacidad para continuar';
+                        return;
+                    }
+                    
+                    if (!this.form.name || !this.form.email) {
+                        this.error = 'Todos los campos son obligatorios';
+                        return;
+                    }
+                    
+                    // Simular registro exitoso
+                    this.success = '¡Registro exitoso! Los términos han sido aceptados.';
+                    
+                    setTimeout(() => {
+                        alert('Formulario enviado correctamente');
+                    }, 500);
+                },
+                clearError() {
+                    this.error = '';
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

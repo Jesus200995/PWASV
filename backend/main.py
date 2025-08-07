@@ -63,6 +63,9 @@ class PasswordChange(BaseModel):
     usuario_id: int
     nueva_contrasena: str
 
+class TerminosAceptados(BaseModel):
+    usuario_id: int
+
 # Montar carpeta de fotos para servir estáticamente
 app.mount("/fotos", StaticFiles(directory="fotos"), name="fotos")
 
@@ -71,6 +74,96 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"  # Cambia esto por seguridad
 
 # Endpoints de autenticación
+@app.get("/usuarios/{user_id}/terminos")
+async def verificar_terminos_usuario(user_id: int):
+    """Verificar si un usuario ha aceptado los términos y condiciones"""
+    try:
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, correo FROM usuarios WHERE id = %s", (user_id,))
+        usuario = cursor.fetchone()
+        
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Crear la tabla usuarios_terminos si no existe
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS usuarios_terminos (
+                id SERIAL PRIMARY KEY,
+                usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+                aceptado BOOLEAN DEFAULT true,
+                fecha_aceptado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_aceptado VARCHAR(45),
+                UNIQUE(usuario_id)
+            )
+        """)
+        
+        # Verificar si ha aceptado términos
+        cursor.execute(
+            "SELECT aceptado, fecha_aceptado FROM usuarios_terminos WHERE usuario_id = %s",
+            (user_id,)
+        )
+        terminos = cursor.fetchone()
+        
+        return {
+            "usuario_id": user_id,
+            "ha_aceptado_terminos": terminos is not None and terminos[0] if terminos else False,
+            "fecha_aceptacion": terminos[1].isoformat() if terminos and terminos[1] else None
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error verificando términos: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al verificar términos: {str(e)}")
+
+@app.post("/usuarios/aceptar_terminos")
+async def aceptar_terminos(terminos: TerminosAceptados):
+    """Registrar la aceptación de términos y condiciones de un usuario"""
+    try:
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, correo FROM usuarios WHERE id = %s", (terminos.usuario_id,))
+        usuario = cursor.fetchone()
+        
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Crear la tabla usuarios_terminos si no existe
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS usuarios_terminos (
+                id SERIAL PRIMARY KEY,
+                usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+                aceptado BOOLEAN DEFAULT true,
+                fecha_aceptado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_aceptado VARCHAR(45),
+                UNIQUE(usuario_id)
+            )
+        """)
+        
+        # Insertar o actualizar la aceptación de términos
+        cursor.execute("""
+            INSERT INTO usuarios_terminos (usuario_id, aceptado, fecha_aceptado) 
+            VALUES (%s, true, CURRENT_TIMESTAMP)
+            ON CONFLICT (usuario_id) 
+            DO UPDATE SET 
+                aceptado = true,
+                fecha_aceptado = CURRENT_TIMESTAMP
+        """, (terminos.usuario_id,))
+        
+        conn.commit()
+        
+        return {
+            "status": "success",
+            "message": "Términos y condiciones aceptados exitosamente",
+            "usuario_id": terminos.usuario_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error aceptando términos: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al registrar aceptación de términos: {str(e)}")
+
 @app.post("/usuarios")
 async def crear_usuario(usuario: UserCreate):
     try:
@@ -105,6 +198,25 @@ async def crear_usuario(usuario: UserCreate):
         )
         
         user_id = cursor.fetchone()[0]
+        
+        # Crear la tabla usuarios_terminos si no existe
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS usuarios_terminos (
+                id SERIAL PRIMARY KEY,
+                usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+                aceptado BOOLEAN DEFAULT true,
+                fecha_aceptado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_aceptado VARCHAR(45),
+                UNIQUE(usuario_id)
+            )
+        """)
+        
+        # Registrar automáticamente la aceptación de términos al crear el usuario
+        cursor.execute(
+            "INSERT INTO usuarios_terminos (usuario_id, aceptado, fecha_aceptado) VALUES (%s, true, CURRENT_TIMESTAMP)",
+            (user_id,)
+        )
+        
         conn.commit()
         
         return {"id": user_id, "mensaje": "Usuario creado exitosamente", "curp": curp_upper}

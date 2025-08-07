@@ -74,8 +74,6 @@ SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"
 
 # ==================== NUEVOS ENDPOINTS DE TÉRMINOS ====================
 
-# ==================== NUEVOS ENDPOINTS DE TÉRMINOS ====================
-
 @app.get("/usuarios/{user_id}/terminos")
 async def verificar_terminos_usuario(user_id: int):
     """Verificar si un usuario ha aceptado los términos y condiciones"""

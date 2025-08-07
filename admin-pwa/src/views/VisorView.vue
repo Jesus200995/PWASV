@@ -469,8 +469,29 @@ const selectedPhotoUrl = ref('')
 // Función para formatear fechas
 const formatFecha = (fechaStr) => {
   try {
+    // Si viene una fecha ISO completa (con T), la procesamos con zona horaria
+    if (typeof fechaStr === 'string' && fechaStr.includes('T')) {
+      return new Date(fechaStr).toLocaleString('es-ES', {
+        timeZone: 'America/Mexico_City' // Forzar zona horaria de México
+      })
+    }
+    
+    // Si viene solo una fecha (YYYY-MM-DD), crear la fecha sin zona horaria
+    if (typeof fechaStr === 'string' && fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10))
+      const fecha = new Date(year, month - 1, day) // month - 1 porque los meses en JS van de 0-11
+      
+      return fecha.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }) + ' 12:00:00'
+    }
+    
+    // Para otros casos, usar el método estándar
     return new Date(fechaStr).toLocaleString('es-ES')
   } catch (e) {
+    console.error('Error al formatear fecha:', e, 'Fecha original:', fechaStr)
     return fechaStr
   }
 }

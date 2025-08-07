@@ -421,10 +421,33 @@ async function cargarAsistencias() {
 
 function formatFecha(fechaStr) {
   try {
-    const fecha = new Date(fechaStr);
-    return fecha.toLocaleDateString();
+    if (!fechaStr) return '';
+    
+    // Si viene una fecha ISO completa (con T), la procesamos
+    if (typeof fechaStr === 'string' && fechaStr.includes('T')) {
+      return new Date(fechaStr).toLocaleDateString('es-ES', {
+        timeZone: 'America/Mexico_City' // Forzar zona horaria de México
+      })
+    }
+    
+    // Si viene solo una fecha (YYYY-MM-DD), crear la fecha sin zona horaria
+    if (typeof fechaStr === 'string' && fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10))
+      const fecha = new Date(year, month - 1, day) // month - 1 porque los meses en JS van de 0-11
+      
+      return fecha.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    }
+    
+    // Para otros casos, usar el método estándar
+    return new Date(fechaStr).toLocaleDateString('es-ES')
   } catch (e) {
-    return fechaStr;
+    console.error('Error al formatear fecha:', e, 'Fecha original:', fechaStr)
+    return fechaStr
   }
 }
 

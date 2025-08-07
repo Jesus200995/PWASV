@@ -860,8 +860,31 @@ const calcularEstadisticas = () => {
 
 const formatFecha = (fechaStr) => {
   try {
+    // Si viene una fecha ISO completa (con T), la procesamos
+    if (typeof fechaStr === 'string' && fechaStr.includes('T')) {
+      return new Date(fechaStr).toLocaleString('es-ES', {
+        timeZone: 'America/Mexico_City' // Forzar zona horaria de México
+      })
+    }
+    
+    // Si viene solo una fecha (YYYY-MM-DD), crear la fecha sin zona horaria
+    if (typeof fechaStr === 'string' && fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10))
+      const fecha = new Date(year, month - 1, day) // month - 1 porque los meses en JS van de 0-11
+      
+      return fecha.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+    
+    // Para otros casos, usar el método estándar
     return new Date(fechaStr).toLocaleString('es-ES')
   } catch (e) {
+    console.error('Error al formatear fecha:', e, 'Fecha original:', fechaStr)
     return fechaStr
   }
 }
@@ -869,6 +892,19 @@ const formatFecha = (fechaStr) => {
 // Nueva función para formato de fecha simple
 const formatFechaSimple = (fechaStr) => {
   try {
+    // Si la fecha viene en formato 'YYYY-MM-DD', crear la fecha directamente sin zona horaria
+    if (typeof fechaStr === 'string' && fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10))
+      const fecha = new Date(year, month - 1, day) // month - 1 porque los meses en JS van de 0-11
+      
+      return fecha.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+    }
+    
+    // Para otros formatos, usar el método tradicional
     const fecha = new Date(fechaStr)
     return fecha.toLocaleDateString('es-ES', {
       day: '2-digit',
@@ -876,6 +912,7 @@ const formatFechaSimple = (fechaStr) => {
       year: 'numeric'
     })
   } catch (e) {
+    console.error('Error al formatear fecha simple:', e, 'Fecha original:', fechaStr)
     return fechaStr
   }
 }
@@ -883,6 +920,20 @@ const formatFechaSimple = (fechaStr) => {
 // Nueva función para formato de fecha más elegante
 const formatFechaElegante = (fechaStr) => {
   try {
+    // Si la fecha viene en formato 'YYYY-MM-DD', crear la fecha directamente sin zona horaria
+    if (typeof fechaStr === 'string' && fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10))
+      const fecha = new Date(year, month - 1, day) // month - 1 porque los meses en JS van de 0-11
+      
+      return fecha.toLocaleDateString('es-ES', {
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
+    }
+    
+    // Para otros formatos, usar el método tradicional
     const fecha = new Date(fechaStr)
     return fecha.toLocaleDateString('es-ES', {
       weekday: 'short',
@@ -891,6 +942,7 @@ const formatFechaElegante = (fechaStr) => {
       year: 'numeric'
     })
   } catch (e) {
+    console.error('Error al formatear fecha elegante:', e, 'Fecha original:', fechaStr)
     return fechaStr
   }
 }

@@ -492,12 +492,15 @@ function formatFecha(fechaStr) {
     }
     
     // Formatear fecha en español mexicano
-    return fecha.toLocaleDateString('es-MX', {
+    const fechaFormateada = fecha.toLocaleDateString('es-MX', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
+    
+    // Capitalizar solo la primera letra
+    return fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
   } catch (e) {
     console.error('Error al formatear fecha:', e, fechaStr);
     return fechaStr;

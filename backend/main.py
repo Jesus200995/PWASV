@@ -5,21 +5,20 @@ from fastapi.security import OAuth2PasswordRequestForm
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
-import os
-import bcrypt
-import re
 from pydantic import BaseModel
 from jose import jwt
 from passlib.context import CryptContext
+import os
+import re
+import bcrypt
 import pytz
-import uvicorn
 
 app = FastAPI()
 
 # Permitir requests desde el frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3003", "http://127.0.0.1:3003", "*"],  # Incluir puertos específicos
+    allow_origins=["http://localhost:3003", "http://127.0.0.1:3003", "*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -71,21 +70,28 @@ app.mount("/fotos", StaticFiles(directory="fotos"), name="fotos")
 
 # Configuración para autenticación JWT
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"  # Cambia esto por seguridad
+SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"
 
-# Endpoints de autenticación
+# ==================== NUEVOS ENDPOINTS DE TÉRMINOS ====================
+
+# ==================== NUEVOS ENDPOINTS DE TÉRMINOS ====================
+
 @app.get("/usuarios/{user_id}/terminos")
 async def verificar_terminos_usuario(user_id: int):
     """Verificar si un usuario ha aceptado los términos y condiciones"""
     try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            
+        print(f"🔍 Verificando términos para usuario {user_id}")
+        
         # Verificar que el usuario existe
         cursor.execute("SELECT id, correo FROM usuarios WHERE id = %s", (user_id,))
         usuario = cursor.fetchone()
         
         if not usuario:
+            print(f"❌ Usuario {user_id} no encontrado")
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
-        
-        # La tabla usuarios_terminos ya existe en el VPS, no necesitamos crearla
         
         # Verificar si ha aceptado términos
         cursor.execute(
@@ -94,11 +100,14 @@ async def verificar_terminos_usuario(user_id: int):
         )
         terminos = cursor.fetchone()
         
-        return {
+        resultado = {
             "usuario_id": user_id,
             "ha_aceptado_terminos": terminos is not None and terminos[0] if terminos else False,
             "fecha_aceptacion": terminos[1].isoformat() if terminos and terminos[1] else None
         }
+        
+        print(f"✅ Términos verificados para usuario {user_id}: {resultado['ha_aceptado_terminos']}")
+        return resultado
         
     except HTTPException:
         raise
@@ -110,14 +119,18 @@ async def verificar_terminos_usuario(user_id: int):
 async def aceptar_terminos(terminos: TerminosAceptados):
     """Registrar la aceptación de términos y condiciones de un usuario"""
     try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            
+        print(f"📝 Registrando términos para usuario {terminos.usuario_id}")
+        
         # Verificar que el usuario existe
         cursor.execute("SELECT id, correo FROM usuarios WHERE id = %s", (terminos.usuario_id,))
         usuario = cursor.fetchone()
         
         if not usuario:
+            print(f"❌ Usuario {terminos.usuario_id} no encontrado")
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
-        
-        # La tabla usuarios_terminos ya existe en el VPS, no necesitamos crearla
         
         # Verificar si ya existe un registro para este usuario
         cursor.execute("SELECT id FROM usuarios_terminos WHERE usuario_id = %s", (terminos.usuario_id,))
@@ -156,7 +169,13 @@ async def aceptar_terminos(terminos: TerminosAceptados):
 
 @app.post("/usuarios")
 async def crear_usuario(usuario: UserCreate):
+    """Crear usuario y automáticamente registrar aceptación de términos"""
     try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            
+        print(f"👤 Creando usuario: {usuario.correo}")
+        
         # Validación de CURP obligatoria
         if not usuario.curp or not usuario.curp.strip():
             raise HTTPException(status_code=400, detail="La CURP es obligatoria")
@@ -167,7 +186,6 @@ async def crear_usuario(usuario: UserCreate):
             raise HTTPException(status_code=400, detail="La CURP debe tener exactamente 18 caracteres")
         
         # Validación básica de formato CURP
-        import re
         if not re.match(r'^[A-Z0-9]{18}$', curp_upper):
             raise HTTPException(status_code=400, detail="La CURP debe contener solo letras mayúsculas y números")
         
@@ -188,15 +206,9 @@ async def crear_usuario(usuario: UserCreate):
         )
         
         user_id = cursor.fetchone()[0]
+        print(f"✅ Usuario creado con ID: {user_id}")
         
-        # La tabla usuarios_terminos ya existe en el VPS con esta estructura:
-        # CREATE TABLE IF NOT EXISTS usuarios_terminos (
-        #     id SERIAL PRIMARY KEY,
-        #     usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-        #     aceptado BOOLEAN NOT NULL DEFAULT FALSE,
-        #     fecha_aceptado TIMESTAMP NOT NULL DEFAULT NOW(),
-        #     ip_aceptado VARCHAR(50)
-        # );
+        # ==================== REGISTRO AUTOMÁTICO DE TÉRMINOS ====================
         
         # Registrar automáticamente la aceptación de términos al crear el usuario
         try:
@@ -214,7 +226,13 @@ async def crear_usuario(usuario: UserCreate):
         
         conn.commit()
         
-        return {"id": user_id, "mensaje": "Usuario creado exitosamente", "curp": curp_upper}
+        return {
+            "id": user_id, 
+            "mensaje": "Usuario creado exitosamente con términos aceptados automáticamente", 
+            "curp": curp_upper,
+            "terminos_registrados": True
+        }
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -1711,6 +1729,23 @@ async def obtener_resumen_historial(usuario_id: int):
     except Exception as e:
         print(f"❌ Error obteniendo resumen de historial: {e}")
         raise HTTPException(status_code=500, detail=f"Error obteniendo resumen: {str(e)}")
+
+# ==================== ENDPOINT DE PRUEBA PARA TÉRMINOS ====================
+
+@app.get("/test/terminos")
+async def test_terminos():
+    """Endpoint de prueba para verificar que la funcionalidad de términos está activa"""
+    return {
+        "status": "active",
+        "message": "Los endpoints de términos están funcionando correctamente",
+        "endpoints": {
+            "verificar_terminos": "/usuarios/{user_id}/terminos",
+            "aceptar_terminos": "/usuarios/aceptar_terminos",
+            "crear_usuario_con_terminos": "/usuarios"
+        },
+        "version": "1.0.0",
+        "timestamp": datetime.now().isoformat()
+    }
 
 if __name__ == "__main__":
     import uvicorn

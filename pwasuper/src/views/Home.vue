@@ -3,7 +3,7 @@
     <!-- Sistema de Asistencia Integrado -->
     <div class="card mb-6">
       <div class="text-center mb-4">
-        <h2 class="text-xl font-bold text-gray-800 mb-2">Sistema de Asistencia</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-2">Registra tu asistencia</h2>
         <p class="text-sm text-gray-500">
           {{ modoAsistencia ? 'Completa los datos para ' + (tipoAsistencia === 'entrada' ? 'marcar entrada' : 'marcar salida') : 'Marca tu entrada y salida del día' }}
         </p>

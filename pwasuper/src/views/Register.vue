@@ -5,7 +5,7 @@
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Crear cuenta
         </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
+        <p class="mt-2 text-center text-sm text-gray-600" style="display: none;">
           Servidor: <span class="font-mono text-xs" :class="currentApiUrl.includes('localhost') ? 'text-blue-600' : 'text-green-600'">
             {{ currentApiUrl }}
           </span>
@@ -69,7 +69,9 @@
         <div class="mt-6 mb-4">
           <div class="border border-gray-300 rounded-md bg-gray-50">
             <div class="p-4">
-              <h3 class="font-semibold text-gray-900 mb-2">AVISO DE PRIVACIDAD OBLIGATORIO</h3>
+              <h3 class="font-bold text-orange-600 mb-2 text-lg bg-gradient-to-r from-yellow-200 to-yellow-100 px-3 py-2 rounded-lg shadow-sm border border-yellow-300">
+                Aviso de Privacidad
+              </h3>
               <div class="max-h-64 overflow-y-auto text-sm text-gray-700 space-y-2 pr-2">
                 <div class="font-semibold">AVISO DE PRIVACIDAD PARA EL REGISTRO Y USO DE INFORMACIÓN DE LOS TÉCNICOS DEL PROGRAMA SEMBRANDO VIDA</div>
                 

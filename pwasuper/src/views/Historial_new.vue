@@ -410,31 +410,49 @@ function formatFecha(fechaStr) {
   try {
     if (!fechaStr) return '';
     
-    // Si viene una fecha ISO completa (con T), la procesamos
-    if (typeof fechaStr === 'string' && fechaStr.includes('T')) {
-      return new Date(fechaStr).toLocaleDateString('es-ES', {
-        timeZone: 'America/Mexico_City' // Forzar zona horaria de México
-      })
+    let fecha;
+    
+    // PROBLEMA IDENTIFICADO: Fechas YYYY-MM-DD se interpretan como UTC
+    // SOLUCION: Forzar interpretación como fecha local de México
+    if (fechaStr.includes('T') || fechaStr.includes(' ')) {
+      // Fecha con hora, usar constructor normal y convertir a zona horaria de México
+      fecha = new Date(fechaStr);
+    } else {
+      // Solo fecha YYYY-MM-DD - SOLUCION MEJORADA
+      // Parsear manualmente para evitar problemas de zona horaria
+      const partesFecha = fechaStr.split('-');
+      if (partesFecha.length === 3) {
+        // Crear fecha usando constructor Date(año, mes-1, día)
+        // Esto crea la fecha en la zona horaria local, no UTC
+        fecha = new Date(parseInt(partesFecha[0]), parseInt(partesFecha[1]) - 1, parseInt(partesFecha[2]));
+        console.log(`📅 Fecha parseada localmente: ${fechaStr} -> ${fecha.toDateString()}`);
+      } else {
+        fecha = new Date(fechaStr + 'T12:00:00'); // Agregar hora para evitar problemas UTC
+      }
     }
     
-    // Si viene solo una fecha (YYYY-MM-DD), crear la fecha sin zona horaria
-    if (typeof fechaStr === 'string' && fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10))
-      const fecha = new Date(year, month - 1, day) // month - 1 porque los meses en JS van de 0-11
-      
-      return fecha.toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
+    // Verificar que la fecha sea válida
+    if (isNaN(fecha.getTime())) {
+      console.error('Fecha inválida:', fechaStr);
+      return fechaStr;
     }
     
-    // Para otros casos, usar el método estándar
-    return new Date(fechaStr).toLocaleDateString('es-ES')
+    // Formatear fecha en español mexicano usando la fecha local parseada
+    const fechaFormateada = fecha.toLocaleDateString('es-MX', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'America/Mexico_City' // Asegurar que se use zona horaria de México
+    });
+    
+    // Capitalizar solo la primera letra
+    const resultado = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+    console.log(`📅 Formato final: ${fechaStr} -> ${resultado}`);
+    return resultado;
   } catch (e) {
-    console.error('Error al formatear fecha:', e, 'Fecha original:', fechaStr)
-    return fechaStr
+    console.error('Error al formatear fecha:', e, fechaStr);
+    return fechaStr;
   }
 }
 

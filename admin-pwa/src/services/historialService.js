@@ -405,12 +405,40 @@ class HistorialService {
     if (!fecha) return 'N/A';
     
     try {
-      return new Date(fecha).toLocaleDateString('es-ES', {
+      let fechaObj;
+      
+      // PROBLEMA IDENTIFICADO: Fechas YYYY-MM-DD se interpretan como UTC
+      // SOLUCION: Forzar interpretación como fecha local de México
+      if (fecha.includes('T') || fecha.includes(' ')) {
+        // Fecha con hora, usar constructor normal
+        fechaObj = new Date(fecha);
+      } else {
+        // Solo fecha YYYY-MM-DD - SOLUCION MEJORADA
+        // Parsear manualmente para evitar problemas de zona horaria
+        const partesFecha = fecha.split('-');
+        if (partesFecha.length === 3) {
+          // Crear fecha usando constructor Date(año, mes-1, día)
+          // Esto crea la fecha en la zona horaria local, no UTC
+          fechaObj = new Date(parseInt(partesFecha[0]), parseInt(partesFecha[1]) - 1, parseInt(partesFecha[2]));
+        } else {
+          fechaObj = new Date(fecha + 'T12:00:00'); // Agregar hora para evitar problemas UTC
+        }
+      }
+      
+      // Verificar que la fecha sea válida
+      if (isNaN(fechaObj.getTime())) {
+        console.error('Fecha inválida en historialService:', fecha);
+        return fecha;
+      }
+      
+      return fechaObj.toLocaleDateString('es-ES', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit'
+        day: '2-digit',
+        timeZone: 'America/Mexico_City' // Asegurar zona horaria de México
       });
     } catch (error) {
+      console.error('Error al formatear fecha en historialService:', error, fecha);
       return fecha;
     }
   }
@@ -558,13 +586,40 @@ class HistorialService {
     if (!fecha) return 'N/A'
     
     try {
-      const fechaObj = new Date(fecha)
+      let fechaObj;
+      
+      // PROBLEMA IDENTIFICADO: Fechas YYYY-MM-DD se interpretan como UTC
+      // SOLUCION: Forzar interpretación como fecha local de México
+      if (fecha.includes('T') || fecha.includes(' ')) {
+        // Fecha con hora, usar constructor normal
+        fechaObj = new Date(fecha);
+      } else {
+        // Solo fecha YYYY-MM-DD - SOLUCION MEJORADA
+        // Parsear manualmente para evitar problemas de zona horaria
+        const partesFecha = fecha.split('-');
+        if (partesFecha.length === 3) {
+          // Crear fecha usando constructor Date(año, mes-1, día)
+          // Esto crea la fecha en la zona horaria local, no UTC
+          fechaObj = new Date(parseInt(partesFecha[0]), parseInt(partesFecha[1]) - 1, parseInt(partesFecha[2]));
+        } else {
+          fechaObj = new Date(fecha + 'T12:00:00'); // Agregar hora para evitar problemas UTC
+        }
+      }
+      
+      // Verificar que la fecha sea válida
+      if (isNaN(fechaObj.getTime())) {
+        console.error('Fecha inválida en historialService:', fecha);
+        return fecha;
+      }
+      
       return fechaObj.toLocaleDateString('es-ES', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit'
-      })
+        day: '2-digit',
+        timeZone: 'America/Mexico_City' // Asegurar zona horaria de México
+      });
     } catch (error) {
+      console.error('Error al formatear fecha en historialService:', error, fecha);
       return fecha
     }
   }

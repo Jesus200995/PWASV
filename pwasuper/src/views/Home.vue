@@ -144,15 +144,16 @@
           type="button"
           @click="getUbicacion"
           :disabled="obteniendoUbicacion"
-          class="btn btn-secondary w-full mb-4 flex items-center justify-center"
+          class="w-full mb-4 flex items-center justify-center px-3 py-2 text-sm font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
           :class="{'opacity-50 cursor-not-allowed': obteniendoUbicacion}"
+          style="background: linear-gradient(135deg, #87CEEB 0%, #1E40AF 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); animation: pulse-subtle 2s infinite;"
         >
-          <div v-if="obteniendoUbicacion" class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-current mr-2"></div>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div v-if="obteniendoUbicacion" class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current mr-2"></div>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          {{ obteniendoUbicacion ? 'Obteniendo ubicación precisa...' : 'Obtener ubicación (funciona offline)' }}
+          {{ obteniendoUbicacion ? 'Obteniendo ubicación precisa...' : 'Obtener Ubicación' }}
         </button>
 
         <!-- Coordenadas -->
@@ -257,7 +258,9 @@
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
     <div v-if="!modoAsistencia" class="card mb-4">
       <div class="text-center mb-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-2">Registrar ubicación</h2>
+        <h2 class="text-lg font-bold text-blue-600 mb-2" style="text-shadow: 0 0 8px rgba(135, 206, 235, 0.8), 0 0 15px rgba(135, 206, 235, 0.6), 0 0 20px rgba(135, 206, 235, 0.4);">
+          Registrar Actividades
+        </h2>
         <p class="text-sm text-gray-500">Captura tu ubicación actual para el registro</p>
       </div>
       
@@ -279,11 +282,12 @@
         <button
           type="button"
           @click="getUbicacionRegistro"
-          class="btn btn-secondary w-full mb-4 flex items-center justify-center"
+          class="w-full mb-4 flex items-center justify-center px-3 py-2 text-sm font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+          style="background: linear-gradient(135deg, #87CEEB 0%, #1E40AF 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); animation: pulse-subtle 2s infinite;"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-2"
+            class="h-4 w-4 mr-2"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -301,7 +305,7 @@
               d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          Obtener ubicación (máxima precisión)
+          Obtener Ubicación
         </button>
 
         <!-- Coordenadas -->
@@ -1355,5 +1359,17 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Animación sutil para el botón de ubicación */
+@keyframes pulse-subtle {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+  }
 }
 </style>

@@ -175,18 +175,18 @@
                 Aviso de Privacidad
               </h3>
               <div class="max-h-64 overflow-y-auto text-sm text-gray-700 space-y-2 pr-2">
-                <div class="font-semibold">AVISO DE PRIVACIDAD PARA EL REGISTRO Y USO DE INFORMACIÓN DE LOS TÉCNICOS DEL PROGRAMA SEMBRANDO VIDA</div>
+                <div class="font-semibold">AVISO DE PRIVACIDAD PARA EL REGISTRO Y USO DE INFORMACIÓN DE LOS TÉCNICOS DEL PROGRAMA SEMBRANDO VIDA MEDIANTE APLICACIÓN MÓVIL OFICIAL</div>
                 
-                <p>En cumplimiento con lo dispuesto por la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), se informa a los Técnicos del Programa Sembrando Vida que los datos personales recabados serán tratados conforme a los siguientes términos:</p>
+                <p>En cumplimiento con lo dispuesto por la Ley General de Transparencia y Acceso a la Información pública y la Ley Federal de Transparencia y Acceso a la Información Pública, se informa a las y los Técnico(a)s del Programa Sembrando Vida que los datos personales recabados serán tratados conforme a los siguientes términos:</p>
                 
                 <div class="font-semibold">1. Identidad y domicilio del responsable</div>
                 <p>El responsable del tratamiento de los datos personales es la Secretaría de Bienestar, Subsecretaria de Inclusión Productiva y Desarrollo Rural con domicilio en: Av. P.º de la Reforma 116, Juárez, Cuauhtémoc, 06600 Ciudad de México, CDMX.</p>
-                <p>Los datos personales mencionados serán recabados y registrados a través de una Aplicación Móvil oficial</p>
                 
                 <div class="font-semibold">2. Datos personales que se recaban</div>
                 <ul class="list-disc pl-4 space-y-1">
                   <li>Nombre completo</li>
                   <li>CURP</li>
+                  <li>Número telefónico</li>
                   <li>Correo electrónico</li>
                   <li>Cargo y supervisor asignado</li>
                   <li>Datos de localización geográfica precisa, capturados a través de coordenadas (latitud y longitud), correspondientes a los sitios donde el titular realiza actividades dentro del Programa.</li>
@@ -195,7 +195,7 @@
                 </ul>
                 
                 <div class="font-semibold">3. Finalidades del tratamiento</div>
-                <p>Los datos personales mencionados serán recabados y registrados a través de la Aplicación Móvil oficial del Programa Sembrando Vida y serán utilizados exclusivamente para:</p>
+                <p>Los datos personales mencionados serán recabados y registrados a través de la aplicación móvil oficial del Programa Sembrando Vida y serán utilizados exclusivamente para:</p>
                 <ul class="list-disc pl-4 space-y-1">
                   <li>Registrar las actividades de los técnicos en campo.</li>
                   <li>Documentar el avance, seguimiento y diagnóstico de la implementación del Programa Sembrando Vida.</li>
@@ -207,7 +207,7 @@
                 <p>Los datos recabados no serán transferidos a terceros sin el consentimiento del titular, salvo en los casos expresamente autorizados por la ley.</p>
                 
                 <div class="font-semibold">5. Medios para ejercer derechos ARCO</div>
-                <p>Usted tiene derecho a Acceder, Rectificar, Cancelar u Oponerse (ARCO) al tratamiento de sus datos personales. Para ejercer estos derechos, puede presentar una solicitud al correo electrónico: [correo de contacto], o acudir al domicilio mencionado en el punto 1.</p>
+                <p>Usted tiene derecho a Acceder, Rectificar, Cancelar u Oponerse (ARCO) al tratamiento de sus datos personales. Para ejercer estos derechos, puede presentar una solicitud al correo electrónico: info@sembrandodatos.com, o acudir al domicilio mencionado en el punto 1.</p>
                 
                 <div class="font-semibold">6. Medidas de seguridad</div>
                 <p>Se informa que los datos personales serán tratados bajo estrictas medidas de seguridad administrativas, técnicas y físicas que garanticen su confidencialidad e integridad.</p>
@@ -215,7 +215,7 @@
                 <div class="font-semibold">7. Cambios al aviso de privacidad</div>
                 <p>Este Aviso de Privacidad puede ser modificado. Las actualizaciones estarán disponibles en https://app.sembrandodatos.com.</p>
                 
-                <div class="font-semibold">Fecha de última actualización: 05 de agosto del 2025.</div>
+                <div class="font-semibold">Fecha de última actualización: 12 de agosto del 2025.</div>
                 
                 <p class="font-semibold text-blue-800">Al proporcionar mis datos personales, acepto el tratamiento conforme al Aviso de Privacidad.</p>
               </div>

@@ -60,7 +60,7 @@
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
-                Registros Generales
+                Actividades Recientes
               </button>
               <button 
                 @click="activeTab = 'entradas'" 
@@ -101,7 +101,7 @@
             </button>
           </div>
 
-          <!-- Contenido de Pestaña: Registros Generales -->
+          <!-- Contenido de Pestaña: Actividades Recientes -->
           <div v-if="activeTab === 'registros'" class="tab-content">
             <div v-if="registros.length === 0" class="empty-state">
               <div class="empty-icon">
@@ -109,8 +109,8 @@
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
                 </svg>
               </div>
-              <h3>No hay registros</h3>
-              <p>Aún no se han creado registros en la aplicación.</p>
+              <h3>No hay actividades</h3>
+              <p>Aún no se han creado actividades en la aplicación.</p>
             </div>
             
             <div v-else class="registros-table-container">

@@ -508,6 +508,7 @@ import offlineService from '../services/offlineService.js';
 import syncService from '../services/syncService.js';
 import geoLocationService from '../services/geoLocationService.js';
 import { obtenerUbicacionSimple } from '../services/geoLocationSimple.js';
+import { compressImage, blobToFile } from '../utils/imageCompressor.js';
 
 // Referencias y estado para asistencia
 const modoAsistencia = ref(false);
@@ -1001,28 +1002,70 @@ async function getUbicacionRegistro() {
   }
 }
 
-function onFileChange(e) {
+async function onFileChange(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  archivoFoto.value = file;
-  const reader = new FileReader();
-  reader.onload = (e2) => {
-    foto.value = e2.target.result;
-  };
-  reader.readAsDataURL(file);
+  try {
+    // Compresión de imagen con calidad media y formato JPG
+    console.log('🖼️ Comprimiendo imagen de asistencia...');
+    const compressedBlob = await compressImage(file, 1280, 0.6);
+    
+    // Convertir el Blob comprimido a un objeto File para mantener compatibilidad
+    const compressedFile = blobToFile(compressedBlob, `${tipoAsistencia.value || 'asistencia'}_${Date.now()}.jpg`);
+    
+    // Usar el archivo comprimido
+    archivoFoto.value = compressedFile;
+    
+    // Mostrar la imagen comprimida en la interfaz
+    const reader = new FileReader();
+    reader.onload = (e2) => {
+      foto.value = e2.target.result;
+    };
+    reader.readAsDataURL(compressedBlob);
+  } catch (err) {
+    console.error('Error al comprimir imagen:', err);
+    // Fallback: usar la imagen original sin comprimir
+    archivoFoto.value = file;
+    const reader = new FileReader();
+    reader.onload = (e2) => {
+      foto.value = e2.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
-function onFileChangeRegistro(e) {
+async function onFileChangeRegistro(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  archivoFotoRegistro.value = file;
-  const reader = new FileReader();
-  reader.onload = (e2) => {
-    fotoRegistro.value = e2.target.result;
-  };
-  reader.readAsDataURL(file);
+  try {
+    // Compresión de imagen con calidad media y formato JPG
+    console.log('🖼️ Comprimiendo imagen de registro...');
+    const compressedBlob = await compressImage(file, 1280, 0.6);
+    
+    // Convertir el Blob comprimido a un objeto File para mantener compatibilidad
+    const compressedFile = blobToFile(compressedBlob, `actividad_${Date.now()}.jpg`);
+    
+    // Usar el archivo comprimido
+    archivoFotoRegistro.value = compressedFile;
+    
+    // Mostrar la imagen comprimida en la interfaz
+    const reader = new FileReader();
+    reader.onload = (e2) => {
+      fotoRegistro.value = e2.target.result;
+    };
+    reader.readAsDataURL(compressedBlob);
+  } catch (err) {
+    console.error('Error al comprimir imagen:', err);
+    // Fallback: usar la imagen original sin comprimir
+    archivoFotoRegistro.value = file;
+    const reader = new FileReader();
+    reader.onload = (e2) => {
+      fotoRegistro.value = e2.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 async function enviarRegistro() {

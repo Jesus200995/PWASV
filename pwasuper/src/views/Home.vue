@@ -97,6 +97,19 @@
         </div>
       </div>
       
+      <!-- Botón de sincronización manual -->
+      <div v-if="!modoAsistencia && isOnline" class="text-center mb-3">
+        <button
+          @click="forzarSincronizacion"
+          class="text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded-lg py-2 px-4 hover:bg-blue-100 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Sincronizar datos ahora
+        </button>
+      </div>
+      
       <!-- Mensaje de estado de asistencia -->
       <div v-if="mensajeAsistencia && !modoAsistencia" class="text-center mb-4">
         <div 
@@ -498,7 +511,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
@@ -1246,7 +1259,7 @@ function limpiarDatosAntiguos() {
 /**
  * Consulta al backend si el usuario ya registró entrada/salida hoy
  */
-async function verificarAsistenciaHoy() {
+async function verificarAsistenciaHoy(forceRefresh = false) {
   verificandoAsistencia.value = true;
   try {
     // Verificar conexión a internet antes de consultar
@@ -1259,7 +1272,8 @@ async function verificarAsistenciaHoy() {
     // Obtener la fecha actual para comparar
     const fechaActual = new Date().toISOString().split('T')[0];
     
-    const datos = await asistenciasService.consultarAsistenciaHoy(user.value.id);
+    console.log(`🔍 Consultando asistencia del día con forceRefresh=${forceRefresh}`);
+    const datos = await asistenciasService.consultarAsistenciaHoy(user.value.id, forceRefresh);
     asistenciaHoy.value = datos;
     
     // Verificar que los datos correspondan al día actual
@@ -1354,12 +1368,107 @@ function guardarEstadoAsistencia() {
 }
 
 // Comprobar si el usuario está autenticado y verificar conexión
+// Forzar sincronización manual
+async function forzarSincronizacion() {
+  try {
+    isOnline.value = await checkInternetConnection();
+    if (!isOnline.value) {
+      error.value = "No hay conexión a internet para sincronizar.";
+      return;
+    }
+    
+    console.log('🔄 Forzando sincronización manual');
+    await syncService.sincronizarManual();
+  } catch (error) {
+    console.error('Error al forzar sincronización:', error);
+    error.value = `Error al sincronizar: ${error.message}`;
+  }
+}
+
+// Manejador de eventos de sincronización
+function handleSyncEvent(event, online, data) {
+  console.log(`🔄 Evento de sincronización recibido: ${event}`);
+  
+  // Actualizar estado de conexión
+  isOnline.value = online;
+  
+  switch (event) {
+    case 'online':
+      console.log('🌐 Conectado en Home.vue');
+      error.value = null;
+      
+      // Si acabamos de recuperar la conexión y hay datos pendientes, sincronizar
+      offlineService.contarPendientes().then(pendientes => {
+        if (pendientes.total > 0) {
+          console.log(`🔄 Conexión recuperada con ${pendientes.total} pendientes, sincronizando automáticamente...`);
+          setTimeout(() => {
+            syncService.sincronizarManual().catch(err => {
+              console.error('Error en sincronización automática al recuperar conexión:', err);
+            });
+          }, 1500); // Esperar un momento para asegurar conexión estable
+        }
+      });
+      break;
+      
+    case 'offline':
+      console.log('📴 Desconectado en Home.vue');
+      error.value = getOfflineMessage();
+      break;
+      
+    case 'syncing':
+      console.log('🔄 Sincronizando...');
+      break;
+      
+    case 'sync_complete':
+      console.log('✅ Sincronización completada:', data);
+      // Actualizar historial y verificar asistencia después de sincronizar
+      if (data && data.exitosos > 0) {
+        // Esperar un momento para que el backend procese los datos
+        setTimeout(async () => {
+          try {
+            console.log('🔄 Actualizando datos de asistencia después de sincronización');
+            // Forzar actualización de datos de asistencia desde el servidor
+            await verificarAsistenciaHoy(true);
+            
+            // Actualizar historial de registros si tenemos entradas offline
+            if (historial.value.some(h => h.offline)) {
+              console.log('🔄 Actualizando historial después de sincronización');
+              // Marcar registros sincronizados como no offline
+              historial.value = historial.value.map(h => {
+                if (h.offline) {
+                  return { ...h, offline: false };
+                }
+                return h;
+              });
+            }
+            
+            // Mostrar mensaje de éxito
+            mensajeAsistencia.value = `Sincronización exitosa. ${data.exitosos} registro(s) enviado(s).`;
+            setTimeout(() => {
+              mensajeAsistencia.value = null;
+            }, 5000);
+          } catch (error) {
+            console.error('Error actualizando datos después de sincronización:', error);
+          }
+        }, 2000); // Esperar 2 segundos para dar tiempo al backend
+      }
+      break;
+      
+    case 'sync_error':
+      console.log('❌ Error en sincronización:', data);
+      break;
+  }
+}
+
 onMounted(async () => {
   // Verificar si el usuario está autenticado
   if (!user.value.id) {
     router.push("/login");
     return;
   }
+  
+  // Registrar manejador de eventos de sincronización
+  syncService.addListener(handleSyncEvent);
   
   // Verificar estado de asistencia del día
   verificarEstadoAsistencia();
@@ -1396,6 +1505,11 @@ onMounted(async () => {
   } catch (error) {
     console.error('❌ Error verificando servicio de geolocalización:', error);
   }
+  
+  // Limpiar manejador de eventos al desmontar el componente
+  onUnmounted(() => {
+    syncService.removeListener(handleSyncEvent);
+  });
 });
 
 // Watcher para guardar cambios de asistencia en localStorage

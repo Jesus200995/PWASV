@@ -193,7 +193,8 @@ class SyncService {
       console.log('📤 Enviando registro offline:', registro.id);
       console.log('🕐 Timestamp original:', registro.timestamp);
       
-      // Actualizar el timestamp de sincronización antes de enviar
+      // Obtener timestamp de sincronización (momento actual)
+      const syncTimestamp = new Date().toISOString();
       await offlineService.actualizarTimestampSincronizacion(registro.id, 'registro');
       
       // Crear FormData para el envío
@@ -205,7 +206,15 @@ class SyncService {
       
       // Usar el timestamp original (hora de creación offline) no el de sincronización
       formData.append('timestamp_offline', registro.timestamp);
+      
+      // Añadir campos adicionales para que el backend identifique correctamente los datos offline
+      formData.append('es_registro_offline', 'true');
+      formData.append('sync_timestamp', syncTimestamp);
+      formData.append('origen_sync', 'pwa_super');
+      formData.append('id_offline', registro.id.toString());
+      
       console.log('📤 Enviando timestamp_offline:', registro.timestamp);
+      console.log('📤 Enviando sync_timestamp:', syncTimestamp);
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (registro.foto_base64) {
@@ -220,10 +229,13 @@ class SyncService {
         }
       }
       
-      // Enviar al endpoint de registros
+      // Enviar al endpoint de registros con headers adicionales para identificación
       const response = await axios.post(`${API_URL}/registro`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'X-Offline-Sync': 'true',
+          'X-Sync-Timestamp': syncTimestamp,
+          'X-Offline-ID': registro.id.toString()
         },
         timeout: 30000, // 30 segundos de timeout
         maxContentLength: Infinity,
@@ -256,7 +268,8 @@ class SyncService {
       console.log(`📤 Enviando asistencia ${asistencia.tipo} offline:`, asistencia.id);
       console.log('🕐 Timestamp original:', asistencia.timestamp);
       
-      // Actualizar el timestamp de sincronización antes de enviar
+      // Obtener timestamp de sincronización (momento actual)
+      const syncTimestamp = new Date().toISOString();
       await offlineService.actualizarTimestampSincronizacion(asistencia.id, 'asistencia');
       
       // Crear FormData para el envío
@@ -268,7 +281,16 @@ class SyncService {
       
       // Usar el timestamp original (hora de creación offline) no el de sincronización
       formData.append('timestamp_offline', asistencia.timestamp);
+      
+      // Añadir campos adicionales para que el backend identifique correctamente los datos offline
+      formData.append('es_asistencia_offline', 'true');
+      formData.append('sync_timestamp', syncTimestamp);
+      formData.append('origen_sync', 'pwa_super');
+      formData.append('id_offline', asistencia.id.toString());
+      formData.append('fecha_offline', asistencia.fecha || new Date().toISOString().split('T')[0]);
+      
       console.log(`📤 Enviando timestamp_offline para ${asistencia.tipo}:`, asistencia.timestamp);
+      console.log(`📤 Enviando sync_timestamp:`, syncTimestamp);
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (asistencia.foto_base64) {
@@ -283,12 +305,28 @@ class SyncService {
         }
       }
       
+      // Configurar headers comunes para la petición
+      const requestConfig = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'X-Offline-Sync': 'true',
+          'X-Sync-Timestamp': syncTimestamp,
+          'X-Offline-ID': asistencia.id.toString(),
+          'X-Asistencia-Tipo': asistencia.tipo
+        },
+        timeout: 30000, // 30 segundos de timeout
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+      };
+      
       // Enviar según el tipo de asistencia
       let response;
       if (asistencia.tipo === 'entrada') {
-        response = await asistenciasService.registrarEntrada(formData);
+        // Pasar la configuración de headers a registrarEntrada
+        response = await asistenciasService.registrarEntrada(formData, requestConfig);
       } else if (asistencia.tipo === 'salida') {
-        response = await asistenciasService.registrarSalida(formData);
+        // Pasar la configuración de headers a registrarSalida
+        response = await asistenciasService.registrarSalida(formData, requestConfig);
       } else {
         throw new Error(`Tipo de asistencia desconocido: ${asistencia.tipo}`);
       }

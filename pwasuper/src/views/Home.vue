@@ -1399,14 +1399,15 @@ async function cargarHistorial(forceRefresh = false) {
     }
     
     // Si hay conexión, intentar obtener del servidor
-    const cacheParam = forceRefresh ? `&_nocache=${Date.now()}` : '';
+    // Siempre incluir un parámetro de tiempo para forzar nueva petición sin cache
+    const cacheParam = `&_nocache=${Date.now()}`;
     const response = await axios.get(
       `${API_URL}/registros?usuario_id=${user.value.id}${cacheParam}`, 
       {
         headers: {
-          'Cache-Control': forceRefresh ? 'no-cache, no-store, must-revalidate' : 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
-          'X-Force-Refresh': forceRefresh ? 'true' : 'false'
+          'X-Force-Refresh': 'true'
         }
       }
     );
@@ -1477,21 +1478,43 @@ async function forzarSincronizacion() {
     }
     
     console.log('🔄 Forzando sincronización manual');
-    await syncService.sincronizarManual();
+    const resultado = await syncService.sincronizarManual();
+    
+    // Mostrar mensaje de sincronización en progreso
+    mensajeAsistencia.value = "Sincronización en progreso...";
     
     // Esperar un poco para que el backend procese los datos y luego actualizar el historial
     setTimeout(async () => {
       try {
-        await cargarHistorial(true); // Forzar actualización del historial
+        // Forzar actualización del historial después de sincronizar
+        await cargarHistorial(true);
         console.log('✅ Historial actualizado después de sincronización manual');
+        
+        // Verificar asistencia y actualizar UI
+        await verificarAsistenciaHoy(true);
+        
+        // Mostrar mensaje de éxito
+        if (resultado && resultado.exitosos > 0) {
+          mensajeAsistencia.value = `Sincronización exitosa. ${resultado.exitosos} registro(s) enviado(s).`;
+        } else {
+          mensajeAsistencia.value = "Sincronización completada. No había registros pendientes.";
+        }
+        
+        // Limpiar mensaje después de un tiempo
+        setTimeout(() => {
+          mensajeAsistencia.value = '';
+        }, 5000);
+        
       } catch (err) {
         console.error('Error actualizando historial después de sincronización manual:', err);
+        mensajeAsistencia.value = "Error al actualizar registros después de sincronizar.";
       }
     }, 2000);
     
   } catch (error) {
     console.error('Error al forzar sincronización:', error);
     error.value = `Error al sincronizar: ${error.message}`;
+    mensajeAsistencia.value = "Error en la sincronización.";
   }
 }
 
@@ -1540,25 +1563,9 @@ function handleSyncEvent(event, online, data) {
             // Forzar actualización de datos de asistencia desde el servidor
             await verificarAsistenciaHoy(true);
             
-            // Actualizar historial de registros si tenemos entradas offline
-            if (historial.value.some(h => h.offline)) {
-              console.log('🔄 Actualizando historial después de sincronización');
-              // Marcar registros sincronizados como no offline
-              historial.value = historial.value.map(h => {
-                if (h.offline) {
-                  return { ...h, offline: false };
-                }
-                return h;
-              });
-              
-              // Actualizar la lista de historial desde el servidor para refrescar todo
-              try {
-                console.log('🔄 Actualizando historial completo desde el servidor');
-                cargarHistorial(true); // Pasar true para forzar actualización
-              } catch (histError) {
-                console.error('Error actualizando historial completo:', histError);
-              }
-            }
+            // Siempre actualizar el historial completo después de una sincronización exitosa
+            console.log('🔄 Actualizando historial completo después de sincronización');
+            await cargarHistorial(true); // Siempre forzar actualización del historial
             
             // Mostrar mensaje de éxito
             mensajeAsistencia.value = `Sincronización exitosa. ${data.exitosos} registro(s) enviado(s).`;

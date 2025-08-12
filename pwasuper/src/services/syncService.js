@@ -212,7 +212,7 @@ class SyncService {
       formData.append('sync_timestamp', syncTimestamp);
       formData.append('origen_sync', 'pwa_super');
       formData.append('id_offline', registro.id.toString());
-      formData.append('tipo', registro.tipo || 'actividad'); // Asegurar que se envía el tipo 'actividad'
+      formData.append('tipo', 'actividad'); // Siempre usar 'actividad' para registros de actividad
       
       console.log('📤 Enviando timestamp_offline:', registro.timestamp);
       console.log('📤 Enviando sync_timestamp:', syncTimestamp);
@@ -238,7 +238,7 @@ class SyncService {
           'X-Offline-Sync': 'true',
           'X-Sync-Timestamp': syncTimestamp,
           'X-Offline-ID': registro.id.toString(),
-          'X-Registro-Tipo': registro.tipo || 'actividad' // Identificar explícitamente como actividad
+          'X-Registro-Tipo': 'actividad' // Siempre identificar explícitamente como actividad
         },
         timeout: 30000, // 30 segundos de timeout
         maxContentLength: Infinity,

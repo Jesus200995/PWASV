@@ -97,18 +97,7 @@
         </div>
       </div>
       
-      <!-- Botón de sincronización manual -->
-      <div v-if="!modoAsistencia && isOnline" class="text-center mb-3">
-        <button
-          @click="forzarSincronizacion"
-          class="text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded-lg py-2 px-4 hover:bg-blue-100 transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Sincronizar datos ahora
-        </button>
-      </div>
+      <!-- La sincronización se realiza automáticamente al recuperar conexión -->
       
       <!-- Mensaje de estado de asistencia -->
       <div v-if="mensajeAsistencia && !modoAsistencia" class="text-center mb-4">
@@ -677,7 +666,7 @@ async function confirmarAsistencia() {
       
       // Mostrar mensaje informativo offline
       mensajeAsistencia.value = `${tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida'} guardada offline. Se enviará automáticamente cuando tengas conexión.`;
-      modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida'} guardada! Se sincronizará cuando recuperes la conexión.`;
+      modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Entrada' : 'Salida'} guardada offline! Se sincronizará automáticamente cuando recuperes la conexión.`;
       showModal.value = true;
       
       // Salir del modo asistencia
@@ -1131,7 +1120,7 @@ async function enviarRegistro() {
       }
 
       // Mostrar modal de éxito offline
-      modalMessage.value = "¡Registro guardado offline! Se enviará automáticamente cuando recuperes la conexión.";
+      modalMessage.value = "¡Registro de actividad guardado offline! Se enviará automáticamente cuando recuperes la conexión.";
       showModal.value = true;
       
       return;
@@ -1530,17 +1519,18 @@ function handleSyncEvent(event, online, data) {
       console.log('🌐 Conectado en Home.vue');
       error.value = null;
       
-      // Si acabamos de recuperar la conexión y hay datos pendientes, sincronizar
-      offlineService.contarPendientes().then(pendientes => {
-        if (pendientes.total > 0) {
-          console.log(`🔄 Conexión recuperada con ${pendientes.total} pendientes, sincronizando automáticamente...`);
-          setTimeout(() => {
-            syncService.sincronizarManual().catch(err => {
-              console.error('Error en sincronización automática al recuperar conexión:', err);
-            });
-          }, 1500); // Esperar un momento para asegurar conexión estable
+      // Siempre sincronizar inmediatamente cuando se recupera la conexión
+      setTimeout(async () => {
+        try {
+          const pendientes = await offlineService.contarPendientes();
+          if (pendientes.total > 0) {
+            console.log(`🔄 Conexión recuperada con ${pendientes.total} pendientes, sincronizando inmediatamente...`);
+            await syncService.sincronizarManual();
+          }
+        } catch (err) {
+          console.error('Error en sincronización automática al recuperar conexión:', err);
         }
-      });
+      }, 500); // Sincronizar casi inmediatamente
       break;
       
     case 'offline':
@@ -1559,23 +1549,24 @@ function handleSyncEvent(event, online, data) {
         // Esperar un momento para que el backend procese los datos
         setTimeout(async () => {
           try {
-            console.log('🔄 Actualizando datos de asistencia después de sincronización');
+            console.log('🔄 Actualizando datos después de sincronización automática');
+            
             // Forzar actualización de datos de asistencia desde el servidor
             await verificarAsistenciaHoy(true);
             
             // Siempre actualizar el historial completo después de una sincronización exitosa
-            console.log('🔄 Actualizando historial completo después de sincronización');
-            await cargarHistorial(true); // Siempre forzar actualización del historial
+            console.log('🔄 Actualizando historial completo después de sincronización automática');
+            await cargarHistorial(true);
             
-            // Mostrar mensaje de éxito
-            mensajeAsistencia.value = `Sincronización exitosa. ${data.exitosos} registro(s) enviado(s).`;
+            // Mostrar mensaje de éxito automático
+            mensajeAsistencia.value = `✅ Sincronización automática exitosa: ${data.exitosos} registro(s) de actividad enviado(s) a la base de datos.`;
             setTimeout(() => {
               mensajeAsistencia.value = null;
-            }, 5000);
+            }, 6000);
           } catch (error) {
-            console.error('Error actualizando datos después de sincronización:', error);
+            console.error('Error actualizando datos después de sincronización automática:', error);
           }
-        }, 2000); // Esperar 2 segundos para dar tiempo al backend
+        }, 1500); // Reducir tiempo de espera
       }
       break;
       

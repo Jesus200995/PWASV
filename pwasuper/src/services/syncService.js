@@ -11,7 +11,9 @@ class SyncService {
     this.isOnline = navigator.onLine;
     this.isSyncing = false;
     this.listeners = [];
+    this.autoSyncInterval = null;
     this.setupEventListeners();
+    this.iniciarVerificacionPeriodica();
   }
 
   /**
@@ -20,14 +22,12 @@ class SyncService {
   setupEventListeners() {
     // Listener para cuando se recupera la conexión
     window.addEventListener('online', async () => {
-      console.log('🌐 Conexión recuperada, iniciando sincronización...');
+      console.log('🌐 Conexión recuperada, iniciando sincronización inmediata...');
       this.isOnline = true;
       this.notifyListeners('online');
       
-      // Esperar un poco para asegurar que la conexión es estable
-      setTimeout(async () => {
-        await this.sincronizarTodo();
-      }, 2000);
+      // Sincronizar inmediatamente sin esperar
+      await this.sincronizarTodo();
     });
 
     // Listener para cuando se pierde la conexión
@@ -49,17 +49,44 @@ class SyncService {
       this.isOnline = await checkInternetConnection();
       this.notifyListeners(this.isOnline ? 'online' : 'offline');
       
-      // Si estamos online al iniciar, sincronizar datos pendientes
+      // Si estamos online al iniciar, sincronizar datos pendientes inmediatamente
       if (this.isOnline) {
         setTimeout(async () => {
           await this.sincronizarTodo();
-        }, 3000);
+        }, 1000); // Solo esperar 1 segundo para verificación inicial
       }
     } catch (error) {
       console.error('Error verificando conexión inicial:', error);
       this.isOnline = false;
       this.notifyListeners('offline');
     }
+  }
+
+  /**
+   * Inicia verificación periódica de conexión y sincronización automática
+   */
+  iniciarVerificacionPeriodica() {
+    // Verificar cada 30 segundos si hay conexión y datos pendientes
+    this.autoSyncInterval = setInterval(async () => {
+      try {
+        const reallyOnline = await checkInternetConnection();
+        
+        if (reallyOnline && !this.isSyncing) {
+          this.isOnline = true;
+          
+          // Verificar si hay datos pendientes
+          const pendientes = await offlineService.contarPendientes(true);
+          if (pendientes.total > 0) {
+            console.log(`🔄 Verificación periódica: ${pendientes.total} registros pendientes, sincronizando automáticamente...`);
+            await this.sincronizarTodo();
+          }
+        } else if (!reallyOnline) {
+          this.isOnline = false;
+        }
+      } catch (error) {
+        console.error('Error en verificación periódica:', error);
+      }
+    }, 30000); // 30 segundos
   }
 
   /**
@@ -123,7 +150,7 @@ class SyncService {
         return;
       }
       
-      console.log(`📊 Sincronizando ${totalPendientes} elementos (${registrosPendientes.length} registros, ${asistenciasPendientes.length} asistencias)`);
+      console.log(`📊 Sincronizando ${totalPendientes} elementos (${registrosPendientes.length} registros de actividad, ${asistenciasPendientes.length} asistencias)`);
       
       // Notificar inicio de sincronización
       this.notifyListeners('syncing', true, totalPendientes);
@@ -131,12 +158,14 @@ class SyncService {
       let exitosos = 0;
       let fallidos = 0;
       
-      // Sincronizar registros generales
+      // Sincronizar registros de actividad primero (son más importantes)
       for (const registro of registrosPendientes) {
         try {
+          console.log(`📤 Sincronizando registro de actividad ID offline: ${registro.id}`);
           await this.enviarRegistro(registro);
           await offlineService.eliminarRegistro(registro.id);
           exitosos++;
+          console.log(`✅ Registro de actividad ${registro.id} sincronizado exitosamente`);
           
           // Notificar progreso
           this.notifyListeners('sync_progress', true, {
@@ -147,7 +176,7 @@ class SyncService {
           });
           
         } catch (error) {
-          console.error(`❌ Error enviando registro ${registro.id}:`, error);
+          console.error(`❌ Error enviando registro de actividad ${registro.id}:`, error);
           fallidos++;
         }
       }
@@ -190,8 +219,16 @@ class SyncService {
    */
   async enviarRegistro(registro) {
     try {
-      console.log('📤 Enviando registro offline:', registro.id);
+      console.log('📤 Enviando registro de actividad offline:', registro.id);
       console.log('🕐 Timestamp original:', registro.timestamp);
+      console.log('📊 Datos del registro:', {
+        usuario_id: registro.usuario_id,
+        tipo: registro.tipo,
+        descripcion: registro.descripcion,
+        latitud: registro.latitud,
+        longitud: registro.longitud,
+        tiene_foto: !!registro.foto_base64
+      });
       
       // Obtener timestamp de sincronización (momento actual)
       const syncTimestamp = new Date().toISOString();
@@ -211,23 +248,24 @@ class SyncService {
       formData.append('es_registro_offline', 'true');
       formData.append('sync_timestamp', syncTimestamp);
       formData.append('origen_sync', 'pwa_super');
-      formData.append('id_offline', registro.id.toString());
+      // NO enviar id_offline para que el backend genere el ID correcto
       formData.append('tipo', 'actividad'); // Siempre usar 'actividad' para registros de actividad
       
       console.log('📤 Enviando timestamp_offline:', registro.timestamp);
       console.log('📤 Enviando sync_timestamp:', syncTimestamp);
-      console.log('📤 Enviando tipo de registro:', registro.tipo || 'actividad');
+      console.log('📤 Enviando tipo de registro: actividad');
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (registro.foto_base64) {
         const archivo = offlineService.base64ToFile(
           registro.foto_base64,
-          registro.foto_filename || `foto_${registro.id}.jpg`,
+          registro.foto_filename || `actividad_${registro.id}.jpg`,
           registro.foto_type || 'image/jpeg'
         );
         
         if (archivo) {
           formData.append('foto', archivo);
+          console.log('📷 Foto adjunta:', archivo.name, archivo.size, 'bytes');
         }
       }
       
@@ -237,7 +275,6 @@ class SyncService {
           'Content-Type': 'multipart/form-data',
           'X-Offline-Sync': 'true',
           'X-Sync-Timestamp': syncTimestamp,
-          'X-Offline-ID': registro.id.toString(),
           'X-Registro-Tipo': 'actividad' // Siempre identificar explícitamente como actividad
         },
         timeout: 30000, // 30 segundos de timeout
@@ -245,17 +282,17 @@ class SyncService {
         maxBodyLength: Infinity
       });
       
-      console.log('✅ Registro enviado exitosamente:', response.data);
+      console.log('✅ Registro de actividad enviado exitosamente:', response.data);
       return response.data;
       
     } catch (error) {
-      console.error('❌ Error enviando registro:', error);
+      console.error('❌ Error enviando registro de actividad:', error);
       
       // Si es un error de duplicado, lo consideramos éxito (ya existe)
       if (error.response && error.response.status === 400 && 
           error.response.data.detail && 
           error.response.data.detail.includes('ya existe')) {
-        console.log('ℹ️ Registro ya existe en el servidor, marcando como enviado');
+        console.log('ℹ️ Registro de actividad ya existe en el servidor, marcando como enviado');
         return { mensaje: 'Registro ya existía en el servidor' };
       }
       
@@ -381,6 +418,16 @@ class SyncService {
    */
   async obtenerPendientes(forceRefresh = false) {
     return await offlineService.contarPendientes(forceRefresh);
+  }
+
+  /**
+   * Limpia los recursos del servicio
+   */
+  destroy() {
+    if (this.autoSyncInterval) {
+      clearInterval(this.autoSyncInterval);
+      this.autoSyncInterval = null;
+    }
   }
 }
 

@@ -166,7 +166,7 @@
               <tbody>                <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
                   <td class="col-id">#{{ usuario.id }}</td>
                   <td class="col-nombre">
-                    <span class="nombre-animado">{{ usuario.nombre_completo }}</span>
+                    <span class="nombre-normal">{{ usuario.nombre_completo || 'Sin nombre' }}</span>
                   </td>
                   <td>{{ usuario.correo }}</td>
                   <td>{{ usuario.cargo }}</td>
@@ -1669,21 +1669,9 @@ const logout = () => {
     inset 0 1px 0 rgba(255,255,255,0.8);
   overflow: hidden;
   border: 1px solid rgba(76, 175, 80, 0.1);
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Eliminar transición para mejor rendimiento */
   padding: clamp(16px, 4vw, 24px);
   box-sizing: border-box;
-}
-
-@keyframes fadeInUp {
-  0% { 
-    opacity: 0; 
-    transform: translateY(40px) scale(0.9); 
-  }
-  100% { 
-    opacity: 1; 
-    transform: translateY(0) scale(1); 
-  }
 }
 
 .usuarios-section:hover {
@@ -1698,12 +1686,7 @@ const logout = () => {
   text-align: center;
   padding: clamp(40px, 10vh, 80px) clamp(16px, 4vw, 32px);
   color: #666;
-  animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
+  /* Eliminar animación fadeIn para mejor rendimiento */
 }
 
 .spinner-large {
@@ -1825,10 +1808,10 @@ const logout = () => {
 
 .table-container {
   overflow: hidden;
-  animation: fadeInUp 0.6s ease-out 0.2s both;
+  /* Eliminar animación para mejor rendimiento */
   border-radius: clamp(12px, 3vw, 16px);
-  background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: white; /* Simplificar el fondo para mejor rendimiento */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04); /* Sombra más ligera */
   width: 100%;
   max-width: 100%;
 }
@@ -1949,72 +1932,20 @@ const logout = () => {
   padding-left: clamp(8px, 2vw, 12px) !important;
 }
 
-/* Animación para el nombre */
-.nombre-animado {
+/* Estilo simple para el nombre (sin animaciones) */
+.nombre-normal {
   display: inline-block;
   color: #2E7D32;
   font-weight: 700;
   font-size: clamp(10px, 2vw, 13px);
-  position: relative;
-  overflow: hidden;
-  animation: nombreEntrada 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  transition: all 0.3s ease;
-}
-
-.nombre-animado::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.2), transparent);
-  animation: nombreBrillo 1.5s ease-in-out infinite;
-}
-
-.nombre-animado:hover {
-  color: #1B5E20;
-  transform: translateX(2px);
-  text-shadow: 0 2px 4px rgba(46, 125, 50, 0.3);
-}
-
-/* Animaciones */
-@keyframes nombreEntrada {
-  0% {
-    opacity: 0;
-    transform: translateX(-20px) scale(0.8);
-  }
-  60% {
-    opacity: 1;
-    transform: translateX(2px) scale(1.05);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes nombreBrillo {
-  0% {
-    left: -100%;
-  }
-  50% {
-    left: 100%;
-  }
-  100% {
-    left: 100%;
-  }
 }
 
 .usuarios-table tbody tr {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
 }
 
 .usuarios-table tbody tr:hover {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.02) 100%);
-  transform: translateX(4px);
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.1);
+  background-color: rgba(76, 175, 80, 0.05);
 }
 
 .usuarios-table tbody tr:hover td {
@@ -2546,8 +2477,8 @@ const logout = () => {
   justify-content: center;
   z-index: 2000;
   padding: clamp(12px, 3vw, 20px);
-  backdrop-filter: blur(8px);
-  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(4px); /* Reducir la intensidad del filtro blur */
+  /* Eliminar animación */
 }
 
 .modal-content-modern {
@@ -2563,18 +2494,7 @@ const logout = () => {
     0 25px 80px rgba(0, 0, 0, 0.15),
     0 10px 40px rgba(0, 0, 0, 0.08);
   border: 2px solid rgba(76, 175, 80, 0.08);
-  animation: modalSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes modalSlideUp {
-  0% { 
-    opacity: 0; 
-    transform: scale(0.85) translateY(30px); 
-  }
-  100% { 
-    opacity: 1; 
-    transform: scale(1) translateY(0); 
-  }
+  /* Eliminar animación costosa */
 }
 
 .modal-header-modern {

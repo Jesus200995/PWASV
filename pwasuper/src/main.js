@@ -17,47 +17,23 @@ Icon.Default.mergeOptions({
   shadowUrl: '/leaflet/marker-shadow.png',
 })
 
-// Registrar Service Worker para funcionalidad PWA offline
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
-      });
-      
-      console.log('✅ Service Worker registrado correctamente:', registration.scope);
-      
-      // Escuchar actualizaciones del service worker
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        console.log('🔄 Nueva versión del Service Worker encontrada');
-        
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('🆕 Nueva versión disponible, considera recargar la página');
-            
-            // Opcional: mostrar notificación al usuario sobre la actualización
-            if (window.confirm('Hay una nueva versión disponible. ¿Deseas actualizar?')) {
-              newWorker.postMessage({ type: 'SKIP_WAITING' });
-              window.location.reload();
-            }
-          }
-        });
-      });
-      
-      // Listener para cuando un service worker toma control
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('🔄 Service Worker actualizado, recargando página...');
-        window.location.reload();
-      });
-      
-    } catch (error) {
-      console.error('❌ Error al registrar Service Worker:', error);
-    }
-  });
-} else {
-  console.warn('⚠️ Service Worker no soportado en este navegador');
-}
+// Importar utilidad de registro del Service Worker
+import { registerServiceWorker, waitForServiceWorkerReady } from './utils/serviceWorkerRegistration.js'
+
+// Registrar el Service Worker para funcionalidad PWA offline
+window.addEventListener('load', async () => {
+  try {
+    // Registrar el service worker
+    const registration = await registerServiceWorker();
+    
+    // Esperar a que el service worker esté listo
+    await waitForServiceWorkerReady();
+    
+    console.log('✅ Aplicación lista con soporte offline');
+  } catch (error) {
+    console.error('❌ Error al inicializar el Service Worker:', error);
+  }
+});
 
 // Crear aplicación
 const app = createApp(App)

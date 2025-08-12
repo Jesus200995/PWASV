@@ -1,9 +1,11 @@
 /**
  * Service Worker para la PWA
- * Maneja cache, notificaciones y sincronización en segundo plano
+ * Maneja cache, notificaciones, actualizaciones obligatorias y sincronización en segundo plano
  */
 
-const CACHE_NAME = 'pwa-super-v1.0.0';
+// Incrementar la versión del cache cuando hay cambios importantes
+// Esto forzará a que se muestre la notificación de actualización
+const CACHE_NAME = 'pwa-super-v1.0.1';
 const OFFLINE_URL = '/offline.html';
 
 // Archivos a cachear para funcionamiento offline
@@ -169,10 +171,13 @@ self.addEventListener('notificationclick', (event) => {
 self.addEventListener('message', (event) => {
   console.log('💬 Mensaje recibido en Service Worker:', event.data);
   
+  // Al recibir mensaje para actualizar, saltar el waiting y activar el nuevo SW
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('⚡ Aplicando actualización solicitada por usuario...');
     self.skipWaiting();
   }
   
+  // Proporcionar la versión actual cuando se solicite
   if (event.data && event.data.type === 'GET_VERSION') {
     event.ports[0].postMessage({
       type: 'VERSION',

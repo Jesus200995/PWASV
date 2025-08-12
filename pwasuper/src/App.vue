@@ -2,6 +2,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConnectivityStatus from './components/ConnectivityStatus.vue';
+import UpdateNotification from './components/UpdateNotification.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -297,6 +298,9 @@ function logout() {
         </transition>
       </router-view>
     </main>
+
+    <!-- Modal de actualización de la aplicación (obligatorio) -->
+    <UpdateNotification />
   </div>
 </template>
 

@@ -90,14 +90,15 @@
           <label for="telefono" class="block text-sm font-medium text-gray-700">Número de teléfono *</label>
           <div class="relative mt-1">
             <!-- Selector de código de país -->
-            <div class="absolute inset-y-0 left-0 flex items-center country-selector">
+            <div class="absolute inset-y-0 left-0 flex items-center">
               <button 
                 type="button"
                 @click="showCountrySelector = !showCountrySelector"
-                class="flex items-center pl-3 pr-2 border-r border-gray-300 h-full focus:outline-none focus:ring-2 focus:ring-primary rounded-l-md bg-gray-50 country-selector"
+                class="flex items-center pl-3 pr-2 border-r border-gray-300 h-full focus:outline-none focus:ring-2 focus:ring-primary rounded-l-md bg-gray-50 text-gray-700"
+                style="max-width: 80px; overflow: hidden; white-space: nowrap;"
               >
-                <span class="mr-1 text-lg">{{ paises.find(p => p.codigo === form.codigoPais)?.bandera || '🌎' }}</span>
-                <span>{{ form.codigoPais }}</span>
+                <span class="mr-1 text-sm">{{ paises.find(p => p.codigo === form.codigoPais)?.bandera || '🌎' }}</span>
+                <span class="text-sm">{{ form.codigoPais }}</span>
                 <svg class="w-4 h-4 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
@@ -121,7 +122,7 @@
             <!-- Dropdown para selección de país -->
             <div 
               v-if="showCountrySelector" 
-              class="absolute z-50 w-64 top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto country-selector"
+              class="absolute z-50 w-64 top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto"
               style="max-height: 250px;"
             >
               <!-- Barra de búsqueda -->
@@ -130,7 +131,7 @@
                   type="text"
                   v-model="countrySearch"
                   placeholder="Buscar país..."
-                  class="w-full px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  class="w-full px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary dropdown-input"
                   @click="$event.stopPropagation()"
                 />
               </div>
@@ -140,7 +141,7 @@
                   v-for="pais in filteredCountries" 
                   :key="pais.codigo"
                   @click="selectCountry(pais)"
-                  class="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer country-selector"
+                  class="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   <span class="text-lg mr-2">{{ pais.bandera }}</span>
                   <span>{{ pais.nombre }}</span>
@@ -564,8 +565,11 @@ function selectCountry(pais) {
 
 // Cerrar el selector de país al hacer clic fuera
 function closeCountrySelector(e) {
-  // Si el clic fue dentro del selector o en el campo de búsqueda, no cerramos
-  if (e.target.closest('.country-selector')) return;
+  // Si el clic fue dentro del botón de selección o en el dropdown, no cerramos
+  if (e.target.closest('button') && e.target.closest('button').contains(document.querySelector('svg')) || 
+      e.target.closest('div') && e.target.closest('div').querySelector && e.target.closest('div').querySelector('input[placeholder="Buscar país..."]')) {
+    return;
+  }
   showCountrySelector.value = false;
 }
 
@@ -707,19 +711,15 @@ button {
 }
 
 /* Estilos para el selector de país */
-.country-selector input:focus {
+.dropdown-input:focus {
   outline: 2px solid #3b82f6;
   outline-offset: -2px;
 }
 
 /* Mejoras para el selector en móviles */
 @media (max-width: 640px) {
-  .country-selector {
-    position: fixed;
-    z-index: 100;
-    max-width: 90vw;
-    left: 5vw !important;
-    right: 5vw !important;
+  .w-64 {
+    max-width: 80vw;
   }
 }
 </style>

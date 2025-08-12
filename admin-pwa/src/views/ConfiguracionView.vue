@@ -406,6 +406,7 @@ const descargarBaseDatos = async () => {
     sqlContent += `    supervisor VARCHAR(255),\n`
     sqlContent += `    contrasena VARCHAR(255) NOT NULL,\n`
     sqlContent += `    curp VARCHAR(18) UNIQUE,\n`
+    sqlContent += `    telefono VARCHAR(20),\n`
     sqlContent += `    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n`
     sqlContent += `    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n`
     sqlContent += `);\n\n`
@@ -413,7 +414,7 @@ const descargarBaseDatos = async () => {
     // Insertar datos de usuarios
     if (usuariosData.length > 0) {
       sqlContent += `-- Datos de usuarios (${usuariosData.length} registros)\n`
-      sqlContent += `INSERT INTO usuarios (id, correo, nombre_completo, cargo, supervisor, contrasena, curp) VALUES\n`
+      sqlContent += `INSERT INTO usuarios (id, correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono) VALUES\n`
       
       const usuariosInserts = usuariosData.map((usuario, index) => {
         const id = usuario.id || index + 1
@@ -425,11 +426,12 @@ const descargarBaseDatos = async () => {
         // Obtener la contraseña real del nuevo endpoint
         const contrasena = (usuario.contrasena || 'sin_contrasena').replace(/'/g, "''")
         const curp = (usuario.curp || '').replace(/'/g, "''")
+        const telefono = (usuario.telefono || '').replace(/'/g, "''")
         
-        // DEBUG: Log de cada usuario para verificar contraseña
-        console.log(`🔍 Usuario ${id}: contrasena="${contrasena}"`)
+        // DEBUG: Log de cada usuario para verificar contraseña y teléfono
+        console.log(`🔍 Usuario ${id}: contrasena="${contrasena}", telefono="${telefono}"`)
         
-        return `(${id}, '${correo}', '${nombre}', '${cargo}', '${supervisor}', '${contrasena}', '${curp}')`
+        return `(${id}, '${correo}', '${nombre}', '${cargo}', '${supervisor}', '${contrasena}', '${curp}', '${telefono}')`
       })
       
       sqlContent += usuariosInserts.join(',\n') + ';\n\n'

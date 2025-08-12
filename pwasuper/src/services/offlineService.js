@@ -77,25 +77,91 @@ class OfflineService {
 
   /**
    * Convierte base64 de vuelta a File
+   * @param {string} base64String - Cadena base64 con datos de la imagen
+   * @param {string} filename - Nombre del archivo a crear
+   * @param {string} mimeType - Tipo MIME por defecto si no se puede extraer de base64
+   * @returns {File|null} - Archivo creado o null si hay error
    */
-  base64ToFile(base64String, filename, mimeType) {
-    if (!base64String) return null;
+  base64ToFile(base64String, filename, mimeType = 'image/jpeg') {
+    if (!base64String) {
+      console.error('❌ base64ToFile: String base64 vacío o nulo');
+      return null;
+    }
     
     try {
-      // Separar el tipo de datos del contenido base64
-      const arr = base64String.split(',');
-      const mime = arr[0].match(/:(.*?);/)[1] || mimeType;
-      const bstr = atob(arr[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
+      console.log(`🔄 Convirtiendo imagen base64 a File (nombre: ${filename})`);
       
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
+      // Verificar formato correcto del base64 (debe tener la estructura data:mime;base64,DATOS)
+      if (!base64String.includes('base64,')) {
+        console.error('❌ base64ToFile: Formato de base64 inválido, debe incluir "base64,"');
+        // Intentar reparar el formato si es posible
+        if (!base64String.startsWith('data:')) {
+          base64String = `data:${mimeType};base64,${base64String}`;
+          console.log('⚠️ Reparando formato de base64, añadiendo encabezado');
+        }
       }
       
-      return new File([u8arr], filename, { type: mime });
+      // Separar el tipo de datos del contenido base64
+      const arr = base64String.split(',');
+      let mime = mimeType;
+      let b64data = '';
+      
+      if (arr.length > 1) {
+        try {
+          // Extraer MIME del encabezado data:tipo/subtipo;base64
+          const mimeMatch = arr[0].match(/:(.*?);/);
+          if (mimeMatch && mimeMatch.length > 1) {
+            mime = mimeMatch[1];
+          }
+          b64data = arr[1];
+        } catch (error) {
+          console.error('❌ Error extrayendo MIME del base64:', error);
+          b64data = arr[1] || base64String; // Usar la parte de datos o todo si no hay coma
+        }
+      } else {
+        // No tiene formato correcto, asumir que es solo datos
+        b64data = base64String;
+        console.warn('⚠️ Base64 no tiene formato estándar, asumiendo solo datos');
+      }
+      
+      // Convertir base64 a bytes
+      try {
+        const bstr = atob(b64data);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        
+        // Crear y devolver el archivo
+        const file = new File([u8arr], filename, { type: mime });
+        console.log(`✅ Archivo creado exitosamente: ${filename}, tamaño: ${file.size} bytes, tipo: ${mime}`);
+        return file;
+      } catch (error) {
+        console.error('❌ Error en decodificación base64:', error);
+        // Intento de recuperación para base64 mal formateados
+        try {
+          // Limpiar caracteres no válidos y reintentar
+          const cleanBase64 = b64data.replace(/[^A-Za-z0-9+/=]/g, '');
+          const bstr = atob(cleanBase64);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          
+          const file = new File([u8arr], filename, { type: mime });
+          console.log(`✅ Archivo recuperado tras limpieza: ${filename}, tamaño: ${file.size} bytes`);
+          return file;
+        } catch (err) {
+          console.error('❌ Falló intento de recuperación de base64:', err);
+          return null;
+        }
+      }
     } catch (error) {
-      console.error('Error convirtiendo base64 a archivo:', error);
+      console.error('❌ Error general convirtiendo base64 a archivo:', error);
       return null;
     }
   }
@@ -193,10 +259,18 @@ class OfflineService {
 
   /**
    * Obtiene todos los registros pendientes de envío
+   * @param {boolean} logDetails - Si es true, imprime detalles de los registros encontrados para debugging
+   * @returns {Promise<Array>} - Arreglo de registros pendientes
    */
-  async obtenerRegistrosPendientes() {
+  async obtenerRegistrosPendientes(logDetails = false) {
     try {
-      await this.initDB();
+      // Asegurar que la BD esté inicializada
+      if (!this.db) {
+        console.log('⚠️ Base de datos no inicializada, inicializando ahora...');
+        await this.initDB();
+      }
+      
+      console.log('🔍 Buscando registros pendientes en IndexedDB...');
       
       const transaction = this.db.transaction([REGISTROS_STORE], 'readonly');
       const store = transaction.objectStore(REGISTROS_STORE);
@@ -205,10 +279,22 @@ class OfflineService {
         const request = store.getAll();
         
         request.onsuccess = () => {
-          resolve(request.result || []);
+          const registros = request.result || [];
+          
+          if (logDetails) {
+            console.log(`✅ Encontrados ${registros.length} registros pendientes:`);
+            registros.forEach((r, idx) => {
+              console.log(`📝 Registro #${idx+1} (ID: ${r.id}): Tipo=${r.tipo || 'actividad'}, Timestamp=${r.timestamp}, Usuario=${r.usuario_id}`);
+            });
+          } else {
+            console.log(`✅ Encontrados ${registros.length} registros pendientes`);
+          }
+          
+          resolve(registros);
         };
         
         request.onerror = () => {
+          console.error('❌ Error en getAll de registros pendientes:', request.error);
           reject(request.error);
         };
       });

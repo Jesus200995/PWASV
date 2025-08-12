@@ -1519,9 +1519,19 @@ function handleSyncEvent(event, online, data) {
       
       // MEJORA: Verificar pendientes y sincronizar de manera más robusta
       // Al recuperar conexión, siempre verificar ambos tipos de pendientes (registros y asistencias)
-      offlineService.contarPendientes(true).then(pendientes => {
+      offlineService.contarPendientes(true).then(async pendientes => {
+        console.log(`📊 Estado de pendientes al recuperar conexión:`, pendientes);
+        
+        // Si hay pendientes, mostrar más detalles para debugging
         if (pendientes.total > 0) {
           console.log(`🔄 Conexión recuperada con ${pendientes.total} pendientes (${pendientes.registros} registros, ${pendientes.asistencias} asistencias), sincronizando automáticamente...`);
+          
+          // Verificar los registros pendientes con más detalle
+          if (pendientes.registros > 0) {
+            // Solicitar detalle de registros pendientes para debugging
+            const registrosPendientes = await offlineService.obtenerRegistrosPendientes(true);
+            console.log(`🧪 DEBUGGING - Registros pendientes encontrados: ${registrosPendientes.length}`);
+          }
           
           // Mostrar un mensaje informativo sobre la sincronización automática
           mensajeAsistencia.value = `Sincronizando ${pendientes.total} registro(s) pendiente(s)...`;
@@ -1529,19 +1539,35 @@ function handleSyncEvent(event, online, data) {
           // MEJORA: Usar un tiempo de espera mayor para asegurar conexión estable
           setTimeout(() => {
             // Usar sincronizarTodo directamente para asegurar sincronización completa
-            syncService.sincronizarTodo().catch(err => {
-              console.error('Error en sincronización automática al recuperar conexión:', err);
-              mensajeAsistencia.value = "Error al sincronizar. Intente nuevamente.";
-              setTimeout(() => {
-                mensajeAsistencia.value = '';
-              }, 5000);
-            });
+            syncService.sincronizarTodo()
+              .then(resultado => {
+                console.log('✅ Resultado de sincronización:', resultado);
+                if (resultado.exitosos > 0) {
+                  mensajeAsistencia.value = `Sincronización exitosa. ${resultado.exitosos} registro(s) enviado(s).`;
+                } else if (resultado.fallidos > 0) {
+                  mensajeAsistencia.value = `Sincronización parcial. ${resultado.fallidos} registro(s) con error.`;
+                }
+                
+                // Verificar nuevamente el estado de pendientes después de sincronizar
+                setTimeout(async () => {
+                  const pendientesDespues = await offlineService.contarPendientes(true);
+                  console.log('📊 Estado de pendientes después de sincronización:', pendientesDespues);
+                }, 1000);
+              })
+              .catch(err => {
+                console.error('❌ Error en sincronización automática al recuperar conexión:', err);
+                mensajeAsistencia.value = "Error al sincronizar. Intente nuevamente.";
+                setTimeout(() => {
+                  mensajeAsistencia.value = '';
+                }, 5000);
+              });
           }, 2500); // Esperar un poco más para asegurar conexión estable
         } else {
           console.log('✅ No hay pendientes que sincronizar al recuperar conexión');
+          // No mostrar mensaje si no hay pendientes
         }
       }).catch(err => {
-        console.error('Error verificando pendientes al recuperar conexión:', err);
+        console.error('❌ Error verificando pendientes al recuperar conexión:', err);
       });
       break;
       
@@ -1559,6 +1585,24 @@ function handleSyncEvent(event, online, data) {
     case 'sync_complete':
       console.log('✅ Sincronización completada:', data);
       
+      // MEJORA: Verificar si hay más pendientes después de la sincronización
+      offlineService.contarPendientes(true).then(pendientesDespues => {
+        console.log('📊 Pendientes después de sincronización:', pendientesDespues);
+        
+        // Si todavía hay pendientes después de la sincronización, puede ser un problema
+        if (pendientesDespues.total > 0) {
+          console.warn(`⚠️ Todavía quedan ${pendientesDespues.total} registros pendientes después de sincronizar`);
+          
+          // Intentar un segundo ciclo de sincronización para registros difíciles
+          if (data && data.exitosos > 0) {
+            console.log('🔄 Intentando un segundo ciclo de sincronización para registros persistentes...');
+            setTimeout(() => {
+              syncService.sincronizarTodo();
+            }, 5000); // Esperar 5 segundos antes de reintentar
+          }
+        }
+      });
+      
       // MEJORA: Siempre actualizar los datos después de una sincronización, incluso si no hay exitosos
       // Esto ayuda a mantener la UI siempre actualizada
       setTimeout(async () => {
@@ -1574,17 +1618,26 @@ function handleSyncEvent(event, online, data) {
           // Mostrar mensaje de éxito según los resultados
           if (data && data.exitosos > 0) {
             mensajeAsistencia.value = `Sincronización exitosa. ${data.exitosos} registro(s) enviado(s).`;
+          } else if (data && data.fallidos > 0) {
+            mensajeAsistencia.value = `Hubo problemas al sincronizar ${data.fallidos} registro(s). Se reintentará automáticamente.`;
           } else {
-            mensajeAsistencia.value = "Sincronización completada. No había registros pendientes.";
+            // Comprobar si realmente no había registros o si hubo un problema
+            offlineService.contarPendientes(true).then(pendientesActuales => {
+              if (pendientesActuales.total > 0) {
+                mensajeAsistencia.value = `Atención: Hay ${pendientesActuales.total} registro(s) pendiente(s) que no se pudieron sincronizar.`;
+              } else {
+                mensajeAsistencia.value = "Sincronización completada. No había registros pendientes.";
+              }
+            });
           }
           
           // Limpiar mensaje después de un tiempo
           setTimeout(() => {
             mensajeAsistencia.value = '';
-          }, 5000);
+          }, 8000); // Aumentar tiempo de visualización
           
         } catch (error) {
-          console.error('Error actualizando datos después de sincronización:', error);
+          console.error('❌ Error actualizando datos después de sincronización:', error);
           mensajeAsistencia.value = "Error actualizando datos después de sincronizar.";
           setTimeout(() => {
             mensajeAsistencia.value = '';

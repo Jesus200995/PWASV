@@ -341,11 +341,26 @@ class SyncService {
 
   /**
    * Envía un registro general al servidor
+   * @param {Object} registro - Objeto con datos del registro a enviar
+   * @returns {Promise<Object>} - Respuesta del servidor
    */
   async enviarRegistro(registro) {
     try {
       console.log('📤 Enviando registro offline:', registro.id);
       console.log('🕐 Timestamp original:', registro.timestamp);
+      console.log('📊 Datos del registro:', {
+        id: registro.id,
+        usuario_id: registro.usuario_id,
+        tipo: registro.tipo || 'actividad',
+        tiene_foto: !!registro.foto_base64,
+        timestamp: registro.timestamp
+      });
+      
+      // Validar datos básicos
+      if (!registro.usuario_id || !registro.latitud || !registro.longitud) {
+        console.error('❌ Registro incompleto, faltan datos básicos');
+        throw new Error('Registro incompleto, faltan datos básicos');
+      }
       
       // Obtener timestamp de sincronización (momento actual)
       const syncTimestamp = new Date().toISOString();
@@ -373,7 +388,9 @@ class SyncService {
       console.log('📤 Enviando tipo de registro:', registro.tipo || 'actividad');
       
       // Convertir foto base64 de vuelta a archivo si existe
+      let archivoAdjunto = false;
       if (registro.foto_base64) {
+        console.log('🖼️ El registro contiene imagen base64, convirtiendo...');
         const archivo = offlineService.base64ToFile(
           registro.foto_base64,
           registro.foto_filename || `foto_${registro.id}.jpg`,
@@ -381,9 +398,18 @@ class SyncService {
         );
         
         if (archivo) {
+          console.log(`🖼️ Imagen convertida correctamente: ${archivo.name}, ${archivo.size} bytes`);
           formData.append('foto', archivo);
+          archivoAdjunto = true;
+        } else {
+          console.error('❌ Error al convertir imagen base64 a archivo');
+          // Continuar sin foto si hay error en la conversión
         }
+      } else {
+        console.warn('⚠️ El registro no contiene imagen base64');
       }
+      
+      console.log(`📤 Enviando registro al backend${archivoAdjunto ? ' con foto adjunta' : ' sin foto'}`);
       
       // Enviar al endpoint de registros con headers adicionales para identificación
       const response = await axios.post(`${API_URL}/registro`, formData, {
@@ -392,7 +418,8 @@ class SyncService {
           'X-Offline-Sync': 'true',
           'X-Sync-Timestamp': syncTimestamp,
           'X-Offline-ID': registro.id.toString(),
-          'X-Registro-Tipo': 'actividad' // Siempre identificar explícitamente como actividad
+          'X-Registro-Tipo': 'actividad', // Siempre identificar explícitamente como actividad
+          'X-Retry-After-Error': 'true' // Indicar que es un intento de reenvío
         },
         timeout: 30000, // 30 segundos de timeout
         maxContentLength: Infinity,
@@ -405,12 +432,30 @@ class SyncService {
     } catch (error) {
       console.error('❌ Error enviando registro:', error);
       
-      // Si es un error de duplicado, lo consideramos éxito (ya existe)
-      if (error.response && error.response.status === 400 && 
-          error.response.data.detail && 
-          error.response.data.detail.includes('ya existe')) {
-        console.log('ℹ️ Registro ya existe en el servidor, marcando como enviado');
-        return { mensaje: 'Registro ya existía en el servidor' };
+      // Verificar error de duplicado de diferentes formas posibles
+      if (error.response && error.response.status === 400) {
+        const errorDetail = error.response.data.detail || '';
+        
+        // Verificar diferentes mensajes de duplicado
+        if (errorDetail.includes('ya existe') || 
+            errorDetail.includes('duplicado') || 
+            errorDetail.includes('duplicate') || 
+            errorDetail.includes('Ya registrado')) {
+          console.log('ℹ️ Registro ya existe en el servidor, marcando como enviado');
+          return { mensaje: 'Registro ya existía en el servidor' };
+        }
+      }
+      
+      // Registrar detalles completos del error para debugging
+      console.error('📄 Detalles completos del error:');
+      if (error.response) {
+        console.error('- Status:', error.response.status);
+        console.error('- Headers:', error.response.headers);
+        console.error('- Data:', error.response.data);
+      } else if (error.request) {
+        console.error('- Sin respuesta del servidor:', error.request);
+      } else {
+        console.error('- Error de configuración:', error.message);
       }
       
       throw error;

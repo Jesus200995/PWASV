@@ -97,19 +97,6 @@
         </div>
       </div>
       
-      <!-- Botón de sincronización manual -->
-      <div v-if="!modoAsistencia && isOnline" class="text-center mb-3">
-        <button
-          @click="forzarSincronizacion"
-          class="text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded-lg py-2 px-4 hover:bg-blue-100 transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Sincronizar datos ahora
-        </button>
-      </div>
-      
       <!-- Mensaje de estado de asistencia -->
       <div v-if="mensajeAsistencia && !modoAsistencia" class="text-center mb-4">
         <div 
@@ -1530,16 +1517,31 @@ function handleSyncEvent(event, online, data) {
       console.log('🌐 Conectado en Home.vue');
       error.value = null;
       
-      // Si acabamos de recuperar la conexión y hay datos pendientes, sincronizar
-      offlineService.contarPendientes().then(pendientes => {
+      // MEJORA: Verificar pendientes y sincronizar de manera más robusta
+      // Al recuperar conexión, siempre verificar ambos tipos de pendientes (registros y asistencias)
+      offlineService.contarPendientes(true).then(pendientes => {
         if (pendientes.total > 0) {
-          console.log(`🔄 Conexión recuperada con ${pendientes.total} pendientes, sincronizando automáticamente...`);
+          console.log(`🔄 Conexión recuperada con ${pendientes.total} pendientes (${pendientes.registros} registros, ${pendientes.asistencias} asistencias), sincronizando automáticamente...`);
+          
+          // Mostrar un mensaje informativo sobre la sincronización automática
+          mensajeAsistencia.value = `Sincronizando ${pendientes.total} registro(s) pendiente(s)...`;
+          
+          // MEJORA: Usar un tiempo de espera mayor para asegurar conexión estable
           setTimeout(() => {
-            syncService.sincronizarManual().catch(err => {
+            // Usar sincronizarTodo directamente para asegurar sincronización completa
+            syncService.sincronizarTodo().catch(err => {
               console.error('Error en sincronización automática al recuperar conexión:', err);
+              mensajeAsistencia.value = "Error al sincronizar. Intente nuevamente.";
+              setTimeout(() => {
+                mensajeAsistencia.value = '';
+              }, 5000);
             });
-          }, 1500); // Esperar un momento para asegurar conexión estable
+          }, 2500); // Esperar un poco más para asegurar conexión estable
+        } else {
+          console.log('✅ No hay pendientes que sincronizar al recuperar conexión');
         }
+      }).catch(err => {
+        console.error('Error verificando pendientes al recuperar conexión:', err);
       });
       break;
       
@@ -1550,37 +1552,54 @@ function handleSyncEvent(event, online, data) {
       
     case 'syncing':
       console.log('🔄 Sincronizando...');
+      // Mostrar mensaje de sincronización en progreso
+      mensajeAsistencia.value = "Sincronizando datos pendientes...";
       break;
       
     case 'sync_complete':
       console.log('✅ Sincronización completada:', data);
-      // Actualizar historial y verificar asistencia después de sincronizar
-      if (data && data.exitosos > 0) {
-        // Esperar un momento para que el backend procese los datos
-        setTimeout(async () => {
-          try {
-            console.log('🔄 Actualizando datos de asistencia después de sincronización');
-            // Forzar actualización de datos de asistencia desde el servidor
-            await verificarAsistenciaHoy(true);
-            
-            // Siempre actualizar el historial completo después de una sincronización exitosa
-            console.log('🔄 Actualizando historial completo después de sincronización');
-            await cargarHistorial(true); // Siempre forzar actualización del historial
-            
-            // Mostrar mensaje de éxito
+      
+      // MEJORA: Siempre actualizar los datos después de una sincronización, incluso si no hay exitosos
+      // Esto ayuda a mantener la UI siempre actualizada
+      setTimeout(async () => {
+        try {
+          console.log('🔄 Actualizando datos después de sincronización');
+          
+          // Primero actualizar datos de asistencia
+          await verificarAsistenciaHoy(true);
+          
+          // Luego actualizar el historial completo
+          await cargarHistorial(true);
+          
+          // Mostrar mensaje de éxito según los resultados
+          if (data && data.exitosos > 0) {
             mensajeAsistencia.value = `Sincronización exitosa. ${data.exitosos} registro(s) enviado(s).`;
-            setTimeout(() => {
-              mensajeAsistencia.value = null;
-            }, 5000);
-          } catch (error) {
-            console.error('Error actualizando datos después de sincronización:', error);
+          } else {
+            mensajeAsistencia.value = "Sincronización completada. No había registros pendientes.";
           }
-        }, 2000); // Esperar 2 segundos para dar tiempo al backend
-      }
+          
+          // Limpiar mensaje después de un tiempo
+          setTimeout(() => {
+            mensajeAsistencia.value = '';
+          }, 5000);
+          
+        } catch (error) {
+          console.error('Error actualizando datos después de sincronización:', error);
+          mensajeAsistencia.value = "Error actualizando datos después de sincronizar.";
+          setTimeout(() => {
+            mensajeAsistencia.value = '';
+          }, 5000);
+        }
+      }, 2000); // Esperar 2 segundos para dar tiempo al backend
       break;
       
     case 'sync_error':
       console.log('❌ Error en sincronización:', data);
+      // Mostrar mensaje de error
+      mensajeAsistencia.value = "Error en la sincronización.";
+      setTimeout(() => {
+        mensajeAsistencia.value = '';
+      }, 5000);
       break;
   }
 }

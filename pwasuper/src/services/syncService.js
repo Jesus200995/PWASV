@@ -22,12 +22,46 @@ class SyncService {
     window.addEventListener('online', async () => {
       console.log('🌐 Conexión recuperada, iniciando sincronización...');
       this.isOnline = true;
+      
+      // Primero notificar a los componentes que estamos online
       this.notifyListeners('online');
       
-      // Esperar un poco para asegurar que la conexión es estable
-      setTimeout(async () => {
-        await this.sincronizarTodo();
-      }, 2000);
+      // Verificar que realmente tengamos conexión real con el backend
+      const reallyConnected = await checkInternetConnection();
+      
+      if (reallyConnected) {
+        console.log('✅ Conexión con backend confirmada, iniciaremos sincronización en breve...');
+        
+        // Esperar un poco más para asegurar que la conexión es estable
+        setTimeout(async () => {
+          try {
+            // Verificar si hay elementos pendientes antes de sincronizar
+            const pendientes = await offlineService.contarPendientes(true);
+            if (pendientes.total > 0) {
+              console.log(`🔄 Iniciando sincronización automática de ${pendientes.total} elementos pendientes (${pendientes.registros} registros, ${pendientes.asistencias} asistencias)`);
+              
+              // Notificar que empieza sincronización
+              this.notifyListeners('syncing', true, pendientes);
+              
+              // Ejecutar sincronización completa
+              await this.sincronizarTodo();
+            } else {
+              console.log('✅ No hay elementos pendientes para sincronizar');
+            }
+          } catch (error) {
+            console.error('❌ Error durante sincronización automática:', error);
+          }
+        }, 3000); // Aumentar tiempo de espera para mayor estabilidad
+      } else {
+        console.log('⚠️ Conexión detectada pero no hay respuesta del backend, esperando...');
+        // Programar un nuevo intento en 30 segundos
+        setTimeout(async () => {
+          if (this.isOnline) {
+            console.log('🔄 Reintentando sincronización después de espera...');
+            await this.sincronizarTodo();
+          }
+        }, 30000);
+      }
     });
 
     // Listener para cuando se pierde la conexión
@@ -37,8 +71,24 @@ class SyncService {
       this.notifyListeners('offline');
     });
 
-    // Verificar conexión inicial
+    // Verificar conexión inicial y establecer polling periódico
     this.verificarConexionInicial();
+    
+    // Establecer verificación periódica de conexión y sincronización
+    // Cada 5 minutos verificamos si hay conexión y pendientes para sincronizar
+    setInterval(async () => {
+      if (this.isOnline && !this.isSyncing) {
+        try {
+          const pendientes = await offlineService.contarPendientes(true);
+          if (pendientes.total > 0) {
+            console.log(`🔄 Verificación periódica: ${pendientes.total} elementos pendientes, intentando sincronizar...`);
+            await this.sincronizarTodo();
+          }
+        } catch (error) {
+          console.error('❌ Error en verificación periódica:', error);
+        }
+      }
+    }, 5 * 60 * 1000); // 5 minutos
   }
 
   /**
@@ -95,7 +145,7 @@ class SyncService {
   async sincronizarTodo() {
     if (this.isSyncing) {
       console.log('⏳ Sincronización ya en progreso...');
-      return;
+      return { mensaje: 'Sincronización ya en progreso', estado: 'en_progreso' };
     }
 
     this.isSyncing = true;
@@ -103,38 +153,53 @@ class SyncService {
     try {
       console.log('🔄 Iniciando sincronización completa...');
       
-      // Verificar que realmente tengamos conexión
-      const reallyOnline = await checkInternetConnection();
+      // Verificar que realmente tengamos conexión con timeout corto
+      const reallyOnline = await checkInternetConnection(5000); // 5 segundos máximo
       if (!reallyOnline) {
         console.log('❌ Verificación de conexión falló, cancelando sincronización');
         this.isOnline = false;
         this.notifyListeners('offline');
-        return;
+        return { mensaje: 'Sin conexión a Internet', estado: 'error' };
       }
 
+      // Forzar actualización de datos pendientes (sin usar caché)
+      const pendientes = await offlineService.contarPendientes(true);
+      
       // Obtener datos pendientes
       const registrosPendientes = await offlineService.obtenerRegistrosPendientes();
       const asistenciasPendientes = await offlineService.obtenerAsistenciasPendientes();
       
       const totalPendientes = registrosPendientes.length + asistenciasPendientes.length;
       
+      // Validar que realmente haya pendientes (doble verificación)
       if (totalPendientes === 0) {
         console.log('✅ No hay datos pendientes para sincronizar');
-        return;
+        // Notificar igualmente para actualizar interfaces
+        this.notifyListeners('sync_complete', true, { exitosos: 0, fallidos: 0, total: 0 });
+        return { mensaje: 'No hay datos pendientes', estado: 'completado' };
       }
       
       console.log(`📊 Sincronizando ${totalPendientes} elementos (${registrosPendientes.length} registros, ${asistenciasPendientes.length} asistencias)`);
       
-      // Notificar inicio de sincronización
-      this.notifyListeners('syncing', true, totalPendientes);
+      // Notificar inicio de sincronización con detalles
+      this.notifyListeners('syncing', true, {
+        registros: registrosPendientes.length,
+        asistencias: asistenciasPendientes.length,
+        total: totalPendientes
+      });
       
       let exitosos = 0;
       let fallidos = 0;
       
-      // Sincronizar registros generales
+      // MEJORA: Sincronizar registros generales con mejor gestión de errores
       for (const registro of registrosPendientes) {
         try {
+          console.log(`🔄 Procesando registro ID: ${registro.id}, timestamp: ${registro.timestamp}, tipo: ${registro.tipo || 'actividad'}`);
+          
+          // Intentar enviar el registro
           await this.enviarRegistro(registro);
+          
+          // Si llega aquí, el envío fue exitoso, eliminar de pendientes
           await offlineService.eliminarRegistro(registro.id);
           exitosos++;
           
@@ -143,19 +208,61 @@ class SyncService {
             procesados: exitosos + fallidos,
             total: totalPendientes,
             exitosos,
-            fallidos
+            fallidos,
+            tipo: 'registro'
           });
           
         } catch (error) {
           console.error(`❌ Error enviando registro ${registro.id}:`, error);
-          fallidos++;
+          
+          // Si el error indica que el registro ya existe, lo consideramos exitoso
+          if (error.response && error.response.status === 400 && 
+              error.response.data && error.response.data.detail && 
+              error.response.data.detail.includes('ya existe')) {
+            
+            console.log(`ℹ️ El registro ${registro.id} ya existe en el servidor, marcando como sincronizado`);
+            await offlineService.eliminarRegistro(registro.id);
+            exitosos++;
+          } else {
+            // Incrementar contador de fallidos
+            fallidos++;
+            
+            // Actualizar el registro con información del error para retentarlo después
+            try {
+              await offlineService.actualizarEstadoSincronizacion(
+                registro.id, 
+                'registro',
+                {
+                  ultimo_error: error.message || 'Error desconocido',
+                  intentos: (registro.intentos || 0) + 1,
+                  ultima_sincronizacion: new Date().toISOString()
+                }
+              );
+            } catch (err) {
+              console.error('Error actualizando estado de sincronización:', err);
+            }
+          }
+          
+          // Notificar progreso incluso con error
+          this.notifyListeners('sync_progress', true, {
+            procesados: exitosos + fallidos,
+            total: totalPendientes,
+            exitosos,
+            fallidos,
+            tipo: 'registro'
+          });
         }
       }
       
-      // Sincronizar asistencias
+      // MEJORA: Sincronizar asistencias con mejor gestión de errores
       for (const asistencia of asistenciasPendientes) {
         try {
+          console.log(`🔄 Procesando asistencia ID: ${asistencia.id}, tipo: ${asistencia.tipo}, timestamp: ${asistencia.timestamp}`);
+          
+          // Intentar enviar la asistencia
           await this.enviarAsistencia(asistencia);
+          
+          // Si llega aquí, el envío fue exitoso, eliminar de pendientes
           await offlineService.eliminarAsistencia(asistencia.id);
           exitosos++;
           
@@ -164,22 +271,69 @@ class SyncService {
             procesados: exitosos + fallidos,
             total: totalPendientes,
             exitosos,
-            fallidos
+            fallidos,
+            tipo: 'asistencia'
           });
           
         } catch (error) {
-          console.error(`❌ Error enviando asistencia ${asistencia.id}:`, error);
-          fallidos++;
+          console.error(`❌ Error enviando asistencia ${asistencia.id} (${asistencia.tipo}):`, error);
+          
+          // Si el error indica que la asistencia ya existe, la consideramos exitosa
+          if (error.response && error.response.status === 400 && 
+              error.response.data && error.response.data.detail && 
+              (error.response.data.detail.includes('Ya existe') || 
+               error.response.data.detail.includes('ya registrada'))) {
+            
+            console.log(`ℹ️ La asistencia ${asistencia.id} (${asistencia.tipo}) ya existe en el servidor, marcando como sincronizada`);
+            await offlineService.eliminarAsistencia(asistencia.id);
+            exitosos++;
+          } else {
+            // Incrementar contador de fallidos
+            fallidos++;
+            
+            // Actualizar la asistencia con información del error para retentarlo después
+            try {
+              await offlineService.actualizarEstadoSincronizacion(
+                asistencia.id, 
+                'asistencia',
+                {
+                  ultimo_error: error.message || 'Error desconocido',
+                  intentos: (asistencia.intentos || 0) + 1,
+                  ultima_sincronizacion: new Date().toISOString()
+                }
+              );
+            } catch (err) {
+              console.error('Error actualizando estado de sincronización:', err);
+            }
+          }
+          
+          // Notificar progreso incluso con error
+          this.notifyListeners('sync_progress', true, {
+            procesados: exitosos + fallidos,
+            total: totalPendientes,
+            exitosos,
+            fallidos,
+            tipo: 'asistencia'
+          });
         }
       }
       
       // Notificar resultado final
-      console.log(`✅ Sincronización completada: ${exitosos} exitosos, ${fallidos} fallidos`);
-      this.notifyListeners('sync_complete', true, { exitosos, fallidos, total: totalPendientes });
+      const resultado = { exitosos, fallidos, total: totalPendientes };
+      console.log(`✅ Sincronización completada: ${exitosos} exitosos, ${fallidos} fallidos de ${totalPendientes} totales`);
+      this.notifyListeners('sync_complete', true, resultado);
+      
+      // Retornar información detallada
+      return {
+        mensaje: `Sincronización completada: ${exitosos} exitosos, ${fallidos} fallidos`,
+        estado: 'completado',
+        ...resultado
+      };
       
     } catch (error) {
       console.error('❌ Error durante la sincronización:', error);
       this.notifyListeners('sync_error', true, error);
+      return { mensaje: `Error en sincronización: ${error.message || 'Error desconocido'}`, estado: 'error' };
     } finally {
       this.isSyncing = false;
     }

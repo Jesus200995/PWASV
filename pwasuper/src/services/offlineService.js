@@ -293,6 +293,60 @@ class OfflineService {
   }
 
   /**
+   * Actualiza el estado de sincronización con información adicional
+   * @param {number} id - ID del registro o asistencia
+   * @param {string} tipo - 'registro' o 'asistencia'
+   * @param {object} datos - Datos adicionales para actualizar (intentos, errores, etc.)
+   */
+  async actualizarEstadoSincronizacion(id, tipo = 'registro', datos = {}) {
+    try {
+      await this.initDB();
+      
+      const storeName = tipo === 'asistencia' ? ASISTENCIAS_STORE : REGISTROS_STORE;
+      const transaction = this.db.transaction([storeName], 'readwrite');
+      const store = transaction.objectStore(storeName);
+      
+      return new Promise((resolve, reject) => {
+        // Primero obtener el registro
+        const getRequest = store.get(id);
+        
+        getRequest.onsuccess = () => {
+          const record = getRequest.result;
+          if (record) {
+            // Actualizar el registro con los nuevos datos
+            const updatedRecord = {
+              ...record,
+              ...datos,
+              ultima_actualizacion: new Date().toISOString()
+            };
+            
+            // Guardar el registro actualizado
+            const putRequest = store.put(updatedRecord);
+            
+            putRequest.onsuccess = () => {
+              console.log(`✅ Estado de sincronización actualizado para ${tipo} ID:`, id);
+              resolve(updatedRecord);
+            };
+            
+            putRequest.onerror = () => {
+              reject(putRequest.error);
+            };
+          } else {
+            reject(new Error(`${tipo} con ID ${id} no encontrado`));
+          }
+        };
+        
+        getRequest.onerror = () => {
+          reject(getRequest.error);
+        };
+      });
+    } catch (error) {
+      console.error(`❌ Error actualizando estado de sincronización para ${tipo}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Elimina un registro después de enviarlo exitosamente
    */
   async eliminarRegistro(id) {

@@ -312,52 +312,144 @@ async def registrar(
     longitud: float = Form(...),
     descripcion: str = Form(""),
     foto: UploadFile = File(...),
-    timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
+    timestamp_offline: str = Form(None),  # Campo para registro offline
+    es_registro_offline: str = Form(None),  # Indica si viene de sincronización offline
+    sync_timestamp: str = Form(None),  # Timestamp de sincronización
+    tipo: str = Form("actividad"),  # Tipo de registro (siempre 'actividad' para registros)
+    id_offline: str = Form(None)  # ID único offline para evitar duplicados
 ):
     print(f"🔍 REGISTRO - Datos recibidos:")
     print(f"   usuario_id: {usuario_id}")
     print(f"   latitud: {latitud}")
     print(f"   longitud: {longitud}")
     print(f"   descripcion: {descripcion}")
-    print(f"   foto: {foto.filename}")
+    print(f"   foto: {foto.filename} ({foto.size} bytes)")
     print(f"   timestamp_offline: {timestamp_offline}")
+    print(f"   es_registro_offline: {es_registro_offline}")
+    print(f"   tipo: {tipo}")
+    print(f"   id_offline: {id_offline}")
     
-    # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
-    if timestamp_offline:
-        try:
-            # Convertir string ISO a datetime
-            fecha_hora = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
-            print(f"📅 ✅ Usando timestamp offline: {fecha_hora}")
-            # Usar el timestamp offline también para el nombre del archivo
-            timestamp_for_filename = fecha_hora.strftime('%Y%m%d%H%M%S')
-        except Exception as e:
-            print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
+    try:
+        # Validar que sea un registro de actividad
+        if tipo != "actividad":
+            print(f"⚠️ ADVERTENCIA: Tipo de registro inesperado: {tipo}")
+        
+        # Verificar si es un intento de duplicado usando id_offline
+        if id_offline and es_registro_offline == 'true':
+            print(f"🔍 Verificando si el registro offline {id_offline} ya existe...")
+            cursor.execute(
+                "SELECT id FROM registros WHERE descripcion LIKE %s AND usuario_id = %s",
+                (f"%{id_offline}%", usuario_id)
+            )
+            existe = cursor.fetchone()
+            if existe:
+                print(f"⚠️ Registro offline {id_offline} ya existe, evitando duplicado")
+                return {
+                    "status": "ok", 
+                    "foto_url": "duplicado",
+                    "mensaje": "El registro ya existe en la base de datos",
+                    "duplicado": True
+                }
+        
+        # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
+        if timestamp_offline:
+            try:
+                # Convertir string ISO a datetime
+                fecha_hora = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
+                print(f"📅 ✅ Usando timestamp offline: {fecha_hora}")
+                # Usar el timestamp offline también para el nombre del archivo
+                timestamp_for_filename = fecha_hora.strftime('%Y%m%d_%H%M%S')
+            except Exception as e:
+                print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
+                fecha_hora = datetime.utcnow()
+                timestamp_for_filename = fecha_hora.strftime('%Y%m%d_%H%M%S')
+        else:
             fecha_hora = datetime.utcnow()
-            timestamp_for_filename = fecha_hora.strftime('%Y%m%d%H%M%S')
-    else:
-        fecha_hora = datetime.utcnow()
-        timestamp_for_filename = fecha_hora.strftime('%Y%m%d%H%M%S')
-        print(f"📅 ⏰ Usando timestamp actual: {fecha_hora}")
+            timestamp_for_filename = fecha_hora.strftime('%Y%m%d_%H%M%S')
+            print(f"📅 ⏰ Usando timestamp actual: {fecha_hora}")
 
-    # Guardar la foto en disco usando el timestamp correcto
-    ext = os.path.splitext(foto.filename)[1]
-    nombre_archivo = f"{usuario_id}_{timestamp_for_filename}{ext}"
-    ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
-    print(f"📁 Guardando foto como: {nombre_archivo}")
-    
-    with open(ruta_archivo, "wb") as f:
-        contenido = await foto.read()
-        f.write(contenido)
+        # MEJORA: Verificar que la foto sea válida antes de procesarla
+        if foto.size == 0:
+            raise HTTPException(status_code=400, detail="La foto está vacía o corrupta")
+        
+        # MEJORA: Validar tipo de archivo
+        if not foto.filename or not foto.filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp')):
+            print(f"⚠️ Tipo de archivo no válido: {foto.filename}")
+            # Asignar extensión por defecto si no tiene
+            ext = '.jpg'
+        else:
+            ext = os.path.splitext(foto.filename)[1].lower()
 
-    # Guardar registro en la base
-    cursor.execute(
-        "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora) VALUES (%s, %s, %s, %s, %s, %s)",
-        (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora)
-    )
-    conn.commit()
-    print(f"✅ Registro guardado en BD con fecha_hora: {fecha_hora}")
+        # Guardar la foto en disco usando el timestamp correcto y tipo de registro
+        nombre_archivo = f"actividad_{usuario_id}_{timestamp_for_filename}{ext}"
+        ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
+        print(f"📁 Guardando foto como: {nombre_archivo}")
+        
+        # MEJORA: Crear directorio si no existe
+        os.makedirs(FOTOS_DIR, exist_ok=True)
+        
+        # Leer y guardar foto con verificación
+        try:
+            contenido = await foto.read()
+            print(f"📸 Leyendo foto: {len(contenido)} bytes")
+            
+            if len(contenido) == 0:
+                raise HTTPException(status_code=400, detail="La foto no tiene contenido")
+            
+            with open(ruta_archivo, "wb") as f:
+                f.write(contenido)
+            
+            # Verificar que se guardó correctamente
+            if not os.path.exists(ruta_archivo):
+                raise Exception("La foto no se guardó correctamente")
+                
+            print(f"✅ Foto guardada exitosamente: {ruta_archivo}")
+            
+        except Exception as e:
+            print(f"❌ Error guardando foto: {e}")
+            raise HTTPException(status_code=500, detail=f"Error guardando imagen: {str(e)}")
 
-    return {"status": "ok", "foto_url": ruta_archivo}
+        # MEJORA: Añadir información adicional en la descripción para identificar registros offline
+        descripcion_final = descripcion
+        if es_registro_offline == 'true':
+            descripcion_final = f"{descripcion} [OFFLINE-ID: {id_offline}]" if id_offline else f"{descripcion} [OFFLINE]"
+
+        # Guardar registro en la base con información adicional
+        try:
+            cursor.execute(
+                """INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora) 
+                   VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""",
+                (usuario_id, latitud, longitud, descripcion_final, ruta_archivo, fecha_hora)
+            )
+            
+            registro_id = cursor.fetchone()[0]
+            conn.commit()
+            print(f"✅ Registro guardado en BD con ID: {registro_id}, fecha_hora: {fecha_hora}")
+
+            return {
+                "status": "ok", 
+                "foto_url": ruta_archivo,
+                "registro_id": registro_id,
+                "timestamp": fecha_hora.isoformat(),
+                "tipo": "actividad",
+                "mensaje": "Registro de actividad guardado exitosamente"
+            }
+            
+        except psycopg2.IntegrityError as e:
+            conn.rollback()
+            print(f"❌ Error de integridad en BD: {e}")
+            raise HTTPException(status_code=400, detail="Error de integridad: posible registro duplicado")
+        
+        except Exception as e:
+            conn.rollback()
+            print(f"❌ Error guardando en BD: {e}")
+            raise HTTPException(status_code=500, detail=f"Error guardando en base de datos: {str(e)}")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error general en registro: {e}")
+        raise HTTPException(status_code=500, detail=f"Error procesando registro: {str(e)}")
 
 # ENDPOINT CORREGIDO - Esta es la parte importante que debe actualizarse
 @app.get("/registros")
@@ -371,12 +463,19 @@ def obtener_registros(usuario_id: int = None):
         # Usar cursor directo - NO usar cursor_factory aquí
         if usuario_id:
             cursor.execute(
-                "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC LIMIT 50",
+                """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora 
+                   FROM registros 
+                   WHERE usuario_id = %s 
+                   ORDER BY fecha_hora DESC 
+                   LIMIT 100""",
                 (usuario_id,)
             )
         else:
             cursor.execute(
-                "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros ORDER BY fecha_hora DESC LIMIT 50"
+                """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora 
+                   FROM registros 
+                   ORDER BY fecha_hora DESC 
+                   LIMIT 100"""
             )
         
         resultados = cursor.fetchall()
@@ -392,12 +491,14 @@ def obtener_registros(usuario_id: int = None):
                 "longitud": float(row[3]) if row[3] else None,
                 "descripcion": row[4],
                 "foto_url": row[5],
-                "fecha_hora": row[6].isoformat() if row[6] else None
+                "fecha_hora": row[6].isoformat() if row[6] else None,
+                "timestamp": row[6].isoformat() if row[6] else None,  # Compatibilidad con frontend
+                "tipo": "actividad"  # Todos los registros son de tipo actividad
             }
             registros.append(registro)
         
-        print(f"✅ Registros procesados correctamente")
-        return {"registros": registros}
+        print(f"✅ Registros procesados correctamente para usuario {usuario_id}")
+        return registros  # Devolver directamente la lista para compatibilidad con frontend
         
     except psycopg2.Error as e:
         print(f"❌ Error de PostgreSQL: {e}")

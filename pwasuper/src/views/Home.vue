@@ -1116,6 +1116,7 @@ async function enviarRegistro() {
         foto: fotoRegistro.value,
         offline: true, // Marcador para indicar que está pendiente
         backend: null,
+        tipo: 'actividad' // Especificar explícitamente el tipo de registro
       });
 
       // Limpiar campos
@@ -1146,11 +1147,13 @@ async function enviarRegistro() {
     formData.append("longitud", longitudRegistro.value);
     formData.append("descripcion", descripcionRegistro.value);
     formData.append("foto", archivoFotoRegistro.value);
+    formData.append("tipo", "actividad"); // Especificar explícitamente que es un registro de actividad
 
     // Enviar datos al backend
     const response = await axios.post(`${API_URL}/registro`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
+        "X-Registro-Tipo": "actividad" // Identificar explícitamente el tipo de registro
       },
       timeout: 15000,
       maxContentLength: Infinity,
@@ -1166,6 +1169,7 @@ async function enviarRegistro() {
       foto: fotoRegistro.value,
       offline: false, // Enviado exitosamente
       backend: response.data,
+      tipo: 'actividad' // Especificar explícitamente el tipo de registro
     });
 
     // Limpiar campos
@@ -1367,7 +1371,102 @@ function guardarEstadoAsistencia() {
   localStorage.setItem(`asistencia_ultima_fecha_${user.value.id}`, fechaHoy);
 }
 
-// Comprobar si el usuario está autenticado y verificar conexión
+/**
+ * Carga los registros de actividades para el historial
+ * @param {boolean} forceRefresh - Si es true, fuerza una actualización desde el servidor
+ */
+async function cargarHistorial(forceRefresh = false) {
+  try {
+    console.log(`🔄 Cargando historial de registros${forceRefresh ? ' (forzando actualización)' : ''}...`);
+    
+    // Verificar conexión a internet
+    const isConnected = await checkInternetConnection();
+    if (!isConnected) {
+      console.log('📴 Sin conexión, mostrando solo registros offline');
+      // Mostrar registros offline si hay
+      const pendientes = await offlineService.obtenerResumenPendientes();
+      if (pendientes && pendientes.registros && pendientes.registros.items) {
+        historial.value = pendientes.registros.items.map(r => ({
+          fecha: new Date(r.timestamp).toLocaleString(),
+          latitud: r.latitud,
+          longitud: r.longitud,
+          descripcion: r.descripcion || 'Sin descripción',
+          offline: true,
+          tipo: r.tipo || 'actividad'
+        }));
+      }
+      return;
+    }
+    
+    // Si hay conexión, intentar obtener del servidor
+    const cacheParam = forceRefresh ? `&_nocache=${Date.now()}` : '';
+    const response = await axios.get(
+      `${API_URL}/registros?usuario_id=${user.value.id}${cacheParam}`, 
+      {
+        headers: {
+          'Cache-Control': forceRefresh ? 'no-cache, no-store, must-revalidate' : 'no-cache',
+          'Pragma': 'no-cache',
+          'X-Force-Refresh': forceRefresh ? 'true' : 'false'
+        }
+      }
+    );
+    
+    // Procesamos los registros del servidor
+    const registrosOnline = response.data.map(r => ({
+      fecha: new Date(r.timestamp).toLocaleString(),
+      latitud: r.latitud,
+      longitud: r.longitud,
+      descripcion: r.descripcion || 'Sin descripción',
+      foto: r.foto_url,
+      offline: false,
+      backend: r,
+      tipo: r.tipo || 'actividad'
+    }));
+    
+    // Obtenemos registros pendientes offline
+    const pendientes = await offlineService.obtenerResumenPendientes();
+    let registrosOffline = [];
+    
+    if (pendientes && pendientes.registros && pendientes.registros.items) {
+      registrosOffline = pendientes.registros.items.map(r => ({
+        fecha: new Date(r.timestamp).toLocaleString(),
+        latitud: r.latitud,
+        longitud: r.longitud,
+        descripcion: r.descripcion || 'Sin descripción',
+        offline: true,
+        tipo: r.tipo || 'actividad'
+      }));
+    }
+    
+    // Combinar registros online y offline, los offline primero
+    historial.value = [...registrosOffline, ...registrosOnline];
+    
+    // Ordenar por fecha más reciente primero
+    historial.value.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    
+    console.log(`✅ Historial actualizado: ${historial.value.length} registros (${registrosOffline.length} offline, ${registrosOnline.length} online)`);
+    
+  } catch (error) {
+    console.error('❌ Error cargando historial:', error);
+    // En caso de error, intentar mostrar datos offline
+    try {
+      const pendientes = await offlineService.obtenerResumenPendientes();
+      if (pendientes && pendientes.registros && pendientes.registros.items) {
+        historial.value = pendientes.registros.items.map(r => ({
+          fecha: new Date(r.timestamp).toLocaleString(),
+          latitud: r.latitud,
+          longitud: r.longitud,
+          descripcion: r.descripcion || 'Sin descripción',
+          offline: true,
+          tipo: r.tipo || 'actividad'
+        }));
+      }
+    } catch (err) {
+      console.error('Error cargando datos offline:', err);
+    }
+  }
+}
+
 // Forzar sincronización manual
 async function forzarSincronizacion() {
   try {
@@ -1379,6 +1478,17 @@ async function forzarSincronizacion() {
     
     console.log('🔄 Forzando sincronización manual');
     await syncService.sincronizarManual();
+    
+    // Esperar un poco para que el backend procese los datos y luego actualizar el historial
+    setTimeout(async () => {
+      try {
+        await cargarHistorial(true); // Forzar actualización del historial
+        console.log('✅ Historial actualizado después de sincronización manual');
+      } catch (err) {
+        console.error('Error actualizando historial después de sincronización manual:', err);
+      }
+    }, 2000);
+    
   } catch (error) {
     console.error('Error al forzar sincronización:', error);
     error.value = `Error al sincronizar: ${error.message}`;
@@ -1440,6 +1550,14 @@ function handleSyncEvent(event, online, data) {
                 }
                 return h;
               });
+              
+              // Actualizar la lista de historial desde el servidor para refrescar todo
+              try {
+                console.log('🔄 Actualizando historial completo desde el servidor');
+                cargarHistorial(true); // Pasar true para forzar actualización
+              } catch (histError) {
+                console.error('Error actualizando historial completo:', histError);
+              }
             }
             
             // Mostrar mensaje de éxito
@@ -1478,6 +1596,9 @@ onMounted(async () => {
   if (!isOnline.value) {
     error.value = getOfflineMessage();
   }
+  
+  // Cargar historial de registros
+  cargarHistorial();
   
   // Verificar estado del servicio de geolocalización
   console.log('🔍 Verificando servicio de geolocalización...');

@@ -120,7 +120,7 @@ class OfflineService {
         foto_type: archivo ? archivo.type : null,
         timestamp: new Date().toISOString(), // Hora de creación offline
         sync_timestamp: null, // Se completará cuando se sincronice
-        tipo: 'registro_general'
+        tipo: 'actividad' // Especificar explícitamente que es un registro de actividad
       };
 
       const transaction = this.db.transaction([REGISTROS_STORE], 'readwrite');

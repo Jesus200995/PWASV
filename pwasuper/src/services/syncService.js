@@ -212,9 +212,11 @@ class SyncService {
       formData.append('sync_timestamp', syncTimestamp);
       formData.append('origen_sync', 'pwa_super');
       formData.append('id_offline', registro.id.toString());
+      formData.append('tipo', registro.tipo || 'actividad'); // Asegurar que se envía el tipo 'actividad'
       
       console.log('📤 Enviando timestamp_offline:', registro.timestamp);
       console.log('📤 Enviando sync_timestamp:', syncTimestamp);
+      console.log('📤 Enviando tipo de registro:', registro.tipo || 'actividad');
       
       // Convertir foto base64 de vuelta a archivo si existe
       if (registro.foto_base64) {
@@ -235,7 +237,8 @@ class SyncService {
           'Content-Type': 'multipart/form-data',
           'X-Offline-Sync': 'true',
           'X-Sync-Timestamp': syncTimestamp,
-          'X-Offline-ID': registro.id.toString()
+          'X-Offline-ID': registro.id.toString(),
+          'X-Registro-Tipo': registro.tipo || 'actividad' // Identificar explícitamente como actividad
         },
         timeout: 30000, // 30 segundos de timeout
         maxContentLength: Infinity,

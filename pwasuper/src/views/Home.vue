@@ -15,19 +15,19 @@
         <button
           @click="iniciarAsistencia('entrada')"
           :disabled="entradaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden flex flex-col items-center justify-center p-6 rounded-xl transition-all duration-300 transform"
+          class="relative overflow-hidden flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 transform"
           :class="{
             'bg-green-500 text-white shadow-lg hover:bg-green-600 hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
             'bg-gray-300 text-gray-500 cursor-not-allowed': entradaMarcada || verificandoAsistencia
           }"
         >
           <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-current"></div>
+            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span class="font-semibold text-lg">
+          <span class="font-semibold text-base">
             <span v-if="asistenciaHoy && asistenciaHoy.entrada">
               Entrada: {{ formatearHora(asistenciaHoy.entrada) }}
             </span>
@@ -41,9 +41,9 @@
           <span v-if="entradaMarcada" class="text-xs mt-1 opacity-75">✓ Registrada</span>
           
           <!-- Mostrar resumen de entrada si está marcada -->
-          <div v-if="datosEntrada.hora" class="mt-2 text-center">
+          <div v-if="datosEntrada.hora" class="mt-1 text-center">
             <p class="text-xs opacity-75">Entrada registrada:</p>
-            <p class="text-sm font-mono font-bold">{{ datosEntrada.hora }}</p>
+            <p class="text-xs font-mono font-bold">{{ datosEntrada.hora }}</p>
             <p class="text-xs opacity-75 mt-1">{{ datosEntrada.descripcion }}</p>
           </div>
         </button>
@@ -52,19 +52,19 @@
         <button
           @click="iniciarAsistencia('salida')"
           :disabled="!entradaMarcada || salidaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden flex flex-col items-center justify-center p-6 rounded-xl transition-all duration-300 transform"
+          class="relative overflow-hidden flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 transform"
           :class="{
             'bg-red-500 text-white shadow-lg hover:bg-red-600 hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
             'bg-gray-300 text-gray-500 cursor-not-allowed': !entradaMarcada || salidaMarcada || verificandoAsistencia
           }"
         >
           <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-current"></div>
+            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span class="font-semibold text-lg">
+          <span class="font-semibold text-base">
             <span v-if="asistenciaHoy && asistenciaHoy.salida">
               Salida: {{ formatearHora(asistenciaHoy.salida) }}
             </span>
@@ -79,9 +79,9 @@
           <span v-else-if="!entradaMarcada" class="text-xs mt-1 opacity-75">Marca entrada primero</span>
           
           <!-- Mostrar resumen de salida si está marcada -->
-          <div v-if="datosSalida.hora" class="mt-2 text-center">
+          <div v-if="datosSalida.hora" class="mt-1 text-center">
             <p class="text-xs opacity-75">Salida registrada:</p>
-            <p class="text-sm font-mono font-bold">{{ datosSalida.hora }}</p>
+            <p class="text-xs font-mono font-bold">{{ datosSalida.hora }}</p>
             <p class="text-xs opacity-75 mt-1">{{ datosSalida.descripcion }}</p>
           </div>
         </button>
@@ -93,7 +93,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
-          <strong>Importante:</strong> Al marcar entrada inicia su jornada laboral. No marque entrada y salida al mismo tiempo, ya que al marcar salida finaliza oficialmente su jornada laboral del día.
+          <strong>Aviso:</strong> El registro de entrada marca el inicio oficial de su jornada laboral. Se recomienda marcar salida únicamente al finalizar sus actividades, ya que esto concluye formalmente su jornada del día.
         </div>
       </div>
       

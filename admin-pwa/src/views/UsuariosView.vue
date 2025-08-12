@@ -2554,9 +2554,11 @@ const logout = () => {
   background: linear-gradient(135deg, #ffffff 0%, #fdfdfd 100%);
   border-radius: clamp(16px, 2.5vw, 24px);
   max-width: clamp(320px, 90vw, 480px);
-  max-height: clamp(500px, 85vh, 700px);
+  max-height: 90vh; /* Aumentar altura máxima para aprovechar más espacio en pantalla */
   width: 100%;
   overflow: hidden;
+  display: flex;
+  flex-direction: column; /* Organizar contenido en columna para permitir scroll correcto */
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.15),
     0 10px 40px rgba(0, 0, 0, 0.08);
@@ -2584,6 +2586,7 @@ const logout = () => {
   background: linear-gradient(135deg, 
     rgba(76, 175, 80, 0.05) 0%, 
     rgba(76, 175, 80, 0.02) 100%);
+  flex-shrink: 0; /* Evita que el encabezado se encoja cuando hay scroll */
 }
 
 .modal-title-section {
@@ -2634,27 +2637,36 @@ const logout = () => {
 
 .modal-body-modern {
   padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px) clamp(16px, 4vw, 24px);
-  max-height: calc(85vh - clamp(60px, 12vw, 80px));
-  overflow-y: auto;
+  flex: 1; /* Toma el espacio restante en el contenedor flex */
+  overflow-y: auto; /* Scroll vertical automático */
+  overscroll-behavior: contain; /* Mejora el comportamiento del scroll */
+  font-size: 14px; /* Reducir tamaño de fuente para mejor visualización */
+  min-height: 0; /* Fuerza el scroll en contenedor flex */
 }
 
 .modal-body-modern::-webkit-scrollbar {
-  width: 4px;
+  width: 8px; /* Ancho más grande para mejor visibilidad y usabilidad */
+  height: 8px;
 }
 
 .modal-body-modern::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 2px;
+  border-radius: 4px;
+  margin: 2px 0;
 }
 
 .modal-body-modern::-webkit-scrollbar-thumb {
   background: #4CAF50;
-  border-radius: 2px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .user-details-grid {
   display: grid;
   gap: clamp(6px, 1.5vw, 10px);
+  padding-right: 4px; /* Espacio para el scrollbar */
+  overflow-anchor: none; /* Mejora el comportamiento del scroll */
 }
 
 .detail-card {
@@ -2662,12 +2674,13 @@ const logout = () => {
     rgba(248, 255, 254, 0.6) 0%, 
     rgba(240, 255, 240, 0.4) 100%);
   border: 1px solid rgba(76, 175, 80, 0.15);
-  border-radius: clamp(8px, 2vw, 12px);
-  padding: clamp(8px, 2vw, 12px) clamp(10px, 2.5vw, 14px);
+  border-radius: clamp(6px, 1.5vw, 10px);
+  padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 12px);
   display: flex;
   align-items: flex-start;
-  gap: clamp(6px, 1.5vw, 10px);
+  gap: clamp(4px, 1vw, 8px);
   transition: all 0.3s ease;
+  margin-bottom: 6px; /* Espacio reducido entre tarjetas */
 }
 
 .detail-card:hover {
@@ -2703,20 +2716,20 @@ const logout = () => {
 
 .detail-label {
   display: block;
-  font-size: clamp(9px, 2vw, 11px);
+  font-size: clamp(8px, 1.8vw, 10px);
   font-weight: 600;
   color: #4CAF50;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: clamp(2px, 0.5vw, 4px);
+  letter-spacing: 0.2px;
+  margin-bottom: 2px;
 }
 
 .detail-value {
   display: block;
-  font-size: clamp(11px, 2.5vw, 14px);
+  font-size: clamp(10px, 2vw, 12px);
   font-weight: 500;
   color: #2E7D32;
-  line-height: 1.3;
+  line-height: 1.2;
   word-break: break-word;
 }
 
@@ -2730,6 +2743,9 @@ const logout = () => {
   font-family: 'Courier New', monospace;
   letter-spacing: 0.5px;
   color: #0277BD;
+  font-weight: 600; /* Más legible */
+  white-space: nowrap; /* Evitar saltos de línea en el número */
+  font-size: clamp(10px, 2vw, 12px); /* Tamaño consistente */
 }
 
 /* Estilos especiales para el campo de contraseña */

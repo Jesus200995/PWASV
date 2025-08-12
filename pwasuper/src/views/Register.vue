@@ -87,6 +87,75 @@
         </div>
         
         <div>
+          <label for="telefono" class="block text-sm font-medium text-gray-700">Número de teléfono *</label>
+          <div class="relative mt-1">
+            <!-- Selector de código de país -->
+            <div class="absolute inset-y-0 left-0 flex items-center country-selector">
+              <button 
+                type="button"
+                @click="showCountrySelector = !showCountrySelector"
+                class="flex items-center pl-3 pr-2 border-r border-gray-300 h-full focus:outline-none focus:ring-2 focus:ring-primary rounded-l-md bg-gray-50 country-selector"
+              >
+                <span class="mr-1 text-lg">{{ paises.find(p => p.codigo === form.codigoPais)?.bandera || '🌎' }}</span>
+                <span>{{ form.codigoPais }}</span>
+                <svg class="w-4 h-4 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Campo de entrada del número -->
+            <input 
+              v-model="form.telefono" 
+              id="telefono" 
+              name="telefono" 
+              type="tel" 
+              required
+              maxlength="10"
+              pattern="[0-9]{10}"
+              placeholder="10 dígitos" 
+              class="pl-24 form-input"
+              @input="validatePhone"
+            />
+            
+            <!-- Dropdown para selección de país -->
+            <div 
+              v-if="showCountrySelector" 
+              class="absolute z-50 w-64 top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto country-selector"
+              style="max-height: 250px;"
+            >
+              <!-- Barra de búsqueda -->
+              <div class="sticky top-0 bg-white p-2 border-b border-gray-200">
+                <input 
+                  type="text"
+                  v-model="countrySearch"
+                  placeholder="Buscar país..."
+                  class="w-full px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  @click="$event.stopPropagation()"
+                />
+              </div>
+              
+              <ul class="py-1">
+                <li 
+                  v-for="pais in filteredCountries" 
+                  :key="pais.codigo"
+                  @click="selectCountry(pais)"
+                  class="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer country-selector"
+                >
+                  <span class="text-lg mr-2">{{ pais.bandera }}</span>
+                  <span>{{ pais.nombre }}</span>
+                  <span class="ml-auto text-gray-500">{{ pais.codigo }}</span>
+                </li>
+                <li v-if="filteredCountries.length === 0" class="px-3 py-2 text-gray-500 text-center">
+                  No se encontraron países
+                </li>
+              </ul>
+            </div>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
+        </div>
+        
+        <div>
           <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
           <input v-model="form.password" id="password" name="password" type="password" required 
             class="mt-1 form-input" />
@@ -202,7 +271,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue';
+import { reactive, ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { apiService } from '../services/apiService.js';
 import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
@@ -217,6 +286,7 @@ const currentApiUrl = ref('');
 const termsAccepted = ref(false);
 const termsError = ref('');
 const showSuccessModal = ref(false);
+const countrySearch = ref('');
 
 const form = reactive({
   email: '',
@@ -224,8 +294,47 @@ const form = reactive({
   cargo: '',
   curp: '',
   supervisor: '',
+  codigoPais: '+52', // Código de país por defecto (México)
+  telefono: '', // Solo los dígitos del teléfono
   password: '',
   confirmPassword: ''
+});
+
+// Lista de países más comunes con sus códigos y banderas
+const paises = [
+  { codigo: '+52', nombre: 'México', bandera: '🇲🇽' },
+  { codigo: '+1', nombre: 'Estados Unidos', bandera: '🇺🇸' },
+  { codigo: '+34', nombre: 'España', bandera: '🇪🇸' },
+  { codigo: '+57', nombre: 'Colombia', bandera: '🇨🇴' },
+  { codigo: '+56', nombre: 'Chile', bandera: '🇨🇱' },
+  { codigo: '+54', nombre: 'Argentina', bandera: '🇦🇷' },
+  { codigo: '+51', nombre: 'Perú', bandera: '🇵🇪' },
+  { codigo: '+591', nombre: 'Bolivia', bandera: '🇧🇴' },
+  { codigo: '+502', nombre: 'Guatemala', bandera: '🇬🇹' },
+  { codigo: '+503', nombre: 'El Salvador', bandera: '🇸🇻' },
+  { codigo: '+504', nombre: 'Honduras', bandera: '🇭🇳' },
+  { codigo: '+506', nombre: 'Costa Rica', bandera: '🇨🇷' },
+  { codigo: '+507', nombre: 'Panamá', bandera: '🇵🇦' },
+  { codigo: '+58', nombre: 'Venezuela', bandera: '🇻🇪' },
+  { codigo: '+593', nombre: 'Ecuador', bandera: '🇪🇨' },
+  { codigo: '+595', nombre: 'Paraguay', bandera: '🇵🇾' },
+  { codigo: '+598', nombre: 'Uruguay', bandera: '🇺🇾' },
+  { codigo: '+55', nombre: 'Brasil', bandera: '🇧🇷' },
+  { codigo: '+505', nombre: 'Nicaragua', bandera: '🇳🇮' },
+  { codigo: '+1', nombre: 'Canadá', bandera: '🇨🇦' }
+];
+
+const showCountrySelector = ref(false);
+
+// Filtro de países basado en la búsqueda
+const filteredCountries = computed(() => {
+  if (!countrySearch.value) return paises;
+  
+  const searchTerm = countrySearch.value.toLowerCase();
+  return paises.filter(pais => 
+    pais.nombre.toLowerCase().includes(searchTerm) || 
+    pais.codigo.includes(searchTerm)
+  );
 });
 
 onMounted(async () => {
@@ -264,14 +373,16 @@ async function register() {
   message.text = '';
   
   try {
-    // Crear payload con CURP obligatoria
+    // Crear payload con CURP y teléfono obligatorios (concatenando código país + número)
+    const telefonoCompleto = `${form.codigoPais}${form.telefono.trim()}`;
     const payload = {
       correo: form.email,
       nombre_completo: form.nombre,
       cargo: form.cargo,
       supervisor: form.supervisor || null,
       contrasena: form.password,
-      curp: form.curp.toUpperCase().trim()
+      curp: form.curp.toUpperCase().trim(),
+      telefono: telefonoCompleto
     };
     
     console.log('📤 Enviando payload:', payload);
@@ -349,6 +460,20 @@ function validateForm() {
     return false;
   }
   
+  // Verificar teléfono obligatorio
+  if (!form.telefono || !form.telefono.trim()) {
+    message.text = 'El número de teléfono es obligatorio';
+    message.type = 'error';
+    return false;
+  }
+  
+  // Validación de formato de teléfono (exactamente 10 dígitos)
+  if (!/^\d{10}$/.test(form.telefono.trim())) {
+    message.text = 'El número de teléfono debe contener exactamente 10 dígitos';
+    message.type = 'error';
+    return false;
+  }
+  
   const curpClean = form.curp.toUpperCase().trim();
   if (curpClean.length !== 18) {
     curpError.value = 'La CURP debe contener exactamente 18 caracteres';
@@ -419,6 +544,50 @@ function formatCurp() {
     }
   }
 }
+
+// Función para validar que el teléfono solo contiene números
+function validatePhone() {
+  // Eliminar cualquier carácter que no sea un número
+  form.telefono = form.telefono.replace(/\D/g, '');
+  
+  // Limitar a 10 dígitos
+  if (form.telefono.length > 10) {
+    form.telefono = form.telefono.slice(0, 10);
+  }
+}
+
+// Función para seleccionar un país
+function selectCountry(pais) {
+  form.codigoPais = pais.codigo;
+  showCountrySelector.value = false;
+}
+
+// Cerrar el selector de país al hacer clic fuera
+function closeCountrySelector(e) {
+  // Si el clic fue dentro del selector o en el campo de búsqueda, no cerramos
+  if (e.target.closest('.country-selector')) return;
+  showCountrySelector.value = false;
+}
+
+// Cerrar el selector si se presiona la tecla ESC
+function handleEscKey(event) {
+  if (event.key === 'Escape' && showCountrySelector.value) {
+    showCountrySelector.value = false;
+  }
+}
+
+// Agregar event listeners en un solo onMounted
+onMounted(() => {
+  // Agregar listeners
+  document.addEventListener('click', closeCountrySelector);
+  document.addEventListener('keydown', handleEscKey);
+  
+  // Retornar función de limpieza para remover listeners cuando el componente se desmonte
+  return () => {
+    document.removeEventListener('click', closeCountrySelector);
+    document.removeEventListener('keydown', handleEscKey);
+  };
+});
 
 function clearTermsError() {
   if (termsError.value) {
@@ -534,6 +703,23 @@ button {
   }
   90% {
     transform: translate3d(0, -2px, 0);
+  }
+}
+
+/* Estilos para el selector de país */
+.country-selector input:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+/* Mejoras para el selector en móviles */
+@media (max-width: 640px) {
+  .country-selector {
+    position: fixed;
+    z-index: 100;
+    max-width: 90vw;
+    left: 5vw !important;
+    right: 5vw !important;
   }
 }
 </style>

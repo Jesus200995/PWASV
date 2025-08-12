@@ -53,6 +53,7 @@ class UserCreate(BaseModel):
     supervisor: str = None
     contrasena: str
     curp: str  # CURP obligatoria
+    telefono: str  # Teléfono obligatorio
 
 class UserLogin(BaseModel):
     correo: str
@@ -187,6 +188,18 @@ async def crear_usuario(usuario: UserCreate):
         if not re.match(r'^[A-Z0-9]{18}$', curp_upper):
             raise HTTPException(status_code=400, detail="La CURP debe contener solo letras mayúsculas y números")
         
+        # Validación de teléfono obligatorio
+        if not usuario.telefono or not usuario.telefono.strip():
+            raise HTTPException(status_code=400, detail="El número de teléfono es obligatorio")
+        
+        # Validación básica de formato de teléfono (permitir números, +, espacios y -)
+        if not re.match(r'^[0-9\+\s\-]+$', usuario.telefono):
+            raise HTTPException(status_code=400, detail="El número de teléfono contiene caracteres no válidos")
+            
+        # Validar que el formato general sea correcto (al menos debe tener un + y números)
+        if not re.match(r'^\+[0-9]+\s*[0-9]+$', usuario.telefono.strip()):
+            raise HTTPException(status_code=400, detail="El formato del teléfono debe incluir código de país con + y números")
+        
         # Comprobar si el correo ya existe
         cursor.execute("SELECT id FROM usuarios WHERE correo = %s", (usuario.correo,))
         if cursor.fetchone():
@@ -197,10 +210,10 @@ async def crear_usuario(usuario: UserCreate):
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="La CURP ya está registrada")
         
-        # Insertar usuario con CURP (contraseña sin encriptar)
+        # Insertar usuario con CURP y teléfono (contraseña sin encriptar)
         cursor.execute(
-            "INSERT INTO usuarios (correo, nombre_completo, cargo, supervisor, contrasena, curp) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
-            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, usuario.contrasena, curp_upper)
+            "INSERT INTO usuarios (correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
+            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, usuario.contrasena, curp_upper, usuario.telefono)
         )
         
         user_id = cursor.fetchone()[0]
@@ -400,9 +413,9 @@ async def obtener_usuarios():
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Obtener todos los usuarios con CURP y contraseña
+        # Obtener todos los usuarios con CURP, teléfono y contraseña
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena FROM usuarios ORDER BY id DESC"
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono FROM usuarios ORDER BY id DESC"
         )
         
         resultados = cursor.fetchall()
@@ -418,7 +431,8 @@ async def obtener_usuarios():
                 "cargo": row[3],
                 "supervisor": row[4],
                 "curp": row[5],
-                "contrasena": row[6]  # Incluir contraseña
+                "contrasena": row[6],  # Incluir contraseña
+                "telefono": row[7] if len(row) > 7 else None  # Incluir teléfono si existe
             }
             usuarios.append(usuario)
         
@@ -443,9 +457,9 @@ async def obtener_usuarios_exportacion_completa():
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Obtener TODOS los campos de usuarios incluyendo contraseñas
+        # Obtener TODOS los campos de usuarios incluyendo contraseñas y teléfono
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp FROM usuarios ORDER BY id DESC"
+            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono FROM usuarios ORDER BY id DESC"
         )
         
         resultados = cursor.fetchall()
@@ -461,7 +475,8 @@ async def obtener_usuarios_exportacion_completa():
                 "cargo": row[3],
                 "supervisor": row[4],
                 "contrasena": row[5],  # INCLUIR LA CONTRASEÑA REAL
-                "curp": row[6]
+                "curp": row[6],
+                "telefono": row[7] if len(row) > 7 else None  # Incluir teléfono si existe
             }
             usuarios.append(usuario)
         
@@ -482,9 +497,9 @@ async def obtener_usuario(user_id: int):
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Buscar usuario por ID con CURP y contraseña
+        # Buscar usuario por ID con CURP, teléfono y contraseña
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena FROM usuarios WHERE id = %s",
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono FROM usuarios WHERE id = %s",
             (user_id,)
         )
         
@@ -499,7 +514,8 @@ async def obtener_usuario(user_id: int):
             "cargo": resultado[3],
             "supervisor": resultado[4],
             "curp": resultado[5],
-            "contrasena": resultado[6]  # Incluir contraseña
+            "contrasena": resultado[6],  # Incluir contraseña
+            "telefono": resultado[7] if len(resultado) > 7 else None  # Incluir teléfono si existe
         }
         
         print(f"✅ Usuario {user_id} obtenido correctamente")
@@ -554,17 +570,17 @@ async def actualizar_usuario(user_id: int, usuario: UserCreate):
         cursor.execute(
             """UPDATE usuarios 
                SET correo = %s, nombre_completo = %s, cargo = %s, 
-                   supervisor = %s, contrasena = %s, curp = %s 
+                   supervisor = %s, contrasena = %s, curp = %s, telefono = %s 
                WHERE id = %s""",
             (usuario.correo, usuario.nombre_completo, usuario.cargo, 
-             usuario.supervisor, usuario.contrasena, curp_upper, user_id)
+             usuario.supervisor, usuario.contrasena, curp_upper, usuario.telefono, user_id)
         )
         
         conn.commit()
         
         # Obtener usuario actualizado
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp FROM usuarios WHERE id = %s",
+            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono FROM usuarios WHERE id = %s",
             (user_id,)
         )
         
@@ -576,7 +592,8 @@ async def actualizar_usuario(user_id: int, usuario: UserCreate):
             "cargo": resultado[3],
             "supervisor": resultado[4],
             "contrasena": resultado[5],
-            "curp": resultado[6]
+            "curp": resultado[6],
+            "telefono": resultado[7] if len(resultado) > 7 else None
         }
         
         print(f"✅ Usuario {user_id} actualizado exitosamente")

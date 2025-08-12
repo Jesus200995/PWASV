@@ -1039,18 +1039,6 @@ async function onFileChangeRegistro(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  // TEMPORAL: Desactivar compresión para resolver problemas de sincronización offline
-  console.log('📸 Usando imagen original sin compresión para registros de actividad');
-  
-  archivoFotoRegistro.value = file;
-  const reader = new FileReader();
-  reader.onload = (e2) => {
-    fotoRegistro.value = e2.target.result;
-  };
-  reader.readAsDataURL(file);
-
-  // CÓDIGO ORIGINAL CON COMPRESIÓN (COMENTADO TEMPORALMENTE):
-  /*
   try {
     // Compresión de imagen con calidad media y formato JPG
     console.log('🖼️ Comprimiendo imagen de registro...');
@@ -1078,7 +1066,6 @@ async function onFileChangeRegistro(e) {
     };
     reader.readAsDataURL(file);
   }
-  */
 }
 
 async function enviarRegistro() {
@@ -1411,35 +1398,21 @@ async function cargarHistorial(forceRefresh = false) {
     
     // Si hay conexión, intentar obtener del servidor
     // Siempre incluir un parámetro de tiempo para forzar nueva petición sin cache
-    const cacheParam = `?_nocache=${Date.now()}`;
-    const url = `${API_URL}/registros${user.value.id ? `?usuario_id=${user.value.id}&_nocache=${Date.now()}` : cacheParam}`;
-    
-    console.log(`📡 Solicitando registros desde: ${url}`);
-    
-    const response = await axios.get(url, {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'X-Force-Refresh': 'true'
+    const cacheParam = `&_nocache=${Date.now()}`;
+    const response = await axios.get(
+      `${API_URL}/registros?usuario_id=${user.value.id}${cacheParam}`, 
+      {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'X-Force-Refresh': 'true'
+        }
       }
-    });
-    
-    console.log(`📊 Respuesta del servidor:`, response.data);
-    
-    // MEJORA: El backend ahora devuelve directamente la lista de registros (no envuelto en .registros)
-    let registrosOnline = [];
-    
-    if (Array.isArray(response.data)) {
-      // Respuesta directa del nuevo endpoint
-      registrosOnline = response.data;
-    } else if (response.data.registros && Array.isArray(response.data.registros)) {
-      // Respuesta del formato anterior (por compatibilidad)
-      registrosOnline = response.data.registros;
-    }
+    );
     
     // Procesamos los registros del servidor
-    const registrosProcesados = registrosOnline.map(r => ({
-      fecha: new Date(r.timestamp || r.fecha_hora).toLocaleString(),
+    const registrosOnline = response.data.map(r => ({
+      fecha: new Date(r.timestamp).toLocaleString(),
       latitud: r.latitud,
       longitud: r.longitud,
       descripcion: r.descripcion || 'Sin descripción',
@@ -1465,21 +1438,15 @@ async function cargarHistorial(forceRefresh = false) {
     }
     
     // Combinar registros online y offline, los offline primero
-    historial.value = [...registrosOffline, ...registrosProcesados];
+    historial.value = [...registrosOffline, ...registrosOnline];
     
     // Ordenar por fecha más reciente primero
     historial.value.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     
-    console.log(`✅ Historial actualizado: ${historial.value.length} registros (${registrosOffline.length} offline, ${registrosProcesados.length} online)`);
+    console.log(`✅ Historial actualizado: ${historial.value.length} registros (${registrosOffline.length} offline, ${registrosOnline.length} online)`);
     
   } catch (error) {
     console.error('❌ Error cargando historial:', error);
-    console.log('📄 Detalles del error:');
-    if (error.response) {
-      console.log('- Status:', error.response.status);
-      console.log('- Data:', error.response.data);
-    }
-    
     // En caso de error, intentar mostrar datos offline
     try {
       const pendientes = await offlineService.obtenerResumenPendientes();
@@ -1492,7 +1459,6 @@ async function cargarHistorial(forceRefresh = false) {
           offline: true,
           tipo: r.tipo || 'actividad'
         }));
-        console.log(`📴 Mostrando ${historial.value.length} registros offline como fallback`);
       }
     } catch (err) {
       console.error('Error cargando datos offline:', err);

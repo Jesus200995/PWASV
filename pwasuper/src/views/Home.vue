@@ -1085,14 +1085,24 @@ async function enviarRegistro() {
       // **MODO OFFLINE: Guardar datos localmente**
       console.log('📴 Sin conexión - Guardando registro offline');
       
-      // Guardar en almacenamiento offline usando IndexedDB
-      await offlineService.guardarRegistroOffline(
+      // MEJORA: Guardar con información más completa para garantizar sincronización
+      const registroID = await offlineService.guardarRegistroOffline(
         user.value.id,
         latitudRegistro.value,
         longitudRegistro.value,
         descripcionRegistro.value,
         archivoFotoRegistro.value
       );
+      
+      console.log(`✅ Registro offline guardado con ID: ${registroID}`);
+      
+      // Notificar al servicio de sincronización que hay registros pendientes
+      // Esto ayuda a asegurar que el sistema está consciente del nuevo registro
+      syncService.notifyListeners('pending_update', false, {
+        tipo: 'registro', 
+        id: registroID,
+        timestamp: new Date().toISOString()
+      });
       
       // Agregar a historial local con indicador offline
       historial.value.unshift({
@@ -1103,7 +1113,8 @@ async function enviarRegistro() {
         foto: fotoRegistro.value,
         offline: true, // Marcador para indicar que está pendiente
         backend: null,
-        tipo: 'actividad' // Especificar explícitamente el tipo de registro
+        tipo: 'actividad', // Especificar explícitamente el tipo de registro
+        id_offline: registroID // Guardar el ID generado para referencia
       });
 
       // Limpiar campos

@@ -168,14 +168,41 @@ class OfflineService {
 
   /**
    * Guarda un registro general offline
+   * @param {number} usuarioId - ID del usuario
+   * @param {string} latitud - Latitud de la ubicación
+   * @param {string} longitud - Longitud de la ubicación
+   * @param {string} descripcion - Descripción del registro
+   * @param {File} archivo - Archivo de imagen adjunto
+   * @returns {Promise<number>} - ID del registro guardado en IndexedDB
    */
   async guardarRegistroOffline(usuarioId, latitud, longitud, descripcion, archivo) {
     try {
+      console.log('🔄 Guardando registro offline para usuario ID:', usuarioId);
       await this.initDB();
       
       // Convertir archivo a base64 si existe
-      const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
+      let fotoBase64 = null;
+      if (archivo) {
+        console.log(`🖼️ Convirtiendo foto a base64 (${archivo.name}, ${archivo.size} bytes)...`);
+        try {
+          fotoBase64 = await this.fileToBase64(archivo);
+          console.log(`✅ Foto convertida exitosamente. Longitud base64: ${fotoBase64.length} caracteres`);
+          
+          // Verificar que el base64 sea válido
+          if (!fotoBase64 || fotoBase64.length < 100) {
+            console.error('⚠️ La conversión base64 generó datos sospechosos, verificando...');
+            if (!fotoBase64.includes('base64') && !fotoBase64.includes(',')) {
+              console.warn('⚠️ El string base64 no tiene el formato esperado, intentando reparar...');
+              fotoBase64 = `data:${archivo.type};base64,${fotoBase64}`;
+            }
+          }
+        } catch (err) {
+          console.error('❌ Error al convertir imagen a base64:', err);
+          fotoBase64 = null; // Continuar sin foto
+        }
+      }
       
+      // MEJORA: Crear registro con más metadatos para identificación
       const registro = {
         usuario_id: usuarioId,
         latitud,
@@ -186,7 +213,12 @@ class OfflineService {
         foto_type: archivo ? archivo.type : null,
         timestamp: new Date().toISOString(), // Hora de creación offline
         sync_timestamp: null, // Se completará cuando se sincronice
-        tipo: 'actividad' // Especificar explícitamente que es un registro de actividad
+        tipo: 'actividad', // Especificar explícitamente que es un registro de actividad
+        fecha_creacion: new Date().toISOString(),
+        intentos: 0,
+        estado: 'pendiente',
+        origen: 'pwa_super',
+        id_cliente: `reg_${Date.now()}_${Math.floor(Math.random() * 1000)}` // ID único para referencia
       };
 
       const transaction = this.db.transaction([REGISTROS_STORE], 'readwrite');
@@ -196,8 +228,24 @@ class OfflineService {
         const request = store.add(registro);
         
         request.onsuccess = () => {
-          console.log('✅ Registro guardado offline con ID:', request.result);
-          resolve(request.result);
+          const id = request.result;
+          console.log(`✅ Registro guardado offline con ID: ${id}`);
+          
+          // MEJORA: Verificar que el registro realmente se guardó para confirmar
+          const getRequest = store.get(id);
+          getRequest.onsuccess = () => {
+            if (getRequest.result) {
+              console.log(`✅ Verificación: Registro ID ${id} guardado correctamente en IndexedDB`);
+              resolve(id);
+            } else {
+              console.error(`❌ Verificación falló: No se encontró el registro ID ${id} recién guardado`);
+              reject(new Error('Error de verificación: registro no encontrado después de guardar'));
+            }
+          };
+          getRequest.onerror = () => {
+            console.warn(`⚠️ No se pudo verificar el registro guardado, pero parece haberse guardado con ID ${id}`);
+            resolve(id); // Resolver de todos modos
+          };
         };
         
         request.onerror = () => {

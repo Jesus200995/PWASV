@@ -128,11 +128,14 @@ class SyncService {
 
   /**
    * Notifica a todos los listeners sobre cambios de estado
+   * @param {string} status - Estado de sincronización ('online', 'offline', 'syncing', 'sync_complete', etc)
+   * @param {boolean} isOnline - Si el dispositivo está online
+   * @param {Object} data - Datos adicionales para el evento
    */
-  notifyListeners(status) {
+  notifyListeners(status, isOnline = this.isOnline, data = null) {
     this.listeners.forEach(callback => {
       try {
-        callback(status, this.isOnline);
+        callback(status, isOnline, data);
       } catch (error) {
         console.error('Error en listener de conectividad:', error);
       }
@@ -159,14 +162,15 @@ class SyncService {
         console.log('❌ Verificación de conexión falló, cancelando sincronización');
         this.isOnline = false;
         this.notifyListeners('offline');
+        this.isSyncing = false; // Asegurar que se resetea la bandera
         return { mensaje: 'Sin conexión a Internet', estado: 'error' };
       }
 
-      // Forzar actualización de datos pendientes (sin usar caché)
+      // MEJORA: Forzar actualización de datos pendientes (sin usar caché)
       const pendientes = await offlineService.contarPendientes(true);
       
-      // Obtener datos pendientes
-      const registrosPendientes = await offlineService.obtenerRegistrosPendientes();
+      // MEJORA: Obtener datos pendientes con opción de logging detallado
+      const registrosPendientes = await offlineService.obtenerRegistrosPendientes(true);
       const asistenciasPendientes = await offlineService.obtenerAsistenciasPendientes();
       
       const totalPendientes = registrosPendientes.length + asistenciasPendientes.length;
@@ -176,6 +180,7 @@ class SyncService {
         console.log('✅ No hay datos pendientes para sincronizar');
         // Notificar igualmente para actualizar interfaces
         this.notifyListeners('sync_complete', true, { exitosos: 0, fallidos: 0, total: 0 });
+        this.isSyncing = false;
         return { mensaje: 'No hay datos pendientes', estado: 'completado' };
       }
       
@@ -192,14 +197,30 @@ class SyncService {
       let fallidos = 0;
       
       // MEJORA: Sincronizar registros generales con mejor gestión de errores
+      console.log(`🔄 Iniciando sincronización de ${registrosPendientes.length} REGISTROS DE ACTIVIDADES:`);
+      
       for (const registro of registrosPendientes) {
         try {
           console.log(`🔄 Procesando registro ID: ${registro.id}, timestamp: ${registro.timestamp}, tipo: ${registro.tipo || 'actividad'}`);
           
+          // MEJORA: Verificar datos críticos antes de intentar enviar
+          if (!registro.usuario_id || !registro.latitud || !registro.longitud) {
+            console.error(`❌ Registro ${registro.id} incompleto, faltan datos básicos`);
+            throw new Error('Datos de registro incompletos');
+          }
+          
+          // MEJORA: Verificar que realmente esté marcado como actividad
+          if (!registro.tipo) {
+            console.log(`⚠️ Registro ${registro.id} no tiene tipo especificado, asumiendo 'actividad'`);
+            registro.tipo = 'actividad';
+          }
+          
           // Intentar enviar el registro
+          console.log(`📤 Enviando registro ${registro.id} al servidor...`);
           await this.enviarRegistro(registro);
           
           // Si llega aquí, el envío fue exitoso, eliminar de pendientes
+          console.log(`✅ Registro ${registro.id} enviado exitosamente, eliminando de pendientes`);
           await offlineService.eliminarRegistro(registro.id);
           exitosos++;
           
@@ -215,10 +236,13 @@ class SyncService {
         } catch (error) {
           console.error(`❌ Error enviando registro ${registro.id}:`, error);
           
+          // MEJORA: Mejor manejo de duplicados y otros errores del servidor
           // Si el error indica que el registro ya existe, lo consideramos exitoso
           if (error.response && error.response.status === 400 && 
               error.response.data && error.response.data.detail && 
-              error.response.data.detail.includes('ya existe')) {
+              (error.response.data.detail.includes('ya existe') || 
+               error.response.data.detail.includes('duplicado') ||
+               error.response.data.detail.includes('Ya registrado'))) {
             
             console.log(`ℹ️ El registro ${registro.id} ya existe en el servidor, marcando como sincronizado`);
             await offlineService.eliminarRegistro(registro.id);
@@ -227,7 +251,7 @@ class SyncService {
             // Incrementar contador de fallidos
             fallidos++;
             
-            // Actualizar el registro con información del error para retentarlo después
+            // MEJORA: Actualizar el registro con información más detallada del error
             try {
               await offlineService.actualizarEstadoSincronizacion(
                 registro.id, 
@@ -235,7 +259,10 @@ class SyncService {
                 {
                   ultimo_error: error.message || 'Error desconocido',
                   intentos: (registro.intentos || 0) + 1,
-                  ultima_sincronizacion: new Date().toISOString()
+                  ultima_sincronizacion: new Date().toISOString(),
+                  detalles_error: error.response ? 
+                    `Status: ${error.response.status}, Detail: ${JSON.stringify(error.response.data || {})}` : 
+                    'Sin respuesta del servidor'
                 }
               );
             } catch (err) {
@@ -373,6 +400,9 @@ class SyncService {
       formData.append('longitud', registro.longitud);
       formData.append('descripcion', registro.descripcion || '');
       
+      // MEJORA: Asegurar que se envía como tipo actividad explícitamente
+      formData.append('tipo', 'actividad');
+      
       // Usar el timestamp original (hora de creación offline) no el de sincronización
       formData.append('timestamp_offline', registro.timestamp);
       
@@ -381,16 +411,19 @@ class SyncService {
       formData.append('sync_timestamp', syncTimestamp);
       formData.append('origen_sync', 'pwa_super');
       formData.append('id_offline', registro.id.toString());
-      formData.append('tipo', 'actividad'); // Siempre usar 'actividad' para registros de actividad
       
       console.log('📤 Enviando timestamp_offline:', registro.timestamp);
       console.log('📤 Enviando sync_timestamp:', syncTimestamp);
-      console.log('📤 Enviando tipo de registro:', registro.tipo || 'actividad');
+      console.log('📤 Enviando tipo de registro: actividad');
       
       // Convertir foto base64 de vuelta a archivo si existe
       let archivoAdjunto = false;
       if (registro.foto_base64) {
         console.log('🖼️ El registro contiene imagen base64, convirtiendo...');
+        // MEJORA: Mayor nivel de logging para la conversión de imágenes
+        console.log(`🔍 Longitud del string base64: ${registro.foto_base64.length}`);
+        console.log(`🔍 Primeros 50 caracteres: ${registro.foto_base64.substring(0, 50)}...`);
+        
         const archivo = offlineService.base64ToFile(
           registro.foto_base64,
           registro.foto_filename || `foto_${registro.id}.jpg`,
@@ -398,11 +431,12 @@ class SyncService {
         );
         
         if (archivo) {
-          console.log(`🖼️ Imagen convertida correctamente: ${archivo.name}, ${archivo.size} bytes`);
+          console.log(`🖼️ Imagen convertida correctamente: ${archivo.name}, ${archivo.size} bytes, tipo: ${archivo.type}`);
           formData.append('foto', archivo);
           archivoAdjunto = true;
         } else {
           console.error('❌ Error al convertir imagen base64 a archivo');
+          console.log('⚠️ Intentando enviar sin foto debido a error de conversión');
           // Continuar sin foto si hay error en la conversión
         }
       } else {
@@ -412,19 +446,26 @@ class SyncService {
       console.log(`📤 Enviando registro al backend${archivoAdjunto ? ' con foto adjunta' : ' sin foto'}`);
       
       // Enviar al endpoint de registros con headers adicionales para identificación
+      // MEJORA: Headers más explícitos para mejor procesamiento en el backend
       const response = await axios.post(`${API_URL}/registro`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'X-Offline-Sync': 'true',
           'X-Sync-Timestamp': syncTimestamp,
           'X-Offline-ID': registro.id.toString(),
-          'X-Registro-Tipo': 'actividad', // Siempre identificar explícitamente como actividad
-          'X-Retry-After-Error': 'true' // Indicar que es un intento de reenvío
+          'X-Registro-Tipo': 'actividad',
+          'X-Retry-After-Error': 'true'
         },
         timeout: 30000, // 30 segundos de timeout
         maxContentLength: Infinity,
         maxBodyLength: Infinity
       });
+      
+      // Verificar que la respuesta sea válida
+      if (!response || !response.data) {
+        console.error('❌ El servidor no devolvió una respuesta válida');
+        throw new Error('Respuesta del servidor inválida');
+      }
       
       console.log('✅ Registro enviado exitosamente:', response.data);
       return response.data;
@@ -432,9 +473,10 @@ class SyncService {
     } catch (error) {
       console.error('❌ Error enviando registro:', error);
       
+      // MEJORA: Verificación más robusta de errores de duplicado
       // Verificar error de duplicado de diferentes formas posibles
       if (error.response && error.response.status === 400) {
-        const errorDetail = error.response.data.detail || '';
+        const errorDetail = error.response.data?.detail || '';
         
         // Verificar diferentes mensajes de duplicado
         if (errorDetail.includes('ya existe') || 
@@ -446,7 +488,7 @@ class SyncService {
         }
       }
       
-      // Registrar detalles completos del error para debugging
+      // MEJORA: Mejor logging de errores para debugging
       console.error('📄 Detalles completos del error:');
       if (error.response) {
         console.error('- Status:', error.response.status);
@@ -454,6 +496,7 @@ class SyncService {
         console.error('- Data:', error.response.data);
       } else if (error.request) {
         console.error('- Sin respuesta del servidor:', error.request);
+        console.error('- Datos de la solicitud:', error.config?.data?.substring(0, 100) + '...');
       } else {
         console.error('- Error de configuración:', error.message);
       }

@@ -331,6 +331,19 @@
               </div>
             </div>
 
+            <!-- Teléfono -->
+            <div class="detail-card">
+              <div class="detail-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Teléfono</span>
+                <span class="detail-value phone-value">{{ usuarioSeleccionado.telefono || 'No especificado' }}</span>
+              </div>
+            </div>
+
             <!-- Estado -->
             <div class="detail-card">
               <div class="detail-icon status-icon">
@@ -416,6 +429,7 @@
               <p><strong>ID:</strong> #{{ usuarioAEliminar.id }}</p>
               <p><strong>Nombre:</strong> {{ usuarioAEliminar.nombre_completo }}</p>
               <p><strong>Correo:</strong> {{ usuarioAEliminar.correo }}</p>
+              <p><strong>Teléfono:</strong> {{ usuarioAEliminar.telefono || 'No especificado' }}</p>
             </div>
             <p class="warning-text">Esta acción eliminará permanentemente al usuario y todos sus datos asociados. <strong>Esta acción no se puede deshacer.</strong></p>
           </div>
@@ -525,6 +539,17 @@
                   maxlength="18"
                 />
               </div>
+
+              <div class="form-group">
+                <label for="edit-telefono">Teléfono</label>
+                <input 
+                  id="edit-telefono"
+                  v-model="datosEdicion.telefono" 
+                  type="tel" 
+                  class="form-input"
+                  placeholder="Teléfono con código de país"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -607,7 +632,8 @@ const datosEdicion = ref({
   cargo: '',
   supervisor: '',
   contrasena: '',
-  curp: ''
+  curp: '',
+  telefono: ''
 })
 
 // Variables para modal de éxito
@@ -722,13 +748,14 @@ const imprimirUsuarios = () => {
         background-color: white !important; 
       }
       
-      .col-id { width: 8%; text-align: center; }
-      .col-correo { width: 25%; }
-      .col-nombre { width: 20%; }
-      .col-cargo { width: 15%; }
-      .col-supervisor { width: 15%; }
-      .col-curp { width: 17%; font-family: monospace; font-size: 8px; }
-      .col-estado { width: 10%; text-align: center; }
+      .col-id { width: 7%; text-align: center; }
+      .col-correo { width: 20%; }
+      .col-nombre { width: 18%; }
+      .col-cargo { width: 13%; }
+      .col-supervisor { width: 13%; }
+      .col-curp { width: 12%; font-family: monospace; font-size: 8px; }
+      .col-telefono { width: 12%; font-family: monospace; font-size: 8px; }
+      .col-estado { width: 8%; text-align: center; }
       
       .estado-activo { 
         color: #28a745 !important; 
@@ -842,6 +869,7 @@ const imprimirUsuarios = () => {
             <th class="col-cargo">Cargo</th>
             <th class="col-supervisor">Supervisor</th>
             <th class="col-curp">CURP</th>
+            <th class="col-telefono">Teléfono</th>
             <th class="col-estado">Estado</th>
           </tr>
         </thead>
@@ -858,6 +886,7 @@ const imprimirUsuarios = () => {
               <td class="col-cargo">${usuario.cargo || 'Sin cargo'}</td>
               <td class="col-supervisor">${usuario.supervisor || 'Sin supervisor'}</td>
               <td class="col-curp">${usuario.curp || 'Sin CURP'}</td>
+              <td class="col-telefono">${usuario.telefono || 'Sin teléfono'}</td>
               <td class="col-estado"><span class="${claseEstado}">${estado}</span></td>
             </tr>
             `
@@ -902,7 +931,8 @@ const exportarExcel = () => {
     'Nombre Completo', 
     'Cargo', 
     'Supervisor', 
-    'CURP', 
+    'CURP',
+    'Teléfono',
     'Estado'
   ]
   
@@ -936,6 +966,7 @@ const exportarExcel = () => {
     usuario.cargo || 'Sin cargo',
     usuario.supervisor || 'Sin supervisor',
     usuario.curp || 'Sin CURP',
+    usuario.telefono || 'Sin teléfono',
     obtenerEstadoUsuario(usuario)
   ])
   
@@ -1160,7 +1191,8 @@ const editarUsuario = (usuario) => {
     cargo: usuario.cargo || '',
     supervisor: usuario.supervisor || '',
     contrasena: usuario.contrasena || '',
-    curp: usuario.curp || ''
+    curp: usuario.curp || '',
+    telefono: usuario.telefono || ''
   }
   showEditModal.value = true
 }
@@ -1176,7 +1208,8 @@ const cancelarEdicion = () => {
     cargo: '',
     supervisor: '',
     contrasena: '',
-    curp: ''
+    curp: '',
+    telefono: ''
   }
 }
 
@@ -2690,6 +2723,13 @@ const logout = () => {
 .status-active {
   color: #4CAF50 !important;
   font-weight: 600;
+}
+
+/* Estilo especial para el campo de teléfono */
+.phone-value {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+  color: #0277BD;
 }
 
 /* Estilos especiales para el campo de contraseña */

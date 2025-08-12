@@ -350,17 +350,31 @@ class OfflineService {
 
   /**
    * Cuenta el total de elementos pendientes
+   * @param {boolean} forceRefresh - Si es true, fuerza una consulta fresca a la base de datos evitando caché
+   * @returns {Promise<Object>} - Objeto con conteo de registros, asistencias y total
    */
-  async contarPendientes() {
+  async contarPendientes(forceRefresh = false) {
     try {
+      // Si se fuerza actualización, renovamos la conexión con IndexedDB
+      if (forceRefresh && this.db) {
+        console.log('🔄 Forzando actualización de conteo de pendientes...');
+        // Cerrar y reabrir la conexión para asegurar datos frescos
+        this.db.close();
+        this.db = null;
+        await this.initDB();
+      }
+      
       const registros = await this.obtenerRegistrosPendientes();
       const asistencias = await this.obtenerAsistenciasPendientes();
       
-      return {
+      const resultado = {
         registros: registros.length,
         asistencias: asistencias.length,
         total: registros.length + asistencias.length
       };
+      
+      console.log('📊 Conteo actualizado de pendientes:', resultado);
+      return resultado;
     } catch (error) {
       console.error('❌ Error contando pendientes:', error);
       return { registros: 0, asistencias: 0, total: 0 };

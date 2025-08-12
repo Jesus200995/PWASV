@@ -335,9 +335,11 @@ class SyncService {
 
   /**
    * Obtiene el número de elementos pendientes
+   * @param {boolean} forceRefresh - Si es true, fuerza una consulta fresca a la base de datos
+   * @returns {Promise<number>} - Número total de elementos pendientes de sincronización
    */
-  async obtenerPendientes() {
-    return await offlineService.contarPendientes();
+  async obtenerPendientes(forceRefresh = false) {
+    return await offlineService.contarPendientes(forceRefresh);
   }
 }
 

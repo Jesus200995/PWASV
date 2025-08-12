@@ -129,10 +129,13 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
       </svg>
-      <span class="text-sm">
-        Sin conexión. 
-        <span v-if="pendientes.total > 0">{{ pendientes.total }} registro{{ pendientes.total > 1 ? 's' : '' }} pendiente{{ pendientes.total > 1 ? 's' : '' }}.</span>
-      </span>
+      <div class="text-sm">
+        <div>Sin conexión</div>
+        <div v-if="pendientes.total > 0" class="text-xs mt-1">
+          {{ pendientes.total }} elemento{{ pendientes.total > 1 ? 's' : '' }} pendiente{{ pendientes.total > 1 ? 's' : '' }}
+          <span class="opacity-80">({{ pendientes.registros }} reg, {{ pendientes.asistencias }} asist)</span>
+        </div>
+      </div>
     </div>
   </teleport>
 </template>
@@ -215,11 +218,11 @@ const getBannerSubtitle = () => {
   const checkStatus = `Verificado ${timeAgoText.value}`;
   
   if (!isOnline.value && pendientes.value.total > 0) {
-    return `${pendientes.value.total} registro${pendientes.value.total > 1 ? 's' : ''} se enviarán al recuperar conexión • ${checkStatus}`;
+    return `${pendientes.value.registros} reg, ${pendientes.value.asistencias} asist. se enviarán al recuperar conexión • ${checkStatus}`;
   } else if (isSyncing.value && syncProgress.value) {
     return `${syncProgress.value.procesados}/${syncProgress.value.total} procesados`;
   } else if (pendientes.value.total > 0) {
-    return `Toca para sincronizar ahora • ${checkStatus}`;
+    return `${pendientes.value.registros} reg, ${pendientes.value.asistencias} asist. • Toca para sincronizar • ${checkStatus}`;
   } else if (isOnline.value) {
     return `Estado: Conectado • ${checkStatus}`;
   }
@@ -240,14 +243,14 @@ const getModalTitle = () => {
 
 const getModalMessage = () => {
   if (!isOnline.value) {
-    return `Tienes ${pendientes.value.total} registro${pendientes.value.total > 1 ? 's' : ''} guardado${pendientes.value.total > 1 ? 's' : ''} que se enviarán automáticamente cuando recuperes la conexión.`;
+    return `Tienes ${pendientes.value.total} elemento${pendientes.value.total > 1 ? 's' : ''} guardado${pendientes.value.total > 1 ? 's' : ''} (${pendientes.value.registros} registro${pendientes.value.registros > 1 ? 's' : ''}, ${pendientes.value.asistencias} asistencia${pendientes.value.asistencias > 1 ? 's' : ''}) que se enviarán automáticamente cuando recuperes la conexión.`;
   } else if (isSyncing.value) {
-    return 'Enviando tus registros guardados al servidor...';
+    return 'Enviando tus registros y asistencias guardados al servidor...';
   } else if (lastSyncResult.value) {
     const { exitosos, fallidos } = lastSyncResult.value;
-    return `Se enviaron ${exitosos} registro${exitosos > 1 ? 's' : ''} correctamente${fallidos > 0 ? ` y ${fallidos} fallaron` : ''}.`;
+    return `Se enviaron ${exitosos} elemento${exitosos > 1 ? 's' : ''} correctamente${fallidos > 0 ? ` y ${fallidos} fallaron` : ''}.`;
   } else {
-    return `Tienes ${pendientes.value.total} registro${pendientes.value.total > 1 ? 's' : ''} pendiente${pendientes.value.total > 1 ? 's' : ''} de envío.`;
+    return `Tienes ${pendientes.value.total} elemento${pendientes.value.total > 1 ? 's' : ''} pendiente${pendientes.value.total > 1 ? 's' : ''} de envío (${pendientes.value.registros} registro${pendientes.value.registros > 1 ? 's' : ''}, ${pendientes.value.asistencias} asistencia${pendientes.value.asistencias > 1 ? 's' : ''}).`;
   }
 };
 
@@ -282,7 +285,7 @@ const sincronizarManual = async () => {
   }
 };
 
-// Listener para eventos de sincronización
+  // Listener para eventos de sincronización
 const handleSyncEvent = (event, online, data) => {
   isOnline.value = online;
   
@@ -315,29 +318,38 @@ const handleSyncEvent = (event, online, data) => {
       lastSyncResult.value = data;
       syncProgress.value = null;
       
-      // Si todos los registros se enviaron exitosamente, ocultar banner después de 3 segundos
-      if (data.exitosos > 0 && data.fallidos === 0) {
-        setTimeout(() => {
-          bannerDismissed.value = true;
-          showModal.value = false;
-        }, 3000);
-      }
+      // Actualizar inmediatamente la cuenta de pendientes después de sincronización
+      actualizarPendientes().then(() => {
+        console.log('📊 Estado actualizado después de sincronización:', pendientes.value);
+        
+        // Si todos los registros se enviaron exitosamente, ocultar banner después de 3 segundos
+        if (data.exitosos > 0 && data.fallidos === 0) {
+          setTimeout(() => {
+            bannerDismissed.value = true;
+            showModal.value = false;
+          }, 3000);
+        }
+      });
       break;
       
     case 'sync_error':
       console.log('❌ Error en sincronización:', data);
       isSyncing.value = false;
       syncProgress.value = null;
+      // Actualizar pendientes incluso si hubo error
+      actualizarPendientes();
       break;
   }
-};
-
-// Actualizar contador de pendientes
+};// Actualizar contador de pendientes
 const actualizarPendientes = async () => {
   try {
-    pendientes.value = await syncService.obtenerPendientes();
+    // Forzar una consulta fresca a la base de datos IndexedDB
+    pendientes.value = await syncService.obtenerPendientes(true);
+    console.log('📊 Pendientes actualizados:', pendientes.value);
+    return pendientes.value;
   } catch (error) {
     console.error('Error obteniendo pendientes:', error);
+    return null;
   }
 };
 

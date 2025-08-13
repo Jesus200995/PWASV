@@ -408,21 +408,22 @@ async def registrar(
     return {"status": "ok", "foto_url": ruta_archivo}
 
 @app.get("/registros")
-def obtener_registros(usuario_id: int = None):
+def obtener_registros(usuario_id: int = None, limit: int = 50):
     try:
-        print(f"🔍 Obteniendo registros para usuario: {usuario_id}")
+        print(f"🔍 Obteniendo registros para usuario: {usuario_id}, límite: {limit}")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
         if usuario_id:
             cursor.execute(
-                "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC LIMIT 50",
-                (usuario_id,)
+                "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC LIMIT %s",
+                (usuario_id, limit)
             )
         else:
             cursor.execute(
-                "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros ORDER BY fecha_hora DESC LIMIT 50"
+                "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros ORDER BY fecha_hora DESC LIMIT %s",
+                (limit,)
             )
         
         resultados = cursor.fetchall()
@@ -450,6 +451,62 @@ def obtener_registros(usuario_id: int = None):
     except Exception as e:
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener registros: {str(e)}")
+
+# NUEVO ENDPOINT PARA ESTADÍSTICAS COMPLETAS (SIN LÍMITES)
+@app.get("/estadisticas")
+def obtener_estadisticas():
+    """Obtener estadísticas completas del sistema sin límites"""
+    try:
+        print("🔍 Obteniendo estadísticas completas del sistema")
+        
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Obtener total real de registros (actividades)
+        cursor.execute("SELECT COUNT(*) FROM registros")
+        total_registros = cursor.fetchone()[0]
+        
+        # Obtener total de usuarios
+        cursor.execute("SELECT COUNT(*) FROM usuarios")
+        total_usuarios = cursor.fetchone()[0]
+        
+        # Obtener registros de hoy
+        cursor.execute("SELECT COUNT(*) FROM registros WHERE DATE(fecha_hora) = CURRENT_DATE")
+        registros_hoy = cursor.fetchone()[0]
+        
+        # Obtener total de asistencias
+        cursor.execute("SELECT COUNT(*) FROM asistencias")
+        total_asistencias = cursor.fetchone()[0]
+        
+        # Obtener asistencias de hoy
+        cursor.execute("SELECT COUNT(*) FROM asistencias WHERE fecha = CURRENT_DATE")
+        asistencias_hoy = cursor.fetchone()[0]
+        
+        # Obtener usuarios presentes hoy (que han marcado entrada)
+        cursor.execute("""
+            SELECT COUNT(DISTINCT usuario_id) FROM asistencias 
+            WHERE fecha = CURRENT_DATE AND hora_entrada IS NOT NULL
+        """)
+        usuarios_presentes = cursor.fetchone()[0]
+        
+        estadisticas = {
+            "total_registros": total_registros,
+            "total_usuarios": total_usuarios,
+            "registros_hoy": registros_hoy,
+            "total_asistencias": total_asistencias,
+            "asistencias_hoy": asistencias_hoy,
+            "usuarios_presentes": usuarios_presentes
+        }
+        
+        print(f"✅ Estadísticas obtenidas: {estadisticas}")
+        return {"estadisticas": estadisticas}
+        
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
 
 @app.get("/usuarios")
 async def obtener_usuarios():

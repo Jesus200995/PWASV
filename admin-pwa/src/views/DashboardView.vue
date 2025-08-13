@@ -613,6 +613,7 @@ import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
 import AsistenciasService from '../services/asistenciasService.js'
+import { estadisticasService } from '../services/estadisticasService.js'
 
 const router = useRouter()
 
@@ -771,7 +772,8 @@ const cargarRegistros = async () => {
   
   try {
     const token = localStorage.getItem('admin_token')
-    const response = await axios.get(`${API_URL}/registros`, {
+    // Para el dashboard, cargar más registros para tener mejor información estadística
+    const response = await axios.get(`${API_URL}/registros?limit=1000`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -786,7 +788,7 @@ const cargarRegistros = async () => {
     // También cargar asistencias cuando se actualicen los registros
     await cargarAsistencias()
     
-    calcularEstadisticas()
+    await calcularEstadisticas()
     
     console.log('Registros cargados en Dashboard:', registros.value)
   } catch (err) {
@@ -805,7 +807,7 @@ const cargarRegistros = async () => {
 const cargarUsuarios = async () => {
   try {
     usuarios.value = await usuariosService.obtenerUsuarios()
-    calcularEstadisticas() // Recalcular con usuarios reales
+    await calcularEstadisticas() // Recalcular con usuarios reales
     console.log('✅ Usuarios reales cargados en Dashboard:', usuarios.value)
   } catch (err) {
     console.error('❌ Error al cargar usuarios desde la base de datos:', err)
@@ -820,42 +822,49 @@ const cargarUsuarios = async () => {
 const cargarAsistencias = async () => {
   try {
     asistencias.value = await AsistenciasService.obtenerAsistencias()
-    calcularEstadisticas() // Recalcular con asistencias
+    await calcularEstadisticas() // Recalcular con asistencias
     console.log('✅ Asistencias cargadas en Dashboard:', asistencias.value)
   } catch (err) {
     console.error('❌ Error al cargar asistencias:', err)
   }
 }
 
-const calcularEstadisticas = () => {
-  const totalRegistros = registros.value.length
-  const totalUsuarios = usuarios.value.length // Usar usuarios reales en lugar de únicos de registros
-  
-  const hoy = new Date().toDateString()
-  const registrosHoy = registros.value.filter(r => {
-    const fechaRegistro = new Date(r.fecha_hora).toDateString()
-    return fechaRegistro === hoy
-  }).length
-
-  // Estadísticas de asistencias
-  const totalAsistencias = asistencias.value.length
-  const hoyISO = new Date().toISOString().split('T')[0]
-  const asistenciasHoy = asistencias.value.filter(a => a.fecha === hoyISO).length
-  
-  // Usuarios presentes hoy (que han marcado entrada)
-  const usuariosPresentes = new Set()
-  asistencias.value.forEach(a => {
-    if (a.fecha === hoyISO && a.hora_entrada) {
-      usuariosPresentes.add(a.usuario_id)
+const calcularEstadisticas = async () => {
+  try {
+    // Usar el nuevo servicio de estadísticas con fallback automático
+    const estadisticasReales = await estadisticasService.obtenerEstadisticasConFallback(
+      registros.value,
+      usuarios.value,
+      asistencias.value
+    )
+    
+    // Aplicar las estadísticas obtenidas
+    stats.totalRegistros = estadisticasReales.totalRegistros
+    stats.totalUsuarios = estadisticasReales.totalUsuarios
+    stats.registrosHoy = estadisticasReales.registrosHoy
+    stats.totalAsistencias = estadisticasReales.totalAsistencias
+    stats.asistenciasHoy = estadisticasReales.asistenciasHoy
+    stats.usuariosPresentes = estadisticasReales.usuariosPresentes
+    
+    console.log('✅ Estadísticas aplicadas:', estadisticasReales)
+    
+  } catch (error) {
+    console.error('❌ Error fatal obteniendo estadísticas:', error)
+    
+    // Si hay error del token, hacer logout
+    if (error.message === 'TOKEN_EXPIRED') {
+      logout()
+      return
     }
-  })
-  
-  stats.totalRegistros = totalRegistros
-  stats.totalUsuarios = totalUsuarios
-  stats.registrosHoy = registrosHoy
-  stats.totalAsistencias = totalAsistencias
-  stats.asistenciasHoy = asistenciasHoy
-  stats.usuariosPresentes = usuariosPresentes.size
+    
+    // Como último recurso, usar valores por defecto
+    stats.totalRegistros = '-'
+    stats.totalUsuarios = '-'
+    stats.registrosHoy = '-'
+    stats.totalAsistencias = '-'
+    stats.asistenciasHoy = '-'
+    stats.usuariosPresentes = '-'
+  }
 }
 
 const formatFecha = (fechaStr) => {

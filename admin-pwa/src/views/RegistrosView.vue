@@ -2012,10 +2012,15 @@ const logout = () => {
     gap: 0.15rem;
   }
   
+  /* Espaciado mínimo en tablets */
+  .page-content {
+    padding: 6px 16px;
+  }
+  
   /* Filtros más compactos en tablets */
   .advanced-filters {
     padding: 0.3rem 0.4rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
   }
   
   .filters-main {
@@ -2075,10 +2080,15 @@ const logout = () => {
     font-size: 0.6rem;
   }
   
+  /* Espaciado ultra mínimo en móviles */
+  .page-content {
+    padding: 4px 12px;
+  }
+  
   /* Filtros ultra compactos en móviles */
   .advanced-filters {
     padding: 0.25rem 0.3rem;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.25rem;
     border-radius: 4px;
   }
   
@@ -2135,7 +2145,7 @@ const logout = () => {
   .toggle-filters-btn {
     padding: 0.2rem 0.3rem;
     font-size: 0.58rem;
-    margin-top: 0.2rem;
+    margin-top: 0.15rem;
     border-radius: 3px;
   }
   
@@ -2276,7 +2286,7 @@ const logout = () => {
 }
 
 .page-content {
-  padding: clamp(16px, 4vw, 32px);
+  padding: clamp(8px, 1.5vw, 16px) clamp(16px, 4vw, 32px);
   box-sizing: border-box;
   width: 100%;
 }
@@ -2288,7 +2298,7 @@ const logout = () => {
   border: 1px solid rgba(76, 175, 80, 0.3);
   border-radius: clamp(6px, 1.5vw, 8px);
   padding: clamp(0.4rem, 1vw, 0.6rem);
-  margin-bottom: clamp(0.6rem, 1.2vw, 0.8rem);
+  margin-bottom: clamp(0.4rem, 1vw, 0.6rem);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08);
   width: 100%;
   box-sizing: border-box;

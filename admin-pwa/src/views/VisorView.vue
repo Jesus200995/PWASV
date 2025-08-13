@@ -39,6 +39,14 @@
               </div>
             </div>
             
+            <!-- Contador de puntos en el mapa con efecto de cristal líquido -->
+            <div class="lcd-counter">
+              <div class="lcd-display">
+                <div class="lcd-label">PUNTOS EN MAPA</div>
+                <div class="lcd-number">{{ totalPuntosEnMapa.toLocaleString() }}</div>
+              </div>
+            </div>
+            
             <button @click="recargarMapa" class="refresh-btn-icon" :disabled="loading" title="Actualizar manualmente">
               <svg class="refresh-icon" :class="{ spinning: loading }" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10"></polyline>
@@ -465,6 +473,9 @@ const showModal = ref(false)
 const modalTitle = ref('')
 const modalType = ref('')
 const selectedPhotoUrl = ref('')
+
+// Contador de puntos en el mapa
+const totalPuntosEnMapa = ref(0)
 
 // Función para formatear fechas
 const formatFecha = (fechaStr) => {
@@ -1133,6 +1144,10 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
     const group = new window.L.featureGroup(markers)
     map.fitBounds(group.getBounds().pad(0.1))
   }
+  
+  // Actualizar contador de puntos en el mapa
+  totalPuntosEnMapa.value = markers.length
+  console.log(`📍 Puntos actualizados en el mapa: ${totalPuntosEnMapa.value}`)
 }
 
 // Filtrar registros según los criterios seleccionados
@@ -1999,6 +2014,140 @@ watch([filtroTipo, filtroPeriodo], () => {
   font-weight: 500;
 }
 
+/* Contador LCD estilo vidrio/cristal elegante */
+.lcd-counter {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.10) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 10px 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lcd-counter:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.15) 100%);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.lcd-counter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    rgba(0, 255, 0, 0.05) 0%,
+    transparent 30%,
+    transparent 70%,
+    rgba(0, 255, 0, 0.03) 100%);
+  pointer-events: none;
+  border-radius: 12px;
+}
+
+.lcd-counter::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, 
+    transparent 40%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 60%);
+  animation: glass-shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: 12px;
+}
+
+@keyframes glass-shimmer {
+  0%, 100% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+}
+
+.lcd-display {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.lcd-label {
+  font-family: 'Inter', 'Poppins', sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  opacity: 0.9;
+}
+
+.lcd-number {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 
+    0 0 8px rgba(255, 255, 255, 0.8),
+    0 0 16px rgba(255, 255, 255, 0.4),
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 0 4px rgba(0, 255, 65, 0.3);
+  line-height: 1;
+  animation: lcd-pulse 3s ease-in-out infinite alternate;
+  background: linear-gradient(135deg, 
+    #ffffff 0%,
+    #f0f0f0 50%,
+    #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: brightness(1.1);
+}
+
+@keyframes lcd-pulse {
+  0% {
+    text-shadow: 
+      0 0 8px rgba(255, 255, 255, 0.8),
+      0 0 16px rgba(255, 255, 255, 0.4),
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      0 0 4px rgba(0, 255, 65, 0.3);
+    transform: scale(1);
+    filter: brightness(1.1);
+  }
+  100% {
+    text-shadow: 
+      0 0 12px rgba(255, 255, 255, 1),
+      0 0 20px rgba(255, 255, 255, 0.6),
+      0 1px 3px rgba(0, 0, 0, 0.4),
+      0 0 8px rgba(0, 255, 65, 0.4);
+    transform: scale(1.02);
+    filter: brightness(1.2);
+  }
+}
+
 .refresh-btn {
   display: flex;
   align-items: center;
@@ -2078,23 +2227,35 @@ watch([filtroTipo, filtroPeriodo], () => {
 .auto-refresh-animation {
   display: flex;
   align-items: center;
-  padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 20px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: clamp(20px, 5vw, 24px);
-  backdrop-filter: blur(10px);
-  animation: containerPulse 3s ease-in-out infinite;
+  gap: clamp(0.25rem, 0.8vw, 0.35rem);
+  padding: clamp(0.25rem, 0.8vw, 0.35rem) clamp(0.5rem, 1.5vw, 0.75rem);
+  border-radius: clamp(12px, 2vw, 16px);
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  font-weight: 500;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auto-refresh-animation:hover {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
 
 .loading-dots {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 2vw, 12px);
+  gap: clamp(0.25rem, 0.8vw, 0.35rem);
 }
 
 .loading-text {
+  font-family: 'Inter', 'Poppins', sans-serif;
   color: rgba(255, 255, 255, 0.95);
-  font-size: clamp(11px, 2.5vw, 13px);
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
   font-weight: 500;
   white-space: nowrap;
   letter-spacing: 0.3px;
@@ -2103,89 +2264,52 @@ watch([filtroTipo, filtroPeriodo], () => {
 .dots-container {
   display: flex;
   align-items: center;
-  gap: clamp(4px, 1vw, 6px);
+  gap: clamp(3px, 0.8vw, 4px);
 }
 
 .dot {
-  width: clamp(6px, 1.5vw, 8px);
-  height: clamp(6px, 1.5vw, 8px);
-  border-radius: 50% 0%;
-  background: linear-gradient(45deg, #4CAF50, #81C784, #A5D6A7);
+  width: clamp(4px, 1vw, 5px);
+  height: clamp(4px, 1vw, 5px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
   position: relative;
-  animation: leafFloat 1.5s ease-in-out infinite;
+  animation: modernDotPulse 1.5s ease-in-out infinite;
   transform-origin: center;
   box-shadow: 
-    0 2px 4px rgba(76, 175, 80, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.dot::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 2px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+    0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .dot-1 {
   animation-delay: 0s;
-  background: linear-gradient(45deg, #4CAF50, #66BB6A);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .dot-2 {
   animation-delay: 0.5s;
-  background: linear-gradient(45deg, #8BC34A, #AED581);
-  border-radius: 0% 50%;
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .dot-3 {
   animation-delay: 1s;
-  background: linear-gradient(45deg, #2E7D32, #4CAF50);
-  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
 }
 
-/* Animaciones */
-@keyframes containerPulse {
-  0%, 100% { 
+/* Animación moderna para los puntos */
+@keyframes modernDotPulse {
+  0%, 60%, 100% {
+    opacity: 0.4;
     transform: scale(1);
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
   }
-  50% { 
-    transform: scale(1.02);
-    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.25);
+  30% {
+    opacity: 1;
+    transform: scale(1.2);
   }
 }
 
-@keyframes leafFloat {
-  0% { 
-    transform: translateY(0px) rotate(0deg) scale(1);
-    opacity: 0.7;
-  }
-  25% { 
-    transform: translateY(-3px) rotate(-5deg) scale(1.1);
-    opacity: 1;
-  }
-  50% { 
-    transform: translateY(-6px) rotate(0deg) scale(1.2);
-    opacity: 0.9;
-    box-shadow: 
-      0 4px 8px rgba(76, 175, 80, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
-  75% { 
-    transform: translateY(-3px) rotate(5deg) scale(1.1);
-    opacity: 1;
-  }
-  100% { 
-    transform: translateY(0px) rotate(0deg) scale(1);
-    opacity: 0.7;
-  }
-}
+/* Eliminar animaciones antiguas - ya no se usan */
 
+/* Animación del botón de recarga */
 .refresh-icon.spinning {
   animation: spinGlow 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

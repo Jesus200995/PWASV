@@ -361,24 +361,35 @@ async def registrar(
 
 # ENDPOINT CORREGIDO - Esta es la parte importante que debe actualizarse
 @app.get("/registros")
-def obtener_registros(usuario_id: int = None, limit: int = 50):
+def obtener_registros(usuario_id: int = None, limit: int = None):
     try:
-        print(f"🔍 Obteniendo registros para usuario: {usuario_id}, límite: {limit}")
+        print(f"🔍 Obteniendo registros para usuario: {usuario_id}, límite: {limit if limit else 'Sin límite'}")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
         # Usar cursor directo - NO usar cursor_factory aquí
         if usuario_id:
-            cursor.execute(
-                "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC LIMIT %s",
-                (usuario_id, limit)
-            )
+            if limit:
+                cursor.execute(
+                    "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC LIMIT %s",
+                    (usuario_id, limit)
+                )
+            else:
+                cursor.execute(
+                    "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC",
+                    (usuario_id,)
+                )
         else:
-            cursor.execute(
-                "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros ORDER BY fecha_hora DESC LIMIT %s",
-                (limit,)
-            )
+            if limit:
+                cursor.execute(
+                    "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros ORDER BY fecha_hora DESC LIMIT %s",
+                    (limit,)
+                )
+            else:
+                cursor.execute(
+                    "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros ORDER BY fecha_hora DESC"
+                )
         
         resultados = cursor.fetchall()
         print(f"📊 Encontrados {len(resultados)} registros")

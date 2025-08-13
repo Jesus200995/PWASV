@@ -292,6 +292,25 @@
           </div>
           
           <div v-else class="table-container">
+            <div class="registros-info">
+              <div class="registros-total">
+                <div class="registros-icon">📊</div>
+                <div class="registros-text">
+                  Mostrando <span class="highlight">{{ registrosFiltrados.length.toLocaleString('es') }}</span> {{ registrosFiltrados.length === 1 ? 'registro' : 'registros' }} 
+                  <template v-if="registrosFiltrados.length !== registros.length">
+                    de <span class="highlight">{{ registros.length.toLocaleString('es') }}</span> totales
+                  </template>
+                </div>
+                <div class="registros-summary" v-if="registros.length > 0">
+                  <span class="registros-badge" title="Registros con fotografía">
+                    <i class="fas fa-camera"></i> {{ (registros.filter(r => r.foto_url).length / registros.length * 100).toFixed(0) }}%
+                  </span>
+                  <span class="registros-badge" title="Usuarios únicos">
+                    <i class="fas fa-users"></i> {{ [...new Set(registros.map(r => r.usuario_id))].length }}
+                  </span>
+                </div>
+              </div>
+            </div>
             <table class="registros-table">
               <thead>
                 <tr>
@@ -536,7 +555,7 @@ const router = useRouter()
 // Estado de conexión
 const isOnline = ref(navigator.onLine)
 
-const API_URL = 'https://apipwa.sembrandodatos.com'
+const API_URL = 'http://localhost:8000'
 const registros = ref([])
 const registrosFiltrados = ref([])
 const usuariosDisponibles = ref([])
@@ -622,6 +641,8 @@ const cargarRegistros = async () => {
   
   try {
     const token = localStorage.getItem('admin_token')
+    console.log('📊 Solicitando TODOS los registros sin límite...')
+    console.time('Carga de registros')
     const response = await axios.get(`${API_URL}/registros`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -631,6 +652,7 @@ const cargarRegistros = async () => {
     
     // La respuesta puede ser directamente un array o tener una propiedad específica
     const registrosRaw = Array.isArray(response.data) ? response.data : (response.data.registros || [])
+    console.log(`🔢 Recibidos ${registrosRaw.length} registros totales del servidor`)
     
     // Enriquecer registros con información de usuarios
     registros.value = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
@@ -640,23 +662,31 @@ const cargarRegistros = async () => {
     aplicarOrdenamiento()
     
     // Extraer usuarios únicos para el filtro (con información completa)
-    const usuariosUnicos = []
+    const usuariosUnicosLista = []
     const usuariosVistos = new Set()
     
     registros.value.forEach(registro => {
       if (!usuariosVistos.has(registro.usuario_id)) {
         usuariosVistos.add(registro.usuario_id)
-        usuariosUnicos.push({
+        usuariosUnicosLista.push({
           id: registro.usuario_id,
           nombre_completo: registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`
         })
       }
     })
     
-    usuariosDisponibles.value = usuariosUnicos.sort((a, b) => a.id - b.id)
+    usuariosDisponibles.value = usuariosUnicosLista.sort((a, b) => a.id - b.id)
     usuariosFiltrados.value = usuariosDisponibles.value
     
     console.log('Registros enriquecidos cargados:', registros.value)
+    console.timeEnd('Carga de registros')
+    
+    // Estadísticas rápidas
+    const conFotos = registros.value.filter(r => r.foto_url).length;
+    const conDescripcion = registros.value.filter(r => r.descripcion && r.descripcion.trim() !== '').length;
+    const totalUsuariosUnicos = new Set(registros.value.map(r => r.usuario_id)).size;
+    
+    console.log(`📈 Estadísticas: ${registros.value.length.toLocaleString('es')} registros | ${totalUsuariosUnicos} usuarios | ${conFotos} con foto (${(conFotos/registros.value.length*100).toFixed(1)}%) | ${conDescripcion} con descripción (${(conDescripcion/registros.value.length*100).toFixed(1)}%)`);
     
     // Aplicar filtros iniciales
     filtrarRegistros()
@@ -3923,5 +3953,102 @@ const logout = () => {
     padding: 0.2rem 0.25rem;
     margin-bottom: 0.2rem;
   }
+  
+  .registros-info {
+    padding: 0.2rem 0.25rem;
+  }
+}
+
+/* Estilos para el contador de registros */
+.registros-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(76, 175, 80, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  font-size: 0.9rem;
+}
+
+.registros-total {
+  color: #4a4a4a;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.15) 100%);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.1);
+  padding: 10px 16px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.5s ease-out;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.registros-total::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.registros-total .highlight {
+  font-weight: 700;
+  color: #4CAF50;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  display: inline-block;
+  font-size: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.registros-total {
+  display: flex;
+  align-items: center;
+}
+
+.registros-icon {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.registros-text {
+  flex: 1;
+}
+
+.registros-summary {
+  display: flex;
+  gap: 8px;
+}
+
+.registros-badge {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+  border-radius: 12px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+.registros-badge i {
+  font-size: 10px;
 }
 </style>

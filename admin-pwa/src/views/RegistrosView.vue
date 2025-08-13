@@ -1779,14 +1779,14 @@ const logout = () => {
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(0.75rem, 2vw, 1.25rem);
+  padding: clamp(0.4rem, 1.2vw, 0.7rem);
   position: sticky;
   top: 0;
   z-index: 100;
   width: 100%;
   box-sizing: border-box;
   color: white;
-  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
+  box-shadow: 0 2px 12px rgba(46, 204, 113, 0.12);
   overflow: hidden;
 }
 
@@ -1807,7 +1807,7 @@ const logout = () => {
   align-items: center;
   max-width: 100%;
   margin: 0;
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(0.4rem, 1.5vw, 0.8rem);
   flex-wrap: wrap;
   width: 100%;
   position: relative;
@@ -1817,16 +1817,16 @@ const logout = () => {
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(0.4rem, 1.5vw, 0.8rem);
   flex: 1;
-  min-width: 200px;
+  min-width: 180px;
 }
 
 .header-icon {
-  width: clamp(36px, 5vw, 48px);
-  height: clamp(36px, 5vw, 48px);
+  width: clamp(28px, 4vw, 36px);
+  height: clamp(28px, 4vw, 36px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(8px, 1.5vw, 12px);
+  border-radius: clamp(6px, 1vw, 8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1837,8 +1837,8 @@ const logout = () => {
 }
 
 .header-icon svg {
-  width: clamp(16px, 3vw, 24px);
-  height: clamp(16px, 3vw, 24px);
+  width: clamp(14px, 2.5vw, 18px);
+  height: clamp(14px, 2.5vw, 18px);
   color: white;
 }
 
@@ -1849,11 +1849,11 @@ const logout = () => {
 
 .header-text {
   flex: 1;
-  min-width: 200px;
+  min-width: 160px;
 }
 
 .header-title {
-  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
   font-weight: 700;
   margin: 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
@@ -1861,23 +1861,23 @@ const logout = () => {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  letter-spacing: -0.5px;
-  line-height: 1.2;
+  letter-spacing: -0.3px;
+  line-height: 1.1;
 }
 
 .header-subtitle {
-  margin: clamp(0.15rem, 0.5vw, 0.25rem) 0 0 0;
+  margin: clamp(0.1rem, 0.3vw, 0.15rem) 0 0 0;
   color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  line-height: 1.3;
+  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
+  line-height: 1.2;
   font-weight: 400;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 1.5vw, 1rem);
+  gap: clamp(0.4rem, 1.2vw, 0.8rem);
   flex-wrap: wrap;
   justify-content: flex-end;
 }
@@ -1885,10 +1885,10 @@ const logout = () => {
 .connection-status {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.25rem, 0.8vw, 0.35rem) clamp(0.5rem, 1.5vw, 0.75rem);
-  border-radius: clamp(12px, 2vw, 16px);
-  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  gap: clamp(0.2rem, 0.6vw, 0.3rem);
+  padding: clamp(0.2rem, 0.6vw, 0.3rem) clamp(0.4rem, 1.2vw, 0.6rem);
+  border-radius: clamp(10px, 1.8vw, 14px);
+  font-size: clamp(0.6rem, 1.3vw, 0.7rem);
   font-weight: 500;
   white-space: nowrap;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1907,8 +1907,8 @@ const logout = () => {
 }
 
 .status-indicator {
-  width: clamp(4px, 1vw, 6px);
-  height: clamp(4px, 1vw, 6px);
+  width: clamp(3px, 0.8vw, 5px);
+  height: clamp(3px, 0.8vw, 5px);
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
@@ -1917,14 +1917,14 @@ const logout = () => {
 .refresh-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.2rem, 0.6vw, 0.3rem);
+  padding: clamp(0.3rem, 0.8vw, 0.4rem) clamp(0.6rem, 1.5vw, 0.8rem);
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: clamp(6px, 1.5vw, 8px);
+  border-radius: clamp(5px, 1.2vw, 7px);
   font-weight: 500;
-  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  font-size: clamp(0.6rem, 1.3vw, 0.7rem);
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -1954,6 +1954,93 @@ const logout = () => {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Responsive improvements for smaller screens */
+@media (max-width: 768px) {
+  .page-header {
+    padding: clamp(0.3rem, 1vw, 0.5rem);
+  }
+  
+  .header-content {
+    gap: 0.5rem;
+  }
+  
+  .header-main {
+    gap: 0.5rem;
+    min-width: 150px;
+  }
+  
+  .header-icon {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .header-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .header-title {
+    font-size: 0.95rem;
+    line-height: 1.05;
+  }
+  
+  .header-subtitle {
+    font-size: 0.62rem;
+    margin-top: 0.05rem;
+  }
+  
+  .header-actions {
+    gap: 0.4rem;
+  }
+  
+  .connection-status {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.58rem;
+    gap: 0.15rem;
+  }
+  
+  .status-indicator {
+    width: 3px;
+    height: 3px;
+  }
+  
+  .refresh-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.58rem;
+    gap: 0.15rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 0.25rem 0.4rem;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+  
+  .header-main {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .header-title {
+    font-size: 0.85rem;
+  }
+  
+  .header-subtitle {
+    font-size: 0.6rem;
+  }
 }
 
 /* Contenido de la página */

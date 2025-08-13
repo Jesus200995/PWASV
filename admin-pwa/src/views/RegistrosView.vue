@@ -2189,6 +2189,52 @@ const logout = () => {
   .advanced-actions {
     gap: 0.25rem;
   }
+  
+  /* Tabla ultra compacta para tablets */
+  .registros-table {
+    min-width: 450px;
+  }
+  
+  .registros-table th {
+    padding: 4px 6px;
+    font-size: 7px;
+    letter-spacing: 0.2px;
+  }
+  
+  .registros-table td {
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+  
+  .foto-mini {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    border-width: 1px;
+  }
+  
+  .btn-ver {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .usuario-info strong {
+    font-size: 9px;
+  }
+  
+  .usuario-info small {
+    font-size: 7px;
+  }
+  
+  .ubicacion,
+  .fecha,
+  .no-foto {
+    font-size: 7px;
+  }
+  
+  .descripcion {
+    max-width: 100px;
+  }
 }
 
 /* Contenido de la página */
@@ -3026,20 +3072,20 @@ const logout = () => {
 
 .registros-table {
   width: 100%;
-  min-width: clamp(600px, 80vw, 800px);
+  min-width: clamp(500px, 70vw, 700px);
   border-collapse: collapse;
   position: relative;
 }
 
 .registros-table th {
   background: linear-gradient(135deg, #f8f9fa 0%, #f0f8f0 100%);
-  padding: clamp(12px, 3vw, 16px) clamp(8px, 2vw, 12px);
+  padding: clamp(6px, 1.5vw, 10px) clamp(4px, 1vw, 8px);
   text-align: center;
   font-weight: 700;
   color: #4CAF50;
   text-transform: uppercase;
-  font-size: clamp(10px, 2.5vw, 12px);
-  letter-spacing: 0.5px;
+  font-size: clamp(8px, 1.8vw, 10px);
+  letter-spacing: 0.3px;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -3048,9 +3094,9 @@ const logout = () => {
 }
 
 .registros-table td {
-  padding: clamp(12px, 3vw, 16px) clamp(8px, 2vw, 12px);
+  padding: clamp(6px, 1.5vw, 10px) clamp(4px, 1vw, 8px);
   border-bottom: 1px solid rgba(224, 224, 224, 0.6);
-  font-size: clamp(12px, 2.5vw, 14px);
+  font-size: clamp(10px, 1.8vw, 12px);
   transition: all 0.3s ease;
   white-space: nowrap;
   overflow: hidden;
@@ -3076,35 +3122,35 @@ const logout = () => {
 }
 
 .foto-mini {
-  width: clamp(40px, 6vw, 48px);
-  height: clamp(40px, 6vw, 48px);
+  width: clamp(24px, 4vw, 32px);
+  height: clamp(24px, 4vw, 32px);
   object-fit: cover;
-  border-radius: clamp(8px, 2vw, 12px);
+  border-radius: clamp(4px, 1vw, 6px);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 2px solid rgba(76, 175, 80, 0.2);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
 .foto-mini:hover {
-  transform: scale(1.1) rotate(2deg);
+  transform: scale(1.05);
   border-color: #4CAF50;
-  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.25);
 }
 
 .no-foto {
   color: #999;
   font-style: italic;
-  font-size: clamp(10px, 2.5vw, 12px);
+  font-size: clamp(8px, 1.8vw, 10px);
 }
 
 .ubicacion {
   font-family: monospace;
-  font-size: clamp(10px, 2.5vw, 12px);
+  font-size: clamp(8px, 1.8vw, 10px);
 }
 
 .descripcion {
-  max-width: clamp(150px, 20vw, 200px);
+  max-width: clamp(120px, 16vw, 160px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3112,29 +3158,29 @@ const logout = () => {
 
 .fecha {
   white-space: nowrap;
-  font-size: clamp(10px, 2.5vw, 12px);
+  font-size: clamp(8px, 1.8vw, 10px);
 }
 
 .usuario-info {
   display: flex;
   flex-direction: column;
-  gap: clamp(1px, 0.5vh, 2px);
+  gap: clamp(0.5px, 0.3vh, 1px);
 }
 
 .usuario-info strong {
-  font-size: clamp(12px, 3vw, 14px);
+  font-size: clamp(10px, 2.2vw, 12px);
   color: #2c3e50;
 }
 
 .usuario-info small {
-  font-size: clamp(10px, 2.5vw, 12px);
+  font-size: clamp(8px, 1.8vw, 10px);
   color: #666;
   font-style: italic;
 }
 
 .btn-ver {
-  width: clamp(32px, 6vw, 36px);
-  height: clamp(32px, 6vw, 36px);
+  width: clamp(24px, 4vw, 28px);
+  height: clamp(24px, 4vw, 28px);
   padding: 0;
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
@@ -3703,12 +3749,63 @@ const logout = () => {
   }
   
   .registros-table {
-    font-size: 12px;
+    min-width: 380px;
+    font-size: 8px;
   }
   
-  .registros-table th,
+  .registros-table th {
+    padding: 3px 4px;
+    font-size: 6px;
+    letter-spacing: 0.1px;
+  }
+  
   .registros-table td {
-    padding: 8px 4px;
+    padding: 3px 4px;
+    font-size: 8px;
+  }
+  
+  /* Elementos de la tabla ultra compactos para móviles */
+  .foto-mini {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    border-width: 0.5px;
+  }
+  
+  .btn-ver {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .btn-ver svg {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .usuario-info {
+    gap: 0;
+  }
+  
+  .usuario-info strong {
+    font-size: 7px;
+    line-height: 1.1;
+  }
+  
+  .usuario-info small {
+    font-size: 6px;
+    line-height: 1;
+  }
+  
+  .ubicacion,
+  .fecha,
+  .no-foto {
+    font-size: 6px;
+    line-height: 1;
+  }
+  
+  .descripcion {
+    max-width: 80px;
+    font-size: 6px;
   }
   
   .modal-content {
@@ -3763,6 +3860,68 @@ const logout = () => {
   .lightbox-hint {
     font-size: 12px;
     padding: 8px 16px;
+  }
+}
+
+/* Ultra compacto para pantallas muy pequeñas */
+@media (max-width: 400px) {
+  .page-content {
+    padding: 2px 8px;
+  }
+  
+  .registros-table {
+    min-width: 320px;
+  }
+  
+  .registros-table th {
+    padding: 2px 3px;
+    font-size: 5px;
+    letter-spacing: 0;
+  }
+  
+  .registros-table td {
+    padding: 2px 3px;
+    font-size: 7px;
+  }
+  
+  .foto-mini {
+    width: 14px;
+    height: 14px;
+    border-radius: 1px;
+  }
+  
+  .btn-ver {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .btn-ver svg {
+    width: 7px;
+    height: 7px;
+  }
+  
+  .usuario-info strong {
+    font-size: 6px;
+  }
+  
+  .usuario-info small {
+    font-size: 5px;
+  }
+  
+  .ubicacion,
+  .fecha,
+  .no-foto {
+    font-size: 5px;
+  }
+  
+  .descripcion {
+    max-width: 60px;
+    font-size: 5px;
+  }
+  
+  .advanced-filters {
+    padding: 0.2rem 0.25rem;
+    margin-bottom: 0.2rem;
   }
 }
 </style>

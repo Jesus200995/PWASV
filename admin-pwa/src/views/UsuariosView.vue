@@ -163,7 +163,7 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>                <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
+              <tbody>                <tr v-for="usuario in usuariosPaginados" :key="usuario.id">
                   <td class="col-id">#{{ usuario.id }}</td>
                   <td class="col-nombre">
                     <span class="nombre-normal">{{ usuario.nombre_completo || 'Sin nombre' }}</span>
@@ -213,6 +213,77 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+          
+          <!-- Paginación -->
+          <div class="pagination-container" v-if="totalPaginas > 1">
+            <div class="pagination-info">
+              Mostrando {{ (paginaActual - 1) * usuariosPorPagina + 1 }}-{{ Math.min(paginaActual * usuariosPorPagina, usuariosFiltrados.length) }} 
+              de {{ usuariosFiltrados.length }} usuarios
+            </div>
+            <div class="pagination-controls">
+              <button 
+                @click="paginaAnterior" 
+                :disabled="paginaActual === 1"
+                class="pagination-btn pagination-btn-prev"
+                title="Página anterior"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15,18 9,12 15,6"></polyline>
+                </svg>
+              </button>
+              
+              <div class="pagination-numbers">
+                <!-- Primera página -->
+                <button 
+                  v-if="totalPaginas > 1"
+                  @click="cambiarPagina(1)" 
+                  :class="{ 'active': 1 === paginaActual }"
+                  class="pagination-btn pagination-number"
+                >
+                  1
+                </button>
+                
+                <!-- Puntos suspensivos izquierda -->
+                <span v-if="paginaActual > 4 && totalPaginas > 6" class="pagination-dots">...</span>
+                
+                <!-- Páginas alrededor de la actual -->
+                <template v-for="pagina in obtenerPaginasVisibles()" :key="pagina">
+                  <button 
+                    v-if="pagina !== 1 && pagina !== totalPaginas"
+                    @click="cambiarPagina(pagina)" 
+                    :class="{ 'active': pagina === paginaActual }"
+                    class="pagination-btn pagination-number"
+                  >
+                    {{ pagina }}
+                  </button>
+                </template>
+                
+                <!-- Puntos suspensivos derecha -->
+                <span v-if="paginaActual < totalPaginas - 3 && totalPaginas > 6" class="pagination-dots">...</span>
+                
+                <!-- Última página -->
+                <button 
+                  v-if="totalPaginas > 1"
+                  @click="cambiarPagina(totalPaginas)" 
+                  :class="{ 'active': totalPaginas === paginaActual }"
+                  class="pagination-btn pagination-number"
+                >
+                  {{ totalPaginas }}
+                </button>
+              </div>
+              
+              <button 
+                @click="paginaSiguiente" 
+                :disabled="paginaActual === totalPaginas"
+                class="pagination-btn pagination-btn-next"
+                title="Página siguiente"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9,18 15,12 9,6"></polyline>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -589,7 +660,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
@@ -606,6 +677,10 @@ const usuariosFiltrados = ref([])
 const loading = ref(false)
 const error = ref('')
 const searchTerm = ref('')
+
+// Variables para paginación
+const paginaActual = ref(1)
+const usuariosPorPagina = ref(50)
 
 // Variables para ordenamiento
 const campoOrdenamiento = ref('fecha') // Por defecto ordenar por fecha
@@ -1024,6 +1099,7 @@ const filtrarUsuarios = () => {
       (usuario.supervisor && usuario.supervisor.toLowerCase().includes(termino))
     )
   }
+  resetearPaginacion()
   aplicarOrdenamiento()
 }
 
@@ -1252,6 +1328,90 @@ const guardarEdicion = async () => {
 // Función para cerrar modal de éxito
 const cerrarSuccessModal = () => {
   showSuccessModal.value = false
+}
+
+// Funciones de paginación
+const usuariosPaginados = computed(() => {
+  const inicio = (paginaActual.value - 1) * usuariosPorPagina.value
+  const fin = inicio + usuariosPorPagina.value
+  return usuariosFiltrados.value.slice(inicio, fin)
+})
+
+const totalPaginas = computed(() => {
+  return Math.ceil(usuariosFiltrados.value.length / usuariosPorPagina.value)
+})
+
+const cambiarPagina = (nuevaPagina) => {
+  if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas.value) {
+    paginaActual.value = nuevaPagina
+  }
+}
+
+const paginaAnterior = () => {
+  if (paginaActual.value > 1) {
+    paginaActual.value--
+  }
+}
+
+const paginaSiguiente = () => {
+  if (paginaActual.value < totalPaginas.value) {
+    paginaActual.value++
+  }
+}
+
+// Resetear página al filtrar
+const resetearPaginacion = () => {
+  paginaActual.value = 1
+}
+
+// Watchers para mejor funcionalidad
+watch(searchTerm, () => {
+  filtrarUsuarios()
+})
+
+watch(usuarios, () => {
+  filtrarUsuarios()
+})
+
+// Validar que la página actual no exceda el total de páginas
+watch(totalPaginas, (newTotal) => {
+  if (paginaActual.value > newTotal && newTotal > 0) {
+    paginaActual.value = newTotal
+  }
+})
+
+// Obtener páginas visibles alrededor de la actual
+const obtenerPaginasVisibles = () => {
+  const paginas = []
+  const total = totalPaginas.value
+  const actual = paginaActual.value
+  
+  if (total <= 6) {
+    // Si hay 6 páginas o menos, mostrar todas
+    for (let i = 2; i < total; i++) {
+      paginas.push(i)
+    }
+  } else {
+    // Lógica para más de 6 páginas
+    if (actual <= 4) {
+      // Páginas al inicio
+      for (let i = 2; i <= 4; i++) {
+        paginas.push(i)
+      }
+    } else if (actual >= total - 3) {
+      // Páginas al final
+      for (let i = total - 3; i < total; i++) {
+        paginas.push(i)
+      }
+    } else {
+      // Páginas en el medio
+      for (let i = actual - 1; i <= actual + 1; i++) {
+        paginas.push(i)
+      }
+    }
+  }
+  
+  return paginas
 }
 
 const logout = () => {
@@ -2889,6 +3049,99 @@ const logout = () => {
   font-size: 12px;
 }
 
+/* Estilos de Paginación */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: clamp(12px, 1.5vw, 16px);
+  padding: clamp(10px, 1.2vw, 14px);
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff0 100%);
+  border-radius: clamp(8px, 1.2vw, 10px);
+  border: 1px solid #4CAF50;
+  box-shadow: 
+    0 2px 8px rgba(76, 175, 80, 0.12),
+    0 1px 4px rgba(76, 175, 80, 0.08);
+}
+
+.pagination-info {
+  font-size: clamp(9px, 1.1vw, 11px);
+  color: #2e7d32;
+  font-weight: 600;
+  margin-bottom: clamp(6px, 0.8vw, 8px);
+  text-align: center;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 0.6vw, 6px);
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(24px, 3vw, 28px);
+  height: clamp(24px, 3vw, 28px);
+  border: 1px solid #4CAF50;
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff0 100%);
+  color: #2e7d32;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: clamp(9px, 1.1vw, 11px);
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 1px 3px rgba(76, 175, 80, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4CAF50 0%, #43A047 100%);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 
+    0 2px 6px rgba(76, 175, 80, 0.25),
+    0 1px 4px rgba(76, 175, 80, 0.15);
+  border-color: #43A047;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+  background: #f5f5f5;
+  color: #bdbdbd;
+  border-color: #e0e0e0;
+}
+
+.pagination-btn.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+  color: white;
+  box-shadow: 
+    0 2px 6px rgba(76, 175, 80, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border-color: #388E3C;
+  transform: scale(1.1);
+}
+
+.pagination-numbers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(3px, 0.5vw, 4px);
+}
+
+.pagination-dots {
+  padding: 0 clamp(4px, 0.6vw, 6px);
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: clamp(9px, 1.1vw, 11px);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .main-content {
@@ -3063,6 +3316,22 @@ const logout = () => {
     width: 100%;
     justify-content: center;
   }
+  
+  .pagination-container {
+    padding: clamp(8px, 1.2vw, 12px);
+    gap: clamp(6px, 1.5vw, 8px);
+  }
+  
+  .pagination-info {
+    order: 2;
+    margin-bottom: 0;
+    font-size: clamp(8px, 1vw, 10px);
+  }
+  
+  .pagination-controls {
+    order: 1;
+    gap: clamp(3px, 0.5vw, 4px);
+  }
 }
 
 @media (max-width: 480px) {
@@ -3152,6 +3421,21 @@ const logout = () => {
   .modal-content {
     max-width: calc(100vw - 10px);
     margin: 5px;
+  }
+  
+  .pagination-numbers {
+    gap: clamp(1px, 0.3vw, 2px);
+  }
+  
+  .pagination-btn {
+    width: clamp(20px, 2.8vw, 24px);
+    height: clamp(20px, 2.8vw, 24px);
+    font-size: clamp(8px, 0.9vw, 10px);
+    border-width: 1px;
+  }
+  
+  .pagination-numbers {
+    gap: clamp(2px, 0.4vw, 3px);
   }
 }
 

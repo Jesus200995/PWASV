@@ -1,10 +1,22 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-6">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      <!-- Botón de regreso -->
+      <div class="flex justify-start mb-4">
+        <button @click="goBackToLogin" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 shadow-sm">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Volver al Login
+        </button>
+      </div>
+
+      <div class="text-center">
+        <h2 class="text-center text-3xl md:text-4xl font-light text-gray-800 tracking-wide leading-tight">
           Crear cuenta
         </h2>
+        <!-- Línea verde decorativa -->
+        <div class="mx-auto mt-3 w-16 h-0.5 bg-gradient-to-r from-green-400 to-green-600 rounded-full"></div>
         <p class="mt-2 text-center text-sm text-gray-600" style="display: none;">
           Servidor: <span class="font-mono text-xs" :class="currentApiUrl.includes('localhost') ? 'text-blue-600' : 'text-green-600'">
             {{ currentApiUrl }}
@@ -88,69 +100,71 @@
         
         <div>
           <label for="telefono" class="block text-sm font-medium text-gray-700">Número de teléfono *</label>
-          <div class="relative mt-1">
+          <div class="flex mt-1 space-x-2">
             <!-- Selector de código de país -->
-            <div class="absolute inset-y-0 left-0 flex items-center">
+            <div class="relative">
               <button 
                 type="button"
                 @click="showCountrySelector = !showCountrySelector"
-                class="flex items-center pl-3 pr-2 border-r border-gray-300 h-full focus:outline-none focus:ring-2 focus:ring-primary rounded-l-md bg-gray-50 text-gray-700"
-                style="max-width: 80px; overflow: hidden; white-space: nowrap;"
+                class="flex items-center px-3 py-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors min-w-[100px] justify-between"
               >
-                <span class="mr-1 text-sm">{{ paises.find(p => p.codigo === form.codigoPais)?.bandera || '🌎' }}</span>
-                <span class="text-sm">{{ form.codigoPais }}</span>
-                <svg class="w-4 h-4 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-center">
+                  <span class="text-sm mr-1">{{ paises.find(p => p.codigo === form.codigoPais)?.bandera || '🌎' }}</span>
+                  <span class="text-sm font-medium">{{ form.codigoPais }}</span>
+                </div>
+                <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
+              
+              <!-- Dropdown para selección de país -->
+              <div 
+                v-if="showCountrySelector" 
+                class="absolute z-50 w-72 top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-hidden"
+              >
+                <!-- Barra de búsqueda -->
+                <div class="sticky top-0 bg-white p-2 border-b border-gray-200">
+                  <input 
+                    type="text"
+                    v-model="countrySearch"
+                    placeholder="Buscar país..."
+                    class="w-full px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    @click="$event.stopPropagation()"
+                  />
+                </div>
+                
+                <ul class="py-1 max-h-60 overflow-y-auto">
+                  <li 
+                    v-for="pais in filteredCountries" 
+                    :key="pais.codigo"
+                    @click="selectCountry(pais)"
+                    class="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
+                  >
+                    <span class="text-lg mr-3">{{ pais.bandera }}</span>
+                    <span class="flex-1">{{ pais.nombre }}</span>
+                    <span class="text-gray-500 font-mono text-sm">{{ pais.codigo }}</span>
+                  </li>
+                  <li v-if="filteredCountries.length === 0" class="px-3 py-2 text-gray-500 text-center">
+                    No se encontraron países
+                  </li>
+                </ul>
+              </div>
             </div>
             
             <!-- Campo de entrada del número -->
-            <input 
-              v-model="form.telefono" 
-              id="telefono" 
-              name="telefono" 
-              type="tel" 
-              required
-              maxlength="10"
-              pattern="[0-9]{10}"
-              placeholder="10 dígitos" 
-              class="pl-24 form-input"
-              @input="validatePhone"
-            />
-            
-            <!-- Dropdown para selección de país -->
-            <div 
-              v-if="showCountrySelector" 
-              class="absolute z-50 w-64 top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto"
-              style="max-height: 250px;"
-            >
-              <!-- Barra de búsqueda -->
-              <div class="sticky top-0 bg-white p-2 border-b border-gray-200">
-                <input 
-                  type="text"
-                  v-model="countrySearch"
-                  placeholder="Buscar país..."
-                  class="w-full px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary dropdown-input"
-                  @click="$event.stopPropagation()"
-                />
-              </div>
-              
-              <ul class="py-1">
-                <li 
-                  v-for="pais in filteredCountries" 
-                  :key="pais.codigo"
-                  @click="selectCountry(pais)"
-                  class="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  <span class="text-lg mr-2">{{ pais.bandera }}</span>
-                  <span>{{ pais.nombre }}</span>
-                  <span class="ml-auto text-gray-500">{{ pais.codigo }}</span>
-                </li>
-                <li v-if="filteredCountries.length === 0" class="px-3 py-2 text-gray-500 text-center">
-                  No se encontraron países
-                </li>
-              </ul>
+            <div class="flex-1">
+              <input 
+                v-model="form.telefono" 
+                id="telefono" 
+                name="telefono" 
+                type="tel" 
+                required
+                maxlength="10"
+                pattern="[0-9]{10}"
+                placeholder="10 dígitos" 
+                class="form-input w-full"
+                @input="validatePhone"
+              />
             </div>
           </div>
           <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
@@ -158,14 +172,56 @@
         
         <div>
           <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-          <input v-model="form.password" id="password" name="password" type="password" required 
-            class="mt-1 form-input" />
+          <div class="relative mt-1">
+            <input 
+              v-model="form.password" 
+              id="password" 
+              name="password" 
+              :type="showPassword ? 'text' : 'password'" 
+              required 
+              class="form-input pr-10" 
+            />
+            <button 
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+            >
+              <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+              </svg>
+            </button>
+          </div>
         </div>
         
         <div>
           <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar contraseña</label>
-          <input v-model="form.confirmPassword" id="confirmPassword" name="confirmPassword" type="password" required 
-            class="mt-1 form-input" />
+          <div class="relative mt-1">
+            <input 
+              v-model="form.confirmPassword" 
+              id="confirmPassword" 
+              name="confirmPassword" 
+              :type="showConfirmPassword ? 'text' : 'password'" 
+              required 
+              class="form-input pr-10" 
+            />
+            <button 
+              type="button"
+              @click="showConfirmPassword = !showConfirmPassword"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+            >
+              <svg v-if="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- AVISO DE PRIVACIDAD -->
@@ -288,6 +344,8 @@ const termsAccepted = ref(false);
 const termsError = ref('');
 const showSuccessModal = ref(false);
 const countrySearch = ref('');
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 
 const form = reactive({
   email: '',
@@ -616,9 +674,94 @@ function goToLogin() {
   showSuccessModal.value = false;
   router.push('/login');
 }
+
+function goBackToLogin() {
+  router.push('/login');
+}
 </script>
 
 <style scoped>
+/* Tipografía profesional para el título */
+h2 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+/* Estilos para los íconos de mostrar/ocultar contraseña */
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Mejora visual de los botones de contraseña */
+button[type="button"]:hover svg {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+button[type="button"]:active svg {
+  transform: scale(0.95);
+}
+
+/* Estilos para el botón de regreso */
+.inline-flex {
+  backdrop-filter: blur(10px);
+}
+
+.inline-flex:hover svg {
+  transform: translateX(-2px);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Efecto hover para la línea verde */
+.bg-gradient-to-r:hover {
+  transform: scaleX(1.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Mejora visual del gradiente */
+.bg-gradient-to-r {
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Responsividad mejorada */
+@media (max-width: 640px) {
+  h2 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  .py-6 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  /* Mejorar botón de regreso en móviles */
+  .inline-flex {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 1.75rem;
+    line-height: 2rem;
+  }
+}
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s;
 }

@@ -469,6 +469,7 @@
 import Sidebar from '../components/Sidebar.vue'
 import MapaAsistenciaModal from '../components/MapaAsistenciaModal.vue'
 import AsistenciasService from '../services/asistenciasService.js'
+import EstadisticasService from '../services/estadisticasService.js'
 import * as XLSX from 'xlsx'
 
 export default {
@@ -504,18 +505,40 @@ export default {
       // Propiedades para el modal del mapa
       mapaModalVisible: false,
       asistenciaSeleccionada: null,
-      tipoMapa: 'entrada' // 'entrada', 'salida', 'asistencia'
+      tipoMapa: 'entrada', // 'entrada', 'salida', 'asistencia'
+      // Estadísticas del servidor
+      estadisticasServidor: {
+        totalAsistencias: 0,
+        totalAsistenciasHoy: 0,
+        usuariosPresentes: 0,
+        totalRegistros: 0,
+        totalUsuarios: 0,
+        registrosHoy: 0
+      }
     }
   },
   computed: {
     totalAsistencias() {
-      return this.asistencias.length
+      // Usar estadísticas del servidor si están disponibles, sino calcular localmente
+      return this.estadisticasServidor.totalAsistencias > 0 
+        ? this.estadisticasServidor.totalAsistencias 
+        : this.asistencias.length
     },
     totalAsistenciasHoy() {
+      // Usar estadísticas del servidor si están disponibles, sino calcular localmente
+      if (this.estadisticasServidor.totalAsistenciasHoy > 0) {
+        return this.estadisticasServidor.totalAsistenciasHoy
+      }
+      
       const hoy = new Date().toISOString().split('T')[0]
       return this.asistencias.filter(a => a.fecha === hoy).length
     },
     usuariosPresentes() {
+      // Usar estadísticas del servidor si están disponibles, sino calcular localmente
+      if (this.estadisticasServidor.usuariosPresentes > 0) {
+        return this.estadisticasServidor.usuariosPresentes
+      }
+      
       const hoy = new Date().toISOString().split('T')[0]
       const usuariosHoy = new Set()
       this.asistencias.forEach(a => {
@@ -639,7 +662,13 @@ export default {
       this.error = null
       
       try {
-        this.asistencias = await AsistenciasService.obtenerAsistenciasConUsuarios()
+        // Cargar asistencias y estadísticas en paralelo
+        const [asistencias] = await Promise.all([
+          AsistenciasService.obtenerAsistenciasConUsuarios(),
+          this.cargarEstadisticas()
+        ])
+        
+        this.asistencias = asistencias
         this.filtrarAsistencias()
         console.log('✅ Asistencias cargadas:', this.asistencias.length)
       } catch (error) {
@@ -647,6 +676,43 @@ export default {
         this.error = 'Error al cargar las asistencias. Por favor, intenta de nuevo.'
       } finally {
         this.loading = false
+      }
+    },
+
+    async cargarEstadisticas() {
+      try {
+        console.log('🔍 Cargando estadísticas desde el servidor...')
+        
+        // Usar el servicio de estadísticas con fallback
+        const estadisticas = await EstadisticasService.obtenerEstadisticasConFallback(
+          [], // registros (no los usamos aquí)
+          [], // usuarios (no los usamos aquí) 
+          this.asistencias // asistencias para fallback
+        )
+        
+        // Actualizar estadísticas del servidor
+        this.estadisticasServidor = {
+          totalAsistencias: estadisticas.totalAsistencias || 0,
+          totalAsistenciasHoy: estadisticas.asistenciasHoy || 0,
+          usuariosPresentes: estadisticas.usuariosPresentes || 0,
+          totalRegistros: estadisticas.totalRegistros || 0,
+          totalUsuarios: estadisticas.totalUsuarios || 0,
+          registrosHoy: estadisticas.registrosHoy || 0
+        }
+        
+        console.log('✅ Estadísticas cargadas:', this.estadisticasServidor)
+        
+      } catch (error) {
+        console.warn('⚠️ Error al cargar estadísticas, usando cálculo local:', error)
+        // En caso de error, resetear estadísticas para que use cálculo local
+        this.estadisticasServidor = {
+          totalAsistencias: 0,
+          totalAsistenciasHoy: 0,
+          usuariosPresentes: 0,
+          totalRegistros: 0,
+          totalUsuarios: 0,
+          registrosHoy: 0
+        }
       }
     },
 

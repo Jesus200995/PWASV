@@ -1284,14 +1284,14 @@ const logout = () => {
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(0.75rem, 2vw, 1.25rem);
+  padding: clamp(0.4rem, 1.2vw, 0.7rem);
   position: sticky;
   top: 0;
   z-index: 100;
   width: 100%;
   box-sizing: border-box;
   color: white;
-  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
+  box-shadow: 0 2px 12px rgba(46, 204, 113, 0.12);
   overflow: hidden;
 }
 
@@ -1312,7 +1312,7 @@ const logout = () => {
   align-items: center;
   max-width: 100%;
   margin: 0;
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(0.4rem, 1.5vw, 0.8rem);
   flex-wrap: wrap;
   width: 100%;
   position: relative;
@@ -1322,16 +1322,16 @@ const logout = () => {
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(0.3rem, 1.2vw, 0.6rem);
   flex: 1;
   min-width: 200px;
 }
 
 .header-icon {
-  width: clamp(36px, 5vw, 48px);
-  height: clamp(36px, 5vw, 48px);
+  width: clamp(28px, 4vw, 36px);
+  height: clamp(28px, 4vw, 36px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(8px, 1.5vw, 12px);
+  border-radius: clamp(6px, 1.2vw, 9px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1342,8 +1342,8 @@ const logout = () => {
 }
 
 .header-icon svg {
-  width: clamp(16px, 3vw, 24px);
-  height: clamp(16px, 3vw, 24px);
+  width: clamp(14px, 2.5vw, 20px);
+  height: clamp(14px, 2.5vw, 20px);
   color: white;
 }
 
@@ -1358,7 +1358,7 @@ const logout = () => {
 }
 
 .header-title {
-  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  font-size: clamp(0.9rem, 2.5vw, 1.2rem);
   font-weight: 700;
   margin: 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
@@ -1371,9 +1371,9 @@ const logout = () => {
 }
 
 .header-subtitle {
-  margin: clamp(0.15rem, 0.5vw, 0.25rem) 0 0 0;
+  margin: clamp(0.1rem, 0.3vw, 0.15rem) 0 0 0;
   color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.75rem);
   line-height: 1.3;
   font-weight: 400;
   letter-spacing: 0.2px;
@@ -1382,7 +1382,7 @@ const logout = () => {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 1.5vw, 1rem);
+  gap: clamp(0.3rem, 1vw, 0.6rem);
   flex-wrap: wrap;
   justify-content: flex-end;
 }
@@ -1466,12 +1466,12 @@ const logout = () => {
 }
 
 .search-section {
-  margin-bottom: 16px;
+  margin-bottom: clamp(8px, 1.5vw, 12px);
   animation: slideInRight 0.6s ease-out;
   background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
   border: 2px solid #4CAF50;
-  border-radius: 12px;
-  padding: 12px 16px;
+  border-radius: clamp(6px, 1.2vw, 9px);
+  padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 12px);
   box-shadow: 
     0 6px 24px rgba(76, 175, 80, 0.12),
     0 3px 12px rgba(76, 175, 80, 0.08);
@@ -1497,13 +1497,13 @@ const logout = () => {
 .search-group, .sort-group, .export-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: clamp(4px, 1vw, 6px);
 }
 
 .search-group {
   position: relative;
   flex: 1;
-  min-width: 200px;
+  min-width: clamp(150px, 20vw, 180px);
 }
 
 .sort-group label {
@@ -1621,10 +1621,10 @@ const logout = () => {
 
 .search-input {
   width: 100%;
-  padding: 6px 12px 6px 32px;
+  padding: clamp(4px, 1vw, 5px) clamp(8px, 1.5vw, 10px) clamp(4px, 1vw, 5px) clamp(24px, 3vw, 28px);
   border: 1px solid rgba(76, 175, 80, 0.3);
-  border-radius: 16px;
-  font-size: 12px;
+  border-radius: clamp(12px, 2vw, 14px);
+  font-size: clamp(10px, 1.2vw, 11px);
   background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
   transition: all 0.3s ease;
   box-shadow: 0 1px 4px rgba(76, 175, 80, 0.1);
@@ -1636,7 +1636,7 @@ const logout = () => {
 .search-input::placeholder {
   color: #999;
   font-weight: 400;
-  font-size: 11px;
+  font-size: clamp(9px, 1.1vw, 10px);
 }
 
 .search-input:focus {
@@ -1653,7 +1653,7 @@ const logout = () => {
 
 .search-icon {
   position: absolute;
-  left: 8px;
+  left: clamp(6px, 1.2vw, 7px);
   top: 50%;
   transform: translateY(-50%);
   color: #4CAF50;
@@ -1828,12 +1828,12 @@ const logout = () => {
 
 .usuarios-table th {
   background: linear-gradient(135deg, #f8f9fa 0%, #f0f8f0 100%);
-  padding: clamp(8px, 1.5vw, 12px) clamp(4px, 1vw, 8px);
+  padding: clamp(6px, 1.2vw, 8px) clamp(3px, 0.8vw, 5px);
   text-align: center;
   font-weight: 700;
   color: #4CAF50;
   text-transform: uppercase;
-  font-size: clamp(8px, 1.5vw, 10px);
+  font-size: clamp(7px, 1.2vw, 8px);
   letter-spacing: 0.5px;
   border-bottom: 2px solid rgba(76, 175, 80, 0.2);
   position: sticky;
@@ -1862,9 +1862,9 @@ const logout = () => {
 }
 
 .usuarios-table td {
-  padding: clamp(6px, 1.2vw, 10px) clamp(3px, 0.8vw, 6px);
+  padding: clamp(4px, 1vw, 6px) clamp(2px, 0.6vw, 4px);
   border-bottom: 1px solid rgba(224, 224, 224, 0.6);
-  font-size: clamp(9px, 1.8vw, 12px);
+  font-size: clamp(8px, 1.5vw, 10px);
   transition: all 0.3s ease;
   color: #444;
   font-weight: 500;
@@ -1953,9 +1953,9 @@ const logout = () => {
 }
 
 .status-badge {
-  padding: clamp(3px, 0.6vw, 5px) clamp(6px, 1.2vw, 8px);
-  border-radius: clamp(8px, 2vw, 12px);
-  font-size: clamp(7px, 1.4vw, 9px);
+  padding: clamp(2px, 0.4vw, 3px) clamp(4px, 1vw, 6px);
+  border-radius: clamp(6px, 1.5vw, 9px);
+  font-size: clamp(6px, 1.2vw, 7px);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -1964,7 +1964,7 @@ const logout = () => {
   position: relative;
   overflow: hidden;
   white-space: nowrap;
-  min-width: clamp(35px, 7vw, 50px);
+  min-width: clamp(28px, 5.5vw, 40px);
   text-align: center;
   max-width: 100%;
 }
@@ -2005,8 +2005,8 @@ const logout = () => {
 }
 
 .btn-ver {
-  width: clamp(32px, 6vw, 36px);
-  height: clamp(32px, 6vw, 36px);
+  width: clamp(24px, 4.5vw, 28px);
+  height: clamp(24px, 4.5vw, 28px);
   padding: 0;
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
@@ -2052,8 +2052,8 @@ const logout = () => {
 }
 
 .btn-ver svg {
-  width: clamp(14px, 3vw, 16px);
-  height: clamp(14px, 3vw, 16px);
+  width: clamp(12px, 2.5vw, 14px);
+  height: clamp(12px, 2.5vw, 14px);
   transition: all 0.3s ease;
 }
 
@@ -2081,8 +2081,8 @@ const logout = () => {
 
 /* Estilos para el botón de eliminar */
 .btn-eliminar {
-  width: clamp(32px, 6vw, 36px);
-  height: clamp(32px, 6vw, 36px);
+  width: clamp(24px, 4.5vw, 28px);
+  height: clamp(24px, 4.5vw, 28px);
   padding: 0;
   background: linear-gradient(135deg, #f44336, #d32f2f);
   color: white;
@@ -2128,8 +2128,8 @@ const logout = () => {
 }
 
 .btn-eliminar svg {
-  width: clamp(14px, 3vw, 16px);
-  height: clamp(14px, 3vw, 16px);
+  width: clamp(12px, 2.5vw, 14px);
+  height: clamp(12px, 2.5vw, 14px);
   transition: all 0.3s ease;
 }
 
@@ -2139,8 +2139,8 @@ const logout = () => {
 
 /* Estilos para el botón de editar */
 .btn-editar {
-  width: clamp(32px, 6vw, 36px);
-  height: clamp(32px, 6vw, 36px);
+  width: clamp(24px, 4.5vw, 28px);
+  height: clamp(24px, 4.5vw, 28px);
   padding: 0;
   background: linear-gradient(135deg, #ff9800, #f57c00);
   color: white;
@@ -2186,8 +2186,8 @@ const logout = () => {
 }
 
 .btn-editar svg {
-  width: clamp(14px, 3vw, 16px);
-  height: clamp(14px, 3vw, 16px);
+  width: clamp(12px, 2.5vw, 14px);
+  height: clamp(12px, 2.5vw, 14px);
   transition: all 0.3s ease;
 }
 
@@ -2904,28 +2904,28 @@ const logout = () => {
   .usuarios-table {
     width: 100%;
     max-width: 100%;
-    font-size: clamp(8px, 1.6vw, 11px);
+    font-size: clamp(7px, 1.3vw, 9px);
   }
   
   .usuarios-table th,
   .usuarios-table td {
-    padding: clamp(5px, 1vw, 8px) clamp(2px, 0.6vw, 5px);
-    font-size: clamp(8px, 1.6vw, 11px);
+    padding: clamp(3px, 0.8vw, 5px) clamp(1px, 0.5vw, 3px);
+    font-size: clamp(7px, 1.3vw, 9px);
     text-align: center;
   }
   
   .btn-ver {
-    padding: clamp(3px, 0.6vw, 5px) clamp(4px, 0.8vw, 6px);
-    font-size: clamp(7px, 1.2vw, 9px);
-    min-width: clamp(40px, 8vw, 60px);
+    padding: clamp(2px, 0.4vw, 3px) clamp(3px, 0.6vw, 4px);
+    font-size: clamp(6px, 1vw, 7px);
+    min-width: clamp(30px, 6vw, 45px);
     width: 100%;
     max-width: 100%;
   }
   
   .status-badge {
-    padding: clamp(2px, 0.4vw, 4px) clamp(4px, 0.8vw, 6px);
-    font-size: clamp(6px, 1.2vw, 8px);
-    min-width: clamp(30px, 6vw, 45px);
+    padding: clamp(1px, 0.3vw, 2px) clamp(3px, 0.6vw, 4px);
+    font-size: clamp(5px, 1vw, 6px);
+    min-width: clamp(24px, 4.5vw, 35px);
     width: 100%;
     max-width: 100%;
   }

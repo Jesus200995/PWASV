@@ -2011,6 +2011,39 @@ const logout = () => {
     font-size: 0.58rem;
     gap: 0.15rem;
   }
+  
+  /* Filtros más compactos en tablets */
+  .advanced-filters {
+    padding: 0.3rem 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .filters-main {
+    gap: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .search-input {
+    padding: 0.25rem 0.4rem 0.25rem 1.8rem;
+    font-size: 0.6rem;
+  }
+  
+  .date-input {
+    padding: 0.2rem 0.35rem;
+    font-size: 0.58rem;
+    min-width: 90px;
+  }
+  
+  .quick-date-btn {
+    padding: 0.15rem 0.3rem;
+    font-size: 0.58rem;
+  }
+  
+  .toggle-filters-btn {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.6rem;
+    margin-top: 0.25rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2040,6 +2073,111 @@ const logout = () => {
   
   .header-subtitle {
     font-size: 0.6rem;
+  }
+  
+  /* Filtros ultra compactos en móviles */
+  .advanced-filters {
+    padding: 0.25rem 0.3rem;
+    margin-bottom: 0.4rem;
+    border-radius: 4px;
+  }
+  
+  .filters-main {
+    gap: 0.2rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .search-box {
+    min-width: 150px;
+  }
+  
+  .search-input {
+    padding: 0.2rem 0.3rem 0.2rem 1.6rem;
+    font-size: 0.58rem;
+    border-radius: 3px;
+  }
+  
+  .search-icon {
+    width: 10px;
+    height: 10px;
+    left: 0.4rem;
+  }
+  
+  .date-range-filter {
+    gap: 0.3rem;
+  }
+  
+  .date-picker-container {
+    gap: 0.2rem;
+  }
+  
+  .date-label {
+    font-size: 0.55rem;
+  }
+  
+  .date-input {
+    padding: 0.15rem 0.25rem;
+    font-size: 0.55rem;
+    min-width: 80px;
+    border-radius: 3px;
+  }
+  
+  .quick-date-filters {
+    gap: 0.15rem;
+  }
+  
+  .quick-date-btn {
+    padding: 0.12rem 0.25rem;
+    font-size: 0.55rem;
+    border-radius: 2px;
+  }
+  
+  .toggle-filters-btn {
+    padding: 0.2rem 0.3rem;
+    font-size: 0.58rem;
+    margin-top: 0.2rem;
+    border-radius: 3px;
+  }
+  
+  .advanced-filters-grid {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+  
+  .filter-label {
+    font-size: 0.55rem;
+  }
+  
+  .filter-select {
+    padding: 0.2rem 0.3rem;
+    font-size: 0.55rem;
+    border-radius: 3px;
+  }
+  
+  .checkbox-option {
+    font-size: 0.55rem;
+    gap: 0.1rem;
+  }
+  
+  .checkbox-option input[type="checkbox"] {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .sort-btn {
+    padding: 0.15rem 0.3rem;
+    font-size: 0.55rem;
+    border-radius: 2px;
+  }
+  
+  .export-btn {
+    padding: 0.2rem 0.3rem;
+    font-size: 0.55rem;
+    border-radius: 2px;
+  }
+  
+  .advanced-actions {
+    gap: 0.25rem;
   }
 }
 
@@ -2143,62 +2281,58 @@ const logout = () => {
   width: 100%;
 }
 
-/* FILTROS AVANZADOS ULTRA RESPONSIVE */
+/* FILTROS AVANZADOS ULTRA COMPACTOS */
 .advanced-filters {
   background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
   backdrop-filter: blur(10px);
-  border: 2px solid #4CAF50;
-  border-radius: clamp(8px, 2vw, 12px);
-  padding: clamp(0.75rem, 2vw, 1rem);
-  margin-bottom: clamp(1rem, 2vw, 1.25rem);
-  box-shadow: 
-    0 6px 24px rgba(76, 175, 80, 0.12),
-    0 3px 12px rgba(76, 175, 80, 0.08);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.4rem, 1vw, 0.6rem);
+  margin-bottom: clamp(0.6rem, 1.2vw, 0.8rem);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08);
   width: 100%;
   box-sizing: border-box;
   transition: all 0.3s ease;
 }
 
 .advanced-filters:hover {
-  border-color: #45a049;
-  box-shadow: 
-    0 8px 32px rgba(76, 175, 80, 0.15),
-    0 4px 16px rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.5);
+  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.12);
   transform: translateY(-1px);
 }
 
 .filters-main {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.5rem, 1.5vw, 0.65rem);
-  margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+  gap: clamp(0.3rem, 0.8vw, 0.4rem);
+  margin-bottom: clamp(0.3rem, 0.8vw, 0.4rem);
   width: 100%;
 }
 
 .search-box {
   position: relative;
   flex: 1;
-  min-width: clamp(200px, 40vw, 300px);
+  min-width: clamp(180px, 35vw, 250px);
   max-width: 100%;
 }
 
 .search-icon {
   position: absolute;
-  left: clamp(0.75rem, 2vw, 1rem);
+  left: clamp(0.5rem, 1.2vw, 0.7rem);
   top: 50%;
   transform: translateY(-50%);
   color: #9ca3af;
-  width: clamp(14px, 2vw, 16px);
-  height: clamp(14px, 2vw, 16px);
+  width: clamp(12px, 1.5vw, 14px);
+  height: clamp(12px, 1.5vw, 14px);
 }
 
 .search-input {
   width: 100%;
-  padding: clamp(0.5rem, 1.5vw, 0.65rem) clamp(0.75rem, 2vw, 1rem) clamp(0.5rem, 1.5vw, 0.65rem) clamp(2.5rem, 6vw, 3rem);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.3rem, 0.8vw, 0.4rem) clamp(0.5rem, 1.2vw, 0.7rem) clamp(0.3rem, 0.8vw, 0.4rem) clamp(2rem, 4vw, 2.4rem);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: clamp(4px, 1vw, 6px);
   background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
@@ -2211,21 +2345,21 @@ const logout = () => {
 
 .clear-search-btn {
   position: absolute;
-  right: clamp(0.75rem, 2vw, 1rem);
+  right: clamp(0.5rem, 1.2vw, 0.7rem);
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   color: #9ca3af;
   cursor: pointer;
-  padding: clamp(0.2rem, 0.5vw, 0.25rem);
+  padding: clamp(0.15rem, 0.3vw, 0.2rem);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  width: clamp(20px, 3vw, 24px);
-  height: clamp(20px, 3vw, 24px);
+  width: clamp(16px, 2.5vw, 20px);
+  height: clamp(16px, 2.5vw, 20px);
 }
 
 .clear-search-btn:hover {
@@ -2236,7 +2370,7 @@ const logout = () => {
 .date-range-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.4rem, 1vw, 0.6rem);
   align-items: center;
   width: 100%;
 }
@@ -2244,7 +2378,7 @@ const logout = () => {
 .date-picker-container {
   display: flex;
   align-items: center;
-  gap: clamp(0.4rem, 1vw, 0.5rem);
+  gap: clamp(0.25rem, 0.6vw, 0.35rem);
   flex-wrap: wrap;
 }
 
@@ -2252,17 +2386,17 @@ const logout = () => {
   font-weight: 500;
   color: #4b5563;
   white-space: nowrap;
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
 }
 
 .date-input {
-  padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.6rem, 1.5vw, 0.75rem);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.25rem, 0.6vw, 0.35rem) clamp(0.4rem, 1vw, 0.5rem);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: clamp(4px, 1vw, 6px);
   background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   transition: all 0.3s ease;
-  min-width: clamp(120px, 20vw, 140px);
+  min-width: clamp(100px, 16vw, 120px);
 }
 
 .date-input:focus {
@@ -2274,16 +2408,16 @@ const logout = () => {
 .quick-date-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.4rem, 1vw, 0.5rem);
+  gap: clamp(0.25rem, 0.6vw, 0.35rem);
   margin-left: auto;
 }
 
 .quick-date-btn {
-  padding: clamp(0.3rem, 0.8vw, 0.35rem) clamp(0.6rem, 1.5vw, 0.75rem);
+  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
   background: rgba(0, 0, 0, 0.05);
   border: none;
-  border-radius: clamp(4px, 1vw, 6px);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  border-radius: clamp(3px, 0.8vw, 4px);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
@@ -2303,12 +2437,12 @@ const logout = () => {
 .clear-date-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.3rem, 0.8vw, 0.35rem) clamp(0.6rem, 1.5vw, 0.75rem);
+  gap: clamp(0.15rem, 0.5vw, 0.25rem);
+  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
   background: rgba(244, 67, 54, 0.1);
   border: none;
-  border-radius: clamp(4px, 1vw, 6px);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  border-radius: clamp(3px, 0.8vw, 4px);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   font-weight: 500;
   color: #f44336;
   cursor: pointer;
@@ -2322,58 +2456,58 @@ const logout = () => {
 
 .filters-advanced {
   border-top: 1px solid rgba(0, 0, 0, 0.05);
-  padding-top: clamp(0.6rem, 1.5vw, 0.8rem);
-  margin-top: clamp(0.3rem, 0.8vw, 0.4rem);
+  padding-top: clamp(0.3rem, 0.8vw, 0.4rem);
+  margin-top: clamp(0.2rem, 0.5vw, 0.25rem);
 }
 
 .advanced-filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(clamp(180px, 25vw, 220px), 1fr));
-  gap: clamp(0.75rem, 2vw, 1rem);
-  margin-bottom: clamp(0.6rem, 1.5vw, 0.8rem);
+  grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 20vw, 180px), 1fr));
+  gap: clamp(0.4rem, 1vw, 0.6rem);
+  margin-bottom: clamp(0.3rem, 0.8vw, 0.4rem);
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.25rem, 0.6vw, 0.3rem);
+  gap: clamp(0.15rem, 0.4vw, 0.2rem);
 }
 
 .filter-label {
   font-weight: 600;
   color: #4b5563;
-  margin-bottom: clamp(0.1rem, 0.3vw, 0.15rem);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  margin-bottom: clamp(0.05rem, 0.2vw, 0.1rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
 }
 
 .filter-options {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.5rem, 1.3vw, 0.65rem);
+  gap: clamp(0.3rem, 0.8vw, 0.4rem);
 }
 
 .checkbox-option {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
+  gap: clamp(0.15rem, 0.5vw, 0.25rem);
   cursor: pointer;
   user-select: none;
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
 }
 
 .checkbox-option input[type="checkbox"] {
-  width: clamp(12px, 2vw, 14px);
-  height: clamp(12px, 2vw, 14px);
+  width: clamp(10px, 1.5vw, 12px);
+  height: clamp(10px, 1.5vw, 12px);
   accent-color: #4CAF50;
   cursor: pointer;
 }
 
 .filter-select {
-  padding: clamp(0.35rem, 0.9vw, 0.45rem) clamp(0.6rem, 1.5vw, 0.75rem);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.25rem, 0.6vw, 0.3rem) clamp(0.4rem, 1vw, 0.5rem);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: clamp(4px, 1vw, 6px);
   background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
@@ -2389,18 +2523,18 @@ const logout = () => {
 .sort-options {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.4rem, 1vw, 0.5rem);
+  gap: clamp(0.25rem, 0.6vw, 0.35rem);
 }
 
 .sort-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.3rem, 0.8vw, 0.35rem) clamp(0.6rem, 1.5vw, 0.75rem);
+  gap: clamp(0.15rem, 0.5vw, 0.25rem);
+  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
   background: rgba(0, 0, 0, 0.05);
   border: none;
-  border-radius: clamp(4px, 1vw, 6px);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  border-radius: clamp(3px, 0.8vw, 4px);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
@@ -2420,21 +2554,21 @@ const logout = () => {
 .advanced-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.4rem, 1vw, 0.6rem);
   justify-content: flex-end;
 }
 
 .export-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.35rem, 0.9vw, 0.45rem) clamp(0.6rem, 1.5vw, 0.8rem);
+  gap: clamp(0.15rem, 0.5vw, 0.25rem);
+  padding: clamp(0.25rem, 0.6vw, 0.3rem) clamp(0.4rem, 1vw, 0.5rem);
   background: rgba(33, 150, 243, 0.1);
   color: #2196F3;
   border: none;
-  border-radius: clamp(4px, 1vw, 6px);
+  border-radius: clamp(3px, 0.8vw, 4px);
   font-weight: 500;
-  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
@@ -2465,17 +2599,17 @@ const logout = () => {
 .toggle-filters-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.35rem, 1vw, 0.5rem);
-  padding: clamp(0.5rem, 1.2vw, 0.65rem) clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.25rem, 0.6vw, 0.35rem);
+  padding: clamp(0.3rem, 0.8vw, 0.4rem) clamp(0.5rem, 1.2vw, 0.7rem);
   background: rgba(76, 175, 80, 0.1);
   border: 1px solid rgba(76, 175, 80, 0.2);
-  border-radius: clamp(6px, 1.5vw, 8px);
+  border-radius: clamp(4px, 1vw, 6px);
   color: #4CAF50;
-  font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: clamp(0.5rem, 1.2vw, 0.65rem);
+  margin-top: clamp(0.3rem, 0.8vw, 0.4rem);
   width: 100%;
   justify-content: center;
 }

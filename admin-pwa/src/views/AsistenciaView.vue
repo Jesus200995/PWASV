@@ -3293,9 +3293,55 @@ export default {
   transition: all 0.3s ease; /* Igual a usuarios-table */
   color: #444; /* Igual a usuarios-table */
   font-weight: 500; /* Igual a usuarios-table */
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Estilos específicos por columna para mejor responsividad */
+.asistencias-table td:nth-child(1) { /* Usuario */
+  white-space: nowrap;
+}
+
+.asistencias-table td:nth-child(2) { /* Correo - permitir wrap */
+  white-space: normal;
+  word-break: break-word;
+  hyphens: auto;
+  line-height: 1.2;
+  max-width: 0; /* Forzar que respete el width */
+  font-family: Arial, sans-serif; /* Fuente Arial */
+  font-size: clamp(8px, 1.4vw, 9px); /* Mismo tamaño que user-name */
+  color: #1565C0; /* Azul fuerte */
+  font-weight: 700; /* Negritas (bold) */
+  font-style: italic; /* Cursiva/de lado */
+}
+
+.asistencias-table td:nth-child(3) { /* Fecha */
+  white-space: nowrap;
+}
+
+.asistencias-table td:nth-child(4), /* Entrada */
+.asistencias-table td:nth-child(5) { /* Salida */
+  white-space: nowrap;
+}
+
+.asistencias-table td:nth-child(6), /* Ubicación Entrada */
+.asistencias-table td:nth-child(7) { /* Ubicación Salida */
+  white-space: normal;
+  word-break: break-word;
+}
+
+.asistencias-table td:nth-child(8) { /* Fotos */
+  white-space: nowrap;
+}
+
+.asistencias-table td:nth-child(9) { /* Observaciones - permitir wrap */
+  white-space: normal;
+  word-break: break-word;
+  hyphens: auto;
+  line-height: 1.3;
+  max-width: 0; /* Forzar que respete el width */
+  text-align: left; /* Mejor lectura para texto largo */
+  padding-left: clamp(4px, 1vw, 6px);
 }
 
 .asistencias-table tr:hover {
@@ -3422,6 +3468,22 @@ export default {
   text-align: center;
   min-height: clamp(28px, 4vw, 32px); /* Altura mínima más pequeña */
   padding: clamp(2px, 0.6vw, 4px); /* Padding más pequeño */
+  word-break: break-word; /* Permitir división de palabras largas */
+}
+
+.location-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, 0.4vw, 3px);
+  width: 100%;
+  min-width: 0; /* Permitir contracción */
+}
+
+.location-actions {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .location-info {
@@ -3574,10 +3636,12 @@ export default {
 }
 
 .observations-cell {
-  text-align: center;
+  text-align: left; /* Cambiado a izquierda para mejor lectura */
   max-width: 100%;
   word-wrap: break-word;
   hyphens: auto;
+  line-height: 1.3;
+  padding: clamp(4px, 1vw, 6px); /* Padding consistente */
 }
 
 .observation-item {
@@ -3585,10 +3649,18 @@ export default {
   font-size: clamp(7px, 1.2vw, 8px); /* Tamaño más pequeño */
   line-height: 1.3;
   word-break: break-word;
+  text-align: left; /* Alineación izquierda */
 }
 
 .observation-item:last-child {
   margin-bottom: 0;
+}
+
+.observation-item strong {
+  color: #4CAF50; /* Color destacado para las etiquetas */
+  font-weight: 600;
+  display: inline-block;
+  margin-right: 4px;
 }
 
 .observation-item strong {
@@ -3821,6 +3893,15 @@ export default {
     gap: clamp(2px, 0.8vw, 4px); /* Gap más pequeño */
   }
 
+  /* Estilos específicos para correo en tablet */
+  .asistencias-table td:nth-child(2) { /* Correo */
+    font-family: Arial, sans-serif; /* Fuente Arial */
+    font-size: clamp(7px, 1.3vw, 8px); /* Tamaño consistente */
+    color: #1565C0; /* Azul fuerte */
+    font-weight: 700; /* Negritas (bold) */
+    font-style: italic; /* Cursiva/de lado */
+  }
+
   .location-cell {
     gap: clamp(2px, 0.6vw, 3px); /* Gap más pequeño */
   }
@@ -3873,20 +3954,56 @@ export default {
 /* EXTRA PEQUEÑO - ULTRA COMPACTO */
 @media (max-width: 480px) {
   .asistencias-table {
-    font-size: clamp(0.55rem, 2vw, 0.65rem);
+    font-size: clamp(7px, 1.8vw, 8px); /* Tamaño más pequeño y consistente */
   }
   
   .asistencias-table th,
   .asistencias-table td {
-    padding: clamp(0.3rem, 1vw, 0.5rem);
+    padding: clamp(3px, 0.8vw, 4px) clamp(1px, 0.4vw, 2px); /* Padding extra compacto */
   }
 
   .user-name {
-    font-size: clamp(0.6rem, 1.8vw, 0.7rem);
+    font-size: clamp(7px, 1.6vw, 8px); /* Tamaño más pequeño */
   }
 
   .user-cargo {
-    font-size: clamp(0.5rem, 1.5vw, 0.6rem);
+    font-size: clamp(6px, 1.3vw, 7px); /* Tamaño más pequeño */
+  }
+
+  .user-avatar {
+    width: clamp(16px, 3vw, 18px); /* Avatar extra pequeño */
+    height: clamp(16px, 3vw, 18px);
+    font-size: clamp(6px, 1.2vw, 7px);
+  }
+
+  .time-badge,
+  .date-badge {
+    font-size: clamp(6px, 1.2vw, 7px); /* Badges más pequeños */
+    padding: clamp(1px, 0.2vw, 2px) clamp(3px, 0.6vw, 4px);
+  }
+
+  .location-badge.compact {
+    font-size: clamp(5px, 1vw, 6px); /* Location badge extra pequeño */
+    padding: clamp(1px, 0.1vw, 2px) clamp(2px, 0.3vw, 3px);
+  }
+
+  .photo-thumbnail {
+    width: clamp(14px, 3vw, 16px); /* Thumbnails extra pequeños */
+    height: clamp(14px, 3vw, 16px);
+  }
+
+  .map-btn.circular {
+    width: clamp(14px, 3vw, 16px); /* Botones extra pequeños */
+    height: clamp(14px, 3vw, 16px);
+  }
+
+  .observation-item {
+    font-size: clamp(6px, 1.2vw, 7px); /* Observaciones más pequeñas */
+    line-height: 1.2;
+  }
+
+  .no-data {
+    font-size: clamp(6px, 1.1vw, 7px); /* No-data más pequeño */
   }
   
   /* TABLA EXTRA COMPACTA - USA TODO EL ANCHO DISPONIBLE */
@@ -3908,5 +4025,20 @@ export default {
   .asistencias-table td:nth-child(8) { width: 5%; }  /* Fotos - muy compacto */
   .asistencias-table th:nth-child(9), 
   .asistencias-table td:nth-child(9) { width: 5%; }  /* Observaciones - muy compacto */
+
+  /* Ajustes específicos para mejorar la lectura en móvil */
+  .asistencias-table td:nth-child(2) { /* Correo */
+    font-size: clamp(7px, 1.2vw, 8px); /* Mismo tamaño que user-name en móvil */
+    line-height: 1.1;
+    font-family: Arial, sans-serif; /* Fuente Arial */
+    color: #1565C0; /* Azul fuerte */
+    font-weight: 700; /* Negritas (bold) */
+    font-style: italic; /* Cursiva/de lado */
+  }
+
+  .asistencias-table td:nth-child(9) { /* Observaciones */
+    text-align: left;
+    padding-left: clamp(2px, 0.5vw, 3px);
+  }
 }
 </style>

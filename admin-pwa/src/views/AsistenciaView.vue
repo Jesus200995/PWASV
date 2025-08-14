@@ -3241,7 +3241,7 @@ export default {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed; /* CRITICAL: Layout fijo para control total */
-  font-size: clamp(0.65rem, 1.3vw, 0.875rem);
+  font-size: clamp(8px, 1.5vw, 10px); /* Tamaño igual a usuarios-table */
   margin: 0;
 }
 
@@ -3266,45 +3266,54 @@ export default {
 .asistencias-table td:nth-child(9) { width: 9%; }  /* Observaciones - más espacio */
 
 .asistencias-table th {
-  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-  padding: clamp(0.75rem, 1.5vw, 1rem);
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f8f0 100%);
+  padding: clamp(6px, 1.2vw, 8px) clamp(3px, 0.8vw, 5px); /* Padding igual a usuarios-table */
   text-align: center;
-  font-weight: 600;
-  color: #4a5568;
-  border-bottom: 2px solid #e2e8f0;
-  font-size: clamp(0.6rem, 1.3vw, 0.8rem);
-  line-height: 1.2;
+  font-weight: 700; /* Peso igual a usuarios-table */
+  color: #4CAF50; /* Color igual a usuarios-table */
+  text-transform: uppercase; /* Igual a usuarios-table */
+  font-size: clamp(7px, 1.2vw, 8px); /* Tamaño igual a usuarios-table */
+  letter-spacing: 0.5px; /* Igual a usuarios-table */
+  border-bottom: 2px solid rgba(76, 175, 80, 0.2); /* Igual a usuarios-table */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .asistencias-table td {
-  padding: clamp(0.5rem, 1vw, 0.75rem);
-  border-bottom: 1px solid #f1f5f9;
+  padding: clamp(4px, 1vw, 6px) clamp(2px, 0.6vw, 4px); /* Padding igual a usuarios-table */
+  border-bottom: 1px solid rgba(224, 224, 224, 0.6); /* Igual a usuarios-table */
   vertical-align: middle;
   text-align: center;
+  font-size: clamp(8px, 1.5vw, 10px); /* Tamaño igual a usuarios-table */
+  transition: all 0.3s ease; /* Igual a usuarios-table */
+  color: #444; /* Igual a usuarios-table */
+  font-weight: 500; /* Igual a usuarios-table */
+  white-space: nowrap;
   overflow: hidden;
-  word-wrap: break-word;
-  hyphens: auto;
+  text-overflow: ellipsis;
 }
 
 .asistencias-table tr:hover {
   background: rgba(76, 175, 80, 0.05);
 }
 
-/* ESTILOS ESPECÍFICOS DE CELDAS - ULTRA RESPONSIVE */
+/* ESTILOS ESPECÍFICOS DE CELDAS - COMPACTO COMO USUARIOS */
 .user-info {
   display: flex;
   align-items: center;
-  gap: clamp(0.4rem, 1vw, 0.6rem);
+  gap: clamp(0.25rem, 0.8vw, 0.35rem); /* Gap más pequeño */
   justify-content: center;
   text-align: center;
 }
 
 .user-avatar {
-  width: clamp(28px, 4vw, 36px);
-  height: clamp(28px, 4vw, 36px);
+  width: clamp(20px, 3vw, 24px); /* Avatar más pequeño */
+  height: clamp(20px, 3vw, 24px);
   background: linear-gradient(135deg, #4CAF50, #45a049);
   border-radius: 50%;
   display: flex;
@@ -3312,7 +3321,7 @@ export default {
   justify-content: center;
   color: white;
   font-weight: 600;
-  font-size: clamp(0.6rem, 1.5vw, 0.75rem);
+  font-size: clamp(7px, 1.2vw, 8px); /* Texto más pequeño */
   flex-shrink: 0;
 }
 
@@ -3328,7 +3337,7 @@ export default {
 .user-name {
   font-weight: 600;
   color: #2d3748;
-  font-size: clamp(0.65rem, 1.3vw, 0.8rem);
+  font-size: clamp(8px, 1.4vw, 9px); /* Nombre más pequeño */
   line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3337,7 +3346,7 @@ export default {
 }
 
 .user-cargo {
-  font-size: clamp(0.55rem, 1.1vw, 0.65rem);
+  font-size: clamp(7px, 1.1vw, 8px); /* Cargo más pequeño */
   color: #718096;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3348,10 +3357,10 @@ export default {
 .date-badge {
   background: rgba(76, 175, 80, 0.1);
   color: #4CAF50;
-  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.5rem, 1vw, 0.75rem);
-  border-radius: clamp(12px, 2vw, 20px);
+  padding: clamp(2px, 0.4vw, 3px) clamp(4px, 0.8vw, 6px); /* Padding más pequeño */
+  border-radius: clamp(6px, 1.2vw, 8px); /* Border radius más pequeño */
   font-weight: 500;
-  font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+  font-size: clamp(7px, 1.2vw, 8px); /* Tamaño más pequeño */
   white-space: nowrap;
   display: inline-block;
   max-width: 100%;
@@ -3360,13 +3369,13 @@ export default {
 }
 
 .time-badge {
-  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.5rem, 1vw, 0.75rem);
-  border-radius: clamp(12px, 2vw, 20px);
+  padding: clamp(2px, 0.4vw, 3px) clamp(4px, 0.8vw, 6px); /* Padding más pequeño */
+  border-radius: clamp(6px, 1.2vw, 8px); /* Border radius más pequeño */
   font-weight: 500;
-  font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+  font-size: clamp(7px, 1.2vw, 8px); /* Tamaño más pequeño */
   white-space: nowrap;
   display: inline-block;
-  min-width: clamp(50px, 10vw, 60px);
+  min-width: clamp(35px, 8vw, 45px); /* Ancho mínimo más pequeño */
   text-align: center;
   max-width: 100%;
   overflow: hidden;
@@ -3388,7 +3397,7 @@ export default {
 .asistencias-table th:nth-child(5),
 .asistencias-table td:nth-child(4),
 .asistencias-table td:nth-child(5) {
-  min-width: 100px;
+  min-width: 70px; /* Ancho mínimo más pequeño */
   white-space: nowrap;
   text-align: center;
 }
@@ -3398,9 +3407,9 @@ export default {
 .asistencias-table th:nth-child(7),
 .asistencias-table td:nth-child(6),
 .asistencias-table td:nth-child(7) {
-  min-width: 180px;
-  max-width: 220px;
-  padding: 0.75rem;
+  min-width: 120px; /* Ancho mínimo más pequeño */
+  max-width: 150px; /* Ancho máximo más pequeño */
+  padding: clamp(4px, 1vw, 6px) clamp(2px, 0.6vw, 4px); /* Padding igual a usuarios-table */
 }
 
 /* UBICACIONES ULTRA RESPONSIVE */
@@ -3409,10 +3418,10 @@ export default {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: clamp(0.4rem, 1vw, 0.5rem);
+  gap: clamp(2px, 0.8vw, 4px); /* Gap más pequeño */
   text-align: center;
-  min-height: clamp(40px, 6vw, 44px);
-  padding: clamp(0.3rem, 0.8vw, 0.5rem);
+  min-height: clamp(28px, 4vw, 32px); /* Altura mínima más pequeña */
+  padding: clamp(2px, 0.6vw, 4px); /* Padding más pequeño */
 }
 
 .location-info {
@@ -3429,9 +3438,9 @@ export default {
 .location-badge {
   background: rgba(156, 39, 176, 0.1);
   color: #9C27B0;
-  padding: clamp(0.15rem, 0.4vw, 0.2rem) clamp(0.3rem, 0.8vw, 0.4rem);
-  border-radius: clamp(8px, 1.5vw, 12px);
-  font-size: clamp(0.55rem, 1.1vw, 0.65rem);
+  padding: clamp(2px, 0.3vw, 3px) clamp(4px, 0.6vw, 6px); /* Padding más pequeño */
+  border-radius: clamp(4px, 1vw, 6px); /* Border radius más pequeño */
+  font-size: clamp(7px, 1.1vw, 8px); /* Tamaño más pequeño */
   font-family: monospace;
   cursor: help;
   display: inline-block;
@@ -3444,8 +3453,8 @@ export default {
 }
 
 .location-badge.compact {
-  font-size: clamp(0.5rem, 1vw, 0.6rem);
-  padding: clamp(0.1rem, 0.3vw, 0.15rem) clamp(0.25rem, 0.6vw, 0.3rem);
+  font-size: clamp(7px, 1vw, 8px); /* Tamaño más pequeño */
+  padding: clamp(2px, 0.2vw, 3px) clamp(4px, 0.4vw, 5px); /* Padding más pequeño */
 }
 
 /* BOTONES DE MAPA ULTRA RESPONSIVE */
@@ -3463,8 +3472,8 @@ export default {
 }
 
 .map-btn.circular {
-  width: clamp(28px, 4vw, 32px);
-  height: clamp(28px, 4vw, 32px);
+  width: clamp(20px, 3vw, 24px); /* Botón más pequeño */
+  height: clamp(20px, 3vw, 24px);
   border-radius: 50%;
   animation: subtlePulse 4s ease-in-out infinite;
 }
@@ -3528,7 +3537,7 @@ export default {
 .photos-cell {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.3rem, 0.8vw, 0.4rem);
+  gap: clamp(2px, 0.6vw, 4px); /* Gap más pequeño */
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -3538,18 +3547,18 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.3rem, 0.8vw, 0.4rem);
+  gap: clamp(2px, 0.6vw, 4px); /* Gap más pequeño */
   flex-direction: column;
 }
 
 .photo-thumbnail {
-  width: clamp(28px, 4vw, 36px);
-  height: clamp(28px, 4vw, 36px);
+  width: clamp(20px, 3vw, 24px); /* Thumbnail más pequeño */
+  height: clamp(20px, 3vw, 24px);
   object-fit: cover;
-  border-radius: clamp(6px, 1.5vw, 8px);
+  border-radius: clamp(4px, 1vw, 6px); /* Border radius más pequeño */
   cursor: pointer;
   transition: transform 0.2s ease;
-  border: 2px solid #e2e8f0;
+  border: 1px solid #e2e8f0; /* Border más delgado */
   flex-shrink: 0;
 }
 
@@ -3559,7 +3568,7 @@ export default {
 }
 
 .photo-label {
-  font-size: clamp(0.55rem, 1.1vw, 0.65rem);
+  font-size: clamp(7px, 1vw, 8px); /* Tamaño más pequeño */
   color: #718096;
   white-space: nowrap;
 }
@@ -3572,8 +3581,8 @@ export default {
 }
 
 .observation-item {
-  margin-bottom: clamp(0.3rem, 0.8vw, 0.4rem);
-  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+  margin-bottom: clamp(2px, 0.6vw, 3px); /* Margen más pequeño */
+  font-size: clamp(7px, 1.2vw, 8px); /* Tamaño más pequeño */
   line-height: 1.3;
   word-break: break-word;
 }
@@ -3592,7 +3601,7 @@ export default {
 .no-data {
   color: #a0aec0;
   font-style: italic;
-  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+  font-size: clamp(7px, 1.1vw, 8px); /* Tamaño más pequeño */
   text-align: center;
 }
 
@@ -3779,12 +3788,12 @@ export default {
   }
   
   .asistencias-table {
-    font-size: clamp(0.6rem, 1.8vw, 0.75rem);
+    font-size: clamp(7px, 1.4vw, 9px); /* Tamaño más pequeño para móvil */
   }
   
   .asistencias-table th,
   .asistencias-table td {
-    padding: clamp(0.4rem, 1.2vw, 0.6rem);
+    padding: clamp(3px, 0.8vw, 5px); /* Padding más pequeño para móvil */
   }
 
   /* TABLA MÓVIL - DISTRIBUCIÓN OPTIMIZADA PARA TODO EL ANCHO */
@@ -3809,36 +3818,36 @@ export default {
 
   .user-info {
     flex-direction: column;
-    gap: clamp(0.3rem, 1vw, 0.5rem);
+    gap: clamp(2px, 0.8vw, 4px); /* Gap más pequeño */
   }
 
   .location-cell {
-    gap: clamp(0.25rem, 0.8vw, 0.4rem);
+    gap: clamp(2px, 0.6vw, 3px); /* Gap más pequeño */
   }
 
   .location-badge.compact {
-    font-size: clamp(0.45rem, 1.2vw, 0.55rem);
-    padding: clamp(0.1rem, 0.3vw, 0.15rem) clamp(0.2rem, 0.6vw, 0.25rem);
+    font-size: clamp(6px, 1vw, 7px); /* Tamaño más pequeño */
+    padding: clamp(1px, 0.2vw, 2px) clamp(3px, 0.4vw, 4px); /* Padding más pequeño */
   }
 
   .map-btn.circular {
-    width: clamp(24px, 6vw, 28px);
-    height: clamp(24px, 6vw, 28px);
+    width: clamp(18px, 4vw, 20px); /* Botón más pequeño */
+    height: clamp(18px, 4vw, 20px);
   }
 
   .map-btn svg {
-    width: clamp(10px, 2.5vw, 12px);
-    height: clamp(10px, 2.5vw, 12px);
+    width: clamp(8px, 2vw, 10px); /* Icono más pequeño */
+    height: clamp(8px, 2vw, 10px);
   }
 
   .photo-thumbnail {
-    width: clamp(24px, 6vw, 28px);
-    height: clamp(24px, 6vw, 28px);
+    width: clamp(18px, 4vw, 20px); /* Thumbnail más pequeño */
+    height: clamp(18px, 4vw, 20px);
   }
 
   .time-badge {
-    min-width: clamp(40px, 8vw, 50px);
-    padding: clamp(0.15rem, 0.4vw, 0.2rem) clamp(0.4rem, 1vw, 0.5rem);
+    min-width: clamp(30px, 6vw, 35px); /* Ancho mínimo más pequeño */
+    padding: clamp(2px, 0.3vw, 3px) clamp(4px, 0.8vw, 6px); /* Padding más pequeño */
   }
 
   /* FILTROS MÓVIL */

@@ -41,88 +41,144 @@
         <div class="advanced-filters">
           <!-- Filtros principales -->
           <div class="filters-main">
-            <!-- Barra de búsqueda -->
-            <div class="search-box">
-              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-              <input 
-                v-model="searchTerm" 
-                type="text" 
-                placeholder="Buscar por nombre, correo o ubicación..." 
-                class="search-input"
-                @input="filtrarAsistencias"
-              >
-              <button v-if="searchTerm" @click="limpiarBusqueda" class="clear-search-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+            <!-- Contenedor izquierdo con filtros -->
+            <div class="filters-left">
+              <!-- Barra de búsqueda -->
+              <div class="search-box">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
                 </svg>
-              </button>
-            </div>
-            
-            <!-- Filtro de rango de fecha con datepickers -->
-            <div class="date-range-filter">
-              <div class="date-picker-container">
-                <label class="date-label">Desde:</label>
                 <input 
-                  type="date" 
-                  v-model="filtroFechaInicio" 
-                  class="date-input" 
-                  :max="filtroFechaFin || maxDate"
-                  @change="filtrarAsistencias"
+                  v-model="searchTerm" 
+                  type="text" 
+                  placeholder="Buscar por nombre, correo o ubicación..." 
+                  class="search-input"
+                  @input="filtrarAsistencias"
                 >
-              </div>
-              <div class="date-picker-container">
-                <label class="date-label">Hasta:</label>
-                <input 
-                  type="date" 
-                  v-model="filtroFechaFin" 
-                  class="date-input" 
-                  :min="filtroFechaInicio"
-                  :max="maxDate"
-                  @change="filtrarAsistencias"
-                >
-              </div>
-              
-              <!-- Selectores rápidos de fecha -->
-              <div class="quick-date-filters">
-                <button 
-                  @click="seleccionarFechaRapida('hoy')" 
-                  :class="['quick-date-btn', filtroRapido === 'hoy' ? 'active' : '']"
-                >
-                  Hoy
-                </button>
-                <button 
-                  @click="seleccionarFechaRapida('ayer')" 
-                  :class="['quick-date-btn', filtroRapido === 'ayer' ? 'active' : '']"
-                >
-                  Ayer
-                </button>
-                <button 
-                  @click="seleccionarFechaRapida('semana')" 
-                  :class="['quick-date-btn', filtroRapido === 'semana' ? 'active' : '']"
-                >
-                  Esta semana
-                </button>
-                <button 
-                  @click="seleccionarFechaRapida('mes')" 
-                  :class="['quick-date-btn', filtroRapido === 'mes' ? 'active' : '']"
-                >
-                  Este mes
-                </button>
-                <button 
-                  v-if="hayFiltrosFechas" 
-                  @click="limpiarFiltrosFechas" 
-                  class="clear-date-btn"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button v-if="searchTerm" @click="limpiarBusqueda" class="clear-search-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
-                  Limpiar
                 </button>
+              </div>
+              
+              <!-- Filtro de rango de fecha con datepickers -->
+              <div class="date-range-filter">
+                <div class="date-picker-container">
+                  <label class="date-label">Desde:</label>
+                  <input 
+                    type="date" 
+                    v-model="filtroFechaInicio" 
+                    class="date-input" 
+                    :max="filtroFechaFin || maxDate"
+                    @change="filtrarAsistencias"
+                  >
+                </div>
+                <div class="date-picker-container">
+                  <label class="date-label">Hasta:</label>
+                  <input 
+                    type="date" 
+                    v-model="filtroFechaFin" 
+                    class="date-input" 
+                    :min="filtroFechaInicio"
+                    :max="maxDate"
+                    @change="filtrarAsistencias"
+                  >
+                </div>
+                
+                <!-- Selectores rápidos de fecha -->
+                <div class="quick-date-filters">
+                  <button 
+                    @click="seleccionarFechaRapida('hoy')" 
+                    :class="['quick-date-btn', filtroRapido === 'hoy' ? 'active' : '']"
+                  >
+                    Hoy
+                  </button>
+                  <button 
+                    @click="seleccionarFechaRapida('ayer')" 
+                    :class="['quick-date-btn', filtroRapido === 'ayer' ? 'active' : '']"
+                  >
+                    Ayer
+                  </button>
+                  <button 
+                    @click="seleccionarFechaRapida('semana')" 
+                    :class="['quick-date-btn', filtroRapido === 'semana' ? 'active' : '']"
+                  >
+                    Esta semana
+                  </button>
+                  <button 
+                    @click="seleccionarFechaRapida('mes')" 
+                    :class="['quick-date-btn', filtroRapido === 'mes' ? 'active' : '']"
+                  >
+                    Este mes
+                  </button>
+                  <button 
+                    v-if="hayFiltrosFechas" 
+                    @click="limpiarFiltrosFechas" 
+                    class="clear-date-btn"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Limpiar
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Contadores de estadísticas en el lado derecho -->
+            <div class="filters-right">
+              <div class="visor-stats-compact">
+                <div class="compact-stat-card">
+                  <div class="compact-stat-icon">
+                    <!-- Icono de asistencias hoy -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" 
+                            fill="#4CAF50"/>
+                      <circle cx="12" cy="12" r="3" fill="#66BB6A" opacity="0.8"/>
+                    </svg>
+                  </div>
+                  <div class="compact-stat-info">
+                    <div class="compact-stat-value">{{ totalAsistenciasHoy }}</div>
+                    <div class="compact-stat-label">Asistencias hoy</div>
+                  </div>
+                </div>
+                
+                <div class="compact-stat-card">
+                  <div class="compact-stat-icon">
+                    <!-- Icono de usuarios presentes -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" 
+                            fill="#4CAF50"/>
+                      <circle cx="9" cy="7" r="4" fill="#66BB6A"/>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke="#4CAF50" stroke-width="2"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#43A047" stroke-width="2"/>
+                    </svg>
+                  </div>
+                  <div class="compact-stat-info">
+                    <div class="compact-stat-value">{{ usuariosPresentes }}</div>
+                    <div class="compact-stat-label">Usuarios presentes</div>
+                  </div>
+                </div>
+
+                <div class="compact-stat-card">
+                  <div class="compact-stat-icon">
+                    <!-- Icono de total registros -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 6L9 17l-5-5" stroke="#4CAF50" stroke-width="3" fill="none"/>
+                      <circle cx="18" cy="8" r="2" fill="#66BB6A"/>
+                      <circle cx="6" cy="16" r="2" fill="#43A047"/>
+                      <circle cx="12" cy="12" r="1.5" fill="#4CAF50"/>
+                    </svg>
+                  </div>
+                  <div class="compact-stat-info">
+                    <div class="compact-stat-value">{{ totalAsistencias }}</div>
+                    <div class="compact-stat-label">Total registros</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -225,46 +281,6 @@
               <button @click="limpiarTodosFiltros" class="clear-all-filters">
                 Limpiar todos
               </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estadísticas rápidas -->
-        <div class="stats-section">
-          <div class="stat-card">
-            <div class="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-number">{{ totalAsistenciasHoy }}</span>
-              <span class="stat-label">Asistencias Hoy</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-number">{{ usuariosPresentes }}</span>
-              <span class="stat-label">Usuarios Presentes</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 6L9 17l-5-5"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-number">{{ totalAsistencias }}</span>
-              <span class="stat-label">Total Registros</span>
             </div>
           </div>
         </div>
@@ -811,6 +827,45 @@ export default {
 
     formatearFecha(fecha) {
       return AsistenciasService.formatearFecha(fecha)
+    },
+
+    formatearFechaCorta(fecha) {
+      if (!fecha) return ''
+      try {
+        const fechaObj = new Date(fecha)
+        return fechaObj.toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: '2-digit'
+        })
+      } catch (error) {
+        return fecha
+      }
+    },
+
+    formatearFechaSimple(fecha) {
+      if (!fecha) return ''
+      try {
+        const fechaObj = new Date(fecha)
+        return fechaObj.toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        })
+      } catch (error) {
+        return fecha
+      }
+    },
+
+    formatearFechaConDia(fecha) {
+      if (!fecha) return ''
+      try {
+        const fechaObj = new Date(fecha)
+        return fechaObj.toLocaleDateString('es-ES', {
+          weekday: 'long'
+        })
+      } catch (error) {
+        return ''
+      }
     },
 
     formatearHora(hora) {
@@ -2199,6 +2254,12 @@ export default {
         return fechaStr
       }
     },
+
+    logout() {
+      localStorage.removeItem('admin_token')
+      localStorage.removeItem('admin_user')
+      this.$router.push('/login')
+    },
   }
 }
 </script>
@@ -2809,6 +2870,285 @@ export default {
 
 .clear-all-filters:hover {
   background: rgba(244, 67, 54, 0.2);
+}
+
+/* ESTILOS PARA CONTADORES COMPACTOS EN FILTROS - EXACTO COMO REGISTROSVIEW */
+.filters-left {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.4rem, 1vw, 0.6rem);
+  flex: 1;
+  min-width: 0;
+}
+
+.filters-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+/* === ESTILOS PARA CONTADORES COMPACTOS === */
+/* Estilos para contadores compactos del visor - MÁS PEQUEÑOS */
+.visor-stats-compact {
+  display: flex;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+  padding: 0;
+  background: transparent;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.compact-stat-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.4rem, 1vw, 0.6rem);
+  padding: clamp(0.5rem, 1.2vw, 0.8rem) clamp(0.8rem, 2vw, 1.2rem);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+  border: 1px solid rgba(76, 175, 80, 0.15);
+  border-radius: clamp(8px, 2vw, 12px);
+  box-shadow: 
+    0 2px 12px rgba(76, 175, 80, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  cursor: default;
+  min-width: clamp(120px, 15vw, 150px);
+  font-size: clamp(0.75rem, 1.4vw, 0.85rem);
+}
+
+.compact-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.08), transparent);
+  transition: left 0.8s ease;
+}
+
+.compact-stat-card:hover::before {
+  left: 100%;
+}
+
+.compact-stat-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 4px 20px rgba(76, 175, 80, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: rgba(76, 175, 80, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(240, 255, 240, 0.95) 100%);
+}
+
+.compact-stat-icon {
+  position: relative;
+  width: clamp(28px, 3.5vw, 32px);
+  height: clamp(28px, 3.5vw, 32px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  border-radius: clamp(6px, 1.5vw, 8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.compact-stat-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.compact-stat-card:hover .compact-stat-icon {
+  transform: rotate(-3deg) scale(1.08);
+  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(240, 255, 240, 0.9) 100%);
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+.compact-stat-card:hover .compact-stat-icon::before {
+  opacity: 1;
+}
+
+.compact-stat-icon svg {
+  width: clamp(14px, 2.2vw, 16px);
+  height: clamp(14px, 2.2vw, 16px);
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(76, 175, 80, 0.3));
+}
+
+.compact-stat-card:hover .compact-stat-icon svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(76, 175, 80, 0.4));
+}
+
+.compact-stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.1rem, 0.3vw, 0.15rem);
+  flex: 1;
+  min-width: 0;
+}
+
+.compact-stat-value {
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #2c3e50 0%, #4CAF50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.compact-stat-card:hover .compact-stat-value {
+  transform: scale(1.03);
+  background: linear-gradient(135deg, #4CAF50 0%, #43A047 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.compact-stat-label {
+  font-size: clamp(0.55rem, 1.1vw, 0.65rem);
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  transition: all 0.3s ease;
+}
+
+.compact-stat-card:hover .compact-stat-label {
+  color: #4CAF50;
+  transform: translateX(1px);
+}
+
+/* Responsive para contadores compactos - NUEVA ESTRUCTURA */
+@media (max-width: 768px) {
+  .filters-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filters-left {
+    width: 100%;
+  }
+  
+  .filters-right {
+    margin-left: 0;
+    margin-top: clamp(0.5rem, 1vw, 0.75rem);
+    justify-content: center;
+  }
+  
+  .visor-stats-compact {
+    gap: 0.75rem;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+  }
+  
+  .compact-stat-card {
+    min-width: 110px;
+    padding: 0.6rem 0.8rem;
+    gap: 0.5rem;
+  }
+  
+  .compact-stat-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .compact-stat-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .compact-stat-value {
+    font-size: 1rem;
+  }
+  
+  .compact-stat-label {
+    font-size: 0.58rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters-right .visor-stats-compact {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  
+  .compact-stat-card {
+    min-width: 100%;
+    max-width: 220px;
+    margin: 0 auto;
+    padding: 0.6rem 0.8rem;
+  }
+  
+  .visor-stats-compact {
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+  }
+  
+  .compact-stat-card {
+    min-width: 110px;
+    padding: 0.6rem 0.8rem;
+    gap: 0.5rem;
+    border-radius: 10px;
+  }
+  
+  .compact-stat-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+  }
+  
+  .compact-stat-icon svg {
+    width: 13px;
+    height: 13px;
+  }
+  
+  .compact-stat-value {
+    font-size: 0.95rem;
+  }
+  
+  .compact-stat-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* Animaciones adicionales */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ESTADISTICAS ULTRA RESPONSIVE */

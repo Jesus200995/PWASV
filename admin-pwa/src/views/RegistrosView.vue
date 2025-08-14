@@ -36,6 +36,42 @@
         </div>
       </header>
 
+      <!-- Contadores de estadísticas compactos -->
+      <div class="visor-stats-compact">
+        <div class="compact-stat-card">
+          <div class="compact-stat-icon">
+            <!-- Icono de calendario/actividades hoy -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" 
+                    fill="#4CAF50"/>
+              <circle cx="12" cy="6" r="2" fill="#66BB6A" opacity="0.8"/>
+              <path d="M16 11h2v2h-2zm0 3h2v2h-2z" fill="#4CAF50" opacity="0.6"/>
+            </svg>
+          </div>
+          <div class="compact-stat-info">
+            <div class="compact-stat-value">{{ actividadesHoy }}</div>
+            <div class="compact-stat-label">Actividades hoy</div>
+          </div>
+        </div>
+        
+        <div class="compact-stat-card">
+          <div class="compact-stat-icon">
+            <!-- Icono de estadísticas/total actividades -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" 
+                    fill="#4CAF50"/>
+              <circle cx="5" cy="19" r="2" fill="#66BB6A" opacity="0.7"/>
+              <circle cx="12" cy="12" r="1.5" fill="#4CAF50" opacity="0.8"/>
+              <circle cx="19" cy="5" r="1.5" fill="#43A047"/>
+            </svg>
+          </div>
+          <div class="compact-stat-info">
+            <div class="compact-stat-value">{{ totalActividades }}</div>
+            <div class="compact-stat-label">Total actividades</div>
+          </div>
+        </div>
+      </div>
+
       <div class="page-content">
         <!-- Panel de filtros avanzados -->
         <div class="advanced-filters">
@@ -726,6 +762,10 @@ const paginaActual = ref(1)
 const registrosPorPagina = ref(50)
 const paginaSalto = ref('')
 
+// Variables para contadores de estadísticas
+const actividadesHoy = ref('-')
+const totalActividades = ref('-')
+
 // Variables computadas para filtros
 const maxDate = ref(new Date().toISOString().split('T')[0])
 const hayFiltrosFechas = ref(false)
@@ -878,6 +918,9 @@ const cargarRegistros = async () => {
     // Aplicar filtros iniciales
     filtrarRegistros()
     
+    // Calcular estadísticas
+    calcularEstadisticas()
+    
   } catch (err) {
     console.error('Error al cargar registros:', err)
     if (err.response?.status === 401) {
@@ -887,6 +930,33 @@ const cargarRegistros = async () => {
     }
   } finally {
     loading.value = false
+  }
+}
+
+// Función para calcular estadísticas
+const calcularEstadisticas = () => {
+  try {
+    // Total de actividades (registros)
+    totalActividades.value = registros.value.length.toLocaleString('es')
+    
+    // Actividades de hoy
+    const hoy = new Date()
+    hoy.setHours(0, 0, 0, 0)
+    const mañana = new Date(hoy)
+    mañana.setDate(mañana.getDate() + 1)
+    
+    const registrosHoy = registros.value.filter(registro => {
+      const fechaRegistro = new Date(registro.fecha_hora)
+      return fechaRegistro >= hoy && fechaRegistro < mañana
+    })
+    
+    actividadesHoy.value = registrosHoy.length.toLocaleString('es')
+    
+    console.log(`📊 Estadísticas calculadas: ${totalActividades.value} total, ${actividadesHoy.value} hoy`)
+  } catch (error) {
+    console.error('Error al calcular estadísticas:', error)
+    actividadesHoy.value = '0'
+    totalActividades.value = '0'
   }
 }
 
@@ -4690,6 +4760,227 @@ const logout = () => {
     padding: 0.4rem 0.6rem;
     font-size: 0.8rem;
     min-width: 60px;
+  }
+}
+
+/* === ESTILOS PARA CONTADORES COMPACTOS === */
+/* Estilos para contadores compactos del visor - MÁS PEQUEÑOS */
+.visor-stats-compact {
+  display: flex;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+  padding: clamp(0.3rem, 1vw, 0.6rem) clamp(0.75rem, 3vw, 1.5rem);
+  background: transparent;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.compact-stat-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.4rem, 1vw, 0.6rem);
+  padding: clamp(0.4rem, 1.2vw, 0.7rem) clamp(0.7rem, 2vw, 1rem);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+  border: 1px solid rgba(76, 175, 80, 0.15);
+  border-radius: clamp(8px, 2vw, 12px);
+  box-shadow: 
+    0 2px 12px rgba(76, 175, 80, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  cursor: default;
+  min-width: clamp(110px, 14vw, 140px);
+}
+
+.compact-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.08), transparent);
+  transition: left 0.8s ease;
+}
+
+.compact-stat-card:hover::before {
+  left: 100%;
+}
+
+.compact-stat-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 4px 20px rgba(76, 175, 80, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: rgba(76, 175, 80, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(240, 255, 240, 0.95) 100%);
+}
+
+.compact-stat-icon {
+  position: relative;
+  width: clamp(24px, 3vw, 28px);
+  height: clamp(24px, 3vw, 28px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  border-radius: clamp(6px, 1.5vw, 8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.compact-stat-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.compact-stat-card:hover .compact-stat-icon {
+  transform: rotate(-3deg) scale(1.08);
+  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(240, 255, 240, 0.9) 100%);
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+.compact-stat-card:hover .compact-stat-icon::before {
+  opacity: 1;
+}
+
+.compact-stat-icon svg {
+  width: clamp(12px, 2vw, 14px);
+  height: clamp(12px, 2vw, 14px);
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(76, 175, 80, 0.3));
+}
+
+.compact-stat-card:hover .compact-stat-icon svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(76, 175, 80, 0.4));
+}
+
+.compact-stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.05rem, 0.2vw, 0.1rem);
+  flex: 1;
+  min-width: 0;
+}
+
+.compact-stat-value {
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #2c3e50 0%, #4CAF50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.compact-stat-card:hover .compact-stat-value {
+  transform: scale(1.03);
+  background: linear-gradient(135deg, #4CAF50 0%, #43A047 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.compact-stat-label {
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  transition: all 0.3s ease;
+}
+
+.compact-stat-card:hover .compact-stat-label {
+  color: #4CAF50;
+  transform: translateX(1px);
+}
+
+/* Responsive para contadores compactos - MÁS PEQUEÑOS */
+@media (max-width: 768px) {
+  .visor-stats-compact {
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+  }
+  
+  .compact-stat-card {
+    min-width: 100px;
+    padding: 0.5rem 0.7rem;
+    gap: 0.4rem;
+  }
+  
+  .compact-stat-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .compact-stat-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .compact-stat-value {
+    font-size: 1.1rem;
+  }
+  
+  .compact-stat-label {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .visor-stats-compact {
+    gap: 0.5rem;
+    padding: 0.3rem 0.5rem;
+    margin: 0;
+  }
+  
+  .compact-stat-card {
+    min-width: 85px;
+    padding: 0.4rem 0.6rem;
+    gap: 0.3rem;
+    border-radius: 8px;
+  }
+  
+  .compact-stat-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+  }
+  
+  .compact-stat-icon svg {
+    width: 11px;
+    height: 11px;
+  }
+  
+  .compact-stat-value {
+    font-size: 0.95rem;
+  }
+  
+  .compact-stat-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.02em;
   }
 }
 

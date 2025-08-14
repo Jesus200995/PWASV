@@ -39,81 +39,106 @@
         <!-- Búsqueda y Filtros -->
         <div class="search-section">
           <div class="controls-row">
-            <!-- Barra de búsqueda -->
-            <div class="search-group">
-              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-              <input 
-                v-model="searchTerm" 
-                type="text" 
-                placeholder="Buscar..." 
-                class="search-input"
-                @input="filtrarUsuarios"
-              >
-            </div>
+            <!-- Contenedor izquierdo con filtros -->
+            <div class="controls-left">
+              <!-- Barra de búsqueda -->
+              <div class="search-group">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input 
+                  v-model="searchTerm" 
+                  type="text" 
+                  placeholder="Buscar..." 
+                  class="search-input"
+                  @input="filtrarUsuarios"
+                >
+              </div>
 
-            <!-- Ordenamiento -->
-            <div class="sort-group">
-              <label>Ordenar:</label>
-              <div class="sort-buttons">
-                <button 
-                  @click="ordenarPor('id')"
-                  :class="['sort-btn', { active: campoOrdenamiento === 'id' }]"
-                  title="Ordenar por ID"
-                >
-                  ID
-                  <svg v-if="campoOrdenamiento === 'id'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
-                    <path v-else d="m7 9 5-5 5 5"/>
+              <!-- Ordenamiento -->
+              <div class="sort-group">
+                <label>Ordenar:</label>
+                <div class="sort-buttons">
+                  <button 
+                    @click="ordenarPor('id')"
+                    :class="['sort-btn', { active: campoOrdenamiento === 'id' }]"
+                    title="Ordenar por ID"
+                  >
+                    ID
+                    <svg v-if="campoOrdenamiento === 'id'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                      <path v-else d="m7 9 5-5 5 5"/>
+                    </svg>
+                  </button>
+                  <button 
+                    @click="ordenarPor('nombre')"
+                    :class="['sort-btn', { active: campoOrdenamiento === 'nombre' }]"
+                    title="Ordenar por Nombre"
+                  >
+                    Nombre
+                    <svg v-if="campoOrdenamiento === 'nombre'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                      <path v-else d="m7 9 5-5 5 5"/>
+                    </svg>
+                  </button>
+                  <button 
+                    @click="ordenarPor('fecha')"
+                    :class="['sort-btn', { active: campoOrdenamiento === 'fecha' }]"
+                    title="Ordenar por Fecha de Registro"
+                  >
+                    Fecha
+                    <svg v-if="campoOrdenamiento === 'fecha'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                      <path v-else d="m7 9 5-5 5 5"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Botones de exportación -->
+              <div class="export-actions">
+                <button @click="exportarExcel" class="export-btn excel">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
                   </svg>
+                  Excel
                 </button>
-                <button 
-                  @click="ordenarPor('nombre')"
-                  :class="['sort-btn', { active: campoOrdenamiento === 'nombre' }]"
-                  title="Ordenar por Nombre"
-                >
-                  Nombre
-                  <svg v-if="campoOrdenamiento === 'nombre'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
-                    <path v-else d="m7 9 5-5 5 5"/>
+                <button @click="imprimirUsuarios" class="export-btn print">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
                   </svg>
-                </button>
-                <button 
-                  @click="ordenarPor('fecha')"
-                  :class="['sort-btn', { active: campoOrdenamiento === 'fecha' }]"
-                  title="Ordenar por Fecha de Registro"
-                >
-                  Fecha
-                  <svg v-if="campoOrdenamiento === 'fecha'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
-                    <path v-else d="m7 9 5-5 5 5"/>
-                  </svg>
+                  Imprimir
                 </button>
               </div>
             </div>
-
-            <!-- Botones de exportación -->
-            <div class="export-actions">
-              <button @click="exportarExcel" class="export-btn excel">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                Excel
-              </button>
-              <button @click="imprimirUsuarios" class="export-btn print">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                  <rect x="6" y="14" width="12" height="8"></rect>
-                </svg>
-                Imprimir
-              </button>
+            
+            <!-- Contador de usuarios en el lado derecho -->
+            <div class="controls-right">
+              <div class="users-stats-compact">
+                <div class="compact-stat-card">
+                  <div class="compact-stat-icon">
+                    <!-- Icono de usuarios -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" 
+                            stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="9" cy="7" r="4" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke="#66BB6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#66BB6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="compact-stat-info">
+                    <div class="compact-stat-value">{{ totalUsuarios }}</div>
+                    <div class="compact-stat-label">Total usuarios</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -678,6 +703,9 @@ const loading = ref(false)
 const error = ref('')
 const searchTerm = ref('')
 
+// Variable para contador de usuarios
+const totalUsuarios = ref('-')
+
 // Variables para paginación
 const paginaActual = ref(1)
 const usuariosPorPagina = ref(50)
@@ -736,6 +764,9 @@ const cargarUsuarios = async () => {
     usuarios.value = await usuariosService.obtenerUsuarios()
     usuariosFiltrados.value = usuarios.value
     
+    // Actualizar contador de usuarios
+    totalUsuarios.value = usuarios.value.length.toLocaleString('es')
+    
     // Aplicar ordenamiento inicial
     aplicarOrdenamiento()
     
@@ -745,6 +776,7 @@ const cargarUsuarios = async () => {
     error.value = 'Error al conectar con la base de datos. Verifica que el servidor esté funcionando.'
     usuarios.value = []
     usuariosFiltrados.value = []
+    totalUsuarios.value = '0'
   } finally {
     loading.value = false
   }
@@ -1652,6 +1684,29 @@ const logout = () => {
   gap: 20px;
   flex-wrap: wrap;
   justify-content: space-between;
+}
+
+.controls-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.controls-right {
+  display: flex;
+  align-items: center;
+  margin-left: clamp(0.5rem, 1.5vw, 1rem);
+  flex-shrink: 0;
+}
+
+.controls-right .users-stats-compact {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: clamp(0.3rem, 0.8vw, 0.4rem);
 }
 
 .search-group, .sort-group, .export-actions {
@@ -3765,6 +3820,252 @@ const logout = () => {
   .btn-success-ok {
     padding: 8px 20px;
     font-size: 13px;
+  }
+}
+
+/* === ESTILOS PARA CONTADOR DE USUARIOS === */
+.users-stats-compact {
+  display: flex;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+  padding: 0;
+  background: transparent;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.users-stats-compact .compact-stat-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.4rem, 1vw, 0.6rem);
+  padding: clamp(0.5rem, 1.2vw, 0.8rem) clamp(0.8rem, 2vw, 1.2rem);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+  border: 1px solid rgba(76, 175, 80, 0.15);
+  border-radius: clamp(8px, 2vw, 12px);
+  box-shadow: 
+    0 2px 12px rgba(76, 175, 80, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  cursor: default;
+  min-width: clamp(120px, 15vw, 150px);
+  font-size: clamp(0.75rem, 1.4vw, 0.85rem);
+}
+
+.users-stats-compact .compact-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.08), transparent);
+  transition: left 0.8s ease;
+}
+
+.users-stats-compact .compact-stat-card:hover::before {
+  left: 100%;
+}
+
+.users-stats-compact .compact-stat-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 4px 20px rgba(76, 175, 80, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: rgba(76, 175, 80, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(240, 255, 240, 0.95) 100%);
+}
+
+.users-stats-compact .compact-stat-icon {
+  position: relative;
+  width: clamp(28px, 3.5vw, 32px);
+  height: clamp(28px, 3.5vw, 32px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  border-radius: clamp(6px, 1.5vw, 8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.users-stats-compact .compact-stat-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.users-stats-compact .compact-stat-card:hover .compact-stat-icon {
+  transform: rotate(-3deg) scale(1.08);
+  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(240, 255, 240, 0.9) 100%);
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+.users-stats-compact .compact-stat-card:hover .compact-stat-icon::before {
+  opacity: 1;
+}
+
+.users-stats-compact .compact-stat-icon svg {
+  width: clamp(14px, 2.2vw, 16px);
+  height: clamp(14px, 2.2vw, 16px);
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(76, 175, 80, 0.3));
+}
+
+.users-stats-compact .compact-stat-card:hover .compact-stat-icon svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(76, 175, 80, 0.4));
+}
+
+.users-stats-compact .compact-stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.1rem, 0.3vw, 0.15rem);
+  flex: 1;
+  min-width: 0;
+}
+
+.users-stats-compact .compact-stat-value {
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #2c3e50 0%, #4CAF50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.users-stats-compact .compact-stat-card:hover .compact-stat-value {
+  transform: scale(1.03);
+  background: linear-gradient(135deg, #4CAF50 0%, #43A047 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.users-stats-compact .compact-stat-label {
+  font-size: clamp(0.55rem, 1.1vw, 0.65rem);
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  transition: all 0.3s ease;
+}
+
+.users-stats-compact .compact-stat-card:hover .compact-stat-label {
+  color: #4CAF50;
+  transform: translateX(1px);
+}
+
+/* Responsive para contador de usuarios */
+@media (max-width: 768px) {
+  .controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .controls-left {
+    width: 100%;
+  }
+  
+  .controls-right {
+    margin-left: 0;
+    margin-top: clamp(0.5rem, 1vw, 0.75rem);
+    justify-content: center;
+  }
+  
+  .users-stats-compact {
+    gap: 0.75rem;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+  }
+  
+  .users-stats-compact .compact-stat-card {
+    min-width: 110px;
+    padding: 0.6rem 0.8rem;
+    gap: 0.5rem;
+  }
+  
+  .users-stats-compact .compact-stat-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .users-stats-compact .compact-stat-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .users-stats-compact .compact-stat-value {
+    font-size: 1rem;
+  }
+  
+  .users-stats-compact .compact-stat-label {
+    font-size: 0.58rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .controls-right .users-stats-compact {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  
+  .users-stats-compact .compact-stat-card {
+    min-width: 100%;
+    max-width: 220px;
+    margin: 0 auto;
+    padding: 0.6rem 0.8rem;
+  }
+  
+  .users-stats-compact .compact-stat-icon {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .users-stats-compact .compact-stat-icon svg {
+    width: 13px;
+    height: 13px;
+  }
+  
+  .users-stats-compact .compact-stat-value {
+    font-size: 0.95rem;
+  }
+  
+  .users-stats-compact .compact-stat-label {
+    font-size: 0.55rem;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

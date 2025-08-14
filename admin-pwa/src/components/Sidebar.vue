@@ -176,6 +176,7 @@
       
       <nav class="sidebar-nav">
       <ul>
+        <!-- Dashboard - OCULTO TEMPORALMENTE (NO ELIMINAR - Solo documentado para futura referencia)
         <li class="nav-item" :class="{ active: $route.name === 'Dashboard' }">
           <router-link to="/dashboard" class="nav-link">
             <div class="nav-icon-wrapper">
@@ -187,6 +188,21 @@
               </svg>
             </div>
             <span class="nav-text">Dashboard</span>
+            <div class="nav-glow"></div>
+          </router-link>
+        </li>
+        -->
+        
+        <!-- Visor de Seguimiento - MOVIDO AL PRIMER LUGAR -->
+        <li class="nav-item" :class="{ active: $route.name === 'Visor' }">
+          <router-link to="/visor" class="nav-link">
+            <div class="nav-icon-wrapper">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </div>
+            <span class="nav-text">Visor de Seguimiento</span>
             <div class="nav-glow"></div>
           </router-link>
         </li>
@@ -219,19 +235,6 @@
               </svg>
             </div>
             <span class="nav-text">Registro de Actividades</span>
-            <div class="nav-glow"></div>
-          </router-link>
-        </li>
-        
-        <li class="nav-item" :class="{ active: $route.name === 'Visor' }">
-          <router-link to="/visor" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-            </div>
-            <span class="nav-text">Visor de Seguimiento</span>
             <div class="nav-glow"></div>
           </router-link>
         </li>

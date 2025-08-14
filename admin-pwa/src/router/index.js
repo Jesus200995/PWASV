@@ -11,7 +11,7 @@ import AsistenciaView from '../views/AsistenciaView.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard'
+    redirect: '/visor'  // Cambiado de /dashboard a /visor - Dashboard oculto temporalmente
   },
   {
     path: '/login',
@@ -77,7 +77,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login')
   } else if (to.name === 'Login' && isAuthenticated) {
-    next('/dashboard')
+    next('/visor')  // Cambiado de /dashboard a /visor - Dashboard oculto temporalmente
   } else {
     next()
   }

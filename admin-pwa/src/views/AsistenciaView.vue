@@ -2223,14 +2223,14 @@ export default {
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(0.75rem, 2vw, 1.25rem);
+  padding: clamp(0.3rem, 0.8vw, 0.5rem);
   position: sticky;
   top: 0;
   z-index: 100;
   width: 100%;
   box-sizing: border-box;
   color: white;
-  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
+  box-shadow: 0 2px 12px rgba(46, 204, 113, 0.12);
   overflow: hidden;
 }
 
@@ -2251,7 +2251,7 @@ export default {
   align-items: center;
   max-width: 100%;
   margin: 0;
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex-wrap: wrap;
   width: 100%;
   position: relative;
@@ -2261,16 +2261,16 @@ export default {
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex: 1;
-  min-width: 200px;
+  min-width: 140px;
 }
 
 .header-icon {
-  width: clamp(36px, 5vw, 48px);
-  height: clamp(36px, 5vw, 48px);
+  width: clamp(24px, 3vw, 30px);
+  height: clamp(24px, 3vw, 30px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(8px, 1.5vw, 12px);
+  border-radius: clamp(5px, 0.8vw, 6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2278,6 +2278,12 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
   animation: float 3s ease-in-out infinite;
+}
+
+.header-icon svg {
+  width: clamp(12px, 2vw, 15px);
+  height: clamp(12px, 2vw, 15px);
+  color: white;
 }
 
 @keyframes float {
@@ -2291,33 +2297,37 @@ export default {
   color: white;
 }
 
-.header-text h1 {
-  margin: 0;
-  font-size: clamp(1.1rem, 3vw, 1.5rem);
+.header-text {
+  flex: 1;
+  min-width: 120px;
+}
+
+.header-title {
+  font-size: clamp(0.8rem, 2vw, 1rem);
   font-weight: 700;
-  color: white;
+  margin: 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  letter-spacing: -0.5px;
-  line-height: 1.2;
+  letter-spacing: -0.3px;
+  line-height: 1;
 }
 
-.header-text p {
-  margin: clamp(0.15rem, 0.5vw, 0.25rem) 0 0 0;
+.header-subtitle {
+  margin: clamp(0.05rem, 0.2vw, 0.08rem) 0 0 0;
   color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  line-height: 1.3;
+  font-size: clamp(0.55rem, 1vw, 0.65rem);
+  line-height: 1.1;
   font-weight: 400;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.05px;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 1.5vw, 1rem);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex-wrap: wrap;
   justify-content: flex-end;
 }
@@ -2325,10 +2335,10 @@ export default {
 .connection-status {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.25rem, 0.8vw, 0.35rem) clamp(0.5rem, 1.5vw, 0.75rem);
-  border-radius: clamp(12px, 2vw, 16px);
-  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  gap: clamp(0.15rem, 0.4vw, 0.2rem);
+  padding: clamp(0.15rem, 0.4vw, 0.2rem) clamp(0.3rem, 0.8vw, 0.4rem);
+  border-radius: clamp(8px, 1.2vw, 10px);
+  font-size: clamp(0.55rem, 1vw, 0.6rem);
   font-weight: 500;
   white-space: nowrap;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -2347,8 +2357,8 @@ export default {
 }
 
 .status-indicator {
-  width: clamp(4px, 1vw, 6px);
-  height: clamp(4px, 1vw, 6px);
+  width: clamp(2px, 0.6vw, 3px);
+  height: clamp(2px, 0.6vw, 3px);
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
@@ -2357,14 +2367,14 @@ export default {
 .refresh-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.15rem, 0.4vw, 0.2rem);
+  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: clamp(6px, 1.5vw, 8px);
+  border-radius: clamp(4px, 0.8vw, 5px);
   font-weight: 500;
-  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  font-size: clamp(0.55rem, 1vw, 0.6rem);
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -2392,71 +2402,81 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-/* CONTENIDO ULTRA RESPONSIVE - APROVECHA TODO EL ANCHO */
-.page-content {
-  padding: clamp(1rem, 2vw, 1.5rem);
-  max-width: 100%;
-  margin: 0;
-  width: 100%;
-  box-sizing: border-box;
+/* Responsive improvements for smaller screens */
+@media (max-width: 768px) {
+  .page-header {
+    padding: clamp(0.3rem, 1vw, 0.5rem);
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: clamp(0.75rem, 2vw, 1rem);
+    align-items: stretch;
+    text-align: center;
+  }
 }
 
-/* FILTROS AVANZADOS ULTRA RESPONSIVE */
+/* CONTENIDO ULTRA RESPONSIVE - APROVECHA TODO EL ANCHO */
+.page-content {
+  padding: clamp(8px, 1.5vw, 16px) clamp(16px, 4vw, 32px);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* FILTROS AVANZADOS ULTRA COMPACTOS */
 .advanced-filters {
   background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
   backdrop-filter: blur(10px);
-  border: 2px solid #4CAF50;
-  border-radius: clamp(8px, 2vw, 12px);
-  padding: clamp(0.75rem, 2vw, 1rem);
-  margin-bottom: clamp(1rem, 2vw, 1.25rem);
-  box-shadow: 
-    0 6px 24px rgba(76, 175, 80, 0.12),
-    0 3px 12px rgba(76, 175, 80, 0.08);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.4rem, 1vw, 0.6rem);
+  margin-bottom: clamp(0.4rem, 1vw, 0.6rem);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08);
   width: 100%;
   box-sizing: border-box;
   transition: all 0.3s ease;
 }
 
 .advanced-filters:hover {
-  border-color: #45a049;
-  box-shadow: 
-    0 8px 32px rgba(76, 175, 80, 0.15),
-    0 4px 16px rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.5);
+  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.12);
   transform: translateY(-1px);
 }
 
 .filters-main {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.5rem, 1.5vw, 0.65rem);
-  margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+  gap: clamp(0.3rem, 0.8vw, 0.4rem);
+  margin-bottom: clamp(0.3rem, 0.8vw, 0.4rem);
   width: 100%;
+  align-items: stretch;
+  justify-content: space-between;
 }
 
 .search-box {
   position: relative;
   flex: 1;
-  min-width: clamp(200px, 40vw, 300px);
+  min-width: clamp(180px, 35vw, 250px);
   max-width: 100%;
 }
 
 .search-icon {
   position: absolute;
-  left: clamp(0.75rem, 2vw, 1rem);
+  left: clamp(0.5rem, 1.2vw, 0.7rem);
   top: 50%;
   transform: translateY(-50%);
   color: #9ca3af;
-  width: clamp(14px, 2vw, 16px);
-  height: clamp(14px, 2vw, 16px);
+  width: clamp(12px, 1.5vw, 14px);
+  height: clamp(12px, 1.5vw, 14px);
 }
 
 .search-input {
   width: 100%;
-  padding: clamp(0.5rem, 1.5vw, 0.65rem) clamp(0.75rem, 2vw, 1rem) clamp(0.5rem, 1.5vw, 0.65rem) clamp(2.5rem, 6vw, 3rem);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.3rem, 0.8vw, 0.4rem) clamp(0.5rem, 1.2vw, 0.7rem) clamp(0.3rem, 0.8vw, 0.4rem) clamp(2rem, 4vw, 2.4rem);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: clamp(4px, 1vw, 6px);
   background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
@@ -2469,21 +2489,21 @@ export default {
 
 .clear-search-btn {
   position: absolute;
-  right: clamp(0.75rem, 2vw, 1rem);
+  right: clamp(0.5rem, 1.2vw, 0.7rem);
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   color: #9ca3af;
   cursor: pointer;
-  padding: clamp(0.2rem, 0.5vw, 0.25rem);
+  padding: clamp(0.15rem, 0.3vw, 0.2rem);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  width: clamp(20px, 3vw, 24px);
-  height: clamp(20px, 3vw, 24px);
+  width: clamp(16px, 2.5vw, 20px);
+  height: clamp(16px, 2.5vw, 20px);
 }
 
 .clear-search-btn:hover {
@@ -2494,7 +2514,7 @@ export default {
 .date-range-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.75rem, 2vw, 1rem);
+  gap: clamp(0.4rem, 1vw, 0.6rem);
   align-items: center;
   width: 100%;
 }
@@ -2502,7 +2522,7 @@ export default {
 .date-picker-container {
   display: flex;
   align-items: center;
-  gap: clamp(0.4rem, 1vw, 0.5rem);
+  gap: clamp(0.25rem, 0.6vw, 0.35rem);
   flex-wrap: wrap;
 }
 
@@ -2510,17 +2530,17 @@ export default {
   font-weight: 500;
   color: #4b5563;
   white-space: nowrap;
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
 }
 
 .date-input {
-  padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.6rem, 1.5vw, 0.75rem);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.25rem, 0.6vw, 0.35rem) clamp(0.4rem, 1vw, 0.5rem);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: clamp(4px, 1vw, 6px);
   background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   transition: all 0.3s ease;
-  min-width: clamp(120px, 20vw, 140px);
+  min-width: clamp(110px, 18vw, 130px);
 }
 
 .date-input:focus {
@@ -2532,16 +2552,16 @@ export default {
 .quick-date-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.4rem, 1vw, 0.5rem);
+  gap: clamp(0.25rem, 0.6vw, 0.35rem);
   margin-left: auto;
 }
 
 .quick-date-btn {
-  padding: clamp(0.3rem, 0.8vw, 0.35rem) clamp(0.6rem, 1.5vw, 0.75rem);
+  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
   background: rgba(0, 0, 0, 0.05);
   border: none;
-  border-radius: clamp(4px, 1vw, 6px);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  border-radius: clamp(3px, 0.8vw, 4px);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
@@ -2561,12 +2581,12 @@ export default {
 .clear-date-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.3rem, 0.8vw, 0.35rem) clamp(0.6rem, 1.5vw, 0.75rem);
+  gap: clamp(0.15rem, 0.5vw, 0.25rem);
+  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
   background: rgba(244, 67, 54, 0.1);
   border: none;
-  border-radius: clamp(4px, 1vw, 6px);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  border-radius: clamp(3px, 0.8vw, 4px);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   font-weight: 500;
   color: #f44336;
   cursor: pointer;
@@ -2580,58 +2600,58 @@ export default {
 
 .filters-advanced {
   border-top: 1px solid rgba(0, 0, 0, 0.05);
-  padding-top: clamp(0.6rem, 1.5vw, 0.8rem);
-  margin-top: clamp(0.3rem, 0.8vw, 0.4rem);
+  padding-top: clamp(0.3rem, 0.8vw, 0.4rem);
+  margin-top: clamp(0.2rem, 0.5vw, 0.25rem);
 }
 
 .advanced-filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(clamp(180px, 25vw, 220px), 1fr));
-  gap: clamp(0.75rem, 2vw, 1rem);
-  margin-bottom: clamp(0.6rem, 1.5vw, 0.8rem);
+  grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 20vw, 180px), 1fr));
+  gap: clamp(0.4rem, 1vw, 0.6rem);
+  margin-bottom: clamp(0.3rem, 0.8vw, 0.4rem);
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.25rem, 0.6vw, 0.3rem);
+  gap: clamp(0.15rem, 0.4vw, 0.2rem);
 }
 
 .filter-label {
   font-weight: 600;
   color: #4b5563;
-  margin-bottom: clamp(0.1rem, 0.3vw, 0.15rem);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  margin-bottom: clamp(0.05rem, 0.2vw, 0.1rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
 }
 
 .filter-options {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.5rem, 1.3vw, 0.65rem);
+  gap: clamp(0.3rem, 0.8vw, 0.4rem);
 }
 
 .checkbox-option {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
+  gap: clamp(0.15rem, 0.5vw, 0.25rem);
   cursor: pointer;
   user-select: none;
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
 }
 
 .checkbox-option input[type="checkbox"] {
-  width: clamp(12px, 2vw, 14px);
-  height: clamp(12px, 2vw, 14px);
+  width: clamp(10px, 1.5vw, 12px);
+  height: clamp(10px, 1.5vw, 12px);
   accent-color: #4CAF50;
   cursor: pointer;
 }
 
 .filter-select {
-  padding: clamp(0.35rem, 0.9vw, 0.45rem) clamp(0.6rem, 1.5vw, 0.75rem);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.25rem, 0.6vw, 0.3rem) clamp(0.4rem, 1vw, 0.5rem);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: clamp(4px, 1vw, 6px);
   background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;

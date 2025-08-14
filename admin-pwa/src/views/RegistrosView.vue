@@ -4911,7 +4911,7 @@ const logout = () => {
 }
 
 .compact-stat-value {
-  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
   font-weight: 700;
   color: #2c3e50;
   line-height: 1;
@@ -4932,7 +4932,7 @@ const logout = () => {
 }
 
 .compact-stat-label {
-  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
+  font-size: clamp(0.55rem, 1.1vw, 0.65rem);
   font-weight: 500;
   color: #64748b;
   text-transform: uppercase;
@@ -4987,11 +4987,11 @@ const logout = () => {
   }
   
   .compact-stat-value {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
   
   .compact-stat-label {
-    font-size: 0.65rem;
+    font-size: 0.58rem;
   }
 }
 
@@ -5034,11 +5034,11 @@ const logout = () => {
   }
   
   .compact-stat-value {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
   }
   
   .compact-stat-label {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     letter-spacing: 0.02em;
   }
 }

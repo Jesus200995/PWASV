@@ -296,7 +296,8 @@
               <div class="registros-total">
                 <div class="registros-icon">📊</div>
                 <div class="registros-text">
-                  Mostrando <span class="highlight">{{ registrosFiltrados.length.toLocaleString('es') }}</span> {{ registrosFiltrados.length === 1 ? 'registro' : 'registros' }} 
+                  Página <span class="highlight">{{ paginaActual }}</span> de <span class="highlight">{{ totalPaginas }}</span>
+                  • {{ registrosFiltrados.length.toLocaleString('es') }} {{ registrosFiltrados.length === 1 ? 'registro' : 'registros' }} 
                   <template v-if="registrosFiltrados.length !== registros.length">
                     de <span class="highlight">{{ registros.length.toLocaleString('es') }}</span> totales
                   </template>
@@ -307,6 +308,9 @@
                   </span>
                   <span class="registros-badge" title="Usuarios únicos">
                     <i class="fas fa-users"></i> {{ [...new Set(registros.map(r => r.usuario_id))].length }}
+                  </span>
+                  <span class="registros-badge pagination-badge" title="Registros por página">
+                    <i class="fas fa-list"></i> {{ registrosPorPagina }}/pág
                   </span>
                 </div>
               </div>
@@ -323,7 +327,7 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>                <tr v-for="registro in registrosFiltrados" :key="registro.id">
+              <tbody>                <tr v-for="registro in registrosPaginados" :key="registro.id">
                   <td>#{{ registro.id }}</td>
                   <td>
                     <div class="usuario-info">
@@ -365,6 +369,141 @@
                 </tr>
               </tbody>
             </table>
+            
+            <!-- Componente de Paginación -->
+            <div v-if="totalPaginas > 1" class="pagination-container">
+              <div class="pagination-info">
+                <span class="pagination-text">
+                  Mostrando <strong>{{ indiceInicio + 1 }}</strong> a <strong>{{ Math.min(indiceFin, registrosFiltrados.length) }}</strong> 
+                  de <strong>{{ registrosFiltrados.length }}</strong> registros
+                </span>
+                <div class="pagination-selector">
+                  <label for="itemsPorPagina" class="pagination-label">Registros por página:</label>
+                  <select 
+                    id="itemsPorPagina" 
+                    v-model="registrosPorPagina" 
+                    @change="cambiarRegistrosPorPagina"
+                    class="pagination-select"
+                  >
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                  </select>
+                </div>
+              </div>
+              
+              <nav class="pagination-nav" aria-label="Navegación de páginas">
+                <!-- Botón Primera Página -->
+                <button 
+                  @click="irAPagina(1)" 
+                  :disabled="paginaActual === 1"
+                  class="pagination-btn pagination-first"
+                  title="Primera página"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="11 17 6 12 11 7"></polyline>
+                    <polyline points="18 17 13 12 18 7"></polyline>
+                  </svg>
+                </button>
+                
+                <!-- Botón Página Anterior -->
+                <button 
+                  @click="irAPagina(paginaActual - 1)" 
+                  :disabled="paginaActual === 1"
+                  class="pagination-btn pagination-prev"
+                  title="Página anterior"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                  <span class="pagination-btn-text">Anterior</span>
+                </button>
+                
+                <!-- Números de Página -->
+                <div class="pagination-numbers">
+                  <!-- Página 1 siempre visible si hay más de 1 página -->
+                  <button 
+                    v-if="mostrarPagina(1)"
+                    @click="irAPagina(1)"
+                    :class="['pagination-number', { active: paginaActual === 1 }]"
+                  >
+                    1
+                  </button>
+                  
+                  <!-- Puntos suspensivos iniciales -->
+                  <span v-if="paginaActual > 4" class="pagination-ellipsis">...</span>
+                  
+                  <!-- Páginas del rango visible -->
+                  <button 
+                    v-for="pagina in paginasVisibles" 
+                    :key="pagina"
+                    @click="irAPagina(pagina)"
+                    :class="['pagination-number', { active: paginaActual === pagina }]"
+                  >
+                    {{ pagina }}
+                  </button>
+                  
+                  <!-- Puntos suspensivos finales -->
+                  <span v-if="paginaActual < totalPaginas - 3" class="pagination-ellipsis">...</span>
+                  
+                  <!-- Última página siempre visible si hay más de 1 página -->
+                  <button 
+                    v-if="mostrarPagina(totalPaginas) && totalPaginas > 1"
+                    @click="irAPagina(totalPaginas)"
+                    :class="['pagination-number', { active: paginaActual === totalPaginas }]"
+                  >
+                    {{ totalPaginas }}
+                  </button>
+                </div>
+                
+                <!-- Botón Página Siguiente -->
+                <button 
+                  @click="irAPagina(paginaActual + 1)" 
+                  :disabled="paginaActual === totalPaginas"
+                  class="pagination-btn pagination-next"
+                  title="Página siguiente"
+                >
+                  <span class="pagination-btn-text">Siguiente</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+                
+                <!-- Botón Última Página -->
+                <button 
+                  @click="irAPagina(totalPaginas)" 
+                  :disabled="paginaActual === totalPaginas"
+                  class="pagination-btn pagination-last"
+                  title="Última página"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="13 17 18 12 13 7"></polyline>
+                    <polyline points="6 17 11 12 6 7"></polyline>
+                  </svg>
+                </button>
+              </nav>
+              
+              <!-- Navegación rápida -->
+              <div class="pagination-jump">
+                <label for="jumpToPage" class="pagination-label">Ir a página:</label>
+                <input 
+                  id="jumpToPage"
+                  type="number" 
+                  v-model.number="paginaSalto"
+                  @keyup.enter="saltarAPagina"
+                  :min="1" 
+                  :max="totalPaginas"
+                  class="pagination-input"
+                  placeholder="Nº"
+                >
+                <button @click="saltarAPagina" class="pagination-jump-btn" title="Ir a página">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14m-7-7 7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -543,7 +682,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import * as XLSX from 'xlsx'
@@ -580,6 +719,11 @@ const filtroConFoto = ref(false)
 const filtroSinFoto = ref(false)
 const filtroConDescripcion = ref(false)
 
+// Variables para paginación
+const paginaActual = ref(1)
+const registrosPorPagina = ref(50)
+const paginaSalto = ref('')
+
 // Variables computadas para filtros
 const maxDate = ref(new Date().toISOString().split('T')[0])
 const hayFiltrosFechas = ref(false)
@@ -594,6 +738,47 @@ const showLightbox = ref(false)
 const lightboxImageUrl = ref('')
 
 let map = null
+
+// Computed properties para paginación
+const totalPaginas = computed(() => {
+  return Math.ceil(registrosFiltrados.value.length / registrosPorPagina.value)
+})
+
+const indiceInicio = computed(() => {
+  return (paginaActual.value - 1) * registrosPorPagina.value
+})
+
+const indiceFin = computed(() => {
+  return indiceInicio.value + registrosPorPagina.value
+})
+
+const registrosPaginados = computed(() => {
+  return registrosFiltrados.value.slice(indiceInicio.value, indiceFin.value)
+})
+
+const paginasVisibles = computed(() => {
+  const paginas = []
+  const inicio = Math.max(2, paginaActual.value - 2)
+  const fin = Math.min(totalPaginas.value - 1, paginaActual.value + 2)
+  
+  for (let i = inicio; i <= fin; i++) {
+    if (i !== 1 && i !== totalPaginas.value) {
+      paginas.push(i)
+    }
+  }
+  
+  return paginas
+})
+
+const mostrarPagina = (numeroPagina) => {
+  if (numeroPagina === 1) {
+    return totalPaginas.value > 1 && (paginaActual.value <= 4 || numeroPagina === 1)
+  }
+  if (numeroPagina === totalPaginas.value) {
+    return totalPaginas.value > 1 && (paginaActual.value >= totalPaginas.value - 3 || numeroPagina === totalPaginas.value)
+  }
+  return false
+}
 
 onMounted(() => {
   cargarRegistros()
@@ -797,6 +982,10 @@ const filtrarRegistros = () => {
   }
 
   registrosFiltrados.value = filtrados
+  
+  // Resetear a la primera página cuando se aplican filtros
+  paginaActual.value = 1
+  
   actualizarFiltrosActivos()
   aplicarOrdenamiento()
 }
@@ -920,7 +1109,38 @@ const limpiarTodosFiltros = () => {
   filtroConDescripcion.value = false
   filtroUsuarioTexto.value = ''
   mostrarSugerencias.value = false
+  paginaActual.value = 1 // Resetear paginación
   filtrarRegistros()
+}
+
+// Funciones de paginación
+const irAPagina = (numeroPagina) => {
+  if (numeroPagina >= 1 && numeroPagina <= totalPaginas.value) {
+    paginaActual.value = numeroPagina
+    
+    // Scroll suave al inicio de la tabla
+    const tableContainer = document.querySelector('.table-container')
+    if (tableContainer) {
+      tableContainer.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      })
+    }
+  }
+}
+
+const cambiarRegistrosPorPagina = () => {
+  // Recalcular qué página mostrar para mantener aproximadamente el mismo registro visible
+  const registroActual = indiceInicio.value + 1
+  const nuevaPagina = Math.ceil(registroActual / registrosPorPagina.value)
+  paginaActual.value = Math.max(1, Math.min(nuevaPagina, totalPaginas.value))
+}
+
+const saltarAPagina = () => {
+  if (paginaSalto.value && paginaSalto.value >= 1 && paginaSalto.value <= totalPaginas.value) {
+    irAPagina(paginaSalto.value)
+    paginaSalto.value = ''
+  }
 }
 
 const exportarRegistros = (tipo) => {
@@ -4050,5 +4270,436 @@ const logout = () => {
 
 .registros-badge i {
   font-size: 10px;
+}
+
+.pagination-badge {
+  background: rgba(156, 39, 176, 0.1);
+  color: #9C27B0;
+  border-color: rgba(156, 39, 176, 0.2);
+}
+
+/* === ESTILOS DE PAGINACIÓN === */
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.08);
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.pagination-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pagination-text {
+  color: #4b5563;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.pagination-text strong {
+  color: #4CAF50;
+  font-weight: 700;
+}
+
+.pagination-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-label {
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pagination-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(209, 213, 219, 0.6);
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+}
+
+.pagination-select:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.pagination-select:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+}
+
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.625rem 1rem;
+  background: white;
+  border: 1px solid rgba(209, 213, 219, 0.6);
+  border-radius: 10px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  min-height: 44px;
+}
+
+.pagination-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.pagination-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border-color: #4CAF50;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+.pagination-btn:active:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+}
+
+.pagination-btn:disabled {
+  background: #f9fafb;
+  color: #d1d5db;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
+.pagination-btn-text {
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.pagination-first,
+.pagination-last {
+  padding: 0.625rem 0.75rem;
+}
+
+.pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: white;
+  border: 1px solid rgba(209, 213, 219, 0.6);
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.pagination-number::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.15), transparent);
+  transition: left 0.4s ease;
+}
+
+.pagination-number:hover:not(.active)::before {
+  left: 100%;
+}
+
+.pagination-number:hover:not(.active) {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+  border-color: rgba(76, 175, 80, 0.4);
+  color: #4CAF50;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.2);
+}
+
+.pagination-number.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border-color: #4CAF50;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(76, 175, 80, 0.4),
+    0 3px 10px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  cursor: default;
+}
+
+.pagination-ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: #9ca3af;
+  font-size: 1.25rem;
+  font-weight: 700;
+  user-select: none;
+  letter-spacing: 0.1em;
+}
+
+.pagination-jump {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pagination-input {
+  width: 80px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(209, 213, 219, 0.6);
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.pagination-input:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.pagination-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+}
+
+.pagination-jump-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.pagination-jump-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transition: left 0.4s ease;
+}
+
+.pagination-jump-btn:hover::before {
+  left: 100%;
+}
+
+.pagination-jump-btn:hover {
+  background: linear-gradient(135deg, #43A047 0%, #5CB85C 100%);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.pagination-jump-btn:active {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+}
+
+/* Responsive para paginación */
+@media (max-width: 768px) {
+  .pagination-container {
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+  }
+  
+  .pagination-info {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .pagination-selector {
+    justify-content: center;
+  }
+  
+  .pagination-nav {
+    gap: 0.15rem;
+  }
+  
+  .pagination-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+  
+  .pagination-btn-text {
+    display: none;
+  }
+  
+  .pagination-first,
+  .pagination-last {
+    padding: 0.5rem;
+  }
+  
+  .pagination-number {
+    width: 40px;
+    height: 40px;
+    font-size: 0.8rem;
+  }
+  
+  .pagination-ellipsis {
+    width: 30px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .pagination-jump {
+    margin-top: 0.5rem;
+  }
+  
+  .pagination-input {
+    width: 70px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  
+  .pagination-jump-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-container {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .pagination-nav {
+    gap: 0.1rem;
+  }
+  
+  .pagination-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    min-height: 36px;
+  }
+  
+  .pagination-first,
+  .pagination-last {
+    padding: 0.4rem;
+  }
+  
+  .pagination-number {
+    width: 36px;
+    height: 36px;
+    font-size: 0.75rem;
+    border-radius: 8px;
+  }
+  
+  .pagination-ellipsis {
+    width: 24px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+  
+  .pagination-numbers {
+    margin: 0 0.25rem;
+  }
+  
+  .pagination-text {
+    font-size: 0.8rem;
+  }
+  
+  .pagination-label {
+    font-size: 0.8rem;
+  }
+  
+  .pagination-select {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    min-width: 60px;
+  }
+}
+
+/* Animaciones adicionales */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

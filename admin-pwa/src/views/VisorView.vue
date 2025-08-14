@@ -1870,11 +1870,11 @@ watch([filtroTipo, filtroPeriodo], () => {
   z-index: 1;
 }
 
-/* Header con diseño moderno y verde */
+/* Header con diseño moderno y verde - MÁS DELGADO */
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(0.75rem, 2vw, 1.25rem);
+  padding: clamp(0.4rem, 1.2vw, 0.7rem);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -1902,7 +1902,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   align-items: center;
   max-width: 100%;
   margin: 0;
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(0.3rem, 1.2vw, 0.6rem);
   flex-wrap: wrap;
   width: 100%;
   position: relative;
@@ -1912,16 +1912,16 @@ watch([filtroTipo, filtroPeriodo], () => {
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(0.3rem, 1.2vw, 0.6rem);
   flex: 1;
-  min-width: 200px;
+  min-width: 150px;
 }
 
 .header-icon {
-  width: clamp(36px, 5vw, 48px);
-  height: clamp(36px, 5vw, 48px);
+  width: clamp(28px, 4vw, 36px);
+  height: clamp(28px, 4vw, 36px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(8px, 1.5vw, 12px);
+  border-radius: clamp(6px, 1vw, 8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1932,8 +1932,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .header-icon svg {
-  width: clamp(16px, 3vw, 24px);
-  height: clamp(16px, 3vw, 24px);
+  width: clamp(14px, 2.5vw, 18px);
+  height: clamp(14px, 2.5vw, 18px);
   color: white;
 }
 
@@ -1944,11 +1944,11 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .header-text {
   flex: 1;
-  min-width: 200px;
+  min-width: 150px;
 }
 
 .header-title {
-  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  font-size: clamp(0.9rem, 2.2vw, 1.2rem);
   font-weight: 700;
   margin: 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
@@ -1957,22 +1957,22 @@ watch([filtroTipo, filtroPeriodo], () => {
   background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   letter-spacing: -0.5px;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .header-subtitle {
-  margin: clamp(0.15rem, 0.5vw, 0.25rem) 0 0 0;
+  margin: clamp(0.1rem, 0.3vw, 0.15rem) 0 0 0;
   color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  line-height: 1.3;
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+  line-height: 1.2;
   font-weight: 400;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 1.5vw, 1rem);
+  gap: clamp(0.3rem, 1vw, 0.6rem);
   flex-wrap: wrap;
   justify-content: flex-end;
 }
@@ -1980,10 +1980,10 @@ watch([filtroTipo, filtroPeriodo], () => {
 .connection-status {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.25rem, 0.8vw, 0.35rem) clamp(0.5rem, 1.5vw, 0.75rem);
-  border-radius: clamp(12px, 2vw, 16px);
-  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  gap: clamp(0.2rem, 0.6vw, 0.25rem);
+  padding: clamp(0.2rem, 0.6vw, 0.25rem) clamp(0.4rem, 1.2vw, 0.6rem);
+  border-radius: clamp(10px, 1.5vw, 12px);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   font-weight: 500;
   white-space: nowrap;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -2014,7 +2014,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   font-weight: 500;
 }
 
-/* Contador LCD estilo vidrio/cristal elegante */
+/* Contador LCD estilo vidrio/cristal elegante - MÁS COMPACTO */
 .lcd-counter {
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.25) 0%,
@@ -2022,8 +2022,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
-  padding: 10px 16px;
+  border-radius: 8px;
+  padding: 6px 10px;
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
@@ -2095,19 +2095,19 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .lcd-label {
   font-family: 'Inter', 'Poppins', sans-serif;
-  font-size: 8px;
+  font-size: 6px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
-  letter-spacing: 1.2px;
-  margin-bottom: 4px;
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   opacity: 0.9;
 }
 
 .lcd-number {
   font-family: 'Inter', sans-serif;
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 900;
   color: #ffffff;
   text-shadow: 
@@ -2186,23 +2186,23 @@ watch([filtroTipo, filtroPeriodo], () => {
   to { transform: rotate(360deg); }
 }
 
-/* Nuevo botón solo con icono */
+/* Nuevo botón solo con icono - MÁS COMPACTO */
 .refresh-btn-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(8px, 2vw, 12px);
+  padding: clamp(6px, 1.5vw, 8px);
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: clamp(8px, 2vw, 12px);
+  border-radius: clamp(6px, 1.5vw, 8px);
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
-  width: clamp(40px, 8vw, 48px);
-  height: clamp(40px, 8vw, 48px);
+  width: clamp(32px, 6vw, 36px);
+  height: clamp(32px, 6vw, 36px);
 }
 
 .refresh-btn-icon:hover:not(:disabled) {
@@ -2223,14 +2223,14 @@ watch([filtroTipo, filtroPeriodo], () => {
   transition: all 0.1s ease;
 }
 
-/* Animación de carga automática */
+/* Animación de carga automática - MÁS COMPACTA */
 .auto-refresh-animation {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
-  padding: clamp(0.25rem, 0.8vw, 0.35rem) clamp(0.5rem, 1.5vw, 0.75rem);
-  border-radius: clamp(12px, 2vw, 16px);
-  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  gap: clamp(0.2rem, 0.6vw, 0.25rem);
+  padding: clamp(0.2rem, 0.6vw, 0.25rem) clamp(0.4rem, 1.2vw, 0.6rem);
+  border-radius: clamp(10px, 1.5vw, 12px);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   font-weight: 500;
   white-space: nowrap;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -2249,27 +2249,27 @@ watch([filtroTipo, filtroPeriodo], () => {
 .loading-dots {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem);
+  gap: clamp(0.2rem, 0.6vw, 0.25rem);
 }
 
 .loading-text {
   font-family: 'Inter', 'Poppins', sans-serif;
   color: rgba(255, 255, 255, 0.95);
-  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
   font-weight: 500;
   white-space: nowrap;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
 }
 
 .dots-container {
   display: flex;
   align-items: center;
-  gap: clamp(3px, 0.8vw, 4px);
+  gap: clamp(2px, 0.6vw, 3px);
 }
 
 .dot {
-  width: clamp(4px, 1vw, 5px);
-  height: clamp(4px, 1vw, 5px);
+  width: clamp(3px, 0.8vw, 4px);
+  height: clamp(3px, 0.8vw, 4px);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.8);
   position: relative;
@@ -2364,10 +2364,10 @@ watch([filtroTipo, filtroPeriodo], () => {
 /* Contenido principal */
 .page-content {
   flex: 1;
-  padding: clamp(12px, 2.5vw, 20px);
+  padding: clamp(6px, 1.5vw, 8px);
   display: flex;
   flex-direction: column;
-  gap: clamp(10px, 2vw, 16px);
+  gap: clamp(4px, 1vw, 6px);
   overflow: visible;
   width: 100%;
   max-width: 100%;
@@ -2384,6 +2384,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   max-width: 100%;
   overflow: visible;
   box-sizing: border-box;
+  margin-top: clamp(-2px, -0.5vw, 0px);
 }
 
 @keyframes filterBarSlideIn {
@@ -2401,16 +2402,16 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: grid;
   grid-template-columns: 1fr 1fr minmax(280px, 1fr) minmax(200px, 300px);
   grid-template-areas: "filter1 filter2 search legend";
-  gap: clamp(8px, 1.5vw, 12px);
+  gap: clamp(6px, 1vw, 8px);
   background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 2px solid #4CAF50;
-  border-radius: clamp(12px, 2vw, 16px);
-  padding: clamp(10px, 2vw, 16px);
+  border: 1px solid #4CAF50;
+  border-radius: clamp(8px, 1.5vw, 10px);
+  padding: clamp(6px, 1.2vw, 10px);
   box-shadow: 
-    0 8px 32px rgba(76, 175, 80, 0.15),
-    0 4px 16px rgba(76, 175, 80, 0.1);
+    0 6px 24px rgba(76, 175, 80, 0.12),
+    0 2px 8px rgba(76, 175, 80, 0.08);
   position: relative;
   overflow: visible;
   width: 100%;
@@ -2422,16 +2423,16 @@ watch([filtroTipo, filtroPeriodo], () => {
 .filter-group:hover {
   border-color: #45a049;
   box-shadow: 
-    0 12px 40px rgba(76, 175, 80, 0.18),
-    0 6px 20px rgba(76, 175, 80, 0.12);
-  transform: translateY(-1px);
+    0 8px 28px rgba(76, 175, 80, 0.15),
+    0 3px 12px rgba(76, 175, 80, 0.1);
+  transform: translateY(-0.5px);
 }
 
 /* Layout responsivo con breakpoints específicos */
 @media (max-width: 1400px) {
   .filter-group {
     grid-template-columns: 1fr 1fr minmax(250px, 1fr) minmax(180px, 280px);
-    gap: clamp(6px, 1.2vw, 10px);
+    gap: clamp(5px, 1vw, 8px);
   }
 }
 
@@ -2442,8 +2443,8 @@ watch([filtroTipo, filtroPeriodo], () => {
       "filter1 filter2"
       "search search"
       "legend legend";
-    gap: clamp(8px, 1.5vw, 12px);
-    padding: clamp(12px, 2.5vw, 16px);
+    gap: clamp(6px, 1.2vw, 8px);
+    padding: clamp(8px, 1.8vw, 12px);
   }
 }
 
@@ -2455,14 +2456,14 @@ watch([filtroTipo, filtroPeriodo], () => {
       "filter1"
       "filter2"  
       "legend";
-    gap: clamp(10px, 2vw, 14px);
+    gap: clamp(6px, 1.5vw, 10px);
   }
 }
 
 @media (max-width: 480px) {
   .filter-group {
-    padding: clamp(8px, 2vw, 12px);
-    gap: clamp(8px, 2vw, 12px);
+    padding: clamp(6px, 1.5vw, 8px);
+    gap: clamp(6px, 1.5vw, 8px);
   }
 }
 
@@ -2479,7 +2480,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 .filter-item {
   display: flex;
   align-items: center;
-  gap: clamp(6px, 1.2vw, 8px);
+  gap: clamp(4px, 0.8vw, 6px);
   position: relative;
   min-width: 0;
   box-sizing: border-box;
@@ -2498,8 +2499,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   opacity: 0.8;
   transition: all 0.3s ease;
   flex-shrink: 0;
-  width: clamp(14px, 2vw, 16px);
-  height: clamp(14px, 2vw, 16px);
+  width: clamp(12px, 1.5vw, 14px);
+  height: clamp(12px, 1.5vw, 14px);
 }
 
 .filter-item:hover .filter-icon {
@@ -2511,11 +2512,11 @@ watch([filtroTipo, filtroPeriodo], () => {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(76, 175, 80, 0.2);
   color: #2c3e50;
-  font-size: clamp(12px, 1.8vw, 14px);
+  font-size: clamp(11px, 1.5vw, 12px);
   font-weight: 500;
   cursor: pointer;
-  padding: clamp(6px, 1.2vw, 8px) clamp(8px, 1.5vw, 12px);
-  border-radius: clamp(6px, 1vw, 8px);
+  padding: clamp(4px, 0.8vw, 6px) clamp(6px, 1.2vw, 8px);
+  border-radius: clamp(5px, 0.8vw, 6px);
   transition: all 0.3s ease;
   outline: none;
   width: 100%;
@@ -2543,15 +2544,15 @@ watch([filtroTipo, filtroPeriodo], () => {
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-/* Leyenda integrada en los filtros - Completamente responsiva */
+/* Leyenda integrada en los filtros - Completamente responsiva y MÁS COMPACTA */
 .filter-legend {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(8px, 1.5vw, 12px);
-  padding: clamp(8px, 1.5vw, 12px);
+  gap: clamp(6px, 1.2vw, 8px);
+  padding: clamp(6px, 1.2vw, 8px);
   background: rgba(76, 175, 80, 0.08);
-  border-radius: clamp(8px, 1.5vw, 10px);
+  border-radius: clamp(6px, 1.2vw, 8px);
   border: 1px solid rgba(76, 175, 80, 0.2);
   grid-area: legend;
   flex-wrap: wrap;
@@ -2562,8 +2563,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 .legend-item-inline {
   display: flex;
   align-items: center;
-  gap: clamp(4px, 1vw, 6px);
-  font-size: clamp(10px, 1.5vw, 12px);
+  gap: clamp(3px, 0.8vw, 4px);
+  font-size: clamp(9px, 1.2vw, 10px);
   font-weight: 500;
   color: #2c3e50;
   flex-shrink: 0;
@@ -2572,8 +2573,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .legend-point-small {
   display: inline-block;
-  width: clamp(10px, 1.5vw, 12px);
-  height: clamp(10px, 1.5vw, 12px);
+  width: clamp(8px, 1.2vw, 10px);
+  height: clamp(8px, 1.2vw, 10px);
   border-radius: 50%;
   border: 2px solid white;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
@@ -2592,23 +2593,24 @@ watch([filtroTipo, filtroPeriodo], () => {
   .filter-legend {
     justify-content: space-around;
     margin-top: 0;
+    gap: clamp(8px, 2vw, 12px);
   }
 }
 
 @media (max-width: 900px) {
   .filter-legend {
-    gap: clamp(12px, 2.5vw, 16px);
+    gap: clamp(8px, 2vw, 12px);
   }
   
   .legend-item-inline {
-    gap: clamp(6px, 1.5vw, 8px);
+    gap: clamp(4px, 1.2vw, 6px);
   }
 }
 
 @media (max-width: 600px) {
   .filter-legend {
     flex-wrap: wrap;
-    gap: clamp(8px, 2vw, 12px);
+    gap: clamp(6px, 1.5vw, 8px);
   }
   
   .legend-item-inline {
@@ -2620,12 +2622,12 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 @media (max-width: 400px) {
   .legend-text {
-    font-size: clamp(9px, 2vw, 10px);
+    font-size: clamp(8px, 1.8vw, 9px);
   }
   
   .legend-point-small {
-    width: clamp(8px, 2vw, 10px);
-    height: clamp(8px, 2vw, 10px);
+    width: clamp(6px, 1.5vw, 8px);
+    height: clamp(6px, 1.5vw, 8px);
   }
 }
 
@@ -2647,7 +2649,7 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .legend-text {
-  font-size: clamp(9px, 1.2vw, 11px);
+  font-size: clamp(9px, 1.2vw, 10px);
   font-weight: 500;
   color: #555;
   white-space: nowrap;
@@ -2672,8 +2674,8 @@ watch([filtroTipo, filtroPeriodo], () => {
   align-items: center;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(76, 175, 80, 0.3);
-  border-radius: clamp(10px, 1.5vw, 12px);
-  padding: clamp(4px, 0.8vw, 6px);
+  border-radius: clamp(8px, 1.2vw, 10px);
+  padding: clamp(3px, 0.6vw, 4px);
   transition: all 0.3s ease;
   width: 100%;
   overflow: visible;
@@ -2689,19 +2691,19 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .search-input-icon {
   color: #4CAF50;
-  margin-left: clamp(8px, 1.5vw, 12px);
+  margin-left: clamp(6px, 1.2vw, 8px);
   opacity: 0.7;
   flex-shrink: 0;
-  width: clamp(14px, 2vw, 16px);
-  height: clamp(14px, 2vw, 16px);
+  width: clamp(12px, 1.5vw, 14px);
+  height: clamp(12px, 1.5vw, 14px);
 }
 
 .modern-search-input {
   flex: 1;
   border: none;
   background: transparent;
-  padding: clamp(8px, 1.5vw, 12px);
-  font-size: clamp(12px, 1.8vw, 14px);
+  padding: clamp(6px, 1.2vw, 8px);
+  font-size: clamp(11px, 1.5vw, 12px);
   color: #2c3e50;
   outline: none;
   font-weight: 400;
@@ -2719,9 +2721,9 @@ watch([filtroTipo, filtroPeriodo], () => {
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
-  border-radius: clamp(6px, 1vw, 8px);
-  width: clamp(32px, 5vw, 40px);
-  height: clamp(32px, 5vw, 40px);
+  border-radius: clamp(5px, 0.8vw, 6px);
+  width: clamp(28px, 4vw, 32px);
+  height: clamp(28px, 4vw, 32px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2729,7 +2731,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
   flex-shrink: 0;
-  margin-right: clamp(2px, 0.5vw, 4px);
+  margin-right: clamp(2px, 0.4vw, 3px);
 }
 
 .modern-search-btn:hover {

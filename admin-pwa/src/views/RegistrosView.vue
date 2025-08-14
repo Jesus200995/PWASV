@@ -1809,7 +1809,7 @@ const logout = () => {
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(0.4rem, 1.2vw, 0.7rem);
+  padding: clamp(0.3rem, 0.8vw, 0.5rem);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -1837,7 +1837,7 @@ const logout = () => {
   align-items: center;
   max-width: 100%;
   margin: 0;
-  gap: clamp(0.4rem, 1.5vw, 0.8rem);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex-wrap: wrap;
   width: 100%;
   position: relative;
@@ -1847,16 +1847,16 @@ const logout = () => {
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(0.4rem, 1.5vw, 0.8rem);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex: 1;
-  min-width: 180px;
+  min-width: 140px;
 }
 
 .header-icon {
-  width: clamp(28px, 4vw, 36px);
-  height: clamp(28px, 4vw, 36px);
+  width: clamp(24px, 3vw, 30px);
+  height: clamp(24px, 3vw, 30px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(6px, 1vw, 8px);
+  border-radius: clamp(5px, 0.8vw, 6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1867,8 +1867,8 @@ const logout = () => {
 }
 
 .header-icon svg {
-  width: clamp(14px, 2.5vw, 18px);
-  height: clamp(14px, 2.5vw, 18px);
+  width: clamp(12px, 2vw, 15px);
+  height: clamp(12px, 2vw, 15px);
   color: white;
 }
 
@@ -1879,11 +1879,11 @@ const logout = () => {
 
 .header-text {
   flex: 1;
-  min-width: 160px;
+  min-width: 120px;
 }
 
 .header-title {
-  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-size: clamp(0.8rem, 2vw, 1rem);
   font-weight: 700;
   margin: 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
@@ -1892,22 +1892,22 @@ const logout = () => {
   background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   letter-spacing: -0.3px;
-  line-height: 1.1;
+  line-height: 1;
 }
 
 .header-subtitle {
-  margin: clamp(0.1rem, 0.3vw, 0.15rem) 0 0 0;
+  margin: clamp(0.05rem, 0.2vw, 0.08rem) 0 0 0;
   color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
-  line-height: 1.2;
+  font-size: clamp(0.55rem, 1vw, 0.65rem);
+  line-height: 1.1;
   font-weight: 400;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.05px;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: clamp(0.4rem, 1.2vw, 0.8rem);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex-wrap: wrap;
   justify-content: flex-end;
 }
@@ -1915,10 +1915,10 @@ const logout = () => {
 .connection-status {
   display: flex;
   align-items: center;
-  gap: clamp(0.2rem, 0.6vw, 0.3rem);
-  padding: clamp(0.2rem, 0.6vw, 0.3rem) clamp(0.4rem, 1.2vw, 0.6rem);
-  border-radius: clamp(10px, 1.8vw, 14px);
-  font-size: clamp(0.6rem, 1.3vw, 0.7rem);
+  gap: clamp(0.15rem, 0.4vw, 0.2rem);
+  padding: clamp(0.15rem, 0.4vw, 0.2rem) clamp(0.3rem, 0.8vw, 0.4rem);
+  border-radius: clamp(8px, 1.2vw, 10px);
+  font-size: clamp(0.55rem, 1vw, 0.6rem);
   font-weight: 500;
   white-space: nowrap;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1937,8 +1937,8 @@ const logout = () => {
 }
 
 .status-indicator {
-  width: clamp(3px, 0.8vw, 5px);
-  height: clamp(3px, 0.8vw, 5px);
+  width: clamp(2px, 0.6vw, 3px);
+  height: clamp(2px, 0.6vw, 3px);
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
@@ -1947,14 +1947,14 @@ const logout = () => {
 .refresh-btn {
   display: flex;
   align-items: center;
-  gap: clamp(0.2rem, 0.6vw, 0.3rem);
-  padding: clamp(0.3rem, 0.8vw, 0.4rem) clamp(0.6rem, 1.5vw, 0.8rem);
+  gap: clamp(0.15rem, 0.4vw, 0.2rem);
+  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: clamp(5px, 1.2vw, 7px);
+  border-radius: clamp(4px, 0.8vw, 5px);
   font-weight: 500;
-  font-size: clamp(0.6rem, 1.3vw, 0.7rem);
+  font-size: clamp(0.55rem, 1vw, 0.6rem);
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

@@ -58,6 +58,17 @@
         </div>
       </header>
 
+      <!-- Contadores pequeños desde Dashboard -->
+      <div class="visor-stats-compact">
+        <div class="compact-stat-card" v-for="stat in statCards" :key="stat.label">
+          <div class="compact-stat-icon" v-html="stat.icon"></div>
+          <div class="compact-stat-info">
+            <span class="compact-stat-value">{{ stat.value }}</span>
+            <span class="compact-stat-label">{{ stat.label }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="page-content">        <div class="modern-filter-bar">
           <div class="filter-group">
             <div class="filter-item">
@@ -423,12 +434,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
 import asistenciasService from '../services/asistenciasService.js'
+import { estadisticasService } from '../services/estadisticasService.js'
 
 const router = useRouter()
 
@@ -438,8 +450,17 @@ const isOnline = ref(navigator.onLine)
 const API_URL = 'https://apipwa.sembrandodatos.com'
 const registros = ref([])
 const asistencias = ref([])
+const usuarios = ref([])
 const loading = ref(false)
 const error = ref('')
+
+// Variables para estadísticas
+const stats = reactive({
+  totalUsuarios: '-',
+  registrosHoy: '-',
+  asistenciasHoy: '-',
+  usuariosPresentes: '-'
+})
 
 // Estado del mapa
 const mapInitialized = ref(false)
@@ -476,6 +497,30 @@ const selectedPhotoUrl = ref('')
 
 // Contador de puntos en el mapa
 const totalPuntosEnMapa = ref(0)
+
+// Computed property para las tarjetas de estadísticas compactas
+const statCards = computed(() => [
+  {
+    label: 'Usuarios Activos',
+    value: stats.totalUsuarios,
+    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient></defs><path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z" fill="url(#grad2)"/></svg>`
+  },
+  {
+    label: 'Actividades de Hoy',
+    value: stats.registrosHoy,
+    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient></defs><path d="M8 6h8v2H8zM6 10h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" fill="url(#grad3)"/><circle cx="9" cy="13" r="0.5" fill="#66BB6A"/><circle cx="12" cy="13" r="0.5" fill="#66BB6A"/><circle cx="15" cy="13" r="0.5" fill="#66BB6A"/></svg>`
+  },
+  {
+    label: 'Asistencias Hoy',
+    value: stats.asistenciasHoy,
+    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient></defs><circle cx="12" cy="12" r="8" stroke="#4CAF50" stroke-width="2" fill="none"/><path d="m12 6 v6 l4 2" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round"/></svg>`
+  },
+  {
+    label: 'Usuarios Presentes',
+    value: stats.usuariosPresentes,
+    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" /><stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" /></linearGradient></defs><circle cx="8" cy="8" r="2" fill="url(#grad6)"/><circle cx="16" cy="8" r="2" fill="url(#grad6)"/><path d="M4 18v-1a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v1M16 13a4 4 0 0 1 4 4v1" stroke="#4CAF50" stroke-width="2" stroke-linecap="round"/></svg>`
+  }
+])
 
 // Función para formatear fechas
 const formatFecha = (fechaStr) => {
@@ -678,15 +723,16 @@ const cargarRegistros = async () => {
   try {
     const token = localStorage.getItem('admin_token')
     
-    // Cargar registros y asistencias en paralelo
-    const [responseRegistros, asistenciasData] = await Promise.all([
+    // Cargar registros, asistencias y usuarios en paralelo
+    const [responseRegistros, asistenciasData, usuariosData] = await Promise.all([
       axios.get(`${API_URL}/registros`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       }),
-      asistenciasService.obtenerAsistenciasConUsuarios()
+      asistenciasService.obtenerAsistenciasConUsuarios(),
+      usuariosService.obtenerUsuarios()
     ])
     
     // La respuesta puede ser directamente un array o tener una propiedad específica
@@ -698,6 +744,10 @@ const cargarRegistros = async () => {
     // Guardar datos
     registros.value = registrosEnriquecidos
     asistencias.value = asistenciasData
+    usuarios.value = usuariosData
+    
+    // Calcular estadísticas
+    await calcularEstadisticas()
     
     // Obtener las últimas actividades por usuario (combinando registros y asistencias)
     const ultimasActividadesData = obtenerUltimasActividadesPorUsuario(registrosEnriquecidos, asistenciasData)
@@ -720,6 +770,46 @@ const cargarRegistros = async () => {
     }
   } finally {
     loading.value = false
+  }
+}
+
+// Función para calcular estadísticas
+const calcularEstadisticas = async () => {
+  try {
+    // Usar el servicio de estadísticas con fallback automático
+    const estadisticasReales = await estadisticasService.obtenerEstadisticasConFallback(
+      registros.value,
+      usuarios.value,
+      asistencias.value
+    )
+    
+    // Aplicar las estadísticas obtenidas (solo las 4 que queremos mostrar)
+    stats.totalUsuarios = estadisticasReales.totalUsuarios
+    stats.registrosHoy = estadisticasReales.registrosHoy
+    stats.asistenciasHoy = estadisticasReales.asistenciasHoy
+    stats.usuariosPresentes = estadisticasReales.usuariosPresentes
+    
+    console.log('✅ Estadísticas aplicadas en Visor:', {
+      totalUsuarios: stats.totalUsuarios,
+      registrosHoy: stats.registrosHoy,
+      asistenciasHoy: stats.asistenciasHoy,
+      usuariosPresentes: stats.usuariosPresentes
+    })
+    
+  } catch (error) {
+    console.error('❌ Error obteniendo estadísticas en Visor:', error)
+    
+    // Si hay error del token, hacer logout
+    if (error.message === 'TOKEN_EXPIRED') {
+      logout()
+      return
+    }
+    
+    // Como último recurso, usar valores por defecto
+    stats.totalUsuarios = '-'
+    stats.registrosHoy = '-'
+    stats.asistenciasHoy = '-'
+    stats.usuariosPresentes = '-'
   }
 }
 
@@ -5699,6 +5789,212 @@ watch([filtroTipo, filtroPeriodo], () => {
   :global(.leaflet-popup-content) {
     margin: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 12px) !important;
     font-size: clamp(10px, 2.5vw, 12px) !important;
+  }
+}
+
+/* Estilos para contadores compactos del visor */
+.visor-stats-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 18vw, 160px), 1fr));
+  gap: clamp(8px, 1.5vw, 12px);
+  padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 255, 248, 0.95) 100%);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  border-radius: 0;
+}
+
+.compact-stat-card {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(102, 187, 106, 0.05) 100%);
+  padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 12px);
+  border-radius: clamp(8px, 1.5vw, 12px);
+  box-shadow: 
+    0 2px 8px rgba(76, 175, 80, 0.1), 
+    0 1px 4px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.5vw, 8px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(76, 175, 80, 0.15);
+  min-height: clamp(40px, 6vh, 50px);
+}
+
+.compact-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.1), transparent);
+  border-radius: clamp(8px, 1.5vw, 12px);
+  transition: left 0.5s ease;
+  z-index: 0;
+}
+
+.compact-stat-card:hover::before {
+  left: 100%;
+}
+
+.compact-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 16px rgba(76, 175, 80, 0.2), 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.12) 0%, rgba(102, 187, 106, 0.08) 100%);
+  border-color: rgba(76, 175, 80, 0.25);
+}
+
+.compact-stat-icon {
+  width: clamp(24px, 4vw, 28px);
+  height: clamp(24px, 4vw, 28px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: clamp(4px, 1vw, 6px);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(102, 187, 106, 0.05) 100%);
+  position: relative;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.compact-stat-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  transform: translate(-50%, -50%);
+}
+
+.compact-stat-card:hover .compact-stat-icon {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(102, 187, 106, 0.08) 100%);
+}
+
+.compact-stat-card:hover .compact-stat-icon::before {
+  width: clamp(35px, 6vw, 40px);
+  height: clamp(35px, 6vw, 40px);
+}
+
+.compact-stat-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.compact-stat-value {
+  font-size: clamp(14px, 2.8vw, 18px);
+  color: #4CAF50;
+  margin-bottom: clamp(1px, 0.5vw, 2px);
+  font-weight: 700;
+  letter-spacing: clamp(0.3px, 0.08vw, 0.5px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+
+.compact-stat-card:hover .compact-stat-value {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #388e3c 0%, #4CAF50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.compact-stat-label {
+  color: #666;
+  font-size: clamp(8px, 1.4vw, 10px);
+  font-weight: 600;
+  margin: 0;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: clamp(0.1px, 0.05vw, 0.2px);
+  line-height: 1.2;
+}
+
+.compact-stat-card:hover .compact-stat-label {
+  color: #4CAF50;
+}
+
+/* Responsive para contadores compactos */
+@media (max-width: 768px) {
+  .visor-stats-compact {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(6px, 1.5vw, 8px);
+    padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2.5vw, 16px);
+  }
+  
+  .compact-stat-card {
+    padding: clamp(5px, 1.2vw, 8px) clamp(6px, 1.5vw, 10px);
+    min-height: clamp(35px, 5vh, 45px);
+    gap: clamp(4px, 1vw, 6px);
+  }
+  
+  .compact-stat-icon {
+    width: clamp(20px, 3.5vw, 24px);
+    height: clamp(20px, 3.5vw, 24px);
+  }
+  
+  .compact-stat-value {
+    font-size: clamp(12px, 2.5vw, 16px);
+  }
+  
+  .compact-stat-label {
+    font-size: clamp(7px, 1.2vw, 9px);
+  }
+}
+
+@media (max-width: 480px) {
+  .visor-stats-compact {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(4px, 1vw, 6px);
+    padding: clamp(5px, 1.2vw, 6px) clamp(8px, 2vw, 12px);
+  }
+  
+  .compact-stat-card {
+    padding: clamp(4px, 1vw, 6px) clamp(5px, 1.2vw, 8px);
+    min-height: clamp(30px, 4.5vh, 40px);
+    gap: clamp(3px, 0.8vw, 5px);
+    border-radius: clamp(6px, 1.2vw, 8px);
+  }
+  
+  .compact-stat-icon {
+    width: clamp(18px, 3vw, 22px);
+    height: clamp(18px, 3vw, 22px);
+    border-radius: clamp(3px, 0.8vw, 4px);
+  }
+  
+  .compact-stat-value {
+    font-size: clamp(11px, 2.2vw, 14px);
+  }
+  
+  .compact-stat-label {
+    font-size: clamp(6px, 1vw, 8px);
+    letter-spacing: clamp(0.05px, 0.03vw, 0.1px);
   }
 }
 

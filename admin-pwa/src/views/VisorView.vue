@@ -1785,8 +1785,9 @@ const cerrarModal = () => {
 }
 
 // Recargar mapa y datos
-const recargarMapa = () => {
-  cargarRegistros()
+const recargarMapa = async () => {
+  await cargarRegistros()
+  await calcularEstadisticas()
 }
 
 // Logout

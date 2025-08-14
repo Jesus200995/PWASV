@@ -198,8 +198,22 @@
           <router-link to="/visor" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Pin de ubicación clásico -->
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="currentColor" opacity="0.15"/>
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
+                
+                <!-- Punto central -->
+                <circle cx="12" cy="10" r="3" fill="currentColor" opacity="0.8"/>
+                <circle cx="12" cy="10" r="1.5" fill="rgba(255,255,255,0.9)"/>
+                
+                <!-- Ondas de señal GPS -->
+                <circle cx="12" cy="10" r="5" opacity="0.3" stroke-dasharray="2,3" stroke-width="1"/>
+                <circle cx="12" cy="10" r="7" opacity="0.2" stroke-dasharray="3,4" stroke-width="0.8"/>
+                
+                <!-- Elementos decorativos minimalistas -->
+                <circle cx="4" cy="4" r="0.8" fill="currentColor" opacity="0.3"/>
+                <circle cx="20" cy="6" r="0.8" fill="currentColor" opacity="0.3"/>
+                <circle cx="6" cy="20" r="0.8" fill="currentColor" opacity="0.3"/>
               </svg>
             </div>
             <span class="nav-text">Visor de Seguimiento</span>
@@ -211,10 +225,15 @@
           <router-link to="/asistencia" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6L9 17l-5-5"/>
-                <path d="M3 12h6m6-6h6m-6 12h6"/>
-                <rect x="7" y="3" width="3" height="18" rx="1"/>
-                <rect x="14" y="3" width="3" height="18" rx="1"/>
+                <!-- Ícono de lista de verificación premium -->
+                <rect x="3" y="4" width="18" height="16" rx="3" ry="3" opacity="0.1" fill="currentColor"/>
+                <rect x="3" y="4" width="18" height="16" rx="3" ry="3"/>
+                <path d="M9 12l2 2 4-4"/>
+                <path d="M7 8h10"/>
+                <path d="M7 16h6"/>
+                <!-- Detalles decorativos -->
+                <circle cx="18" cy="6" r="1" opacity="0.4"/>
+                <circle cx="18" cy="18" r="1" opacity="0.4"/>
               </svg>
             </div>
             <span class="nav-text">Asistencia</span>
@@ -226,12 +245,16 @@
           <router-link to="/registros" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <rect x="3" y="10" width="18" height="12"/>
-                <line x1="8" y1="14" x2="16" y2="14"/>
-                <line x1="8" y1="18" x2="12" y2="18"/>
+                <!-- Ícono de documento premium con detalles -->
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+                <!-- Elementos decorativos premium -->
+                <rect x="6" y="4" width="2" height="1" opacity="0.3"/>
+                <circle cx="19" cy="19" r="1.5" opacity="0.2" fill="currentColor"/>
+                <path d="M12 11l1.5 1.5L16 10" opacity="0.4"/>
               </svg>
             </div>
             <span class="nav-text">Registro de Actividades</span>
@@ -243,8 +266,15 @@
           <router-link to="/usuarios" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+                <!-- Ícono de usuarios premium con efecto de grupo -->
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                <!-- Elementos decorativos premium -->
+                <circle cx="9" cy="7" r="2" opacity="0.2" fill="currentColor"/>
+                <circle cx="18" cy="6" r="1" opacity="0.3"/>
+                <path d="M12 18h8" opacity="0.2"/>
               </svg>
             </div>
             <span class="nav-text">Usuarios</span>
@@ -256,7 +286,19 @@
           <router-link to="/historiales" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <!-- Ícono de reloj premium con elementos de tiempo -->
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12,6 12,12 16,14"/>
+                <!-- Marcadores de hora elegantes -->
+                <circle cx="12" cy="2" r="0.5" opacity="0.6"/>
+                <circle cx="22" cy="12" r="0.5" opacity="0.6"/>
+                <circle cx="12" cy="22" r="0.5" opacity="0.6"/>
+                <circle cx="2" cy="12" r="0.5" opacity="0.6"/>
+                <!-- Efecto de cronómetro -->
+                <path d="M12 2v4" opacity="0.4"/>
+                <path d="M12 20v2" opacity="0.4"/>
+                <path d="M4.93 4.93l2.83 2.83" opacity="0.3"/>
+                <path d="M16.24 16.24l2.83 2.83" opacity="0.3"/>
               </svg>
             </div>
             <span class="nav-text">Historiales</span>
@@ -268,9 +310,15 @@
           <router-link to="/configuracion" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Ícono de configuración premium con múltiples engranajes -->
                 <circle cx="12" cy="12" r="3"/>
-                <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m21-7h-6M7 5h6"/>
-                <path d="M19.42 15.58l-2.83-2.83m-3.18 0l-2.83 2.83M19.42 8.42l-2.83 2.83m-3.18 0L10.58 8.42"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                <!-- Elementos decorativos -->
+                <circle cx="12" cy="12" r="1" opacity="0.4" fill="currentColor"/>
+                <circle cx="12" cy="8" r="0.5" opacity="0.3"/>
+                <circle cx="12" cy="16" r="0.5" opacity="0.3"/>
+                <circle cx="8" cy="12" r="0.5" opacity="0.3"/>
+                <circle cx="16" cy="12" r="0.5" opacity="0.3"/>
               </svg>
             </div>
             <span class="nav-text">Configuración</span>
@@ -869,35 +917,40 @@ if (typeof window !== 'undefined') {
 }
 
 .nav-item {
-  margin-bottom: clamp(3px, 0.6vh, 6px);
-  padding: 0 clamp(6px, 1.2vw, 12px);
+  margin-bottom: clamp(2px, 0.4vh, 4px);
+  padding: 0 clamp(4px, 0.8vw, 8px);  /* Padding lateral reducido para acercar al borde */
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 1.2vw, 12px);
-  padding: clamp(8px, 1.6vh, 14px) clamp(8px, 1.5vw, 14px);
-  color: rgba(255, 255, 255, 0.8);
+  gap: clamp(6px, 1vw, 8px);  /* Gap reducido para acercar más a la izquierda */
+  padding: clamp(8px, 1.6vh, 14px) clamp(6px, 1.2vw, 10px);  /* Padding izquierdo reducido */
+  color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
-  border-radius: clamp(6px, 1vw, 10px);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: clamp(8px, 1.2vw, 12px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  margin-bottom: clamp(1px, 0.3vh, 3px);
-  backdrop-filter: blur(10px);
-  min-height: clamp(40px, 5vh, 52px);
+  margin-bottom: clamp(2px, 0.4vh, 4px);
+  backdrop-filter: blur(5px);
+  border: 1px solid transparent;
+  min-height: clamp(40px, 5vh, 50px);  /* Altura reducida para compactar */
 }
 
 .nav-link:hover {
   background: linear-gradient(135deg, 
-    rgba(13, 78, 20, 0.3) 0%, 
-    rgba(27, 94, 32, 0.2) 100%);
-  color: #FFFFFF;
-  transform: translateX(4px) scale(1.01);
+    rgba(255, 255, 255, 0.08) 0%, 
+    rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  transform: translateX(2px) scale(1.01);
   box-shadow: 
-    0 4px 15px rgba(13, 78, 20, 0.3),
+    0 2px 12px rgba(255, 255, 255, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-radius: clamp(6px, 1vw, 10px);
 }
 
 .nav-link:hover .nav-glow {
@@ -905,55 +958,78 @@ if (typeof window !== 'undefined') {
   transform: scale(1);
 }
 
+.nav-link:hover .nav-icon {
+  filter: drop-shadow(0 1px 6px rgba(255, 255, 255, 0.2));
+  transform: scale(1.02);
+}
+
 .nav-item.active .nav-link,
 .nav-link.router-link-active,
 .nav-link.router-link-exact-active {
+  /* Efecto de vidrio transparente moderno */
   background: linear-gradient(135deg, 
-    #0D4E14 0%, 
-    #1B5E20 100%);
-  color: white;
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.12) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.95);
   box-shadow: 
-    0 6px 20px rgba(13, 78, 20, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transform: translateX(3px);
+    0 4px 20px rgba(255, 255, 255, 0.1),
+    0 2px 10px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateX(2px);
+  border-radius: clamp(8px, 1.2vw, 12px);
 }
 
 .nav-item.active .nav-link .nav-icon,
 .nav-link.router-link-active .nav-icon,
 .nav-link.router-link-exact-active .nav-icon {
-  filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.3));
+  filter: drop-shadow(0 1px 4px rgba(255, 255, 255, 0.4)) 
+          drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+  transform: scale(1.05);
 }
 
 .nav-icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(18px, 2.2vw, 20px);
-  height: clamp(18px, 2.2vw, 20px);
+  width: clamp(16px, 2vw, 18px);  /* Reducido de 20px máximo a 18px */
+  height: clamp(16px, 2vw, 18px);
   position: relative;
   flex-shrink: 0;
 }
 
 .nav-icon {
-  width: clamp(14px, 1.8vw, 18px);
-  height: clamp(14px, 1.8vw, 18px);
-  stroke-width: 2.2;
+  width: clamp(12px, 1.6vw, 15px);  /* Reducido de 18px máximo a 15px */
+  height: clamp(12px, 1.6vw, 15px);
+  stroke-width: 2;  /* Reducido de 2.2 a 2 para líneas más finas */
   transition: all 0.3s ease;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));  /* Sombra más sutil */
 }
 
 .nav-text {
-  font-size: clamp(9px, 1.1vw, 12px);
-  font-weight: 600;
+  font-size: clamp(6px, 0.7vw, 8px);  /* Aún más pequeño: máximo 8px */
+  font-weight: 500;
+  font-family: 'Inter', 'SF Pro Text', '-apple-system', 'BlinkMacSystemFont', sans-serif;
   text-shadow: none;
-  letter-spacing: -0.01em;
-  white-space: normal;
-  word-wrap: break-word;
+  letter-spacing: 0.02em;
+  white-space: normal;  /* Permitir múltiples líneas */
+  word-wrap: break-word;  /* Romper palabras si es necesario */
   overflow-wrap: break-word;
-  line-height: 1.2;
+  line-height: 1.1;  /* Líneas aún más compactas */
   flex: 1;
   min-width: 0;
   text-align: left;
+  transition: all 0.2s ease;
+  max-height: 2.2em;  /* Máximo 2 líneas más compacto */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;  /* Propiedad estándar */
+  -webkit-box-orient: vertical;
 }
 
 .nav-glow {
@@ -1154,10 +1230,11 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 13px;
+    font-size: 8px;  /* Más pequeño en tablet */
     white-space: normal;
     word-wrap: break-word;
-    line-height: 1.2;
+    line-height: 1.1;
+    max-height: 2.2em;
   }
   
   .logout-btn {
@@ -1246,10 +1323,11 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 11px;
+    font-size: 7px;  /* Muy pequeño en landscape móvil */
     white-space: normal;
     word-wrap: break-word;
-    line-height: 1.2;
+    line-height: 1.1;
+    max-height: 2.2em;
   }
   
   .sidebar-footer {

@@ -8,7 +8,7 @@ const API_CONFIG = {
 }
 
 // Durante el desarrollo usar localhost, en producción usar el servidor remoto
-const API_URL = window.location.hostname === 'localhost' ? API_CONFIG.local : API_CONFIG.production
+const API_URL = API_CONFIG.production // Forzar uso de producción
 
 console.log(`🌐 EstadísticasService usando API: ${API_URL}`)
 

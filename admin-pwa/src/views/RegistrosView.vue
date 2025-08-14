@@ -36,129 +36,134 @@
         </div>
       </header>
 
-      <!-- Contadores de estadísticas compactos -->
-      <div class="visor-stats-compact">
-        <div class="compact-stat-card">
-          <div class="compact-stat-icon">
-            <!-- Icono de calendario/actividades hoy -->
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" 
-                    fill="#4CAF50"/>
-              <circle cx="12" cy="6" r="2" fill="#66BB6A" opacity="0.8"/>
-              <path d="M16 11h2v2h-2zm0 3h2v2h-2z" fill="#4CAF50" opacity="0.6"/>
-            </svg>
-          </div>
-          <div class="compact-stat-info">
-            <div class="compact-stat-value">{{ actividadesHoy }}</div>
-            <div class="compact-stat-label">Actividades hoy</div>
-          </div>
-        </div>
-        
-        <div class="compact-stat-card">
-          <div class="compact-stat-icon">
-            <!-- Icono de estadísticas/total actividades -->
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" 
-                    fill="#4CAF50"/>
-              <circle cx="5" cy="19" r="2" fill="#66BB6A" opacity="0.7"/>
-              <circle cx="12" cy="12" r="1.5" fill="#4CAF50" opacity="0.8"/>
-              <circle cx="19" cy="5" r="1.5" fill="#43A047"/>
-            </svg>
-          </div>
-          <div class="compact-stat-info">
-            <div class="compact-stat-value">{{ totalActividades }}</div>
-            <div class="compact-stat-label">Total actividades</div>
-          </div>
-        </div>
-      </div>
-
       <div class="page-content">
         <!-- Panel de filtros avanzados -->
         <div class="advanced-filters">
           <!-- Filtros principales -->
           <div class="filters-main">
-            <!-- Barra de búsqueda -->
-            <div class="search-box">
-              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-              <input 
-                v-model="searchTerm" 
-                type="text" 
-                placeholder="Buscar por usuario, descripción o ubicación..." 
-                class="search-input"
-                @input="filtrarRegistros"
-              >
-              <button v-if="searchTerm" @click="limpiarBusqueda" class="clear-search-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+            <!-- Contenedor izquierdo con filtros -->
+            <div class="filters-left">
+              <!-- Barra de búsqueda -->
+              <div class="search-box">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
                 </svg>
-              </button>
-            </div>
-            
-            <!-- Filtro de rango de fecha con datepickers -->
-            <div class="date-range-filter">
-              <div class="date-picker-container">
-                <label class="date-label">Desde:</label>
                 <input 
-                  type="date" 
-                  v-model="filtroFechaInicio" 
-                  class="date-input" 
-                  :max="filtroFechaFin || maxDate"
-                  @change="filtrarRegistros"
+                  v-model="searchTerm" 
+                  type="text" 
+                  placeholder="Buscar por usuario, descripción o ubicación..." 
+                  class="search-input"
+                  @input="filtrarRegistros"
                 >
-              </div>
-              <div class="date-picker-container">
-                <label class="date-label">Hasta:</label>
-                <input 
-                  type="date" 
-                  v-model="filtroFechaFin" 
-                  class="date-input" 
-                  :min="filtroFechaInicio"
-                  :max="maxDate"
-                  @change="filtrarRegistros"
-                >
-              </div>
-              
-              <!-- Selectores rápidos de fecha -->
-              <div class="quick-date-filters">
-                <button 
-                  @click="seleccionarFechaRapida('hoy')" 
-                  :class="['quick-date-btn', filtroRapido === 'hoy' ? 'active' : '']"
-                >
-                  Hoy
-                </button>
-                <button 
-                  @click="seleccionarFechaRapida('ayer')" 
-                  :class="['quick-date-btn', filtroRapido === 'ayer' ? 'active' : '']"
-                >
-                  Ayer
-                </button>
-                <button 
-                  @click="seleccionarFechaRapida('semana')" 
-                  :class="['quick-date-btn', filtroRapido === 'semana' ? 'active' : '']"
-                >
-                  Esta semana
-                </button>
-                <button 
-                  @click="seleccionarFechaRapida('mes')" 
-                  :class="['quick-date-btn', filtroRapido === 'mes' ? 'active' : '']"
-                >
-                  Este mes
-                </button>
-                <button 
-                  v-if="hayFiltrosFechas" 
-                  @click="limpiarFiltrosFechas" 
-                  class="clear-date-btn"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button v-if="searchTerm" @click="limpiarBusqueda" class="clear-search-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
-                  Limpiar
                 </button>
+              </div>
+              
+              <!-- Filtro de rango de fecha con datepickers -->
+              <div class="date-range-filter">
+                <div class="date-picker-container">
+                  <label class="date-label">Desde:</label>
+                  <input 
+                    type="date" 
+                    v-model="filtroFechaInicio" 
+                    class="date-input" 
+                    :max="filtroFechaFin || maxDate"
+                    @change="filtrarRegistros"
+                  >
+                </div>
+                <div class="date-picker-container">
+                  <label class="date-label">Hasta:</label>
+                  <input 
+                    type="date" 
+                    v-model="filtroFechaFin" 
+                    class="date-input" 
+                    :min="filtroFechaInicio"
+                    :max="maxDate"
+                    @change="filtrarRegistros"
+                  >
+                </div>
+                
+                <!-- Selectores rápidos de fecha -->
+                <div class="quick-date-filters">
+                  <button 
+                    @click="seleccionarFechaRapida('hoy')" 
+                    :class="['quick-date-btn', filtroRapido === 'hoy' ? 'active' : '']"
+                  >
+                    Hoy
+                  </button>
+                  <button 
+                    @click="seleccionarFechaRapida('ayer')" 
+                    :class="['quick-date-btn', filtroRapido === 'ayer' ? 'active' : '']"
+                  >
+                    Ayer
+                  </button>
+                  <button 
+                    @click="seleccionarFechaRapida('semana')" 
+                    :class="['quick-date-btn', filtroRapido === 'semana' ? 'active' : '']"
+                  >
+                    Esta semana
+                  </button>
+                  <button 
+                    @click="seleccionarFechaRapida('mes')" 
+                    :class="['quick-date-btn', filtroRapido === 'mes' ? 'active' : '']"
+                  >
+                    Este mes
+                  </button>
+                  <button 
+                    v-if="hayFiltrosFechas" 
+                    @click="limpiarFiltrosFechas" 
+                    class="clear-date-btn"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Limpiar
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Contadores de estadísticas en el lado derecho -->
+            <div class="filters-right">
+              <div class="visor-stats-compact">
+                <div class="compact-stat-card">
+                  <div class="compact-stat-icon">
+                    <!-- Icono de calendario/actividades hoy -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" 
+                            fill="#4CAF50"/>
+                      <circle cx="12" cy="6" r="2" fill="#66BB6A" opacity="0.8"/>
+                      <path d="M16 11h2v2h-2zm0 3h2v2h-2z" fill="#4CAF50" opacity="0.6"/>
+                    </svg>
+                  </div>
+                  <div class="compact-stat-info">
+                    <div class="compact-stat-value">{{ actividadesHoy }}</div>
+                    <div class="compact-stat-label">Actividades hoy</div>
+                  </div>
+                </div>
+                
+                <div class="compact-stat-card">
+                  <div class="compact-stat-icon">
+                    <!-- Icono de estadísticas/total actividades -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" 
+                            fill="#4CAF50"/>
+                      <circle cx="5" cy="19" r="2" fill="#66BB6A" opacity="0.7"/>
+                      <circle cx="12" cy="12" r="1.5" fill="#4CAF50" opacity="0.8"/>
+                      <circle cx="19" cy="5" r="1.5" fill="#43A047"/>
+                    </svg>
+                  </div>
+                  <div class="compact-stat-info">
+                    <div class="compact-stat-value">{{ totalActividades }}</div>
+                    <div class="compact-stat-label">Total actividades</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2685,6 +2690,30 @@ const logout = () => {
   gap: clamp(0.3rem, 0.8vw, 0.4rem);
   margin-bottom: clamp(0.3rem, 0.8vw, 0.4rem);
   width: 100%;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.filters-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.3rem, 0.8vw, 0.4rem);
+  flex: 1;
+  min-width: 0;
+}
+
+.filters-right {
+  display: flex;
+  align-items: center;
+  margin-left: clamp(0.5rem, 1.5vw, 1rem);
+  flex-shrink: 0;
+}
+
+.filters-right .visor-stats-compact {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: clamp(0.3rem, 0.8vw, 0.4rem);
 }
 
 .search-box {
@@ -4768,7 +4797,7 @@ const logout = () => {
 .visor-stats-compact {
   display: flex;
   gap: clamp(0.5rem, 1.5vw, 1rem);
-  padding: clamp(0.3rem, 1vw, 0.6rem) clamp(0.75rem, 3vw, 1.5rem);
+  padding: 0;
   background: transparent;
   justify-content: center;
   flex-wrap: wrap;
@@ -4781,7 +4810,7 @@ const logout = () => {
   display: flex;
   align-items: center;
   gap: clamp(0.4rem, 1vw, 0.6rem);
-  padding: clamp(0.4rem, 1.2vw, 0.7rem) clamp(0.7rem, 2vw, 1rem);
+  padding: clamp(0.5rem, 1.2vw, 0.8rem) clamp(0.8rem, 2vw, 1.2rem);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
   border: 1px solid rgba(76, 175, 80, 0.15);
   border-radius: clamp(8px, 2vw, 12px);
@@ -4793,7 +4822,8 @@ const logout = () => {
   overflow: hidden;
   backdrop-filter: blur(8px);
   cursor: default;
-  min-width: clamp(110px, 14vw, 140px);
+  min-width: clamp(120px, 15vw, 150px);
+  font-size: clamp(0.75rem, 1.4vw, 0.85rem);
 }
 
 .compact-stat-card::before {
@@ -4823,8 +4853,8 @@ const logout = () => {
 
 .compact-stat-icon {
   position: relative;
-  width: clamp(24px, 3vw, 28px);
-  height: clamp(24px, 3vw, 28px);
+  width: clamp(28px, 3.5vw, 32px);
+  height: clamp(28px, 3.5vw, 32px);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
   border: 2px solid rgba(76, 175, 80, 0.2);
   border-radius: clamp(6px, 1.5vw, 8px);
@@ -4861,8 +4891,8 @@ const logout = () => {
 }
 
 .compact-stat-icon svg {
-  width: clamp(12px, 2vw, 14px);
-  height: clamp(12px, 2vw, 14px);
+  width: clamp(14px, 2.2vw, 16px);
+  height: clamp(14px, 2.2vw, 16px);
   transition: all 0.3s ease;
   filter: drop-shadow(0 1px 2px rgba(76, 175, 80, 0.3));
 }
@@ -4875,13 +4905,13 @@ const logout = () => {
 .compact-stat-info {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.05rem, 0.2vw, 0.1rem);
+  gap: clamp(0.1rem, 0.3vw, 0.15rem);
   flex: 1;
   min-width: 0;
 }
 
 .compact-stat-value {
-  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
   font-weight: 700;
   color: #2c3e50;
   line-height: 1;
@@ -4902,7 +4932,7 @@ const logout = () => {
 }
 
 .compact-stat-label {
-  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
   font-weight: 500;
   color: #64748b;
   text-transform: uppercase;
@@ -4916,8 +4946,69 @@ const logout = () => {
   transform: translateX(1px);
 }
 
-/* Responsive para contadores compactos - MÁS PEQUEÑOS */
+/* Responsive para contadores compactos - NUEVA ESTRUCTURA */
 @media (max-width: 768px) {
+  .filters-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filters-left {
+    width: 100%;
+  }
+  
+  .filters-right {
+    margin-left: 0;
+    margin-top: clamp(0.5rem, 1vw, 0.75rem);
+    justify-content: center;
+  }
+  
+  .visor-stats-compact {
+    gap: 0.75rem;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+  }
+  
+  .compact-stat-card {
+    min-width: 110px;
+    padding: 0.6rem 0.8rem;
+    gap: 0.5rem;
+  }
+  
+  .compact-stat-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .compact-stat-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .compact-stat-value {
+    font-size: 1.2rem;
+  }
+  
+  .compact-stat-label {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters-right .visor-stats-compact {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  
+  .compact-stat-card {
+    min-width: 100%;
+    max-width: 220px;
+    margin: 0 auto;
+    padding: 0.6rem 0.8rem;
+  }
+  
   .visor-stats-compact {
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
@@ -4925,19 +5016,21 @@ const logout = () => {
   }
   
   .compact-stat-card {
-    min-width: 100px;
-    padding: 0.5rem 0.7rem;
-    gap: 0.4rem;
+    min-width: 110px;
+    padding: 0.6rem 0.8rem;
+    gap: 0.5rem;
+    border-radius: 10px;
   }
   
   .compact-stat-icon {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
   }
   
   .compact-stat-icon svg {
-    width: 12px;
-    height: 12px;
+    width: 13px;
+    height: 13px;
   }
   
   .compact-stat-value {
@@ -4946,40 +5039,6 @@ const logout = () => {
   
   .compact-stat-label {
     font-size: 0.6rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .visor-stats-compact {
-    gap: 0.5rem;
-    padding: 0.3rem 0.5rem;
-    margin: 0;
-  }
-  
-  .compact-stat-card {
-    min-width: 85px;
-    padding: 0.4rem 0.6rem;
-    gap: 0.3rem;
-    border-radius: 8px;
-  }
-  
-  .compact-stat-icon {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-  }
-  
-  .compact-stat-icon svg {
-    width: 11px;
-    height: 11px;
-  }
-  
-  .compact-stat-value {
-    font-size: 0.95rem;
-  }
-  
-  .compact-stat-label {
-    font-size: 0.55rem;
     letter-spacing: 0.02em;
   }
 }

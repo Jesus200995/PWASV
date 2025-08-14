@@ -1650,15 +1650,13 @@ const logout = () => {
 }
 
 .page-content {
-  padding: clamp(16px, 2vw, 24px);
+  padding: clamp(8px, 1.5vw, 16px) clamp(16px, 4vw, 32px);
   box-sizing: border-box;
   width: 100%;
-  max-width: 100%;
-  margin: 0;
 }
 
 .search-section {
-  margin-bottom: clamp(8px, 1.5vw, 12px);
+  margin-bottom: clamp(0.4rem, 1vw, 0.6rem);
   animation: slideInRight 0.6s ease-out;
   background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
   border: 2px solid #4CAF50;

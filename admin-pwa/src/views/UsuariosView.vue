@@ -180,15 +180,16 @@
                 <tr>
                   <th class="col-id">ID</th>
                   <th class="col-nombre">Nombre Completo</th>
-                  <th>Correo</th>
-                  <th>Cargo</th>
-                  <th>Supervisor</th>
-                  <th>Fecha de Registro</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th class="col-correo">Correo</th>
+                  <th class="col-cargo">Cargo</th>
+                  <th class="col-supervisor">Supervisor</th>
+                  <th class="col-fecha">Fecha de Registro</th>
+                  <th class="col-estado">Estado</th>
+                  <th class="col-acciones">Acciones</th>
                 </tr>
               </thead>
-              <tbody>                <tr v-for="usuario in usuariosPaginados" :key="usuario.id">
+              <tbody>
+                <tr v-for="usuario in usuariosPaginados" :key="usuario.id">
                   <td class="col-id">#{{ usuario.id }}</td>
                   <td class="col-nombre">
                     <span class="nombre-normal">{{ usuario.nombre_completo || 'Sin nombre' }}</span>
@@ -204,35 +205,26 @@
                   </td>
                   <td>
                     <div class="actions-container">
-                      <div class="action-container">
-                        <button @click="verDetalles(usuario)" class="btn-ver" title="Ver detalles del usuario">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                          </svg>
-                        </button>
-                        <span class="btn-label">Detalles</span>
-                      </div>
-                      <div class="action-container">
-                        <button @click="editarUsuario(usuario)" class="btn-editar" title="Editar usuario">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                        </button>
-                        <span class="btn-label-editar">Editar</span>
-                      </div>
-                      <div class="action-container">
-                        <button @click="confirmarEliminarUsuario(usuario)" class="btn-eliminar" title="Eliminar usuario">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3,6 5,6 21,6"></polyline>
-                            <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
-                        </button>
-                        <span class="btn-label-eliminar">Eliminar</span>
-                      </div>
+                      <button @click="verDetalles(usuario)" class="btn-ver" title="Ver detalles del usuario">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </button>
+                      <button @click="editarUsuario(usuario)" class="btn-editar" title="Editar usuario">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button @click="confirmarEliminarUsuario(usuario)" class="btn-eliminar" title="Eliminar usuario">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3,6 5,6 21,6"></polyline>
+                          <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+                          <line x1="10" y1="11" x2="10" y2="17"></line>
+                          <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -2031,102 +2023,146 @@ const logout = () => {
 
 .usuarios-table {
   width: 100%;
-  max-width: 100%;
+  min-width: clamp(320px, 90vw, 800px);
   border-collapse: collapse;
   position: relative;
-  background: transparent;
-  table-layout: fixed;
-  overflow: hidden;
+  table-layout: auto;
 }
 
 .usuarios-table th {
   background: linear-gradient(135deg, #f8f9fa 0%, #f0f8f0 100%);
-  padding: clamp(6px, 1.2vw, 8px) clamp(3px, 0.8vw, 5px);
+  padding: clamp(6px, 1.5vw, 10px) clamp(4px, 1vw, 8px);
   text-align: center;
   font-weight: 700;
   color: #4CAF50;
   text-transform: uppercase;
-  font-size: clamp(7px, 1.2vw, 8px);
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid rgba(76, 175, 80, 0.2);
+  font-size: clamp(8px, 1.8vw, 10px);
+  letter-spacing: 0.3px;
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(224, 224, 224, 0.6);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* Headers específicos */
 .usuarios-table th.col-id {
-  width: 5%;
+  width: clamp(40px, 8%, 60px);
   min-width: 40px;
   font-size: clamp(7px, 1.2vw, 9px);
   padding: clamp(8px, 1.5vw, 12px) clamp(2px, 0.5vw, 4px);
 }
 
 .usuarios-table th.col-nombre {
-  width: 20%;
+  width: clamp(100px, 20%, 200px);
+  min-width: 100px;
   text-align: left;
   padding-left: clamp(8px, 2vw, 12px);
   color: #4CAF50;
   font-weight: 700;
 }
 
+.usuarios-table th.col-correo {
+  width: clamp(120px, 22%, 250px);
+  min-width: 120px;
+}
+
+.usuarios-table th.col-cargo {
+  width: clamp(80px, 15%, 150px);
+  min-width: 80px;
+}
+
+.usuarios-table th.col-supervisor {
+  width: clamp(80px, 15%, 150px);
+  min-width: 80px;
+}
+
+.usuarios-table th.col-fecha {
+  width: clamp(70px, 12%, 120px);
+  min-width: 70px;
+}
+
+.usuarios-table th.col-estado {
+  width: clamp(60px, 10%, 100px);
+  min-width: 60px;
+}
+
+.usuarios-table th.col-acciones {
+  width: clamp(120px, 15%, 160px);
+  min-width: 120px;
+}
+
 .usuarios-table td {
-  padding: clamp(4px, 1vw, 6px) clamp(2px, 0.6vw, 4px);
+  padding: clamp(6px, 1.5vw, 10px) clamp(4px, 1vw, 8px);
   border-bottom: 1px solid rgba(224, 224, 224, 0.6);
-  font-size: clamp(8px, 1.5vw, 10px);
+  font-size: clamp(10px, 1.8vw, 12px);
   transition: all 0.3s ease;
-  color: #444;
-  font-weight: 500;
   white-space: nowrap;
-  vertical-align: middle;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
+  vertical-align: middle;
 }
 
 .usuarios-table td:nth-child(1) { /* ID - Más pequeño */
-  width: 5%;
+  width: clamp(40px, 8%, 60px);
+  min-width: 40px;
   text-align: center;
 }
 
 .usuarios-table td:nth-child(2) { /* Nombre - Ahora segunda columna */
-  width: 20%;
+  width: clamp(100px, 20%, 200px);
+  min-width: 100px;
   text-align: left;
   padding-left: clamp(8px, 2vw, 12px);
 }
 
 .usuarios-table td:nth-child(3) { /* Correo */
-  width: 22%;
+  width: clamp(120px, 22%, 250px);
+  min-width: 120px;
   text-align: center;
 }
 
 .usuarios-table td:nth-child(4) { /* Cargo */
-  width: 15%;
+  width: clamp(80px, 15%, 150px);
+  min-width: 80px;
   text-align: center;
 }
 
 .usuarios-table td:nth-child(5) { /* Supervisor */
-  width: 15%;
+  width: clamp(80px, 15%, 150px);
+  min-width: 80px;
   text-align: center;
 }
 
 .usuarios-table td:nth-child(6) { /* Fecha */
-  width: 12%;
+  width: clamp(70px, 12%, 120px);
+  min-width: 70px;
   text-align: center;
 }
 
 .usuarios-table td:nth-child(7) { /* Estado */
-  width: 10%;
+  width: clamp(60px, 10%, 100px);
+  min-width: 60px;
   text-align: center;
 }
 
 .usuarios-table td:nth-child(8) { /* Acciones */
-  width: 15%;
+  width: clamp(120px, 15%, 160px);
+  min-width: 120px;
   text-align: center;
+  padding: clamp(4px, 1vw, 8px);
+  white-space: nowrap;
+}
+
+/* Contenedor de acciones */
+.actions-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(4px, 1vw, 8px);
+  width: 100%;
+  flex-wrap: nowrap;
 }
 
 /* Estilos específicos para columnas */
@@ -2154,11 +2190,14 @@ const logout = () => {
 }
 
 .usuarios-table tbody tr {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
 }
 
 .usuarios-table tbody tr:hover {
-  background-color: rgba(76, 175, 80, 0.05);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.02) 100%);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.1);
 }
 
 .usuarios-table tbody tr:hover td {
@@ -2218,8 +2257,8 @@ const logout = () => {
 }
 
 .btn-ver {
-  width: clamp(24px, 4.5vw, 28px);
-  height: clamp(24px, 4.5vw, 28px);
+  width: clamp(24px, 4vw, 28px);
+  height: clamp(24px, 4vw, 28px);
   padding: 0;
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
@@ -2265,8 +2304,8 @@ const logout = () => {
 }
 
 .btn-ver svg {
-  width: clamp(12px, 2.5vw, 14px);
-  height: clamp(12px, 2.5vw, 14px);
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
   transition: all 0.3s ease;
 }
 
@@ -2294,8 +2333,8 @@ const logout = () => {
 
 /* Estilos para el botón de eliminar */
 .btn-eliminar {
-  width: clamp(24px, 4.5vw, 28px);
-  height: clamp(24px, 4.5vw, 28px);
+  width: clamp(24px, 4vw, 28px);
+  height: clamp(24px, 4vw, 28px);
   padding: 0;
   background: linear-gradient(135deg, #f44336, #d32f2f);
   color: white;
@@ -2341,8 +2380,8 @@ const logout = () => {
 }
 
 .btn-eliminar svg {
-  width: clamp(12px, 2.5vw, 14px);
-  height: clamp(12px, 2.5vw, 14px);
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
   transition: all 0.3s ease;
 }
 
@@ -2352,8 +2391,8 @@ const logout = () => {
 
 /* Estilos para el botón de editar */
 .btn-editar {
-  width: clamp(24px, 4.5vw, 28px);
-  height: clamp(24px, 4.5vw, 28px);
+  width: clamp(24px, 4vw, 28px);
+  height: clamp(24px, 4vw, 28px);
   padding: 0;
   background: linear-gradient(135deg, #ff9800, #f57c00);
   color: white;
@@ -2399,8 +2438,8 @@ const logout = () => {
 }
 
 .btn-editar svg {
-  width: clamp(12px, 2.5vw, 14px);
-  height: clamp(12px, 2.5vw, 14px);
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
   transition: all 0.3s ease;
 }
 
@@ -3201,6 +3240,33 @@ const logout = () => {
     margin-left: clamp(120px, 12vw, 180px);
     width: calc(100vw - clamp(120px, 12vw, 180px));
   }
+
+  /* Tabla más compacta en tablets */
+  .usuarios-table {
+    min-width: clamp(280px, 95vw, 600px);
+  }
+
+  .usuarios-table th,
+  .usuarios-table td {
+    font-size: clamp(8px, 1.5vw, 10px);
+    padding: clamp(4px, 1vw, 6px) clamp(2px, 0.5vw, 4px);
+  }
+
+  /* Botones de acción más pequeños en tablets */
+  .btn-ver, .btn-eliminar, .btn-editar {
+    width: clamp(20px, 3.5vw, 24px);
+    height: clamp(20px, 3.5vw, 24px);
+  }
+
+  .btn-ver svg, .btn-eliminar svg, .btn-editar svg {
+    width: clamp(10px, 2.5vw, 14px);
+    height: clamp(10px, 2.5vw, 14px);
+  }
+
+  .actions-container {
+    gap: clamp(2px, 0.5vw, 4px);
+  }
+}
   
   .table-container {
     overflow: hidden;
@@ -3249,6 +3315,126 @@ const logout = () => {
   
   .header-content {
     flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Tabla ultra compacta en móviles */
+  .usuarios-table {
+    min-width: clamp(250px, 100vw, 400px);
+    font-size: clamp(7px, 2vw, 9px);
+  }
+
+  .usuarios-table th,
+  .usuarios-table td {
+    font-size: clamp(7px, 2vw, 9px);
+    padding: clamp(2px, 0.8vw, 4px) clamp(1px, 0.4vw, 2px);
+  }
+
+  /* Columnas más compactas en móviles */
+  .usuarios-table td:nth-child(1) { /* ID */
+    width: clamp(30px, 6%, 40px);
+    min-width: 30px;
+  }
+
+  .usuarios-table td:nth-child(2) { /* Nombre */
+    width: clamp(80px, 18%, 120px);
+    min-width: 80px;
+  }
+
+  .usuarios-table td:nth-child(3) { /* Correo */
+    width: clamp(100px, 20%, 150px);
+    min-width: 100px;
+  }
+
+  .usuarios-table td:nth-child(4) { /* Cargo */
+    width: clamp(60px, 12%, 100px);
+    min-width: 60px;
+  }
+
+  .usuarios-table td:nth-child(5) { /* Supervisor */
+    width: clamp(60px, 12%, 100px);
+    min-width: 60px;
+  }
+
+  .usuarios-table td:nth-child(6) { /* Fecha */
+    width: clamp(50px, 10%, 80px);
+    min-width: 50px;
+  }
+
+  .usuarios-table td:nth-child(7) { /* Estado */
+    width: clamp(40px, 8%, 70px);
+    min-width: 40px;
+  }
+
+  .usuarios-table td:nth-child(8) { /* Acciones */
+    width: clamp(100px, 14%, 120px);
+    min-width: 100px;
+  }
+
+  /* Headers en móviles */
+  .usuarios-table th.col-id {
+    width: clamp(30px, 6%, 40px);
+    min-width: 30px;
+  }
+
+  .usuarios-table th.col-nombre {
+    width: clamp(80px, 18%, 120px);
+    min-width: 80px;
+  }
+
+  .usuarios-table th.col-correo {
+    width: clamp(100px, 20%, 150px);
+    min-width: 100px;
+  }
+
+  .usuarios-table th.col-cargo {
+    width: clamp(60px, 12%, 100px);
+    min-width: 60px;
+  }
+
+  .usuarios-table th.col-supervisor {
+    width: clamp(60px, 12%, 100px);
+    min-width: 60px;
+  }
+
+  .usuarios-table th.col-fecha {
+    width: clamp(50px, 10%, 80px);
+    min-width: 50px;
+  }
+
+  .usuarios-table th.col-estado {
+    width: clamp(40px, 8%, 70px);
+    min-width: 40px;
+  }
+
+  .usuarios-table th.col-acciones {
+    width: clamp(100px, 14%, 120px);
+    min-width: 100px;
+  }
+
+  /* Botones ultra compactos en móviles */
+  .btn-ver, .btn-eliminar, .btn-editar {
+    width: clamp(18px, 4vw, 22px);
+    height: clamp(18px, 4vw, 22px);
+  }
+
+  .btn-ver svg, .btn-eliminar svg, .btn-editar svg {
+    width: clamp(8px, 2vw, 12px);
+    height: clamp(8px, 2vw, 12px);
+  }
+
+  .actions-container {
+    gap: clamp(1px, 0.3vw, 2px);
+    justify-content: space-around;
+  }
+
+  .status-badge {
+    font-size: clamp(5px, 1.5vw, 7px);
+    padding: clamp(1px, 0.2vw, 2px) clamp(2px, 0.5vw, 3px);
+    min-width: clamp(20px, 4vw, 30px);
+  }
+
+  .header-content {
     gap: clamp(8px, 2vw, 12px);
     align-items: flex-start;
   }

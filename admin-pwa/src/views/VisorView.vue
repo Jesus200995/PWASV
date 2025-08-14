@@ -917,7 +917,12 @@ const cargarLeaflet = () => {
   })
 }
 
-// Actualizar marcadores en el mapa
+// Actualizar marcadores en el mapa - SUPER OPTIMIZADO PARA RENDIMIENTO
+// - Tamaño de marcadores muy pequeño: 12x12 px (desde 32x32 original)
+// - Eliminadas animaciones costosas (pulse-ring, pulsate, etc.)
+// - Animaciones de selección/enfoque más rápidas y eficientes
+// - Mantiene toda la funcionalidad y diseño visual
+// - Marcadores discretos pero completamente funcionales
 const actualizarMarcadores = (ubicacionesAMostrar = null) => {
   if (!map || !markersLayer) return
   
@@ -948,21 +953,23 @@ const actualizarMarcadores = (ubicacionesAMostrar = null) => {
       
       // Determinar el tipo de actividad y color
       const tipoActividad = determinarTipoActividad(registro)
-      const iconSize = [32, 32]
+      // Tamaño de icono reducido para mejor rendimiento con muchos puntos
       
-      // Crear un HTML simple y moderno para el marcador
+      // Crear un HTML simple y moderno para el marcador (sin animaciones para mejor rendimiento)
       const markerHtml = `
         <div class="location-marker ${tipoActividad.clase}">
-          <div class="pulse-ring"></div>
         </div>
       `
+      
+      // Iconos muy pequeños para mejor rendimiento y menos saturación visual
+      const verySmallIconSize = [12, 12] // Reducido de [20, 20] a [12, 12]
       
       const customIcon = window.L.divIcon({
         className: 'custom-location-marker',
         html: markerHtml,
-        iconSize: iconSize,
-        iconAnchor: [iconSize[0] / 2, iconSize[0] / 2],
-        popupAnchor: [5, -iconSize[0] / 2 - 35] // Desplazado 5px a la derecha para mejor centrado
+        iconSize: verySmallIconSize,
+        iconAnchor: [verySmallIconSize[0] / 2, verySmallIconSize[0] / 2],
+        popupAnchor: [5, -verySmallIconSize[0] / 2 - 35] // Desplazado 5px a la derecha para mejor centrado
       })
 
       // Crear marcador y popup con posicionamiento mejorado
@@ -1268,7 +1275,7 @@ const enfocarUsuarioSeleccionado = () => {
         registroSeleccionado.value = usuario
         mostrarPanelDetalles.value = true
         
-        // Añadir animación especial al marcador
+        // Añadir animación especial al marcador - optimizada
         const markerElement = usuario.marker.getElement()
         if (markerElement) {
           const marker = markerElement.querySelector('.location-marker')
@@ -1276,7 +1283,7 @@ const enfocarUsuarioSeleccionado = () => {
             marker.classList.add('marker-focus-bounce')
             setTimeout(() => {
               marker.classList.remove('marker-focus-bounce')
-            }, 1000)
+            }, 400) // Reducido de 1000ms a 400ms para mejor rendimiento
           }
         }
       }, 800)
@@ -1387,7 +1394,7 @@ const centrarMapaEnUbicacion = (registro) => {
   }
 }
 
-// Resaltar marcador seleccionado
+// Resaltar marcador seleccionado - optimizado
 const resaltarMarcador = (registro) => {
   if (!map || !markers.length) return
   
@@ -1402,16 +1409,16 @@ const resaltarMarcador = (registro) => {
       if (marker) {
         marker.classList.add('selected', 'pulse-selected')
         
-        // Quitar animación temporal después de 2 segundos
+        // Quitar animación temporal después de tiempo optimizado
         setTimeout(() => {
           marker.classList.remove('pulse-selected')
-        }, 2000)
+        }, 600) // Reducido de 2000ms a 600ms
       }
     }
   })
 }
 
-// Limpiar resaltado de todos los marcadores
+// Limpiar resaltado de todos los marcadores - optimizado
 const limpiarResaltadoMarcadores = () => {
   if (!map || !markers.length) return
   
@@ -1422,9 +1429,10 @@ const limpiarResaltadoMarcadores = () => {
       if (marker) {
         marker.classList.remove('selected', 'pulse-selected')
         marker.classList.add('marker-unselected')
+        // Limpiar la clase después de la animación más rápida
         setTimeout(() => {
           marker.classList.remove('marker-unselected')
-        }, 500)
+        }, 300) // Reducido de 500ms a 300ms
       }
     }
   })
@@ -1504,7 +1512,7 @@ const centrarMapa = (registro) => {
     // Si hay un marcador asociado, abrir su popup después de la animación
     if (registro.marker) {
       setTimeout(() => {
-        // Añadir animación especial al marcador
+        // Añadir animación especial al marcador - optimizada
         const markerElement = registro.marker.getElement()
         if (markerElement) {
           const marker = markerElement.querySelector('.location-marker')
@@ -1512,7 +1520,7 @@ const centrarMapa = (registro) => {
             marker.classList.add('marker-focus-bounce')
             setTimeout(() => {
               marker.classList.remove('marker-focus-bounce')
-            }, 1000)
+            }, 400) // Reducido de 1000ms a 400ms para mejor rendimiento
           }
         }
         registro.marker.openPopup()
@@ -4273,20 +4281,23 @@ watch([filtroTipo, filtroPeriodo], () => {
     right: 3px;
   }
 
-/* Estilos para marcadores personalizados */
+/* Estilos para marcadores personalizados - Optimizados para rendimiento */
 :global(.custom-location-marker) {
   background: transparent;
   border: none;
 }
 
+/* Marcadores muy pequeños pero visibles - Optimizados para rendimiento */
 :global(.location-marker) {
   position: relative;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-  animation: appearScale 0.4s ease-out;
+  border: 1px solid white; /* Borde muy delgado para marcadores pequeños */
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.4); /* Sombra más pronunciada para mejor visibilidad */
+  /* Eliminadas las animaciones para mejor rendimiento con muchos puntos */
+  transition: transform 0.2s ease; /* Solo transición básica para hover/selección */
+  cursor: pointer; /* Asegurar que sea clickeable */
 }
 
 :global(.location-marker.entrada) {
@@ -4305,133 +4316,98 @@ watch([filtroTipo, filtroPeriodo], () => {
   background: #FF9800; /* Naranja para ubicaciones de días anteriores (más de 24 horas) */
 }
 
+/* Marcador seleccionado - optimizado para tamaño muy pequeño */
 :global(.location-marker.selected) {
-  border: 3px solid white;
-  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.7), 0 0 10px rgba(0, 0, 0, 0.4);
-  transform: scale(1.15);
+  border: 1px solid white; /* Borde consistente pero delgado */
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.8), 0 0 6px rgba(0, 0, 0, 0.5); /* Halo más pequeño pero visible */
+  transform: scale(1.5); /* Escala mayor para compensar el tamaño pequeño */
   z-index: 100;
-  animation: selectedPulse 1.5s ease-in-out infinite;
+  /* Eliminada animación infinita para mejor rendimiento */
 }
 
-/* Animación de pulso para marcador seleccionado */
+/* Animación de pulso solo cuando se selecciona (no infinita) */
 :global(.location-marker.pulse-selected) {
-  animation: selectedPulse 1.5s ease-in-out infinite, markerGlow 2s ease-in-out;
+  animation: selectedPulse 0.6s ease-out; /* Solo una vez, no infinita */
 }
 
+/* Animación de pulso más corta y eficiente para marcadores pequeños */
 @keyframes selectedPulse {
-  0%, 100% {
-    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  0% {
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.8), 0 0 6px rgba(0, 0, 0, 0.5);
+    transform: scale(1.5);
   }
   50% {
-    box-shadow: 0 2px 15px rgba(76, 175, 80, 0.6);
-    transform: scale(1.05);
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.6), 0 0 10px rgba(0, 0, 0, 0.6);
+    transform: scale(1.7);
+  }
+  100% {
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.8), 0 0 6px rgba(0, 0, 0, 0.5);
+    transform: scale(1.5);
   }
 }
 
+/* Animación optimizada para marcador enfocado */
 @keyframes markerGlow {
   0% {
     filter: brightness(1);
   }
-  50% {
-    filter: brightness(1.3) saturate(1.2);
-  }
   100% {
-    filter: brightness(1);
+    filter: brightness(1.2);
   }
 }
 
-/* Animación para marcador deseleccionado */
+/* Animación de deselección optimizada */
 :global(.location-marker.marker-unselected) {
-  animation: unselectMarker 0.5s ease-out;
+  animation: unselectMarker 0.3s ease-out; /* Más rápida */
 }
 
 @keyframes unselectMarker {
   0% {
-    transform: scale(1.15);
-    filter: brightness(1.2);
+    transform: scale(1.5); /* Desde escala seleccionada */
+    filter: brightness(1.1);
   }
   100% {
-    transform: scale(1);
+    transform: scale(1); /* Volver a tamaño normal */
     filter: brightness(1);
   }
 }
 
-/* Animación de enfoque para marcador */
+/* Animación de enfoque más rápida y eficiente para marcadores pequeños */
 :global(.location-marker.marker-focus-bounce) {
-  animation: focusBounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: focusBounce 0.4s ease-out; /* Más rápida */
 }
 
 @keyframes focusBounce {
   0% {
-    transform: scale(1);
-  }
-  30% {
-    transform: scale(1.3) rotate(5deg);
+    transform: scale(1.5); /* Comenzar desde escala seleccionada */
   }
   60% {
-    transform: scale(1.1) rotate(-2deg);
+    transform: scale(2.0); /* Escala mayor para compensar tamaño pequeño */
   }
   100% {
-    transform: scale(1.15) rotate(0deg);
+    transform: scale(1.5); /* Volver a escala seleccionada */
   }
 }
 
+/* Animaciones de pulso eliminadas para mejor rendimiento */
 :global(.pulse-ring) {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  animation: pulsate 2s ease-out infinite;
-  background: inherit;
-  opacity: 0;
-  z-index: -1;
+  /* Eliminada la animación pulse-ring para optimización de rendimiento */
+  display: none;
 }
 
-@keyframes pulsate {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.8;
-  }
-  
-  70% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-  
-  100% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
-
+/* Animación de aparición simple y rápida */
 @keyframes appearScale {
   0% {
-    transform: scale(0);
+    transform: scale(0.8);
     opacity: 0;
   }
-  
-  60% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-  
   100% {
     transform: scale(1);
     opacity: 1;
   }
 }
 
-@keyframes pulseMarker {
-  0% {
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-  }
-}
+/* Eliminadas animaciones costosas: pulsate, pulseMarker para mejor rendimiento */
 
 /* Estilos mejorados para el popup moderno del marcador */
 :global(.modern-popup-container .leaflet-popup-content-wrapper) {

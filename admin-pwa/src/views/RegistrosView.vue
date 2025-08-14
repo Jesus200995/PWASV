@@ -292,6 +292,7 @@
           </div>
           
           <div v-else class="table-container">
+            <!-- 
             <div class="registros-info">
               <div class="registros-total">
                 <div class="registros-icon">📊</div>
@@ -315,6 +316,7 @@
                 </div>
               </div>
             </div>
+            -->
             <table class="registros-table">
               <thead>
                 <tr>

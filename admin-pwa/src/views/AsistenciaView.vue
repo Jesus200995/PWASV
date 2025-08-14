@@ -678,15 +678,31 @@ export default {
       this.error = null
       
       try {
+        console.log('📊 Solicitando TODAS las asistencias sin límite...')
+        console.time('Carga de asistencias')
+        
         // Cargar asistencias y estadísticas en paralelo
         const [asistencias] = await Promise.all([
           AsistenciasService.obtenerAsistenciasConUsuarios(),
           this.cargarEstadisticas()
         ])
         
+        console.log(`🔢 Recibidas ${asistencias.length} asistencias totales del servidor`)
+        
         this.asistencias = asistencias
         this.filtrarAsistencias()
-        console.log('✅ Asistencias cargadas:', this.asistencias.length)
+        
+        console.timeEnd('Carga de asistencias')
+        
+        // Estadísticas rápidas
+        const conEntrada = this.asistencias.filter(a => a.hora_entrada).length
+        const conSalida = this.asistencias.filter(a => a.hora_salida).length
+        const completas = this.asistencias.filter(a => a.hora_entrada && a.hora_salida).length
+        const totalUsuariosUnicos = new Set(this.asistencias.map(a => a.usuario_id)).size
+        
+        console.log(`📈 Estadísticas de asistencias: ${this.asistencias.length.toLocaleString('es')} registros | ${totalUsuariosUnicos} usuarios únicos | ${conEntrada} con entrada (${(conEntrada/this.asistencias.length*100).toFixed(1)}%) | ${conSalida} con salida (${(conSalida/this.asistencias.length*100).toFixed(1)}%) | ${completas} completas (${(completas/this.asistencias.length*100).toFixed(1)}%)`)
+        
+        console.log('✅ Asistencias cargadas exitosamente:', this.asistencias.length)
       } catch (error) {
         console.error('❌ Error al cargar asistencias:', error)
         this.error = 'Error al cargar las asistencias. Por favor, intenta de nuevo.'

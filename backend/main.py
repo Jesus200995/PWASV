@@ -1084,36 +1084,57 @@ async def marcar_salida(
         raise HTTPException(status_code=500, detail=f"Error al registrar salida: {str(e)}")
 
 @app.get("/asistencias")
-async def obtener_historial_asistencias(usuario_id: int = None):
+async def obtener_historial_asistencias(usuario_id: int = None, limit: int = None):
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        print(f"🔍 Obteniendo historial de asistencias para usuario: {usuario_id}")
+        print(f"🔍 Obteniendo historial de asistencias para usuario: {usuario_id}, límite: {limit if limit else 'Sin límite'}")
         
         if usuario_id:
-            cursor.execute(
-                """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
-                          latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
-                          foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
-                   FROM asistencias 
-                   WHERE usuario_id = %s 
-                   ORDER BY fecha DESC, hora_entrada DESC 
-                   LIMIT 50""",
-                (usuario_id,)
-            )
+            if limit:
+                cursor.execute(
+                    """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
+                              latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
+                              foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
+                       FROM asistencias 
+                       WHERE usuario_id = %s 
+                       ORDER BY fecha DESC, hora_entrada DESC 
+                       LIMIT %s""",
+                    (usuario_id, limit)
+                )
+            else:
+                cursor.execute(
+                    """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
+                              latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
+                              foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
+                       FROM asistencias 
+                       WHERE usuario_id = %s 
+                       ORDER BY fecha DESC, hora_entrada DESC""",
+                    (usuario_id,)
+                )
         else:
-            cursor.execute(
-                """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
-                          latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
-                          foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
-                   FROM asistencias 
-                   ORDER BY fecha DESC, hora_entrada DESC 
-                   LIMIT 50"""
-            )
+            if limit:
+                cursor.execute(
+                    """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
+                              latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
+                              foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
+                       FROM asistencias 
+                       ORDER BY fecha DESC, hora_entrada DESC 
+                       LIMIT %s""",
+                    (limit,)
+                )
+            else:
+                cursor.execute(
+                    """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
+                              latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
+                              foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
+                       FROM asistencias 
+                       ORDER BY fecha DESC, hora_entrada DESC"""
+                )
         
         resultados = cursor.fetchall()
-        print(f"📊 Encontradas {len(resultados)} asistencias")
+        print(f"📊 Encontradas {len(resultados)} asistencias totales sin límite")
         
         # Convertir tuplas a diccionarios manualmente
         asistencias = []
@@ -1135,7 +1156,7 @@ async def obtener_historial_asistencias(usuario_id: int = None):
             }
             asistencias.append(asistencia)
         
-        print(f"✅ Historial de asistencias procesado correctamente")
+        print(f"✅ Historial completo de {len(asistencias)} asistencias procesado correctamente")
         return {"asistencias": asistencias}
         
     except psycopg2.Error as e:

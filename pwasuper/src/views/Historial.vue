@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 relative overflow-hidden">
+  <div class="fixed inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 overflow-hidden">
     <!-- Elementos decorativos para mejorar el efecto de vidrio -->
     <div class="absolute inset-0">
       <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
@@ -7,16 +7,17 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
     
-    <div class="page-container relative z-10">
+    <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
+      <div class="page-container relative z-10 p-4 sm:p-6 lg:p-8 min-h-full">
     <!-- Tabs para alternar entre registros normales y asistencias -->
     <div class="glass-card mb-6">
       <div class="flex border-b border-gray-200 mb-6">
         <button 
           @click="cambiarTab('registros')" 
           :class="[
-            'px-4 py-2 font-medium text-sm border-b-2 transition-colors',
+            'glass-tab px-4 py-2 font-medium text-sm border-b-2 transition-all mr-2',
             tabActiva === 'registros' 
-              ? 'border-primary text-primary' 
+              ? 'border-primary text-primary glass-tab-active' 
               : 'border-transparent text-gray-500 hover:text-gray-700'
           ]"
         >
@@ -25,9 +26,9 @@
         <button 
           @click="cambiarTab('asistencias')" 
           :class="[
-            'px-4 py-2 font-medium text-sm border-b-2 transition-colors ml-4',
+            'glass-tab px-4 py-2 font-medium text-sm border-b-2 transition-all ml-2',
             tabActiva === 'asistencias' 
-              ? 'border-primary text-primary' 
+              ? 'border-primary text-primary glass-tab-active' 
               : 'border-transparent text-gray-500 hover:text-gray-700'
           ]"
         >
@@ -44,7 +45,7 @@
               Registros de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
             </p>
           </div>
-          <button @click="cargarRegistros" class="btn btn-secondary text-sm px-3 py-1 mt-2 sm:mt-0">
+          <button @click="cargarRegistros" class="glass-button text-sm px-3 py-1 mt-2 sm:mt-0">
             <svg v-if="cargando" class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -63,7 +64,7 @@
               Asistencias de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
             </p>
           </div>
-          <button @click="cargarAsistencias" class="btn btn-secondary text-sm px-3 py-1 mt-2 sm:mt-0">
+          <button @click="cargarAsistencias" class="glass-button text-sm px-3 py-1 mt-2 sm:mt-0">
             <svg v-if="cargandoAsistencias" class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -87,7 +88,7 @@
           Total de registros: <span class="font-semibold text-primary">{{ registros.length }}</span>
         </div>
         <div class="space-y-2">
-          <div v-for="(registro, index) in registros" :key="index" class="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <div v-for="(registro, index) in registros" :key="index" class="glass-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
             <div class="p-3">
               <div class="flex gap-3">
                 <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative" :class="{'cursor-pointer': registro.foto_url}" @click="registro.foto_url && verImagen(registro.foto_url)">
@@ -139,7 +140,7 @@
           Total de asistencias: <span class="font-semibold text-primary">{{ asistencias.length }}</span>
         </div>
         <div class="space-y-2">
-          <div v-for="(asistencia, index) in asistencias" :key="index" class="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <div v-for="(asistencia, index) in asistencias" :key="index" class="glass-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
             <div class="p-3">
               <!-- Información de la fecha -->
               <div class="flex justify-between items-center mb-2">
@@ -243,7 +244,7 @@
         </svg>
         <p class="mt-2 text-gray-500">Aún no tienes registros guardados</p>
         <p class="text-sm text-gray-400 mt-1">Crea tu primer registro para verlo aquí</p>
-        <router-link to="/" class="btn btn-primary inline-block mt-4 text-sm">Crear nuevo registro</router-link>
+        <router-link to="/" class="glass-button inline-block mt-4 text-sm">Crear nuevo registro</router-link>
       </div>
 
       <!-- Estado vacío para asistencias -->
@@ -253,7 +254,7 @@
         </svg>
         <p class="mt-2 text-gray-500">Aún no tienes registros de asistencia</p>
         <p class="text-sm text-gray-400 mt-1">Marca tu primera asistencia para verla aquí</p>
-        <router-link to="/" class="btn btn-primary inline-block mt-4 text-sm">Marcar asistencia</router-link>
+        <router-link to="/" class="glass-button inline-block mt-4 text-sm">Marcar asistencia</router-link>
       </div>
       
       <!-- Cargando registros -->
@@ -268,13 +269,15 @@
         <p class="mt-4 text-gray-500">Cargando asistencias...</p>
       </div>
     </div>
+  </div>
+</div>
     
     <!-- Diálogo de mapa -->
     <div v-if="mapaVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
+      <div class="glass-modal rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
         <div class="p-3 border-b border-gray-200 flex justify-between items-center">
           <h3 class="text-sm font-medium">Ubicación</h3>
-          <button @click="mapaVisible = false" class="text-gray-500 hover:text-gray-700">
+          <button @click="mapaVisible = false" class="glass-close-button text-gray-500 hover:text-gray-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -284,7 +287,7 @@
           <div id="detailMap" class="h-full w-full"></div>
         </div>
         <div class="p-2 border-t border-gray-200">
-          <button @click="mapaVisible = false" class="btn btn-secondary w-full text-sm py-1.5">Cerrar</button>
+          <button @click="mapaVisible = false" class="glass-button w-full text-sm py-1.5">Cerrar</button>
         </div>
       </div>
     </div>
@@ -300,7 +303,6 @@
         <div class="overflow-hidden rounded-lg bg-black bg-opacity-30">
           <img :src="imagenSeleccionada" class="w-full h-auto object-contain max-h-[80vh]" alt="Imagen ampliada" />
         </div>
-      </div>
       </div>
     </div>
   </div>
@@ -888,5 +890,300 @@ function verImagen(url) {
   .glass-card {
     background: rgba(255, 255, 255, 0.85);
   }
+}
+
+/* Estilos para botones con efecto de vidrio */
+.glass-button {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #1f2937;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 16px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.glass-button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 25px 0 rgba(31, 38, 135, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 4px 12px 0 rgba(31, 38, 135, 0.15),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.glass-button:hover::before {
+  left: 100%;
+}
+
+/* Estilos para tabs con efecto de vidrio */
+.glass-tab {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-tab:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-tab-active {
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  box-shadow: 
+    0 4px 16px 0 rgba(76, 175, 80, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Estilos para elementos individuales con efecto de vidrio */
+.glass-item {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 4px 20px 0 rgba(31, 38, 135, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+  position: relative;
+}
+
+.glass-item:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 30px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Estilos para modales con efecto de vidrio */
+.glass-modal {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-modal .border-b,
+.glass-modal .border-t {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Botón de cerrar con efecto de vidrio */
+.glass-close-button {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px;
+  transition: all 0.3s ease;
+}
+
+.glass-close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Responsividad mejorada */
+@media (max-width: 640px) {
+  .glass-card {
+    margin: 0.5rem;
+    padding: 1rem;
+    border-radius: 16px;
+  }
+  
+  .glass-tab {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    margin: 0 1px;
+  }
+  
+  .glass-button {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    min-height: 32px;
+  }
+  
+  .glass-item {
+    margin: 0.25rem 0;
+  }
+  
+  .glass-modal {
+    margin: 0.5rem;
+    max-width: calc(100vw - 1rem);
+    border-radius: 16px;
+  }
+  
+  /* Mejoras específicas para elementos pequeños */
+  .w-16, .h-16 {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+  }
+  
+  .w-14, .h-14 {
+    width: 3rem !important;
+    height: 3rem !important;
+  }
+  
+  .text-2xl {
+    font-size: 1.25rem !important;
+  }
+  
+  .text-base {
+    font-size: 0.875rem !important;
+  }
+  
+  .gap-3 {
+    gap: 0.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .glass-card {
+    margin: 0.25rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
+  
+  .glass-tab {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+  
+  .glass-button {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    min-height: 28px;
+  }
+  
+  .text-xs {
+    font-size: 0.65rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .glass-card {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .glass-item {
+    border-radius: 16px;
+  }
+  
+  .glass-button {
+    padding: 0.75rem 1.5rem;
+    min-height: 42px;
+  }
+  
+  .glass-modal {
+    max-width: 600px;
+  }
+}
+
+/* Mejoras de contraste para mejor legibilidad */
+.glass-card .text-gray-800,
+.glass-item .text-gray-800 {
+  color: #1f2937 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.glass-card .text-gray-600,
+.glass-item .text-gray-600 {
+  color: #4b5563 !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+}
+
+.glass-card .text-gray-500,
+.glass-item .text-gray-500 {
+  color: #6b7280 !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Efectos especiales para elementos interactivos */
+.glass-item button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin: -2px -6px;
+  transition: all 0.2s ease;
+}
+
+/* Animaciones suaves para carga */
+.glass-item {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Estados de error mejorados */
+.glass-card .bg-red-100 {
+  background: rgba(254, 226, 226, 0.8) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
 }
 </style>

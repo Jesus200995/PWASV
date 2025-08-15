@@ -7,19 +7,19 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
     
-    <div class="page-container w-full max-w-md relative z-10">
-      <!-- Header Section Compacto -->
-      <div class="text-center mb-6">
-        <div class="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 xl:w-44 xl:h-44 mx-auto -mb-6">
-          <img 
-            src="/src/images/icono.png" 
-            alt="Sembrando Vida Logo" 
-            class="w-full h-full object-contain rounded-full"
-          />
-        </div>
-        <h1 class="text-xl font-bold text-primary mb-1 text-center glass-title">Recuperar Contraseña</h1>
-        <h2 class="text-lg font-semibold text-gray-700">Cambiar contraseña</h2>
-        <p class="mt-1 text-gray-500 text-sm">Ingresa tu correo y nueva contraseña</p>
+    <div class="page-container w-full max-w-md relative z-10 px-2">
+      <!-- Back to Login Link - Top Left -->
+      <div class="flex justify-start mb-3">
+        <router-link to="/login" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
+          ← Volver al inicio de sesión
+        </router-link>
+      </div>
+
+      <!-- Header Section -->
+      <div class="text-center mb-4">
+        <h1 class="text-lg font-bold text-primary mb-1 text-center glass-title">Recuperar Contraseña</h1>
+        <h2 class="text-base font-semibold text-gray-700">Cambiar contraseña</h2>
+        <p class="mt-1 text-gray-500 text-xs">Ingresa tu correo y nueva contraseña</p>
       </div>
 
       <!-- Success Message -->
@@ -49,12 +49,12 @@
       <!-- Reset Password Form -->
       <div class="glass-card">
         <form @submit.prevent="resetPassword">
-          <div class="space-y-4">
+          <div class="space-y-3">
             <div>
-              <label for="email" class="block text-sm font-medium text-gray-800 mb-2">Correo electrónico</label>
+              <label for="email" class="block text-xs font-medium text-gray-800 mb-1">Correo electrónico</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                   </svg>
                 </div>
@@ -65,7 +65,7 @@
                   type="email" 
                   autocomplete="email" 
                   required 
-                  class="glass-input w-full pl-11 pr-4 py-3" 
+                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
                   placeholder="nombre@ejemplo.com" 
                   :class="{ 'animate-shake': formError }" 
                 />
@@ -73,10 +73,10 @@
             </div>
             
             <div>
-              <label for="newPassword" class="block text-sm font-medium text-gray-800 mb-2">Nueva contraseña</label>
+              <label for="newPassword" class="block text-xs font-medium text-gray-800 mb-1">Nueva contraseña</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
@@ -87,7 +87,7 @@
                   :type="showPassword ? 'text' : 'password'" 
                   autocomplete="new-password" 
                   required 
-                  class="glass-input w-full pl-11 pr-11 py-3" 
+                  class="glass-input w-full pl-9 pr-9 py-2 text-sm" 
                   placeholder="Nueva contraseña" 
                   :class="{ 'animate-shake': formError }" 
                   minlength="6"
@@ -95,12 +95,12 @@
                 <button
                   type="button"
                   @click="togglePasswordVisibility"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
+                  class="absolute inset-y-0 right-0 flex items-center pr-2 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
                 >
-                  <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
                   </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
@@ -110,10 +110,10 @@
             </div>
 
             <div>
-              <label for="confirmPassword" class="block text-sm font-medium text-gray-800 mb-2">Confirmar nueva contraseña</label>
+              <label for="confirmPassword" class="block text-xs font-medium text-gray-800 mb-1">Confirmar nueva contraseña</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -124,7 +124,7 @@
                   :type="showConfirmPassword ? 'text' : 'password'" 
                   autocomplete="new-password" 
                   required 
-                  class="glass-input w-full pl-11 pr-11 py-3" 
+                  class="glass-input w-full pl-9 pr-9 py-2 text-sm" 
                   placeholder="Confirmar contraseña" 
                   :class="{ 'animate-shake': formError }" 
                   minlength="6"
@@ -132,12 +132,12 @@
                 <button
                   type="button"
                   @click="toggleConfirmPasswordVisibility"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
+                  class="absolute inset-y-0 right-0 flex items-center pr-2 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
                 >
-                  <svg v-if="showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg v-if="showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
                   </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
@@ -149,25 +149,16 @@
           <button 
             type="submit" 
             :disabled="loading" 
-            class="glass-button w-full mt-6 flex items-center justify-center"
+            class="glass-button w-full mt-4 flex items-center justify-center py-2 text-sm"
             :class="{ 'opacity-50 cursor-not-allowed': loading }"
           >
-            <svg v-if="loading" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+            <svg v-if="loading" class="animate-spin h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
             <span>{{ loading ? 'Cambiando contraseña...' : 'Cambiar contraseña' }}</span>
           </button>
         </form>
-
-        <!-- Back to Login Link -->
-        <div class="text-center mt-6">
-          <p class="text-sm text-gray-700">
-            <router-link to="/login" class="font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
-              ← Volver al inicio de sesión
-            </router-link>
-          </p>
-        </div>
       </div>
     </div>
   </div>
@@ -365,7 +356,7 @@ async function resetPassword() {
     0 8px 32px 0 rgba(31, 38, 135, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.05),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  padding: 2rem;
+  padding: 1.25rem;
   position: relative;
   overflow: hidden;
 }
@@ -397,13 +388,13 @@ async function resetPassword() {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: #1f2937;
   transition: all 0.3s ease;
   box-shadow: 
     0 4px 16px 0 rgba(31, 38, 135, 0.1),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  min-height: 48px;
+  min-height: 36px;
 }
 
 .glass-input:focus {
@@ -537,8 +528,8 @@ button[type="button"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 32px;
+  min-height: 32px;
   transition: all 0.2s ease;
   box-shadow: none !important;
 }
@@ -564,65 +555,70 @@ button[type="button"]:hover svg {
 
 /* Mejoras de responsividad para pantallas móviles */
 @media (max-width: 480px) {
+  .page-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
   .glass-card {
-    padding: 1.25rem;
-    margin: 0 0.5rem;
+    padding: 1rem;
+    margin: 0 0.25rem;
   }
   
   .glass-input {
-    font-size: 16px; /* Evita zoom en iOS */
-    min-height: 44px;
-  }
-  
-  .text-xl {
-    font-size: 1.125rem;
+    font-size: 14px; /* Evita zoom en iOS */
+    min-height: 36px;
   }
   
   .text-lg {
     font-size: 1rem;
   }
+  
+  .text-base {
+    font-size: 0.875rem;
+  }
 }
 
 @media (max-height: 600px) {
   .page-container {
-    max-width: 350px;
+    max-width: 320px;
   }
   
-  .text-center.mb-6 {
-    margin-bottom: 1rem;
+  .text-center.mb-4 {
+    margin-bottom: 0.75rem;
   }
   
   .glass-card {
-    padding: 1.5rem;
+    padding: 1rem;
   }
 }
 
 /* Para pantallas muy pequeñas como iPhone SE */
 @media (max-width: 375px) and (max-height: 667px) {
   .page-container {
-    max-width: 320px;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    max-width: 300px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
   
   .glass-card {
-    padding: 1rem;
+    padding: 0.875rem;
   }
   
   .glass-input {
-    font-size: 16px;
-    min-height: 42px;
+    font-size: 14px;
+    min-height: 34px;
   }
 }
 
 /* Para pantallas grandes */
 @media (min-width: 768px) {
   .page-container {
-    max-width: 400px;
+    max-width: 420px;
   }
   
   .glass-card {
-    padding: 2.5rem;
+    padding: 1.5rem;
   }
 }
 

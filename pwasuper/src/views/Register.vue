@@ -72,10 +72,10 @@
         <form @submit.prevent="register" @keydown.enter="handleEnterKey">
           <div class="space-y-3">
             <div>
-              <label for="email" class="block text-xs font-medium text-gray-800 mb-1">Correo electrónico</label>
+              <label for="email" class="block text-xs font-medium text-gray-800 mb-1">Correo electrónico *</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                   </svg>
                 </div>
@@ -86,57 +86,106 @@
                   type="email" 
                   autocomplete="email" 
                   required 
-                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
-                  placeholder="nombre@ejemplo.com" 
+                  class="glass-input w-full pl-9 pr-3 py-2" 
+                  placeholder="ejemplo@correo.com" 
                 />
               </div>
             </div>
             
+            <!-- Campos separados para nombre completo -->
             <div>
-              <label for="nombre" class="block text-xs font-medium text-gray-800 mb-1">Nombre completo</label>
+              <label for="nombre" class="block text-xs font-medium text-gray-800 mb-1">Nombre(s) *</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <input 
                   v-model="form.nombre" 
+                  @input="formatNombre"
                   id="nombre" 
                   name="nombre" 
                   type="text" 
                   required 
-                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
-                  placeholder="Nombre completo" 
+                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
+                  placeholder="Ej. JOSÉ MARÍA" 
                 />
               </div>
+              <p class="mt-1 text-xs text-gray-500">Ingresa tu nombre o nombres de pila</p>
             </div>
             
             <div>
-              <label for="cargo" class="block text-xs font-medium text-gray-800 mb-1">Cargo</label>
+              <label for="primerApellido" class="block text-xs font-medium text-gray-800 mb-1">Apellido Paterno *</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="form.primerApellido" 
+                  @input="formatPrimerApellido"
+                  id="primerApellido" 
+                  name="primerApellido" 
+                  type="text" 
+                  required 
+                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
+                  placeholder="Ej. GARCÍA" 
+                />
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Apellido del padre</p>
+            </div>
+            
+            <div>
+              <label for="segundoApellido" class="block text-xs font-medium text-gray-800 mb-1">Apellido Materno *</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="form.segundoApellido" 
+                  @input="formatSegundoApellido"
+                  id="segundoApellido" 
+                  name="segundoApellido" 
+                  type="text" 
+                  required 
+                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
+                  placeholder="Ej. LÓPEZ" 
+                />
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Apellido de la madre</p>
+            </div>
+            
+            <div>
+              <label for="cargo" class="block text-xs font-medium text-gray-800 mb-1">Puesto de Trabajo *</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <input 
                   v-model="form.cargo" 
+                  @input="formatCargo"
                   id="cargo" 
                   name="cargo" 
                   type="text" 
                   required 
-                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
-                  placeholder="Tu cargo" 
+                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
+                  placeholder="Ej. TÉCNICO AGRÍCOLA" 
                 />
               </div>
+              <p class="mt-1 text-xs text-gray-500">Indica tu posición o rol laboral actual</p>
             </div>
             
             <div>
               <label for="curp" class="block text-xs font-medium text-gray-800 mb-1">CURP *</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
@@ -149,7 +198,7 @@
                   required
                   maxlength="18" 
                   placeholder="18 caracteres en mayúsculas"
-                  class="glass-input w-full pl-9 pr-3 py-2 text-sm uppercase tracking-wide" 
+                  class="glass-input w-full pl-9 pr-3 py-2 uppercase tracking-wide" 
                 />
               </div>
               <p v-if="curpError" class="mt-1 text-xs text-red-600">{{ curpError }}</p>
@@ -158,22 +207,25 @@
             </div>
             
             <div>
-              <label for="supervisor" class="block text-xs font-medium text-gray-800 mb-1">Supervisor</label>
+              <label for="supervisor" class="block text-xs font-medium text-gray-800 mb-1">Supervisor Inmediato *</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
                 <input 
                   v-model="form.supervisor" 
+                  @input="formatSupervisor"
                   id="supervisor" 
                   name="supervisor" 
                   type="text" 
-                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
-                  placeholder="Nombre del supervisor (opcional)" 
+                  required
+                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
+                  placeholder="Ej. MARÍA GARCÍA LÓPEZ" 
                 />
               </div>
+              <p class="mt-1 text-xs text-gray-500">Nombre completo de tu jefe directo o coordinador</p>
             </div>
             
             <div>
@@ -416,6 +468,8 @@ const showConfirmPassword = ref(false);
 const form = reactive({
   email: '',
   nombre: '',
+  primerApellido: '',
+  segundoApellido: '',
   cargo: '',
   curp: '',
   supervisor: '',
@@ -496,11 +550,14 @@ async function register() {
   
   try {
     const telefonoCompleto = `${form.codigoPais}${form.telefono.trim()}`;
+    // Construir nombre completo a partir de los campos separados
+    const nombreCompleto = `${form.nombre.trim()} ${form.primerApellido.trim()} ${form.segundoApellido.trim()}`.toUpperCase();
+    
     const payload = {
-      correo: form.email,
-      nombre_completo: form.nombre,
-      cargo: form.cargo,
-      supervisor: form.supervisor || null,
+      correo: form.email.trim(),
+      nombre_completo: nombreCompleto,
+      cargo: form.cargo.trim().toUpperCase(),
+      supervisor: form.supervisor.trim().toUpperCase(),
       contrasena: form.password,
       curp: form.curp.toUpperCase().trim(),
       telefono: telefonoCompleto
@@ -559,20 +616,72 @@ function validateForm() {
   termsError.value = '';
   message.text = '';
   
+  // Validación de términos y condiciones
   if (!termsAccepted.value) {
     termsError.value = 'Debes aceptar el Aviso de Privacidad para continuar';
     message.text = 'Debes aceptar el Aviso de Privacidad para continuar';
     message.type = 'error';
     return false;
   }
-  
-  if (!form.curp || !form.curp.trim()) {
-    curpError.value = 'La CURP es obligatoria';
-    message.text = 'Por favor completa todos los campos obligatorios';
+
+  // Validación de email obligatorio y formato
+  if (!form.email || !form.email.trim()) {
+    message.text = 'El correo electrónico es obligatorio';
+    message.type = 'error';
+    return false;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(form.email.trim())) {
+    message.text = 'Por favor ingresa un correo electrónico válido';
+    message.type = 'error';
+    return false;
+  }
+
+  // Validación de nombre obligatorio
+  if (!form.nombre || !form.nombre.trim()) {
+    message.text = 'El nombre es obligatorio';
+    message.type = 'error';
+    return false;
+  }
+
+  // Validación de primer apellido obligatorio
+  if (!form.primerApellido || !form.primerApellido.trim()) {
+    message.text = 'El primer apellido es obligatorio';
+    message.type = 'error';
+    return false;
+  }
+
+  // Validación de segundo apellido obligatorio
+  if (!form.segundoApellido || !form.segundoApellido.trim()) {
+    message.text = 'El segundo apellido es obligatorio';
+    message.type = 'error';
+    return false;
+  }
+
+  // Validación de cargo obligatorio
+  if (!form.cargo || !form.cargo.trim()) {
+    message.text = 'El puesto de trabajo es obligatorio';
+    message.type = 'error';
+    return false;
+  }
+
+  // Validación de supervisor obligatorio
+  if (!form.supervisor || !form.supervisor.trim()) {
+    message.text = 'El supervisor inmediato es obligatorio. Debes ingresar el nombre de tu jefe directo';
     message.type = 'error';
     return false;
   }
   
+  // Validación de CURP obligatoria
+  if (!form.curp || !form.curp.trim()) {
+    curpError.value = 'La CURP es obligatoria';
+    message.text = 'La CURP es obligatoria';
+    message.type = 'error';
+    return false;
+  }
+  
+  // Validación de teléfono obligatorio
   if (!form.telefono || !form.telefono.trim()) {
     message.text = 'El número de teléfono es obligatorio';
     message.type = 'error';
@@ -585,6 +694,7 @@ function validateForm() {
     return false;
   }
   
+  // Validación de formato CURP
   const curpClean = form.curp.toUpperCase().trim();
   if (curpClean.length !== 18) {
     curpError.value = 'La CURP debe contener exactamente 18 caracteres';
@@ -601,6 +711,7 @@ function validateForm() {
     return false;
   }
   
+  // Validación de contraseñas
   if (form.password !== form.confirmPassword) {
     message.text = 'Las contraseñas no coinciden';
     message.type = 'error';
@@ -609,13 +720,6 @@ function validateForm() {
   
   if (form.password.length < 6) {
     message.text = 'La contraseña debe tener al menos 6 caracteres';
-    message.type = 'error';
-    return false;
-  }
-  
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(form.email)) {
-    message.text = 'Por favor ingresa un correo electrónico válido';
     message.type = 'error';
     return false;
   }
@@ -647,6 +751,26 @@ function formatCurp() {
       curpWarning.value = 'CURP válida ✓';
     }
   }
+}
+
+function formatNombre() {
+  form.nombre = form.nombre.toUpperCase();
+}
+
+function formatPrimerApellido() {
+  form.primerApellido = form.primerApellido.toUpperCase();
+}
+
+function formatSegundoApellido() {
+  form.segundoApellido = form.segundoApellido.toUpperCase();
+}
+
+function formatSupervisor() {
+  form.supervisor = form.supervisor.toUpperCase();
+}
+
+function formatCargo() {
+  form.cargo = form.cargo.toUpperCase();
 }
 
 function validatePhone() {

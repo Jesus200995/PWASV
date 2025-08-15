@@ -1,6 +1,13 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center p-4">
-    <div class="page-container w-full max-w-md">
+  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4 relative overflow-hidden">
+    <!-- Elementos decorativos para mejorar el efecto de vidrio -->
+    <div class="absolute inset-0">
+      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
+      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="page-container w-full max-w-md relative z-10">
       <!-- Header Section Compacto -->
       <div class="text-center mb-6">
         <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
@@ -26,14 +33,14 @@
       </transition>
 
       <!-- Login Form -->
-      <div class="card">
+      <div class="glass-card">
         <form @submit.prevent="login">
           <div class="space-y-4">
             <div>
-              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Correo electrónico</label>
+              <label for="email" class="block text-sm font-medium text-gray-800 mb-2">Correo electrónico</label>
               <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                   </svg>
                 </div>
@@ -44,7 +51,7 @@
                   type="email" 
                   autocomplete="email" 
                   required 
-                  class="form-input pl-10" 
+                  class="glass-input w-full pl-11 pr-4 py-3" 
                   placeholder="nombre@ejemplo.com" 
                   :class="{ 'animate-shake': formError }" 
                 />
@@ -52,10 +59,10 @@
             </div>
             
             <div>
-              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+              <label for="password" class="block text-sm font-medium text-gray-800 mb-2">Contraseña</label>
               <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
@@ -63,13 +70,26 @@
                   v-model="password" 
                   id="password" 
                   name="password" 
-                  type="password" 
+                  :type="showPassword ? 'text' : 'password'" 
                   autocomplete="current-password" 
                   required 
-                  class="form-input pl-10" 
+                  class="glass-input w-full pl-11 pr-11 py-3" 
                   placeholder="••••••••" 
                   :class="{ 'animate-shake': formError }" 
                 />
+                <button
+                  type="button"
+                  @click="togglePasswordVisibility"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
+                >
+                  <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
@@ -77,7 +97,7 @@
           <button 
             type="submit" 
             :disabled="loading" 
-            class="btn btn-primary w-full mt-6"
+            class="glass-button w-full mt-6"
             :class="{ 'opacity-50 cursor-not-allowed': loading }"
           >
             <svg v-if="loading" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
@@ -90,9 +110,9 @@
 
         <!-- Register Link -->
         <div class="text-center mt-6">
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-gray-700">
             ¿No tienes cuenta?
-            <router-link to="/register" class="font-medium text-primary hover:text-primary-dark transition-colors duration-200">
+            <router-link to="/register" class="font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
               Crear cuenta
             </router-link>
           </p>
@@ -111,6 +131,7 @@ import { API_URL, getBestApiUrl, checkInternetConnection, getOfflineMessage } fr
 const router = useRouter();
 const email = ref('');
 const password = ref('');
+const showPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref('');
 const formError = ref(false);
@@ -132,6 +153,10 @@ onMounted(async () => {
     }
   }
 });
+
+function togglePasswordVisibility() {
+  showPassword.value = !showPassword.value;
+}
 
 async function login() {
   loading.value = true;
@@ -253,7 +278,224 @@ async function login() {
   animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
 }
 
+/* Efecto de vidrio realista - Glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: all 0.6s;
+}
+
+.glass-card:hover::before {
+  left: 150%;
+}
+
+.glass-input {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 1rem;
+  color: #1f2937;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 16px 0 rgba(31, 38, 135, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  min-height: 48px;
+}
+
+.glass-input:focus {
+  outline: none;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 0 0 3px rgba(76, 175, 80, 0.1),
+    0 8px 25px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.glass-input::placeholder {
+  color: rgba(75, 85, 99, 0.6);
+}
+
+/* Estilos para los iconos y botones dentro de los inputs */
+.relative .absolute {
+  z-index: 10;
+}
+
+.relative .absolute svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Estilos específicos para el botón del ojo */
+button[type="button"] {
+  background: transparent !important;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  transition: all 0.2s ease;
+  box-shadow: none !important;
+}
+
+button[type="button"]:focus {
+  outline: none;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+button[type="button"]:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+button[type="button"] svg {
+  transition: all 0.2s ease;
+}
+
+button[type="button"]:hover svg {
+  transform: scale(1.1);
+}
+
+.glass-button {
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(76, 175, 80, 0.8) 0%, 
+    rgba(56, 142, 60, 0.8) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px 0 rgba(76, 175, 80, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glass-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px 0 rgba(76, 175, 80, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(76, 175, 80, 0.9) 0%, 
+    rgba(56, 142, 60, 0.9) 100%);
+}
+
+.glass-button:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 
+    0 4px 15px 0 rgba(76, 175, 80, 0.3),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.glass-button:hover::before {
+  left: 100%;
+}
+
+.glass-link {
+  position: relative;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.glass-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4CAF50, #81C784);
+  transition: width 0.3s ease;
+  border-radius: 1px;
+}
+
+.glass-link:hover::after {
+  width: 100%;
+}
+
 /* Mejoras de responsividad para pantallas móviles */
+@media (max-width: 480px) {
+  .glass-card {
+    padding: 1.25rem;
+    margin: 0 0.5rem;
+  }
+  
+  .glass-input {
+    font-size: 16px; /* Evita zoom en iOS */
+    min-height: 44px;
+  }
+  
+  .relative .absolute svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.375rem;
+  }
+  
+  .text-lg {
+    font-size: 1rem;
+  }
+}
+
 @media (max-height: 600px) {
   .page-container {
     max-width: 350px;
@@ -275,6 +517,10 @@ async function login() {
   .text-lg {
     font-size: 1rem;
   }
+  
+  .glass-card {
+    padding: 1.5rem;
+  }
 }
 
 @media (max-height: 500px) {
@@ -289,6 +535,10 @@ async function login() {
   .mt-6 {
     margin-top: 1rem;
   }
+  
+  .glass-card {
+    padding: 1.25rem;
+  }
 }
 
 /* Para pantallas muy pequeñas como iPhone SE */
@@ -297,6 +547,37 @@ async function login() {
     max-width: 320px;
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+  
+  .glass-card {
+    padding: 1rem;
+  }
+  
+  .glass-input {
+    font-size: 16px;
+    min-height: 42px;
+  }
+}
+
+/* Para pantallas grandes */
+@media (min-width: 768px) {
+  .page-container {
+    max-width: 400px;
+  }
+  
+  .glass-card {
+    padding: 2.5rem;
+  }
+}
+
+/* Soporte adicional para navegadores que no soportan backdrop-filter */
+@supports not (backdrop-filter: blur(20px)) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  
+  .glass-input {
+    background: rgba(255, 255, 255, 0.7);
   }
 }
 </style>

@@ -63,6 +63,15 @@ class PasswordChange(BaseModel):
     usuario_id: int
     nueva_contrasena: str
 
+# Modelo para actualizar información personal (sin contraseña)
+class UserInfoUpdate(BaseModel):
+    nombre_completo: str
+    correo: str
+    cargo: str
+    supervisor: str = None
+    curp: str = None
+    telefono: str = None
+
 class TerminosAceptados(BaseModel):
     usuario_id: int
 
@@ -677,6 +686,84 @@ async def actualizar_usuario(user_id: int, usuario: UserCreate):
         conn.rollback()
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al actualizar usuario: {str(e)}")
+
+# Endpoint para actualizar solo información personal de un usuario (sin contraseña)
+@app.patch("/usuarios/{user_id}/info")
+async def actualizar_info_usuario(user_id: int, info: UserInfoUpdate):
+    """Actualiza solo la información personal de un usuario (sin modificar contraseña)"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"✏️ Actualizando información personal del usuario {user_id}...")
+        
+        # Validación de CURP si se proporciona
+        curp_upper = None
+        if info.curp and info.curp.strip():
+            curp_upper = info.curp.upper().strip()
+            if len(curp_upper) != 18:
+                raise HTTPException(status_code=400, detail="La CURP debe tener exactamente 18 caracteres")
+            
+            if not re.match(r'^[A-Z0-9]{18}$', curp_upper):
+                raise HTTPException(status_code=400, detail="La CURP tiene un formato inválido")
+            
+            # Verificar que la CURP no esté en uso por otro usuario
+            cursor.execute("SELECT id FROM usuarios WHERE curp = %s AND id != %s", (curp_upper, user_id))
+            if cursor.fetchone():
+                raise HTTPException(status_code=400, detail="Esta CURP ya está registrada por otro usuario")
+        
+        # Verificar que el correo no esté en uso por otro usuario
+        cursor.execute("SELECT id FROM usuarios WHERE correo = %s AND id != %s", (info.correo, user_id))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="Este correo ya está registrado por otro usuario")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (user_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Actualizar solo información personal (sin modificar contraseña)
+        cursor.execute(
+            """UPDATE usuarios 
+               SET correo = %s, nombre_completo = %s, cargo = %s, 
+                   supervisor = %s, curp = %s, telefono = %s 
+               WHERE id = %s""",
+            (info.correo, info.nombre_completo, info.cargo, 
+             info.supervisor, curp_upper, info.telefono, user_id)
+        )
+        
+        conn.commit()
+        
+        # Obtener usuario actualizado
+        cursor.execute(
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, telefono FROM usuarios WHERE id = %s",
+            (user_id,)
+        )
+        
+        resultado = cursor.fetchone()
+        usuario_actualizado = {
+            "id": resultado[0],
+            "correo": resultado[1],
+            "nombre_completo": resultado[2],
+            "cargo": resultado[3],
+            "supervisor": resultado[4],
+            "curp": resultado[5],
+            "telefono": resultado[6]
+        }
+        
+        print(f"✅ Información personal del usuario {user_id} actualizada exitosamente")
+        return {"success": True, "mensaje": "Información personal actualizada exitosamente", "usuario": usuario_actualizado}
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al actualizar información personal: {str(e)}")
 
 # Endpoint para eliminar un usuario específico con todos sus datos
 @app.delete("/usuarios/{user_id}")

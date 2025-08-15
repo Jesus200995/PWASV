@@ -26,12 +26,19 @@
 
       <!-- Información del usuario -->
       <div class="glass-card mb-2">
-        <h2 class="text-sm font-semibold text-gray-800 mb-2 modern-title flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Información Personal
-        </h2>
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-sm font-semibold text-gray-800 modern-title flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Información Personal
+          </h2>
+          <button @click="openEditModal" class="glass-edit-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+        </div>
         <div class="green-line mb-2"></div>
         
         <div class="space-y-2">
@@ -148,6 +155,208 @@
         </div>
       </div>
     </transition>
+
+    <!-- Modal de edición de información personal -->
+    <transition name="fade">
+      <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3" style="z-index: 65;">
+        <div class="bg-white rounded-2xl max-w-sm w-full mx-3 max-h-[90vh] overflow-y-auto edit-modal">
+          <div class="sticky top-0 bg-white rounded-t-2xl border-b border-green-100 p-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Editar Información
+              </h3>
+              <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="p-4">
+            <form @submit.prevent="updateUserInfo" class="space-y-4">
+              <!-- Mensaje de error general -->
+              <div v-if="editErrors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg" role="alert">
+                <p class="text-sm">{{ editErrors.general }}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+                <input
+                  v-model="editForm.nombre_completo"
+                  type="text"
+                  class="edit-input w-full"
+                  :class="{ 'border-red-500': editErrors.nombre_completo }"
+                  placeholder="Ingresa tu nombre completo"
+                  required
+                />
+                <p v-if="editErrors.nombre_completo" class="text-red-500 text-xs mt-1">{{ editErrors.nombre_completo }}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  v-model="editForm.correo"
+                  type="email"
+                  class="edit-input w-full"
+                  :class="{ 'border-red-500': editErrors.correo }"
+                  placeholder="Ingresa tu email"
+                  required
+                />
+                <p v-if="editErrors.correo" class="text-red-500 text-xs mt-1">{{ editErrors.correo }}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                <input
+                  v-model="editForm.cargo"
+                  type="text"
+                  class="edit-input w-full"
+                  :class="{ 'border-red-500': editErrors.cargo }"
+                  placeholder="Ingresa tu cargo"
+                  required
+                />
+                <p v-if="editErrors.cargo" class="text-red-500 text-xs mt-1">{{ editErrors.cargo }}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Supervisor</label>
+                <input
+                  v-model="editForm.supervisor"
+                  type="text"
+                  class="edit-input w-full"
+                  placeholder="Ingresa el nombre de tu supervisor"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">CURP</label>
+                <input
+                  v-model="editForm.curp"
+                  type="text"
+                  class="edit-input w-full"
+                  :class="{ 'border-red-500': editErrors.curp }"
+                  placeholder="Ingresa tu CURP"
+                  maxlength="18"
+                />
+                <p v-if="editErrors.curp" class="text-red-500 text-xs mt-1">{{ editErrors.curp }}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <div class="flex space-x-2">
+                  <!-- Selector de código de país -->
+                  <div class="relative">
+                    <button 
+                      type="button"
+                      @click="showCountrySelector = !showCountrySelector"
+                      class="edit-input flex items-center px-2 py-2 min-w-[80px] justify-between text-sm"
+                    >
+                      <div class="flex items-center">
+                        <span class="text-xs mr-1">{{ paises.find(p => p.codigo === editForm.codigoPais)?.bandera || '🌎' }}</span>
+                        <span class="text-xs font-medium">{{ editForm.codigoPais }}</span>
+                      </div>
+                      <svg class="w-3 h-3 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    
+                    <!-- Dropdown para selección de país -->
+                    <div 
+                      v-if="showCountrySelector" 
+                      class="absolute z-50 w-64 top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden"
+                    >
+                      <!-- Barra de búsqueda -->
+                      <div class="sticky top-0 bg-white p-2 border-b border-gray-200">
+                        <input 
+                          type="text"
+                          v-model="countrySearch"
+                          placeholder="Buscar país..."
+                          class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                          @click="$event.stopPropagation()"
+                        />
+                      </div>
+                      
+                      <ul class="py-1 max-h-48 overflow-y-auto">
+                        <li 
+                          v-for="pais in filteredCountries" 
+                          :key="pais.codigo"
+                          @click="selectCountry(pais)"
+                          class="flex items-center px-2 py-1 hover:bg-gray-100 cursor-pointer transition-colors"
+                        >
+                          <span class="text-sm mr-2">{{ pais.bandera }}</span>
+                          <span class="flex-1 text-xs">{{ pais.nombre }}</span>
+                          <span class="text-gray-500 font-mono text-xs">{{ pais.codigo }}</span>
+                        </li>
+                        <li v-if="filteredCountries.length === 0" class="px-2 py-1 text-gray-500 text-center text-xs">
+                          No se encontraron países
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  <!-- Campo de entrada del número -->
+                  <div class="flex-1">
+                    <input
+                      v-model="editForm.telefonoDigitos"
+                      type="tel"
+                      class="edit-input w-full"
+                      placeholder="10 dígitos"
+                      maxlength="10"
+                      @input="validatePhoneEdit"
+                    />
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
+              </div>
+
+              <div class="flex space-x-3 pt-4">
+                <button
+                  type="button"
+                  @click="closeEditModal"
+                  class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  :disabled="isUpdatingUser"
+                  class="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  <svg v-if="isUpdatingUser" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {{ isUpdatingUser ? 'Guardando...' : 'Guardar Cambios' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Modal de éxito para edición -->
+    <transition name="fade">
+      <div v-if="showEditSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3" style="z-index: 70;">
+        <div class="bg-white rounded-2xl max-w-xs w-full mx-3 p-6 text-center">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">¡Información actualizada!</h3>
+          <div class="w-12 h-0.5 bg-gradient-to-r from-green-400 to-green-600 rounded-full mx-auto mb-3"></div>
+          <p class="text-sm text-gray-600 mb-4">Tus datos personales han sido actualizados correctamente.</p>
+          <button @click="showEditSuccessModal = false" class="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all">
+            Entendido
+          </button>
+        </div>
+      </div>
+    </transition>
       </div>
     </div>
   </div>
@@ -167,6 +376,51 @@ const errors = ref({})
 const isChangingPassword = ref(false)
 const showSuccessModal = ref(false)
 
+// Variables reactivas para edición de información personal
+const showEditModal = ref(false)
+const showEditSuccessModal = ref(false)
+const isUpdatingUser = ref(false)
+const editErrors = ref({})
+const editForm = ref({
+  nombre_completo: '',
+  correo: '',
+  cargo: '',
+  supervisor: '',
+  curp: '',
+  telefono: '',
+  codigoPais: '+52',
+  telefonoDigitos: ''
+})
+
+// Variables para selector de país
+const showCountrySelector = ref(false)
+const countrySearch = ref('')
+
+// Lista de países más comunes con sus códigos y banderas
+const paises = [
+  { codigo: '+52', nombre: 'México', bandera: '🇲🇽' },
+  { codigo: '+1', nombre: 'Estados Unidos', bandera: '🇺🇸' },
+  { codigo: '+34', nombre: 'España', bandera: '🇪🇸' },
+  { codigo: '+57', nombre: 'Colombia', bandera: '🇨🇴' },
+  { codigo: '+56', nombre: 'Chile', bandera: '🇨🇱' },
+  { codigo: '+54', nombre: 'Argentina', bandera: '🇦🇷' },
+  { codigo: '+51', nombre: 'Perú', bandera: '🇵🇪' },
+  { codigo: '+591', nombre: 'Bolivia', bandera: '🇧🇴' },
+  { codigo: '+502', nombre: 'Guatemala', bandera: '🇬🇹' },
+  { codigo: '+503', nombre: 'El Salvador', bandera: '🇸🇻' }
+]
+
+// Filtro de países basado en la búsqueda
+const filteredCountries = computed(() => {
+  if (!countrySearch.value) return paises
+  
+  const searchTerm = countrySearch.value.toLowerCase()
+  return paises.filter(pais => 
+    pais.nombre.toLowerCase().includes(searchTerm) || 
+    pais.codigo.includes(searchTerm)
+  )
+})
+
 onMounted(() => {
   const storedUser = localStorage.getItem('user')
   if (storedUser) {
@@ -175,7 +429,27 @@ onMounted(() => {
     // Cargar los datos completos del usuario desde el backend
     loadUserData()
   }
+
+  // Event listeners para cerrar el selector de país
+  document.addEventListener('click', closeCountrySelector)
+  document.addEventListener('keydown', handleEscKey)
 })
+
+// Función para cerrar el selector de país al hacer clic fuera
+const closeCountrySelector = (e) => {
+  if (e.target.closest('button') && e.target.closest('button').contains(document.querySelector('svg')) || 
+      e.target.closest('div') && e.target.closest('div').querySelector && e.target.closest('div').querySelector('input[placeholder="Buscar país..."]')) {
+    return
+  }
+  showCountrySelector.value = false
+}
+
+// Función para cerrar con tecla Escape
+const handleEscKey = (event) => {
+  if (event.key === 'Escape' && showCountrySelector.value) {
+    showCountrySelector.value = false
+  }
+}
 
 const loadUserData = async () => {
   try {
@@ -343,6 +617,204 @@ const changePassword = async () => {
     }
   } finally {
     isChangingPassword.value = false
+  }
+}
+
+// Función para abrir el modal de edición
+const openEditModal = () => {
+  // Extraer código de país y dígitos del teléfono actual
+  let codigoPais = '+52'
+  let telefonoDigitos = ''
+  
+  if (user.value.telefono) {
+    const telefonoCompleto = user.value.telefono.toString()
+    // Buscar coincidencia con códigos de país conocidos
+    const paisEncontrado = paises.find(pais => telefonoCompleto.startsWith(pais.codigo))
+    if (paisEncontrado) {
+      codigoPais = paisEncontrado.codigo
+      telefonoDigitos = telefonoCompleto.slice(paisEncontrado.codigo.length)
+    } else {
+      // Si no encuentra coincidencia, asumir que es completo sin código
+      telefonoDigitos = telefonoCompleto
+    }
+  }
+  
+  // Cargar los datos actuales en el formulario
+  editForm.value = {
+    nombre_completo: user.value.nombre_completo || '',
+    correo: user.value.correo || '',
+    cargo: user.value.cargo || '',
+    supervisor: user.value.supervisor || '',
+    curp: user.value.curp || '',
+    telefono: user.value.telefono || '',
+    codigoPais: codigoPais,
+    telefonoDigitos: telefonoDigitos
+  }
+  
+  // Resetear errores
+  editErrors.value = {}
+  
+  showEditModal.value = true
+}
+
+// Función para cerrar el modal de edición
+const closeEditModal = () => {
+  showEditModal.value = false
+  showCountrySelector.value = false
+  countrySearch.value = ''
+  editForm.value = {
+    nombre_completo: '',
+    correo: '',
+    cargo: '',
+    supervisor: '',
+    curp: '',
+    telefono: '',
+    codigoPais: '+52',
+    telefonoDigitos: ''
+  }
+  editErrors.value = {}
+}
+
+// Función para actualizar la información del usuario
+const updateUserInfo = async () => {
+  try {
+    console.log('Iniciando actualización de información personal...')
+    
+    // Resetear errores
+    editErrors.value = {}
+    
+    // Validaciones
+    if (!editForm.value.nombre_completo?.trim()) {
+      editErrors.value.nombre_completo = 'El nombre completo es obligatorio'
+      return
+    }
+    
+    if (!editForm.value.correo?.trim()) {
+      editErrors.value.correo = 'El email es obligatorio'
+      return
+    }
+    
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(editForm.value.correo)) {
+      editErrors.value.correo = 'El formato del email no es válido'
+      return
+    }
+    
+    if (!editForm.value.cargo?.trim()) {
+      editErrors.value.cargo = 'El cargo es obligatorio'
+      return
+    }
+    
+    // Validar CURP si se proporciona
+    if (editForm.value.curp && editForm.value.curp.length > 0) {
+      if (editForm.value.curp.length !== 18) {
+        editErrors.value.curp = 'El CURP debe tener exactamente 18 caracteres'
+        return
+      }
+    }
+    
+    isUpdatingUser.value = true
+    
+    // Verificar conexión a internet
+    const online = await checkInternetConnection()
+    if (!online) {
+      editErrors.value.general = getOfflineMessage()
+      return
+    }
+    
+    const storedUser = JSON.parse(localStorage.getItem('user'))
+    
+    // Construir teléfono completo
+    const telefonoCompleto = editForm.value.telefonoDigitos ? 
+      `${editForm.value.codigoPais}${editForm.value.telefonoDigitos.trim()}` : null
+    
+    const response = await axios.patch(`${API_URL}/usuarios/${storedUser.id}/info`, {
+      nombre_completo: editForm.value.nombre_completo.trim(),
+      correo: editForm.value.correo.trim(),
+      cargo: editForm.value.cargo.trim(),
+      supervisor: editForm.value.supervisor?.trim() || null,
+      curp: editForm.value.curp?.trim() || null,
+      telefono: telefonoCompleto
+    }, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    console.log('Respuesta del servidor:', response.data)
+    
+    if (response.status === 200 && response.data.success) {
+      // Construir teléfono completo para guardar
+      const telefonoCompleto = editForm.value.telefonoDigitos ? 
+        `${editForm.value.codigoPais}${editForm.value.telefonoDigitos.trim()}` : null
+      
+      // Actualizar los datos del usuario en el estado local
+      user.value = {
+        ...user.value,
+        nombre_completo: editForm.value.nombre_completo,
+        correo: editForm.value.correo,
+        cargo: editForm.value.cargo,
+        supervisor: editForm.value.supervisor,
+        curp: editForm.value.curp,
+        telefono: telefonoCompleto
+      }
+      
+      // Actualizar localStorage
+      const updatedUser = { 
+        ...storedUser, 
+        nombre_completo: editForm.value.nombre_completo,
+        correo: editForm.value.correo,
+        cargo: editForm.value.cargo,
+        supervisor: editForm.value.supervisor,
+        curp: editForm.value.curp,
+        telefono: telefonoCompleto
+      }
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+      
+      // Cerrar modal de edición
+      closeEditModal()
+      
+      // Mostrar modal de éxito
+      showEditSuccessModal.value = true
+      
+      // Recargar datos del usuario para asegurar sincronización
+      setTimeout(() => {
+        loadUserData()
+      }, 1000)
+    }
+    
+  } catch (error) {
+    console.error('Error al actualizar información:', error)
+    
+    if (error.response) {
+      const errorMsg = error.response.data?.detail || 
+                      error.response.data?.message || 
+                      'Error al actualizar la información'
+      editErrors.value.general = errorMsg
+    } else if (error.request) {
+      editErrors.value.general = 'No se pudo conectar con el servidor. Verifica tu conexión.'
+    } else {
+      editErrors.value.general = 'Error al actualizar la información: ' + error.message
+    }
+  } finally {
+    isUpdatingUser.value = false
+  }
+}
+
+// Función para seleccionar país
+const selectCountry = (pais) => {
+  editForm.value.codigoPais = pais.codigo
+  showCountrySelector.value = false
+}
+
+// Función para validar teléfono
+const validatePhoneEdit = () => {
+  editForm.value.telefonoDigitos = editForm.value.telefonoDigitos.replace(/\D/g, '')
+  
+  if (editForm.value.telefonoDigitos.length > 10) {
+    editForm.value.telefonoDigitos = editForm.value.telefonoDigitos.slice(0, 10)
   }
 }
 </script>
@@ -841,5 +1313,75 @@ const changePassword = async () => {
   .glass-button {
     background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
   }
+}
+
+/* Estilos para modales de edición */
+.edit-modal {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Inputs del modal de edición */
+.edit-input {
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #10b981;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.edit-input.border-red-500 {
+  border-color: #ef4444;
+}
+
+.edit-input.border-red-500:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Botón de edición circular mejorado */
+.glass-edit-button {
+  width: 2rem;
+  height: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.glass-edit-button:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+  transform: scale(1.05);
+}
+
+.glass-edit-button:active {
+  transform: scale(0.95);
 }
 </style>

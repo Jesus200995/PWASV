@@ -1,7 +1,15 @@
 <template>
-  <div class="page-container">
+  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 relative overflow-hidden">
+    <!-- Elementos decorativos para mejorar el efecto de vidrio -->
+    <div class="absolute inset-0">
+      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
+      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="page-container relative z-10">
     <!-- Tabs para alternar entre registros normales y asistencias -->
-    <div class="card mb-6">
+    <div class="glass-card mb-6">
       <div class="flex border-b border-gray-200 mb-6">
         <button 
           @click="cambiarTab('registros')" 
@@ -292,6 +300,7 @@
         <div class="overflow-hidden rounded-lg bg-black bg-opacity-30">
           <img :src="imagenSeleccionada" class="w-full h-auto object-contain max-h-[80vh]" alt="Imagen ampliada" />
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -786,6 +795,98 @@ function verImagen(url) {
   
   [v-if="imagenModalVisible"] img {
     max-height: 70vh;
+  }
+}
+
+/* Efecto de vidrio realista - Glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: all 0.6s;
+}
+
+.glass-card:hover::before {
+  left: 150%;
+}
+
+/* Animaciones personalizadas */
+@keyframes pulse-slow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+
+/* Estilos adicionales para mejor integración con el efecto de vidrio */
+.glass-card .border-b {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.glass-card button {
+  transition: all 0.3s ease;
+}
+
+.glass-card button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px;
+}
+
+/* Mejorar contraste de texto sobre fondo de vidrio */
+.glass-card .text-gray-800 {
+  color: #1f2937 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.glass-card .text-gray-600 {
+  color: #4b5563 !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.glass-card .text-gray-500 {
+  color: #6b7280 !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Soporte adicional para navegadores que no soportan backdrop-filter */
+@supports not (backdrop-filter: blur(20px)) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
   }
 }
 </style>

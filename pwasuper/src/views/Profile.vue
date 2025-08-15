@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col p-4 relative overflow-hidden">
+  <div class="fixed inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 overflow-hidden" style="z-index: 0;">
     <!-- Elementos decorativos para mejorar el efecto de vidrio -->
     <div class="absolute inset-0">
       <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
@@ -7,16 +7,17 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
 
-    <div class="page-container w-full max-w-md mx-auto relative z-10 py-4">
+    <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4" style="z-index: 1;">
+      <div class="page-container w-full max-w-md mx-auto relative z-10 p-4 sm:p-6 lg:p-8">
       <!-- Header del perfil -->
-      <div class="glass-card mb-4">
-        <div class="text-center mb-6">
-          <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-3 glass-avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="glass-card mb-3">
+        <div class="text-center mb-4">
+          <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-2 glass-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <h1 class="text-xl font-bold text-gray-800 modern-title">{{ user.nombre_completo }}</h1>
+          <h1 class="text-lg font-bold text-gray-800 modern-title">{{ user.nombre_completo }}</h1>
           <div class="green-line mx-auto mb-2"></div>
           <p class="text-sm text-gray-600">{{ user.cargo }}</p>
           <p class="text-xs text-gray-500 mt-1">{{ user.email }}</p>
@@ -24,14 +25,14 @@
       </div>
 
       <!-- Información del usuario -->
-      <div class="glass-card mb-4">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4 modern-title flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="glass-card mb-3">
+        <h2 class="text-base font-semibold text-gray-800 mb-3 modern-title flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Información Personal
         </h2>
-        <div class="green-line mb-4"></div>
+        <div class="green-line mb-3"></div>
         
         <div class="space-y-3">
           <div class="glass-info-row flex justify-between items-center py-2">
@@ -58,13 +59,13 @@
 
       <!-- Cambio de contraseña -->
       <div class="glass-card">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4 modern-title flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <h2 class="text-base font-semibold text-gray-800 mb-3 modern-title flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
           Cambiar Contraseña
         </h2>
-        <div class="green-line mb-4"></div>
+        <div class="green-line mb-3"></div>
         <form @submit.prevent="changePassword" class="space-y-4">
         <!-- Mensaje de error general -->
         <div v-if="errors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg" role="alert">
@@ -114,7 +115,7 @@
 
     <!-- Modal de confirmación -->
     <transition name="fade">
-      <div v-if="showSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div v-if="showSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style="z-index: 60;">
         <div class="glass-card max-w-sm w-full mx-4">
           <div class="text-center">
             <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 glass-success-icon">
@@ -132,6 +133,7 @@
         </div>
       </div>
     </transition>
+      </div>
     </div>
   </div>
 </template>
@@ -519,72 +521,237 @@ const changePassword = async () => {
 /* Mejoras de responsividad para pantallas móviles */
 @media (max-width: 480px) {
   .page-container {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
   }
   
   .glass-card {
-    padding: 1rem;
-    margin: 0 0.25rem;
+    padding: 0.875rem;
+    margin-bottom: 0.5rem;
+    border-radius: 16px;
   }
   
   .glass-input {
     font-size: 14px; /* Evita zoom en iOS */
-    min-height: 36px;
-  }
-  
-  .text-xl {
-    font-size: 1.125rem;
+    min-height: 32px;
+    padding: 0.5rem;
   }
   
   .text-lg {
     font-size: 1rem;
   }
+  
+  .text-base {
+    font-size: 0.875rem;
+  }
+  
+  .w-16, .h-16 {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  
+  .h-8, .w-8 {
+    height: 1.75rem;
+    width: 1.75rem;
+  }
+  
+  .mb-3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mb-4 {
+    margin-bottom: 0.75rem;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 0.75rem;
+  }
+  
+  .space-y-3 > * + * {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .page-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    max-width: calc(100vw - 1rem);
+  }
+  
+  .glass-card {
+    padding: 0.75rem;
+    margin-bottom: 0.375rem;
+    border-radius: 12px;
+  }
+  
+  .glass-input {
+    font-size: 14px;
+    min-height: 30px;
+    padding: 0.375rem 0.5rem;
+  }
+  
+  .glass-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .text-lg {
+    font-size: 0.95rem;
+  }
+  
+  .text-base {
+    font-size: 0.8rem;
+  }
+  
+  .text-sm {
+    font-size: 0.75rem;
+  }
+  
+  .text-xs {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .page-container {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .glass-card {
+    margin-bottom: 0.375rem;
+    padding: 0.75rem;
+  }
+  
+  .mb-3 {
+    margin-bottom: 0.375rem;
+  }
+  
+  .mb-4 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 0.5rem;
+  }
+  
+  .space-y-3 > * + * {
+    margin-top: 0.375rem;
+  }
 }
 
 @media (max-height: 600px) {
   .page-container {
-    max-width: 320px;
+    max-width: 300px;
+    padding: 0.375rem 0.5rem;
   }
   
   .glass-card {
-    padding: 1rem;
+    padding: 0.625rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .w-16, .h-16 {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .text-lg {
+    font-size: 0.9rem;
+  }
+  
+  .text-base {
+    font-size: 0.775rem;
   }
 }
 
 @media (max-height: 500px) {
   .glass-card {
-    padding: 0.875rem;
-  }
-}
-
-/* Para pantallas muy pequeñas como iPhone SE */
-@media (max-width: 375px) and (max-height: 667px) {
-  .page-container {
-    max-width: 300px;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding: 0.5rem;
   }
   
-  .glass-card {
-    padding: 0.875rem;
+  .mb-2, .mb-3, .mb-4 {
+    margin-bottom: 0.25rem;
   }
   
-  .glass-input {
-    font-size: 14px;
-    min-height: 34px;
+  .space-y-4 > * + * {
+    margin-top: 0.375rem;
+  }
+  
+  .space-y-3 > * + * {
+    margin-top: 0.25rem;
   }
 }
 
 /* Para pantallas grandes */
 @media (min-width: 768px) {
   .page-container {
-    max-width: 380px;
+    max-width: 400px;
+    padding: 1rem;
+  }
+  
+  .glass-card {
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    max-width: 450px;
+    padding: 1.5rem 1rem;
   }
   
   .glass-card {
     padding: 1.5rem;
+    margin-bottom: 1.25rem;
   }
+}
+
+/* Prevenir superposición de elementos */
+.glass-card {
+  position: relative;
+  z-index: 2;
+  clear: both;
+}
+
+/* Asegurar que los modales estén por encima de todo */
+.fixed[style*="z-index: 60"] {
+  z-index: 60 !important;
+}
+
+/* Z-index hierarchy para elementos principales */
+.page-container {
+  position: relative;
+  z-index: 2;
+}
+
+/* Contenedor de fondo con z-index bajo */
+.fixed.inset-0[style*="z-index: 0"] {
+  z-index: 0 !important;
+}
+
+/* Contenedor scrollable */
+.absolute.inset-0[style*="z-index: 1"] {
+  z-index: 1 !important;
+}
+
+/* Mejoras para el contenedor scrollable */
+.absolute.inset-0.overflow-y-auto {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Espaciado optimizado para evitar superposición */
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
 }
 
 /* Soporte adicional para navegadores que no soportan backdrop-filter */

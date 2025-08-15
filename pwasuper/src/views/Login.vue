@@ -10,10 +10,12 @@
     <div class="page-container w-full max-w-md relative z-10">
       <!-- Header Section Compacto -->
       <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
+        <div class="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 mx-auto mb-4">
+          <img 
+            src="/src/images/icono.png" 
+            alt="Sembrando Vida Logo" 
+            class="w-full h-full object-contain rounded-full"
+          />
         </div>
         <h1 class="text-2xl font-bold text-primary mb-1">Sembrando Vida</h1>
         <h2 class="text-lg font-semibold text-gray-700">Iniciar sesión</h2>

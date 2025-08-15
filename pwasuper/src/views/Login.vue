@@ -17,7 +17,8 @@
             class="w-full h-full object-contain rounded-full"
           />
         </div>
-        <h1 class="text-lg font-bold text-primary mb-1 text-center glass-title">Aplicación de Seguimiento</h1>
+        <h1 class="text-lg font-semibold mb-1 text-center modern-title">Aplicación de Seguimiento</h1>
+        <div class="green-line mx-auto mb-2"></div>
         <h2 class="text-base font-semibold text-gray-700">Iniciar sesión</h2>
         <p class="mt-1 text-gray-500 text-xs">Ingresa tus credenciales para acceder</p>
       </div>
@@ -477,30 +478,60 @@ button[type="button"]:hover svg {
   width: 100%;
 }
 
-.glass-title {
-  color: #2e7d32;
-  text-shadow: 
-    0 1px 2px rgba(46, 125, 50, 0.3),
-    0 0 8px rgba(46, 125, 50, 0.2);
-  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.3));
+.modern-title {
+  background: linear-gradient(
+    90deg, 
+    #166534 0%, 
+    #15803d 25%, 
+    #86efac 50%, 
+    #15803d 75%, 
+    #166534 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-wave 3s ease-in-out infinite;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  letter-spacing: -0.015em;
+  font-weight: 500;
   position: relative;
 }
 
-.glass-title::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0.2) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  z-index: 1;
-  pointer-events: none;
+.green-line {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, #16a34a, #22c55e, #16a34a);
+  border-radius: 1px;
+  animation: line-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes gradient-wave {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes line-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.3);
+    opacity: 0.8;
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+    opacity: 1;
+  }
+}
+
+/* Respaldo para navegadores que no soportan background-clip: text */
+@supports not (-webkit-background-clip: text) {
+  .modern-title {
+    color: #166534;
+    animation: none;
+  }
 }
 
 /* Mejoras de responsividad para pantallas móviles */

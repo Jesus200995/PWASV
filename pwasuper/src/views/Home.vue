@@ -7,17 +7,19 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
 
-    <div class="page-container w-full max-w-md mx-auto relative z-10 py-4">
+    <div class="page-container w-full max-w-md mx-auto relative z-10 py-4 space-y-6">
       <!-- Sistema de Asistencia Integrado -->
-      <div class="glass-card mb-6">
+      <div class="glass-card">
         <div class="text-center mb-4">
           <h2 class="text-xl font-bold text-gray-800 mb-2 modern-title">Registra tu asistencia</h2>
           <div class="green-line mx-auto mb-2"></div>
           <p class="text-sm text-gray-500">
             {{ modoAsistencia ? 'Completa los datos para ' + (tipoAsistencia === 'entrada' ? 'marcar entrada' : 'marcar salida') : 'Marca tu entrada y salida del día' }}
           </p>
-        </div>      <!-- Botones de Asistencia (solo visibles cuando no está en modo asistencia) -->
-      <div v-if="!modoAsistencia" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        </div>
+
+        <!-- Botones de Asistencia (solo visibles cuando no está en modo asistencia) -->
+        <div v-if="!modoAsistencia" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <!-- Botón Marcar Entrada -->
         <button
           @click="iniciarAsistencia('entrada')"
@@ -94,18 +96,18 @@
         </button>
       </div>
 
-      <!-- Advertencia sobre registro de asistencia -->
-      <div v-if="!modoAsistencia" class="text-center mb-3">
-        <div class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-          <strong>Aviso:</strong> El registro de entrada marca el inicio oficial de su jornada laboral. Se recomienda marcar salida únicamente al finalizar sus actividades, ya que esto concluye formalmente su jornada del día.
+        <!-- Advertencia sobre registro de asistencia -->
+        <div v-if="!modoAsistencia" class="text-center mb-3">
+          <div class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <strong>Aviso:</strong> El registro de entrada marca el inicio oficial de su jornada laboral. Se recomienda marcar salida únicamente al finalizar sus actividades, ya que esto concluye formalmente su jornada del día.
+          </div>
         </div>
-      </div>
-      
-      <!-- Mensaje de estado de asistencia -->
-      <div v-if="mensajeAsistencia && !modoAsistencia" class="text-center mb-4">
+        
+        <!-- Mensaje de estado de asistencia -->
+        <div v-if="mensajeAsistencia && !modoAsistencia" class="text-center mb-4">
         <div 
           class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium"
           :class="{
@@ -125,11 +127,11 @@
           </svg>
           {{ mensajeAsistencia }}
         </div>
+        </div>
       </div>
-    </div>
 
       <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
-      <div v-if="modoAsistencia" class="glass-card mb-4">
+      <div v-if="modoAsistencia" class="glass-card">
         <div class="text-center mb-6">
           <h2 class="text-xl font-bold text-gray-800 mb-2 modern-title">
             {{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}
@@ -271,7 +273,7 @@
     </div>
 
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
-    <div v-if="!modoAsistencia" class="glass-card mb-4">
+    <div v-if="!modoAsistencia" class="glass-card">
       <div class="text-center mb-6">
         <h2 class="text-lg font-bold text-gray-800 mb-3 modern-title">
           Registra tus actividades
@@ -2149,5 +2151,35 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
     transform: translateY(-1px);
   }
+}
+
+/* Mejora de espaciado para evitar que se encimen las secciones */
+.space-y-6 > * + * {
+  margin-top: 1.5rem !important;
+}
+
+/* Asegurar que cada glass-card tenga su espacio definido */
+.glass-card + .glass-card {
+  margin-top: 1.5rem;
+}
+
+/* Espaciado específico para secciones condicionales */
+.glass-card {
+  margin-bottom: 0 !important; /* Remover margins bottom para usar space-y-6 */
+  position: relative;
+  z-index: 1;
+}
+
+/* Separación clara entre formulario de asistencia y actividades */
+.page-container > .glass-card:not(:first-child) {
+  clear: both;
+  margin-top: 1.5rem;
+}
+
+/* Mensajes de estado sin interferir con otros elementos */
+.text-center.mb-4 {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 1rem !important;
 }
 </style>

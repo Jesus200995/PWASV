@@ -10,17 +10,29 @@
     <div class="page-container w-full max-w-md relative z-10">
       <!-- Header Section Compacto -->
       <div class="text-center mb-6">
-        <div class="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 mx-auto -mb-8">
+        <div class="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 xl:w-44 xl:h-44 mx-auto -mb-6">
           <img 
             src="/src/images/icono.png" 
             alt="Sembrando Vida Logo" 
             class="w-full h-full object-contain rounded-full"
           />
         </div>
-        <h1 class="text-xl font-bold text-primary mb-1 text-center glass-title">Aplicación de Seguimiento</h1>
-        <h2 class="text-lg font-semibold text-gray-700">Iniciar sesión</h2>
-        <p class="mt-1 text-gray-500 text-sm">Ingresa tus credenciales para acceder</p>
+        <h1 class="text-xl font-bold text-primary mb-1 text-center glass-title">Recuperar Contraseña</h1>
+        <h2 class="text-lg font-semibold text-gray-700">Cambiar contraseña</h2>
+        <p class="mt-1 text-gray-500 text-sm">Ingresa tu correo y nueva contraseña</p>
       </div>
+
+      <!-- Success Message -->
+      <transition name="bounce">
+        <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-sm mb-4" role="alert">
+          <p class="flex items-center text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            {{ successMessage }}
+          </p>
+        </div>
+      </transition>
 
       <!-- Error Message -->
       <transition name="bounce">
@@ -34,9 +46,9 @@
         </div>
       </transition>
 
-      <!-- Login Form -->
+      <!-- Reset Password Form -->
       <div class="glass-card">
-        <form @submit.prevent="login">
+        <form @submit.prevent="resetPassword">
           <div class="space-y-4">
             <div>
               <label for="email" class="block text-sm font-medium text-gray-800 mb-2">Correo electrónico</label>
@@ -61,7 +73,7 @@
             </div>
             
             <div>
-              <label for="password" class="block text-sm font-medium text-gray-800 mb-2">Contraseña</label>
+              <label for="newPassword" class="block text-sm font-medium text-gray-800 mb-2">Nueva contraseña</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,15 +81,16 @@
                   </svg>
                 </div>
                 <input 
-                  v-model="password" 
-                  id="password" 
-                  name="password" 
+                  v-model="newPassword" 
+                  id="newPassword" 
+                  name="newPassword" 
                   :type="showPassword ? 'text' : 'password'" 
-                  autocomplete="current-password" 
+                  autocomplete="new-password" 
                   required 
                   class="glass-input w-full pl-11 pr-11 py-3" 
-                  placeholder="••••••••" 
+                  placeholder="Nueva contraseña" 
                   :class="{ 'animate-shake': formError }" 
+                  minlength="6"
                 />
                 <button
                   type="button"
@@ -85,6 +98,43 @@
                   class="absolute inset-y-0 right-0 flex items-center pr-3 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
                 >
                   <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
+            </div>
+
+            <div>
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-800 mb-2">Confirmar nueva contraseña</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="confirmPassword" 
+                  id="confirmPassword" 
+                  name="confirmPassword" 
+                  :type="showConfirmPassword ? 'text' : 'password'" 
+                  autocomplete="new-password" 
+                  required 
+                  class="glass-input w-full pl-11 pr-11 py-3" 
+                  placeholder="Confirmar contraseña" 
+                  :class="{ 'animate-shake': formError }" 
+                  minlength="6"
+                />
+                <button
+                  type="button"
+                  @click="toggleConfirmPasswordVisibility"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
+                >
+                  <svg v-if="showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
                   </svg>
                   <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,21 +156,15 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            {{ loading ? 'Iniciando sesión...' : 'Iniciar sesión' }}
+            {{ loading ? 'Cambiando contraseña...' : 'Cambiar contraseña' }}
           </button>
         </form>
 
-        <!-- Register Link -->
+        <!-- Back to Login Link -->
         <div class="text-center mt-6">
           <p class="text-sm text-gray-700">
-            ¿No tienes cuenta?
-            <router-link to="/register" class="font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
-              Crear cuenta
-            </router-link>
-          </p>
-          <p class="text-sm text-gray-700 mt-2">
-            <router-link to="/forgot-password" class="font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
-              ¿Olvidaste tu contraseña?
+            <router-link to="/login" class="font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
+              ← Volver al inicio de sesión
             </router-link>
           </p>
         </div>
@@ -130,49 +174,53 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URL, getBestApiUrl, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 
 const router = useRouter();
 const email = ref('');
-const password = ref('');
+const newPassword = ref('');
+const confirmPassword = ref('');
 const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref('');
+const successMessage = ref('');
 const formError = ref(false);
-const isOnline = ref(true);
-const currentApiUrl = ref(API_URL);
-
-// Verificar conexión a internet cuando carga el componente
-onMounted(async () => {
-  isOnline.value = await checkInternetConnection();
-  if (!isOnline.value) {
-    errorMessage.value = getOfflineMessage();
-  } else {
-    try {
-      currentApiUrl.value = await getBestApiUrl();
-      console.log(`🌐 Login usando servidor: ${currentApiUrl.value}`);
-    } catch (error) {
-      console.warn('Error detectando servidor, usando URL por defecto:', error);
-      currentApiUrl.value = API_URL;
-    }
-  }
-});
 
 function togglePasswordVisibility() {
   showPassword.value = !showPassword.value;
 }
 
-async function login() {
+function toggleConfirmPasswordVisibility() {
+  showConfirmPassword.value = !showConfirmPassword.value;
+}
+
+async function resetPassword() {
   loading.value = true;
   errorMessage.value = '';
+  successMessage.value = '';
   formError.value = false;
   
-  // Verificar si hay campos vacíos
-  if (!email.value || !password.value) {
+  // Validaciones
+  if (!email.value || !newPassword.value || !confirmPassword.value) {
     errorMessage.value = 'Por favor, completa todos los campos';
+    formError.value = true;
+    loading.value = false;
+    return;
+  }
+  
+  if (newPassword.value.length < 6) {
+    errorMessage.value = 'La nueva contraseña debe tener al menos 6 caracteres';
+    formError.value = true;
+    loading.value = false;
+    return;
+  }
+  
+  if (newPassword.value !== confirmPassword.value) {
+    errorMessage.value = 'Las contraseñas no coinciden';
     formError.value = true;
     loading.value = false;
     return;
@@ -187,56 +235,77 @@ async function login() {
     return;
   }
   
-  // Actualizar URL si es necesario
-  if (!currentApiUrl.value || currentApiUrl.value === API_URL) {
-    currentApiUrl.value = await getBestApiUrl();
-  }
-  
   try {
-    // Conectar con la API real
-    const response = await axios.post(`${currentApiUrl.value}/login`, {
-      correo: email.value,
-      contrasena: password.value
-    }, {
-      timeout: 10000, // 10 segundos de timeout
+    // Obtener la mejor URL del servidor
+    const currentApiUrl = await getBestApiUrl();
+    
+    // Primero verificar que el usuario existe
+    const usuariosResponse = await axios.get(`${currentApiUrl}/usuarios`, {
+      timeout: 10000,
       headers: {
         'Content-Type': 'application/json'
       }
     });
     
-    // Obtener datos del usuario desde la respuesta
-    const userData = response.data;
+    const usuarios = usuariosResponse.data.usuarios;
+    const usuario = usuarios.find(u => u.correo.toLowerCase() === email.value.toLowerCase());
     
-    // Guardar datos del usuario en localStorage
-    localStorage.setItem('user', JSON.stringify(userData));
+    if (!usuario) {
+      errorMessage.value = 'No se encontró una cuenta con ese correo electrónico';
+      formError.value = true;
+      loading.value = false;
+      return;
+    }
     
-    // Establecer bandera para mostrar mensaje de bienvenida
-    sessionStorage.setItem('justLoggedIn', 'true');
+    // Actualizar la contraseña directamente en la base de datos
+    // Como el backend usa contraseñas sin encriptar, podemos usar el endpoint de actualización
+    const updateData = {
+      correo: usuario.correo,
+      nombre_completo: usuario.nombre_completo,
+      cargo: usuario.cargo,
+      supervisor: usuario.supervisor,
+      contrasena: newPassword.value, // Nueva contraseña
+      curp: usuario.curp,
+      telefono: usuario.telefono
+    };
     
-    // Forzar recarga de la página para asegurar que el estado se actualice correctamente
-    window.location.href = '/';
+    await axios.put(`${currentApiUrl}/usuarios/${usuario.id}`, updateData, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    successMessage.value = 'Contraseña actualizada exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.';
+    
+    // Limpiar formulario
+    email.value = '';
+    newPassword.value = '';
+    confirmPassword.value = '';
+    
+    // Redirigir al login después de 3 segundos
+    setTimeout(() => {
+      router.push('/login');
+    }, 3000);
+    
   } catch (error) {
-    console.error('Error de inicio de sesión:', error);
+    console.error('Error al cambiar contraseña:', error);
     
     if (error.response) {
-      // El servidor respondió con un estado de error
       const status = error.response.status;
-      if (status === 401) {
-        errorMessage.value = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+      if (status === 404) {
+        errorMessage.value = 'No se encontró una cuenta con ese correo electrónico';
       } else if (status === 500) {
         errorMessage.value = 'Error del servidor. Inténtalo de nuevo en unos minutos.';
       } else {
-        errorMessage.value = error.response.data.detail || 'Error al iniciar sesión. Verifica tus credenciales.';
+        errorMessage.value = error.response.data.detail || 'Error al cambiar la contraseña';
       }
     } else if (error.request) {
-      // La solicitud fue hecha pero no se recibió respuesta
       errorMessage.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
     } else if (error.code === 'ECONNABORTED') {
-      // Timeout
       errorMessage.value = 'La conexión tardó demasiado. Verifica tu conexión a internet.';
     } else {
-      // Algo ocurrió al configurar la solicitud
-      errorMessage.value = 'Error al iniciar sesión: ' + error.message;
+      errorMessage.value = 'Error al cambiar contraseña: ' + error.message;
     }
     
     formError.value = true;
@@ -352,49 +421,6 @@ async function login() {
   color: rgba(75, 85, 99, 0.6);
 }
 
-/* Estilos para los iconos y botones dentro de los inputs */
-.relative .absolute {
-  z-index: 10;
-}
-
-.relative .absolute svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-/* Estilos específicos para el botón del ojo */
-button[type="button"] {
-  background: transparent !important;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  transition: all 0.2s ease;
-  box-shadow: none !important;
-}
-
-button[type="button"]:focus {
-  outline: none;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-button[type="button"]:hover {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-button[type="button"] svg {
-  transition: all 0.2s ease;
-}
-
-button[type="button"]:hover svg {
-  transform: scale(1.1);
-}
-
 .glass-button {
   padding: 0.875rem 1.5rem;
   border-radius: 12px;
@@ -503,6 +529,39 @@ button[type="button"]:hover svg {
   pointer-events: none;
 }
 
+/* Estilos específicos para los botones del ojo */
+button[type="button"] {
+  background: transparent !important;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  transition: all 0.2s ease;
+  box-shadow: none !important;
+}
+
+button[type="button"]:focus {
+  outline: none;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+button[type="button"]:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+button[type="button"] svg {
+  transition: all 0.2s ease;
+}
+
+button[type="button"]:hover svg {
+  transform: scale(1.1);
+}
+
 /* Mejoras de responsividad para pantallas móviles */
 @media (max-width: 480px) {
   .glass-card {
@@ -515,13 +574,8 @@ button[type="button"]:hover svg {
     min-height: 44px;
   }
   
-  .relative .absolute svg {
-    width: 1.125rem;
-    height: 1.125rem;
-  }
-  
-  .text-2xl {
-    font-size: 1.375rem;
+  .text-xl {
+    font-size: 1.125rem;
   }
   
   .text-lg {
@@ -538,39 +592,8 @@ button[type="button"]:hover svg {
     margin-bottom: 1rem;
   }
   
-  .w-16.h-16 {
-    width: 3rem;
-    height: 3rem;
-  }
-  
-  .text-2xl {
-    font-size: 1.25rem;
-  }
-  
-  .text-lg {
-    font-size: 1rem;
-  }
-  
   .glass-card {
     padding: 1.5rem;
-  }
-}
-
-@media (max-height: 500px) {
-  .text-center.mb-6 {
-    margin-bottom: 0.75rem;
-  }
-  
-  .mb-4 {
-    margin-bottom: 0.5rem;
-  }
-  
-  .mt-6 {
-    margin-top: 1rem;
-  }
-  
-  .glass-card {
-    padding: 1.25rem;
   }
 }
 

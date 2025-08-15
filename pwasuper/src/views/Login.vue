@@ -10,14 +10,14 @@
     <div class="page-container w-full max-w-md relative z-10">
       <!-- Header Section Compacto -->
       <div class="text-center mb-6">
-        <div class="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 mx-auto mb-4">
+        <div class="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 mx-auto -mb-8">
           <img 
             src="/src/images/icono.png" 
             alt="Sembrando Vida Logo" 
             class="w-full h-full object-contain rounded-full"
           />
         </div>
-        <h1 class="text-2xl font-bold text-primary mb-1">Sembrando Vida</h1>
+        <h1 class="text-xl font-bold text-primary mb-1 text-center glass-title">Aplicación de Seguimiento</h1>
         <h2 class="text-lg font-semibold text-gray-700">Iniciar sesión</h2>
         <p class="mt-1 text-gray-500 text-sm">Ingresa tus credenciales para acceder</p>
       </div>
@@ -470,6 +470,32 @@ button[type="button"]:hover svg {
 
 .glass-link:hover::after {
   width: 100%;
+}
+
+.glass-title {
+  color: #2e7d32;
+  text-shadow: 
+    0 1px 2px rgba(46, 125, 50, 0.3),
+    0 0 8px rgba(46, 125, 50, 0.2);
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.3));
+  position: relative;
+}
+
+.glass-title::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.2) 0%, 
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* Mejoras de responsividad para pantallas móviles */

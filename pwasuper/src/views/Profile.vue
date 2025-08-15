@@ -37,32 +37,32 @@
         <div class="space-y-2">
           <div class="glass-info-row flex justify-between items-center py-1">
             <span class="text-xs font-medium text-gray-600">Nombre completo:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.nombre_completo }}</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.nombre_completo || 'No disponible' }}</span>
           </div>
           
           <div class="glass-info-row flex justify-between items-center py-1">
             <span class="text-xs font-medium text-gray-600">Email:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.correo || user.email }}</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.correo || user.email || 'No disponible' }}</span>
           </div>
           
           <div class="glass-info-row flex justify-between items-center py-1">
             <span class="text-xs font-medium text-gray-600">Cargo:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.cargo }}</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.cargo || 'No disponible' }}</span>
           </div>
           
           <div class="glass-info-row flex justify-between items-center py-1">
             <span class="text-xs font-medium text-gray-600">Supervisor:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.supervisor || 'No asignado' }}</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ (user.supervisor && user.supervisor.trim()) || 'No asignado' }}</span>
           </div>
           
           <div class="glass-info-row flex justify-between items-center py-1">
             <span class="text-xs font-medium text-gray-600">CURP:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.curp || 'No registrado' }}</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ (user.curp && user.curp.trim()) || 'No registrado' }}</span>
           </div>
           
           <div class="glass-info-row flex justify-between items-center py-1">
             <span class="text-xs font-medium text-gray-600">Teléfono:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.telefono || 'No registrado' }}</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ (user.telefono && user.telefono.trim()) || 'No registrado' }}</span>
           </div>
           
           <div v-if="user.fecha_registro" class="glass-info-row flex justify-between items-center py-1">
@@ -171,8 +171,71 @@ onMounted(() => {
   const storedUser = localStorage.getItem('user')
   if (storedUser) {
     user.value = JSON.parse(storedUser)
+    
+    // Cargar los datos completos del usuario desde el backend
+    loadUserData()
   }
 })
+
+const loadUserData = async () => {
+  try {
+    console.log('🔍 Cargando datos del usuario ID:', user.value.id)
+    console.log('📋 Datos iniciales del user:', user.value)
+    
+    const online = await checkInternetConnection()
+    if (!online) {
+      console.log('❌ Sin conexión, usando datos del localStorage')
+      return
+    }
+    
+    console.log('🌐 Haciendo petición a:', `${API_URL}/usuarios/${user.value.id}`)
+    
+    const response = await axios.get(`${API_URL}/usuarios/${user.value.id}`, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    console.log('📡 Respuesta status:', response.status)
+    
+    if (response.status === 200) {
+      const userData = response.data
+      console.log('📊 Datos RAW del backend:', userData)
+      console.log('👀 Supervisor:', userData.supervisor)
+      console.log('� CURP:', userData.curp)
+      console.log('👀 Teléfono:', userData.telefono)
+      
+      // No incluir la contraseña para seguridad
+      delete userData.contrasena
+      
+      // Actualizar los datos del usuario
+      user.value = {
+        ...user.value,
+        ...userData
+      }
+      
+      console.log('✅ Datos del usuario FINALES:', user.value)
+      console.log('🔎 user.supervisor final:', user.value.supervisor)
+      console.log('🔎 user.curp final:', user.value.curp)
+      console.log('🔎 user.telefono final:', user.value.telefono)
+      
+      // Actualizar también el localStorage con los datos completos
+      localStorage.setItem('user', JSON.stringify(user.value))
+      
+      console.log('✅ Datos del usuario actualizados desde el backend')
+    }
+  } catch (error) {
+    console.error('❌ Error al cargar datos completos del usuario:', error)
+    if (error.response) {
+      console.error('📡 Error response:', error.response.status, error.response.data)
+    } else if (error.request) {
+      console.error('📡 Error request:', error.request)
+    } else {
+      console.error('📡 Error message:', error.message)
+    }
+  }
+}
 
 const formatDate = (dateString) => {
   if (!dateString) return 'No disponible'

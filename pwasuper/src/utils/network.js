@@ -20,7 +20,7 @@ export function getOfflineMessage() {
 
 // Configuración de URLs de API
 const API_URLS = {
-  development: ["http://localhost:8001", "http://localhost:8000"],
+  development: ["http://localhost:8000", "http://localhost:8001"],
   production: "https://apipwa.sembrandodatos.com"
 };
 

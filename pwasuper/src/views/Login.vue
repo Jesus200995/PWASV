@@ -1,18 +1,21 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white p-4">
-    <div class="page-container w-full">
-      <div class="text-center mb-8">
-        <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <div class="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center p-4">
+    <div class="page-container w-full max-w-md">
+      <!-- Header Section Compacto -->
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
         </div>
-        <h1 class="text-3xl font-bold text-primary mb-2">Sembrando Vida</h1>
-        <h2 class="text-xl font-semibold text-gray-700">Iniciar sesión</h2>
-        <p class="mt-2 text-gray-500 text-sm">Ingresa tus credenciales para acceder</p>
-      </div>      
+        <h1 class="text-2xl font-bold text-primary mb-1">Sembrando Vida</h1>
+        <h2 class="text-lg font-semibold text-gray-700">Iniciar sesión</h2>
+        <p class="mt-1 text-gray-500 text-sm">Ingresa tus credenciales para acceder</p>
+      </div>
+
+      <!-- Error Message -->
       <transition name="bounce">
-        <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-sm mb-6" role="alert">
+        <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-sm mb-4" role="alert">
           <p class="flex items-center text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -22,6 +25,7 @@
         </div>
       </transition>
 
+      <!-- Login Form -->
       <div class="card">
         <form @submit.prevent="login">
           <div class="space-y-4">
@@ -63,7 +67,8 @@
                   autocomplete="current-password" 
                   required 
                   class="form-input pl-10" 
-                  placeholder="••••••••"                  :class="{ 'animate-shake': formError }" 
+                  placeholder="••••••••" 
+                  :class="{ 'animate-shake': formError }" 
                 />
               </div>
             </div>
@@ -81,7 +86,10 @@
             </svg>
             {{ loading ? 'Iniciando sesión...' : 'Iniciar sesión' }}
           </button>
-        </form>        <div class="text-center mt-6">
+        </form>
+
+        <!-- Register Link -->
+        <div class="text-center mt-6">
           <p class="text-sm text-gray-600">
             ¿No tienes cuenta?
             <router-link to="/register" class="font-medium text-primary hover:text-primary-dark transition-colors duration-200">
@@ -243,5 +251,52 @@ async function login() {
 
 .animate-shake {
   animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Mejoras de responsividad para pantallas móviles */
+@media (max-height: 600px) {
+  .page-container {
+    max-width: 350px;
+  }
+  
+  .text-center.mb-6 {
+    margin-bottom: 1rem;
+  }
+  
+  .w-16.h-16 {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+  
+  .text-lg {
+    font-size: 1rem;
+  }
+}
+
+@media (max-height: 500px) {
+  .text-center.mb-6 {
+    margin-bottom: 0.75rem;
+  }
+  
+  .mb-4 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mt-6 {
+    margin-top: 1rem;
+  }
+}
+
+/* Para pantallas muy pequeñas como iPhone SE */
+@media (max-width: 375px) and (max-height: 667px) {
+  .page-container {
+    max-width: 320px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 </style>

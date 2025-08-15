@@ -7,73 +7,73 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
 
-    <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4" style="z-index: 1;">
-      <div class="page-container w-full max-w-md mx-auto relative z-10 p-4 sm:p-6 lg:p-8">
+    <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-3" style="z-index: 1;">
+      <div class="page-container w-full max-w-sm mx-auto relative z-10 p-3 sm:p-4 lg:p-5">
       <!-- Header del perfil -->
-      <div class="glass-card mb-3">
-        <div class="text-center mb-4">
-          <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-2 glass-avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="glass-card mb-2">
+        <div class="text-center mb-3">
+          <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-2 glass-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <h1 class="text-lg font-bold text-gray-800 modern-title">{{ user.nombre_completo }}</h1>
+          <h1 class="text-base font-bold text-gray-800 modern-title">{{ user.nombre_completo }}</h1>
           <div class="green-line mx-auto mb-2"></div>
-          <p class="text-sm text-gray-600">{{ user.cargo }}</p>
+          <p class="text-xs text-gray-600">{{ user.cargo }}</p>
           <p class="text-xs text-gray-500 mt-1">{{ user.email }}</p>
         </div>
       </div>
 
       <!-- Información del usuario -->
-      <div class="glass-card mb-3">
-        <h2 class="text-base font-semibold text-gray-800 mb-3 modern-title flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="glass-card mb-2">
+        <h2 class="text-sm font-semibold text-gray-800 mb-2 modern-title flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Información Personal
         </h2>
-        <div class="green-line mb-3"></div>
+        <div class="green-line mb-2"></div>
         
-        <div class="space-y-3">
-          <div class="glass-info-row flex justify-between items-center py-2">
-            <span class="text-sm font-medium text-gray-600">Nombre completo:</span>
-            <span class="text-sm text-gray-800 font-semibold">{{ user.nombre_completo }}</span>
+        <div class="space-y-2">
+          <div class="glass-info-row flex justify-between items-center py-1">
+            <span class="text-xs font-medium text-gray-600">Nombre completo:</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.nombre_completo }}</span>
           </div>
           
-          <div class="glass-info-row flex justify-between items-center py-2">
-            <span class="text-sm font-medium text-gray-600">Email:</span>
-            <span class="text-sm text-gray-800 font-semibold">{{ user.email }}</span>
+          <div class="glass-info-row flex justify-between items-center py-1">
+            <span class="text-xs font-medium text-gray-600">Email:</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.email }}</span>
           </div>
           
-          <div class="glass-info-row flex justify-between items-center py-2">
-            <span class="text-sm font-medium text-gray-600">Cargo:</span>
-            <span class="text-sm text-gray-800 font-semibold">{{ user.cargo }}</span>
+          <div class="glass-info-row flex justify-between items-center py-1">
+            <span class="text-xs font-medium text-gray-600">Cargo:</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.cargo }}</span>
           </div>
           
-          <div class="glass-info-row flex justify-between items-center py-2">
-            <span class="text-sm font-medium text-gray-600">Fecha de registro:</span>
-            <span class="text-sm text-gray-800 font-semibold">{{ formatDate(user.fecha_registro) }}</span>
+          <div class="glass-info-row flex justify-between items-center py-1">
+            <span class="text-xs font-medium text-gray-600">Fecha de registro:</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ formatDate(user.fecha_registro) }}</span>
           </div>
         </div>
       </div>
 
       <!-- Cambio de contraseña -->
       <div class="glass-card">
-        <h2 class="text-base font-semibold text-gray-800 mb-3 modern-title flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <h2 class="text-sm font-semibold text-gray-800 mb-2 modern-title flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
           Cambiar Contraseña
         </h2>
-        <div class="green-line mb-3"></div>
-        <form @submit.prevent="changePassword" class="space-y-4">
+        <div class="green-line mb-2"></div>
+        <form @submit.prevent="changePassword" class="space-y-3">
         <!-- Mensaje de error general -->
-        <div v-if="errors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg" role="alert">
-          <p class="text-sm">{{ errors.general }}</p>
+        <div v-if="errors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 rounded-lg" role="alert">
+          <p class="text-xs">{{ errors.general }}</p>
         </div>
         
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Nueva contraseña</label>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Nueva contraseña</label>
           <input
             v-model="passwordForm.newPassword"
             type="password"
@@ -86,7 +86,7 @@
         </div>
         
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar nueva contraseña</label>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Confirmar nueva contraseña</label>
           <input
             v-model="passwordForm.confirmPassword"
             type="password"
@@ -104,7 +104,7 @@
           class="glass-button w-full"
           :class="{ 'opacity-50 cursor-not-allowed': isChangingPassword }"
         >
-          <svg v-if="isChangingPassword" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+          <svg v-if="isChangingPassword" class="animate-spin h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -115,17 +115,17 @@
 
     <!-- Modal de confirmación -->
     <transition name="fade">
-      <div v-if="showSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style="z-index: 60;">
-        <div class="glass-card max-w-sm w-full mx-4">
+      <div v-if="showSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3" style="z-index: 60;">
+        <div class="glass-card max-w-xs w-full mx-3">
           <div class="text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 glass-success-icon">
-              <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 glass-success-icon">
+              <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2 modern-title">¡Contraseña cambiada!</h3>
-            <div class="green-line mx-auto mb-3"></div>
-            <p class="text-sm text-gray-600 mb-4">Tu contraseña ha sido actualizada exitosamente.</p>
+            <h3 class="text-base font-semibold text-gray-900 mb-2 modern-title">¡Contraseña cambiada!</h3>
+            <div class="green-line mx-auto mb-2"></div>
+            <p class="text-xs text-gray-600 mb-3">Tu contraseña ha sido actualizada exitosamente.</p>
             <button @click="showSuccessModal = false" class="glass-button w-full">
               Entendido
             </button>
@@ -285,13 +285,13 @@ const changePassword = async () => {
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
-    0 8px 32px 0 rgba(31, 38, 135, 0.2),
+    0 6px 25px 0 rgba(31, 38, 135, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.05),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  padding: 1.25rem;
+  padding: 0.875rem;
   position: relative;
   overflow: hidden;
 }
@@ -318,19 +318,19 @@ const changePassword = async () => {
 }
 
 .glass-input {
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: #1f2937;
   transition: all 0.3s ease;
   box-shadow: 
-    0 4px 16px 0 rgba(31, 38, 135, 0.1),
+    0 3px 12px 0 rgba(31, 38, 135, 0.1),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  min-height: 36px;
-  padding: 0.75rem;
+  min-height: 30px;
+  padding: 0.5rem;
 }
 
 .glass-input:focus {
@@ -349,8 +349,8 @@ const changePassword = async () => {
 }
 
 .glass-button {
-  padding: 0.875rem 1.5rem;
-  border-radius: 12px;
+  padding: 0.625rem 1rem;
+  border-radius: 10px;
   border: 1px solid rgba(76, 175, 80, 0.3);
   background: linear-gradient(135deg, 
     rgba(76, 175, 80, 0.8) 0%, 
@@ -359,13 +359,13 @@ const changePassword = async () => {
   -webkit-backdrop-filter: blur(15px);
   color: white;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.8rem;
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 4px 20px 0 rgba(76, 175, 80, 0.3),
+    0 3px 15px 0 rgba(76, 175, 80, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -431,7 +431,7 @@ const changePassword = async () => {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  padding: 0.75rem 0;
+  padding: 0.5rem 0;
   transition: all 0.3s ease;
 }
 
@@ -467,8 +467,8 @@ const changePassword = async () => {
 }
 
 .green-line {
-  width: 60px;
-  height: 2px;
+  width: 40px;
+  height: 1.5px;
   background: linear-gradient(90deg, #16a34a, #22c55e, #16a34a);
   border-radius: 1px;
   animation: line-glow 2s ease-in-out infinite alternate;
@@ -521,85 +521,22 @@ const changePassword = async () => {
 /* Mejoras de responsividad para pantallas móviles */
 @media (max-width: 480px) {
   .page-container {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-  }
-  
-  .glass-card {
-    padding: 0.875rem;
-    margin-bottom: 0.5rem;
-    border-radius: 16px;
-  }
-  
-  .glass-input {
-    font-size: 14px; /* Evita zoom en iOS */
-    min-height: 32px;
-    padding: 0.5rem;
-  }
-  
-  .text-lg {
-    font-size: 1rem;
-  }
-  
-  .text-base {
-    font-size: 0.875rem;
-  }
-  
-  .w-16, .h-16 {
-    width: 3.5rem;
-    height: 3.5rem;
-  }
-  
-  .h-8, .w-8 {
-    height: 1.75rem;
-    width: 1.75rem;
-  }
-  
-  .mb-3 {
-    margin-bottom: 0.5rem;
-  }
-  
-  .mb-4 {
-    margin-bottom: 0.75rem;
-  }
-  
-  .space-y-4 > * + * {
-    margin-top: 0.75rem;
-  }
-  
-  .space-y-3 > * + * {
-    margin-top: 0.5rem;
-  }
-}
-
-@media (max-width: 375px) {
-  .page-container {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-    max-width: calc(100vw - 1rem);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
   
   .glass-card {
-    padding: 0.75rem;
+    padding: 0.625rem;
     margin-bottom: 0.375rem;
     border-radius: 12px;
   }
   
   .glass-input {
-    font-size: 14px;
-    min-height: 30px;
-    padding: 0.375rem 0.5rem;
-  }
-  
-  .glass-button {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
-  
-  .text-lg {
-    font-size: 0.95rem;
+    font-size: 14px; /* Evita zoom en iOS */
+    min-height: 28px;
+    padding: 0.375rem;
   }
   
   .text-base {
@@ -610,6 +547,65 @@ const changePassword = async () => {
     font-size: 0.75rem;
   }
   
+  .w-12, .h-12 {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  
+  .h-6, .w-6 {
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+  
+  .mb-2 {
+    margin-bottom: 0.375rem;
+  }
+  
+  .mb-3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .space-y-3 > * + * {
+    margin-top: 0.5rem;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 0.375rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .page-container {
+    padding-left: 0.375rem;
+    padding-right: 0.375rem;
+    max-width: calc(100vw - 0.75rem);
+  }
+  
+  .glass-card {
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
+    border-radius: 10px;
+  }
+  
+  .glass-input {
+    font-size: 14px;
+    min-height: 26px;
+    padding: 0.25rem 0.375rem;
+  }
+  
+  .glass-button {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .text-base {
+    font-size: 0.75rem;
+  }
+  
+  .text-sm {
+    font-size: 0.7rem;
+  }
+  
   .text-xs {
     font-size: 0.65rem;
   }
@@ -617,97 +613,97 @@ const changePassword = async () => {
 
 @media (max-height: 700px) {
   .page-container {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
   }
   
   .glass-card {
-    margin-bottom: 0.375rem;
-    padding: 0.75rem;
+    margin-bottom: 0.25rem;
+    padding: 0.5rem;
+  }
+  
+  .mb-2 {
+    margin-bottom: 0.25rem;
   }
   
   .mb-3 {
     margin-bottom: 0.375rem;
   }
   
-  .mb-4 {
-    margin-bottom: 0.5rem;
-  }
-  
-  .space-y-4 > * + * {
-    margin-top: 0.5rem;
-  }
-  
   .space-y-3 > * + * {
     margin-top: 0.375rem;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 0.25rem;
   }
 }
 
 @media (max-height: 600px) {
   .page-container {
-    max-width: 300px;
-    padding: 0.375rem 0.5rem;
+    max-width: 280px;
+    padding: 0.25rem 0.375rem;
   }
   
   .glass-card {
-    padding: 0.625rem;
-    margin-bottom: 0.25rem;
+    padding: 0.5rem;
+    margin-bottom: 0.125rem;
   }
   
-  .w-16, .h-16 {
-    width: 3rem;
-    height: 3rem;
-  }
-  
-  .text-lg {
-    font-size: 0.9rem;
+  .w-12, .h-12 {
+    width: 2.5rem;
+    height: 2.5rem;
   }
   
   .text-base {
-    font-size: 0.775rem;
+    font-size: 0.75rem;
+  }
+  
+  .text-sm {
+    font-size: 0.7rem;
   }
 }
 
 @media (max-height: 500px) {
   .glass-card {
-    padding: 0.5rem;
+    padding: 0.375rem;
   }
   
-  .mb-2, .mb-3, .mb-4 {
-    margin-bottom: 0.25rem;
-  }
-  
-  .space-y-4 > * + * {
-    margin-top: 0.375rem;
+  .mb-1, .mb-2, .mb-3 {
+    margin-bottom: 0.125rem;
   }
   
   .space-y-3 > * + * {
     margin-top: 0.25rem;
+  }
+  
+  .space-y-2 > * + * {
+    margin-top: 0.125rem;
   }
 }
 
 /* Para pantallas grandes */
 @media (min-width: 768px) {
   .page-container {
-    max-width: 400px;
-    padding: 1rem;
+    max-width: 350px;
+    padding: 0.75rem;
   }
   
   .glass-card {
-    padding: 1.25rem;
-    margin-bottom: 1rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
   }
 }
 
 @media (min-width: 1024px) {
   .page-container {
-    max-width: 450px;
-    padding: 1.5rem 1rem;
+    max-width: 380px;
+    padding: 1rem 0.75rem;
   }
   
   .glass-card {
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
+    padding: 1.125rem;
+    margin-bottom: 1rem;
   }
 }
 

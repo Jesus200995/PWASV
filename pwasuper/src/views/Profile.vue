@@ -158,37 +158,37 @@
 
     <!-- Modal de edición de información personal -->
     <transition name="fade">
-      <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3" style="z-index: 65;">
-        <div class="bg-white rounded-2xl max-w-sm w-full mx-3 max-h-[90vh] overflow-y-auto edit-modal">
-          <div class="sticky top-0 bg-white rounded-t-2xl border-b border-green-100 p-4">
+      <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3" style="z-index: 9999;">
+        <div class="bg-white rounded-2xl max-w-xs w-full mx-3 max-h-[85vh] overflow-y-auto edit-modal">
+          <div class="sticky top-0 bg-white rounded-t-2xl border-b border-green-100 p-3">
             <div class="flex justify-between items-center">
-              <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <h3 class="text-sm font-bold text-gray-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
                 Editar Información
               </h3>
               <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
           </div>
           
-          <div class="p-4">
-            <form @submit.prevent="updateUserInfo" class="space-y-4">
+          <div class="p-3">
+            <form @submit.prevent="updateUserInfo" class="space-y-3">
               <!-- Mensaje de error general -->
-              <div v-if="editErrors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg" role="alert">
-                <p class="text-sm">{{ editErrors.general }}</p>
+              <div v-if="editErrors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 rounded-lg" role="alert">
+                <p class="text-xs">{{ editErrors.general }}</p>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
                 <input
                   v-model="editForm.nombre_completo"
                   type="text"
-                  class="edit-input w-full"
+                  class="edit-input-small w-full"
                   :class="{ 'border-red-500': editErrors.nombre_completo }"
                   placeholder="Ingresa tu nombre completo"
                   required
@@ -197,11 +197,11 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
                 <input
                   v-model="editForm.correo"
                   type="email"
-                  class="edit-input w-full"
+                  class="edit-input-small w-full"
                   :class="{ 'border-red-500': editErrors.correo }"
                   placeholder="Ingresa tu email"
                   required
@@ -210,11 +210,11 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Cargo</label>
                 <input
                   v-model="editForm.cargo"
                   type="text"
-                  class="edit-input w-full"
+                  class="edit-input-small w-full"
                   :class="{ 'border-red-500': editErrors.cargo }"
                   placeholder="Ingresa tu cargo"
                   required
@@ -223,21 +223,21 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Supervisor</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Supervisor</label>
                 <input
                   v-model="editForm.supervisor"
                   type="text"
-                  class="edit-input w-full"
+                  class="edit-input-small w-full"
                   placeholder="Ingresa el nombre de tu supervisor"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">CURP</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1">CURP</label>
                 <input
                   v-model="editForm.curp"
                   type="text"
-                  class="edit-input w-full"
+                  class="edit-input-small w-full"
                   :class="{ 'border-red-500': editErrors.curp }"
                   placeholder="Ingresa tu CURP"
                   maxlength="18"
@@ -246,20 +246,20 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
                 <div class="flex space-x-2">
                   <!-- Selector de código de país -->
                   <div class="relative">
                     <button 
                       type="button"
                       @click="showCountrySelector = !showCountrySelector"
-                      class="edit-input flex items-center px-2 py-2 min-w-[80px] justify-between text-sm"
+                      class="edit-input-small flex items-center px-2 py-1 min-w-[70px] justify-between text-xs"
                     >
                       <div class="flex items-center">
                         <span class="text-xs mr-1">{{ paises.find(p => p.codigo === editForm.codigoPais)?.bandera || '🌎' }}</span>
                         <span class="text-xs font-medium">{{ editForm.codigoPais }}</span>
                       </div>
-                      <svg class="w-3 h-3 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-2 h-2 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                       </svg>
                     </button>
@@ -267,7 +267,7 @@
                     <!-- Dropdown para selección de país -->
                     <div 
                       v-if="showCountrySelector" 
-                      class="absolute z-50 w-64 top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden"
+                      class="absolute z-50 w-56 top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden"
                     >
                       <!-- Barra de búsqueda -->
                       <div class="sticky top-0 bg-white p-2 border-b border-gray-200">
@@ -280,14 +280,14 @@
                         />
                       </div>
                       
-                      <ul class="py-1 max-h-48 overflow-y-auto">
+                      <ul class="py-1 max-h-40 overflow-y-auto">
                         <li 
                           v-for="pais in filteredCountries" 
                           :key="pais.codigo"
                           @click="selectCountry(pais)"
                           class="flex items-center px-2 py-1 hover:bg-gray-100 cursor-pointer transition-colors"
                         >
-                          <span class="text-sm mr-2">{{ pais.bandera }}</span>
+                          <span class="text-xs mr-2">{{ pais.bandera }}</span>
                           <span class="flex-1 text-xs">{{ pais.nombre }}</span>
                           <span class="text-gray-500 font-mono text-xs">{{ pais.codigo }}</span>
                         </li>
@@ -303,7 +303,7 @@
                     <input
                       v-model="editForm.telefonoDigitos"
                       type="tel"
-                      class="edit-input w-full"
+                      class="edit-input-small w-full"
                       placeholder="10 dígitos"
                       maxlength="10"
                       @input="validatePhoneEdit"
@@ -313,20 +313,20 @@
                 <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
               </div>
 
-              <div class="flex space-x-3 pt-4">
+              <div class="flex space-x-2 pt-3">
                 <button
                   type="button"
                   @click="closeEditModal"
-                  class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 font-medium transition-colors"
+                  class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 text-xs font-medium transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   :disabled="isUpdatingUser"
-                  class="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  class="flex-1 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xs font-medium hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
-                  <svg v-if="isUpdatingUser" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                  <svg v-if="isUpdatingUser" class="animate-spin h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -349,7 +349,6 @@
             </svg>
           </div>
           <h3 class="text-lg font-bold text-gray-900 mb-2">¡Información actualizada!</h3>
-          <div class="w-12 h-0.5 bg-gradient-to-r from-green-400 to-green-600 rounded-full mx-auto mb-3"></div>
           <p class="text-sm text-gray-600 mb-4">Tus datos personales han sido actualizados correctamente.</p>
           <button @click="showEditSuccessModal = false" class="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all">
             Entendido
@@ -1356,6 +1355,32 @@ const validatePhoneEdit = () => {
 .edit-input.border-red-500:focus {
   border-color: #ef4444;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Versión pequeña de inputs para móviles */
+.edit-input-small {
+  padding: 0.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+}
+
+.edit-input-small:focus {
+  outline: none;
+  border-color: #10b981;
+  background-color: white;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+}
+
+.edit-input-small.border-red-500 {
+  border-color: #ef4444;
+}
+
+.edit-input-small.border-red-500:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
 }
 
 /* Botón de edición circular mejorado */

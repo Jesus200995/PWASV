@@ -20,7 +20,7 @@
           <h1 class="text-base font-bold text-gray-800 modern-title">{{ user.nombre_completo }}</h1>
           <div class="green-line mx-auto mb-2"></div>
           <p class="text-xs text-gray-600">{{ user.cargo }}</p>
-          <p class="text-xs text-gray-500 mt-1">{{ user.email }}</p>
+          <p class="text-xs text-gray-500 mt-1">{{ user.correo || user.email }}</p>
         </div>
       </div>
 
@@ -42,7 +42,7 @@
           
           <div class="glass-info-row flex justify-between items-center py-1">
             <span class="text-xs font-medium text-gray-600">Email:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.email }}</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.correo || user.email }}</span>
           </div>
           
           <div class="glass-info-row flex justify-between items-center py-1">
@@ -51,6 +51,21 @@
           </div>
           
           <div class="glass-info-row flex justify-between items-center py-1">
+            <span class="text-xs font-medium text-gray-600">Supervisor:</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.supervisor || 'No asignado' }}</span>
+          </div>
+          
+          <div class="glass-info-row flex justify-between items-center py-1">
+            <span class="text-xs font-medium text-gray-600">CURP:</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.curp || 'No registrado' }}</span>
+          </div>
+          
+          <div class="glass-info-row flex justify-between items-center py-1">
+            <span class="text-xs font-medium text-gray-600">Teléfono:</span>
+            <span class="text-xs text-gray-800 font-semibold">{{ user.telefono || 'No registrado' }}</span>
+          </div>
+          
+          <div v-if="user.fecha_registro" class="glass-info-row flex justify-between items-center py-1">
             <span class="text-xs font-medium text-gray-600">Fecha de registro:</span>
             <span class="text-xs text-gray-800 font-semibold">{{ formatDate(user.fecha_registro) }}</span>
           </div>

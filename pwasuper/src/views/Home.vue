@@ -1,15 +1,22 @@
 <template>
-  <div class="page-container py-4">
-    <!-- Sistema de Asistencia Integrado -->
-    <div class="card mb-6">
-      <div class="text-center mb-4">
-        <h2 class="text-xl font-bold text-gray-800 mb-2">Registra tu asistencia</h2>
-        <p class="text-sm text-gray-500">
-          {{ modoAsistencia ? 'Completa los datos para ' + (tipoAsistencia === 'entrada' ? 'marcar entrada' : 'marcar salida') : 'Marca tu entrada y salida del día' }}
-        </p>
-      </div>
+  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col p-4 relative overflow-hidden">
+    <!-- Elementos decorativos para mejorar el efecto de vidrio -->
+    <div class="absolute inset-0">
+      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
+      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
+    </div>
 
-      <!-- Botones de Asistencia (solo visibles cuando no está en modo asistencia) -->
+    <div class="page-container w-full max-w-md mx-auto relative z-10 py-4">
+      <!-- Sistema de Asistencia Integrado -->
+      <div class="glass-card mb-6">
+        <div class="text-center mb-4">
+          <h2 class="text-xl font-bold text-gray-800 mb-2 modern-title">Registra tu asistencia</h2>
+          <div class="green-line mx-auto mb-2"></div>
+          <p class="text-sm text-gray-500">
+            {{ modoAsistencia ? 'Completa los datos para ' + (tipoAsistencia === 'entrada' ? 'marcar entrada' : 'marcar salida') : 'Marca tu entrada y salida del día' }}
+          </p>
+        </div>      <!-- Botones de Asistencia (solo visibles cuando no está en modo asistencia) -->
       <div v-if="!modoAsistencia" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <!-- Botón Marcar Entrada -->
         <button
@@ -121,16 +128,15 @@
       </div>
     </div>
 
-    <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
-    <div v-if="modoAsistencia" class="card mb-4">
-      <div class="text-center mb-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-2">
-          {{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}
-        </h2>
-        <p class="text-sm text-gray-500">Completa todos los datos requeridos</p>
-      </div>
-      
-      <!-- Info del usuario -->
+      <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
+      <div v-if="modoAsistencia" class="glass-card mb-4">
+        <div class="text-center mb-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-2 modern-title">
+            {{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}
+          </h2>
+          <div class="green-line mx-auto mb-2"></div>
+          <p class="text-sm text-gray-500">Completa todos los datos requeridos</p>
+        </div>      <!-- Info del usuario -->
       <div class="bg-primary/10 rounded-lg p-3 mb-6">
         <div class="flex items-center">
           <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
@@ -154,9 +160,8 @@
           type="button"
           @click="getUbicacion"
           :disabled="obteniendoUbicacion"
-          class="w-full mb-4 flex items-center justify-center px-3 py-2 text-sm font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+          class="glass-button w-full mb-4 flex items-center justify-center px-3 py-2 text-sm font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
           :class="{'opacity-50 cursor-not-allowed': obteniendoUbicacion}"
-          style="background: linear-gradient(135deg, #87CEEB 0%, #1E40AF 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); animation: pulse-subtle 2s infinite;"
         >
           <div v-if="obteniendoUbicacion" class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current mr-2"></div>
           <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -220,7 +225,7 @@
         <textarea
           v-model="descripcion"
           rows="3"
-          class="form-input"
+          class="glass-input w-full"
           :placeholder="'Describe el lugar donde ' + (tipoAsistencia === 'entrada' ? 'inicias' : 'terminas') + ' tu jornada...'"
         ></textarea>
       </div>
@@ -229,7 +234,7 @@
       <div class="flex gap-3">
         <button
           @click="cancelarAsistencia"
-          class="btn btn-secondary flex-1"
+          class="glass-button-secondary flex-1"
         >
           Cancelar
         </button>
@@ -237,7 +242,7 @@
         <button
           @click="confirmarAsistencia"
           :disabled="!puedeEnviarAsistencia || enviandoAsistencia"
-          class="btn btn-primary flex-1 relative"
+          class="glass-button flex-1 relative"
           :class="{'opacity-50 cursor-not-allowed': !puedeEnviarAsistencia || enviandoAsistencia}"
         >
           <div v-if="enviandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
@@ -266,13 +271,13 @@
     </div>
 
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
-    <div v-if="!modoAsistencia" class="card mb-4">
+    <div v-if="!modoAsistencia" class="glass-card mb-4">
       <div class="text-center mb-6">
-        <h2 class="text-lg font-bold text-gray-800 mb-3">
+        <h2 class="text-lg font-bold text-gray-800 mb-3 modern-title">
           Registra tus actividades
         </h2>
         <!-- Línea tipo marcatextos -->
-        <div class="w-full h-1 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 rounded-full shadow-sm border border-orange-300 mb-3"></div>
+        <div class="green-line mx-auto mb-3"></div>
         <p class="text-sm text-gray-500">Captura tu ubicación actual para el registro</p>
       </div>
       
@@ -294,8 +299,7 @@
         <button
           type="button"
           @click="getUbicacionRegistro"
-          class="w-full mb-4 flex items-center justify-center px-3 py-2 text-sm font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-          style="background: linear-gradient(135deg, #87CEEB 0%, #1E40AF 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); animation: pulse-subtle 2s infinite;"
+          class="glass-button w-full mb-4 flex items-center justify-center px-3 py-2 text-sm font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -380,7 +384,7 @@
             v-model="descripcionRegistro"
             id="descripcionRegistro"
             rows="3"
-            class="form-input"
+            class="glass-input w-full"
             placeholder="Describe el lugar o añade notas..."
           ></textarea>
         </div>
@@ -389,7 +393,7 @@
         <button
           type="submit"
           :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || enviando"
-          :class="['btn w-full', !latitudRegistro || !longitudRegistro || !fotoRegistro || enviando ? 'bg-gray-400 cursor-not-allowed' : 'btn-primary']"
+          :class="['glass-button w-full', !latitudRegistro || !longitudRegistro || !fotoRegistro || enviando ? 'opacity-50 cursor-not-allowed' : '']"
         >
           <span v-if="enviando" class="flex items-center justify-center">
             <svg
@@ -434,8 +438,9 @@
     </transition>
 
     <!-- Historial reciente (solo cuando no está en modo asistencia) -->
-    <div v-if="historial.length > 0 && !modoAsistencia" class="card">
-      <h3 class="text-lg font-semibold text-gray-800 mb-3">Registros recientes</h3>
+    <div v-if="historial.length > 0 && !modoAsistencia" class="glass-card">
+      <h3 class="text-lg font-semibold text-gray-800 mb-3 modern-title">Registros recientes</h3>
+      <div class="green-line mb-4"></div>
       <div class="space-y-3">
         <div
           v-for="(r, i) in historial.slice(0, 3)"
@@ -480,7 +485,7 @@
       <div class="text-center mt-4">
         <router-link
           to="/historial"
-          class="text-sm text-primary hover:underline"
+          class="text-sm text-primary hover:underline glass-link"
         >
           Ver todos los registros &rarr;
         </router-link>
@@ -494,6 +499,7 @@
       :message="modalMessage"
       @close="closeSuccessModal"
     />
+    </div>
   </div>
 </template>
 
@@ -1739,6 +1745,398 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.bounce-enter-active {
+  animation: bounce-in 0.5s;
+}
+.bounce-leave-active {
+  animation: bounce-in 0.5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.animate-shake {
+  animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Efecto de vidrio realista - Glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: all 0.6s;
+}
+
+.glass-card:hover::before {
+  left: 150%;
+}
+
+.glass-input {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 0.875rem;
+  color: #1f2937;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 16px 0 rgba(31, 38, 135, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  min-height: 36px;
+  padding: 0.75rem;
+}
+
+.glass-input:focus {
+  outline: none;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 0 0 3px rgba(76, 175, 80, 0.1),
+    0 8px 25px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.glass-input::placeholder {
+  color: rgba(75, 85, 99, 0.6);
+}
+
+.glass-button {
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(76, 175, 80, 0.8) 0%, 
+    rgba(56, 142, 60, 0.8) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px 0 rgba(76, 175, 80, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glass-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px 0 rgba(76, 175, 80, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(76, 175, 80, 0.9) 0%, 
+    rgba(56, 142, 60, 0.9) 100%);
+}
+
+.glass-button:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 
+    0 4px 15px 0 rgba(76, 175, 80, 0.3),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.glass-button:hover::before {
+  left: 100%;
+}
+
+.glass-button-secondary {
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(156, 163, 175, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(156, 163, 175, 0.6) 0%, 
+    rgba(107, 114, 128, 0.6) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px 0 rgba(156, 163, 175, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glass-button-secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px 0 rgba(156, 163, 175, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+}
+
+.glass-button-action {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.05) 100%);
+}
+
+.glass-button-action:hover:not(:disabled) {
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+}
+
+.glass-link {
+  position: relative;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.glass-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4CAF50, #81C784);
+  transition: width 0.3s ease;
+  border-radius: 1px;
+}
+
+.glass-link:hover::after {
+  width: 100%;
+}
+
+.modern-title {
+  background: linear-gradient(
+    90deg, 
+    #166534 0%, 
+    #15803d 25%, 
+    #86efac 50%, 
+    #15803d 75%, 
+    #166534 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-wave 3s ease-in-out infinite;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  letter-spacing: -0.015em;
+  font-weight: 500;
+  position: relative;
+}
+
+.green-line {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, #16a34a, #22c55e, #16a34a);
+  border-radius: 1px;
+  animation: line-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes gradient-wave {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes line-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.3);
+    opacity: 0.8;
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+    opacity: 1;
+  }
+}
+
+/* Animación para elementos decorativos */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+/* Respaldo para navegadores que no soportan background-clip: text */
+@supports not (-webkit-background-clip: text) {
+  .modern-title {
+    color: #166534;
+    animation: none;
+  }
+}
+
+/* Mejoras de responsividad para pantallas móviles */
+@media (max-width: 480px) {
+  .page-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .glass-card {
+    padding: 1rem;
+    margin: 0 0.25rem;
+  }
+  
+  .glass-input {
+    font-size: 14px; /* Evita zoom en iOS */
+    min-height: 36px;
+  }
+  
+  .text-xl {
+    font-size: 1.125rem;
+  }
+  
+  .text-lg {
+    font-size: 1rem;
+  }
+}
+
+@media (max-height: 600px) {
+  .page-container {
+    max-width: 320px;
+  }
+  
+  .glass-card {
+    padding: 1rem;
+  }
+}
+
+@media (max-height: 500px) {
+  .glass-card {
+    padding: 0.875rem;
+  }
+}
+
+/* Para pantallas muy pequeñas como iPhone SE */
+@media (max-width: 375px) and (max-height: 667px) {
+  .page-container {
+    max-width: 300px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .glass-card {
+    padding: 0.875rem;
+  }
+  
+  .glass-input {
+    font-size: 14px;
+    min-height: 34px;
+  }
+}
+
+/* Para pantallas grandes */
+@media (min-width: 768px) {
+  .page-container {
+    max-width: 380px;
+  }
+  
+  .glass-card {
+    padding: 1.5rem;
+  }
+}
+
+/* Soporte adicional para navegadores que no soportan backdrop-filter */
+@supports not (backdrop-filter: blur(20px)) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  
+  .glass-input {
+    background: rgba(255, 255, 255, 0.7);
+  }
+  
+  .glass-button {
+    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+  }
+  
+  .glass-button-secondary {
+    background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%);
+  }
 }
 
 /* Animación sutil para el botón de ubicación */

@@ -1,33 +1,31 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-6">
-      <!-- Botón de regreso -->
-      <div class="flex justify-start mb-4">
-        <button @click="goBackToLogin" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 shadow-sm">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          Volver al Login
-        </button>
+  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4 relative overflow-hidden">
+    <!-- Elementos decorativos para mejorar el efecto de vidrio -->
+    <div class="absolute inset-0">
+      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
+      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="page-container w-full max-w-md relative z-10 px-2">
+      <!-- Back to Login Link - Top Left -->
+      <div class="flex justify-start mb-3">
+        <router-link to="/login" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
+          ← Volver al inicio de sesión
+        </router-link>
       </div>
 
-      <div class="text-center">
-        <h2 class="text-center text-3xl md:text-4xl font-light text-gray-800 tracking-wide leading-tight">
-          Crear cuenta
-        </h2>
-        <!-- Línea verde decorativa -->
-        <div class="mx-auto mt-3 w-16 h-0.5 bg-gradient-to-r from-green-400 to-green-600 rounded-full"></div>
-        <p class="mt-2 text-center text-sm text-gray-600" style="display: none;">
-          Servidor: <span class="font-mono text-xs" :class="currentApiUrl.includes('localhost') ? 'text-blue-600' : 'text-green-600'">
-            {{ currentApiUrl }}
-          </span>
-        </p>
+      <!-- Header Section -->
+      <div class="text-center mb-4">
+        <h1 class="text-lg font-bold text-primary mb-1 text-center glass-title">Crear Cuenta</h1>
+        <h2 class="text-base font-semibold text-gray-700">Registro</h2>
+        <p class="mt-1 text-gray-500 text-xs">Completa los datos para crear tu cuenta</p>
       </div>
-      
-      <!-- Modal de éxito -->
-      <transition name="modal">
+
+      <!-- Success Message -->
+      <transition name="bounce">
         <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.5);">
-          <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+          <div class="glass-card max-w-md w-full mx-4 transform transition-all">
             <div class="p-6 text-center">
               <!-- Icono de éxito animado -->
               <div class="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center animate-bounce">
@@ -48,7 +46,7 @@
               </div>
               
               <!-- Botón opcional -->
-              <button @click="goToLogin" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+              <button @click="goToLogin" class="glass-button">
                 Ir al Login
               </button>
             </div>
@@ -56,273 +54,341 @@
         </div>
       </transition>
 
-      <!-- Mensajes de error (solo errores ahora) -->
-      <transition name="fade">
-        <div v-if="message.text && message.type === 'error'" class="border-l-4 p-4 rounded bg-red-100 border-red-500 text-red-700" role="alert">
-          <p>{{ message.text }}</p>
+      <!-- Error Message -->
+      <transition name="bounce">
+        <div v-if="message.text && message.type === 'error'" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-sm mb-4" role="alert">
+          <p class="flex items-center text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            {{ message.text }}
+          </p>
         </div>
       </transition>
 
-      <form class="mt-8 space-y-4" @submit.prevent="register" @keydown.enter="handleEnterKey">
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
-          <input v-model="form.email" id="email" name="email" type="email" autocomplete="email" required 
-            class="mt-1 form-input" />
-        </div>
-        
-        <div>
-          <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre completo</label>
-          <input v-model="form.nombre" id="nombre" name="nombre" type="text" required 
-            class="mt-1 form-input" />
-        </div>
-        
-        <div>
-          <label for="cargo" class="block text-sm font-medium text-gray-700">Cargo</label>
-          <input v-model="form.cargo" id="cargo" name="cargo" type="text" required 
-            class="mt-1 form-input" />
-        </div>
-        
-        <div>
-          <label for="curp" class="block text-sm font-medium text-gray-700">CURP *</label>
-          <input v-model="form.curp" @input="formatCurp" id="curp" name="curp" type="text" required
-            maxlength="18" placeholder="18 caracteres en mayúsculas"
-            class="mt-1 form-input uppercase tracking-wide" />
-          <p v-if="curpError" class="mt-1 text-sm text-red-600">{{ curpError }}</p>
-          <p class="mt-1 text-xs text-gray-500">La CURP debe contener exactamente 18 caracteres en mayúsculas</p>
-          <p v-if="curpWarning" class="mt-1 text-xs text-yellow-600">{{ curpWarning }}</p>
-        </div>
-        
-        <div>
-          <label for="supervisor" class="block text-sm font-medium text-gray-700">Supervisor</label>
-          <input v-model="form.supervisor" id="supervisor" name="supervisor" type="text" 
-            class="mt-1 form-input" />
-        </div>
-        
-        <div>
-          <label for="telefono" class="block text-sm font-medium text-gray-700">Número de teléfono *</label>
-          <div class="flex mt-1 space-x-2">
-            <!-- Selector de código de país -->
-            <div class="relative">
-              <button 
-                type="button"
-                @click="showCountrySelector = !showCountrySelector"
-                class="flex items-center px-3 py-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors min-w-[100px] justify-between"
-              >
-                <div class="flex items-center">
-                  <span class="text-sm mr-1">{{ paises.find(p => p.codigo === form.codigoPais)?.bandera || '🌎' }}</span>
-                  <span class="text-sm font-medium">{{ form.codigoPais }}</span>
+      <!-- Register Form -->
+      <div class="glass-card">
+
+        <form @submit.prevent="register" @keydown.enter="handleEnterKey">
+          <div class="space-y-3">
+            <div>
+              <label for="email" class="block text-xs font-medium text-gray-800 mb-1">Correo electrónico</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                  </svg>
                 </div>
-                <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-              </button>
-              
-              <!-- Dropdown para selección de país -->
-              <div 
-                v-if="showCountrySelector" 
-                class="absolute z-50 w-72 top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-hidden"
-              >
-                <!-- Barra de búsqueda -->
-                <div class="sticky top-0 bg-white p-2 border-b border-gray-200">
-                  <input 
-                    type="text"
-                    v-model="countrySearch"
-                    placeholder="Buscar país..."
-                    class="w-full px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    @click="$event.stopPropagation()"
-                  />
-                </div>
-                
-                <ul class="py-1 max-h-60 overflow-y-auto">
-                  <li 
-                    v-for="pais in filteredCountries" 
-                    :key="pais.codigo"
-                    @click="selectCountry(pais)"
-                    class="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
-                  >
-                    <span class="text-lg mr-3">{{ pais.bandera }}</span>
-                    <span class="flex-1">{{ pais.nombre }}</span>
-                    <span class="text-gray-500 font-mono text-sm">{{ pais.codigo }}</span>
-                  </li>
-                  <li v-if="filteredCountries.length === 0" class="px-3 py-2 text-gray-500 text-center">
-                    No se encontraron países
-                  </li>
-                </ul>
+                <input 
+                  v-model="form.email" 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  autocomplete="email" 
+                  required 
+                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
+                  placeholder="nombre@ejemplo.com" 
+                />
               </div>
             </div>
             
-            <!-- Campo de entrada del número -->
-            <div class="flex-1">
-              <input 
-                v-model="form.telefono" 
-                id="telefono" 
-                name="telefono" 
-                type="tel" 
-                required
-                maxlength="10"
-                pattern="[0-9]{10}"
-                placeholder="10 dígitos" 
-                class="form-input w-full"
-                @input="validatePhone"
-              />
-            </div>
-          </div>
-          <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
-        </div>
-        
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-          <div class="relative mt-1">
-            <input 
-              v-model="form.password" 
-              id="password" 
-              name="password" 
-              :type="showPassword ? 'text' : 'password'" 
-              required 
-              class="form-input pr-10" 
-            />
-            <button 
-              type="button"
-              @click="showPassword = !showPassword"
-              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none"
-            >
-              <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        <div>
-          <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar contraseña</label>
-          <div class="relative mt-1">
-            <input 
-              v-model="form.confirmPassword" 
-              id="confirmPassword" 
-              name="confirmPassword" 
-              :type="showConfirmPassword ? 'text' : 'password'" 
-              required 
-              class="form-input pr-10" 
-            />
-            <button 
-              type="button"
-              @click="showConfirmPassword = !showConfirmPassword"
-              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none"
-            >
-              <svg v-if="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- AVISO DE PRIVACIDAD -->
-        <div class="mt-6 mb-4">
-          <div class="border border-gray-300 rounded-md bg-gray-50">
-            <div class="p-4">
-              <h3 class="font-bold text-orange-600 mb-2 text-lg bg-gradient-to-r from-yellow-200 to-yellow-100 px-3 py-2 rounded-lg shadow-sm border border-yellow-300">
-                Aviso de Privacidad
-              </h3>
-              <div class="max-h-64 overflow-y-auto text-sm text-gray-700 space-y-2 pr-2">
-                <div class="font-semibold">AVISO DE PRIVACIDAD PARA EL REGISTRO Y USO DE INFORMACIÓN DE LOS TÉCNICOS DEL PROGRAMA SEMBRANDO VIDA MEDIANTE APLICACIÓN MÓVIL OFICIAL</div>
-                
-                <p>En cumplimiento con lo dispuesto por la Ley General de Transparencia y Acceso a la Información pública y la Ley Federal de Transparencia y Acceso a la Información Pública, se informa a las y los Técnico(a)s del Programa Sembrando Vida que los datos personales recabados serán tratados conforme a los siguientes términos:</p>
-                
-                <div class="font-semibold">1. Identidad y domicilio del responsable</div>
-                <p>El responsable del tratamiento de los datos personales es la Secretaría de Bienestar, Subsecretaria de Inclusión Productiva y Desarrollo Rural con domicilio en: Av. P.º de la Reforma 116, Juárez, Cuauhtémoc, 06600 Ciudad de México, CDMX.</p>
-                
-                <div class="font-semibold">2. Datos personales que se recaban</div>
-                <ul class="list-disc pl-4 space-y-1">
-                  <li>Nombre completo</li>
-                  <li>CURP</li>
-                  <li>Número telefónico</li>
-                  <li>Correo electrónico</li>
-                  <li>Cargo y supervisor asignado</li>
-                  <li>Datos de localización geográfica precisa, capturados a través de coordenadas (latitud y longitud), correspondientes a los sitios donde el titular realiza actividades dentro del Programa.</li>
-                  <li>Actividades realizadas en campo dentro del Programa</li>
-                  <li>Fotografías de las actividades realizadas</li>
-                </ul>
-                
-                <div class="font-semibold">3. Finalidades del tratamiento</div>
-                <p>Los datos personales mencionados serán recabados y registrados a través de la aplicación móvil oficial del Programa Sembrando Vida y serán utilizados exclusivamente para:</p>
-                <ul class="list-disc pl-4 space-y-1">
-                  <li>Registrar las actividades de los técnicos en campo.</li>
-                  <li>Documentar el avance, seguimiento y diagnóstico de la implementación del Programa Sembrando Vida.</li>
-                  <li>Elaborar reportes y análisis internos sobre el desempeño operativo del programa.</li>
-                </ul>
-                <p>Los datos no serán utilizados con fines publicitarios, comerciales ni compartidos con terceros sin el consentimiento previo del titular, salvo las excepciones previstas en la ley.</p>
-                
-                <div class="font-semibold">4. Transferencias de datos personales</div>
-                <p>Los datos recabados no serán transferidos a terceros sin el consentimiento del titular, salvo en los casos expresamente autorizados por la ley.</p>
-                
-                <div class="font-semibold">5. Medios para ejercer derechos ARCO</div>
-                <p>Usted tiene derecho a Acceder, Rectificar, Cancelar u Oponerse (ARCO) al tratamiento de sus datos personales. Para ejercer estos derechos, puede presentar una solicitud al correo electrónico: info@sembrandodatos.com, o acudir al domicilio mencionado en el punto 1.</p>
-                
-                <div class="font-semibold">6. Medidas de seguridad</div>
-                <p>Se informa que los datos personales serán tratados bajo estrictas medidas de seguridad administrativas, técnicas y físicas que garanticen su confidencialidad e integridad.</p>
-                
-                <div class="font-semibold">7. Cambios al aviso de privacidad</div>
-                <p>Este Aviso de Privacidad puede ser modificado. Las actualizaciones estarán disponibles en https://app.sembrandodatos.com.</p>
-                
-                <div class="font-semibold">Fecha de última actualización: 12 de agosto del 2025.</div>
-                
-                <p class="font-semibold text-blue-800">Al proporcionar mis datos personales, acepto el tratamiento conforme al Aviso de Privacidad.</p>
-              </div>
-            </div>
-          </div>
-          
-          <!-- CHECKBOX OBLIGATORIO -->
-          <div class="mt-4">
-            <div class="flex items-start">
-              <div class="flex items-center h-5">
+            <div>
+              <label for="nombre" class="block text-xs font-medium text-gray-800 mb-1">Nombre completo</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
                 <input 
-                  v-model="termsAccepted" 
-                  @change="clearTermsError"
-                  id="terms" 
-                  name="terms" 
-                  type="checkbox" 
-                  class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  required
+                  v-model="form.nombre" 
+                  id="nombre" 
+                  name="nombre" 
+                  type="text" 
+                  required 
+                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
+                  placeholder="Nombre completo" 
                 />
               </div>
-              <div class="ml-3 text-sm">
-                <label for="terms" class="font-medium text-gray-700">
-                  He leído y acepto el Aviso de Privacidad y los Términos y Condiciones. <span class="text-red-500">*</span>
-                </label>
+            </div>
+            
+            <div>
+              <label for="cargo" class="block text-xs font-medium text-gray-800 mb-1">Cargo</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="form.cargo" 
+                  id="cargo" 
+                  name="cargo" 
+                  type="text" 
+                  required 
+                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
+                  placeholder="Tu cargo" 
+                />
               </div>
             </div>
-            <p v-if="termsError" class="mt-1 text-sm text-red-600">{{ termsError }}</p>
-          </div>
-        </div>
+            
+            <div>
+              <label for="curp" class="block text-xs font-medium text-gray-800 mb-1">CURP *</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="form.curp" 
+                  @input="formatCurp" 
+                  id="curp" 
+                  name="curp" 
+                  type="text" 
+                  required
+                  maxlength="18" 
+                  placeholder="18 caracteres en mayúsculas"
+                  class="glass-input w-full pl-9 pr-3 py-2 text-sm uppercase tracking-wide" 
+                />
+              </div>
+              <p v-if="curpError" class="mt-1 text-xs text-red-600">{{ curpError }}</p>
+              <p class="mt-1 text-xs text-gray-500">La CURP debe contener exactamente 18 caracteres en mayúsculas</p>
+              <p v-if="curpWarning" class="mt-1 text-xs text-green-600">{{ curpWarning }}</p>
+            </div>
+            
+            <div>
+              <label for="supervisor" class="block text-xs font-medium text-gray-800 mb-1">Supervisor</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="form.supervisor" 
+                  id="supervisor" 
+                  name="supervisor" 
+                  type="text" 
+                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
+                  placeholder="Nombre del supervisor (opcional)" 
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label for="telefono" class="block text-xs font-medium text-gray-800 mb-1">Número de teléfono *</label>
+              <div class="flex space-x-2">
+                <!-- Selector de código de país -->
+                <div class="relative">
+                  <button 
+                    type="button"
+                    @click="showCountrySelector = !showCountrySelector"
+                    class="glass-input flex items-center px-2 py-2 min-w-[80px] justify-between text-sm"
+                  >
+                    <div class="flex items-center">
+                      <span class="text-xs mr-1">{{ paises.find(p => p.codigo === form.codigoPais)?.bandera || '🌎' }}</span>
+                      <span class="text-xs font-medium">{{ form.codigoPais }}</span>
+                    </div>
+                    <svg class="w-3 h-3 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </button>
+                  
+                  <!-- Dropdown para selección de país -->
+                  <div 
+                    v-if="showCountrySelector" 
+                    class="absolute z-50 w-64 top-full left-0 mt-1 bg-white/90 backdrop-filter backdrop-blur-lg border border-white/20 rounded-lg shadow-xl overflow-hidden"
+                  >
+                    <!-- Barra de búsqueda -->
+                    <div class="sticky top-0 bg-white/80 backdrop-filter backdrop-blur-lg p-2 border-b border-white/20">
+                      <input 
+                        type="text"
+                        v-model="countrySearch"
+                        placeholder="Buscar país..."
+                        class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        @click="$event.stopPropagation()"
+                      />
+                    </div>
+                    
+                    <ul class="py-1 max-h-48 overflow-y-auto">
+                      <li 
+                        v-for="pais in filteredCountries" 
+                        :key="pais.codigo"
+                        @click="selectCountry(pais)"
+                        class="flex items-center px-2 py-1 hover:bg-white/20 cursor-pointer transition-colors"
+                      >
+                        <span class="text-sm mr-2">{{ pais.bandera }}</span>
+                        <span class="flex-1 text-xs">{{ pais.nombre }}</span>
+                        <span class="text-gray-500 font-mono text-xs">{{ pais.codigo }}</span>
+                      </li>
+                      <li v-if="filteredCountries.length === 0" class="px-2 py-1 text-gray-500 text-center text-xs">
+                        No se encontraron países
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <!-- Campo de entrada del número -->
+                <div class="flex-1">
+                  <input 
+                    v-model="form.telefono" 
+                    id="telefono" 
+                    name="telefono" 
+                    type="tel" 
+                    required
+                    maxlength="10"
+                    pattern="[0-9]{10}"
+                    placeholder="10 dígitos" 
+                    class="glass-input w-full py-2 px-3 text-sm"
+                    @input="validatePhone"
+                  />
+                </div>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
+            </div>
+            
+            <div>
+              <label for="password" class="block text-xs font-medium text-gray-800 mb-1">Contraseña</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="form.password" 
+                  id="password" 
+                  name="password" 
+                  :type="showPassword ? 'text' : 'password'" 
+                  required 
+                  class="glass-input w-full pl-9 pr-9 py-2 text-sm" 
+                  placeholder="••••••••" 
+                  minlength="6"
+                />
+                <button
+                  type="button"
+                  @click="togglePasswordVisibility"
+                  class="absolute inset-y-0 right-0 flex items-center pr-2 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
+                >
+                  <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
+            </div>
 
-        <div>
-          <button type="submit" :disabled="loading || !termsAccepted" 
-            class="mt-4 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
-            :class="loading || !termsAccepted ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary'">
-            <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <div>
+              <label for="confirmPassword" class="block text-xs font-medium text-gray-800 mb-1">Confirmar contraseña</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="form.confirmPassword" 
+                  id="confirmPassword" 
+                  name="confirmPassword" 
+                  :type="showConfirmPassword ? 'text' : 'password'" 
+                  required 
+                  class="glass-input w-full pl-9 pr-9 py-2 text-sm" 
+                  placeholder="Confirmar contraseña" 
+                  minlength="6"
+                />
+                <button
+                  type="button"
+                  @click="toggleConfirmPasswordVisibility"
+                  class="absolute inset-y-0 right-0 flex items-center pr-2 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
+                >
+                  <svg v-if="showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- AVISO DE PRIVACIDAD -->
+          <div class="mt-4 mb-3">
+            <div class="glass-card-inner">
+              <div class="p-3">
+                <h3 class="font-bold text-orange-600 mb-2 text-base bg-gradient-to-r from-yellow-200/80 to-yellow-100/80 px-2 py-1 rounded-lg shadow-sm border border-yellow-300/50 backdrop-filter backdrop-blur-sm">
+                  Aviso de Privacidad
+                </h3>
+                <div class="max-h-32 overflow-y-auto text-xs text-gray-700 space-y-1 pr-2">
+                  <div class="font-semibold">AVISO DE PRIVACIDAD PARA EL REGISTRO Y USO DE INFORMACIÓN DE LOS TÉCNICOS DEL PROGRAMA SEMBRANDO VIDA MEDIANTE APLICACIÓN MÓVIL OFICIAL</div>
+                  
+                  <p>En cumplimiento con lo dispuesto por la Ley General de Transparencia y Acceso a la Información pública y la Ley Federal de Transparencia y Acceso a la Información Pública, se informa a las y los Técnico(a)s del Programa Sembrando Vida que los datos personales recabados serán tratados conforme a los siguientes términos:</p>
+                  
+                  <div class="font-semibold">1. Identidad y domicilio del responsable</div>
+                  <p>El responsable del tratamiento de los datos personales es la Secretaría de Bienestar, Subsecretaria de Inclusión Productiva y Desarrollo Rural con domicilio en: Av. P.º de la Reforma 116, Juárez, Cuauhtémoc, 06600 Ciudad de México, CDMX.</p>
+                  
+                  <div class="font-semibold">2. Datos personales que se recaban</div>
+                  <ul class="list-disc pl-4 space-y-1">
+                    <li>Nombre completo, CURP, Número telefónico, Correo electrónico</li>
+                    <li>Cargo y supervisor asignado</li>
+                    <li>Datos de localización geográfica precisa, capturados a través de coordenadas</li>
+                    <li>Actividades realizadas en campo y fotografías</li>
+                  </ul>
+                  
+                  <div class="font-semibold">3. Finalidades del tratamiento</div>
+                  <p>Los datos serán utilizados exclusivamente para registrar actividades de técnicos, documentar avances del programa y elaborar reportes internos.</p>
+                  
+                  <div class="font-semibold">Fecha de última actualización: 12 de agosto del 2025.</div>
+                  
+                  <p class="font-semibold text-blue-800">Al proporcionar mis datos personales, acepto el tratamiento conforme al Aviso de Privacidad.</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- CHECKBOX OBLIGATORIO -->
+            <div class="mt-3">
+              <div class="flex items-start">
+                <div class="flex items-center h-4">
+                  <input 
+                    v-model="termsAccepted" 
+                    @change="clearTermsError"
+                    id="terms" 
+                    name="terms" 
+                    type="checkbox" 
+                    class="focus:ring-green-500 h-3 w-3 text-green-600 border-gray-300 rounded"
+                    required
+                  />
+                </div>
+                <div class="ml-2 text-xs">
+                  <label for="terms" class="font-medium text-gray-700">
+                    He leído y acepto el Aviso de Privacidad y los Términos y Condiciones. <span class="text-red-500">*</span>
+                  </label>
+                </div>
+              </div>
+              <p v-if="termsError" class="mt-1 text-xs text-red-600">{{ termsError }}</p>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            :disabled="loading || !termsAccepted" 
+            class="glass-button w-full mt-4 flex items-center justify-center py-2 text-sm"
+            :class="{ 'opacity-50 cursor-not-allowed': loading || !termsAccepted }"
+          >
+            <svg v-if="loading" class="animate-spin h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            {{ loading ? 'Registrando...' : termsAccepted ? 'Registrarme' : 'Debes aceptar los términos' }}
+            <span>{{ loading ? 'Registrando...' : termsAccepted ? 'Registrarme' : 'Debes aceptar los términos' }}</span>
           </button>
-        </div>
-      </form>
-
-      <div class="text-center">
-        <p class="text-sm text-gray-600">
-          ¿Ya tienes cuenta?
-          <router-link to="/login" class="font-medium text-primary hover:text-primary/80">
-            Iniciar sesión
-          </router-link>
-        </p>      </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -370,17 +436,7 @@ const paises = [
   { codigo: '+51', nombre: 'Perú', bandera: '🇵🇪' },
   { codigo: '+591', nombre: 'Bolivia', bandera: '🇧🇴' },
   { codigo: '+502', nombre: 'Guatemala', bandera: '🇬🇹' },
-  { codigo: '+503', nombre: 'El Salvador', bandera: '🇸🇻' },
-  { codigo: '+504', nombre: 'Honduras', bandera: '🇭🇳' },
-  { codigo: '+506', nombre: 'Costa Rica', bandera: '🇨🇷' },
-  { codigo: '+507', nombre: 'Panamá', bandera: '🇵🇦' },
-  { codigo: '+58', nombre: 'Venezuela', bandera: '🇻🇪' },
-  { codigo: '+593', nombre: 'Ecuador', bandera: '🇪🇨' },
-  { codigo: '+595', nombre: 'Paraguay', bandera: '🇵🇾' },
-  { codigo: '+598', nombre: 'Uruguay', bandera: '🇺🇾' },
-  { codigo: '+55', nombre: 'Brasil', bandera: '🇧🇷' },
-  { codigo: '+505', nombre: 'Nicaragua', bandera: '🇳🇮' },
-  { codigo: '+1', nombre: 'Canadá', bandera: '🇨🇦' }
+  { codigo: '+503', nombre: 'El Salvador', bandera: '🇸🇻' }
 ];
 
 const showCountrySelector = ref(false);
@@ -402,7 +458,6 @@ onMounted(async () => {
     message.text = getOfflineMessage();
     message.type = 'error';
   } else {
-    // Obtener la URL actual del servicio API
     try {
       await apiService.refreshApiUrl();
       currentApiUrl.value = apiService.getCurrentApiUrl();
@@ -411,13 +466,22 @@ onMounted(async () => {
       console.warn('Error inicializando servicio API:', error);
     }
   }
+
+  document.addEventListener('click', closeCountrySelector);
+  document.addEventListener('keydown', handleEscKey);
 });
 
+function togglePasswordVisibility() {
+  showPassword.value = !showPassword.value;
+}
+
+function toggleConfirmPasswordVisibility() {
+  showConfirmPassword.value = !showConfirmPassword.value;
+}
+
 async function register() {
-  // Validar datos incluyendo términos
   if (!validateForm()) return;
   
-  // Verificar conexión a internet
   isOnline.value = await checkInternetConnection();
   if (!isOnline.value) {
     message.text = getOfflineMessage();
@@ -425,14 +489,12 @@ async function register() {
     return;
   }
   
-  // Prevenir múltiples envíos
   if (loading.value) return;
   
   loading.value = true;
   message.text = '';
   
   try {
-    // Crear payload con CURP y teléfono obligatorios (concatenando código país + número)
     const telefonoCompleto = `${form.codigoPais}${form.telefono.trim()}`;
     const payload = {
       correo: form.email,
@@ -446,22 +508,17 @@ async function register() {
     
     console.log('📤 Enviando payload:', payload);
     
-    // Usar el servicio API que maneja automáticamente la mejor URL
     const response = await apiService.createUser(payload);
     
     console.log('✅ Respuesta del servidor:', response);
     
-    // Actualizar la URL mostrada
     currentApiUrl.value = apiService.getCurrentApiUrl();
     
-    // Mostrar modal de éxito en lugar del mensaje
     showSuccessModal.value = true;
     
-    // Redirigir después de 3 segundos
     setTimeout(() => {
       router.push('/login');
     }, 3000);
-    
     
   } catch (error) {
     console.error('Error de registro:', error);
@@ -497,13 +554,11 @@ async function register() {
 }
 
 function validateForm() {
-  // Limpiar errores previos
   curpError.value = '';
   curpWarning.value = '';
   termsError.value = '';
   message.text = '';
   
-  // Verificar aceptación de términos
   if (!termsAccepted.value) {
     termsError.value = 'Debes aceptar el Aviso de Privacidad para continuar';
     message.text = 'Debes aceptar el Aviso de Privacidad para continuar';
@@ -511,7 +566,6 @@ function validateForm() {
     return false;
   }
   
-  // Verificar CURP obligatoria
   if (!form.curp || !form.curp.trim()) {
     curpError.value = 'La CURP es obligatoria';
     message.text = 'Por favor completa todos los campos obligatorios';
@@ -519,14 +573,12 @@ function validateForm() {
     return false;
   }
   
-  // Verificar teléfono obligatorio
   if (!form.telefono || !form.telefono.trim()) {
     message.text = 'El número de teléfono es obligatorio';
     message.type = 'error';
     return false;
   }
   
-  // Validación de formato de teléfono (exactamente 10 dígitos)
   if (!/^\d{10}$/.test(form.telefono.trim())) {
     message.text = 'El número de teléfono debe contener exactamente 10 dígitos';
     message.type = 'error';
@@ -541,7 +593,6 @@ function validateForm() {
     return false;
   }
   
-  // Validación básica de formato CURP (solo letras y números)
   const curpRegex = /^[A-Z0-9]{18}$/;
   if (!curpRegex.test(curpClean)) {
     curpError.value = 'La CURP solo debe contener letras mayúsculas y números';
@@ -550,21 +601,18 @@ function validateForm() {
     return false;
   }
   
-  // Verificar que las contraseñas coincidan
   if (form.password !== form.confirmPassword) {
     message.text = 'Las contraseñas no coinciden';
     message.type = 'error';
     return false;
   }
   
-  // Verificar que la contraseña tenga al menos 6 caracteres
   if (form.password.length < 6) {
     message.text = 'La contraseña debe tener al menos 6 caracteres';
     message.type = 'error';
     return false;
   }
   
-  // Verificar formato de correo electrónico
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(form.email)) {
     message.text = 'Por favor ingresa un correo electrónico válido';
@@ -576,10 +624,8 @@ function validateForm() {
 }
 
 function formatCurp() {
-  // Convertir a mayúsculas automáticamente
   form.curp = form.curp.toUpperCase();
   
-  // Limpiar errores cuando el usuario empiece a escribir
   if (curpError.value) {
     curpError.value = '';
   }
@@ -590,7 +636,6 @@ function formatCurp() {
     termsError.value = '';
   }
   
-  // Validación en tiempo real
   if (form.curp.length > 0 && form.curp.length < 18) {
     curpError.value = `Faltan ${18 - form.curp.length} caracteres`;
   } else if (form.curp.length === 18) {
@@ -604,26 +649,20 @@ function formatCurp() {
   }
 }
 
-// Función para validar que el teléfono solo contiene números
 function validatePhone() {
-  // Eliminar cualquier carácter que no sea un número
   form.telefono = form.telefono.replace(/\D/g, '');
   
-  // Limitar a 10 dígitos
   if (form.telefono.length > 10) {
     form.telefono = form.telefono.slice(0, 10);
   }
 }
 
-// Función para seleccionar un país
 function selectCountry(pais) {
   form.codigoPais = pais.codigo;
   showCountrySelector.value = false;
 }
 
-// Cerrar el selector de país al hacer clic fuera
 function closeCountrySelector(e) {
-  // Si el clic fue dentro del botón de selección o en el dropdown, no cerramos
   if (e.target.closest('button') && e.target.closest('button').contains(document.querySelector('svg')) || 
       e.target.closest('div') && e.target.closest('div').querySelector && e.target.closest('div').querySelector('input[placeholder="Buscar país..."]')) {
     return;
@@ -631,25 +670,11 @@ function closeCountrySelector(e) {
   showCountrySelector.value = false;
 }
 
-// Cerrar el selector si se presiona la tecla ESC
 function handleEscKey(event) {
   if (event.key === 'Escape' && showCountrySelector.value) {
     showCountrySelector.value = false;
   }
 }
-
-// Agregar event listeners en un solo onMounted
-onMounted(() => {
-  // Agregar listeners
-  document.addEventListener('click', closeCountrySelector);
-  document.addEventListener('keydown', handleEscKey);
-  
-  // Retornar función de limpieza para remover listeners cuando el componente se desmonte
-  return () => {
-    document.removeEventListener('click', closeCountrySelector);
-    document.removeEventListener('keydown', handleEscKey);
-  };
-});
 
 function clearTermsError() {
   if (termsError.value) {
@@ -661,7 +686,6 @@ function clearTermsError() {
 }
 
 function handleEnterKey(event) {
-  // Prevenir envío del formulario si no se han aceptado los términos
   if (!termsAccepted.value) {
     event.preventDefault();
     termsError.value = 'Debes aceptar el Aviso de Privacidad para continuar';
@@ -674,94 +698,9 @@ function goToLogin() {
   showSuccessModal.value = false;
   router.push('/login');
 }
-
-function goBackToLogin() {
-  router.push('/login');
-}
 </script>
 
 <style scoped>
-/* Tipografía profesional para el título */
-h2 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-weight: 300;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
-}
-
-/* Estilos para los íconos de mostrar/ocultar contraseña */
-.form-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-/* Mejora visual de los botones de contraseña */
-button[type="button"]:hover svg {
-  transform: scale(1.1);
-  transition: transform 0.2s ease-in-out;
-}
-
-button[type="button"]:active svg {
-  transform: scale(0.95);
-}
-
-/* Estilos para el botón de regreso */
-.inline-flex {
-  backdrop-filter: blur(10px);
-}
-
-.inline-flex:hover svg {
-  transform: translateX(-2px);
-  transition: transform 0.2s ease-in-out;
-}
-
-/* Efecto hover para la línea verde */
-.bg-gradient-to-r:hover {
-  transform: scaleX(1.1);
-  transition: transform 0.3s ease-in-out;
-}
-
-/* Mejora visual del gradiente */
-.bg-gradient-to-r {
-  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
-  transition: all 0.3s ease-in-out;
-}
-
-/* Responsividad mejorada */
-@media (max-width: 640px) {
-  h2 {
-    font-size: 1.875rem;
-    line-height: 2.25rem;
-  }
-  
-  .py-6 {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-  }
-  
-  /* Mejorar botón de regreso en móviles */
-  .inline-flex {
-    font-size: 0.875rem;
-    padding: 0.5rem 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  h2 {
-    font-size: 1.75rem;
-    line-height: 2rem;
-  }
-}
-
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s;
 }
@@ -769,58 +708,279 @@ button[type="button"]:active svg {
   opacity: 0;
 }
 
-.uppercase {
-  text-transform: uppercase;
+.bounce-enter-active {
+  animation: bounce-in 0.5s;
+}
+.bounce-leave-active {
+  animation: bounce-in 0.5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-.tracking-wide {
-  letter-spacing: 0.025em;
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.animate-shake {
+  animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Efecto de vidrio realista - Glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: all 0.6s;
+}
+
+.glass-card:hover::before {
+  left: 150%;
+}
+
+.glass-card-inner {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 4px 16px 0 rgba(31, 38, 135, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-input {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 0.875rem;
+  color: #1f2937;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 16px 0 rgba(31, 38, 135, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  min-height: 36px;
+}
+
+.glass-input:focus {
+  outline: none;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 0 0 3px rgba(76, 175, 80, 0.1),
+    0 8px 25px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.glass-input::placeholder {
+  color: rgba(75, 85, 99, 0.6);
+}
+
+.glass-button {
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(76, 175, 80, 0.8) 0%, 
+    rgba(56, 142, 60, 0.8) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px 0 rgba(76, 175, 80, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glass-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px 0 rgba(76, 175, 80, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(76, 175, 80, 0.9) 0%, 
+    rgba(56, 142, 60, 0.9) 100%);
+}
+
+.glass-button:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 
+    0 4px 15px 0 rgba(76, 175, 80, 0.3),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.glass-button:hover::before {
+  left: 100%;
+}
+
+.glass-link {
+  position: relative;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.glass-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4CAF50, #81C784);
+  transition: width 0.3s ease;
+  border-radius: 1px;
+}
+
+.glass-link:hover::after {
+  width: 100%;
+}
+
+.glass-title {
+  color: #2e7d32;
+  text-shadow: 
+    0 1px 2px rgba(46, 125, 50, 0.3),
+    0 0 8px rgba(46, 125, 50, 0.2);
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.3));
+  position: relative;
+}
+
+.glass-title::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.2) 0%, 
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Estilos específicos para los botones del ojo */
+button[type="button"] {
+  background: transparent !important;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  transition: all 0.2s ease;
+  box-shadow: none !important;
+}
+
+button[type="button"]:focus {
+  outline: none;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+button[type="button"]:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+button[type="button"] svg {
+  transition: all 0.2s ease;
+}
+
+button[type="button"]:hover svg {
+  transform: scale(1.1);
 }
 
 /* Estilos para el scroll del aviso de privacidad */
-.max-h-64.overflow-y-auto::-webkit-scrollbar {
+.max-h-40.overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }
 
-.max-h-64.overflow-y-auto::-webkit-scrollbar-track {
-  background: #f1f5f9;
+.max-h-40.overflow-y-auto::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.5);
   border-radius: 3px;
 }
 
-.max-h-64.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+.max-h-40.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.8);
   border-radius: 3px;
 }
 
-.max-h-64.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+.max-h-40.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
 }
 
 /* Mejoras visuales para el checkbox */
 input[type="checkbox"]:checked {
-  background-color: #2563eb;
-  border-color: #2563eb;
-}
-
-/* Transiciones para botón deshabilitado */
-button {
-  transition: all 0.2s ease-in-out;
-}
-
-/* Animaciones para el modal */
-.modal-enter-active, .modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-.modal-enter-from, .modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-active .bg-white, .modal-leave-active .bg-white {
-  transition: all 0.3s ease;
-}
-.modal-enter-from .bg-white, .modal-leave-to .bg-white {
-  transform: scale(0.8) translateY(-50px);
-  opacity: 0;
+  background-color: #10b981;
+  border-color: #10b981;
 }
 
 /* Animación de la barra de progreso */
@@ -833,36 +993,99 @@ button {
   animation: progress 3s linear forwards;
 }
 
-/* Animación del bounce mejorada */
-.animate-bounce {
-  animation: bounce 1s infinite;
+.uppercase {
+  text-transform: uppercase;
 }
 
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
-    transform: translate3d(0,0,0);
-  }
-  40%, 43% {
-    transform: translate3d(0, -15px, 0);
-  }
-  70% {
-    transform: translate3d(0, -7px, 0);
-  }
-  90% {
-    transform: translate3d(0, -2px, 0);
-  }
+.tracking-wide {
+  letter-spacing: 0.025em;
 }
 
-/* Estilos para el selector de país */
-.dropdown-input:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: -2px;
-}
-
-/* Mejoras para el selector en móviles */
-@media (max-width: 640px) {
+/* Mejoras de responsividad para pantallas móviles */
+@media (max-width: 480px) {
+  .page-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .glass-card {
+    padding: 1rem;
+    margin: 0 0.25rem;
+  }
+  
+  .glass-input {
+    font-size: 14px; /* Evita zoom en iOS */
+    min-height: 36px;
+  }
+  
+  .text-lg {
+    font-size: 1rem;
+  }
+  
+  .text-base {
+    font-size: 0.875rem;
+  }
+  
   .w-64 {
-    max-width: 80vw;
+    max-width: 75vw;
+  }
+}
+
+@media (max-height: 600px) {
+  .page-container {
+    max-width: 320px;
+  }
+  
+  .text-center.mb-4 {
+    margin-bottom: 0.75rem;
+  }
+  
+  .glass-card {
+    padding: 1rem;
+  }
+}
+
+/* Para pantallas muy pequeñas como iPhone SE */
+@media (max-width: 375px) and (max-height: 667px) {
+  .page-container {
+    max-width: 300px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .glass-card {
+    padding: 0.875rem;
+  }
+  
+  .glass-input {
+    font-size: 14px;
+    min-height: 34px;
+  }
+}
+
+/* Para pantallas grandes */
+@media (min-width: 768px) {
+  .page-container {
+    max-width: 420px;
+  }
+  
+  .glass-card {
+    padding: 1.5rem;
+  }
+}
+
+/* Soporte adicional para navegadores que no soportan backdrop-filter */
+@supports not (backdrop-filter: blur(20px)) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  
+  .glass-input {
+    background: rgba(255, 255, 255, 0.7);
+  }
+  
+  .glass-card-inner {
+    background: rgba(255, 255, 255, 0.7);
   }
 }
 </style>

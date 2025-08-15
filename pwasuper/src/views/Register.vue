@@ -23,32 +23,57 @@
       </div>
 
       <!-- Success Message -->
-      <transition name="bounce">
-        <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.5);">
-          <div class="glass-card max-w-md w-full mx-4 transform transition-all">
-            <div class="p-6 text-center">
+      <transition name="modal-fade">
+        <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div class="success-modal-card w-full max-w-sm mx-4 transform transition-all duration-500 animate-bounce-in">
+            <div class="p-6 text-center relative overflow-hidden">
+              
+              <!-- Elementos decorativos de fondo -->
+              <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-400 via-emerald-300 to-teal-400"></div>
+                <div class="absolute -top-4 -right-4 w-16 h-16 bg-white/20 rounded-full animate-pulse"></div>
+                <div class="absolute -bottom-2 -left-2 w-12 h-12 bg-green-400/30 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+              </div>
+
               <!-- Icono de éxito animado -->
-              <div class="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center animate-bounce">
-                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              <div class="relative z-10 mx-auto mb-4 w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg animate-success-icon">
+                <div class="absolute inset-0 bg-gradient-to-br from-green-300 to-emerald-400 rounded-full animate-ping opacity-20"></div>
+                <svg class="w-10 h-10 text-white animate-check-draw" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" class="check-path"></path>
                 </svg>
               </div>
               
               <!-- Título -->
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">¡Registro Exitoso!</h3>
+              <h3 class="relative z-10 text-xl font-bold text-green-600 mb-2 animate-slide-up">¡Registro Exitoso!</h3>
               
               <!-- Mensaje -->
-              <p class="text-gray-600 mb-4">Tu cuenta ha sido creada correctamente. Serás redirigido al login en unos segundos.</p>
+              <p class="relative z-10 text-gray-700 mb-6 text-sm leading-relaxed animate-slide-up" style="animation-delay: 0.2s;">
+                Tu cuenta ha sido creada correctamente.<br>
+                <span class="text-green-600 font-medium">Serás redirigido al login...</span>
+              </p>
               
-              <!-- Barra de progreso -->
-              <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
-                <div class="bg-green-500 h-2 rounded-full animate-progress" style="animation-duration: 3s;"></div>
+              <!-- Barra de progreso mejorada -->
+              <div class="relative z-10 w-full bg-gray-200 rounded-full h-2 mb-6 overflow-hidden animate-slide-up" style="animation-delay: 0.4s;">
+                <div class="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full animate-progress-fill shadow-sm relative">
+                  <div class="absolute inset-0 bg-white/30 animate-shimmer"></div>
+                </div>
               </div>
               
-              <!-- Botón opcional -->
-              <button @click="goToLogin" class="glass-button">
-                Ir al Login
+              <!-- Botón mejorado -->
+              <button @click="goToLogin" class="relative z-10 success-button animate-slide-up" style="animation-delay: 0.6s;">
+                <span class="relative z-10">Ir al Login Ahora</span>
+                <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
+
+              <!-- Confeti animado -->
+              <div class="absolute inset-0 pointer-events-none">
+                <div class="confetti-1"></div>
+                <div class="confetti-2"></div>
+                <div class="confetti-3"></div>
+                <div class="confetti-4"></div>
+                <div class="confetti-5"></div>
+                <div class="confetti-6"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1117,6 +1142,262 @@ input[type="checkbox"]:checked {
   animation: progress 3s linear forwards;
 }
 
+/* Nuevas animaciones para el modal de éxito */
+.success-modal-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  box-shadow: 
+    0 20px 40px rgba(16, 185, 129, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.success-modal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.6), transparent);
+  animation: scan 2s infinite;
+}
+
+@keyframes scan {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.success-button {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  min-width: 140px;
+}
+
+.success-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.success-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.success-button:focus {
+  outline: 2px solid #059669;
+  outline-offset: 2px;
+}
+
+/* Animaciones específicas para el modal de éxito */
+@keyframes bounce-in-success {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-100px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05) translateY(0);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes success-icon {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+@keyframes check-draw {
+  0% {
+    stroke-dasharray: 0 50;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dasharray: 50 0;
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progress-fill {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Confeti animado */
+.confetti-1, .confetti-2, .confetti-3, .confetti-4, .confetti-5, .confetti-6 {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: confetti-fall 3s linear infinite;
+}
+
+.confetti-1 {
+  background: #10b981;
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 2.5s;
+}
+
+.confetti-2 {
+  background: #34d399;
+  left: 20%;
+  animation-delay: 0.3s;
+  animation-duration: 3s;
+}
+
+.confetti-3 {
+  background: #ffffff;
+  left: 80%;
+  animation-delay: 0.6s;
+  animation-duration: 2.8s;
+}
+
+.confetti-4 {
+  background: #059669;
+  left: 90%;
+  animation-delay: 0.9s;
+  animation-duration: 3.2s;
+}
+
+.confetti-5 {
+  background: #6ee7b7;
+  left: 50%;
+  animation-delay: 0.2s;
+  animation-duration: 2.7s;
+}
+
+.confetti-6 {
+  background: #d1fae5;
+  left: 70%;
+  animation-delay: 0.5s;
+  animation-duration: 3.1s;
+}
+
+/* Clases de animación */
+.animate-bounce-in {
+  animation: bounce-in-success 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-success-icon {
+  animation: success-icon 1s ease-out 0.3s both;
+}
+
+.animate-check-draw {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: check-draw 0.8s ease-out 0.8s both;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out both;
+}
+
+.animate-progress-fill {
+  animation: progress-fill 3s ease-out;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Transiciones del modal */
+.modal-fade-enter-active, .modal-fade-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-fade-enter-from {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+.modal-fade-leave-to {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+.modal-fade-enter-active .success-modal-card,
+.modal-fade-leave-active .success-modal-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-fade-enter-from .success-modal-card {
+  transform: scale(0.8) translateY(-100px);
+  opacity: 0;
+}
+
+.modal-fade-leave-to .success-modal-card {
+  transform: scale(0.8) translateY(100px);
+  opacity: 0;
+}
+
 .uppercase {
   text-transform: uppercase;
 }
@@ -1152,6 +1433,28 @@ input[type="checkbox"]:checked {
   
   .w-64 {
     max-width: 75vw;
+  }
+  
+  /* Responsividad específica para el modal de éxito */
+  .success-modal-card {
+    margin: 16px;
+    max-width: calc(100vw - 32px);
+    border-radius: 20px;
+  }
+  
+  .success-modal-card .p-6 {
+    padding: 20px;
+  }
+  
+  .success-button {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-width: 120px;
+  }
+  
+  .confetti-1, .confetti-2, .confetti-3, .confetti-4, .confetti-5, .confetti-6 {
+    width: 4px;
+    height: 4px;
   }
 }
 
@@ -1210,6 +1513,35 @@ input[type="checkbox"]:checked {
   
   .glass-card-inner {
     background: rgba(255, 255, 255, 0.7);
+  }
+  
+  .success-modal-card {
+    background: rgba(255, 255, 255, 0.95);
+  }
+}
+
+/* Mejoras en accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce-in,
+  .animate-success-icon,
+  .animate-check-draw,
+  .animate-slide-up,
+  .animate-progress-fill,
+  .animate-shimmer,
+  .confetti-1,
+  .confetti-2,
+  .confetti-3,
+  .confetti-4,
+  .confetti-5,
+  .confetti-6 {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  
+  .modal-fade-enter-active,
+  .modal-fade-leave-active,
+  .success-button {
+    transition-duration: 0.01ms !important;
   }
 }
 </style>

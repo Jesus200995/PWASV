@@ -8,8 +8,54 @@
     </div>
 
     <div class="page-container w-full max-w-lg mx-auto relative z-10 py-2 sm:py-3 space-y-4">
+      <!-- Botones de selección de sección -->
+      <div v-if="!modoAsistencia" class="glass-card">
+        <div class="text-center mb-4">
+          <h1 class="text-xl font-bold text-gray-800 mb-3 modern-title">Panel de Registro</h1>
+          <div class="green-line mx-auto mb-4"></div>
+          <p class="text-xs text-gray-500 mb-4">Selecciona el tipo de registro que deseas realizar</p>
+          
+          <!-- Botones de navegación entre secciones -->
+          <div class="flex gap-2 section-nav-container p-1 rounded-full">
+            <button
+              @click="seccionActiva = 'asistencia'"
+              :class="[
+                'section-nav-button flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300',
+                seccionActiva === 'asistencia' 
+                  ? 'active bg-green-500 text-white shadow-lg' 
+                  : 'text-gray-600 hover:bg-white/30'
+              ]"
+            >
+              <div class="flex items-center justify-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Asistencia</span>
+              </div>
+            </button>
+            
+            <button
+              @click="seccionActiva = 'actividades'"
+              :class="[
+                'section-nav-button flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300',
+                seccionActiva === 'actividades' 
+                  ? 'active bg-blue-500 text-white shadow-lg' 
+                  : 'text-gray-600 hover:bg-white/30'
+              ]"
+            >
+              <div class="flex items-center justify-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>Actividades</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Sistema de Asistencia Integrado -->
-      <div class="glass-card">
+      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" class="glass-card">
         <div class="text-center mb-3">
           <h2 class="text-lg font-bold text-gray-800 mb-2 modern-title">Registra tu asistencia</h2>
           <div class="green-line mx-auto mb-2"></div>
@@ -270,10 +316,10 @@
           </span>
         </div>
       </div>
-    </div>
+      </div>
 
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
-    <div v-if="!modoAsistencia" class="glass-card">
+    <div v-if="seccionActiva === 'actividades' && !modoAsistencia" class="glass-card">
       <div class="text-center mb-4">
         <h2 class="text-lg font-bold text-gray-800 mb-2 modern-title">
           Registra tus actividades
@@ -439,8 +485,8 @@
       </div>
     </transition>
 
-    <!-- Historial reciente (solo cuando no está en modo asistencia) -->
-    <div v-if="historial.length > 0 && !modoAsistencia" class="glass-card">
+    <!-- Historial reciente (solo cuando no está en modo asistencia y sección actividades está activa) -->
+    <div v-if="historial.length > 0 && !modoAsistencia && seccionActiva === 'actividades'" class="glass-card">
       <h3 class="text-base font-semibold text-gray-800 mb-2 modern-title">Registros recientes</h3>
       <div class="green-line mb-3"></div>
       <div class="space-y-2">
@@ -555,6 +601,9 @@ const router = useRouter();
 const isOnline = ref(true);
 const showModal = ref(false);
 const modalMessage = ref('');
+
+// Control de secciones activas
+const seccionActiva = ref('asistencia'); // 'asistencia' o 'actividades'
 
 // Obtener información del usuario del localStorage
 const user = computed(() => {
@@ -2203,5 +2252,42 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   position: relative;
   z-index: 2;
   margin-bottom: 1rem !important;
+}
+
+/* Estilos para botones de navegación entre secciones */
+.section-nav-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.section-nav-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.section-nav-button:hover::before {
+  left: 100%;
+}
+
+.section-nav-button.active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.section-nav-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 4px 16px 0 rgba(31, 38, 135, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 }
 </style>

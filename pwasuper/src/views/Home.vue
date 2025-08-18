@@ -178,10 +178,10 @@
         <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
         <div v-if="modoAsistencia" class="mt-6 border-t border-gray-200 pt-6">
           <div class="text-center mb-4">
-            <h2 class="text-lg font-bold text-gray-800 mb-2 modern-title">
-              {{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}
+            <h2 class="text-lg font-bold text-gray-800 mb-2"
+                :class="tipoAsistencia === 'entrada' ? 'entrada-title' : 'salida-title'">
+              {{ tipoAsistencia === 'entrada' ? 'ENTRADA' : 'SALIDA' }}
             </h2>
-            <div class="green-line mx-auto mb-2"></div>
             <p class="text-xs text-gray-500">Completa todos los datos requeridos</p>
           </div>
           
@@ -2061,6 +2061,49 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 
 .glass-link:hover::after {
   width: 100%;
+}
+
+/* Estilos para títulos de entrada y salida con franja de fondo */
+.entrada-title {
+  color: #166534;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  position: relative;
+  padding: 0.75rem 1.5rem;
+  margin: -0.75rem -1.25rem 0.5rem -1.25rem;
+  background: linear-gradient(
+    135deg, 
+    rgba(22, 163, 74, 0.15) 0%,    /* Verde fuerte suave en bordes */
+    rgba(34, 197, 94, 0.10) 25%,   /* Verde medio muy suave */
+    rgba(134, 239, 172, 0.08) 50%, /* Verde suave en el centro */
+    rgba(34, 197, 94, 0.10) 75%,   /* Verde medio muy suave */
+    rgba(22, 163, 74, 0.15) 100%   /* Verde fuerte suave en bordes */
+  );
+  border-left: 4px solid rgba(22, 163, 74, 0.6);
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.1);
+}
+
+.salida-title {
+  color: #991b1b;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  position: relative;
+  padding: 0.75rem 1.5rem;
+  margin: -0.75rem -1.25rem 0.5rem -1.25rem;
+  background: linear-gradient(
+    135deg, 
+    rgba(220, 38, 38, 0.15) 0%,    /* Rojo fuerte suave en bordes */
+    rgba(239, 68, 68, 0.10) 25%,   /* Rojo medio muy suave */
+    rgba(252, 165, 165, 0.08) 50%, /* Rojo suave en el centro */
+    rgba(239, 68, 68, 0.10) 75%,   /* Rojo medio muy suave */
+    rgba(220, 38, 38, 0.15) 100%   /* Rojo fuerte suave en bordes */
+  );
+  border-left: 4px solid rgba(220, 38, 38, 0.6);
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
 }
 
 .modern-title {

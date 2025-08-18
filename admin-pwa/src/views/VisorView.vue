@@ -27,18 +27,6 @@
               <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
             </div>
             
-            <!-- Animación de carga automática -->
-            <div class="auto-refresh-animation">
-              <div class="loading-dots">
-                <span class="loading-text">Actualizando</span>
-                <div class="dots-container">
-                  <div class="dot dot-1"></div>
-                  <div class="dot dot-2"></div>
-                  <div class="dot dot-3"></div>
-                </div>
-              </div>
-            </div>
-            
             <!-- Contador de puntos en el mapa con efecto de cristal líquido -->
             <div class="lcd-counter">
               <div class="lcd-display">
@@ -478,10 +466,7 @@ const mostrarSugerencias = ref(false)
 const sugerenciasUsuarios = ref([])
 const sugerenciaSeleccionada = ref(-1)
 
-// Auto-refresh
-const autoRefreshInterval = ref(null)
-const nextUpdateTime = ref(null)
-const timeRemaining = ref(120) // 2 minutos en segundos
+// Variables de tiempo para sugerencias solamente
 const timeoutSugerencias = ref(null)
 
 // Registro seleccionado y estado del panel de detalles
@@ -1867,32 +1852,10 @@ const manejarTeclaEscape = (event) => {
   }
 }
 
-// Funciones de auto-refresh
-const iniciarAutoRefresh = () => {
-  // Actualizar cada 2 minutos (120000 ms)
-  autoRefreshInterval.value = setInterval(() => {
-    console.log('🌱 Auto-actualizando mapa...')
-    cargarRegistros()
-  }, 120000) // 2 minutos
-  
-  // Establecer próxima actualización
-  nextUpdateTime.value = new Date(Date.now() + 120000)
-}
-
-const detenerAutoRefresh = () => {
-  if (autoRefreshInterval.value) {
-    clearInterval(autoRefreshInterval.value)
-    autoRefreshInterval.value = null
-  }
-}
-
 // Ciclo de vida
 onMounted(() => {
   // Cargar registros y después inicializar el mapa
   cargarRegistros()
-  
-  // Iniciar auto-refresh
-  iniciarAutoRefresh()
   
   // Agregar listener para tecla Escape
   document.addEventListener('keydown', manejarTeclaEscape)
@@ -1908,9 +1871,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Detener auto-refresh
-  detenerAutoRefresh()
-  
   // Limpiar listeners de redimensionamiento
   window.removeEventListener('resize', recalcularPalitos)
   
@@ -2322,92 +2282,6 @@ watch([filtroTipo, filtroPeriodo], () => {
   transition: all 0.1s ease;
 }
 
-/* Animación de carga automática - MÁS COMPACTA */
-.auto-refresh-animation {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.2rem, 0.6vw, 0.25rem);
-  padding: clamp(0.2rem, 0.6vw, 0.25rem) clamp(0.4rem, 1.2vw, 0.6rem);
-  border-radius: clamp(10px, 1.5vw, 12px);
-  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
-  font-weight: 500;
-  white-space: nowrap;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.auto-refresh-animation:hover {
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
-}
-
-.loading-dots {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.2rem, 0.6vw, 0.25rem);
-}
-
-.loading-text {
-  font-family: 'Inter', 'Poppins', sans-serif;
-  color: rgba(255, 255, 255, 0.95);
-  font-size: clamp(0.6rem, 1.2vw, 0.7rem);
-  font-weight: 500;
-  white-space: nowrap;
-  letter-spacing: 0.2px;
-}
-
-.dots-container {
-  display: flex;
-  align-items: center;
-  gap: clamp(2px, 0.6vw, 3px);
-}
-
-.dot {
-  width: clamp(3px, 0.8vw, 4px);
-  height: clamp(3px, 0.8vw, 4px);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.8);
-  position: relative;
-  animation: modernDotPulse 1.5s ease-in-out infinite;
-  transform-origin: center;
-  box-shadow: 
-    0 1px 2px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.dot-1 {
-  animation-delay: 0s;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.dot-2 {
-  animation-delay: 0.5s;
-  background: rgba(255, 255, 255, 0.8);
-}
-
-.dot-3 {
-  animation-delay: 1s;
-  background: rgba(255, 255, 255, 0.7);
-}
-
-/* Animación moderna para los puntos */
-@keyframes modernDotPulse {
-  0%, 60%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  30% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-}
-
-/* Eliminar animaciones antiguas - ya no se usan */
-
 /* Animación del botón de recarga */
 .refresh-icon.spinning {
   animation: spinGlow 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -2450,15 +2324,6 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 /* Header actions */
-
-.refresh-icon.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 
 /* Contenido principal */
 .page-content {

@@ -2080,7 +2080,7 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 
 /* Estilos para títulos de entrada y salida con franja de fondo */
 .entrada-title {
-  color: #166534;
+  color: #80D600;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   letter-spacing: -0.01em;
   font-weight: 700;
@@ -2089,15 +2089,15 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   margin: -0.75rem -1.25rem 0.5rem -1.25rem;
   background: linear-gradient(
     135deg, 
-    rgba(22, 163, 74, 0.15) 0%,    /* Verde fuerte suave en bordes */
-    rgba(34, 197, 94, 0.10) 25%,   /* Verde medio muy suave */
-    rgba(134, 239, 172, 0.08) 50%, /* Verde suave en el centro */
-    rgba(34, 197, 94, 0.10) 75%,   /* Verde medio muy suave */
-    rgba(22, 163, 74, 0.15) 100%   /* Verde fuerte suave en bordes */
+    rgba(128, 214, 0, 0.15) 0%,    /* Verde #80D600 suave en bordes */
+    rgba(128, 214, 0, 0.10) 25%,   /* Verde #80D600 muy suave */
+    rgba(128, 214, 0, 0.08) 50%,   /* Verde #80D600 suave en el centro */
+    rgba(128, 214, 0, 0.10) 75%,   /* Verde #80D600 muy suave */
+    rgba(128, 214, 0, 0.15) 100%   /* Verde #80D600 suave en bordes */
   );
-  border-left: 4px solid rgba(22, 163, 74, 0.6);
+  border-left: 4px solid rgba(128, 214, 0, 0.6);
   border-radius: 0 8px 8px 0;
-  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.1);
+  box-shadow: 0 2px 8px rgba(128, 214, 0, 0.1);
 }
 
 .salida-title {

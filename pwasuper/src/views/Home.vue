@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col p-4 relative overflow-hidden">
+  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col p-2 sm:p-3 relative overflow-hidden">
     <!-- Elementos decorativos para mejorar el efecto de vidrio -->
     <div class="absolute inset-0">
       <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
@@ -7,36 +7,36 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
 
-    <div class="page-container w-full max-w-md mx-auto relative z-10 py-4 space-y-6">
+    <div class="page-container w-full max-w-lg mx-auto relative z-10 py-2 sm:py-3 space-y-4">
       <!-- Sistema de Asistencia Integrado -->
       <div class="glass-card">
-        <div class="text-center mb-4">
-          <h2 class="text-xl font-bold text-gray-800 mb-2 modern-title">Registra tu asistencia</h2>
+        <div class="text-center mb-3">
+          <h2 class="text-lg font-bold text-gray-800 mb-2 modern-title">Registra tu asistencia</h2>
           <div class="green-line mx-auto mb-2"></div>
-          <p class="text-sm text-gray-500">
+          <p class="text-xs text-gray-500">
             {{ modoAsistencia ? 'Completa los datos para ' + (tipoAsistencia === 'entrada' ? 'marcar entrada' : 'marcar salida') : 'Marca tu entrada y salida del día' }}
           </p>
         </div>
 
         <!-- Botones de Asistencia (solo visibles cuando no está en modo asistencia) -->
-        <div v-if="!modoAsistencia" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div v-if="!modoAsistencia" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         <!-- Botón Marcar Entrada -->
         <button
           @click="iniciarAsistencia('entrada')"
           :disabled="entradaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 transform"
+          class="relative overflow-hidden flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 transform"
           :class="{
             'bg-green-500 text-white shadow-lg hover:bg-green-600 hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
             'bg-gray-300 text-gray-500 cursor-not-allowed': entradaMarcada || verificandoAsistencia
           }"
         >
           <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
+            <div class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current"></div>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span class="font-semibold text-base">
+          <span class="font-semibold text-sm">
             <span v-if="asistenciaHoy && asistenciaHoy.entrada">
               Entrada: {{ formatearHora(asistenciaHoy.entrada) }}
             </span>
@@ -61,19 +61,19 @@
         <button
           @click="iniciarAsistencia('salida')"
           :disabled="!entradaMarcada || salidaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 transform"
+          class="relative overflow-hidden flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 transform"
           :class="{
             'bg-red-500 text-white shadow-lg hover:bg-red-600 hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
             'bg-gray-300 text-gray-500 cursor-not-allowed': !entradaMarcada || salidaMarcada || verificandoAsistencia
           }"
         >
           <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
+            <div class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current"></div>
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span class="font-semibold text-base">
+          <span class="font-semibold text-sm">
             <span v-if="asistenciaHoy && asistenciaHoy.salida">
               Salida: {{ formatearHora(asistenciaHoy.salida) }}
             </span>
@@ -98,8 +98,8 @@
 
         <!-- Advertencia sobre registro de asistencia -->
         <div v-if="!modoAsistencia" class="text-center mb-3">
-          <div class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-2 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
             <strong>Aviso:</strong> El registro de entrada marca el inicio oficial de su jornada laboral. Se recomienda marcar salida únicamente al finalizar sus actividades, ya que esto concluye formalmente su jornada del día.
@@ -107,22 +107,22 @@
         </div>
         
         <!-- Mensaje de estado de asistencia -->
-        <div v-if="mensajeAsistencia && !modoAsistencia" class="text-center mb-4">
+        <div v-if="mensajeAsistencia && !modoAsistencia" class="text-center mb-3">
         <div 
-          class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium"
+          class="inline-flex items-center px-3 py-2 rounded-full text-xs font-medium"
           :class="{
             'bg-green-100 text-green-800': mensajeAsistencia.includes('éxito') || mensajeAsistencia.includes('registrada'),
             'bg-red-100 text-red-800': mensajeAsistencia.includes('Error') || mensajeAsistencia.includes('error'),
             'bg-yellow-100 text-yellow-800': mensajeAsistencia.includes('Ya')
           }"
         >
-          <svg v-if="mensajeAsistencia.includes('éxito') || mensajeAsistencia.includes('registrada')" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-if="mensajeAsistencia.includes('éxito') || mensajeAsistencia.includes('registrada')" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
-          <svg v-else-if="mensajeAsistencia.includes('Error') || mensajeAsistencia.includes('error')" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-else-if="mensajeAsistencia.includes('Error') || mensajeAsistencia.includes('error')" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
           {{ mensajeAsistencia }}
@@ -132,41 +132,41 @@
 
       <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
       <div v-if="modoAsistencia" class="glass-card">
-        <div class="text-center mb-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-2 modern-title">
+        <div class="text-center mb-4">
+          <h2 class="text-lg font-bold text-gray-800 mb-2 modern-title">
             {{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}
           </h2>
           <div class="green-line mx-auto mb-2"></div>
-          <p class="text-sm text-gray-500">Completa todos los datos requeridos</p>
+          <p class="text-xs text-gray-500">Completa todos los datos requeridos</p>
         </div>      <!-- Info del usuario -->
-      <div class="bg-primary/10 rounded-lg p-3 mb-6">
+      <div class="bg-primary/10 rounded-lg p-2 mb-4">
         <div class="flex items-center">
-          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
-            <span class="text-white text-sm font-bold">{{ getUserInitials }}</span>
+          <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
+            <span class="text-white text-xs font-bold">{{ getUserInitials }}</span>
           </div>
           <div>
-            <p class="font-medium text-primary">{{ user.nombre_completo }}</p>
+            <p class="font-medium text-primary text-sm">{{ user.nombre_completo }}</p>
             <p class="text-xs text-gray-500">{{ user.cargo }}</p>
           </div>
         </div>
       </div>
 
       <!-- Paso 1: Ubicación -->
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-lg font-semibold text-gray-800">1. Ubicación</h3>
-          <span v-if="latitud && longitud" class="text-green-600 text-sm">✓ Completado</span>
+      <div class="mb-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-base font-semibold text-gray-800">1. Ubicación</h3>
+          <span v-if="latitud && longitud" class="text-green-600 text-xs">✓ Completado</span>
         </div>
         
         <button
           type="button"
           @click="getUbicacion"
           :disabled="obteniendoUbicacion"
-          class="glass-button w-full mb-4 flex items-center justify-center px-3 py-2 text-sm font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
+          class="glass-button w-full mb-3 flex items-center justify-center px-3 py-2 text-xs font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
           :class="{'opacity-50 cursor-not-allowed': obteniendoUbicacion}"
         >
-          <div v-if="obteniendoUbicacion" class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current mr-2"></div>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div v-if="obteniendoUbicacion" class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current mr-2"></div>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -174,34 +174,34 @@
         </button>
 
         <!-- Coordenadas -->
-        <div v-if="latitud && longitud" class="bg-green-50 border border-green-200 rounded-lg p-3">
-          <div class="grid grid-cols-2 gap-3">
+        <div v-if="latitud && longitud" class="bg-green-50 border border-green-200 rounded-lg p-2">
+          <div class="grid grid-cols-2 gap-2">
             <div>
               <p class="text-xs text-gray-500">Latitud</p>
-              <p class="font-mono text-sm font-medium text-gray-800">{{ latitud }}</p>
+              <p class="font-mono text-xs font-medium text-gray-800">{{ latitud }}</p>
             </div>
             <div>
               <p class="text-xs text-gray-500">Longitud</p>
-              <p class="font-mono text-sm font-medium text-gray-800">{{ longitud }}</p>
+              <p class="font-mono text-xs font-medium text-gray-800">{{ longitud }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Paso 2: Foto -->
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-lg font-semibold text-gray-800">2. Foto</h3>
-          <span v-if="foto" class="text-green-600 text-sm">✓ Completado</span>
+      <div class="mb-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-base font-semibold text-gray-800">2. Foto</h3>
+          <span v-if="foto" class="text-green-600 text-xs">✓ Completado</span>
         </div>
         
         <div class="flex items-center justify-center w-full">
-          <label class="flex flex-col w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100">
-            <div v-if="!foto" class="flex flex-col items-center justify-center pt-7">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <label class="flex flex-col w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100">
+            <div v-if="!foto" class="flex flex-col items-center justify-center pt-5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <p class="pt-1 text-sm text-gray-400">Selecciona una foto</p>
+              <p class="pt-1 text-xs text-gray-400">Selecciona una foto</p>
             </div>
             <div v-else class="flex items-center justify-center h-full">
               <img :src="foto" class="h-full object-contain" />
@@ -218,25 +218,25 @@
       </div>
 
       <!-- Paso 3: Descripción -->
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-lg font-semibold text-gray-800">3. Descripción/Notas</h3>
-          <span v-if="descripcion.trim()" class="text-green-600 text-sm">✓ Completado</span>
+      <div class="mb-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-base font-semibold text-gray-800">3. Descripción/Notas</h3>
+          <span v-if="descripcion.trim()" class="text-green-600 text-xs">✓ Completado</span>
         </div>
         
         <textarea
           v-model="descripcion"
-          rows="3"
-          class="glass-input w-full"
+          rows="2"
+          class="glass-input w-full text-xs"
           :placeholder="'Describe el lugar donde ' + (tipoAsistencia === 'entrada' ? 'inicias' : 'terminas') + ' tu jornada...'"
         ></textarea>
       </div>
 
       <!-- Botones de acción -->
-      <div class="flex gap-3">
+      <div class="flex gap-2">
         <button
           @click="cancelarAsistencia"
-          class="glass-button-secondary flex-1"
+          class="glass-button-secondary flex-1 text-xs py-2"
         >
           Cancelar
         </button>
@@ -244,11 +244,11 @@
         <button
           @click="confirmarAsistencia"
           :disabled="!puedeEnviarAsistencia || enviandoAsistencia"
-          class="glass-button flex-1 relative"
+          class="glass-button flex-1 relative text-xs py-2"
           :class="{'opacity-50 cursor-not-allowed': !puedeEnviarAsistencia || enviandoAsistencia}"
         >
           <div v-if="enviandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
           </div>
           <span>{{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}</span>
         </button>
@@ -274,23 +274,23 @@
 
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
     <div v-if="!modoAsistencia" class="glass-card">
-      <div class="text-center mb-6">
-        <h2 class="text-lg font-bold text-gray-800 mb-3 modern-title">
+      <div class="text-center mb-4">
+        <h2 class="text-lg font-bold text-gray-800 mb-2 modern-title">
           Registra tus actividades
         </h2>
         <!-- Línea tipo marcatextos -->
-        <div class="green-line mx-auto mb-3"></div>
-        <p class="text-sm text-gray-500">Captura tu ubicación actual para el registro</p>
+        <div class="green-line mx-auto mb-2"></div>
+        <p class="text-xs text-gray-500">Captura tu ubicación actual para el registro</p>
       </div>
       
       <!-- Info del usuario -->
-      <div class="bg-primary/10 rounded-lg p-3 mb-6">
+      <div class="bg-primary/10 rounded-lg p-2 mb-4">
         <div class="flex items-center">
-          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
-            <span class="text-white text-sm font-bold">{{ getUserInitials }}</span>
+          <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
+            <span class="text-white text-xs font-bold">{{ getUserInitials }}</span>
           </div>
           <div>
-            <p class="font-medium text-primary">{{ user.nombre_completo }}</p>
+            <p class="font-medium text-primary text-sm">{{ user.nombre_completo }}</p>
             <p class="text-xs text-gray-500">{{ user.cargo }}</p>
           </div>
         </div>
@@ -301,7 +301,7 @@
         <button
           type="button"
           @click="getUbicacionRegistro"
-          class="glass-button w-full mb-4 flex items-center justify-center px-3 py-2 text-sm font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
+          class="glass-button w-full mb-3 flex items-center justify-center px-3 py-2 text-xs font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -441,19 +441,19 @@
 
     <!-- Historial reciente (solo cuando no está en modo asistencia) -->
     <div v-if="historial.length > 0 && !modoAsistencia" class="glass-card">
-      <h3 class="text-lg font-semibold text-gray-800 mb-3 modern-title">Registros recientes</h3>
-      <div class="green-line mb-4"></div>
-      <div class="space-y-3">
+      <h3 class="text-base font-semibold text-gray-800 mb-2 modern-title">Registros recientes</h3>
+      <div class="green-line mb-3"></div>
+      <div class="space-y-2">
         <div
           v-for="(r, i) in historial.slice(0, 3)"
           :key="i"
-          class="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow relative"
+          class="border border-gray-200 rounded-lg p-2 hover:shadow-md transition-shadow relative"
           :class="{ 'border-orange-300 bg-orange-50': r.offline }"
         >
           <!-- Indicador de estado offline -->
-          <div v-if="r.offline" class="absolute top-2 right-2">
+          <div v-if="r.offline" class="absolute top-1 right-1">
             <div class="flex items-center text-orange-600 text-xs">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Pendiente
@@ -461,7 +461,7 @@
           </div>
           
           <div class="flex">
-            <div class="w-20 h-20 bg-gray-100 rounded overflow-hidden mr-3">
+            <div class="w-16 h-16 bg-gray-100 rounded overflow-hidden mr-2">
               <img
                 v-if="r.foto"
                 :src="r.foto"
@@ -470,7 +470,7 @@
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs text-gray-500">{{ r.fecha }}</p>
-              <p class="text-sm text-gray-800 truncate">
+              <p class="text-xs text-gray-800 truncate">
                 {{ r.descripcion || 'Sin descripción' }}
               </p>
               <p class="text-xs font-mono text-gray-600">
@@ -2054,13 +2054,14 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 /* Mejoras de responsividad para pantallas móviles */
 @media (max-width: 480px) {
   .page-container {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: 0.375rem;
+    padding-right: 0.375rem;
+    max-width: 100%;
   }
   
   .glass-card {
-    padding: 1rem;
-    margin: 0 0.25rem;
+    padding: 0.75rem;
+    margin: 0 0.125rem;
   }
   
   .glass-input {
@@ -2069,11 +2070,15 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   }
   
   .text-xl {
-    font-size: 1.125rem;
+    font-size: 1rem;
   }
   
   .text-lg {
-    font-size: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .text-base {
+    font-size: 0.8rem;
   }
 }
 
@@ -2096,11 +2101,28 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 /* Para pantallas muy pequeñas como iPhone SE */
 @media (max-width: 375px) and (max-height: 667px) {
   .page-container {
-    max-width: 300px;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    max-width: 100%;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
   }
   
+  .glass-card {
+    padding: 0.625rem;
+    margin: 0;
+  }
+}
+
+@media (max-height: 600px) {
+  .page-container {
+    max-width: 320px;
+  }
+  
+  .glass-card {
+    padding: 1rem;
+  }
+}
+
+@media (max-height: 500px) {
   .glass-card {
     padding: 0.875rem;
   }

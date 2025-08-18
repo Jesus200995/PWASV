@@ -526,12 +526,20 @@
       <div
         v-if="error"
         :class="isInfoMessage ? 
-          'mb-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded' : 
+          'mb-4 bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm' : 
           'mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded'"
         role="alert"
       >
-        <p class="font-bold">{{ isInfoMessage ? 'Información' : 'Error' }}</p>
-        <p>{{ error }}</p>
+        <p class="font-bold flex items-center">
+          <svg v-if="isInfoMessage" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          {{ isInfoMessage ? 'Información' : 'Error' }}
+        </p>
+        <p class="mt-1">{{ error }}</p>
       </div>
     </transition>
 
@@ -667,7 +675,29 @@ const user = computed(() => {
 
 // Determinar si el mensaje es de tipo información (sin conexión) o error
 const isInfoMessage = computed(() => {
-  return error.value && error.value.includes('Sin conexión');
+  if (!error.value) return false;
+  
+  // Palabras clave para mensajes informativos/positivos
+  const infoKeywords = [
+    'Sin conexión',
+    '¡Excelente!',
+    'Buena precisión',
+    'Precisión aceptable',
+    'Ubicación obtenida',
+    'Se usó ubicación',
+    'Funciona sin internet',
+    'modo offline',
+    'caché offline',
+    'precisión de',
+    'Registro con precisión'
+  ];
+  
+  // Verificar si el mensaje contiene alguna palabra clave informativa
+  const isInfo = infoKeywords.some(keyword => 
+    error.value.toLowerCase().includes(keyword.toLowerCase())
+  );
+  
+  return isInfo;
 });
 
 // Función para obtener las iniciales del usuario

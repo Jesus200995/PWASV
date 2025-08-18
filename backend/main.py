@@ -1170,6 +1170,128 @@ async def marcar_salida(
         print(f"❌ Error general en salida: {e}")
         raise HTTPException(status_code=500, detail=f"Error al registrar salida: {str(e)}")
 
+@app.get("/asistencia/hoy/{usuario_id}")
+async def consultar_asistencia_hoy(usuario_id: int):
+    """
+    Consulta la asistencia del día actual para un usuario específico.
+    Usa la zona horaria de CDMX para determinar correctamente qué es 'hoy'.
+    """
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🔍 Consultando asistencia del día actual para usuario {usuario_id}")
+        
+        # CRUCIAL: Usar la fecha actual en zona horaria CDMX
+        now_cdmx = datetime.now(CDMX_TZ)
+        fecha_hoy_cdmx = now_cdmx.date()
+        
+        print(f"📅 Fecha actual en CDMX: {fecha_hoy_cdmx}")
+        print(f"⏰ Hora actual en CDMX: {now_cdmx.strftime('%H:%M:%S')}")
+        
+        # Consultar asistencia para la fecha actual en CDMX
+        cursor.execute(
+            """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
+                      latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
+                      foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
+               FROM asistencias 
+               WHERE usuario_id = %s AND fecha = %s""",
+            (usuario_id, fecha_hoy_cdmx)
+        )
+        
+        registro = cursor.fetchone()
+        
+        print(f"📊 Registro encontrado: {registro is not None}")
+        
+        if registro:
+            # Construir respuesta con datos encontrados
+            resultado = {
+                "id": registro[0],
+                "usuario_id": registro[1],
+                "fecha": registro[2].isoformat() if registro[2] else None,
+                "entrada": registro[3].isoformat() if registro[3] else None,
+                "salida": registro[4].isoformat() if registro[4] else None,
+                "latitud_entrada": float(registro[5]) if registro[5] else None,
+                "longitud_entrada": float(registro[6]) if registro[6] else None,
+                "latitud_salida": float(registro[7]) if registro[7] else None,
+                "longitud_salida": float(registro[8]) if registro[8] else None,
+                "foto_entrada_url": registro[9],
+                "foto_salida_url": registro[10],
+                "descripcion_entrada": registro[11],
+                "descripcion_salida": registro[12]
+            }
+        else:
+            # No hay registro para hoy, devolver estructura vacía
+            resultado = {
+                "id": None,
+                "usuario_id": usuario_id,
+                "fecha": fecha_hoy_cdmx.isoformat(),
+                "entrada": None,
+                "salida": None,
+                "latitud_entrada": None,
+                "longitud_entrada": None,
+                "latitud_salida": None,
+                "longitud_salida": None,
+                "foto_entrada_url": None,
+                "foto_salida_url": None,
+                "descripcion_entrada": None,
+                "descripcion_salida": None
+            }
+        
+        print(f"✅ Consulta de asistencia hoy completada: {resultado['entrada'] is not None}, {resultado['salida'] is not None}")
+        return resultado
+        
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL en consulta hoy: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general en consulta hoy: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al consultar asistencia de hoy: {str(e)}")
+
+@app.get("/debug/tiempo-actual")
+async def debug_tiempo_actual():
+    """Endpoint para verificar la hora y fecha actual en diferentes zonas horarias"""
+    try:
+        import pytz
+        from datetime import datetime
+        
+        # Hora UTC
+        utc_now = datetime.utcnow()
+        
+        # Hora en CDMX
+        cdmx_tz = pytz.timezone("America/Mexico_City")
+        cdmx_now = datetime.now(cdmx_tz)
+        
+        # Fecha en CDMX (que es lo que usamos para comparar asistencias)
+        fecha_cdmx = cdmx_now.date()
+        
+        resultado = {
+            "utc": {
+                "datetime": utc_now.isoformat(),
+                "fecha": utc_now.date().isoformat(),
+                "hora": utc_now.strftime("%H:%M:%S"),
+                "timestamp_filename": utc_now.strftime('%Y%m%d%H%M%S')
+            },
+            "cdmx": {
+                "datetime": cdmx_now.isoformat(),
+                "fecha": fecha_cdmx.isoformat(),
+                "hora": cdmx_now.strftime("%H:%M:%S"),
+                "timestamp_filename": cdmx_now.strftime('%Y%m%d%H%M%S'),
+                "timezone_name": str(cdmx_now.tzinfo),
+                "timezone_offset": cdmx_now.strftime('%z')
+            },
+            "comparacion": {
+                "misma_fecha": utc_now.date() == fecha_cdmx,
+                "diferencia_horas": int((cdmx_now - utc_now.replace(tzinfo=pytz.UTC)).total_seconds() / 3600)
+            },
+            "mensaje": f"En CDMX son las {cdmx_now.strftime('%H:%M:%S')} del {fecha_cdmx.strftime('%Y-%m-%d')}"
+        }
+        
+        return resultado
+        
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/asistencias")
 async def obtener_historial_asistencias(usuario_id: int = None, limit: int = None):
     try:

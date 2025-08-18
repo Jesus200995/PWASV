@@ -16,17 +16,11 @@ class AsistenciasService {
     try {
       console.log('🔍 Consultando asistencia del día para usuario:', usuarioId);
       
-      // Obtener la fecha actual en formato YYYY-MM-DD
-      const now = new Date();
-      const today = now.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-      
-      console.log(`🔍 Consultando asistencias para la fecha: ${today}`);
-      
       // Añadir timestamp aleatorio para evitar caché si forceRefresh es true
-      const cacheParam = forceRefresh ? `&_nocache=${Date.now()}` : '';
+      const cacheParam = forceRefresh ? `?_nocache=${Date.now()}` : '';
       
-      // Usar el endpoint de asistencias filtrado por usuario y fecha de hoy exactamente
-      const response = await axios.get(`${API_URL}/asistencias?usuario_id=${usuarioId}&fecha=${today}${cacheParam}`, {
+      // NUEVA IMPLEMENTACIÓN: Usar el endpoint específico que maneja correctamente la zona horaria CDMX
+      const response = await axios.get(`${API_URL}/asistencia/hoy/${usuarioId}${cacheParam}`, {
         // Añadir timeout y manejo de cache para asegurar respuestas actualizadas
         timeout: 10000,
         headers: {
@@ -36,39 +30,31 @@ class AsistenciasService {
         }
       });
       
-      console.log('✅ Datos de asistencia obtenidos:', response.data);
+      console.log('✅ Datos de asistencia hoy obtenidos:', response.data);
       
-      // Adaptamos la respuesta al formato esperado
-      const asistencias = response.data.asistencias || [];
+      // El endpoint ya devuelve el formato correcto, solo necesitamos mapear algunos campos
+      const asistenciaHoy = response.data;
       
-      // Filtramos solo las asistencias de hoy para mayor seguridad
-      const asistenciasHoy = asistencias.filter(a => {
-        // Convertir fecha de la asistencia a YYYY-MM-DD para comparar
-        const fechaAsistencia = a.fecha ? new Date(a.fecha).toISOString().split('T')[0] : null;
-        return fechaAsistencia === today;
-      });
-      
-      console.log(`🔍 Asistencias filtradas para hoy (${today}):`, asistenciasHoy);
-      
-      const asistenciaHoy = asistenciasHoy.length > 0 ? asistenciasHoy[0] : null;
-      
-      // Crear objeto con el formato esperado asegurando que corresponda al día de hoy
+      // Crear objeto con el formato esperado por el frontend
       const resultado = {
-        entrada: asistenciaHoy?.hora_entrada || null,
-        salida: asistenciaHoy?.hora_salida || null,
-        fecha: today,
-        descripcion_entrada: asistenciaHoy?.descripcion_entrada || null,
-        descripcion_salida: asistenciaHoy?.descripcion_salida || null,
-        latitud_entrada: asistenciaHoy?.latitud_entrada || null,
-        longitud_entrada: asistenciaHoy?.longitud_entrada || null,
-        latitud_salida: asistenciaHoy?.latitud_salida || null,
-        longitud_salida: asistenciaHoy?.longitud_salida || null,
-        foto_entrada_url: asistenciaHoy?.foto_entrada_url || null,
-        foto_salida_url: asistenciaHoy?.foto_salida_url || null,
-        id: asistenciaHoy?.id || null
+        entrada: asistenciaHoy.entrada || null,
+        salida: asistenciaHoy.salida || null,
+        fecha: asistenciaHoy.fecha || null,
+        descripcion_entrada: asistenciaHoy.descripcion_entrada || null,
+        descripcion_salida: asistenciaHoy.descripcion_salida || null,
+        latitud_entrada: asistenciaHoy.latitud_entrada || null,
+        longitud_entrada: asistenciaHoy.longitud_entrada || null,
+        latitud_salida: asistenciaHoy.latitud_salida || null,
+        longitud_salida: asistenciaHoy.longitud_salida || null,
+        foto_entrada_url: asistenciaHoy.foto_entrada_url || null,
+        foto_salida_url: asistenciaHoy.foto_salida_url || null,
+        id: asistenciaHoy.id || null
       };
       
       console.log('✅ Datos de asistencia hoy formateados:', resultado);
+      console.log(`📅 Fecha consultada (CDMX): ${resultado.fecha}`);
+      console.log(`⏰ Estado: Entrada=${resultado.entrada ? 'SÍ' : 'NO'}, Salida=${resultado.salida ? 'SÍ' : 'NO'}`);
+      
       return resultado;
     } catch (error) {
       console.error('❌ Error al consultar asistencia del día:', error);

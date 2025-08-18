@@ -8,45 +8,49 @@
     </div>
     
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
-      <div class="page-container relative z-10 p-4 sm:p-6 lg:p-8 min-h-full">
+      <div class="page-container relative z-10 px-2 sm:px-4 lg:px-6 min-h-full">
     <!-- Tabs para alternar entre registros normales y asistencias -->
-    <div class="glass-card mb-6">
-      <div class="flex border-b border-gray-200 mb-6">
-        <button 
-          @click="cambiarTab('registros')" 
-          :class="[
-            'glass-tab px-4 py-2 font-medium text-sm border-b-2 transition-all mr-2',
-            tabActiva === 'registros' 
-              ? 'border-primary text-primary glass-tab-active' 
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          ]"
-        >
-          Registros Normales
-        </button>
-        <button 
-          @click="cambiarTab('asistencias')" 
-          :class="[
-            'glass-tab px-4 py-2 font-medium text-sm border-b-2 transition-all ml-2',
-            tabActiva === 'asistencias' 
-              ? 'border-primary text-primary glass-tab-active' 
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          ]"
-        >
-          Asistencias
-        </button>
+    <div class="glass-card mb-4">
+      <div class="flex justify-center border-b border-gray-200 mb-4 pb-2">
+        <div class="flex bg-gray-100/50 backdrop-blur-sm rounded-xl p-1 gap-1">
+          <button 
+            @click="cambiarTab('registros')" 
+            :class="[
+              'tab-button px-4 py-2 font-medium text-xs rounded-lg transition-all duration-300 ease-in-out relative overflow-hidden',
+              tabActiva === 'registros' 
+                ? 'tab-active bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg shadow-green-400/50' 
+                : 'text-gray-600 hover:text-gray-800 hover:bg-white/70'
+            ]"
+          >
+            <span class="relative z-10">Registros Actividades</span>
+            <div v-if="tabActiva === 'registros'" class="absolute inset-0 bg-gradient-to-r from-green-300 to-green-400 opacity-20 animate-pulse"></div>
+          </button>
+          <button 
+            @click="cambiarTab('asistencias')" 
+            :class="[
+              'tab-button px-4 py-2 font-medium text-xs rounded-lg transition-all duration-300 ease-in-out relative overflow-hidden',
+              tabActiva === 'asistencias' 
+                ? 'tab-active bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg shadow-green-400/50' 
+                : 'text-gray-600 hover:text-gray-800 hover:bg-white/70'
+            ]"
+          >
+            <span class="relative z-10">Asistencias</span>
+            <div v-if="tabActiva === 'asistencias'" class="absolute inset-0 bg-gradient-to-r from-green-300 to-green-400 opacity-20 animate-pulse"></div>
+          </button>
+        </div>
       </div>
 
       <!-- Tab de Registros Normales -->
       <div v-show="tabActiva === 'registros'">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
           <div>
-            <h2 class="text-2xl font-bold text-gray-800">Historial de registros</h2>
-            <p v-if="userInfo" class="text-sm text-gray-600 mt-1">
+            <h2 class="text-lg font-bold text-gray-800">Registros actividades</h2>
+            <p v-if="userInfo" class="text-xs text-gray-600 mt-1">
               Registros de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
             </p>
           </div>
-          <button @click="cargarRegistros" class="glass-button text-sm px-3 py-1 mt-2 sm:mt-0">
-            <svg v-if="cargando" class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <button @click="cargarRegistros" class="glass-button text-xs px-2 py-1 mt-2 sm:mt-0">
+            <svg v-if="cargando" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
@@ -57,15 +61,15 @@
 
       <!-- Tab de Asistencias -->
       <div v-show="tabActiva === 'asistencias'">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
           <div>
-            <h2 class="text-2xl font-bold text-gray-800">Historial de asistencias</h2>
-            <p v-if="userInfo" class="text-sm text-gray-600 mt-1">
+            <h2 class="text-lg font-bold text-gray-800">Historial de asistencias</h2>
+            <p v-if="userInfo" class="text-xs text-gray-600 mt-1">
               Asistencias de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
             </p>
           </div>
-          <button @click="cargarAsistencias" class="glass-button text-sm px-3 py-1 mt-2 sm:mt-0">
-            <svg v-if="cargandoAsistencias" class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <button @click="cargarAsistencias" class="glass-button text-xs px-2 py-1 mt-2 sm:mt-0">
+            <svg v-if="cargandoAsistencias" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
@@ -74,9 +78,9 @@
         </div>
       </div>
 
-      <div v-if="error" class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
-        <p>{{ error }}</p>
-        <p class="text-sm mt-2">
+      <div v-if="error" class="mb-3 bg-red-100 border-l-4 border-red-500 text-red-700 p-3" role="alert">
+        <p class="text-xs">{{ error }}</p>
+        <p class="text-xs mt-1">
           <strong>Problema técnico detectado:</strong> El servidor principal está experimentando problemas. 
           El administrador del sistema necesita actualizar el código del servidor.
         </p>
@@ -89,17 +93,17 @@
         </div>
         <div class="space-y-2">
           <div v-for="(registro, index) in registros" :key="index" class="glass-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
-            <div class="p-3">
-              <div class="flex gap-3">
-                <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative" :class="{'cursor-pointer': registro.foto_url}" @click="registro.foto_url && verImagen(registro.foto_url)">
+            <div class="p-2">
+              <div class="flex gap-2">
+                <div class="w-12 h-12 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative" :class="{'cursor-pointer': registro.foto_url}" @click="registro.foto_url && verImagen(registro.foto_url)">
                   <img v-if="registro.foto_url" :src="registro.foto_url" class="w-full h-full object-cover" alt="Foto" />
                   <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
                   <div v-if="registro.foto_url" class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
@@ -108,7 +112,7 @@
                 <div class="flex-1 min-w-0">
                   <div class="flex justify-between items-start">
                     <p class="text-xs text-gray-500 font-medium">{{ formatFecha(registro.fecha_hora) }}</p>
-                    <button @click="verEnMapa(registro)" class="text-primary hover:text-primary-dark text-xs flex items-center ml-2 whitespace-nowrap">
+                    <button @click="verEnMapa(registro)" class="text-primary hover:text-primary-dark text-xs flex items-center ml-1 whitespace-nowrap">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                       </svg>
@@ -116,9 +120,9 @@
                     </button>
                   </div>
                   
-                  <p class="text-xs text-gray-800 mt-1 line-clamp-2">{{ registro.descripcion || "Sin descripción" }}</p>
+                  <p class="text-xs text-gray-800 mt-0.5 line-clamp-2">{{ registro.descripcion || "Sin descripción" }}</p>
                   
-                  <div class="mt-1 flex items-center">
+                  <div class="mt-0.5 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -136,15 +140,15 @@
 
       <!-- Lista de asistencias -->
       <div v-if="tabActiva === 'asistencias' && asistencias.length > 0">
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-3 text-xs text-gray-600">
           Total de asistencias: <span class="font-semibold text-primary">{{ asistencias.length }}</span>
         </div>
         <div class="space-y-2">
           <div v-for="(asistencia, index) in asistencias" :key="index" class="glass-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
-            <div class="p-3">
+            <div class="p-2">
               <!-- Información de la fecha -->
               <div class="flex justify-between items-center mb-2">
-                <h3 class="text-base font-medium text-gray-800">{{ formatFecha(asistencia.fecha) }}</h3>
+                <h3 class="text-sm font-medium text-gray-800">{{ formatFecha(asistencia.fecha) }}</h3>
                 <div class="flex flex-wrap gap-1">
                   <span v-if="asistencia.hora_entrada" class="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap">
                     E: {{ formatHora(asistencia.hora_entrada) }}
@@ -164,10 +168,10 @@
                   Entrada - {{ formatHora(asistencia.hora_entrada) }}
                 </h4>
                 <div class="flex items-start gap-2">
-                  <div v-if="asistencia.foto_entrada_url" class="w-14 h-14 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_entrada_url}`)">
+                  <div v-if="asistencia.foto_entrada_url" class="w-10 h-10 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_entrada_url}`)">
                     <img :src="`${API_URL}/${asistencia.foto_entrada_url}`" class="w-full h-full object-cover" alt="Foto" />
                     <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
@@ -198,10 +202,10 @@
                   Salida - {{ formatHora(asistencia.hora_salida) }}
                 </h4>
                 <div class="flex items-start gap-2">
-                  <div v-if="asistencia.foto_salida_url" class="w-14 h-14 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_salida_url}`)">
+                  <div v-if="asistencia.foto_salida_url" class="w-10 h-10 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_salida_url}`)">
                     <img :src="`${API_URL}/${asistencia.foto_salida_url}`" class="w-full h-full object-cover" alt="Foto" />
                     <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
@@ -238,35 +242,35 @@
       </div>
 
       <!-- Estado vacío para registros -->
-      <div v-if="tabActiva === 'registros' && registros.length === 0 && !cargando" class="text-center py-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div v-if="tabActiva === 'registros' && registros.length === 0 && !cargando" class="text-center py-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
-        <p class="mt-2 text-gray-500">Aún no tienes registros guardados</p>
-        <p class="text-sm text-gray-400 mt-1">Crea tu primer registro para verlo aquí</p>
-        <router-link to="/" class="glass-button inline-block mt-4 text-sm">Crear nuevo registro</router-link>
+        <p class="mt-2 text-gray-500 text-sm">Aún no tienes registros guardados</p>
+        <p class="text-xs text-gray-400 mt-1">Crea tu primer registro para verlo aquí</p>
+        <router-link to="/" class="glass-button inline-block mt-3 text-xs">Crear nuevo registro</router-link>
       </div>
 
       <!-- Estado vacío para asistencias -->
-      <div v-if="tabActiva === 'asistencias' && asistencias.length === 0 && !cargandoAsistencias" class="text-center py-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div v-if="tabActiva === 'asistencias' && asistencias.length === 0 && !cargandoAsistencias" class="text-center py-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <p class="mt-2 text-gray-500">Aún no tienes registros de asistencia</p>
-        <p class="text-sm text-gray-400 mt-1">Marca tu primera asistencia para verla aquí</p>
-        <router-link to="/" class="glass-button inline-block mt-4 text-sm">Marcar asistencia</router-link>
+        <p class="mt-2 text-gray-500 text-sm">Aún no tienes registros de asistencia</p>
+        <p class="text-xs text-gray-400 mt-1">Marca tu primera asistencia para verla aquí</p>
+        <router-link to="/" class="glass-button inline-block mt-3 text-xs">Marcar asistencia</router-link>
       </div>
       
       <!-- Cargando registros -->
-      <div v-if="tabActiva === 'registros' && cargando" class="text-center py-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-        <p class="mt-4 text-gray-500">Cargando registros...</p>
+      <div v-if="tabActiva === 'registros' && cargando" class="text-center py-6">
+        <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto"></div>
+        <p class="mt-3 text-gray-500 text-sm">Cargando registros...</p>
       </div>
 
       <!-- Cargando asistencias -->
-      <div v-if="tabActiva === 'asistencias' && cargandoAsistencias" class="text-center py-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-        <p class="mt-4 text-gray-500">Cargando asistencias...</p>
+      <div v-if="tabActiva === 'asistencias' && cargandoAsistencias" class="text-center py-6">
+        <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto"></div>
+        <p class="mt-3 text-gray-500 text-sm">Cargando asistencias...</p>
       </div>
     </div>
   </div>
@@ -274,11 +278,11 @@
     
     <!-- Diálogo de mapa -->
     <div v-if="mapaVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
-      <div class="glass-modal rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
-        <div class="p-3 border-b border-gray-200 flex justify-between items-center">
-          <h3 class="text-sm font-medium">Ubicación</h3>
+      <div class="glass-modal rounded-lg shadow-xl w-full max-w-sm max-h-[85vh] flex flex-col">
+        <div class="p-2 border-b border-gray-200 flex justify-between items-center">
+          <h3 class="text-xs font-medium">Ubicación</h3>
           <button @click="mapaVisible = false" class="glass-close-button text-gray-500 hover:text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -287,21 +291,21 @@
           <div id="detailMap" class="h-full w-full"></div>
         </div>
         <div class="p-2 border-t border-gray-200">
-          <button @click="mapaVisible = false" class="glass-button w-full text-sm py-1.5">Cerrar</button>
+          <button @click="mapaVisible = false" class="glass-button w-full text-xs py-1">Cerrar</button>
         </div>
       </div>
     </div>
     
     <!-- Modal para visualizar imagen -->
-    <div v-if="imagenModalVisible" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-3">
-      <div class="w-full max-w-xs sm:max-w-sm md:max-w-md max-h-[85vh] flex flex-col relative">
+    <div v-if="imagenModalVisible" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-2">
+      <div class="w-full max-w-xs sm:max-w-sm md:max-w-md max-h-[80vh] flex flex-col relative">
         <button @click="imagenModalVisible = false" class="absolute right-1 top-1 bg-black bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-70 transition-opacity z-10">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
         <div class="overflow-hidden rounded-lg bg-black bg-opacity-30">
-          <img :src="imagenSeleccionada" class="w-full h-auto object-contain max-h-[80vh]" alt="Imagen ampliada" />
+          <img :src="imagenSeleccionada" class="w-full h-auto object-contain max-h-[75vh]" alt="Imagen ampliada" />
         </div>
       </div>
     </div>
@@ -805,13 +809,13 @@ function verImagen(url) {
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
     0 8px 32px 0 rgba(31, 38, 135, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.05),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  padding: 1.25rem;
+  padding: 1rem;
   position: relative;
   overflow: hidden;
 }
@@ -837,58 +841,34 @@ function verImagen(url) {
   left: 150%;
 }
 
-/* Animaciones personalizadas */
-@keyframes pulse-slow {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.3;
+/* Ajustes específicos para pantallas pequeñas */
+@media (max-width: 320px) {
+  .w-12 {
+    width: 2.75rem;
   }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.5;
+  
+  .h-12 {
+    height: 2.75rem;
   }
-}
-
-.animate-pulse-slow {
-  animation: pulse-slow 6s ease-in-out infinite;
-}
-
-/* Estilos adicionales para mejor integración con el efecto de vidrio */
-.glass-card .border-b {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.glass-card button {
-  transition: all 0.3s ease;
-}
-
-.glass-card button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 8px;
-}
-
-/* Mejorar contraste de texto sobre fondo de vidrio */
-.glass-card .text-gray-800 {
-  color: #1f2937 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-.glass-card .text-gray-600 {
-  color: #4b5563 !important;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
-}
-
-.glass-card .text-gray-500 {
-  color: #6b7280 !important;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.2);
-}
-
-/* Soporte adicional para navegadores que no soportan backdrop-filter */
-@supports not (backdrop-filter: blur(20px)) {
-  .glass-card {
-    background: rgba(255, 255, 255, 0.85);
+  
+  .w-10 {
+    width: 2.25rem;
+  }
+  
+  .h-10 {
+    height: 2.25rem;
+  }
+  
+  .gap-2 {
+    gap: 0.375rem;
+  }
+  
+  .text-lg {
+    font-size: 1rem !important;
+  }
+  
+  .text-sm {
+    font-size: 0.75rem !important;
   }
 }
 
@@ -897,7 +877,7 @@ function verImagen(url) {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #1f2937;
   font-weight: 500;
@@ -912,69 +892,89 @@ function verImagen(url) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  min-height: 30px;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  padding: 0.375rem 0.75rem;
 }
 
-.glass-button:hover {
+/* Estilos modernos para pestañas */
+.tab-button {
+  position: relative;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid transparent;
+  min-width: 120px;
+  text-align: center;
+}
+
+.tab-button:not(.tab-active):hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 25px 0 rgba(31, 38, 135, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.glass-button:active {
-  transform: translateY(0);
-  box-shadow: 
-    0 4px 12px 0 rgba(31, 38, 135, 0.15),
-    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+.tab-active {
+  transform: translateY(-2px) scale(1.02);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-.glass-button::before {
+.tab-active::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+  border-radius: inherit;
+  z-index: 1;
 }
 
-.glass-button:hover::before {
-  left: 100%;
+.tab-active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  border-radius: inherit;
+  opacity: 0;
+  animation: shimmer 2s infinite;
+  z-index: 2;
 }
 
-/* Estilos para tabs con efecto de vidrio */
-.glass-tab {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin: 0 2px;
-  position: relative;
-  overflow: hidden;
+@keyframes shimmer {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
 }
 
-.glass-tab:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.glass-tab-active {
-  background: rgba(76, 175, 80, 0.15);
-  border: 1px solid rgba(76, 175, 80, 0.3);
+/* Efecto de brillo verde */
+.tab-active {
   box-shadow: 
-    0 4px 16px 0 rgba(76, 175, 80, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    0 4px 20px rgba(34, 197, 94, 0.4),
+    0 0 30px rgba(34, 197, 94, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Animación suave para el cambio de pestañas */
+.tab-button span {
+  transition: all 0.3s ease;
+}
+
+.tab-active span {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
 }
 
 /* Estilos para elementos individuales con efecto de vidrio */
@@ -995,7 +995,7 @@ function verImagen(url) {
   box-shadow: 
     0 8px 30px 0 rgba(31, 38, 135, 0.15),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 /* Estilos para modales con efecto de vidrio */
@@ -1022,168 +1022,65 @@ function verImagen(url) {
   -webkit-backdrop-filter: blur(8px);
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 6px;
+  padding: 4px;
   transition: all 0.3s ease;
 }
 
 .glass-close-button:hover {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 /* Responsividad mejorada */
 @media (max-width: 640px) {
-  .glass-card {
-    margin: 0.5rem;
-    padding: 1rem;
-    border-radius: 16px;
-  }
-  
-  .glass-tab {
-    font-size: 0.75rem;
-    padding: 6px 12px;
-    margin: 0 1px;
-  }
-  
-  .glass-button {
-    font-size: 0.75rem;
-    padding: 6px 12px;
-    min-height: 32px;
-  }
-  
-  .glass-item {
-    margin: 0.25rem 0;
-  }
-  
-  .glass-modal {
-    margin: 0.5rem;
-    max-width: calc(100vw - 1rem);
-    border-radius: 16px;
-  }
-  
-  /* Mejoras específicas para elementos pequeños */
-  .w-16, .h-16 {
-    width: 3.5rem !important;
-    height: 3.5rem !important;
-  }
-  
-  .w-14, .h-14 {
-    width: 3rem !important;
-    height: 3rem !important;
-  }
-  
-  .text-2xl {
-    font-size: 1.25rem !important;
-  }
-  
-  .text-base {
-    font-size: 0.875rem !important;
-  }
-  
-  .gap-3 {
-    gap: 0.5rem !important;
-  }
-}
-
-@media (max-width: 480px) {
   .glass-card {
     margin: 0.25rem;
     padding: 0.75rem;
     border-radius: 12px;
   }
   
-  .glass-tab {
+  .tab-button {
     font-size: 0.7rem;
-    padding: 4px 8px;
+    padding: 6px 12px;
+    min-width: 100px;
   }
   
   .glass-button {
     font-size: 0.7rem;
     padding: 4px 8px;
-    min-height: 28px;
-  }
-  
-  .text-xs {
-    font-size: 0.65rem !important;
-  }
-}
-
-@media (min-width: 1024px) {
-  .glass-card {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
+    min-height: 26px;
   }
   
   .glass-item {
-    border-radius: 16px;
-  }
-  
-  .glass-button {
-    padding: 0.75rem 1.5rem;
-    min-height: 42px;
+    margin: 0.2rem 0;
   }
   
   .glass-modal {
-    max-width: 600px;
+    margin: 0.25rem;
+    max-width: calc(100vw - 0.5rem);
+    border-radius: 12px;
   }
 }
 
-/* Mejoras de contraste para mejor legibilidad */
-.glass-card .text-gray-800,
-.glass-item .text-gray-800 {
-  color: #1f2937 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-  font-weight: 600;
-}
-
-.glass-card .text-gray-600,
-.glass-item .text-gray-600 {
-  color: #4b5563 !important;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
-  font-weight: 500;
-}
-
-.glass-card .text-gray-500,
-.glass-item .text-gray-500 {
-  color: #6b7280 !important;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.2);
-}
-
-/* Efectos especiales para elementos interactivos */
-.glass-item button:hover {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 6px;
-  padding: 2px 6px;
-  margin: -2px -6px;
-  transition: all 0.2s ease;
-}
-
-/* Animaciones suaves para carga */
-.glass-item {
-  animation: slideInUp 0.3s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
+/* Estilos específicos para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .tab-button {
+    font-size: 0.65rem;
+    padding: 5px 8px;
+    min-width: 80px;
   }
-  to {
-    transform: translateY(0);
-    opacity: 1;
+  
+  .tab-button span {
+    font-size: 0.65rem;
   }
 }
 
-/* Estados de error mejorados */
-.glass-card .bg-red-100 {
-  background: rgba(254, 226, 226, 0.8) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 12px;
+/* Mejoras para tablets y pantallas medianas */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tab-button {
+    min-width: 140px;
+    padding: 8px 16px;
+  }
 }
 </style>

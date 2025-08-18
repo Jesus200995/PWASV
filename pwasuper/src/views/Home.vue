@@ -174,148 +174,150 @@
           {{ mensajeAsistencia }}
         </div>
         </div>
-      </div>
 
-      <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
-      <div v-if="modoAsistencia" class="glass-card">
-        <div class="text-center mb-4">
-          <h2 class="text-lg font-bold text-gray-800 mb-2 modern-title">
-            {{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}
-          </h2>
-          <div class="green-line mx-auto mb-2"></div>
-          <p class="text-xs text-gray-500">Completa todos los datos requeridos</p>
-        </div>      <!-- Info del usuario -->
-      <div class="bg-primary/10 rounded-lg p-2 mb-4">
-        <div class="flex items-center">
-          <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
-            <span class="text-white text-xs font-bold">{{ getUserInitials }}</span>
+        <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
+        <div v-if="modoAsistencia" class="mt-6 border-t border-gray-200 pt-6">
+          <div class="text-center mb-4">
+            <h2 class="text-lg font-bold text-gray-800 mb-2 modern-title">
+              {{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}
+            </h2>
+            <div class="green-line mx-auto mb-2"></div>
+            <p class="text-xs text-gray-500">Completa todos los datos requeridos</p>
           </div>
-          <div>
-            <p class="font-medium text-primary text-sm">{{ user.nombre_completo }}</p>
-            <p class="text-xs text-gray-500">{{ user.cargo }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Paso 1: Ubicación -->
-      <div class="mb-4">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-base font-semibold text-gray-800">1. Ubicación</h3>
-          <span v-if="latitud && longitud" class="text-green-600 text-xs">✓ Completado</span>
-        </div>
-        
-        <button
-          type="button"
-          @click="getUbicacion"
-          :disabled="obteniendoUbicacion"
-          class="glass-button w-full mb-3 flex items-center justify-center px-3 py-2 text-xs font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
-          :class="{'opacity-50 cursor-not-allowed': obteniendoUbicacion}"
-        >
-          <div v-if="obteniendoUbicacion" class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current mr-2"></div>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          {{ obteniendoUbicacion ? 'Obteniendo ubicación precisa...' : 'Obtener Ubicación' }}
-        </button>
-
-        <!-- Coordenadas -->
-        <div v-if="latitud && longitud" class="bg-green-50 border border-green-200 rounded-lg p-2">
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <p class="text-xs text-gray-500">Latitud</p>
-              <p class="font-mono text-xs font-medium text-gray-800">{{ latitud }}</p>
-            </div>
-            <div>
-              <p class="text-xs text-gray-500">Longitud</p>
-              <p class="font-mono text-xs font-medium text-gray-800">{{ longitud }}</p>
+          
+          <!-- Info del usuario -->
+          <div class="bg-primary/10 rounded-lg p-2 mb-4">
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
+                <span class="text-white text-xs font-bold">{{ getUserInitials }}</span>
+              </div>
+              <div>
+                <p class="font-medium text-primary text-sm">{{ user.nombre_completo }}</p>
+                <p class="text-xs text-gray-500">{{ user.cargo }}</p>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Paso 2: Foto -->
-      <div class="mb-4">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-base font-semibold text-gray-800">2. Foto</h3>
-          <span v-if="foto" class="text-green-600 text-xs">✓ Completado</span>
-        </div>
-        
-        <div class="flex items-center justify-center w-full">
-          <label class="flex flex-col w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100">
-            <div v-if="!foto" class="flex flex-col items-center justify-center pt-5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <!-- Paso 1: Ubicación -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-base font-semibold text-gray-800">1. Ubicación</h3>
+              <span v-if="latitud && longitud" class="text-green-600 text-xs">✓ Completado</span>
+            </div>
+            
+            <button
+              type="button"
+              @click="getUbicacion"
+              :disabled="obteniendoUbicacion"
+              class="glass-button w-full mb-3 flex items-center justify-center px-3 py-2 text-xs font-medium text-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
+              :class="{'opacity-50 cursor-not-allowed': obteniendoUbicacion}"
+            >
+              <div v-if="obteniendoUbicacion" class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current mr-2"></div>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <p class="pt-1 text-xs text-gray-400">Selecciona una foto</p>
-            </div>
-            <div v-else class="flex items-center justify-center h-full">
-              <img :src="foto" class="h-full object-contain" />
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              @change="onFileChange"
-              class="hidden"
-              ref="fileInput"
-            />
-          </label>
-        </div>
-      </div>
+              {{ obteniendoUbicacion ? 'Obteniendo ubicación precisa...' : 'Obtener Ubicación' }}
+            </button>
 
-      <!-- Paso 3: Descripción -->
-      <div class="mb-4">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-base font-semibold text-gray-800">3. Descripción/Notas</h3>
-          <span v-if="descripcion.trim()" class="text-green-600 text-xs">✓ Completado</span>
-        </div>
-        
-        <textarea
-          v-model="descripcion"
-          rows="2"
-          class="glass-input w-full text-xs"
-          :placeholder="'Describe el lugar donde ' + (tipoAsistencia === 'entrada' ? 'inicias' : 'terminas') + ' tu jornada...'"
-        ></textarea>
-      </div>
-
-      <!-- Botones de acción -->
-      <div class="flex gap-2">
-        <button
-          @click="cancelarAsistencia"
-          class="glass-button-secondary flex-1 text-xs py-2"
-        >
-          Cancelar
-        </button>
-        
-        <button
-          @click="confirmarAsistencia"
-          :disabled="!puedeEnviarAsistencia || enviandoAsistencia"
-          class="glass-button flex-1 relative text-xs py-2"
-          :class="{'opacity-50 cursor-not-allowed': !puedeEnviarAsistencia || enviandoAsistencia}"
-        >
-          <div v-if="enviandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+            <!-- Coordenadas -->
+            <div v-if="latitud && longitud" class="bg-green-50 border border-green-200 rounded-lg p-2">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <p class="text-xs text-gray-500">Latitud</p>
+                  <p class="font-mono text-xs font-medium text-gray-800">{{ latitud }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Longitud</p>
+                  <p class="font-mono text-xs font-medium text-gray-800">{{ longitud }}</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <span>{{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}</span>
-        </button>
-      </div>
 
-      <!-- Advertencia si faltan datos -->
-      <div v-if="!puedeEnviarAsistencia" class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <div class="flex items-center text-yellow-800">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-          <span class="text-sm font-medium">
-            Faltan datos: 
-            {{ !latitud || !longitud ? 'Ubicación' : '' }}
-            {{ (!latitud || !longitud) && !foto ? ', ' : '' }}
-            {{ !foto ? 'Foto' : '' }}
-            {{ ((!latitud || !longitud) || !foto) && !descripcion.trim() ? ', ' : '' }}
-            {{ !descripcion.trim() ? 'Descripción' : '' }}
-          </span>
+          <!-- Paso 2: Foto -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-base font-semibold text-gray-800">2. Foto</h3>
+              <span v-if="foto" class="text-green-600 text-xs">✓ Completado</span>
+            </div>
+            
+            <div class="flex items-center justify-center w-full">
+              <label class="flex flex-col w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100">
+                <div v-if="!foto" class="flex flex-col items-center justify-center pt-5">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <p class="pt-1 text-xs text-gray-400">Selecciona una foto</p>
+                </div>
+                <div v-else class="flex items-center justify-center h-full">
+                  <img :src="foto" class="h-full object-contain" />
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="onFileChange"
+                  class="hidden"
+                  ref="fileInput"
+                />
+              </label>
+            </div>
+          </div>
+
+          <!-- Paso 3: Descripción -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-base font-semibold text-gray-800">3. Descripción/Notas</h3>
+              <span v-if="descripcion.trim()" class="text-green-600 text-xs">✓ Completado</span>
+            </div>
+            
+            <textarea
+              v-model="descripcion"
+              rows="2"
+              class="glass-input w-full text-xs"
+              :placeholder="'Describe el lugar donde ' + (tipoAsistencia === 'entrada' ? 'inicias' : 'terminas') + ' tu jornada...'"
+            ></textarea>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="flex gap-2">
+            <button
+              @click="cancelarAsistencia"
+              class="glass-button-secondary flex-1 text-xs py-2"
+            >
+              Cancelar
+            </button>
+            
+            <button
+              @click="confirmarAsistencia"
+              :disabled="!puedeEnviarAsistencia || enviandoAsistencia"
+              class="glass-button flex-1 relative text-xs py-2"
+              :class="{'opacity-50 cursor-not-allowed': !puedeEnviarAsistencia || enviandoAsistencia}"
+            >
+              <div v-if="enviandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
+                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+              </div>
+              <span>{{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}</span>
+            </button>
+          </div>
+
+          <!-- Advertencia si faltan datos -->
+          <div v-if="!puedeEnviarAsistencia" class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div class="flex items-center text-yellow-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span class="text-sm font-medium">
+                Faltan datos: 
+                {{ !latitud || !longitud ? 'Ubicación' : '' }}
+                {{ (!latitud || !longitud) && !foto ? ', ' : '' }}
+                {{ !foto ? 'Foto' : '' }}
+                {{ ((!latitud || !longitud) || !foto) && !descripcion.trim() ? ', ' : '' }}
+                {{ !descripcion.trim() ? 'Descripción' : '' }}
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
       </div>
 
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->

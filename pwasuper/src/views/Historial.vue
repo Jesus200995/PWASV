@@ -8,7 +8,7 @@
     </div>
     
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
-      <div class="page-container relative z-10 px-2 sm:px-4 lg:px-6 min-h-full">
+      <div class="page-container relative z-10 p-3 sm:p-4 lg:p-5 min-h-full">
     <!-- Tabs para alternar entre registros normales y asistencias -->
     <div class="glass-card mb-4">
       <div class="flex justify-center border-b border-gray-200 mb-4 pb-2">
@@ -22,7 +22,7 @@
                 : 'text-gray-600 hover:text-gray-800 hover:bg-white/70'
             ]"
           >
-            <span class="relative z-10">Registros Actividades</span>
+            <span class="relative z-10">Actividades</span>
             <div v-if="tabActiva === 'registros'" class="absolute inset-0 bg-gradient-to-r from-green-300 to-green-400 opacity-20 animate-pulse"></div>
           </button>
           <button 
@@ -44,7 +44,7 @@
       <div v-show="tabActiva === 'registros'">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
           <div>
-            <h2 class="text-lg font-bold text-gray-800">Registros actividades</h2>
+            <h2 class="text-lg font-bold text-gray-800">Historial de actividades</h2>
             <p v-if="userInfo" class="text-xs text-gray-600 mt-1">
               Registros de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
             </p>

@@ -84,9 +84,12 @@
           :disabled="entradaMarcada || verificandoAsistencia"
           class="relative overflow-hidden flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 transform"
           :class="{
-            'bg-green-500 text-white shadow-lg hover:bg-green-600 hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
+            'text-white shadow-lg hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
             'bg-gray-300 text-gray-500 cursor-not-allowed': entradaMarcada || verificandoAsistencia
           }"
+          :style="!entradaMarcada && !verificandoAsistencia ? 'background-color: #80D600; box-shadow: 0 4px 12px rgba(128, 214, 0, 0.3);' : ''"
+          @mouseover="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = '#73C000')"
+          @mouseout="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = '#80D600')"
         >
           <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
             <div class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current"></div>

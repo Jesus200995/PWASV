@@ -55,7 +55,19 @@
       </div>
 
       <!-- Sistema de Asistencia Integrado -->
-      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" class="glass-card">
+      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" class="glass-card relative">
+        <!-- Icono de regresar (solo visible en modo asistencia) -->
+        <button 
+          v-if="modoAsistencia"
+          @click="cancelarAsistencia"
+          class="absolute top-3 left-3 w-8 h-8 sm:w-9 sm:h-9 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200 z-20"
+          title="Regresar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
         <div class="text-center mb-3">
           <h2 class="text-lg font-bold text-gray-800 mb-2 modern-title">Registra tu asistencia</h2>
           <div class="green-line mx-auto mb-2"></div>

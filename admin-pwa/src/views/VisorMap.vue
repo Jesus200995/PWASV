@@ -857,6 +857,12 @@ const inicializarMapa = (datos) => {
           // Convertir coordenadas geográficas a coordenadas de pantalla
           const point = map.project(coordinates);
           
+          console.log('🔍 Propiedades del registro completo:', props);
+          
+          // Obtener la URL de imagen con logging detallado
+          const imagenUrl = obtenerUrlImagen(props);
+          console.log('🖼️ URL de imagen obtenida:', imagenUrl);
+          
           // Actualizar variables globales del popup
           popupData.value = {
             coordinates: coordinates,
@@ -873,7 +879,7 @@ const inicializarMapa = (datos) => {
             registroId: props.id || props.registro_id || 'N/A',
             usuarioId: props.usuario_id || 'N/A',
             descripcion: props.descripcion || props.descripcion_entrada || props.descripcion_salida || '',
-            imagenUrl: obtenerUrlImagen(props),
+            imagenUrl: imagenUrl,
             precision: props.precision || props.accuracy || null,
             estadoConexion: props.estado_conexion || (props.offline ? 'Offline' : 'Online'),
             datosOriginales: props
@@ -1107,23 +1113,67 @@ const esUbicacionReciente = (fechaStr) => {
 const obtenerUrlImagen = (props) => {
   const API_BASE_URL = 'https://apipwa.sembrandodatos.com';
   
-  // Si es una entrada, usar foto_entrada_url
-  if (props.tipo_actividad === 'entrada' && props.foto_entrada_url) {
-    return `${API_BASE_URL}/${props.foto_entrada_url}`;
+  console.log('🔍 Obteniendo imagen para props:', props);
+  
+  // Función para construir URL completa
+  const construirURL = (path) => {
+    if (!path) return null;
+    // Si ya es una URL completa, devolverla tal como está
+    if (path.startsWith('http')) return path;
+    // Si ya tiene la base URL, devolverla tal como está
+    if (path.startsWith(API_BASE_URL)) return path;
+    // Asegurar que no haya doble slash
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return `${API_BASE_URL}/${cleanPath}`;
+  };
+  
+  // Prioridad 1: Tipo específico de actividad
+  if (props.tipo_actividad === 'entrada') {
+    if (props.foto_entrada_url) {
+      const url = construirURL(props.foto_entrada_url);
+      console.log('✅ Imagen entrada encontrada:', url);
+      return url;
+    }
+  } else if (props.tipo_actividad === 'salida') {
+    if (props.foto_salida_url) {
+      const url = construirURL(props.foto_salida_url);
+      console.log('✅ Imagen salida encontrada:', url);
+      return url;
+    }
   }
   
-  // Si es una salida, usar foto_salida_url
-  if (props.tipo_actividad === 'salida' && props.foto_salida_url) {
-    return `${API_BASE_URL}/${props.foto_salida_url}`;
+  // Prioridad 2: Campos de imagen generales
+  const camposImagen = [
+    'foto_url',
+    'imagen_url', 
+    'imagen',
+    'photo_url',
+    'picture_url',
+    'foto',
+    'picture'
+  ];
+  
+  for (const campo of camposImagen) {
+    if (props[campo]) {
+      const url = construirURL(props[campo]);
+      console.log(`✅ Imagen encontrada en campo '${campo}':`, url);
+      return url;
+    }
   }
   
-  // Para registros normales, usar foto_url
-  if (props.foto_url) {
-    return `${API_BASE_URL}/${props.foto_url}`;
+  // Prioridad 3: Verificar si hay alguna propiedad que contenga 'foto' o 'imagen'
+  for (const [key, value] of Object.entries(props)) {
+    if (value && typeof value === 'string' && 
+        (key.toLowerCase().includes('foto') || key.toLowerCase().includes('imagen') || 
+         key.toLowerCase().includes('photo') || key.toLowerCase().includes('picture'))) {
+      const url = construirURL(value);
+      console.log(`✅ Imagen encontrada en campo dinámico '${key}':`, url);
+      return url;
+    }
   }
   
-  // Fallbacks adicionales
-  return props.imagen_url || props.imagen || null;
+  console.log('❌ No se encontró imagen en:', Object.keys(props));
+  return null;
 }
 
 // Función para manejar el clic en "Ver más detalles" en el popup
@@ -1134,11 +1184,59 @@ const toggleDetallesRegistro = () => {
 
 // Función para manejar errores de carga de imagen
 const onImageError = (event) => {
-  console.log('Error al cargar imagen:', event.target.src);
-  // Ocultar la imagen y reemplazar con placeholder
+  console.log('❌ Error al cargar imagen:', event.target.src);
+  console.log('📋 Datos originales del registro:', popupData.value.datosOriginales);
+  
+  // Intentar con URL alternativa si está disponible
+  const props = popupData.value.datosOriginales;
+  if (props) {
+    const urlAlternativa = obtenerImagenAlternativa(props, event.target.src);
+    if (urlAlternativa && urlAlternativa !== event.target.src) {
+      console.log('🔄 Intentando con URL alternativa:', urlAlternativa);
+      event.target.src = urlAlternativa;
+      return;
+    }
+  }
+  
+  // Si no hay alternativa, ocultar imagen y mostrar placeholder
   event.target.style.display = 'none';
-  // Cambiar la URL para mostrar placeholder
   popupData.value.imagenUrl = null;
+}
+
+// Función para obtener URL de imagen alternativa
+const obtenerImagenAlternativa = (props, urlFallida) => {
+  const API_BASE_URL = 'https://apipwa.sembrandodatos.com';
+  
+  // Lista de campos alternativos para probar
+  const camposAlternativos = [
+    'foto_url',
+    'imagen_url',
+    'imagen',
+    'photo_url',
+    'picture_url',
+    'foto',
+    'foto_entrada_url',
+    'foto_salida_url'
+  ];
+  
+  for (const campo of camposAlternativos) {
+    if (props[campo]) {
+      let urlAlternativa = props[campo];
+      
+      // Construir URL completa si es necesario
+      if (!urlAlternativa.startsWith('http')) {
+        const cleanPath = urlAlternativa.startsWith('/') ? urlAlternativa.slice(1) : urlAlternativa;
+        urlAlternativa = `${API_BASE_URL}/${cleanPath}`;
+      }
+      
+      // Si esta URL es diferente a la que falló, intentar con ella
+      if (urlAlternativa !== urlFallida) {
+        return urlAlternativa;
+      }
+    }
+  }
+  
+  return null;
 }
 
 // Función para manejar carga exitosa de imagen  

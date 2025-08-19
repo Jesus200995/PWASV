@@ -13,36 +13,17 @@
           <div class="header-main">
             <div class="header-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <path d="m9 9 5 12 1.8-5.2L21 14.8z"/>
               </svg>
             </div>
             <div class="header-text">
-              <h1 class="header-title">Mapa Optimizado</h1>
-              <p class="header-subtitle">Visualización de ubicaciones de forma eficiente</p>
+              <h1 class="header-title">Mapa de Seguimiento</h1>
+              <p class="header-subtitle">Visualización de registros</p>
             </div>
           </div>
           <div class="header-actions">
-            <div class="connection-status" :class="{ 'online': isOnline, 'offline': !isOnline }">
-              <div class="status-indicator"></div>
-              <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
-            </div>
-            
-            <!-- Contador de puntos en el mapa con efecto de cristal líquido -->
-            <div class="lcd-counter">
-              <div class="lcd-display">
-                <div class="lcd-label">PUNTOS EN MAPA</div>
-                <div class="lcd-number">{{ totalPuntosEnMapa.toLocaleString() }}</div>
-              </div>
-            </div>
-            
-            <button @click="recargarMapa" class="refresh-btn-icon" :disabled="loading" title="Actualizar manualmente">
-              <svg class="refresh-icon" :class="{ spinning: loading }" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <polyline points="1 20 1 14 7 14"></polyline>
-                <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-              </svg>
-            </button>
+            <!-- Elementos de la barra superior removidos: En línea, contador de puntos y botón actualizar -->
           </div>
         </div>
       </header>
@@ -1517,7 +1498,7 @@ onUnmounted(() => {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
-  animation: float 3s ease-in-out infinite;
+  /* Animación removida para icono estático */
 }
 
 .header-icon svg {

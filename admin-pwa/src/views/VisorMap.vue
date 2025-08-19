@@ -176,15 +176,12 @@
                 <strong>{{ popupData.tipoActividad }}</strong>
               </div>
               
-              <div class="popup-header-right">
-                <span class="popup-fecha">{{ popupData.fecha }}</span>
-                <button class="popup-close-btn" @click="cerrarPopup" title="Cerrar">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
-              </div>
+              <button class="popup-close-btn" @click="cerrarPopup" title="Cerrar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
             <div class="popup-body">
               <div class="popup-row">
@@ -200,6 +197,26 @@
                   <circle cx="12" cy="10" r="3"/>
                 </svg>
                 <div class="popup-coordenadas">{{ popupData.coordenadasTexto }}</div>
+              </div>
+              
+              <!-- Fecha y hora con iconos -->
+              <div class="popup-datetime-section">
+                <div class="popup-row">
+                  <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <div class="popup-fecha">{{ popupData.fechaFormateada }}</div>
+                </div>
+                <div class="popup-row">
+                  <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12,6 12,12 16,14"/>
+                  </svg>
+                  <div class="popup-hora">{{ popupData.horaFormateada }}</div>
+                </div>
               </div>
             </div>
             <div class="popup-footer">
@@ -259,6 +276,8 @@ const popupData = ref({
   coordinates: [],
   usuario: '',
   fecha: '',
+  fechaFormateada: '',
+  horaFormateada: '',
   tipoActividad: '',
   tipoClase: '',
   coordenadasTexto: ''
@@ -684,7 +703,22 @@ const inicializarMapa = (datos) => {
         if (!isNaN(coordinates[0]) && !isNaN(coordinates[1])) {
           // Obtener información del punto
           const usuario = props.nombre || `Usuario ${props.usuario_id}`;
-          const fecha = new Date(props.fecha_hora).toLocaleString('es-ES');
+          const fechaCompleta = new Date(props.fecha_hora);
+          
+          // Formatear fecha y hora por separado
+          const fechaFormateada = fechaCompleta.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+          
+          const horaFormateada = fechaCompleta.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+          }).toLowerCase(); // Convertir am/pm a minúsculas
+          
           const tipoActividad = props.tipo_actividad === 'entrada' ? 'Entrada' : 
                                props.tipo_actividad === 'salida' ? 'Salida' : 
                                'Registro';
@@ -696,7 +730,9 @@ const inicializarMapa = (datos) => {
           popupData.value = {
             coordinates: coordinates,
             usuario: usuario,
-            fecha: fecha,
+            fecha: fechaCompleta.toLocaleString('es-ES'), // Mantener para compatibilidad
+            fechaFormateada: fechaFormateada,
+            horaFormateada: horaFormateada,
             tipoActividad: tipoActividad,
             tipoClase: props.tipo_actividad,
             coordenadasTexto: `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`
@@ -1790,6 +1826,16 @@ onUnmounted(() => {
   margin-bottom: 0;
 }
 
+.popup-datetime-section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.popup-datetime-section .popup-row {
+  margin-bottom: 6px;
+}
+
 .popup-usuario {
   font-weight: 500;
   font-size: 14px;
@@ -1800,6 +1846,19 @@ onUnmounted(() => {
   font-size: 11px;
   font-family: monospace;
   color: #6b7280;
+}
+
+.popup-fecha {
+  font-size: 12px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.popup-hora {
+  font-size: 12px;
+  color: #374151;
+  font-weight: 500;
+  font-family: monospace;
 }
 
 .popup-footer {

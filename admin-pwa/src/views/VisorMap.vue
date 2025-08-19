@@ -146,6 +146,67 @@
             <button @click="cargarDatos" class="retry-btn">Reintentar</button>
           </div>
           <div id="mapa-principal" class="mapa-area"></div>
+          
+          <!-- Popup personalizado -->
+          <div v-show="showCustomPopup" 
+               class="custom-popup" 
+               :class="'popup-' + popupData.tipoClase" 
+               :style="{ top: popupY + 'px', left: popupX + 'px' }">
+            <div class="popup-header">
+              <div class="popup-title">
+                <!-- Iconos según el tipo de actividad -->
+                <svg v-if="popupData.tipoClase === 'entrada'" class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                  <polyline points="10 17 15 12 10 7"/>
+                  <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                <svg v-else-if="popupData.tipoClase === 'salida'" class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <svg v-else-if="popupData.tipoClase === 'registro-hoy'" class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <svg v-else class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <strong>{{ popupData.tipoActividad }}</strong>
+              </div>
+              <span class="popup-fecha">{{ popupData.fecha }}</span>
+            </div>
+            <div class="popup-body">
+              <div class="popup-row">
+                <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <div class="popup-usuario">{{ popupData.usuario }}</div>
+              </div>
+              <div class="popup-row">
+                <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <div class="popup-coordenadas">{{ popupData.coordenadasTexto }}</div>
+              </div>
+            </div>
+            <div class="popup-footer">
+              <button class="popup-btn" @click="verDetallesRegistro">
+                <svg class="popup-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <line x1="11" y1="8" x2="11" y2="14"/>
+                  <line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+                Ver detalles
+              </button>
+            </div>
+            <!-- Flecha indicadora que apunta al punto en el mapa -->
+            <div class="popup-arrow"></div>
+          </div>
         </div>
       </div>
     </main>
@@ -180,6 +241,19 @@ const totalPuntosEnMapa = ref(0)
 let map = null
 let puntosSource = null
 let hasDatosUsuario = ref(false)
+
+// Estado del popup personalizado
+const showCustomPopup = ref(false)
+const popupX = ref(0)
+const popupY = ref(0)
+const popupData = ref({
+  coordinates: [],
+  usuario: '',
+  fecha: '',
+  tipoActividad: '',
+  tipoClase: '',
+  coordenadasTexto: ''
+})
 
 // Registros y filtrado
 const registros = ref([])
@@ -589,45 +663,56 @@ const inicializarMapa = (datos) => {
       
       // Eliminamos los eventos relacionados con clústeres, ya que no los usamos más
       
+      // Usaremos las variables del componente principal para el popup
+
       // Evento al hacer clic en un punto individual
       map.on('click', 'unclustered-point', (e) => {
+        console.log('Click en punto individual', e.features[0]);
         const props = e.features[0].properties;
         const coordinates = e.features[0].geometry.coordinates.slice();
         
         // Asegurar que las coordenadas sean válidas
         if (!isNaN(coordinates[0]) && !isNaN(coordinates[1])) {
-          // Mostrar popup con información del punto
+          // Obtener información del punto
           const usuario = props.nombre || `Usuario ${props.usuario_id}`;
           const fecha = new Date(props.fecha_hora).toLocaleString('es-ES');
           const tipoActividad = props.tipo_actividad === 'entrada' ? 'Entrada' : 
                                props.tipo_actividad === 'salida' ? 'Salida' : 
                                'Registro';
           
-          // Crear popup con diseño personalizado
-          const popupContent = `
-            <div class="mapbox-popup-content">
-              <div class="popup-header ${props.tipo_actividad}">
-                <h4>${tipoActividad}</h4>
-                <span class="popup-fecha">${fecha}</span>
-              </div>
-              <div class="popup-body">
-                <div class="popup-usuario">${usuario}</div>
-                <div class="popup-coordenadas">
-                  ${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}
-                </div>
-              </div>
-            </div>
-          `;
+          // Convertir coordenadas geográficas a coordenadas de pantalla
+          const point = map.project(coordinates);
           
-          new mapboxgl.Popup({
-            closeButton: true,
-            closeOnClick: true,
-            maxWidth: '300px',
-            className: 'mapbox-custom-popup'
-          })
-          .setLngLat(coordinates)
-          .setHTML(popupContent)
-          .addTo(map);
+          // Actualizar variables globales del popup
+          popupData.value = {
+            coordinates: coordinates,
+            usuario: usuario,
+            fecha: fecha,
+            tipoActividad: tipoActividad,
+            tipoClase: props.tipo_actividad,
+            coordenadasTexto: `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`
+          };
+          
+          // Posicionar el popup justo encima del punto, dejando espacio para la flecha
+          popupX.value = point.x;
+          popupY.value = point.y - 20; // Más cercano al punto para que la flecha apunte correctamente
+          showCustomPopup.value = true;
+          
+          console.log('Mostrando popup en:', popupX.value, popupY.value);
+          console.log('Datos del popup:', popupData.value);
+          
+          // Evitar que se propague el evento para no cerrar el popup inmediatamente
+          e.originalEvent.stopPropagation();
+        }
+      });
+      
+      // Cerrar el popup al hacer clic en cualquier lugar del mapa
+      map.on('click', (e) => {
+        // Verificar si el clic fue directamente en el mapa (y no en un punto)
+        const features = map.queryRenderedFeatures(e.point, { layers: ['unclustered-point'] });
+        if (features.length === 0) {
+          console.log('Cerrar popup - clic fuera de punto');
+          showCustomPopup.value = false;
         }
       });
       
@@ -638,6 +723,23 @@ const inicializarMapa = (datos) => {
       
       map.on('mouseleave', 'unclustered-point', () => {
         map.getCanvas().style.cursor = '';
+      });
+      
+      // Actualizar la posición del popup cuando el mapa se mueve
+      map.on('move', () => {
+        // Si el popup está abierto y hay coordenadas, actualizar su posición
+        if (showCustomPopup.value && popupData.value.coordinates && popupData.value.coordinates.length) {
+          const point = map.project(popupData.value.coordinates);
+          popupX.value = point.x;
+          popupY.value = point.y - 20; // Mantener la misma distancia arriba del punto
+          console.log('Actualizando posición del popup en move:', popupX.value, popupY.value);
+        }
+      });
+      
+      // Cerrar popup al hacer zoom
+      map.on('zoom', () => {
+        console.log('Cerrar popup - zoom');
+        showCustomPopup.value = false;
       });
       
       // Actualizar puntos en el mapa
@@ -809,6 +911,19 @@ const esUbicacionReciente = (fechaStr) => {
     console.error('Error al procesar fecha:', e);
     return false;
   }
+}
+
+// Función para manejar el clic en "Ver detalles" en el popup
+const verDetallesRegistro = () => {
+  // Obtiene los datos actuales del popup
+  const registro = popupData.value;
+  
+  // Aquí puedes implementar lo que quieras hacer con los detalles del registro
+  // Por ejemplo, abrir un modal con más información, navegar a una página de detalles, etc.
+  console.log('Ver detalles del registro:', registro);
+  
+  // Por ahora, simplemente cerramos el popup
+  showCustomPopup.value = false;
 }
 
 // Recargar mapa y datos
@@ -1444,16 +1559,222 @@ onUnmounted(() => {
 /* Estilos específicos para Mapbox */
 @import url('https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css');
 
-/* Personalización de popups */
-.mapbox-custom-popup .mapboxgl-popup-content {
-  padding: 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+/* Personalización de popups personalizados */
+.custom-popup {
+  position: absolute;
+  width: 280px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  transform: translate(-50%, -105%);
+  pointer-events: auto;
+  font-family: 'Inter', 'Poppins', sans-serif;
+  overflow: visible; /* Permite que la flecha sea visible */
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Colores dinámicos según tipo de registro */
+.custom-popup.popup-entrada {
+  background-color: #f0fdf4;
+  border: 1px solid rgba(50, 205, 50, 0.3);
+}
+
+.custom-popup.popup-salida {
+  background-color: #fef2f2;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.custom-popup.popup-registro-hoy {
+  background-color: #eff6ff;
+  border: 1px solid rgba(30, 58, 138, 0.3);
+}
+
+.custom-popup.popup-registro-antiguo, 
+.custom-popup.popup-antiguo {
+  background-color: #fff7ed;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+/* Estilos para la flecha indicadora */
+.popup-arrow {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 10px;
   overflow: hidden;
 }
 
-.mapbox-popup-content {
-  font-family: 'Inter', 'Poppins', sans-serif;
+.popup-arrow::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  transform: translateY(-50%) rotate(45deg);
+  top: 0;
+  left: 3px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Colores de la flecha según el tipo */
+.popup-entrada .popup-arrow::after {
+  background-color: #f0fdf4;
+  border-right: 1px solid rgba(50, 205, 50, 0.3);
+  border-bottom: 1px solid rgba(50, 205, 50, 0.3);
+}
+
+.popup-salida .popup-arrow::after {
+  background-color: #fef2f2;
+  border-right: 1px solid rgba(220, 38, 38, 0.3);
+  border-bottom: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.popup-registro-hoy .popup-arrow::after {
+  background-color: #eff6ff;
+  border-right: 1px solid rgba(30, 58, 138, 0.3);
+  border-bottom: 1px solid rgba(30, 58, 138, 0.3);
+}
+
+.popup-registro-antiguo .popup-arrow::after,
+.popup-antiguo .popup-arrow::after {
+  background-color: #fff7ed;
+  border-right: 1px solid rgba(255, 152, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.popup-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.popup-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.popup-icon-small {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Colores de iconos y texto según tipo */
+.popup-entrada .popup-icon,
+.popup-entrada .popup-icon-small,
+.popup-entrada strong {
+  color: #22c55e;
+}
+
+.popup-salida .popup-icon,
+.popup-salida .popup-icon-small,
+.popup-salida strong {
+  color: #ef4444;
+}
+
+.popup-registro-hoy .popup-icon,
+.popup-registro-hoy .popup-icon-small,
+.popup-registro-hoy strong {
+  color: #1e40af;
+}
+
+.popup-registro-antiguo .popup-icon,
+.popup-registro-antiguo .popup-icon-small,
+.popup-antiguo .popup-icon,
+.popup-antiguo .popup-icon-small,
+.popup-registro-antiguo strong,
+.popup-antiguo strong {
+  color: #f59e0b;
+}
+
+.popup-header strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.popup-fecha {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(107, 114, 128, 0.8);
+  background-color: rgba(0, 0, 0, 0.04);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.popup-body {
+  padding: 12px 14px;
+}
+
+.popup-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.popup-row:last-child {
+  margin-bottom: 0;
+}
+
+.popup-usuario {
+  font-weight: 500;
+  font-size: 14px;
+  color: #111827;
+}
+
+.popup-coordenadas {
+  font-size: 11px;
+  font-family: monospace;
+  color: #6b7280;
+}
+
+.popup-footer {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.popup-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background-color: rgba(0, 0, 0, 0.04);
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.popup-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.popup-btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Adaptación para modo móvil */
+@media (max-width: 640px) {
+  .custom-popup {
+    width: 240px;
+  }
 }
 
 /* Estilos para el tooltip de ayuda de zoom */

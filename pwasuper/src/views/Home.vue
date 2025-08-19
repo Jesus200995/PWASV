@@ -240,19 +240,19 @@
                 
                 <!-- Estado completado -->
                 <div v-else-if="latitud && longitud" class="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-dark-green glass-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span class="text-sm font-medium tracking-wide">Ubicación Obtenida</span>
+                  <span class="text-sm font-bold tracking-wide glass-text">Ubicación Obtenida</span>
                 </div>
                 
                 <!-- Estado inicial -->
                 <div v-else class="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-white location-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span class="text-sm font-medium tracking-wide">Obtener Ubicación</span>
+                  <span class="text-sm font-bold tracking-wider text-white location-text">Obtener Ubicación</span>
                 </div>
               </button>
 
@@ -392,17 +392,17 @@
           >
             <!-- Estado completado -->
             <div v-if="latitudRegistro && longitudRegistro" class="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-dark-green glass-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="text-sm font-medium tracking-wide">Ubicación Obtenida</span>
+              <span class="text-sm font-bold tracking-wide glass-text">Ubicación Obtenida</span>
             </div>
             
             <!-- Estado inicial -->
             <div v-else class="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 mr-3"
+                class="h-5 w-5 mr-3 text-white location-icon"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -420,7 +420,7 @@
                   d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              <span class="text-sm font-medium tracking-wide">Obtener Ubicación</span>
+              <span class="text-sm font-bold tracking-wider text-white location-text">Obtener Ubicación</span>
             </div>
           </button>
 
@@ -2546,15 +2546,15 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 
 .location-button {
   background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.9) 0%,    /* Azul suave en el centro */
-    rgba(37, 99, 235, 1) 50%,      /* Azul intenso */
-    rgba(29, 78, 216, 1) 100%      /* Azul fuerte en los bordes */
+    rgba(54, 231, 187, 0.9) 0%,    /* Color #36E7BB suave */
+    rgba(42, 210, 170, 1) 50%,     /* Turquesa medio */
+    rgba(30, 180, 150, 1) 100%     /* Turquesa oscuro en los bordes */
   );
-  border: 2px solid rgba(37, 99, 235, 0.8);
+  border: 2px solid rgba(54, 231, 187, 0.8);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   box-shadow: 
-    0 8px 32px 0 rgba(59, 130, 246, 0.4),
+    0 8px 32px 0 rgba(54, 231, 187, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
     inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
@@ -2569,55 +2569,101 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 .location-button:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.02);
   box-shadow: 
-    0 12px 40px 0 rgba(59, 130, 246, 0.5),
+    0 12px 40px 0 rgba(54, 231, 187, 0.5),
     0 0 0 2px rgba(255, 255, 255, 0.2),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
     inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
   background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 1) 0%,
-    rgba(37, 99, 235, 1) 50%,
-    rgba(29, 78, 216, 1) 100%
+    rgba(54, 231, 187, 1) 0%,
+    rgba(42, 210, 170, 1) 50%,
+    rgba(30, 180, 150, 1) 100%
   );
-  border-color: rgba(59, 130, 246, 0.9);
+  border-color: rgba(54, 231, 187, 0.9);
 }
 
 .location-button:active:not(:disabled) {
   transform: translateY(-1px) scale(1.01);
   box-shadow: 
-    0 6px 20px 0 rgba(59, 130, 246, 0.4),
+    0 6px 20px 0 rgba(54, 231, 187, 0.4),
     inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* Estado de éxito con gradiente verde-azul */
+/* Estado de éxito con efecto de vidrio (glassmorphism) y color #3FDE99 */
 .location-button-success {
-  background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.9) 0%,    /* Verde esmeralda suave */
-    rgba(5, 150, 105, 1) 50%,      /* Verde esmeralda intenso */
-    rgba(4, 120, 87, 1) 100%       /* Verde oscuro en bordes */
-  ) !important;
-  border-color: rgba(16, 185, 129, 0.8) !important;
+  background: rgba(63, 222, 153, 0.4) !important; /* Color base #3FDE99 con transparencia */
+  backdrop-filter: blur(15px) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(63, 222, 153, 0.7) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.5) !important;
   box-shadow: 
-    0 8px 32px 0 rgba(16, 185, 129, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
-  animation: success-pulse 2s ease-in-out infinite;
+    0 8px 32px 0 rgba(63, 222, 153, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 0 rgba(63, 222, 153, 0.2);
+  color: rgba(0, 40, 20, 0.9) !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+  animation: glass-shine 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de brillo para botones con efecto de vidrio */
+@keyframes glass-shine {
+  0% {
+    background: rgba(63, 222, 153, 0.4);
+  }
+  50% {
+    background: rgba(63, 222, 153, 0.6);
+  }
+  100% {
+    background: rgba(63, 222, 153, 0.4);
+  }
 }
 
 .location-button-success:hover:not(:disabled) {
-  background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 1) 0%,
-    rgba(5, 150, 105, 1) 50%,
-    rgba(4, 120, 87, 1) 100%
-  ) !important;
-  border-color: rgba(16, 185, 129, 0.9) !important;
+  background: rgba(63, 222, 153, 0.6) !important;
+  border: 1px solid rgba(63, 222, 153, 0.9) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.7) !important;
   box-shadow: 
-    0 12px 40px 0 rgba(16, 185, 129, 0.5),
-    0 0 0 2px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    0 12px 40px 0 rgba(63, 222, 153, 0.5),
+    0 0 10px 2px rgba(63, 222, 153, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-3px) scale(1.03);
 }
 
-/* Efecto de brillo para el botón */
+/* Efecto de reflejos para el botón de ubicación obtenida */
+.location-button-success::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  animation: glass-sweep 6s infinite linear;
+}
+
+@keyframes glass-sweep {
+  0% {
+    transform: rotate(30deg) translateX(-100%);
+  }
+  50% {
+    transform: rotate(30deg) translateX(100%);
+  }
+  100% {
+    transform: rotate(30deg) translateX(100%);
+  }
+}
+
+/* Efecto de brillo para el botón normal */
 .location-button::before {
   content: '';
   position: absolute;
@@ -2693,19 +2739,58 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
+/* Estilos para los elementos dentro del botón de vidrio */
+.glass-text {
+  color: rgba(0, 40, 20, 0.9);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.glass-icon {
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.5));
+  color: rgba(0, 40, 20, 0.7) !important;
+  opacity: 0.9;
+}
+
+.text-dark-green {
+  color: rgba(0, 40, 20, 0.8);
+}
+
+/* Efectos para el botón Obtener Ubicación */
+.location-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.location-icon {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s ease;
+}
+
+.location-button:hover .location-text {
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.location-button:hover .location-icon {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
 /* Animaciones */
 @keyframes success-pulse {
   0%, 100% {
     box-shadow: 
-      0 8px 32px 0 rgba(16, 185, 129, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.1),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+      0 8px 32px 0 rgba(63, 222, 153, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.2),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
   }
   50% {
     box-shadow: 
-      0 8px 32px 0 rgba(16, 185, 129, 0.6),
-      0 0 0 2px rgba(16, 185, 129, 0.3),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+      0 8px 32px 0 rgba(63, 222, 153, 0.6),
+      0 0 0 2px rgba(63, 222, 153, 0.3),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
   }
 }
 

@@ -1346,7 +1346,9 @@ function verificarEstadoAsistencia() {
     const ahora = new Date();
     const fechaHoy = ahora.toISOString().split('T')[0];
     
-    // Cada día es un nuevo registro, así que primero limpiamos los estados
+    console.log(`🔍 Verificando estado de asistencia para ${fechaHoy}`);
+    
+    // Reiniciar estados por defecto (suponemos que no hay registros)
     entradaMarcada.value = false;
     salidaMarcada.value = false;
     datosEntrada.value = {};
@@ -1357,19 +1359,81 @@ function verificarEstadoAsistencia() {
     
     if (estadoHoy) {
       const datos = JSON.parse(estadoHoy);
-      entradaMarcada.value = datos.entradaMarcada || false;
-      salidaMarcada.value = datos.salidaMarcada || false;
-      datosEntrada.value = datos.datosEntrada || {};
-      datosSalida.value = datos.datosSalida || {};
+      
+      // Verificar si los datos están dentro del periodo de validez (antes de las 23:59:59)
+      const expiraEn = datos.expiraEn ? new Date(datos.expiraEn) : new Date(fechaHoy + 'T23:59:59');
+      const esValido = ahora < expiraEn;
+      
+      console.log(`📊 Datos locales encontrados para hoy:`, {
+        entrada: !!datos.entradaMarcada,
+        salida: !!datos.salidaMarcada,
+        expiraEn: expiraEn.toLocaleTimeString(),
+        esValido,
+        horaActual: ahora.toLocaleTimeString()
+      });
+      
+      if (esValido) {
+        // Los datos son válidos (todavía estamos en el mismo día antes de las 23:59:59)
+        console.log(`✅ Usando datos locales válidos (expiran a las 23:59:59)`);
+        entradaMarcada.value = datos.entradaMarcada || false;
+        salidaMarcada.value = datos.salidaMarcada || false;
+        datosEntrada.value = datos.datosEntrada || {};
+        datosSalida.value = datos.datosSalida || {};
+      } else {
+        console.log(`⚠️ Datos locales expirados, reiniciando estados`);
+      }
+    } else {
+      console.log(`ℹ️ No hay datos guardados para hoy, consultando backend`);
     }
 
     // Limpiamos datos de días anteriores para no acumular basura en localStorage
     limpiarDatosAntiguos();
 
-    // Después de cargar del localStorage, verificar con el backend
+    // Después de cargar del localStorage, verificar con el backend para tener datos actualizados
     verificarAsistenciaHoy();
   } catch (error) {
     console.error('Error al verificar estado de asistencia:', error);
+  }
+}
+
+// Función para asegurar que los estados se mantengan correctamente hasta las 23:59:59
+function asegurarEstadosConsistentes() {
+  if (!user.value.id) return;
+  
+  const ahora = new Date();
+  const fechaHoy = ahora.toISOString().split('T')[0];
+  
+  console.log('🔐 Verificando consistencia de estados de asistencia...');
+  
+  try {
+    const estadoHoy = localStorage.getItem(`asistencia_${user.value.id}_${fechaHoy}`);
+    
+    if (estadoHoy) {
+      const datos = JSON.parse(estadoHoy);
+      
+      // Verificar si estamos antes de la hora de expiración (23:59:59)
+      const expiraEn = datos.expiraEn ? new Date(datos.expiraEn) : new Date(fechaHoy + 'T23:59:59');
+      
+      if (ahora < expiraEn) {
+        console.log('✅ Asegurando estados hasta las 23:59:59');
+        
+        // Si en localStorage indica que la entrada fue marcada, asegurar que se refleje en el estado
+        if (datos.entradaMarcada && !entradaMarcada.value) {
+          console.log('🔄 Restaurando estado de entrada marcada');
+          entradaMarcada.value = true;
+          datosEntrada.value = datos.datosEntrada || {};
+        }
+        
+        // Si en localStorage indica que la salida fue marcada, asegurar que se refleje en el estado
+        if (datos.salidaMarcada && !salidaMarcada.value) {
+          console.log('🔄 Restaurando estado de salida marcada');
+          salidaMarcada.value = true;
+          datosSalida.value = datos.datosSalida || {};
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error al asegurar estados consistentes:', error);
   }
 }
 
@@ -1398,87 +1462,86 @@ function limpiarDatosAntiguos() {
 /**
  * Consulta al backend si el usuario ya registró entrada/salida hoy
  */
-async function verificarAsistenciaHoy(forceRefresh = false) {
-  verificandoAsistencia.value = true;
-  try {
-    // Verificar conexión a internet antes de consultar
-    isOnline.value = await checkInternetConnection();
-    if (!isOnline.value) {
-      console.log('Sin conexión, usando datos locales de asistencia');
-      return;
-    }
+  async function verificarAsistenciaHoy(forceRefresh = false) {
+    verificandoAsistencia.value = true;
+    try {
+      // Verificar conexión a internet antes de consultar
+      isOnline.value = await checkInternetConnection();
+      if (!isOnline.value) {
+        console.log('Sin conexión, usando datos locales de asistencia');
+        return;
+      }
 
-    // Obtener la fecha actual para comparar
-    const fechaActual = new Date().toISOString().split('T')[0];
-    
-    console.log(`🔍 Consultando asistencia del día con forceRefresh=${forceRefresh}`);
-    const datos = await asistenciasService.consultarAsistenciaHoy(user.value.id, forceRefresh);
-    asistenciaHoy.value = datos;
-    
-    // Verificar que los datos correspondan al día actual
-    if (datos.fecha && datos.fecha === fechaActual) {
-      // Actualizar estado de botones según la respuesta del backend
-      if (datos.entrada) {
-        entradaMarcada.value = true;
-        datosEntrada.value = {
-          hora: formatearHora(datos.entrada),
-          descripcion: datos.descripcion_entrada || '',
-          latitud: datos.latitud_entrada,
-          longitud: datos.longitud_entrada,
-          foto_url: datos.foto_entrada_url
-        };
+      // Obtener la fecha actual para comparar (CDMX)
+      const ahora = new Date();
+      const fechaActual = ahora.toISOString().split('T')[0];
+      
+      console.log(`🔍 Consultando asistencia del día con forceRefresh=${forceRefresh}`);
+      const datos = await asistenciasService.consultarAsistenciaHoy(user.value.id, forceRefresh);
+      asistenciaHoy.value = datos;
+      
+      // Verificar que los datos correspondan al día actual
+      if (datos.fecha && datos.fecha === fechaActual) {
+        // Actualizar estado de botones según la respuesta del backend
+        if (datos.entrada) {
+          entradaMarcada.value = true;
+          datosEntrada.value = {
+            hora: formatearHora(datos.entrada),
+            descripcion: datos.descripcion_entrada || '',
+            latitud: datos.latitud_entrada,
+            longitud: datos.longitud_entrada,
+            foto_url: datos.foto_entrada_url
+          };
+        } else {
+          // Si no hay entrada registrada hoy, resetear estado
+          entradaMarcada.value = false;
+          datosEntrada.value = {};
+        }
+        
+        if (datos.salida) {
+          salidaMarcada.value = true;
+          datosSalida.value = {
+            hora: formatearHora(datos.salida),
+            descripcion: datos.descripcion_salida || '',
+            latitud: datos.latitud_salida,
+            longitud: datos.longitud_salida,
+            foto_url: datos.foto_salida_url
+          };
+        } else {
+          // Si no hay salida registrada hoy, resetear estado de salida
+          salidaMarcada.value = false;
+          datosSalida.value = {};
+        }
+        
+        // Guardar estado actualizado
+        guardarEstadoAsistencia();
       } else {
-        // Si no hay entrada registrada hoy, resetear estado
+        console.log('Sin registros para el día de hoy. Reiniciando estados.');
+        // Es un nuevo día, reiniciar estados
         entradaMarcada.value = false;
-        datosEntrada.value = {};
-      }
-      
-      if (datos.salida) {
-        salidaMarcada.value = true;
-        datosSalida.value = {
-          hora: formatearHora(datos.salida),
-          descripcion: datos.descripcion_salida || '',
-          latitud: datos.latitud_salida,
-          longitud: datos.longitud_salida,
-          foto_url: datos.foto_salida_url
-        };
-      } else {
-        // Si no hay salida registrada hoy, resetear estado de salida
         salidaMarcada.value = false;
+        datosEntrada.value = {};
         datosSalida.value = {};
+        guardarEstadoAsistencia();
       }
+    } catch (error) {
+      console.error('Error al verificar asistencia de hoy:', error);
+      // Si hay error de conexión pero es un nuevo día, reiniciar estados
+      const fechaGuardada = localStorage.getItem(`asistencia_ultima_fecha_${user.value.id}`);
+      const fechaActual = new Date().toISOString().split('T')[0];
       
-      // Guardar estado actualizado
-      guardarEstadoAsistencia();
-    } else {
-      console.log('Sin registros para el día de hoy. Reiniciando estados.');
-      // Es un nuevo día, reiniciar estados
-      entradaMarcada.value = false;
-      salidaMarcada.value = false;
-      datosEntrada.value = {};
-      datosSalida.value = {};
-      guardarEstadoAsistencia();
+      if (fechaGuardada !== fechaActual) {
+        // Es un nuevo día, reiniciar estados incluso sin conexión
+        entradaMarcada.value = false;
+        salidaMarcada.value = false;
+        datosEntrada.value = {};
+        datosSalida.value = {};
+        guardarEstadoAsistencia();
+      }
+    } finally {
+      verificandoAsistencia.value = false;
     }
-  } catch (error) {
-    console.error('Error al verificar asistencia de hoy:', error);
-    // Si hay error de conexión pero es un nuevo día, reiniciar estados
-    const fechaGuardada = localStorage.getItem(`asistencia_ultima_fecha_${user.value.id}`);
-    const fechaActual = new Date().toISOString().split('T')[0];
-    
-    if (fechaGuardada !== fechaActual) {
-      // Es un nuevo día, reiniciar estados incluso sin conexión
-      entradaMarcada.value = false;
-      salidaMarcada.value = false;
-      datosEntrada.value = {};
-      datosSalida.value = {};
-      guardarEstadoAsistencia();
-    }
-  } finally {
-    verificandoAsistencia.value = false;
-  }
-}
-
-/**
+  }/**
  * Formatea una fecha ISO a formato de hora local
  */
 function formatearHora(fechaISO) {
@@ -1491,13 +1554,24 @@ function guardarEstadoAsistencia() {
   const ahora = new Date();
   const fechaHoy = ahora.toISOString().split('T')[0];
   
+  // Configurar expiración a las 23:59:59 del día actual
+  const finDelDia = new Date();
+  finDelDia.setHours(23, 59, 59, 999);
+  
   const estado = {
     entradaMarcada: entradaMarcada.value,
     salidaMarcada: salidaMarcada.value,
     datosEntrada: datosEntrada.value,
     datosSalida: datosSalida.value,
-    ultimaActualizacion: ahora.toISOString()
+    ultimaActualizacion: ahora.toISOString(),
+    // Guardar hora de expiración a las 23:59:59 del día actual
+    expiraEn: finDelDia.toISOString()
   };
+  
+  console.log(`💾 Guardando estado de asistencia para el día ${fechaHoy}`);
+  console.log(`   ⏰ Entrada marcada: ${entradaMarcada.value}`);
+  console.log(`   ⏰ Salida marcada: ${salidaMarcada.value}`);
+  console.log(`   📅 Expira a las: ${finDelDia.toLocaleTimeString()} (23:59:59 hora local)`);
   
   // Guardar el estado del día actual
   localStorage.setItem(`asistencia_${user.value.id}_${fechaHoy}`, JSON.stringify(estado));
@@ -1805,6 +1879,22 @@ function handleSyncEvent(event, online, data) {
   }
 }
 
+// Añadir una verificación periódica para asegurar que el estado de los botones se mantenga consistente
+let verificacionPeriodica;
+
+// Comprobación si un horario está dentro del día actual (antes de las 23:59:59)
+function esHorarioDentroDelDiaActual() {
+  const ahora = new Date();
+  const finDelDia = new Date();
+  
+  // Establecer a las 23:59:59 del día actual
+  finDelDia.setHours(23, 59, 59, 999);
+  
+  console.log(`⏰ Verificación de horario: ${ahora.toLocaleTimeString()} < ${finDelDia.toLocaleTimeString()} = ${ahora < finDelDia}`);
+  
+  return ahora < finDelDia;
+}
+
 onMounted(async () => {
   // Verificar si el usuario está autenticado
   if (!user.value.id) {
@@ -1815,7 +1905,9 @@ onMounted(async () => {
   // Registrar manejador de eventos de sincronización
   syncService.addListener(handleSyncEvent);
   
-  // Verificar estado de asistencia del día
+  console.log('🚀 Inicializando componente Home, verificando estado de asistencia');
+  
+  // Verificar estado de asistencia del día inmediatamente
   verificarEstadoAsistencia();
   
   // Verificar conexión a internet
@@ -1854,16 +1946,48 @@ onMounted(async () => {
     console.error('❌ Error verificando servicio de geolocalización:', error);
   }
   
-  // Limpiar manejador de eventos al desmontar el componente
-  onUnmounted(() => {
-    syncService.removeListener(handleSyncEvent);
-  });
+  // Realizar una verificación inicial de consistencia
+  asegurarEstadosConsistentes();
+  
+  // MEJORA: Establecer verificación periódica del estado de asistencia
+  // Esta verificación asegura que los estados se mantengan correctos durante todo el día
+  verificacionPeriodica = setInterval(() => {
+    console.log('🔄 Verificación periódica de estado de asistencia');
+    // Verificar si todavía estamos en el mismo día (antes de 23:59:59)
+    if (esHorarioDentroDelDiaActual()) {
+      // Asegurar consistencia local primero
+      asegurarEstadosConsistentes();
+      
+      // Estamos en el mismo día, verificar estados con backend si hay conexión
+      if (navigator.onLine) {
+        console.log('🔄 Actualizando estados desde backend');
+        verificarAsistenciaHoy(true);
+      } else {
+        console.log('📴 Sin conexión, manteniendo estados actuales');
+      }
+    } else {
+      console.log('📆 Día finalizado (después de 23:59:59), esperando cambio de fecha');
+    }
+  }, 3 * 60 * 1000); // Verificar cada 3 minutos (reducido para mayor frecuencia)
+});
+
+// Limpiar recursos al desmontar el componente
+onUnmounted(() => {
+  syncService.removeListener(handleSyncEvent);
+  
+  // Limpiar verificación periódica
+  if (verificacionPeriodica) {
+    clearInterval(verificacionPeriodica);
+    console.log('🧹 Limpiado intervalo de verificación de asistencia');
+  }
 });
 
 // Watcher para guardar cambios de asistencia en localStorage
 watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   if (user.value.id) {
     guardarEstadoAsistencia();
+    // Asegurar consistencia después de guardar
+    asegurarEstadosConsistentes();
   }
 }, { deep: true });
 </script>

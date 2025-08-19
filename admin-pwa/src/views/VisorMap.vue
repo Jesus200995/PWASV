@@ -200,97 +200,99 @@
 
               <!-- Información expandida -->
               <div v-if="popupData.expandido" class="popup-expanded-content">
-                <!-- Imagen del registro -->
-                <div v-if="popupData.imagenUrl" class="popup-image-section">
-                  <div class="popup-section-header">
-                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="8.5" cy="8.5" r="1.5"/>
-                      <polyline points="21,15 16,10 5,21"/>
-                    </svg>
-                    <span class="popup-section-title">Fotografía</span>
-                  </div>
-                  <div class="popup-image-container">
-                    <img :src="popupData.imagenUrl" alt="Imagen del registro" class="popup-image" @error="onImageError" />
-                  </div>
-                </div>
+                <div class="popup-expanded-layout">
+                  <!-- Columna izquierda: Información básica -->
+                  <div class="popup-info-column">
+                    <!-- Detalles técnicos adicionales -->
+                    <div class="popup-details-grid">
+                      <!-- ID del registro -->
+                      <div class="popup-detail-item">
+                        <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M9 12h6M9 16h6M9 8h6m-8 12h8a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <div class="popup-detail">
+                          <span class="popup-detail-label">ID Registro:</span>
+                          <span class="popup-detail-value">{{ popupData.registroId || 'N/A' }}</span>
+                        </div>
+                      </div>
 
-                <!-- Sin imagen disponible -->
-                <div v-else class="popup-no-image-section">
-                  <div class="popup-section-header">
-                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="9" y1="9" x2="15" y2="15"/>
-                      <line x1="15" y1="9" x2="9" y2="15"/>
-                    </svg>
-                    <span class="popup-section-title">Sin imagen disponible</span>
-                  </div>
-                </div>
+                      <!-- Usuario ID -->
+                      <div class="popup-detail-item">
+                        <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                          <circle cx="8.5" cy="7" r="4"/>
+                          <path d="M20 8v6M23 11h-6"/>
+                        </svg>
+                        <div class="popup-detail">
+                          <span class="popup-detail-label">Usuario ID:</span>
+                          <span class="popup-detail-value">{{ popupData.usuarioId || 'N/A' }}</span>
+                        </div>
+                      </div>
+                      
+                      <!-- Precisión GPS -->
+                      <div v-if="popupData.precision" class="popup-detail-item">
+                        <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                          <circle cx="12" cy="9" r="2.5"/>
+                        </svg>
+                        <div class="popup-detail">
+                          <span class="popup-detail-label">Precisión GPS:</span>
+                          <span class="popup-detail-value">± {{ popupData.precision }}m</span>
+                        </div>
+                      </div>
 
-                <!-- Descripción del registro -->
-                <div v-if="popupData.descripcion" class="popup-description-section">
-                  <div class="popup-section-header">
-                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14,2 14,8 20,8"/>
-                      <line x1="16" y1="13" x2="8" y2="13"/>
-                      <line x1="16" y1="17" x2="8" y2="17"/>
-                      <polyline points="10,9 9,9 8,9"/>
-                    </svg>
-                    <span class="popup-section-title">Descripción</span>
-                  </div>
-                  <div class="popup-description-content">
-                    {{ popupData.descripcion }}
-                  </div>
-                </div>
-
-                <!-- Detalles técnicos adicionales -->
-                <div class="popup-details-grid">
-                  <!-- ID del registro -->
-                  <div class="popup-detail-item">
-                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M9 12h6M9 16h6M9 8h6m-8 12h8a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    <div class="popup-detail">
-                      <span class="popup-detail-label">ID Registro:</span>
-                      <span class="popup-detail-value">{{ popupData.registroId || 'N/A' }}</span>
+                      <!-- Estado de conexión -->
+                      <div v-if="popupData.estadoConexion" class="popup-detail-item">
+                        <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <div class="popup-detail">
+                          <span class="popup-detail-label">Estado:</span>
+                          <span class="popup-detail-value">{{ popupData.estadoConexion }}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <!-- Usuario ID -->
-                  <div class="popup-detail-item">
-                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                      <circle cx="8.5" cy="7" r="4"/>
-                      <path d="M20 8v6M23 11h-6"/>
-                    </svg>
-                    <div class="popup-detail">
-                      <span class="popup-detail-label">Usuario ID:</span>
-                      <span class="popup-detail-value">{{ popupData.usuarioId || 'N/A' }}</span>
+                  
+                  <!-- Columna derecha: Imagen y Descripción -->
+                  <div class="popup-image-column">
+                    <!-- Imagen -->
+                    <div v-if="popupData.imagenUrl" class="popup-image-section-compact">
+                      <div class="popup-image-container-compact">
+                        <img :src="popupData.imagenUrl" 
+                             alt="Imagen del registro" 
+                             class="popup-image-compact" 
+                             @error="onImageError"
+                             @load="onImageLoad" />
+                      </div>
                     </div>
-                  </div>
-
-                  <!-- Precisión GPS -->
-                  <div v-if="popupData.precision" class="popup-detail-item">
-                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                      <circle cx="12" cy="9" r="2.5"/>
-                    </svg>
-                    <div class="popup-detail">
-                      <span class="popup-detail-label">Precisión GPS:</span>
-                      <span class="popup-detail-value">± {{ popupData.precision }}m</span>
+                    <div v-else class="popup-no-image-section-compact">
+                      <div class="popup-no-image-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                          <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" stroke-width="2"/>
+                          <polyline points="21,15 16,10 5,21" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span class="no-image-text">Sin imagen</span>
+                      </div>
                     </div>
-                  </div>
-
-                  <!-- Estado de conexión -->
-                  <div v-if="popupData.estadoConexion" class="popup-detail-item">
-                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                    <div class="popup-detail">
-                      <span class="popup-detail-label">Estado:</span>
-                      <span class="popup-detail-value">{{ popupData.estadoConexion }}</span>
+                    
+                    <!-- Descripción debajo de la imagen con scroll -->
+                    <div v-if="popupData.descripcion" class="popup-description-section-compact">
+                      <div class="popup-section-header">
+                        <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                          <polyline points="14,2 14,8 20,8"/>
+                          <line x1="16" y1="13" x2="8" y2="13"/>
+                          <line x1="16" y1="17" x2="8" y2="17"/>
+                          <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                        <span class="popup-section-title">Descripción</span>
+                      </div>
+                      <div class="popup-description-scrollable">
+                        {{ popupData.descripcion }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1121,7 +1123,15 @@ const toggleDetallesRegistro = () => {
 // Función para manejar errores de carga de imagen
 const onImageError = (event) => {
   console.log('Error al cargar imagen:', event.target.src);
+  // Ocultar la imagen y reemplazar con placeholder
   event.target.style.display = 'none';
+  // Cambiar la URL para mostrar placeholder
+  popupData.value.imagenUrl = null;
+}
+
+// Función para manejar carga exitosa de imagen  
+const onImageLoad = (event) => {
+  console.log('Imagen cargada correctamente:', event.target.src);
 }
 
 // Función para cerrar el popup cuando se hace clic en el botón X
@@ -1787,10 +1797,11 @@ onUnmounted(() => {
   overflow-wrap: break-word;
 }
 
-/* Popup expandido */
+/* Popup expandido - dimensiones rectangulares */
 .custom-popup:has(.popup-expanded-content) {
-  max-width: 400px;
-  min-width: 350px;
+  max-width: 650px;
+  min-width: 600px;
+  width: auto;
 }
 
 /* Colores dinámicos según tipo de registro */
@@ -2091,6 +2102,27 @@ onUnmounted(() => {
   animation: expandContent 0.3s ease-out;
 }
 
+/* Layout de dos columnas para popup expandido */
+.popup-expanded-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  min-height: 200px;
+}
+
+.popup-info-column {
+  flex: 1;
+  width: 50%;
+  min-width: 0;
+}
+
+.popup-image-column {
+  flex: 1;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+}
+
 @keyframes expandContent {
   from {
     opacity: 0;
@@ -2108,6 +2140,106 @@ onUnmounted(() => {
 
 .popup-image-section {
   margin-bottom: 16px;
+}
+
+/* Estilos para imagen compacta en layout de dos columnas */
+.popup-image-section-compact {
+  margin-bottom: 0;
+}
+
+.popup-image-container-compact {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  max-height: 120px;
+  margin-bottom: 12px;
+}
+
+.popup-image-compact {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.popup-no-image-section-compact {
+  margin-bottom: 0;
+}
+
+.popup-no-image-section-compact .popup-section-header {
+  opacity: 0.6;
+}
+
+.popup-no-image-placeholder {
+  width: 100%;
+  height: 100px;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.popup-no-image-placeholder svg {
+  width: 32px;
+  height: 32px;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+
+.no-image-text {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Descripción con scroll en columna derecha */
+.popup-description-section-compact {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.popup-description-scrollable {
+  flex: 1;
+  max-height: 100px;
+  overflow-y: auto;
+  padding: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #374151;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.popup-description-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.popup-description-scrollable::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.popup-description-scrollable::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.popup-description-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .popup-no-image-section {

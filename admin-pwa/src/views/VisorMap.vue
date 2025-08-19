@@ -186,7 +186,7 @@ const registros = ref([])
 const asistencias = ref([])
 const usuarios = ref([])
 
-// Estado de los clusters
+// Estado de los clusters y horario CDMX
 const clusterInfo = reactive({
   total: 0,
   entradas: 0,
@@ -194,6 +194,19 @@ const clusterInfo = reactive({
   registrosHoy: 0,
   registrosAntiguos: 0
 })
+
+// Función para obtener la fecha actual en CDMX (tiempo real)
+const obtenerFechaCDMX = () => {
+  // Horario de Ciudad de México: UTC-6 (normal) o UTC-5 (horario de verano)
+  // Para simplificar, usamos -6 como zona horaria fija para CDMX
+  const fechaUTC = new Date();
+  const offsetCDMX = -6 * 60; // -6 horas en minutos
+  const utcOffset = fechaUTC.getTimezoneOffset(); // Offset local en minutos
+  const totalOffset = offsetCDMX + utcOffset; // Diferencia entre local y CDMX
+  
+  const fechaCDMX = new Date(fechaUTC.getTime() + totalOffset * 60000);
+  return fechaCDMX;
+}
 
 // Función para cargar datos
 const cargarDatos = async () => {
@@ -343,43 +356,74 @@ const obtenerUltimasActividadesPorUsuario = (registros, asistencias) => {
   })
 }
 
-// Determinar el tipo de actividad para colores en el mapa
+// Determinar el tipo de actividad para colores en el mapa usando horario CDMX
 const determinarTipoActividad = (actividad) => {
+  // Verificar si la actividad ocurrió hoy en horario CDMX
+  const esActividadDeHoy = esUbicacionReciente(actividad.fecha_hora);
+  
+  // CASO 1: Si la actividad es de tipo entrada
   if (actividad.tipo_actividad === 'entrada') {
-    return {
-      tipo: 'entrada',
-      clase: 'entrada',
-      descripcion: 'Entrada',
-      color: '#32CD32' // Verde lima
+    // Si la entrada es de hoy (CDMX): Verde
+    if (esActividadDeHoy) {
+      return {
+        tipo: 'entrada',
+        clase: 'entrada',
+        descripcion: 'Entrada de Hoy',
+        color: '#32CD32' // Verde lima
+      };
+    } 
+    // Si la entrada NO es de hoy (CDMX): Naranja (antigua)
+    else {
+      return {
+        tipo: 'registro-antiguo',
+        clase: 'antiguo',
+        descripcion: 'Entrada Anterior',
+        color: '#FF9800' // Naranja
+      };
     }
-  } else if (actividad.tipo_actividad === 'salida') {
-    return {
-      tipo: 'salida',
-      clase: 'salida',
-      descripcion: 'Salida',
-      color: '#DC2626' // Rojo
+  }
+  
+  // CASO 2: Si la actividad es de tipo salida
+  else if (actividad.tipo_actividad === 'salida') {
+    // Si la salida es de hoy (CDMX): Rojo
+    if (esActividadDeHoy) {
+      return {
+        tipo: 'salida',
+        clase: 'salida',
+        descripcion: 'Salida de Hoy',
+        color: '#DC2626' // Rojo
+      };
     }
-  } else {
-    // Es un registro normal
-    const fechaRegistro = new Date(actividad.fecha_hora)
-    const ahora = new Date()
-    const diferenciaMilisegundos = ahora - fechaRegistro
-    const diferenciaHoras = diferenciaMilisegundos / (1000 * 60 * 60)
-    
-    if (diferenciaHoras <= 24) {
+    // Si la salida NO es de hoy (CDMX): Naranja (antigua)
+    else {
+      return {
+        tipo: 'registro-antiguo',
+        clase: 'antiguo',
+        descripcion: 'Salida Anterior',
+        color: '#FF9800' // Naranja
+      };
+    }
+  }
+  
+  // CASO 3: Si es un registro normal (ni entrada ni salida)
+  else {
+    // Si el registro es de hoy (CDMX): Azul
+    if (esActividadDeHoy) {
       return {
         tipo: 'registro-hoy',
         clase: 'registro-hoy',
         descripcion: 'Registro de Hoy',
         color: '#1E3A8A' // Azul marino
-      }
-    } else {
+      };
+    }
+    // Si el registro NO es de hoy (CDMX): Naranja (antiguo)
+    else {
       return {
         tipo: 'registro-antiguo',
         clase: 'antiguo',
         descripcion: 'Registro Anterior',
         color: '#FF9800' // Naranja
-      }
+      };
     }
   }
 }
@@ -521,7 +565,8 @@ const inicializarMapa = (datos) => {
             'entrada', '#32CD32', // Verde para entradas
             'salida', '#DC2626', // Rojo para salidas
             'registro-hoy', '#1E3A8A', // Azul para registros de hoy
-            '#FF9800' // Naranja para registros antiguos (por defecto)
+            'registro-antiguo', '#FF9800', // Naranja para registros antiguos
+            '#A9A9A9' // Gris por defecto (no debería llegar aquí)
           ],
           // Tamaño un poco más grande pero manteniendo proporción según nivel de zoom
           'circle-radius': [
@@ -663,11 +708,35 @@ const actualizarPuntosMapa = (datos) => {
   if (!map || !puntosSource) return;
   
   try {
+    // Reiniciar contadores
+    clusterInfo.total = 0;
+    clusterInfo.entradas = 0;
+    clusterInfo.salidas = 0;
+    clusterInfo.registrosHoy = 0;
+    clusterInfo.registrosAntiguos = 0;
+    
     // Convertir datos a formato GeoJSON
     const features = datos.map(punto => {
-      const tipoActividad = punto.tipo_actividad === 'registro' ? 
-                         (esUbicacionReciente(punto.fecha_hora) ? 'registro-hoy' : 'registro-antiguo') : 
-                         punto.tipo_actividad;
+      // Usar la función determinarTipoActividad para clasificar según horario CDMX
+      const infoActividad = determinarTipoActividad(punto);
+      const tipoActividad = infoActividad.tipo;
+      
+      // Verificar si la actividad es de hoy según el horario CDMX
+      const esHoy = esUbicacionReciente(punto.fecha_hora);
+      
+      // Actualizar contadores para las estadísticas
+      clusterInfo.total++;
+      
+      // Actualizar contadores basados en el tipo de actividad
+      if (tipoActividad === 'entrada') {
+        clusterInfo.entradas++;
+      } else if (tipoActividad === 'salida') {
+        clusterInfo.salidas++;
+      } else if (tipoActividad === 'registro-hoy') {
+        clusterInfo.registrosHoy++;
+      } else if (tipoActividad === 'registro-antiguo') {
+        clusterInfo.registrosAntiguos++;
+      }
       
       return {
         type: 'Feature',
@@ -714,15 +783,30 @@ const actualizarPuntosMapa = (datos) => {
   }
 }
 
-// Función auxiliar para determinar si una ubicación es reciente
+// Función auxiliar para determinar si una ubicación es reciente usando horario CDMX
 const esUbicacionReciente = (fechaStr) => {
   try {
-    const fechaRegistro = new Date(fechaStr);
-    const ahora = new Date();
-    const diferenciaMilisegundos = ahora - fechaRegistro;
-    const diferenciaHoras = diferenciaMilisegundos / (1000 * 60 * 60);
-    return diferenciaHoras <= 24;
+    // Convertir la cadena de fecha a objeto Date
+    const fechaObj = new Date(fechaStr);
+    
+    // Obtener la fecha actual en CDMX
+    const fechaCDMX = obtenerFechaCDMX();
+    
+    // Ajustar la fecha proporcionada al horario CDMX
+    const offsetCDMX = -6 * 60; // -6 horas en minutos
+    const utcOffset = fechaObj.getTimezoneOffset(); // Offset local en minutos
+    const totalOffset = offsetCDMX + utcOffset; // Diferencia entre local y CDMX
+    
+    const fechaObjCDMX = new Date(fechaObj.getTime() + totalOffset * 60000);
+    
+    // Verificar si es del mismo día (hoy en CDMX)
+    return (
+      fechaCDMX.getFullYear() === fechaObjCDMX.getFullYear() &&
+      fechaCDMX.getMonth() === fechaObjCDMX.getMonth() &&
+      fechaCDMX.getDate() === fechaObjCDMX.getDate()
+    );
   } catch (e) {
+    console.error('Error al procesar fecha:', e);
     return false;
   }
 }

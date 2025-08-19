@@ -221,6 +221,31 @@
           </router-link>
         </li>
         
+        <!-- Mapa Optimizado -->
+        <li class="nav-item" :class="{ active: $route.name === 'VisorMap' }">
+          <router-link to="/visor-map" class="nav-link">
+            <div class="nav-icon-wrapper">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Icono de mapa moderno -->
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="currentColor" opacity="0.1"/>
+                <path d="M15 3v18"/>
+                <path d="M9 3v18"/>
+                <path d="M3 9h6"/>
+                <path d="M3 15h6"/>
+                <path d="M15 9h6"/>
+                <path d="M15 15h6"/>
+                
+                <!-- Marcadores pequeños -->
+                <circle cx="7.5" cy="7.5" r="1" fill="currentColor" opacity="0.8"/>
+                <circle cx="16.5" cy="12" r="1" fill="currentColor" opacity="0.8"/>
+                <circle cx="12" cy="16.5" r="1" fill="currentColor" opacity="0.8"/>
+              </svg>
+            </div>
+            <span class="nav-text">Mapa</span>
+            <div class="nav-glow"></div>
+          </router-link>
+        </li>
+        
         <li class="nav-item" :class="{ active: $route.name === 'Asistencia' }">
           <router-link to="/asistencia" class="nav-link">
             <div class="nav-icon-wrapper">

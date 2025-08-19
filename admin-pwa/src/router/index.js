@@ -7,6 +7,7 @@ import RegistrosView from '../views/RegistrosView.vue'
 import ConfiguracionView from '../views/ConfiguracionView.vue'
 import VisorView from '../views/VisorView.vue'
 import AsistenciaView from '../views/AsistenciaView.vue'
+import VisorMapView from '../views/VisorMap.vue'
 
 const routes = [
   {
@@ -58,6 +59,14 @@ const routes = [
     path: '/visor',
     name: 'Visor',
     component: VisorView,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/visor-map',
+    name: 'VisorMap',
+    component: VisorMapView,
     meta: {
       requiresAuth: true
     }

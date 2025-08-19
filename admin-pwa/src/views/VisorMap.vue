@@ -271,7 +271,7 @@
                   <div class="popup-image-column">
                     <!-- Imagen -->
                     <div v-if="popupData.imagenUrl" class="popup-image-section-compact">
-                      <div class="popup-image-container-compact">
+                      <div class="popup-image-container-compact" @click="abrirImagenCompleta" style="cursor: pointer;" title="Click para ver imagen completa">
                         <img :src="popupData.imagenUrl" 
                              alt="Imagen del registro" 
                              class="popup-image-compact" 
@@ -356,6 +356,32 @@
         </div>
       </div>
     </main>
+    
+    <!-- Modal para ver imagen completa -->
+    <div v-if="mostrarImagenCompleta" class="image-modal-overlay" @click="cerrarImagenCompleta">
+      <div class="image-modal-container">
+        <button class="image-modal-close" @click="cerrarImagenCompleta" title="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="image-modal-content" @click.stop>
+          <img :src="imagenCompletaUrl" alt="Imagen completa" class="image-modal-img" />
+          <div class="image-modal-info">
+            <div class="image-info-row">
+              <strong>Usuario:</strong> {{ popupData.usuario }}
+            </div>
+            <div class="image-info-row">
+              <strong>Fecha:</strong> {{ popupData.fechaFormateada }}
+            </div>
+            <div class="image-info-row" v-if="popupData.descripcion">
+              <strong>Descripción:</strong> {{ popupData.descripcion }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -392,6 +418,10 @@ let hasDatosUsuario = ref(false)
 const showCustomPopup = ref(false)
 const popupX = ref(0)
 const popupY = ref(0)
+
+// Estado del modal de imagen completa
+const mostrarImagenCompleta = ref(false)
+const imagenCompletaUrl = ref('')
 const popupData = ref({
   coordinates: [],
   usuario: '',
@@ -1242,6 +1272,35 @@ const obtenerImagenAlternativa = (props, urlFallida) => {
 // Función para manejar carga exitosa de imagen  
 const onImageLoad = (event) => {
   console.log('Imagen cargada correctamente:', event.target.src);
+}
+
+// Función para abrir imagen en modal completo
+const abrirImagenCompleta = () => {
+  if (popupData.value.imagenUrl) {
+    imagenCompletaUrl.value = popupData.value.imagenUrl;
+    mostrarImagenCompleta.value = true;
+    console.log('🖼️ Abriendo imagen completa:', imagenCompletaUrl.value);
+    
+    // Agregar listener para la tecla Escape
+    document.addEventListener('keydown', handleEscapeKey);
+  }
+}
+
+// Función para cerrar modal de imagen completa
+const cerrarImagenCompleta = () => {
+  mostrarImagenCompleta.value = false;
+  imagenCompletaUrl.value = '';
+  console.log('❌ Cerrando imagen completa');
+  
+  // Remover listener de la tecla Escape
+  document.removeEventListener('keydown', handleEscapeKey);
+}
+
+// Función para manejar la tecla Escape
+const handleEscapeKey = (event) => {
+  if (event.key === 'Escape' && mostrarImagenCompleta.value) {
+    cerrarImagenCompleta();
+  }
 }
 
 // Función para cerrar el popup cuando se hace clic en el botón X
@@ -2268,6 +2327,35 @@ onUnmounted(() => {
   min-height: 100px;
   max-height: 120px;
   margin-bottom: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.popup-image-container-compact:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.popup-image-container-compact::after {
+  content: '🔍';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.popup-image-container-compact:hover::after {
+  opacity: 1;
 }
 
 .popup-image-compact {
@@ -2498,6 +2586,127 @@ onUnmounted(() => {
   font-size: 11px;
   font-weight: 600;
   border: 1px solid #fed7aa;
+}
+
+/* Modal para imagen completa */
+.image-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.image-modal-container {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.image-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10001;
+  transition: all 0.3s ease;
+}
+
+.image-modal-close:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.image-modal-close svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.image-modal-content {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.image-modal-img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  background: #f8f9fa;
+}
+
+.image-modal-info {
+  padding: 20px;
+  background: white;
+  border-top: 1px solid #e9ecef;
+}
+
+.image-info-row {
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.image-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.image-info-row strong {
+  color: #495057;
+  margin-right: 8px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive para el modal */
+@media (max-width: 768px) {
+  .image-modal-container {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+  
+  .image-modal-img {
+    max-height: 60vh;
+  }
+  
+  .image-modal-info {
+    padding: 15px;
+  }
+  
+  .image-info-row {
+    font-size: 13px;
+  }
 }
 
 /* Adaptación para modo móvil */

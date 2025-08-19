@@ -693,9 +693,9 @@ const inicializarMapa = (datos) => {
             coordenadasTexto: `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`
           };
           
-          // Posicionar el popup justo encima del punto, dejando espacio para la flecha
+          // Posicionar el popup justo encima del punto, con la flecha muy cerca
           popupX.value = point.x;
-          popupY.value = point.y - 20; // Más cercano al punto para que la flecha apunte correctamente
+          popupY.value = point.y - 10; // Muy cercano al punto para que la flecha apunte directamente
           showCustomPopup.value = true;
           
           console.log('Mostrando popup en:', popupX.value, popupY.value);
@@ -731,7 +731,7 @@ const inicializarMapa = (datos) => {
         if (showCustomPopup.value && popupData.value.coordinates && popupData.value.coordinates.length) {
           const point = map.project(popupData.value.coordinates);
           popupX.value = point.x;
-          popupY.value = point.y - 20; // Mantener la misma distancia arriba del punto
+          popupY.value = point.y - 10; // Mantener la misma distancia muy cercana al punto
           console.log('Actualizando posición del popup en move:', popupX.value, popupY.value);
         }
       });
@@ -1567,7 +1567,7 @@ onUnmounted(() => {
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   z-index: 10;
-  transform: translate(-50%, -105%);
+  transform: translate(-50%, -100%);
   pointer-events: auto;
   font-family: 'Inter', 'Poppins', sans-serif;
   overflow: visible; /* Permite que la flecha sea visible */
@@ -1600,22 +1600,22 @@ onUnmounted(() => {
 /* Estilos para la flecha indicadora */
 .popup-arrow {
   position: absolute;
-  bottom: -10px;
+  bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px;
-  height: 10px;
+  width: 16px;
+  height: 8px;
   overflow: hidden;
 }
 
 .popup-arrow::after {
   content: '';
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   transform: translateY(-50%) rotate(45deg);
   top: 0;
-  left: 3px;
+  left: 2px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 

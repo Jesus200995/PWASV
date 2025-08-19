@@ -237,7 +237,7 @@
                         </svg>
                         <div class="popup-detail">
                           <span class="popup-detail-label">Precisión GPS:</span>
-                          <span class="popup-detail-value">± {{ popupData.precision }}m</span>
+                          <span class="popup-detail-value precision-value">± {{ popupData.precision }}m</span>
                         </div>
                       </div>
 
@@ -249,7 +249,19 @@
                         </svg>
                         <div class="popup-detail">
                           <span class="popup-detail-label">Estado:</span>
-                          <span class="popup-detail-value">{{ popupData.estadoConexion }}</span>
+                          <span class="popup-detail-value status-value" :class="popupData.estadoConexion.toLowerCase()">{{ popupData.estadoConexion }}</span>
+                        </div>
+                      </div>
+                      
+                      <!-- Coordenadas - Solo visible cuando expandido -->
+                      <div class="popup-detail-item">
+                        <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <div class="popup-detail">
+                          <span class="popup-detail-label">Coordenadas:</span>
+                          <span class="popup-detail-value coordinates-value">{{ popupData.coordenadasTexto }}</span>
                         </div>
                       </div>
                     </div>
@@ -298,8 +310,8 @@
                 </div>
               </div>
 
-              <!-- Coordenadas (siempre visible) -->
-              <div class="popup-row">
+              <!-- Coordenadas (solo visible cuando NO expandido) -->
+              <div v-if="!popupData.expandido" class="popup-row">
                 <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                   <circle cx="12" cy="10" r="3"/>
@@ -2309,14 +2321,14 @@ onUnmounted(() => {
 .popup-details-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .popup-detail-item {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 
 .popup-detail {
@@ -2340,6 +2352,54 @@ onUnmounted(() => {
   font-weight: 500;
   color: #111827;
   word-break: break-word;
+}
+
+/* Estilos específicos para Estado de conexión */
+.status-value {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Estado Online */
+.status-value.online {
+  background-color: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+/* Estado Offline */
+.status-value.offline {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+/* Estilos específicos para Coordenadas */
+.coordinates-value {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #dbeafe;
+  letter-spacing: 0.05em;
+}
+
+/* Precisión GPS con estilo distintivo */
+.precision-value {
+  background-color: #fff7ed;
+  color: #ea580c;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #fed7aa;
 }
 
 /* Adaptación para modo móvil */

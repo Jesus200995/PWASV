@@ -175,7 +175,16 @@
                 </svg>
                 <strong>{{ popupData.tipoActividad }}</strong>
               </div>
-              <span class="popup-fecha">{{ popupData.fecha }}</span>
+              
+              <div class="popup-header-right">
+                <span class="popup-fecha">{{ popupData.fecha }}</span>
+                <button class="popup-close-btn" @click="cerrarPopup" title="Cerrar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
             </div>
             <div class="popup-body">
               <div class="popup-row">
@@ -926,6 +935,12 @@ const verDetallesRegistro = () => {
   showCustomPopup.value = false;
 }
 
+// Función para cerrar el popup cuando se hace clic en el botón X
+const cerrarPopup = () => {
+  console.log('Cerrando popup mediante botón X');
+  showCustomPopup.value = false;
+}
+
 // Recargar mapa y datos
 const recargarMapa = async () => {
   // Si hay un error grave, reiniciar completamente el mapa
@@ -1653,10 +1668,58 @@ onUnmounted(() => {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
+.popup-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .popup-title {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.popup-close-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s;
+}
+
+.popup-close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.popup-close-btn svg {
+  width: 14px;
+  height: 14px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Estilos específicos para el botón X en cada tipo de popup */
+.popup-entrada .popup-close-btn:hover svg {
+  color: #22c55e;
+}
+
+.popup-salida .popup-close-btn:hover svg {
+  color: #ef4444;
+}
+
+.popup-registro-hoy .popup-close-btn:hover svg {
+  color: #1e40af;
+}
+
+.popup-registro-antiguo .popup-close-btn:hover svg,
+.popup-antiguo .popup-close-btn:hover svg {
+  color: #f59e0b;
 }
 
 .popup-icon {

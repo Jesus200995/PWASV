@@ -868,14 +868,16 @@ const inicializarMapa = (datos) => {
           // PASO 2: Centrar el mapa con zoom moderado
           console.log('🎯 Centrando mapa en coordenadas:', coordinates);
           
-          // Centrar el mapa con zoom alto y suave
+          // Centrar el mapa con un pequeño offset hacia abajo usando padding
           map.flyTo({
-            center: coordinates,
-            zoom: map.getZoom() + 4.0, // Zoom doble del anterior (2.0 x 2)
-            duration: 800, // Animación suave y no ruda
+            center: coordinates, // Usar coordenadas originales
+            zoom: map.getZoom() + 4.0, // Zoom alto
+            duration: 800, // Animación suave
             essential: true,
-            curve: 1, // Curva más suave para transición menos ruda
-            speed: 0.8 // Velocidad más lenta para suavidad
+            curve: 1, 
+            speed: 0.8,
+            // Padding para crear más espacio arriba y posicionar el punto más abajo
+            padding: { top: 200, bottom: 50, left: 50, right: 50 }
           });
           
           // PASO 3: Esperar a que termine la animación del mapa

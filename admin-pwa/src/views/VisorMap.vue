@@ -877,7 +877,7 @@ const inicializarMapa = (datos) => {
             curve: 1, 
             speed: 0.8,
             // Padding para crear más espacio arriba y posicionar el punto más abajo
-            padding: { top: 200, bottom: 50, left: 50, right: 50 }
+            padding: { top: 300, bottom: 50, left: 50, right: 50 }
           });
           
           // PASO 3: Esperar a que termine la animación del mapa

@@ -179,7 +179,6 @@ const totalPuntosEnMapa = ref(0)
 // Referencias al mapa y capas
 let map = null
 let puntosSource = null
-let clusterSource = null
 let hasDatosUsuario = ref(false)
 
 // Registros y filtrado
@@ -450,7 +449,7 @@ const inicializarMapa = (datos) => {
     
     // Esperar a que el mapa se cargue
     map.on('load', () => {
-      // Añadir fuente de datos para puntos individuales
+      // Añadir fuente de datos para puntos individuales (sin clustering)
       map.addSource('puntos', {
         type: 'geojson',
         data: {
@@ -460,68 +459,20 @@ const inicializarMapa = (datos) => {
         cluster: false
       });
       
-      // Añadir fuente de datos para clústeres
+      // Modificar fuente de datos para deshabilitar clústeres completamente
       map.addSource('clusters', {
         type: 'geojson',
         data: {
           type: 'FeatureCollection',
           features: []
         },
-        cluster: true,
-        clusterMaxZoom: 14, // Máximo zoom para clústeres
-        clusterRadius: 50 // Radio de agrupación
+        cluster: false // Desactivamos el clustering para que no aparezcan círculos con números
       });
       
-      // Guardar referencias a las fuentes para actualizarlas después
+      // Guardar referencia a la fuente para actualizarla después
       puntosSource = map.getSource('puntos');
-      clusterSource = map.getSource('clusters');
       
-      // Añadir capa de clústeres (agrupaciones de puntos)
-      map.addLayer({
-        id: 'clusters',
-        type: 'circle',
-        source: 'clusters',
-        filter: ['has', 'point_count'],
-        paint: {
-          // Tamaño del círculo según la cantidad de puntos
-          'circle-radius': [
-            'step',
-            ['get', 'point_count'],
-            20, // Tamaño base para 1 punto
-            10, 30, // 10+ puntos, tamaño 30
-            50, 40, // 50+ puntos, tamaño 40
-            100, 50 // 100+ puntos, tamaño 50
-          ],
-          // Color del círculo según la cantidad de puntos
-          'circle-color': [
-            'step',
-            ['get', 'point_count'],
-            '#4CAF50', // Color base (verde)
-            10, '#2196F3', // 10+ puntos, azul
-            50, '#FF9800', // 50+ puntos, naranja
-            100, '#F44336' // 100+ puntos, rojo
-          ],
-          'circle-stroke-width': 2,
-          'circle-stroke-color': 'white',
-          'circle-opacity': 0.85
-        }
-      });
-      
-      // Añadir etiquetas para los clústeres
-      map.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'clusters',
-        filter: ['has', 'point_count'],
-        layout: {
-          'text-field': '{point_count_abbreviated}',
-          'text-font': ['DIN Pro Medium', 'Arial Unicode MS Bold'],
-          'text-size': 14
-        },
-        paint: {
-          'text-color': 'white'
-        }
-      });
+      // Eliminamos las capas de clústeres para que no aparezcan en el mapa
       
       // Añadir capa para los puntos individuales
       map.addLayer({
@@ -538,40 +489,26 @@ const inicializarMapa = (datos) => {
             'registro-hoy', '#1E3A8A', // Azul para registros de hoy
             '#FF9800' // Naranja para registros antiguos (por defecto)
           ],
-          'circle-radius': 8,
-          'circle-stroke-width': 2,
+          // Tamaño un poco más grande pero manteniendo proporción según nivel de zoom
+          'circle-radius': [
+            'interpolate', 
+            ['linear'], 
+            ['zoom'],
+            // A niveles de zoom bajos, puntos más visibles
+            3, 3.5,
+            // A niveles de zoom medios, puntos de tamaño medio
+            8, 5.5,
+            // A niveles de zoom altos, puntos más grandes
+            14, 7
+          ],
+          // Borde ligeramente más grueso para mejor definición
+          'circle-stroke-width': 1.5,
           'circle-stroke-color': 'white',
-          'circle-opacity': 0.85
+          'circle-opacity': 0.9
         }
       });
       
-      // Evento para expandir un clúster al hacer clic
-      map.on('click', 'clusters', (e) => {
-        const features = map.queryRenderedFeatures(e.point, {
-          layers: ['clusters']
-        });
-        const clusterId = features[0].properties.cluster_id;
-        clusterSource.getClusterExpansionZoom(
-          clusterId,
-          (err, zoom) => {
-            if (err) return;
-            
-            map.easeTo({
-              center: features[0].geometry.coordinates,
-              zoom: zoom
-            });
-          }
-        );
-      });
-      
-      // Cambiar cursor a puntero al pasar sobre los clústeres
-      map.on('mouseenter', 'clusters', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      
-      map.on('mouseleave', 'clusters', () => {
-        map.getCanvas().style.cursor = '';
-      });
+      // Eliminamos los eventos relacionados con clústeres, ya que no los usamos más
       
       // Evento al hacer clic en un punto individual
       map.on('click', 'unclustered-point', (e) => {
@@ -689,7 +626,7 @@ const inicializarMapa = (datos) => {
 
 // Función para actualizar los puntos en el mapa
 const actualizarPuntosMapa = (datos) => {
-  if (!map || !puntosSource || !clusterSource) return;
+  if (!map || !puntosSource) return;
   
   try {
     // Convertir datos a formato GeoJSON
@@ -715,13 +652,8 @@ const actualizarPuntosMapa = (datos) => {
       };
     });
     
-    // Actualizar fuente de datos para puntos y clústeres
+    // Actualizar solo la fuente de datos para puntos (sin clústeres)
     puntosSource.setData({
-      type: 'FeatureCollection',
-      features: features
-    });
-    
-    clusterSource.setData({
       type: 'FeatureCollection',
       features: features
     });

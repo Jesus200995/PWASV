@@ -189,7 +189,12 @@
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <div class="popup-usuario">{{ popupData.usuario }}</div>
+                <div class="popup-usuario-info">
+                  <div class="popup-usuario">{{ popupData.usuario }}</div>
+                  <div class="popup-correo" v-if="popupData.correoUsuario">
+                    <span class="popup-correo-texto">{{ popupData.correoUsuario }}</span>
+                  </div>
+                </div>
               </div>
               <div class="popup-row">
                 <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -275,6 +280,7 @@ const popupY = ref(0)
 const popupData = ref({
   coordinates: [],
   usuario: '',
+  correoUsuario: '',
   fecha: '',
   fechaFormateada: '',
   horaFormateada: '',
@@ -703,6 +709,7 @@ const inicializarMapa = (datos) => {
         if (!isNaN(coordinates[0]) && !isNaN(coordinates[1])) {
           // Obtener información del punto
           const usuario = props.nombre || `Usuario ${props.usuario_id}`;
+          const correoUsuario = props.correo || '';
           const fechaCompleta = new Date(props.fecha_hora);
           
           // Formatear fecha y hora por separado
@@ -730,6 +737,7 @@ const inicializarMapa = (datos) => {
           popupData.value = {
             coordinates: coordinates,
             usuario: usuario,
+            correoUsuario: correoUsuario,
             fecha: fechaCompleta.toLocaleString('es-ES'), // Mantener para compatibilidad
             fechaFormateada: fechaFormateada,
             horaFormateada: horaFormateada,
@@ -891,6 +899,7 @@ const actualizarPuntosMapa = (datos) => {
           id: punto.id,
           usuario_id: punto.usuario_id,
           nombre: punto.usuario?.nombre_completo || `Usuario ${punto.usuario_id}`,
+          correo: punto.usuario?.correo || '',
           tipo_actividad: tipoActividad,
           fecha_hora: punto.fecha_hora,
           descripcion: punto.descripcion || ''
@@ -1613,7 +1622,9 @@ onUnmounted(() => {
 /* Personalización de popups personalizados */
 .custom-popup {
   position: absolute;
-  width: 280px;
+  width: 100%;
+  max-width: 300px;
+  min-width: 250px;
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
@@ -1624,6 +1635,10 @@ onUnmounted(() => {
   overflow: visible; /* Permite que la flecha sea visible */
   opacity: 1;
   transition: opacity 0.2s ease-in-out;
+  /* Asegurar que no se salga de la pantalla */
+  left: clamp(5px, 50%, calc(100vw - 305px));
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Colores dinámicos según tipo de registro */
@@ -1842,6 +1857,30 @@ onUnmounted(() => {
   color: #111827;
 }
 
+.popup-correo {
+  margin-top: 3px;
+}
+
+.popup-correo-texto {
+  font-weight: 400;
+  font-size: 10px;
+  color: #6b7280;
+  font-style: italic;
+  line-height: 1.2;
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.popup-email {
+  font-weight: 400;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 2px;
+  margin-left: 24px; /* Alinea con el texto del usuario */
+  font-style: italic;
+}
+
 .popup-coordenadas {
   font-size: 11px;
   font-family: monospace;
@@ -1893,9 +1932,57 @@ onUnmounted(() => {
 }
 
 /* Adaptación para modo móvil */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .custom-popup {
-    width: 240px;
+    width: 90vw;
+    max-width: 280px;
+    min-width: 220px;
+  }
+  
+  .popup-correo-texto {
+    font-size: 9px;
+    max-width: 180px;
+  }
+  
+  .popup-usuario {
+    font-size: 13px;
+  }
+  
+  .popup-coordenadas {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-popup {
+    width: 95vw;
+    max-width: 260px;
+    min-width: 200px;
+  }
+  
+  .popup-header {
+    padding: 10px 12px;
+  }
+  
+  .popup-body {
+    padding: 10px 12px;
+  }
+  
+  .popup-correo-texto {
+    font-size: 8px;
+    max-width: 160px;
+  }
+  
+  .popup-usuario {
+    font-size: 12px;
+  }
+  
+  .popup-coordenadas {
+    font-size: 9px;
+  }
+  
+  .popup-fecha, .popup-hora {
+    font-size: 11px;
   }
 }
 

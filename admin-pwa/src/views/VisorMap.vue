@@ -428,15 +428,35 @@ const inicializarMapa = (datos) => {
       maxZoom: 18,
       pitchWithRotate: false, // Limitar inclinación para mejor rendimiento
       attributionControl: false,
-      cooperativeGestures: true,  // Mejora la experiencia táctil
+      cooperativeGestures: false, // Desactivamos para permitir scroll normal con el mouse
+      scrollZoom: true, // Habilitamos zoom con rueda del mouse
+      dragRotate: false, // Desactivamos rotación con arrastre para una experiencia más intuitiva
       fadeDuration: 300   // Transiciones suaves
     });
     
-    // Añadir controles básicos
+    // Añadir controles de navegación mejorados con zoom visible
     map.addControl(new mapboxgl.NavigationControl({
-      showCompass: false
-    }), 'bottom-right');
+      showCompass: true, // Mostramos la brújula para orientación
+      visualizePitch: false, // No mostrar el control de inclinación para simplificar
+      showZoom: true // Asegurarnos que los botones de zoom sean visibles
+    }), 'top-right'); // Movemos a la esquina superior derecha para mejor visibilidad
     
+    // Añadir mensaje sobre el uso de la rueda del mouse
+    const zoomHelpElement = document.createElement('div');
+    zoomHelpElement.className = 'mapbox-zoom-help';
+    zoomHelpElement.innerHTML = `
+      <div class="zoom-help-tooltip">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 16v-4"></path>
+          <path d="M12 8h.01"></path>
+        </svg>
+        <span>Use la rueda del ratón para acercar/alejar</span>
+      </div>
+    `;
+    map.getContainer().appendChild(zoomHelpElement);
+    
+    // Añadir control de atribución en posición menos intrusiva
     map.addControl(new mapboxgl.AttributionControl({
       compact: true
     }), 'bottom-left');
@@ -446,6 +466,20 @@ const inicializarMapa = (datos) => {
       maxWidth: 100,
       unit: 'metric'
     }), 'bottom-left');
+    
+    // Añadir atajos de teclado para zoom
+    map.getCanvas().tabIndex = 0; // Hacer que el canvas sea enfocable para eventos de teclado
+    map.getCanvas().addEventListener('keydown', (e) => {
+      if (e.key === '+' || e.key === '=') {
+        map.zoomIn(); // Zoom in con tecla +
+      } else if (e.key === '-') {
+        map.zoomOut(); // Zoom out con tecla -
+      }
+    });
+    
+    // Configurar el comportamiento de zoom con la rueda del ratón para hacerlo más suave
+    map.scrollZoom.setWheelZoomRate(1/450); // Velocidad de zoom más suave
+    map.scrollZoom.setZoomRate(0.75); // Ajustar la intensidad del zoom
     
     // Esperar a que el mapa se cargue
     map.on('load', () => {
@@ -1336,6 +1370,36 @@ onUnmounted(() => {
 
 .mapbox-popup-content {
   font-family: 'Inter', 'Poppins', sans-serif;
+}
+
+/* Estilos para el tooltip de ayuda de zoom */
+.mapbox-zoom-help {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  pointer-events: none;
+  animation: fadeInOut 5s forwards;
+}
+
+.zoom-help-tooltip {
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .popup-header {

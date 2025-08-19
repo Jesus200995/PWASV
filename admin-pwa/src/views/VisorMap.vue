@@ -184,6 +184,7 @@
               </button>
             </div>
             <div class="popup-body">
+              <!-- Información básica del usuario -->
               <div class="popup-row">
                 <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -196,6 +197,106 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Información expandida -->
+              <div v-if="popupData.expandido" class="popup-expanded-content">
+                <!-- Imagen del registro -->
+                <div v-if="popupData.imagenUrl" class="popup-image-section">
+                  <div class="popup-section-header">
+                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21,15 16,10 5,21"/>
+                    </svg>
+                    <span class="popup-section-title">Fotografía</span>
+                  </div>
+                  <div class="popup-image-container">
+                    <img :src="popupData.imagenUrl" alt="Imagen del registro" class="popup-image" @error="onImageError" />
+                  </div>
+                </div>
+
+                <!-- Sin imagen disponible -->
+                <div v-else class="popup-no-image-section">
+                  <div class="popup-section-header">
+                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                    </svg>
+                    <span class="popup-section-title">Sin imagen disponible</span>
+                  </div>
+                </div>
+
+                <!-- Descripción del registro -->
+                <div v-if="popupData.descripcion" class="popup-description-section">
+                  <div class="popup-section-header">
+                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14,2 14,8 20,8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                      <polyline points="10,9 9,9 8,9"/>
+                    </svg>
+                    <span class="popup-section-title">Descripción</span>
+                  </div>
+                  <div class="popup-description-content">
+                    {{ popupData.descripcion }}
+                  </div>
+                </div>
+
+                <!-- Detalles técnicos adicionales -->
+                <div class="popup-details-grid">
+                  <!-- ID del registro -->
+                  <div class="popup-detail-item">
+                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 12h6M9 16h6M9 8h6m-8 12h8a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <div class="popup-detail">
+                      <span class="popup-detail-label">ID Registro:</span>
+                      <span class="popup-detail-value">{{ popupData.registroId || 'N/A' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Usuario ID -->
+                  <div class="popup-detail-item">
+                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                      <circle cx="8.5" cy="7" r="4"/>
+                      <path d="M20 8v6M23 11h-6"/>
+                    </svg>
+                    <div class="popup-detail">
+                      <span class="popup-detail-label">Usuario ID:</span>
+                      <span class="popup-detail-value">{{ popupData.usuarioId || 'N/A' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Precisión GPS -->
+                  <div v-if="popupData.precision" class="popup-detail-item">
+                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                      <circle cx="12" cy="9" r="2.5"/>
+                    </svg>
+                    <div class="popup-detail">
+                      <span class="popup-detail-label">Precisión GPS:</span>
+                      <span class="popup-detail-value">± {{ popupData.precision }}m</span>
+                    </div>
+                  </div>
+
+                  <!-- Estado de conexión -->
+                  <div v-if="popupData.estadoConexion" class="popup-detail-item">
+                    <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <div class="popup-detail">
+                      <span class="popup-detail-label">Estado:</span>
+                      <span class="popup-detail-value">{{ popupData.estadoConexion }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Coordenadas (siempre visible) -->
               <div class="popup-row">
                 <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -225,14 +326,14 @@
               </div>
             </div>
             <div class="popup-footer">
-              <button class="popup-btn" @click="verDetallesRegistro">
+              <button class="popup-btn" @click="toggleDetallesRegistro">
                 <svg class="popup-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                  <line x1="11" y1="8" x2="11" y2="14"/>
-                  <line x1="8" y1="11" x2="14" y2="11"/>
+                  <path v-if="!popupData.expandido" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle v-if="!popupData.expandido" cx="12" cy="12" r="3"/>
+                  <path v-else d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <path v-if="popupData.expandido" d="M1 1l22 22"/>
                 </svg>
-                Ver detalles
+                {{ popupData.expandido ? 'Ocultar detalles' : 'Ver más detalles' }}
               </button>
             </div>
             <!-- Flecha indicadora que apunta al punto en el mapa -->
@@ -286,7 +387,16 @@ const popupData = ref({
   horaFormateada: '',
   tipoActividad: '',
   tipoClase: '',
-  coordenadasTexto: ''
+  coordenadasTexto: '',
+  expandido: false,
+  // Campos adicionales para la vista expandida
+  registroId: '',
+  usuarioId: '',
+  descripcion: '',
+  imagenUrl: '',
+  precision: null,
+  estadoConexion: '',
+  datosOriginales: null
 })
 
 // Registros y filtrado
@@ -743,7 +853,16 @@ const inicializarMapa = (datos) => {
             horaFormateada: horaFormateada,
             tipoActividad: tipoActividad,
             tipoClase: props.tipo_actividad,
-            coordenadasTexto: `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`
+            coordenadasTexto: `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`,
+            expandido: false,
+            // Datos adicionales para la vista expandida
+            registroId: props.id || props.registro_id || 'N/A',
+            usuarioId: props.usuario_id || 'N/A',
+            descripcion: props.descripcion || props.descripcion_entrada || props.descripcion_salida || '',
+            imagenUrl: obtenerUrlImagen(props),
+            precision: props.precision || props.accuracy || null,
+            estadoConexion: props.estado_conexion || (props.offline ? 'Offline' : 'Online'),
+            datosOriginales: props
           };
           
           // Posicionar el popup justo encima del punto, con la flecha muy cerca
@@ -902,7 +1021,10 @@ const actualizarPuntosMapa = (datos) => {
           correo: punto.usuario?.correo || '',
           tipo_actividad: tipoActividad,
           fecha_hora: punto.fecha_hora,
-          descripcion: punto.descripcion || ''
+          descripcion: punto.descripcion || '',
+          foto_url: punto.foto_url || null,
+          foto_entrada_url: punto.foto_entrada_url || null,
+          foto_salida_url: punto.foto_salida_url || null
         },
         geometry: {
           type: 'Point',
@@ -967,23 +1089,47 @@ const esUbicacionReciente = (fechaStr) => {
   }
 }
 
-// Función para manejar el clic en "Ver detalles" en el popup
-const verDetallesRegistro = () => {
-  // Obtiene los datos actuales del popup
-  const registro = popupData.value;
+// Función auxiliar para obtener la URL de imagen correcta
+const obtenerUrlImagen = (props) => {
+  const API_BASE_URL = 'https://apipwa.sembrandodatos.com';
   
-  // Aquí puedes implementar lo que quieras hacer con los detalles del registro
-  // Por ejemplo, abrir un modal con más información, navegar a una página de detalles, etc.
-  console.log('Ver detalles del registro:', registro);
+  // Si es una entrada, usar foto_entrada_url
+  if (props.tipo_actividad === 'entrada' && props.foto_entrada_url) {
+    return `${API_BASE_URL}/${props.foto_entrada_url}`;
+  }
   
-  // Por ahora, simplemente cerramos el popup
-  showCustomPopup.value = false;
+  // Si es una salida, usar foto_salida_url
+  if (props.tipo_actividad === 'salida' && props.foto_salida_url) {
+    return `${API_BASE_URL}/${props.foto_salida_url}`;
+  }
+  
+  // Para registros normales, usar foto_url
+  if (props.foto_url) {
+    return `${API_BASE_URL}/${props.foto_url}`;
+  }
+  
+  // Fallbacks adicionales
+  return props.imagen_url || props.imagen || null;
+}
+
+// Función para manejar el clic en "Ver más detalles" en el popup
+const toggleDetallesRegistro = () => {
+  popupData.value.expandido = !popupData.value.expandido;
+  console.log('Toggle detalles:', popupData.value.expandido ? 'Expandido' : 'Contraído');
+}
+
+// Función para manejar errores de carga de imagen
+const onImageError = (event) => {
+  console.log('Error al cargar imagen:', event.target.src);
+  event.target.style.display = 'none';
 }
 
 // Función para cerrar el popup cuando se hace clic en el botón X
 const cerrarPopup = () => {
   console.log('Cerrando popup mediante botón X');
   showCustomPopup.value = false;
+  // Resetear el estado expandido
+  popupData.value.expandido = false;
 }
 
 // Recargar mapa y datos
@@ -1634,11 +1780,17 @@ onUnmounted(() => {
   font-family: 'Inter', 'Poppins', sans-serif;
   overflow: visible; /* Permite que la flecha sea visible */
   opacity: 1;
-  transition: opacity 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
   /* Asegurar que no se salga de la pantalla */
   left: clamp(5px, 50%, calc(100vw - 305px));
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+/* Popup expandido */
+.custom-popup:has(.popup-expanded-content) {
+  max-width: 400px;
+  min-width: 350px;
 }
 
 /* Colores dinámicos según tipo de registro */
@@ -1931,12 +2083,144 @@ onUnmounted(() => {
   height: 16px;
 }
 
+/* Estilos para contenido expandido */
+.popup-expanded-content {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  animation: expandContent 0.3s ease-out;
+}
+
+@keyframes expandContent {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    margin-top: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    padding-top: 12px;
+    margin-top: 12px;
+  }
+}
+
+.popup-image-section {
+  margin-bottom: 16px;
+}
+
+.popup-no-image-section {
+  margin-bottom: 16px;
+}
+
+.popup-no-image-section .popup-section-header {
+  opacity: 0.6;
+}
+
+.popup-description-section {
+  margin-bottom: 16px;
+}
+
+.popup-description-content {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #374151;
+  font-style: italic;
+  min-height: 20px;
+}
+
+.popup-description-content:empty::before {
+  content: "Sin descripción disponible";
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.popup-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.popup-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.popup-image-container {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.popup-image {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.popup-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popup-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.popup-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.popup-detail-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.popup-detail-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: #111827;
+  word-break: break-word;
+}
+
 /* Adaptación para modo móvil */
 @media (max-width: 768px) {
   .custom-popup {
     width: 90vw;
-    max-width: 280px;
+    max-width: 320px;
     min-width: 220px;
+  }
+  
+  .custom-popup:has(.popup-expanded-content) {
+    max-width: 350px;
+    min-width: 300px;
   }
   
   .popup-correo-texto {
@@ -1951,13 +2235,31 @@ onUnmounted(() => {
   .popup-coordenadas {
     font-size: 10px;
   }
+  
+  .popup-image-container {
+    min-height: 100px;
+  }
+  
+  .popup-image {
+    max-height: 150px;
+  }
+  
+  .popup-description-content {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
 }
 
 @media (max-width: 480px) {
   .custom-popup {
     width: 95vw;
-    max-width: 260px;
+    max-width: 300px;
     min-width: 200px;
+  }
+  
+  .custom-popup:has(.popup-expanded-content) {
+    max-width: 320px;
+    min-width: 280px;
   }
   
   .popup-header {
@@ -1983,6 +2285,27 @@ onUnmounted(() => {
   
   .popup-fecha, .popup-hora {
     font-size: 11px;
+  }
+  
+  .popup-image-container {
+    min-height: 80px;
+  }
+  
+  .popup-image {
+    max-height: 120px;
+  }
+  
+  .popup-detail-label {
+    font-size: 9px;
+  }
+  
+  .popup-detail-value {
+    font-size: 11px;
+  }
+  
+  .popup-description-content {
+    font-size: 10px;
+    padding: 6px 8px;
   }
 }
 

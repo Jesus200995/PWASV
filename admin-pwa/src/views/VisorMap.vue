@@ -854,13 +854,43 @@ const inicializarMapa = (datos) => {
       // Usaremos las variables del componente principal para el popup
 
       // Evento al hacer clic en un punto individual
-      map.on('click', 'unclustered-point', (e) => {
+      map.on('click', 'unclustered-point', async (e) => {
         console.log('Click en punto individual', e.features[0]);
         const props = e.features[0].properties;
         const coordinates = e.features[0].geometry.coordinates.slice();
         
         // Asegurar que las coordenadas sean válidas
         if (!isNaN(coordinates[0]) && !isNaN(coordinates[1])) {
+          
+          // PASO 1: Marcar que el zoom será automático
+          zoomAutomatico = true;
+          
+          // PASO 2: Centrar el mapa con zoom moderado
+          console.log('🎯 Centrando mapa en coordenadas:', coordinates);
+          
+          // Centrar el mapa con zoom doble y suave
+          map.flyTo({
+            center: coordinates,
+            zoom: map.getZoom() + 1.0, // Zoom doble del anterior (0.5 x 2)
+            duration: 800, // Animación suave y no ruda
+            essential: true,
+            curve: 1, // Curva más suave para transición menos ruda
+            speed: 0.8 // Velocidad más lenta para suavidad
+          });
+          
+          // PASO 3: Esperar a que termine la animación del mapa
+          const esperarCentrado = new Promise((resolve) => {
+            map.once('moveend', () => {
+              // Resetear la bandera de zoom automático
+              zoomAutomatico = false;
+              resolve();
+            });
+          });
+          
+          await esperarCentrado;
+          console.log('✅ Mapa centrado correctamente');
+          
+          // PASO 4: Preparar datos del popup
           // Obtener información del punto
           const usuario = props.nombre || `Usuario ${props.usuario_id}`;
           const correoUsuario = props.correo || '';
@@ -884,16 +914,13 @@ const inicializarMapa = (datos) => {
                                props.tipo_actividad === 'salida' ? 'Salida' : 
                                'Registro';
           
-          // Convertir coordenadas geográficas a coordenadas de pantalla
-          const point = map.project(coordinates);
-          
           console.log('🔍 Propiedades del registro completo:', props);
           
           // Obtener la URL de imagen con logging detallado
           const imagenUrl = obtenerUrlImagen(props);
           console.log('🖼️ URL de imagen obtenida:', imagenUrl);
           
-          // Actualizar variables globales del popup
+          // PASO 5: Actualizar variables globales del popup
           popupData.value = {
             coordinates: coordinates,
             usuario: usuario,
@@ -915,13 +942,18 @@ const inicializarMapa = (datos) => {
             datosOriginales: props
           };
           
-          // Posicionar el popup justo encima del punto, con la flecha muy cerca
+          // PASO 6: Posicionar el popup (después del centrado)
+          // Convertir coordenadas geográficas a coordenadas de pantalla (actualizado después del flyTo)
+          const point = map.project(coordinates);
+          
+          // Posicionar el popup para que la flecha apunte exactamente al centro del círculo
+          // El popup se centra horizontalmente, y verticalmente se posiciona considerando la flecha
           popupX.value = point.x;
-          popupY.value = point.y - 10; // Muy cercano al punto para que la flecha apunte directamente
+          popupY.value = point.y - 15; // Distancia optimizada para alineación perfecta de la flecha con el centro del punto
           showCustomPopup.value = true;
           
-          console.log('Mostrando popup en:', popupX.value, popupY.value);
-          console.log('Datos del popup:', popupData.value);
+          console.log('✅ Popup mostrado en:', popupX.value, popupY.value);
+          console.log('📋 Datos del popup:', popupData.value);
           
           // Evitar que se propague el evento para no cerrar el popup inmediatamente
           e.originalEvent.stopPropagation();
@@ -953,15 +985,24 @@ const inicializarMapa = (datos) => {
         if (showCustomPopup.value && popupData.value.coordinates && popupData.value.coordinates.length) {
           const point = map.project(popupData.value.coordinates);
           popupX.value = point.x;
-          popupY.value = point.y - 10; // Mantener la misma distancia muy cercana al punto
-          console.log('Actualizando posición del popup en move:', popupX.value, popupY.value);
+          popupY.value = point.y - 15; // Mantener la distancia optimizada para alineación perfecta
+          // console.log('Actualizando posición del popup en move:', popupX.value, popupY.value);
         }
       });
       
-      // Cerrar popup al hacer zoom
-      map.on('zoom', () => {
-        console.log('Cerrar popup - zoom');
-        showCustomPopup.value = false;
+      // Variable para controlar si el zoom es automático (del click en punto)
+      let zoomAutomatico = false;
+      
+      // Modificar el evento de click para marcar zoom automático
+      const clickOriginal = map.getContainer().querySelector('.mapboxgl-canvas');
+      
+      // Cerrar popup solo en zoom manual (no automático)
+      map.on('zoomstart', () => {
+        // Solo cerrar si no es zoom automático
+        if (!zoomAutomatico && showCustomPopup.value) {
+          console.log('Cerrar popup - zoom manual');
+          showCustomPopup.value = false;
+        }
       });
       
       // Actualizar puntos en el mapa

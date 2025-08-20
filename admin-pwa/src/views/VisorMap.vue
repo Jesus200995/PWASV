@@ -85,6 +85,36 @@
           </div>
           
           <div class="panel-section">
+            <h4>Filtros</h4>
+            <div class="filter-controls">
+              <div class="filter-item-panel">
+                <svg class="filter-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+                </svg>
+                <select v-model="filtroTipo" class="modern-select-panel" @change="aplicarFiltros">
+                  <option value="">Todas las actividades</option>
+                  <option value="entrada">Solo Entradas</option>
+                  <option value="salida">Solo Salidas</option>
+                  <option value="registro-hoy">Solo Registros de Hoy</option>
+                  <option value="registro-antiguo">Solo Registros Antiguos</option>
+                </select>
+              </div>
+              
+              <div class="filter-item-panel">
+                <svg class="filter-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
+                </svg>
+                <select v-model="filtroPeriodo" class="modern-select-panel" @change="aplicarFiltros">
+                  <option value="all">Todo el tiempo</option>
+                  <option value="today">Hoy</option>
+                  <option value="week">Esta semana</option>
+                  <option value="month">Este mes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="panel-section">
             <h4>Leyenda</h4>
             <div class="leyenda-grid">
               <div class="leyenda-item">
@@ -394,6 +424,7 @@ const totalPuntosEnMapa = ref(0)
 let map = null
 let puntosSource = null
 let hasDatosUsuario = ref(false)
+const mapInitialized = ref(false)
 
 // Estado del popup personalizado
 const showCustomPopup = ref(false)
@@ -428,6 +459,10 @@ const popupData = ref({
 const registros = ref([])
 const asistencias = ref([])
 const usuarios = ref([])
+
+// Variables de filtrado como en VisorView.vue
+const filtroTipo = ref('')
+const filtroPeriodo = ref('all')
 
 // Estado de los clusters y horario CDMX
 const clusterInfo = reactive({
@@ -993,6 +1028,7 @@ const inicializarMapa = (datos) => {
         actualizarPuntosMapa(datos);
       }
       
+      mapInitialized.value = true
       loading.value = false;
     });
     
@@ -1335,6 +1371,76 @@ const cerrarPopup = () => {
   popupData.value.expandido = false;
 }
 
+// Función para aplicar filtros y actualizar las capas del mapa
+const aplicarFiltros = () => {
+  if (!map || !puntosSource) return
+
+  try {
+    console.log('🎛️ Aplicando filtros:', { filtroTipo: filtroTipo.value, filtroPeriodo: filtroPeriodo.value })
+    
+    // Obtener las últimas actividades con los filtros aplicados
+    const registrosFiltrados = filtrarRegistros()
+    const actividadesFiltradas = obtenerUltimasActividadesPorUsuario(registrosFiltrados, asistencias.value)
+    
+    // Filtrar por tipo de actividad si está especificado
+    let actividadesFinales = actividadesFiltradas
+    if (filtroTipo.value) {
+      actividadesFinales = actividadesFiltradas.filter(actividad => {
+        const tipoActividad = determinarTipoActividad(actividad)
+        
+        switch (filtroTipo.value) {
+          case 'entrada':
+            return tipoActividad.tipo === 'entrada'
+          case 'salida':
+            return tipoActividad.tipo === 'salida'
+          case 'registro-hoy':
+            return tipoActividad.tipo === 'registro-hoy'
+          case 'registro-antiguo':
+            return tipoActividad.tipo === 'registro-antiguo'
+          default:
+            return true
+        }
+      })
+    }
+    
+    // Actualizar el mapa con los datos filtrados
+    actualizarPuntosMapa(actividadesFinales)
+    
+    console.log(`✅ Filtros aplicados. Puntos visibles: ${actividadesFinales.length}`)
+    
+  } catch (error) {
+    console.error('❌ Error al aplicar filtros:', error)
+  }
+}
+
+// Función para filtrar registros según criterios (igual que en VisorView.vue)
+const filtrarRegistros = () => {
+  let resultado = [...registros.value]
+  
+  // Filtrar por periodo
+  if (filtroPeriodo.value !== 'all') {
+    const now = new Date()
+    
+    if (filtroPeriodo.value === 'today') {
+      // Hoy
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      resultado = resultado.filter(r => new Date(r.fecha_hora) >= today)
+    } else if (filtroPeriodo.value === 'week') {
+      // Esta semana
+      const weekStart = new Date(now)
+      weekStart.setDate(now.getDate() - now.getDay())
+      weekStart.setHours(0, 0, 0, 0)
+      resultado = resultado.filter(r => new Date(r.fecha_hora) >= weekStart)
+    } else if (filtroPeriodo.value === 'month') {
+      // Este mes
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+      resultado = resultado.filter(r => new Date(r.fecha_hora) >= monthStart)
+    }
+  }
+  
+  return resultado
+}
+
 // Recargar mapa y datos
 const recargarMapa = async () => {
   // Si hay un error grave, reiniciar completamente el mapa
@@ -1410,6 +1516,13 @@ onUnmounted(() => {
   window.removeEventListener('online', () => {});
   window.removeEventListener('offline', () => {});
 });
+
+// Watcher para aplicar filtros automáticamente cuando cambien
+watch([filtroTipo, filtroPeriodo], () => {
+  if (map && mapInitialized.value) {
+    aplicarFiltros()
+  }
+})
 </script>
 
 <style scoped>
@@ -2940,6 +3053,88 @@ onUnmounted(() => {
 
 .mapboxgl-ctrl-logo {
   opacity: 0.7;
+}
+
+/* Estilos para los controles de filtros modernos */
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.filter-item-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  transition: all 0.3s ease;
+  min-height: 36px;
+}
+
+.filter-item-panel:hover {
+  background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
+  border-color: rgba(76, 175, 80, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+}
+
+.filter-icon {
+  color: #4CAF50;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.filter-item-panel:hover .filter-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.modern-select-panel {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  color: #2c3e50;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  outline: none;
+  min-width: 0;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%234CAF50' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 32px;
+}
+
+.modern-select-panel:hover {
+  background: rgba(76, 175, 80, 0.05);
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.modern-select-panel:focus {
+  background: rgba(76, 175, 80, 0.08);
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.modern-select-panel option {
+  background: white;
+  color: #2c3e50;
+  padding: 8px 12px;
+  font-weight: 500;
+}
+
+.modern-select-panel option:hover {
+  background: #f0fff4;
 }
 
 /* Responsive design */

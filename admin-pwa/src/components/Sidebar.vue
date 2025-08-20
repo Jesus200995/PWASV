@@ -193,34 +193,6 @@
         </li>
         -->
         
-        <!-- Visor de Seguimiento - MOVIDO AL PRIMER LUGAR -->
-        <li class="nav-item" :class="{ active: $route.name === 'Visor' }">
-          <router-link to="/visor" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Pin de ubicación clásico -->
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="currentColor" opacity="0.15"/>
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                
-                <!-- Punto central -->
-                <circle cx="12" cy="10" r="3" fill="currentColor" opacity="0.8"/>
-                <circle cx="12" cy="10" r="1.5" fill="rgba(255,255,255,0.9)"/>
-                
-                <!-- Ondas de señal GPS -->
-                <circle cx="12" cy="10" r="5" opacity="0.3" stroke-dasharray="2,3" stroke-width="1"/>
-                <circle cx="12" cy="10" r="7" opacity="0.2" stroke-dasharray="3,4" stroke-width="0.8"/>
-                
-                <!-- Elementos decorativos minimalistas -->
-                <circle cx="4" cy="4" r="0.8" fill="currentColor" opacity="0.3"/>
-                <circle cx="20" cy="6" r="0.8" fill="currentColor" opacity="0.3"/>
-                <circle cx="6" cy="20" r="0.8" fill="currentColor" opacity="0.3"/>
-              </svg>
-            </div>
-            <span class="nav-text">Visor de seguimiento</span>
-            <div class="nav-glow"></div>
-          </router-link>
-        </li>
-        
         <!-- Mapa Optimizado -->
         <li class="nav-item" :class="{ active: $route.name === 'VisorMap' }">
           <router-link to="/visor-map" class="nav-link">

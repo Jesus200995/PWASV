@@ -5,14 +5,13 @@ import UsuariosView from '../views/UsuariosView.vue'
 import HistorialesView from '../views/HistorialesView.vue'
 import RegistrosView from '../views/RegistrosView.vue'
 import ConfiguracionView from '../views/ConfiguracionView.vue'
-import VisorView from '../views/VisorView.vue'
 import AsistenciaView from '../views/AsistenciaView.vue'
 import VisorMapView from '../views/VisorMap.vue'
 
 const routes = [
   {
     path: '/',
-    redirect: '/visor'  // Cambiado de /dashboard a /visor - Dashboard oculto temporalmente
+    redirect: '/visor-map'  // Cambiado de /visor a /visor-map
   },
   {
     path: '/login',
@@ -56,14 +55,6 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/visor',
-    name: 'Visor',
-    component: VisorView,
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
     path: '/visor-map',
     name: 'VisorMap',
     component: VisorMapView,
@@ -86,7 +77,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login')
   } else if (to.name === 'Login' && isAuthenticated) {
-    next('/visor')  // Cambiado de /dashboard a /visor - Dashboard oculto temporalmente
+    next('/visor-map')  // Cambiado de /visor a /visor-map
   } else {
     next()
   }

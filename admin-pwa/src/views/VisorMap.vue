@@ -1810,7 +1810,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   flex-shrink: 0;
   overflow-y: auto;
   max-height: calc(100vh - 92px);
@@ -1943,12 +1943,12 @@ watch([filtroTipo, filtroPeriodo], () => {
 .panel-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .panel-section h4 {
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #1f2937;
 }
@@ -2048,24 +2048,24 @@ watch([filtroTipo, filtroPeriodo], () => {
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .stat-item {
   background: #f9fafb;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
   display: flex;
   flex-direction: column;
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 10px;
   color: #6b7280;
 }
 
 .stat-value {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #1f2937;
 }
@@ -2090,19 +2090,19 @@ watch([filtroTipo, filtroPeriodo], () => {
 .leyenda-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .leyenda-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 10px;
 }
 
 .color-marker {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
 }
 
@@ -2124,12 +2124,12 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 /* Ayuda */
 .help-text {
-  font-size: 12px;
+  font-size: 10px;
   color: #6b7280;
 }
 
 .help-text p {
-  margin: 4px 0;
+  margin: 3px 0;
 }
 
 /* Contenedor del mapa */

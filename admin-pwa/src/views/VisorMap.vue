@@ -56,7 +56,7 @@
               <button @click="recargarMapa" class="retry-btn-small">Reintentar</button>
             </div>
             <div v-else class="status-message">
-              <p class="status-info">{{ totalPuntosEnMapa }} ubicaciones en el mapa</p>
+              <p class="status-info-ubicaciones">{{ totalPuntosEnMapa }} ubicaciones en el mapa</p>
             </div>
           </div>
           
@@ -1952,6 +1952,14 @@ watch([filtroTipo, filtroPeriodo], () => {
   margin: 0;
 }
 
+.status-info-ubicaciones {
+  font-size: 10px;
+  color: #1e40af;
+  font-weight: 600;
+  margin: 0;
+  margin-top: -4px;
+}
+
 /* Estadísticas */
 .stat-grid {
   display: grid;
@@ -3114,7 +3122,7 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 0px;
 }
 
 .section-header:hover {

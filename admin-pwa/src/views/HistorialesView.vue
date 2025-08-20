@@ -59,6 +59,7 @@
                   class="search-input"
                   @input="buscarUsuarios"
                   @focus="mostrarResultados = true"
+                  @blur="setTimeout(() => mostrarResultados = false, 150)"
                 >
                 <button v-if="terminoBusqueda" @click="limpiarBusqueda" class="clear-search-btn">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -67,48 +68,48 @@
                   </svg>
                 </button>
               </div>
-              
-              <!-- Resultados de búsqueda -->
-              <div v-if="mostrarResultados && terminoBusqueda.length > 0" class="search-results">
-                <div v-if="buscandoUsuarios" class="loading-search">
-                  <div class="spinner-small"></div>
-                  <span>Buscando...</span>
-                </div>
-                <div v-else-if="terminoBusqueda.length < 2" class="need-more-chars">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 8v4m0 4h.01"></path>
-                  </svg>
-                  <p>Escribe al menos 2 caracteres para buscar</p>
-                </div>
-                <div v-else-if="usuariosFiltrados.length === 0" class="no-results">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                  </svg>
-                  <p>No se encontraron usuarios</p>
-                </div>
-                <div v-else class="results-list">
-                  <div 
-                    v-for="usuario in usuariosFiltrados" 
-                    :key="usuario.id" 
-                    :class="['result-item', { active: usuarioSeleccionado === usuario.id.toString() }]"
-                    @click="seleccionarUsuario(usuario)"
-                  >
-                    <div class="user-avatar">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
+            </div>
+            
+            <!-- Resultados de búsqueda - Dropdown flotante independiente -->
+            <div v-if="mostrarResultados && terminoBusqueda.length > 0" class="search-results-dropdown">
+              <div v-if="buscandoUsuarios" class="loading-search">
+                <div class="spinner-small"></div>
+                <span>Buscando...</span>
+              </div>
+              <div v-else-if="terminoBusqueda.length < 2" class="need-more-chars">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 8v4m0 4h.01"></path>
+                </svg>
+                <p>Escribe al menos 2 caracteres para buscar</p>
+              </div>
+              <div v-else-if="usuariosFiltrados.length === 0" class="no-results">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <p>No se encontraron usuarios</p>
+              </div>
+              <div v-else class="results-list">
+                <div 
+                  v-for="usuario in usuariosFiltrados" 
+                  :key="usuario.id" 
+                  :class="['result-item', { active: usuarioSeleccionado === usuario.id.toString() }]"
+                  @click="seleccionarUsuario(usuario)"
+                >
+                  <div class="user-avatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <div class="user-info">
+                    <div class="user-name">{{ usuario.nombre_completo }}</div>
+                    <div class="user-details">
+                      <span class="user-email">{{ usuario.correo }}</span>
+                      <span v-if="usuario.curp" class="user-curp">• {{ usuario.curp }}</span>
                     </div>
-                    <div class="user-info">
-                      <div class="user-name">{{ usuario.nombre_completo }}</div>
-                      <div class="user-details">
-                        <span class="user-email">{{ usuario.correo }}</span>
-                        <span v-if="usuario.curp" class="user-curp">• {{ usuario.curp }}</span>
-                      </div>
-                      <div v-if="usuario.cargo" class="user-cargo">{{ usuario.cargo }}</div>
-                    </div>
+                    <div v-if="usuario.cargo" class="user-cargo">{{ usuario.cargo }}</div>
                   </div>
                 </div>
               </div>
@@ -828,7 +829,8 @@ export default {
     // Cerrar resultados al hacer clic fuera
     const cerrarResultados = (event) => {
       const searchContainer = event.target.closest('.user-search-container')
-      if (!searchContainer) {
+      const dropdown = event.target.closest('.search-results-dropdown')
+      if (!searchContainer && !dropdown) {
         mostrarResultados.value = false
       }
     }
@@ -1279,11 +1281,14 @@ export default {
   display: flex;
   flex-direction: column;
   gap: clamp(8px, 1.5vw, 12px);
+  overflow: visible;
 }
 
 /* Sección de selección de usuario */
 .user-selection-section {
   width: 100%;
+  overflow: visible;
+  position: relative;
 }
 
 .selection-card {
@@ -1292,6 +1297,8 @@ export default {
   border-radius: clamp(6px, 1.5vw, 8px);
   padding: clamp(0.4rem, 1vw, 0.6rem);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08);
+  overflow: visible;
+  position: relative;
 }
 
 .selection-header {
@@ -1320,6 +1327,7 @@ export default {
 .user-search-container {
   position: relative;
   width: 100%;
+  overflow: visible;
 }
 
 .search-input-wrapper {
@@ -1381,20 +1389,32 @@ export default {
   color: #4b5563;
 }
 
-/* Resultados de búsqueda */
-.search-results {
+/* Resultados de búsqueda - Dropdown flotante independiente */
+.search-results-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
   background: white;
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  border-top: none;
-  border-radius: 0 0 clamp(4px, 1vw, 6px) clamp(4px, 1vw, 6px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
-  max-height: 300px;
+  border: 2px solid rgba(76, 175, 80, 0.4);
+  border-radius: clamp(6px, 1.2vw, 8px);
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
+  max-height: 320px;
   overflow-y: auto;
-  z-index: 100;
+  z-index: 10000;
+  animation: slideDown 0.2s ease-out;
+  backdrop-filter: blur(8px);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .loading-search {
@@ -1465,10 +1485,10 @@ export default {
   display: flex;
   align-items: center;
   gap: clamp(8px, 1.5vw, 12px);
-  padding: clamp(8px, 1.5vw, 12px);
+  padding: clamp(10px, 2vw, 14px);
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .result-item:last-child {
@@ -1476,12 +1496,12 @@ export default {
 }
 
 .result-item:hover {
-  background: rgba(76, 175, 80, 0.05);
+  background: rgba(76, 175, 80, 0.08);
 }
 
 .result-item.active {
-  background: rgba(76, 175, 80, 0.1);
-  border-left: 3px solid #4CAF50;
+  background: rgba(76, 175, 80, 0.12);
+  border-left: 4px solid #4CAF50;
 }
 
 .user-avatar {

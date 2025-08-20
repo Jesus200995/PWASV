@@ -303,6 +303,24 @@
           </router-link>
         </li>
         
+        <li class="nav-item" :class="{ active: $route.name === 'Notificaciones' }">
+          <router-link to="/notificaciones" class="nav-link">
+            <div class="nav-icon-wrapper">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Ícono de notificaciones premium -->
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                <!-- Elementos decorativos -->
+                <circle cx="12" cy="2" r="1" opacity="0.4"/>
+                <path d="M12 2v2" opacity="0.6"/>
+                <circle cx="12" cy="8" r="1" opacity="0.5" fill="currentColor"/>
+              </svg>
+            </div>
+            <span class="nav-text">Notificaciones</span>
+            <div class="nav-glow"></div>
+          </router-link>
+        </li>
+        
         <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }">
           <router-link to="/configuracion" class="nav-link">
             <div class="nav-icon-wrapper">

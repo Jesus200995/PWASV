@@ -7,6 +7,7 @@ import RegistrosView from '../views/RegistrosView.vue'
 import ConfiguracionView from '../views/ConfiguracionView.vue'
 import AsistenciaView from '../views/AsistenciaView.vue'
 import VisorMapView from '../views/VisorMap.vue'
+import NotificacionesView from '../views/NotificacionesView.vue'
 
 const routes = [
   {
@@ -58,6 +59,14 @@ const routes = [
     path: '/visor-map',
     name: 'VisorMap',
     component: VisorMapView,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/notificaciones',
+    name: 'Notificaciones',
+    component: NotificacionesView,
     meta: {
       requiresAuth: true
     }

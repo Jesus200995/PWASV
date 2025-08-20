@@ -45,15 +45,17 @@
           </div>
           
           <div class="panel-section">
-            <h4>Estado</h4>
+            <div class="section-header-status">
+              <h4>Estado</h4>
+              <div v-if="!error" class="status-badge-small loading">
+                Actualizando<span class="loading-dots"></span>
+              </div>
+            </div>
             <div v-if="error" class="error-message">
               <p>{{ error }}</p>
               <button @click="recargarMapa" class="retry-btn-small">Reintentar</button>
             </div>
             <div v-else class="status-message">
-              <div class="status-badge" :class="loading ? 'loading' : 'success'">
-                {{ loading ? 'Cargando...' : 'Mapa listo' }}
-              </div>
               <p class="status-info">{{ totalPuntosEnMapa }} ubicaciones en el mapa</p>
             </div>
           </div>
@@ -1912,9 +1914,31 @@ watch([filtroTipo, filtroPeriodo], () => {
   max-width: fit-content;
 }
 
-.status-badge.loading {
+.status-badge-small {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  max-width: fit-content;
+}
+
+.status-badge.loading,
+.status-badge-small.loading {
   background-color: #dbeafe;
   color: #1e40af;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
 }
 
 .status-badge.success {
@@ -3084,6 +3108,13 @@ watch([filtroTipo, filtroPeriodo], () => {
   cursor: pointer;
   padding: 2px 0;
   transition: all 0.2s ease;
+}
+
+.section-header-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .section-header:hover {

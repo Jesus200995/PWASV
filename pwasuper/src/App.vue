@@ -11,6 +11,21 @@ const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
 
+// Función para obtener el contador de notificaciones no leídas
+const unreadNotificationsCount = computed(() => {
+  try {
+    const saved = localStorage.getItem('notifications');
+    if (saved) {
+      const notifications = JSON.parse(saved);
+      return notifications.filter(n => !n.read).length;
+    }
+    return 2; // Mostrar un ejemplo inicial
+  } catch (error) {
+    console.error('Error loading notifications count:', error);
+    return 0;
+  }
+});
+
 // Watcher para detectar cambios de ruta y actualizar el estado
 watch(() => route.path, () => {
   // Verificar estado de autenticación en cada cambio de ruta
@@ -210,7 +225,23 @@ function logout() {
             </div>
           </div>
           
-          <!-- Botón del menú hamburguesa -->
+          <div class="flex items-center space-x-2">
+            <!-- Botón de notificaciones -->
+            <router-link 
+              to="/notificaciones"
+              class="relative p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              :class="{ 'bg-blue-50 text-blue-600': route.name === 'Notificaciones' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-3.5-3.5a.928.928 0 010-1.314L20 8.5h-5M9 17H4l3.5-3.5a.928.928 0 000-1.314L4 8.5h5M12 3v18M10.5 21.5a1.5 1.5 0 003 0" />
+              </svg>
+              <!-- Badge de notificaciones no leídas -->
+              <span v-if="unreadNotificationsCount > 0" class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                {{ unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount }}
+              </span>
+            </router-link>
+            
+            <!-- Botón del menú hamburguesa -->
           <button 
             @click="showMobileMenu = !showMobileMenu"
             class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
@@ -219,6 +250,7 @@ function logout() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
+          </div>
         </div>
       </div>
     </header>
@@ -253,6 +285,22 @@ function logout() {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
               <span class="font-medium">Historial</span>
+            </router-link>
+            
+            <router-link 
+              to="/notificaciones" 
+              @click="closeMobileMenu"
+              class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors relative"
+              :class="{ 'bg-primary/10 text-primary': route.name === 'Notificaciones' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-3.5-3.5a.928.928 0 010-1.314L20 8.5h-5M9 17H4l3.5-3.5a.928.928 0 000-1.314L4 8.5h5M12 3v18M10.5 21.5a1.5 1.5 0 003 0" />
+              </svg>
+              <span class="font-medium">Notificaciones</span>
+              <!-- Badge de notificaciones no leídas en el menú -->
+              <span v-if="unreadNotificationsCount > 0" class="ml-auto h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                {{ unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount }}
+              </span>
             </router-link>
             
             <router-link 

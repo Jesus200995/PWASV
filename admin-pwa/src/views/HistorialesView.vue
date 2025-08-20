@@ -1064,14 +1064,14 @@ export default {
 
 .page-content {
   flex: 1;
-  padding: clamp(16px, 2vw, 24px);
+  padding: clamp(8px, 1.5vw, 16px) clamp(16px, 4vw, 32px);
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(12px, 2.5vw, 20px);
+  gap: clamp(8px, 1.5vw, 12px);
 }
 
 /* Sección de selección de usuario */
@@ -1080,22 +1080,22 @@ export default {
 }
 
 .selection-card {
-  background: white;
-  border-radius: clamp(10px, 2vw, 16px);
-  padding: clamp(16px, 3vw, 24px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.4rem, 1vw, 0.6rem);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08);
 }
 
 .selection-header {
-  margin-bottom: clamp(12px, 2.5vw, 16px);
+  margin-bottom: clamp(8px, 1.5vw, 10px);
 }
 
 .selection-header h3 {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 1.5vw, 10px);
-  font-size: clamp(16px, 3vw, 20px);
+  gap: clamp(4px, 1vw, 6px);
+  font-size: clamp(12px, 2.5vw, 14px);
   font-weight: 600;
   color: #2c5530;
   margin: 0;
@@ -1111,19 +1111,19 @@ export default {
 
 .user-select {
   width: 100%;
-  padding: clamp(10px, 2vw, 14px);
-  border: 2px solid #e9ecef;
-  border-radius: clamp(8px, 1.5vw, 10px);
-  font-size: clamp(14px, 2.5vw, 16px);
-  background: white;
+  padding: clamp(0.25rem, 0.6vw, 0.35rem) clamp(0.4rem, 1vw, 0.5rem);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: clamp(4px, 1vw, 6px);
+  background: rgba(255, 255, 255, 0.9);
+  font-size: clamp(11px, 2vw, 12px);
   color: #495057;
   transition: all 0.3s ease;
 }
 
 .user-select:focus {
   outline: none;
-  border-color: #2ecc71;
-  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
 }
 
 /* Sección de filtros */
@@ -1132,22 +1132,30 @@ export default {
 }
 
 .filters-card {
-  background: white;
-  border-radius: clamp(10px, 2vw, 16px);
-  padding: clamp(16px, 3vw, 24px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: clamp(6px, 1.5vw, 8px);
+  padding: clamp(0.4rem, 1vw, 0.6rem);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08);
+  transition: all 0.3s ease;
+}
+
+.filters-card:hover {
+  border-color: rgba(76, 175, 80, 0.5);
+  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.12);
+  transform: translateY(-1px);
 }
 
 .filters-header {
-  margin-bottom: clamp(16px, 3vw, 20px);
+  margin-bottom: clamp(0.3rem, 0.8vw, 0.4rem);
 }
 
 .filters-header h3 {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 1.5vw, 10px);
-  font-size: clamp(16px, 3vw, 20px);
+  gap: clamp(4px, 1vw, 6px);
+  font-size: clamp(12px, 2.5vw, 14px);
   font-weight: 600;
   color: #2c5530;
   margin: 0;
@@ -1159,66 +1167,67 @@ export default {
 
 .filters-grid {
   display: grid;
-  gap: clamp(16px, 3vw, 20px);
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: clamp(0.3rem, 0.8vw, 0.4rem);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: clamp(6px, 1.2vw, 8px);
+  gap: clamp(3px, 0.6vw, 4px);
 }
 
 .filter-group label {
-  font-size: clamp(14px, 2.5vw, 16px);
+  font-size: clamp(11px, 2vw, 12px);
   font-weight: 500;
   color: #495057;
 }
 
 .period-buttons {
   display: flex;
-  gap: clamp(6px, 1.2vw, 8px);
+  gap: clamp(3px, 0.6vw, 4px);
   flex-wrap: wrap;
 }
 
 .period-btn {
-  padding: clamp(8px, 1.5vw, 10px) clamp(12px, 2.5vw, 16px);
-  border: 2px solid #e9ecef;
-  background: white;
-  border-radius: clamp(6px, 1.2vw, 8px);
-  font-size: clamp(12px, 2.2vw, 14px);
+  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: clamp(3px, 0.8vw, 4px);
+  font-size: clamp(10px, 1.8vw, 11px);
   font-weight: 500;
-  color: #6c757d;
+  color: #4b5563;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
 }
 
 .period-btn:hover {
-  border-color: #2ecc71;
-  color: #2ecc71;
+  border-color: #4CAF50;
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.05);
 }
 
 .period-btn.active {
-  background: #2ecc71;
-  border-color: #2ecc71;
+  background: #4CAF50;
+  border-color: #4CAF50;
   color: white;
 }
 
 .date-input, .year-select, .type-select {
-  padding: clamp(8px, 1.5vw, 10px);
-  border: 2px solid #e9ecef;
-  border-radius: clamp(6px, 1.2vw, 8px);
-  font-size: clamp(14px, 2.5vw, 16px);
-  background: white;
+  padding: clamp(0.25rem, 0.6vw, 0.35rem) clamp(0.4rem, 1vw, 0.5rem);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: clamp(4px, 1vw, 6px);
+  background: rgba(255, 255, 255, 0.9);
+  font-size: clamp(10px, 1.8vw, 11px);
   color: #495057;
   transition: all 0.3s ease;
 }
 
 .date-input:focus, .year-select:focus, .type-select:focus {
   outline: none;
-  border-color: #2ecc71;
-  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
 }
 
 /* Sección de estadísticas */

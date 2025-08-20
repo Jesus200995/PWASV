@@ -1534,8 +1534,8 @@ export default {
 
 /* Usuario seleccionado */
 .selected-user {
-  margin-top: clamp(12px, 2vw, 16px);
-  padding-top: clamp(12px, 2vw, 16px);
+  margin-top: clamp(8px, 1.5vw, 10px);
+  padding-top: clamp(8px, 1.5vw, 10px);
   border-top: 1px solid rgba(76, 175, 80, 0.2);
 }
 
@@ -1543,12 +1543,12 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: clamp(8px, 1.5vw, 10px);
+  margin-bottom: clamp(6px, 1.2vw, 8px);
 }
 
 .selected-user-header h4 {
   margin: 0;
-  font-size: clamp(11px, 2vw, 12px);
+  font-size: clamp(9px, 1.6vw, 10px);
   font-weight: 600;
   color: #2c5530;
 }
@@ -1556,13 +1556,13 @@ export default {
 .clear-selection-btn {
   display: flex;
   align-items: center;
-  gap: clamp(4px, 0.8vw, 6px);
-  padding: clamp(4px, 0.8vw, 6px) clamp(8px, 1.5vw, 10px);
+  gap: clamp(3px, 0.6vw, 4px);
+  padding: clamp(3px, 0.6vw, 4px) clamp(6px, 1.2vw, 8px);
   background: transparent;
   border: 1px solid rgba(231, 76, 60, 0.3);
-  border-radius: clamp(3px, 0.6vw, 4px);
+  border-radius: clamp(2px, 0.4vw, 3px);
   color: #e74c3c;
-  font-size: clamp(10px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.4vw, 9px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1576,16 +1576,16 @@ export default {
 .selected-user-card {
   display: flex;
   align-items: center;
-  gap: clamp(10px, 2vw, 12px);
-  padding: clamp(10px, 2vw, 12px);
+  gap: clamp(6px, 1.2vw, 8px);
+  padding: clamp(6px, 1.2vw, 8px);
   background: rgba(76, 175, 80, 0.05);
   border: 1px solid rgba(76, 175, 80, 0.2);
-  border-radius: clamp(4px, 1vw, 6px);
+  border-radius: clamp(3px, 0.8vw, 4px);
 }
 
 .selected-user-avatar {
-  width: clamp(32px, 6vw, 40px);
-  height: clamp(32px, 6vw, 40px);
+  width: clamp(24px, 4.5vw, 28px);
+  height: clamp(24px, 4.5vw, 28px);
   background: linear-gradient(135deg, #4CAF50, #45a049);
   border-radius: 50%;
   display: flex;
@@ -1602,25 +1602,25 @@ export default {
 
 .selected-user-name {
   font-weight: 700;
-  font-size: clamp(12px, 2.2vw, 14px);
+  font-size: clamp(10px, 1.8vw, 11px);
   color: #2c5530;
-  margin-bottom: clamp(3px, 0.6vw, 4px);
+  margin-bottom: clamp(2px, 0.4vw, 3px);
 }
 
 .selected-user-email {
-  font-size: clamp(10px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.4vw, 9px);
   color: #6c757d;
-  margin-bottom: clamp(2px, 0.4vw, 3px);
+  margin-bottom: clamp(1px, 0.3vw, 2px);
 }
 
 .selected-user-curp {
-  font-size: clamp(10px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.4vw, 9px);
   color: #6c757d;
-  margin-bottom: clamp(2px, 0.4vw, 3px);
+  margin-bottom: clamp(1px, 0.3vw, 2px);
 }
 
 .selected-user-cargo {
-  font-size: clamp(10px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.4vw, 9px);
   color: #4CAF50;
   font-weight: 600;
 }
@@ -1634,8 +1634,8 @@ export default {
   background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(76, 175, 80, 0.3);
-  border-radius: clamp(6px, 1.5vw, 8px);
-  padding: clamp(0.4rem, 1vw, 0.6rem);
+  border-radius: clamp(4px, 1vw, 6px);
+  padding: clamp(0.3rem, 0.8vw, 0.4rem);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08);
   transition: all 0.3s ease;
 }
@@ -1647,14 +1647,14 @@ export default {
 }
 
 .filters-header {
-  margin-bottom: clamp(0.3rem, 0.8vw, 0.4rem);
+  margin-bottom: clamp(0.2rem, 0.5vw, 0.25rem);
 }
 
 .filters-header h3 {
   display: flex;
   align-items: center;
-  gap: clamp(4px, 1vw, 6px);
-  font-size: clamp(12px, 2.5vw, 14px);
+  gap: clamp(3px, 0.8vw, 4px);
+  font-size: clamp(10px, 2vw, 11px);
   font-weight: 600;
   color: #2c5530;
   margin: 0;
@@ -1666,34 +1666,34 @@ export default {
 
 .filters-grid {
   display: grid;
-  gap: clamp(0.3rem, 0.8vw, 0.4rem);
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(0.2rem, 0.5vw, 0.25rem);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: clamp(3px, 0.6vw, 4px);
+  gap: clamp(2px, 0.4vw, 3px);
 }
 
 .filter-group label {
-  font-size: clamp(11px, 2vw, 12px);
+  font-size: clamp(9px, 1.6vw, 10px);
   font-weight: 500;
   color: #495057;
 }
 
 .period-buttons {
   display: flex;
-  gap: clamp(3px, 0.6vw, 4px);
+  gap: clamp(2px, 0.4vw, 3px);
   flex-wrap: wrap;
 }
 
 .period-btn {
-  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
+  padding: clamp(0.15rem, 0.4vw, 0.2rem) clamp(0.3rem, 0.8vw, 0.4rem);
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: rgba(255, 255, 255, 0.9);
-  border-radius: clamp(3px, 0.8vw, 4px);
-  font-size: clamp(10px, 1.8vw, 11px);
+  border-radius: clamp(2px, 0.6vw, 3px);
+  font-size: clamp(8px, 1.4vw, 9px);
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
@@ -1714,11 +1714,11 @@ export default {
 }
 
 .date-input, .year-select, .type-select {
-  padding: clamp(0.25rem, 0.6vw, 0.35rem) clamp(0.4rem, 1vw, 0.5rem);
+  padding: clamp(0.2rem, 0.4vw, 0.25rem) clamp(0.3rem, 0.8vw, 0.4rem);
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: clamp(4px, 1vw, 6px);
+  border-radius: clamp(3px, 0.8vw, 4px);
   background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(10px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.4vw, 9px);
   color: #495057;
   transition: all 0.3s ease;
 }
@@ -1736,19 +1736,19 @@ export default {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: clamp(12px, 2.5vw, 16px);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: clamp(8px, 1.5vw, 10px);
 }
 
 .stat-card {
   background: white;
-  border-radius: clamp(10px, 2vw, 14px);
-  padding: clamp(16px, 3vw, 20px);
+  border-radius: clamp(8px, 1.5vw, 10px);
+  padding: clamp(10px, 2vw, 12px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e9ecef;
   display: flex;
   align-items: center;
-  gap: clamp(12px, 2.5vw, 16px);
+  gap: clamp(8px, 1.5vw, 10px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -1758,9 +1758,9 @@ export default {
 }
 
 .stat-icon {
-  width: clamp(40px, 8vw, 48px);
-  height: clamp(40px, 8vw, 48px);
-  border-radius: clamp(8px, 1.5vw, 10px);
+  width: clamp(28px, 5vw, 32px);
+  height: clamp(28px, 5vw, 32px);
+  border-radius: clamp(6px, 1.2vw, 8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1792,7 +1792,7 @@ export default {
 }
 
 .stat-number {
-  font-size: clamp(20px, 4vw, 28px);
+  font-size: clamp(14px, 3vw, 18px);
   font-weight: 700;
   color: #2c5530;
   margin: 0;
@@ -1800,39 +1800,39 @@ export default {
 }
 
 .stat-label {
-  font-size: clamp(12px, 2.2vw, 14px);
+  font-size: clamp(10px, 1.8vw, 11px);
   color: #6c757d;
-  margin: clamp(4px, 0.8vw, 6px) 0 0 0;
+  margin: clamp(3px, 0.6vw, 4px) 0 0 0;
   font-weight: 500;
 }
 
 /* Sección de historial */
 .historial-section {
   background: white;
-  border-radius: clamp(10px, 2vw, 16px);
+  border-radius: clamp(8px, 1.5vw, 12px);
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e9ecef;
-  min-height: 400px;
+  min-height: 300px;
   display: flex;
   flex-direction: column;
 }
 
 .historial-header {
-  padding: clamp(16px, 3vw, 20px);
+  padding: clamp(10px, 2vw, 14px);
   border-bottom: 1px solid #e9ecef;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: clamp(12px, 2.5vw, 16px);
+  gap: clamp(8px, 1.5vw, 10px);
 }
 
 .historial-header h3 {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 1.5vw, 10px);
-  font-size: clamp(16px, 3vw, 20px);
+  gap: clamp(6px, 1.2vw, 8px);
+  font-size: clamp(12px, 2.5vw, 14px);
   font-weight: 600;
   color: #2c5530;
   margin: 0;
@@ -1845,12 +1845,12 @@ export default {
 .historial-actions {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 2.5vw, 16px);
+  gap: clamp(8px, 1.5vw, 10px);
   flex-wrap: wrap;
 }
 
 .record-count {
-  font-size: clamp(12px, 2.2vw, 14px);
+  font-size: clamp(10px, 1.8vw, 11px);
   color: #6c757d;
   white-space: nowrap;
 }
@@ -1858,13 +1858,13 @@ export default {
 .export-btn {
   display: flex;
   align-items: center;
-  gap: clamp(6px, 1.2vw, 8px);
-  padding: clamp(8px, 1.5vw, 10px) clamp(12px, 2.5vw, 16px);
+  gap: clamp(4px, 0.8vw, 6px);
+  padding: clamp(6px, 1.2vw, 8px) clamp(10px, 2vw, 12px);
   background: #27ae60;
   border: none;
-  border-radius: clamp(6px, 1.2vw, 8px);
+  border-radius: clamp(4px, 0.8vw, 6px);
   color: white;
-  font-size: clamp(12px, 2.2vw, 14px);
+  font-size: clamp(10px, 1.8vw, 11px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1984,12 +1984,12 @@ export default {
 .historial-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: clamp(12px, 2.2vw, 14px);
+  font-size: clamp(10px, 1.8vw, 11px);
 }
 
 .historial-table th {
   background: #f8f9fa;
-  padding: clamp(12px, 2.5vw, 16px);
+  padding: clamp(8px, 1.5vw, 10px);
   text-align: left;
   font-weight: 600;
   color: #495057;
@@ -1998,7 +1998,7 @@ export default {
 }
 
 .historial-table td {
-  padding: clamp(12px, 2.5vw, 16px);
+  padding: clamp(8px, 1.5vw, 10px);
   border-bottom: 1px solid #e9ecef;
   vertical-align: middle;
 }
@@ -2010,9 +2010,9 @@ export default {
 .tipo-badge {
   display: inline-flex;
   align-items: center;
-  padding: clamp(4px, 0.8vw, 6px) clamp(8px, 1.5vw, 10px);
-  border-radius: clamp(12px, 2.5vw, 16px);
-  font-size: clamp(11px, 2vw, 12px);
+  padding: clamp(3px, 0.6vw, 4px) clamp(6px, 1.2vw, 8px);
+  border-radius: clamp(10px, 2vw, 12px);
+  font-size: clamp(9px, 1.6vw, 10px);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2040,9 +2040,9 @@ export default {
 .origen-badge {
   display: inline-flex;
   align-items: center;
-  padding: clamp(3px, 0.6vw, 5px) clamp(6px, 1.2vw, 8px);
-  border-radius: clamp(10px, 2vw, 12px);
-  font-size: clamp(10px, 1.8vw, 11px);
+  padding: clamp(2px, 0.4vw, 3px) clamp(5px, 1vw, 6px);
+  border-radius: clamp(8px, 1.5vw, 10px);
+  font-size: clamp(8px, 1.4vw, 9px);
   font-weight: 500;
   text-transform: capitalize;
   letter-spacing: 0.3px;
@@ -2080,12 +2080,12 @@ export default {
 }
 
 .details-btn {
-  padding: clamp(4px, 0.8vw, 6px) clamp(8px, 1.5vw, 10px);
+  padding: clamp(3px, 0.6vw, 4px) clamp(6px, 1.2vw, 8px);
   background: #3498db;
   border: none;
-  border-radius: clamp(4px, 0.8vw, 6px);
+  border-radius: clamp(3px, 0.6vw, 4px);
   color: white;
-  font-size: clamp(11px, 2vw, 12px);
+  font-size: clamp(9px, 1.6vw, 10px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -2099,7 +2099,7 @@ export default {
 .no-details {
   color: #adb5bd;
   font-style: italic;
-  font-size: clamp(11px, 2vw, 12px);
+  font-size: clamp(9px, 1.6vw, 10px);
 }
 
 /* Welcome section */

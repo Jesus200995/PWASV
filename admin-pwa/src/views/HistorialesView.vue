@@ -420,15 +420,24 @@
         </div>
 
         <!-- Estado inicial -->
-        <div v-else class="welcome-section">
-          <div class="welcome-card">
-            <div class="welcome-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
+        <div v-else-if="!mostrarResultados || usuariosFiltrados.length === 0" class="welcome-section">
+          <div class="modern-welcome-card">
+            <div class="glass-background"></div>
+            <div class="welcome-content">
+              <div class="welcome-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+              </div>
+              <h2>Buscar Historial de Usuario</h2>
+              <p>Utiliza el buscador superior para encontrar y seleccionar un usuario.</p>
+              <div class="modern-divider"></div>
+              <div class="search-hint">
+                <span class="hint-icon">💡</span>
+                <span>Puedes buscar por nombre, correo o CURP</span>
+              </div>
             </div>
-            <h2>Historial de Usuarios</h2>
-            <p>Selecciona un usuario de la lista superior para ver su historial completo de actividades.</p>
           </div>
         </div>
       </div>
@@ -2102,85 +2111,155 @@ export default {
   font-size: clamp(9px, 1.6vw, 10px);
 }
 
-/* Welcome section */
+/* Welcome section moderna */
 .welcome-section {
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: clamp(40px, 8vw, 60px);
-  min-height: 400px;
+  align-items: flex-start;
+  padding: clamp(60px, 8vw, 100px) clamp(20px, 4vw, 30px) clamp(40px, 6vw, 60px);
+  min-height: calc(100vh - 200px);
+  padding-top: clamp(80px, 12vw, 120px);
 }
 
-.welcome-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 2px solid rgba(46, 204, 113, 0.2);
-  border-radius: clamp(16px, 3vw, 24px);
-  padding: clamp(24px, 5vw, 40px);
-  text-align: center;
-  max-width: 500px;
-  width: 100%;
-  box-shadow: 0 15px 40px rgba(46, 204, 113, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.modern-welcome-card {
   position: relative;
+  max-width: min(420px, 90vw);
+  width: 100%;
+  border-radius: clamp(12px, 2.5vw, 20px);
   overflow: hidden;
-  box-sizing: border-box;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
 }
 
-.welcome-card::before {
-  content: '';
+.glass-background {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #2ecc71, #27ae60, #16a085);
-  border-radius: 24px 24px 0 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(20px);
 }
 
-.welcome-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 30px 80px rgba(46, 204, 113, 0.25);
+.welcome-content {
+  position: relative;
+  z-index: 2;
+  padding: clamp(20px, 4vw, 32px);
+  text-align: center;
 }
 
 .welcome-icon {
-  width: clamp(48px, 10vw, 64px);
-  height: clamp(48px, 10vw, 64px);
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  border-radius: clamp(10px, 2vw, 14px);
+  width: clamp(28px, 5vw, 40px);
+  height: clamp(28px, 5vw, 40px);
+  margin: 0 auto clamp(12px, 2.5vw, 20px) auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto clamp(16px, 3vw, 20px) auto;
-  box-shadow: 0 10px 25px rgba(46, 204, 113, 0.3);
-  transition: transform 0.3s ease;
-}
-
-.welcome-card:hover .welcome-icon {
-  transform: scale(1.05) rotate(5deg);
 }
 
 .welcome-icon svg {
-  width: clamp(24px, 5vw, 32px);
-  height: clamp(24px, 5vw, 32px);
-  color: white;
+  width: 100%;
+  height: 100%;
+  color: #6b7280;
+  stroke-width: 1.5;
 }
 
-.welcome-card h2 {
-  color: #2c5530;
-  font-size: clamp(18px, 4vw, 24px);
-  font-weight: 800;
-  margin: 0 0 clamp(12px, 2.5vw, 16px) 0;
-  text-shadow: 0 2px 10px rgba(46, 204, 113, 0.2);
-  letter-spacing: -0.5px;
-}
-
-.welcome-card p {
-  color: #27ae60;
-  font-size: clamp(14px, 2.8vw, 16px);
-  line-height: 1.6;
-  margin: 0;
+.welcome-content h2 {
+  color: #374151;
+  font-size: clamp(14px, 3vw, 20px);
   font-weight: 500;
+  margin: 0 0 clamp(6px, 1.2vw, 12px) 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+}
+
+.welcome-content p {
+  color: #6b7280;
+  font-size: clamp(12px, 2.5vw, 15px);
+  line-height: 1.5;
+  margin: 0 0 clamp(12px, 2.5vw, 20px) 0;
+  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modern-divider {
+  width: clamp(30px, 8vw, 60px);
+  height: 1px;
+  background: rgba(156, 163, 175, 0.3);
+  margin: 0 auto clamp(12px, 2.5vw, 20px) auto;
+}
+
+.search-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 1vw, 8px);
+  padding: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 16px);
+  background: rgba(243, 244, 246, 0.6);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  border-radius: clamp(6px, 1.5vw, 12px);
+  color: #6b7280;
+  font-size: clamp(10px, 2vw, 13px);
+  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.hint-icon {
+  font-size: clamp(11px, 2.2vw, 14px);
+  opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .welcome-section {
+    padding-top: clamp(60px, 10vw, 80px);
+    padding-bottom: clamp(30px, 5vw, 40px);
+  }
+  
+  .modern-welcome-card {
+    max-width: 95vw;
+  }
+  
+  .welcome-content {
+    padding: clamp(16px, 3vw, 24px);
+  }
+  
+  .welcome-content p {
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-section {
+    padding-top: clamp(50px, 8vw, 70px);
+  }
+  
+  .welcome-content p {
+    max-width: 240px;
+  }
+  
+  .search-hint {
+    flex-direction: column;
+    gap: clamp(3px, 0.8vw, 5px);
+    text-align: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .welcome-section {
+    padding: clamp(40px, 6vw, 50px) clamp(12px, 3vw, 16px) clamp(20px, 4vw, 30px);
+  }
+  
+  .welcome-content {
+    padding: clamp(12px, 2.5vw, 18px);
+  }
 }
 
 /* Modal de detalles */

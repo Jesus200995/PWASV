@@ -1369,7 +1369,7 @@ export default {
   border: 2px solid rgba(76, 175, 80, 0.4);
   border-radius: clamp(6px, 1.2vw, 8px);
   box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
-  max-height: 320px;
+  max-height: 220px;
   overflow-y: auto;
   z-index: 10000;
   animation: slideDown 0.2s ease-out;
@@ -1391,10 +1391,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(6px, 1vw, 8px);
-  padding: clamp(12px, 2vw, 16px);
+  gap: clamp(4px, 0.8vw, 6px);
+  padding: clamp(8px, 1.5vw, 10px);
   color: #6c757d;
-  font-size: clamp(11px, 2vw, 12px);
+  font-size: clamp(9px, 1.6vw, 10px);
 }
 
 .spinner-small {
@@ -1411,19 +1411,19 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: clamp(16px, 3vw, 20px);
+  padding: clamp(10px, 2vw, 14px);
   color: #6c757d;
   text-align: center;
 }
 
 .need-more-chars svg {
-  margin-bottom: clamp(6px, 1vw, 8px);
+  margin-bottom: clamp(4px, 0.8vw, 6px);
   opacity: 0.6;
 }
 
 .need-more-chars p {
   margin: 0;
-  font-size: clamp(10px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.5vw, 9px);
   font-style: italic;
 }
 
@@ -1432,19 +1432,19 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: clamp(20px, 4vw, 24px);
+  padding: clamp(14px, 2.8vw, 18px);
   color: #6c757d;
   text-align: center;
 }
 
 .no-results svg {
-  margin-bottom: clamp(8px, 1.5vw, 10px);
+  margin-bottom: clamp(6px, 1.2vw, 8px);
   opacity: 0.5;
 }
 
 .no-results p {
   margin: 0;
-  font-size: clamp(11px, 2vw, 12px);
+  font-size: clamp(9px, 1.6vw, 10px);
 }
 
 .results-list {
@@ -1454,8 +1454,8 @@ export default {
 .result-item {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 1.5vw, 12px);
-  padding: clamp(10px, 2vw, 14px);
+  gap: clamp(6px, 1.2vw, 8px);
+  padding: clamp(6px, 1.2vw, 8px);
   cursor: pointer;
   transition: all 0.2s ease;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
@@ -1475,8 +1475,8 @@ export default {
 }
 
 .user-avatar {
-  width: clamp(28px, 5vw, 32px);
-  height: clamp(28px, 5vw, 32px);
+  width: clamp(22px, 4vw, 26px);
+  height: clamp(22px, 4vw, 26px);
   background: linear-gradient(135deg, #4CAF50, #45a049);
   border-radius: 50%;
   display: flex;
@@ -1493,9 +1493,9 @@ export default {
 
 .user-name {
   font-weight: 600;
-  font-size: clamp(11px, 2vw, 12px);
+  font-size: clamp(9px, 1.6vw, 10px);
   color: #2c5530;
-  margin-bottom: clamp(2px, 0.5vw, 3px);
+  margin-bottom: clamp(1px, 0.3vw, 2px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1504,12 +1504,12 @@ export default {
 .user-details {
   display: flex;
   align-items: center;
-  gap: clamp(4px, 0.8vw, 6px);
-  margin-bottom: clamp(2px, 0.5vw, 3px);
+  gap: clamp(3px, 0.6vw, 4px);
+  margin-bottom: clamp(1px, 0.3vw, 2px);
 }
 
 .user-email {
-  font-size: clamp(10px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.4vw, 9px);
   color: #6c757d;
   white-space: nowrap;
   overflow: hidden;
@@ -1518,13 +1518,13 @@ export default {
 }
 
 .user-curp {
-  font-size: clamp(10px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.4vw, 9px);
   color: #6c757d;
   white-space: nowrap;
 }
 
 .user-cargo {
-  font-size: clamp(10px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.4vw, 9px);
   color: #4CAF50;
   font-weight: 500;
   white-space: nowrap;

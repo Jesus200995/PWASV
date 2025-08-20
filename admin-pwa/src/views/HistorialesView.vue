@@ -863,13 +863,15 @@ export default {
 .page-header {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   border-bottom: none;
-  padding: clamp(0.75rem, 2vw, 1.25rem);
+  padding: clamp(0.3rem, 0.8vw, 0.5rem);
   color: white;
-  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(46, 204, 113, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 100;
   width: 100%;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .page-header::before {
@@ -890,7 +892,7 @@ export default {
   position: relative;
   z-index: 2;
   flex-wrap: wrap;
-  gap: clamp(12px, 3vw, 20px);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   max-width: 100%;
   margin: 0;
   width: 100%;
@@ -899,27 +901,28 @@ export default {
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 3vw, 20px);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex: 1;
-  min-width: 200px;
+  min-width: 140px;
 }
 
 .header-icon {
-  width: clamp(2rem, 4vw, 2.5rem);
-  height: clamp(2rem, 4vw, 2.5rem);
+  width: clamp(24px, 3vw, 30px);
+  height: clamp(24px, 3vw, 30px);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(8px, 2vw, 12px);
+  border-radius: clamp(5px, 0.8vw, 6px);
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
   animation: float 3s ease-in-out infinite;
 }
 
 .header-icon svg {
-  width: clamp(1rem, 2vw, 1.25rem);
-  height: clamp(1rem, 2vw, 1.25rem);
+  width: clamp(12px, 2vw, 15px);
+  height: clamp(12px, 2vw, 15px);
   color: white;
 }
 
@@ -930,78 +933,81 @@ export default {
 
 .header-text {
   flex: 1;
-  min-width: 200px;
+  min-width: 120px;
 }
 
 .header-title {
-  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-size: clamp(0.8rem, 2vw, 1rem);
   font-weight: 700;
-  margin: 0 0 clamp(4px, 1vh, 8px) 0;
+  margin: 0;
   background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  letter-spacing: -0.5px;
-  line-height: 1.2;
+  letter-spacing: -0.3px;
+  line-height: 1;
 }
 
 .header-subtitle {
-  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  margin: clamp(0.05rem, 0.2vw, 0.08rem) 0 0 0;
   color: rgba(255, 255, 255, 0.9);
-  margin: 0;
+  font-size: clamp(0.55rem, 1vw, 0.65rem);
+  line-height: 1.1;
   font-weight: 400;
-  letter-spacing: 0.2px;
-  line-height: 1.4;
+  letter-spacing: 0.05px;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 2vw, 16px);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .connection-status {
   display: flex;
   align-items: center;
-  gap: clamp(6px, 1.5vw, 8px);
-  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px);
-  border-radius: clamp(16px, 4vw, 20px);
+  gap: clamp(0.15rem, 0.4vw, 0.2rem);
+  padding: clamp(0.15rem, 0.4vw, 0.2rem) clamp(0.3rem, 0.8vw, 0.4rem);
+  border-radius: clamp(8px, 1.2vw, 10px);
+  font-size: clamp(0.55rem, 1vw, 0.6rem);
+  font-weight: 500;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: clamp(12px, 2.5vw, 14px);
-  font-weight: 500;
   transition: all 0.3s ease;
-  white-space: nowrap;
 }
 
 .connection-status.online {
-  background: rgba(39, 174, 96, 0.2);
-  border-color: rgba(39, 174, 96, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .connection-status.offline {
-  background: rgba(231, 76, 60, 0.2);
-  border-color: rgba(231, 76, 60, 0.3);
+  background: rgba(244, 67, 54, 0.2);
+  color: #fff2f0;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
 }
 
 .status-indicator {
-  width: 8px;
-  height: 8px;
+  width: clamp(2px, 0.6vw, 3px);
+  height: clamp(2px, 0.6vw, 3px);
   border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
   animation: pulse 2s infinite;
 }
 
 .connection-status.online .status-indicator {
-  background: #27ae60;
-  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+  background: currentColor;
 }
 
 .connection-status.offline .status-indicator {
-  background: #e74c3c;
-  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+  background: currentColor;
 }
 
 @keyframes pulse {
@@ -1018,14 +1024,14 @@ export default {
 .refresh-btn {
   display: flex;
   align-items: center;
-  gap: clamp(4px, 1vw, 8px);
-  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: clamp(16px, 4vw, 20px);
+  gap: clamp(0.15rem, 0.4vw, 0.2rem);
+  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
-  font-size: clamp(12px, 2.5vw, 14px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: clamp(4px, 0.8vw, 5px);
   font-weight: 500;
+  font-size: clamp(0.55rem, 1vw, 0.6rem);
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);

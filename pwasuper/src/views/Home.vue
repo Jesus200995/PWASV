@@ -1343,10 +1343,15 @@ function closeSuccessModal() {
 
 function verificarEstadoAsistencia() {
   try {
-    const ahora = new Date();
-    const fechaHoy = ahora.toISOString().split('T')[0];
+    // *** CORREGIDO: Usar fecha CDMX consistente ***
+    const fechaHoyCDMX = new Date().toLocaleString("en-CA", {
+      timeZone: "America/Mexico_City",
+      year: "numeric",
+      month: "2-digit", 
+      day: "2-digit"
+    });
     
-    console.log(`🔍 Verificando estado de asistencia para ${fechaHoy}`);
+    console.log(`🔍 Verificando estado de asistencia para ${fechaHoyCDMX}`);
     
     // Reiniciar estados por defecto (suponemos que no hay registros)
     entradaMarcada.value = false;
@@ -1355,26 +1360,29 @@ function verificarEstadoAsistencia() {
     datosSalida.value = {};
     
     // Verificamos si hay datos guardados para el día de hoy específicamente
-    const estadoHoy = localStorage.getItem(`asistencia_${user.value.id}_${fechaHoy}`);
+    const estadoHoy = localStorage.getItem(`asistencia_${user.value.id}_${fechaHoyCDMX}`);
     
     if (estadoHoy) {
       const datos = JSON.parse(estadoHoy);
       
-      // Verificar si los datos están dentro del periodo de validez (antes de las 23:59:59)
-      const expiraEn = datos.expiraEn ? new Date(datos.expiraEn) : new Date(fechaHoy + 'T23:59:59');
-      const esValido = ahora < expiraEn;
+      // *** CORREGIDO: Verificar expiración en zona horaria CDMX ***
+      const ahoraCDMX = new Date().toLocaleString("sv-SE", { timeZone: "America/Mexico_City" });
+      const fechaCompletaCDMX = new Date(ahoraCDMX);
+      
+      const expiraEn = datos.expiraEn ? new Date(datos.expiraEn) : new Date(fechaHoyCDMX + 'T23:59:59');
+      const esValido = fechaCompletaCDMX < expiraEn;
       
       console.log(`📊 Datos locales encontrados para hoy:`, {
         entrada: !!datos.entradaMarcada,
         salida: !!datos.salidaMarcada,
-        expiraEn: expiraEn.toLocaleTimeString(),
+        expiraEn: expiraEn.toLocaleString("es-MX", { timeZone: "America/Mexico_City" }),
         esValido,
-        horaActual: ahora.toLocaleTimeString()
+        horaActualCDMX: fechaCompletaCDMX.toLocaleString("es-MX", { timeZone: "America/Mexico_City" })
       });
       
       if (esValido) {
-        // Los datos son válidos (todavía estamos en el mismo día antes de las 23:59:59)
-        console.log(`✅ Usando datos locales válidos (expiran a las 23:59:59)`);
+        // Los datos son válidos (todavía estamos en el mismo día antes de las 23:59:59 CDMX)
+        console.log(`✅ Usando datos locales válidos (expiran a las 23:59:59 CDMX)`);
         entradaMarcada.value = datos.entradaMarcada || false;
         salidaMarcada.value = datos.salidaMarcada || false;
         datosEntrada.value = datos.datosEntrada || {};
@@ -1396,26 +1404,34 @@ function verificarEstadoAsistencia() {
   }
 }
 
-// Función para asegurar que los estados se mantengan correctamente hasta las 23:59:59
+// Función para asegurar que los estados se mantengan correctamente hasta las 23:59:59 CDMX
 function asegurarEstadosConsistentes() {
   if (!user.value.id) return;
   
-  const ahora = new Date();
-  const fechaHoy = ahora.toISOString().split('T')[0];
+  // *** CORREGIDO: Usar fecha CDMX consistente ***
+  const fechaHoyCDMX = new Date().toLocaleString("en-CA", {
+    timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit", 
+    day: "2-digit"
+  });
   
   console.log('🔐 Verificando consistencia de estados de asistencia...');
   
   try {
-    const estadoHoy = localStorage.getItem(`asistencia_${user.value.id}_${fechaHoy}`);
+    const estadoHoy = localStorage.getItem(`asistencia_${user.value.id}_${fechaHoyCDMX}`);
     
     if (estadoHoy) {
       const datos = JSON.parse(estadoHoy);
       
-      // Verificar si estamos antes de la hora de expiración (23:59:59)
-      const expiraEn = datos.expiraEn ? new Date(datos.expiraEn) : new Date(fechaHoy + 'T23:59:59');
+      // *** CORREGIDO: Verificar expiración en zona horaria CDMX ***
+      const ahoraCDMX = new Date().toLocaleString("sv-SE", { timeZone: "America/Mexico_City" });
+      const fechaCompletaCDMX = new Date(ahoraCDMX);
       
-      if (ahora < expiraEn) {
-        console.log('✅ Asegurando estados hasta las 23:59:59');
+      const expiraEn = datos.expiraEn ? new Date(datos.expiraEn) : new Date(fechaHoyCDMX + 'T23:59:59');
+      
+      if (fechaCompletaCDMX < expiraEn) {
+        console.log('✅ Asegurando estados hasta las 23:59:59 CDMX');
         
         // Si en localStorage indica que la entrada fue marcada, asegurar que se refleje en el estado
         if (datos.entradaMarcada && !entradaMarcada.value) {
@@ -1442,14 +1458,20 @@ function asegurarEstadosConsistentes() {
  */
 function limpiarDatosAntiguos() {
   try {
-    const hoy = new Date().toISOString().split('T')[0];
+    // *** CORREGIDO: Usar fecha CDMX consistente ***
+    const hoyCDMX = new Date().toLocaleString("en-CA", {
+      timeZone: "America/Mexico_City",
+      year: "numeric",
+      month: "2-digit", 
+      day: "2-digit"
+    });
     
     // Recorremos todas las claves del localStorage
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       
       // Si es una clave de asistencia para este usuario pero no de hoy, la eliminamos
-      if (key && key.startsWith(`asistencia_${user.value.id}_`) && !key.includes(hoy)) {
+      if (key && key.startsWith(`asistencia_${user.value.id}_`) && !key.includes(hoyCDMX)) {
         localStorage.removeItem(key);
         console.log(`🧹 Eliminando datos antiguos: ${key}`);
       }
@@ -1472,15 +1494,23 @@ function limpiarDatosAntiguos() {
         return;
       }
 
-      // Obtener la fecha actual para comparar (CDMX)
-      const ahora = new Date();
-      const fechaActual = ahora.toISOString().split('T')[0];
+      // *** CORREGIDO: Obtener fecha actual en zona horaria de CDMX ***
+      const ahoraCDMX = new Date().toLocaleString("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit", 
+        day: "2-digit"
+      });
+      const fechaActual = ahoraCDMX; // Formato YYYY-MM-DD en CDMX
       
       console.log(`🔍 Consultando asistencia del día con forceRefresh=${forceRefresh}`);
+      console.log(`📅 Fecha actual CDMX: ${fechaActual}`);
       const datos = await asistenciasService.consultarAsistenciaHoy(user.value.id, forceRefresh);
       asistenciaHoy.value = datos;
       
-      // Verificar que los datos correspondan al día actual
+      console.log(`📊 Datos recibidos del backend - fecha: ${datos.fecha}, entrada: ${!!datos.entrada}, salida: ${!!datos.salida}`);
+      
+      // Verificar que los datos correspondan al día actual EN ZONA CDMX
       if (datos.fecha && datos.fecha === fechaActual) {
         // Actualizar estado de botones según la respuesta del backend
         if (datos.entrada) {
@@ -1515,28 +1545,51 @@ function limpiarDatosAntiguos() {
         
         // Guardar estado actualizado
         guardarEstadoAsistencia();
+        
+        console.log(`✅ Estados actualizados para fecha ${fechaActual}: entrada=${entradaMarcada.value}, salida=${salidaMarcada.value}`);
       } else {
-        console.log('Sin registros para el día de hoy. Reiniciando estados.');
-        // Es un nuevo día, reiniciar estados
-        entradaMarcada.value = false;
-        salidaMarcada.value = false;
-        datosEntrada.value = {};
-        datosSalida.value = {};
-        guardarEstadoAsistencia();
+        console.log(`ℹ️ Fecha del backend (${datos.fecha}) ≠ fecha actual CDMX (${fechaActual})`);
+        
+        // *** CORREGIDO: Solo reiniciar estados si realmente es un día diferente ***
+        // Verificar si realmente es un nuevo día comparando fechas correctamente
+        const fechaGuardadaLocal = localStorage.getItem(`asistencia_ultima_fecha_${user.value.id}`);
+        
+        if (fechaGuardadaLocal !== fechaActual) {
+          console.log(`📆 Nuevo día detectado (guardado: ${fechaGuardadaLocal}, actual: ${fechaActual}). Reiniciando estados.`);
+          // Es realmente un nuevo día, reiniciar estados
+          entradaMarcada.value = false;
+          salidaMarcada.value = false;
+          datosEntrada.value = {};
+          datosSalida.value = {};
+          guardarEstadoAsistencia();
+        } else {
+          console.log(`⚠️ Manteniendo estados actuales - posible diferencia de zona horaria entre frontend y backend`);
+          // No reiniciar estados si el día guardado coincide con el actual
+        }
       }
     } catch (error) {
       console.error('Error al verificar asistencia de hoy:', error);
-      // Si hay error de conexión pero es un nuevo día, reiniciar estados
+      // *** CORREGIDO: Solo reiniciar estados en caso de verdadero cambio de día ***
       const fechaGuardada = localStorage.getItem(`asistencia_ultima_fecha_${user.value.id}`);
-      const fechaActual = new Date().toISOString().split('T')[0];
       
-      if (fechaGuardada !== fechaActual) {
+      // Obtener fecha actual CDMX correctamente
+      const fechaActualCDMX = new Date().toLocaleString("en-CA", {
+        timeZone: "America/Mexico_City",
+        year: "numeric",
+        month: "2-digit", 
+        day: "2-digit"
+      });
+      
+      if (fechaGuardada !== fechaActualCDMX) {
+        console.log(`📆 Nuevo día detectado durante error (guardado: ${fechaGuardada}, actual: ${fechaActualCDMX}). Reiniciando estados.`);
         // Es un nuevo día, reiniciar estados incluso sin conexión
         entradaMarcada.value = false;
         salidaMarcada.value = false;
         datosEntrada.value = {};
         datosSalida.value = {};
         guardarEstadoAsistencia();
+      } else {
+        console.log(`⚠️ Error de conexión, pero manteniendo estados del mismo día (${fechaActualCDMX})`);
       }
     } finally {
       verificandoAsistencia.value = false;
@@ -1551,33 +1604,40 @@ function formatearHora(fechaISO) {
 }
 
 function guardarEstadoAsistencia() {
-  const ahora = new Date();
-  const fechaHoy = ahora.toISOString().split('T')[0];
+  // *** CORREGIDO: Usar fecha CDMX consistente ***
+  const fechaHoyCDMX = new Date().toLocaleString("en-CA", {
+    timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit", 
+    day: "2-digit"
+  });
   
-  // Configurar expiración a las 23:59:59 del día actual
-  const finDelDia = new Date();
-  finDelDia.setHours(23, 59, 59, 999);
+  // Configurar expiración a las 23:59:59 del día actual EN CDMX
+  const ahoraCDMX = new Date().toLocaleString("sv-SE", { timeZone: "America/Mexico_City" });
+  const fechaCompletaCDMX = new Date(ahoraCDMX);
+  const finDelDiaCDMX = new Date(fechaCompletaCDMX);
+  finDelDiaCDMX.setHours(23, 59, 59, 999);
   
   const estado = {
     entradaMarcada: entradaMarcada.value,
     salidaMarcada: salidaMarcada.value,
     datosEntrada: datosEntrada.value,
     datosSalida: datosSalida.value,
-    ultimaActualizacion: ahora.toISOString(),
-    // Guardar hora de expiración a las 23:59:59 del día actual
-    expiraEn: finDelDia.toISOString()
+    ultimaActualizacion: new Date().toISOString(),
+    // Guardar hora de expiración a las 23:59:59 del día actual EN CDMX
+    expiraEn: finDelDiaCDMX.toISOString()
   };
   
-  console.log(`💾 Guardando estado de asistencia para el día ${fechaHoy}`);
+  console.log(`💾 Guardando estado de asistencia para el día ${fechaHoyCDMX}`);
   console.log(`   ⏰ Entrada marcada: ${entradaMarcada.value}`);
   console.log(`   ⏰ Salida marcada: ${salidaMarcada.value}`);
-  console.log(`   📅 Expira a las: ${finDelDia.toLocaleTimeString()} (23:59:59 hora local)`);
+  console.log(`   📅 Expira a las: ${finDelDiaCDMX.toLocaleString("es-MX", { timeZone: "America/Mexico_City" })} (23:59:59 CDMX)`);
   
   // Guardar el estado del día actual
-  localStorage.setItem(`asistencia_${user.value.id}_${fechaHoy}`, JSON.stringify(estado));
+  localStorage.setItem(`asistencia_${user.value.id}_${fechaHoyCDMX}`, JSON.stringify(estado));
   
-  // También guardar la última fecha consultada para comparaciones
-  localStorage.setItem(`asistencia_ultima_fecha_${user.value.id}`, fechaHoy);
+  // También guardar la última fecha consultada para comparaciones EN CDMX
+  localStorage.setItem(`asistencia_ultima_fecha_${user.value.id}`, fechaHoyCDMX);
 }
 
 /**
@@ -1882,17 +1942,21 @@ function handleSyncEvent(event, online, data) {
 // Añadir una verificación periódica para asegurar que el estado de los botones se mantenga consistente
 let verificacionPeriodica;
 
-// Comprobación si un horario está dentro del día actual (antes de las 23:59:59)
+// Comprobación si un horario está dentro del día actual (antes de las 23:59:59 CDMX)
 function esHorarioDentroDelDiaActual() {
-  const ahora = new Date();
-  const finDelDia = new Date();
+  // *** CORREGIDO: Usar zona horaria CDMX consistente ***
+  const ahoraCDMX = new Date().toLocaleString("sv-SE", { timeZone: "America/Mexico_City" });
+  const fechaCompletaCDMX = new Date(ahoraCDMX);
   
-  // Establecer a las 23:59:59 del día actual
-  finDelDia.setHours(23, 59, 59, 999);
+  const finDelDiaCDMX = new Date(fechaCompletaCDMX);
+  finDelDiaCDMX.setHours(23, 59, 59, 999);
   
-  console.log(`⏰ Verificación de horario: ${ahora.toLocaleTimeString()} < ${finDelDia.toLocaleTimeString()} = ${ahora < finDelDia}`);
+  const horaActualCDMX = fechaCompletaCDMX.toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
+  const finDelDiaTexto = finDelDiaCDMX.toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
   
-  return ahora < finDelDia;
+  console.log(`⏰ Verificación de horario CDMX: ${horaActualCDMX} < ${finDelDiaTexto} = ${fechaCompletaCDMX < finDelDiaCDMX}`);
+  
+  return fechaCompletaCDMX < finDelDiaCDMX;
 }
 
 onMounted(async () => {
@@ -1900,6 +1964,12 @@ onMounted(async () => {
   if (!user.value.id) {
     router.push("/login");
     return;
+  }
+  
+  // *** DEBUGGING: Hacer función disponible globalmente ***
+  if (typeof window !== 'undefined') {
+    window.debugAsistencia = debugEstadoAsistencia;
+    console.log('🔬 Función de debugging disponible: window.debugAsistencia()');
   }
   
   // Registrar manejador de eventos de sincronización
@@ -1949,26 +2019,84 @@ onMounted(async () => {
   // Realizar una verificación inicial de consistencia
   asegurarEstadosConsistentes();
   
-  // MEJORA: Establecer verificación periódica del estado de asistencia
+  // *** NUEVA FUNCIÓN DE DEBUGGING MEJORADA ***
+  async function debugEstadoAsistencia() {
+    console.log('🔬 === DEBUGGING COMPLETO ESTADO ASISTENCIA ===');
+    
+    // 1. Información de tiempo actual
+    const fechaHoyCDMX = new Date().toLocaleString("en-CA", {
+      timeZone: "America/Mexico_City",
+      year: "numeric",
+      month: "2-digit", 
+      day: "2-digit"
+    });
+    
+    const ahoraCDMX = new Date().toLocaleString("sv-SE", { timeZone: "America/Mexico_City" });
+    const fechaCompletaCDMX = new Date(ahoraCDMX);
+    
+    console.log('📅 Tiempo actual:');
+    console.log(`   🇲🇽 Fecha CDMX: ${fechaHoyCDMX}`);
+    console.log(`   ⏰ Hora completa CDMX: ${fechaCompletaCDMX.toLocaleString("es-MX", { timeZone: "America/Mexico_City" })}`);
+    
+    // 2. Estado actual de variables reactivas
+    console.log('📊 Estado actual variables:');
+    console.log(`   ✅ entradaMarcada: ${entradaMarcada.value}`);
+    console.log(`   🚪 salidaMarcada: ${salidaMarcada.value}`);
+    console.log(`   📝 datosEntrada:`, datosEntrada.value);
+    console.log(`   📝 datosSalida:`, datosSalida.value);
+    
+    // 3. Estado localStorage
+    const estadoHoy = localStorage.getItem(`asistencia_${user.value.id}_${fechaHoyCDMX}`);
+    console.log('💾 Estado localStorage:');
+    if (estadoHoy) {
+      const datos = JSON.parse(estadoHoy);
+      console.log(`   📦 Datos guardados para hoy:`, datos);
+      
+      const expiraEn = datos.expiraEn ? new Date(datos.expiraEn) : null;
+      if (expiraEn) {
+        console.log(`   ⏰ Expira en: ${expiraEn.toLocaleString("es-MX", { timeZone: "America/Mexico_City" })}`);
+        console.log(`   ✅ Es válido: ${fechaCompletaCDMX < expiraEn}`);
+      }
+    } else {
+      console.log('   ❌ No hay datos guardados para hoy');
+    }
+    
+    // 4. Consultar backend
+    try {
+      console.log('🌐 Consultando backend...');
+      const datosBackend = await asistenciasService.consultarAsistenciaHoy(user.value.id, true);
+      console.log('📊 Respuesta del backend:', datosBackend);
+    } catch (error) {
+      console.error('❌ Error consultando backend:', error);
+    }
+    
+    console.log('🔬 === FIN DEBUGGING ===');
+  }
+  
+  // Realizar verificación periódica del estado de asistencia
+  // Esta verificación asegura que los estados se mantengan correctos durante todo el día
+  // *** CORREGIDO: Verificación menos frecuente y más inteligente ***
   // Esta verificación asegura que los estados se mantengan correctos durante todo el día
   verificacionPeriodica = setInterval(() => {
     console.log('🔄 Verificación periódica de estado de asistencia');
-    // Verificar si todavía estamos en el mismo día (antes de 23:59:59)
+    // Verificar si todavía estamos en el mismo día (antes de 23:59:59 CDMX)
     if (esHorarioDentroDelDiaActual()) {
       // Asegurar consistencia local primero
       asegurarEstadosConsistentes();
       
-      // Estamos en el mismo día, verificar estados con backend si hay conexión
+      // *** CORREGIDO: Solo verificar con backend ocasionalmente para evitar resets ***
+      // Estamos en el mismo día, verificar estados con backend solo si hay conexión
+      // y sin forceRefresh para evitar problemas de sincronización
       if (navigator.onLine) {
-        console.log('🔄 Actualizando estados desde backend');
-        verificarAsistenciaHoy(true);
+        console.log('🔄 Verificación suave de estados con backend (sin forceRefresh)');
+        verificarAsistenciaHoy(false); // *** IMPORTANTE: false para no forzar reset ***
       } else {
         console.log('📴 Sin conexión, manteniendo estados actuales');
       }
     } else {
-      console.log('📆 Día finalizado (después de 23:59:59), esperando cambio de fecha');
+      console.log('📆 Día finalizado (después de 23:59:59 CDMX), esperando cambio de fecha');
     }
-  }, 3 * 60 * 1000); // Verificar cada 3 minutos (reducido para mayor frecuencia)
+  }, 10 * 60 * 1000); // *** CORREGIDO: Verificar cada 10 minutos en lugar de 3 ***
 });
 
 // Limpiar recursos al desmontar el componente

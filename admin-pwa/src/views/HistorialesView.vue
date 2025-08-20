@@ -61,12 +61,6 @@
                   @focus="mostrarResultados = true"
                   @blur="setTimeout(() => mostrarResultados = false, 150)"
                 >
-                <button v-if="terminoBusqueda" @click="limpiarBusqueda" class="clear-search-btn">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
               </div>
             </div>
             
@@ -1363,30 +1357,6 @@ export default {
   outline: none;
   border-color: #4CAF50;
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
-}
-
-.clear-search-btn {
-  position: absolute;
-  right: clamp(8px, 1.5vw, 10px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: clamp(2px, 0.5vw, 4px);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  width: clamp(16px, 3vw, 20px);
-  height: clamp(16px, 3vw, 20px);
-}
-
-.clear-search-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #4b5563;
 }
 
 /* Resultados de búsqueda - Dropdown flotante independiente */

@@ -216,7 +216,7 @@
                 <circle cx="6" cy="20" r="0.8" fill="currentColor" opacity="0.3"/>
               </svg>
             </div>
-            <span class="nav-text">Visor de Seguimiento</span>
+            <span class="nav-text">Visor de seguimiento</span>
             <div class="nav-glow"></div>
           </router-link>
         </li>
@@ -241,7 +241,7 @@
                 <circle cx="12" cy="16.5" r="1" fill="currentColor" opacity="0.8"/>
               </svg>
             </div>
-            <span class="nav-text">Mapa</span>
+            <span class="nav-text">Visor de seguimiento</span>
             <div class="nav-glow"></div>
           </router-link>
         </li>

@@ -18,7 +18,7 @@
               </svg>
             </div>
             <div class="header-text">
-              <h1 class="header-title">Mapa de Seguimiento</h1>
+              <h1 class="header-title">Visor de seguimiento</h1>
               <p class="header-subtitle">Visualización de registros</p>
             </div>
           </div>

@@ -83,7 +83,7 @@
                     <option value="">Todas las actividades</option>
                     <option value="entrada">Solo Entradas</option>
                     <option value="salida">Solo Salidas</option>
-                    <option value="registro-hoy">Solo Registros de Hoy</option>
+                    <option value="registro-hoy">Solo Actividades de Hoy</option>
                     <option value="registro-antiguo">Solo Registros Antiguos</option>
                   </select>
                 </div>
@@ -119,7 +119,7 @@
                 <span class="stat-value salida">{{ clusterInfo.salidas }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Hoy</span>
+                <span class="stat-label">Actividades</span>
                 <span class="stat-value hoy">{{ clusterInfo.registrosHoy }}</span>
               </div>
               <div class="stat-item">
@@ -142,7 +142,7 @@
               </div>
               <div class="leyenda-item">
                 <div class="color-marker registro-hoy"></div>
-                <span>Registro (hoy)</span>
+                <span>Actividades (hoy)</span>
               </div>
               <div class="leyenda-item">
                 <div class="color-marker registro-antiguo"></div>
@@ -708,7 +708,7 @@ const determinarTipoActividad = (actividad) => {
       return {
         tipo: 'registro-hoy',
         clase: 'registro-hoy',
-        descripcion: 'Registro de Hoy',
+        descripcion: 'Actividades de Hoy',
         color: '#1E3A8A' // Azul marino
       };
     }
@@ -948,7 +948,7 @@ const inicializarMapa = (datos) => {
           
           const tipoActividad = props.tipo_actividad === 'entrada' ? 'Entrada' : 
                                props.tipo_actividad === 'salida' ? 'Salida' : 
-                               'Registro';
+                               'Actividades';
           
           console.log('🔍 Propiedades del registro completo:', props);
           

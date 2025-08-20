@@ -238,6 +238,66 @@ class UsuariosService {
     }
   }
 
+  async buscarUsuarios(termino) {
+    try {
+      if (!termino || termino.trim().length < 2) {
+        console.log('🚫 Término muy corto, no se realizará búsqueda:', termino);
+        return []; // No buscar con menos de 2 caracteres
+      }
+
+      console.log(`🔍 Buscando usuarios con término: "${termino}"`);
+      
+      // Obtener todos los usuarios desde la API
+      console.log('📡 Obteniendo todos los usuarios desde la API...');
+      const todosLosUsuarios = await this.obtenerUsuarios();
+      console.log('📊 Total de usuarios obtenidos:', todosLosUsuarios.length);
+      
+      if (todosLosUsuarios.length === 0) {
+        console.log('⚠️ No hay usuarios disponibles para filtrar');
+        return [];
+      }
+      
+      // Filtrar usuarios localmente
+      const terminoLower = termino.toLowerCase().trim();
+      console.log('🔎 Filtrando usuarios con término:', terminoLower);
+      
+      const usuariosFiltrados = todosLosUsuarios.filter(usuario => {
+        const nombreCompleto = (usuario.nombre_completo || '').toLowerCase();
+        const correo = (usuario.correo || '').toLowerCase();
+        const curp = (usuario.curp || '').toLowerCase();
+        const cargo = (usuario.cargo || '').toLowerCase();
+        
+        const coincide = nombreCompleto.includes(terminoLower) || 
+                        correo.includes(terminoLower) || 
+                        curp.includes(terminoLower) ||
+                        cargo.includes(terminoLower);
+                        
+        if (coincide) {
+          console.log('✅ Usuario coincidente:', {
+            id: usuario.id,
+            nombre: nombreCompleto,
+            correo: correo,
+            curp: curp
+          });
+        }
+        
+        return coincide;
+      });
+
+      console.log(`✅ Encontrados ${usuariosFiltrados.length} usuarios que coinciden con "${termino}"`);
+      
+      // Limitar resultados a 10 para mejor rendimiento
+      const resultadosLimitados = usuariosFiltrados.slice(0, 10);
+      console.log(`📋 Devolviendo ${resultadosLimitados.length} usuarios (limitado a 10)`);
+      
+      return resultadosLimitados;
+      
+    } catch (error) {
+      console.error(`❌ Error al buscar usuarios con término "${termino}":`, error);
+      return []; // Devolver array vacío en caso de error
+    }
+  }
+
   async eliminarUsuario(id) {
     try {
       console.log(`🗑️ Eliminando usuario ${id} desde la API...`);

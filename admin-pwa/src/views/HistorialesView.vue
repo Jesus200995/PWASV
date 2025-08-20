@@ -34,25 +34,112 @@
       </header>
 
       <div class="page-content">
-        <!-- Selección de Usuario -->
+        <!-- Buscador de Usuario -->
         <div class="user-selection-section">
           <div class="selection-card">
             <div class="selection-header">
               <h3>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
                 </svg>
-                Seleccionar Usuario
+                Buscar Usuario
               </h3>
             </div>
-            <div class="user-selector">
-              <select v-model="usuarioSeleccionado" @change="onUsuarioChange" class="user-select">
-                <option value="">Selecciona un usuario...</option>
-                <option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">
-                  {{ usuario.nombre_completo }} - {{ usuario.correo }}
-                </option>
-              </select>
+            <div class="user-search-container">
+              <div class="search-input-wrapper">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input 
+                  v-model="terminoBusqueda" 
+                  type="text" 
+                  placeholder="Buscar por nombre, correo o CURP..." 
+                  class="search-input"
+                  @input="buscarUsuarios"
+                  @focus="mostrarResultados = true"
+                >
+                <button v-if="terminoBusqueda" @click="limpiarBusqueda" class="clear-search-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              
+              <!-- Resultados de búsqueda -->
+              <div v-if="mostrarResultados && terminoBusqueda.length > 0" class="search-results">
+                <div v-if="buscandoUsuarios" class="loading-search">
+                  <div class="spinner-small"></div>
+                  <span>Buscando...</span>
+                </div>
+                <div v-else-if="terminoBusqueda.length < 2" class="need-more-chars">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 8v4m0 4h.01"></path>
+                  </svg>
+                  <p>Escribe al menos 2 caracteres para buscar</p>
+                </div>
+                <div v-else-if="usuariosFiltrados.length === 0" class="no-results">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                  <p>No se encontraron usuarios</p>
+                </div>
+                <div v-else class="results-list">
+                  <div 
+                    v-for="usuario in usuariosFiltrados" 
+                    :key="usuario.id" 
+                    :class="['result-item', { active: usuarioSeleccionado === usuario.id.toString() }]"
+                    @click="seleccionarUsuario(usuario)"
+                  >
+                    <div class="user-avatar">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                    </div>
+                    <div class="user-info">
+                      <div class="user-name">{{ usuario.nombre_completo }}</div>
+                      <div class="user-details">
+                        <span class="user-email">{{ usuario.correo }}</span>
+                        <span v-if="usuario.curp" class="user-curp">• {{ usuario.curp }}</span>
+                      </div>
+                      <div v-if="usuario.cargo" class="user-cargo">{{ usuario.cargo }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Usuario seleccionado -->
+            <div v-if="usuarioActual" class="selected-user">
+              <div class="selected-user-header">
+                <h4>Usuario Seleccionado:</h4>
+                <button @click="limpiarSeleccion" class="clear-selection-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Limpiar selección
+                </button>
+              </div>
+              <div class="selected-user-card">
+                <div class="selected-user-avatar">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <div class="selected-user-info">
+                  <div class="selected-user-name">{{ usuarioActual.nombre_completo }}</div>
+                  <div class="selected-user-email">{{ usuarioActual.correo }}</div>
+                  <div v-if="usuarioActual.curp" class="selected-user-curp">CURP: {{ usuarioActual.curp }}</div>
+                  <div v-if="usuarioActual.cargo" class="selected-user-cargo">{{ usuarioActual.cargo }}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -392,7 +479,7 @@
 </template>
 
 <script>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import Sidebar from '../components/Sidebar.vue'
 import { useRouter } from 'vue-router'
 import usuariosService from '../services/usuariosService.js'
@@ -417,6 +504,13 @@ export default {
     const historial = ref([])
     const resumen = ref(null)
     const usuarioActual = ref(null)
+    
+    // Estados para búsqueda de usuarios
+    const terminoBusqueda = ref('')
+    const usuariosFiltrados = ref([])
+    const buscandoUsuarios = ref(false)
+    const mostrarResultados = ref(false)
+    const timeoutBusqueda = ref(null)
     
     // Filtros
     const filtros = ref({
@@ -455,13 +549,15 @@ export default {
 
     // Watchers
     watch(usuarioSeleccionado, (newUserId) => {
-      if (newUserId) {
-        // Convertir a número para asegurar compatibilidad
+      if (newUserId && !usuarioActual.value) {
+        // Solo buscar usuario si no está ya cargado (para compatibilidad con selección directa)
         const userId = parseInt(newUserId)
         usuarioActual.value = usuarios.value.find(u => u.id === userId)
-        cargarResumen()
-        cargarHistorial()
-      } else {
+        if (usuarioActual.value) {
+          cargarResumen()
+          cargarHistorial()
+        }
+      } else if (!newUserId) {
         usuarioActual.value = null
         historial.value = []
         resumen.value = null
@@ -648,6 +744,95 @@ export default {
       error.value = ''
     }
 
+    // Métodos de búsqueda de usuarios
+    const buscarUsuarios = async () => {
+      // Limpiar timeout anterior
+      if (timeoutBusqueda.value) {
+        clearTimeout(timeoutBusqueda.value)
+      }
+
+      const termino = terminoBusqueda.value.trim()
+      console.log('🔍 Término de búsqueda:', termino, 'Longitud:', termino.length)
+      
+      if (termino.length === 0) {
+        usuariosFiltrados.value = []
+        mostrarResultados.value = false
+        return
+      }
+
+      if (termino.length < 2) {
+        // Mostrar mensaje de que necesita más caracteres
+        usuariosFiltrados.value = []
+        mostrarResultados.value = true
+        return
+      }
+
+      // Debounce de 300ms
+      timeoutBusqueda.value = setTimeout(async () => {
+        try {
+          buscandoUsuarios.value = true
+          console.log(`🔍 Iniciando búsqueda con término: "${termino}"`)
+          
+          const resultados = await usuariosService.buscarUsuarios(termino)
+          console.log('📋 Resultados obtenidos:', resultados)
+          
+          usuariosFiltrados.value = resultados
+          mostrarResultados.value = true
+          
+          console.log(`✅ Mostrando ${resultados.length} usuarios filtrados`)
+        } catch (err) {
+          console.error('❌ Error al buscar usuarios:', err)
+          error.value = 'Error al buscar usuarios'
+          usuariosFiltrados.value = []
+          mostrarResultados.value = true
+        } finally {
+          buscandoUsuarios.value = false
+        }
+      }, 300)
+    }
+
+    const seleccionarUsuario = (usuario) => {
+      console.log('👤 Usuario seleccionado:', usuario)
+      usuarioSeleccionado.value = usuario.id.toString()
+      usuarioActual.value = usuario
+      terminoBusqueda.value = usuario.nombre_completo
+      mostrarResultados.value = false
+      usuariosFiltrados.value = []
+      error.value = ''
+      
+      // Cargar historial del usuario seleccionado
+      cargarResumen()
+      cargarHistorial()
+    }
+
+    const limpiarBusqueda = () => {
+      terminoBusqueda.value = ''
+      usuariosFiltrados.value = []
+      mostrarResultados.value = false
+      if (timeoutBusqueda.value) {
+        clearTimeout(timeoutBusqueda.value)
+      }
+    }
+
+    const limpiarSeleccion = () => {
+      usuarioSeleccionado.value = ''
+      usuarioActual.value = null
+      historial.value = []
+      resumen.value = null
+      terminoBusqueda.value = ''
+      usuariosFiltrados.value = []
+      mostrarResultados.value = false
+      error.value = ''
+    }
+
+    // Cerrar resultados al hacer clic fuera
+    const cerrarResultados = (event) => {
+      const searchContainer = event.target.closest('.user-search-container')
+      if (!searchContainer) {
+        mostrarResultados.value = false
+      }
+    }
+
     // Métodos de formato
     const formatearOrigen = (origen) => {
       const origenes = {
@@ -764,6 +949,7 @@ export default {
     onMounted(async () => {
       window.addEventListener('online', updateOnlineStatus)
       window.addEventListener('offline', updateOnlineStatus)
+      document.addEventListener('click', cerrarResultados)
       
       // Probar conectividad primero
       try {
@@ -783,6 +969,15 @@ export default {
       filtros.value.semanaEspecifica = `${año}-W${semana.toString().padStart(2, '0')}`
     })
 
+    onUnmounted(() => {
+      window.removeEventListener('online', updateOnlineStatus)
+      window.removeEventListener('offline', updateOnlineStatus)
+      document.removeEventListener('click', cerrarResultados)
+      if (timeoutBusqueda.value) {
+        clearTimeout(timeoutBusqueda.value)
+      }
+    })
+
     return {
       // Estados
       isOnline,
@@ -799,10 +994,22 @@ export default {
       añosDisponibles,
       adminUser,
       
+      // Estados de búsqueda
+      terminoBusqueda,
+      usuariosFiltrados,
+      buscandoUsuarios,
+      mostrarResultados,
+      
       // Métodos principales
       cargarHistorial,
       actualizarHistorial,
       onUsuarioChange,
+      
+      // Métodos de búsqueda
+      buscarUsuarios,
+      seleccionarUsuario,
+      limpiarBusqueda,
+      limpiarSeleccion,
       
       // Métodos de filtros
       setPeriodo,
@@ -1109,21 +1316,323 @@ export default {
   width: 100%;
 }
 
-.user-select {
+/* Estilos para el buscador de usuarios */
+.user-search-container {
+  position: relative;
   width: 100%;
-  padding: clamp(0.25rem, 0.6vw, 0.35rem) clamp(0.4rem, 1vw, 0.5rem);
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: clamp(8px, 1.5vw, 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  width: clamp(12px, 2vw, 14px);
+  height: clamp(12px, 2vw, 14px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.search-input {
+  width: 100%;
+  padding: clamp(0.25rem, 0.6vw, 0.35rem) clamp(0.4rem, 1vw, 0.5rem) clamp(0.25rem, 0.6vw, 0.35rem) clamp(2rem, 4vw, 2.5rem);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: clamp(4px, 1vw, 6px);
   background: rgba(255, 255, 255, 0.9);
   font-size: clamp(11px, 2vw, 12px);
   color: #495057;
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
-.user-select:focus {
+.search-input:focus {
   outline: none;
   border-color: #4CAF50;
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: clamp(8px, 1.5vw, 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: clamp(2px, 0.5vw, 4px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: clamp(16px, 3vw, 20px);
+  height: clamp(16px, 3vw, 20px);
+}
+
+.clear-search-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #4b5563;
+}
+
+/* Resultados de búsqueda */
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-top: none;
+  border-radius: 0 0 clamp(4px, 1vw, 6px) clamp(4px, 1vw, 6px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.loading-search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1vw, 8px);
+  padding: clamp(12px, 2vw, 16px);
+  color: #6c757d;
+  font-size: clamp(11px, 2vw, 12px);
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.need-more-chars {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 3vw, 20px);
+  color: #6c757d;
+  text-align: center;
+}
+
+.need-more-chars svg {
+  margin-bottom: clamp(6px, 1vw, 8px);
+  opacity: 0.6;
+}
+
+.need-more-chars p {
+  margin: 0;
+  font-size: clamp(10px, 1.8vw, 11px);
+  font-style: italic;
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 4vw, 24px);
+  color: #6c757d;
+  text-align: center;
+}
+
+.no-results svg {
+  margin-bottom: clamp(8px, 1.5vw, 10px);
+  opacity: 0.5;
+}
+
+.no-results p {
+  margin: 0;
+  font-size: clamp(11px, 2vw, 12px);
+}
+
+.results-list {
+  padding: 0;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 12px);
+  padding: clamp(8px, 1.5vw, 12px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.result-item:last-child {
+  border-bottom: none;
+}
+
+.result-item:hover {
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.result-item.active {
+  background: rgba(76, 175, 80, 0.1);
+  border-left: 3px solid #4CAF50;
+}
+
+.user-avatar {
+  width: clamp(28px, 5vw, 32px);
+  height: clamp(28px, 5vw, 32px);
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: clamp(11px, 2vw, 12px);
+  color: #2c5530;
+  margin-bottom: clamp(2px, 0.5vw, 3px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-details {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 0.8vw, 6px);
+  margin-bottom: clamp(2px, 0.5vw, 3px);
+}
+
+.user-email {
+  font-size: clamp(10px, 1.8vw, 11px);
+  color: #6c757d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.user-curp {
+  font-size: clamp(10px, 1.8vw, 11px);
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.user-cargo {
+  font-size: clamp(10px, 1.8vw, 11px);
+  color: #4CAF50;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Usuario seleccionado */
+.selected-user {
+  margin-top: clamp(12px, 2vw, 16px);
+  padding-top: clamp(12px, 2vw, 16px);
+  border-top: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.selected-user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: clamp(8px, 1.5vw, 10px);
+}
+
+.selected-user-header h4 {
+  margin: 0;
+  font-size: clamp(11px, 2vw, 12px);
+  font-weight: 600;
+  color: #2c5530;
+}
+
+.clear-selection-btn {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 0.8vw, 6px);
+  padding: clamp(4px, 0.8vw, 6px) clamp(8px, 1.5vw, 10px);
+  background: transparent;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  border-radius: clamp(3px, 0.6vw, 4px);
+  color: #e74c3c;
+  font-size: clamp(10px, 1.8vw, 11px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-selection-btn:hover {
+  background: rgba(231, 76, 60, 0.05);
+  border-color: rgba(231, 76, 60, 0.5);
+}
+
+.selected-user-card {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 12px);
+  padding: clamp(10px, 2vw, 12px);
+  background: rgba(76, 175, 80, 0.05);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  border-radius: clamp(4px, 1vw, 6px);
+}
+
+.selected-user-avatar {
+  width: clamp(32px, 6vw, 40px);
+  height: clamp(32px, 6vw, 40px);
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+
+.selected-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.selected-user-name {
+  font-weight: 700;
+  font-size: clamp(12px, 2.2vw, 14px);
+  color: #2c5530;
+  margin-bottom: clamp(3px, 0.6vw, 4px);
+}
+
+.selected-user-email {
+  font-size: clamp(10px, 1.8vw, 11px);
+  color: #6c757d;
+  margin-bottom: clamp(2px, 0.4vw, 3px);
+}
+
+.selected-user-curp {
+  font-size: clamp(10px, 1.8vw, 11px);
+  color: #6c757d;
+  margin-bottom: clamp(2px, 0.4vw, 3px);
+}
+
+.selected-user-cargo {
+  font-size: clamp(10px, 1.8vw, 11px);
+  color: #4CAF50;
+  font-weight: 600;
 }
 
 /* Sección de filtros */

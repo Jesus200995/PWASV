@@ -33,14 +33,14 @@
         <div class="controles-panel">
           <div class="panel-header">
             <h3>Controles del Mapa</h3>
-            <button @click="recargarMapa" class="btn-refresh" :disabled="loading">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button @click="recargarMapa" class="btn-refresh" :class="{ loading }" :disabled="loading">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 2v6h-6"></path>
                 <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
                 <path d="M3 22v-6h6"></path>
                 <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
               </svg>
-              <span>Actualizar datos</span>
+              <span>{{ loading ? 'Actualizando...' : 'Actualizar datos' }}</span>
             </button>
           </div>
           
@@ -134,15 +134,15 @@
             <div class="leyenda-grid">
               <div class="leyenda-item">
                 <div class="color-marker entrada"></div>
-                <span>Entrada</span>
+                <span>Entrada (hoy)</span>
               </div>
               <div class="leyenda-item">
                 <div class="color-marker salida"></div>
-                <span>Salida</span>
+                <span>Salida (hoy)</span>
               </div>
               <div class="leyenda-item">
                 <div class="color-marker registro-hoy"></div>
-                <span>Registro hoy</span>
+                <span>Registro (hoy)</span>
               </div>
               <div class="leyenda-item">
                 <div class="color-marker registro-antiguo"></div>
@@ -1835,25 +1835,109 @@ watch([filtroTipo, filtroPeriodo], () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  background: #2ecc71;
+  gap: 3px;
+  background: linear-gradient(135deg, 
+    rgba(46, 204, 113, 0.8) 0%, 
+    rgba(39, 174, 96, 0.9) 50%,
+    rgba(46, 204, 113, 0.8) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 14px;
-  font-weight: 500;
+  border-radius: 25px;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 15px rgba(46, 204, 113, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  min-height: 30px;
+}
+
+.btn-refresh::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.4), 
+    transparent);
+  transition: left 0.6s ease;
 }
 
 .btn-refresh:hover {
-  background: #27ae60;
+  background: linear-gradient(135deg, 
+    rgba(39, 174, 96, 0.9) 0%, 
+    rgba(46, 204, 113, 1) 50%,
+    rgba(39, 174, 96, 0.9) 100%);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 
+    0 6px 20px rgba(46, 204, 113, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-refresh:hover::before {
+  left: 100%;
+}
+
+.btn-refresh:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 
+    0 2px 8px rgba(46, 204, 113, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .btn-refresh:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
+  background: linear-gradient(135deg, 
+    rgba(156, 163, 175, 0.6) 0%, 
+    rgba(107, 114, 128, 0.7) 100%);
+  backdrop-filter: blur(10px);
+}
+
+/* Animación de rotación para el icono de recarga */
+.btn-refresh svg {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  will-change: transform;
+}
+
+.btn-refresh.loading svg {
+  animation: refreshSpin 0.8s linear infinite;
+}
+
+.btn-refresh.loading:hover svg {
+  animation: refreshSpin 0.6s linear infinite;
+}
+
+@keyframes refreshSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mejoras de rendimiento para la animación */
+.btn-refresh.loading {
+  pointer-events: none;
+}
+
+.btn-refresh.loading::before {
+  display: none;
 }
 
 .panel-section {

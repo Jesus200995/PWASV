@@ -7,17 +7,31 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
 
-    <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-3" style="z-index: 1;">
-      <div class="page-container w-full max-w-sm mx-auto relative z-10 p-3 sm:p-4 lg:p-5">
-        
-        <!-- Header de notificaciones -->
-        <div class="glass-card mb-2">
-          <div class="text-center mb-3">
-            <h1 class="text-base font-semibold text-gray-800 modern-title">
-              Mis Notificaciones
-            </h1>
+    <div class="absolute inset-0 overflow-hidden" style="z-index: 1;">
+      <!-- Header fijo de notificaciones -->
+      <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-3 sm:px-4 lg:px-5">
+        <div class="w-full max-w-sm mx-auto">
+          <div class="glass-card mb-2 relative">
+            <div class="text-center mb-3">
+              <h1 class="text-base font-semibold text-gray-800 modern-title">
+                Mis Notificaciones
+              </h1>
+            </div>
+            <!-- Contador con contorno redondeado -->
+            <div v-if="conteoNoLeidas > 0" class="absolute bottom-2 right-3">
+              <div class="notification-counter">
+                <span class="text-2xs sm:text-xs font-medium">
+                  {{ conteoNoLeidas === 1 ? `${conteoNoLeidas} nueva` : `${conteoNoLeidas} nuevas` }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- Contenido con scroll -->
+      <div class="absolute inset-0 overflow-y-auto pt-32 sm:pt-36 pb-3">
+        <div class="page-container w-full max-w-sm mx-auto relative z-10 p-3 sm:p-4 lg:p-5">
 
         <!-- Estado de carga -->
         <div v-if="cargando" class="glass-card mb-2">
@@ -39,59 +53,6 @@
             >
               Reintentar
             </button>
-          </div>
-        </div>
-
-        <!-- Filtros y estadísticas ACTUALIZADOS -->
-        <div v-if="!cargando && !error" class="glass-card mb-2">
-          <div class="flex justify-between items-center mb-2">
-            <h2 class="text-sm font-semibold text-gray-800 modern-title">📊 Estadísticas</h2>
-            <button 
-              @click="cargarNotificaciones"
-              class="text-green-600 hover:text-green-700 transition-colors"
-              title="Actualizar notificaciones"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-              </svg>
-            </button>
-          </div>
-          <div class="green-line mb-2"></div>
-          
-          <!-- Toggle para mostrar solo no leídas -->
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-gray-700 font-medium">Solo no leídas</span>
-            <button 
-              @click="toggleFiltroNoLeidas"
-              :class="[
-                'relative inline-flex h-5 w-9 items-center rounded-full transition-colors',
-                soloNoLeidas ? 'bg-red-500' : 'bg-gray-300'
-              ]"
-            >
-              <span 
-                :class="[
-                  'inline-block h-3 w-3 transform rounded-full bg-white transition-transform',
-                  soloNoLeidas ? 'translate-x-5' : 'translate-x-1'
-                ]"
-              ></span>
-            </button>
-          </div>
-          
-          <!-- Estadísticas MEJORADAS -->
-          <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="bg-white bg-opacity-50 rounded-lg p-2 border border-white border-opacity-30">
-              <div class="text-lg font-bold text-gray-800">{{ totalNotificaciones }}</div>
-              <div class="text-xs text-gray-600">Total</div>
-            </div>
-            <div class="bg-red-50 bg-opacity-70 rounded-lg p-2 border border-red-200">
-              <div class="text-lg font-bold text-red-600">{{ conteoNoLeidas }}</div>
-              <div class="text-xs text-red-600">No leídas</div>
-            </div>
-            <div class="bg-green-50 bg-opacity-70 rounded-lg p-2 border border-green-200">
-              <div class="text-lg font-bold text-green-600">{{ totalNotificaciones - conteoNoLeidas }}</div>
-              <div class="text-xs text-green-600">Leídas</div>
-            </div>
           </div>
         </div>
 
@@ -376,6 +337,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -854,6 +816,111 @@ onBeforeUnmount(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Contador de notificaciones con contorno redondeado */
+.notification-counter {
+  background: rgba(255, 242, 242, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 20px;
+  padding: 0.15rem 0.4rem;
+  box-shadow: 
+    0 1px 4px rgba(239, 68, 68, 0.12),
+    0 1px 2px rgba(239, 68, 68, 0.08),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.9);
+  animation: subtle-notification-glow 3s ease-in-out infinite;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-counter span {
+  color: #dc2626;
+  text-shadow: 0 0.5px 1px rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  line-height: 1;
+  font-size: 0.65rem;
+}
+
+.notification-counter:hover {
+  background: rgba(255, 235, 235, 0.99);
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 
+    0 2px 6px rgba(239, 68, 68, 0.18),
+    0 1px 3px rgba(239, 68, 68, 0.12),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.95);
+  transform: translateY(-0.5px) scale(1.05);
+}
+
+@keyframes subtle-notification-glow {
+  0%, 100% {
+    border-color: rgba(239, 68, 68, 0.3);
+    box-shadow: 
+      0 1px 4px rgba(239, 68, 68, 0.1),
+      0 1px 2px rgba(239, 68, 68, 0.06),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.8);
+  }
+  50% {
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 
+      0 2px 6px rgba(239, 68, 68, 0.15),
+      0 1px 3px rgba(239, 68, 68, 0.1),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* Clase de texto extra pequeño para mejor responsividad */
+.text-2xs {
+  font-size: 0.65rem;
+  line-height: 0.9rem;
+}
+
+/* Responsividad del contador */
+@media (max-width: 480px) {
+  .notification-counter {
+    padding: 0.12rem 0.3rem;
+    border-radius: 18px;
+    border-width: 1px;
+    min-height: 16px;
+  }
+  
+  .notification-counter span {
+    font-size: 0.6rem;
+    line-height: 0.9;
+    letter-spacing: 0.005em;
+  }
+}
+
+@media (max-width: 375px) {
+  .notification-counter {
+    padding: 0.1rem 0.25rem;
+    border-radius: 16px;
+    min-height: 14px;
+  }
+  
+  .notification-counter span {
+    font-size: 0.55rem;
+    line-height: 0.85;
+  }
+}
+
+/* Asegurar que no interfiera con el título */
+.glass-card {
+  position: relative;
+  min-height: 60px;
+}
+
+.glass-card .notification-counter {
+  position: absolute;
+  bottom: 6px;
+  right: 10px;
+  z-index: 10;
 }
 
 /* Efecto de vidrio realista - Glassmorphism */

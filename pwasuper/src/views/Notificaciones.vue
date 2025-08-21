@@ -12,18 +12,33 @@
       <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-3 sm:px-4 lg:px-5 pt-4 sm:pt-6">
         <div class="w-full max-w-sm mx-auto">
           <div class="glass-card mb-2 relative">
-            <div class="text-center mb-3">
+            <div class="text-center mb-3 relative py-1">
               <h1 class="text-base font-semibold text-gray-800 modern-title">
                 Mis Notificaciones
               </h1>
-            </div>
-            <!-- Contador con contorno redondeado -->
-            <div v-if="conteoNoLeidas > 0" class="absolute bottom-2 right-3">
-              <div class="notification-counter">
-                <span class="text-2xs sm:text-xs font-medium">
-                  {{ conteoNoLeidas === 1 ? `${conteoNoLeidas} nueva` : `${conteoNoLeidas} nuevas` }}
-                </span>
-              </div>
+              <!-- Botón de refresh movido al lado derecho -->
+              <button 
+                @click="refrescarNotificaciones"
+                :disabled="cargando"
+                class="absolute top-1/2 right-3 transform -translate-y-1/2 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all duration-200 group"
+                :class="{ 'cursor-not-allowed opacity-50': cargando }"
+                title="Actualizar notificaciones"
+              >
+                <svg 
+                  class="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors duration-200"
+                  :class="{ 'animate-spin': cargando }"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    stroke-width="2" 
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -552,6 +567,29 @@ const cargarMasNotificaciones = () => {
   }
 }
 
+// NUEVA FUNCIÓN: Refrescar notificaciones manualmente
+const refrescarNotificaciones = async () => {
+  if (cargando.value) return // Evitar múltiples llamadas simultáneas
+  
+  console.log('🔄 Refrescando notificaciones manualmente...')
+  
+  try {
+    // Recargar notificaciones desde el inicio
+    await cargarNotificaciones(true)
+    
+    // También actualizar el badge global
+    const usuarioId = obtenerUsuarioId()
+    if (usuarioId) {
+      await fetchUnreadCount(usuarioId)
+    }
+    
+    console.log('✅ Notificaciones refrescadas exitosamente')
+    
+  } catch (error) {
+    console.error('❌ Error al refrescar notificaciones:', error)
+  }
+}
+
 // NUEVO: Toggle para filtro de no leídas
 const toggleFiltroNoLeidas = async () => {
   soloNoLeidas.value = !soloNoLeidas.value
@@ -818,96 +856,10 @@ onBeforeUnmount(() => {
   opacity: 0;
 }
 
-/* Contador de notificaciones con contorno redondeado */
-.notification-counter {
-  background: rgba(255, 242, 242, 0.98);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  border-radius: 20px;
-  padding: 0.15rem 0.4rem;
-  box-shadow: 
-    0 1px 4px rgba(239, 68, 68, 0.12),
-    0 1px 2px rgba(239, 68, 68, 0.08),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.9);
-  animation: subtle-notification-glow 3s ease-in-out infinite;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.notification-counter span {
-  color: #dc2626;
-  text-shadow: 0 0.5px 1px rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  line-height: 1;
-  font-size: 0.65rem;
-}
-
-.notification-counter:hover {
-  background: rgba(255, 235, 235, 0.99);
-  border-color: rgba(239, 68, 68, 0.45);
-  box-shadow: 
-    0 2px 6px rgba(239, 68, 68, 0.18),
-    0 1px 3px rgba(239, 68, 68, 0.12),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.95);
-  transform: translateY(-0.5px) scale(1.05);
-}
-
-@keyframes subtle-notification-glow {
-  0%, 100% {
-    border-color: rgba(239, 68, 68, 0.3);
-    box-shadow: 
-      0 1px 4px rgba(239, 68, 68, 0.1),
-      0 1px 2px rgba(239, 68, 68, 0.06),
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.8);
-  }
-  50% {
-    border-color: rgba(239, 68, 68, 0.4);
-    box-shadow: 
-      0 2px 6px rgba(239, 68, 68, 0.15),
-      0 1px 3px rgba(239, 68, 68, 0.1),
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.9);
-  }
-}
-
 /* Clase de texto extra pequeño para mejor responsividad */
 .text-2xs {
   font-size: 0.65rem;
   line-height: 0.9rem;
-}
-
-/* Responsividad del contador */
-@media (max-width: 480px) {
-  .notification-counter {
-    padding: 0.12rem 0.3rem;
-    border-radius: 18px;
-    border-width: 1px;
-    min-height: 16px;
-  }
-  
-  .notification-counter span {
-    font-size: 0.6rem;
-    line-height: 0.9;
-    letter-spacing: 0.005em;
-  }
-}
-
-@media (max-width: 375px) {
-  .notification-counter {
-    padding: 0.1rem 0.25rem;
-    border-radius: 16px;
-    min-height: 14px;
-  }
-  
-  .notification-counter span {
-    font-size: 0.55rem;
-    line-height: 0.85;
-  }
 }
 
 /* Asegurar que no interfiera con el título */
@@ -916,11 +868,46 @@ onBeforeUnmount(() => {
   min-height: 60px;
 }
 
-.glass-card .notification-counter {
-  position: absolute;
-  bottom: 6px;
-  right: 10px;
-  z-index: 10;
+/* Botón de refresh con efecto glassmorphism */
+.glass-card button {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.glass-card button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Responsividad para el botón de refresh */
+@media (max-width: 480px) {
+  .glass-card button {
+    padding: 0.375rem;
+    right: 0.5rem !important;
+  }
+  
+  .glass-card button svg {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .glass-card button {
+    padding: 0.3rem;
+    right: 0.375rem !important;
+  }
+  
+  .glass-card button svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
 }
 
 /* Efecto de vidrio realista - Glassmorphism */

@@ -85,7 +85,7 @@
           </div>
           
           <!-- Estadísticas -->
-          <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="grid grid-cols-3 gap-2 text-center">
             <div class="bg-white bg-opacity-30 rounded-lg p-2">
               <div class="text-lg font-bold text-green-600">{{ totalNotificaciones }}</div>
               <div class="text-xs text-gray-600">Total</div>
@@ -94,11 +94,15 @@
               <div class="text-lg font-bold text-blue-600">{{ notificacionesRecientes }}</div>
               <div class="text-xs text-gray-600">Recientes</div>
             </div>
+            <div class="bg-white bg-opacity-30 rounded-lg p-2">
+              <div class="text-lg font-bold text-orange-500">{{ notificacionesNoLeidas }}</div>
+              <div class="text-xs text-gray-600">No leídas</div>
+            </div>
           </div>
         </div>
 
         <!-- Lista de notificaciones -->
-        <div v-if="!cargando && !error" class="glass-card">
+        <div v-if="!cargando && !error" class="bg-transparent backdrop-blur-sm rounded-xl p-3 border border-white border-opacity-20">
           <h2 class="text-sm font-semibold text-gray-800 mb-2 modern-title flex items-center">
             <span class="mr-2">📋</span>
             Notificaciones
@@ -109,12 +113,27 @@
           <div class="green-line mb-3"></div>
           
           <!-- Lista de notificaciones -->
-          <div v-if="notificacionesFiltradas.length > 0" class="space-y-2">
+          <div v-if="notificacionesFiltradas.length > 0" class="space-y-3">
             <div 
-              v-for="notificacion in notificacionesFiltradas" 
+              v-for="(notificacion, index) in notificacionesFiltradas" 
               :key="notificacion.id"
-              class="notification-item bg-white bg-opacity-40 rounded-lg p-3 hover:bg-opacity-60 transition-all"
+              :class="[
+                'notification-item bg-white rounded-xl p-4 hover:bg-opacity-70 transition-all duration-300 cursor-pointer shadow-sm border-2 hover:shadow-lg relative',
+                esNotificacionLeida(notificacion.id) 
+                  ? 'bg-opacity-40 border-gray-200 hover:border-gray-300' 
+                  : 'bg-opacity-60 border-red-300 hover:border-red-400 shadow-red-100'
+              ]"
+              @click="abrirDetalleNotificacion(notificacion)"
             >
+              <!-- Campanita animada para notificaciones no leídas -->
+              <div v-if="!esNotificacionLeida(notificacion.id)" class="absolute -top-2 -right-2 z-20">
+                <div class="bg-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-lg bell-container">
+                  <svg class="bell-icon w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                  </svg>
+                </div>
+              </div>
+              
               <div class="flex items-start space-x-3">
                 <!-- Icono de tipo -->
                 <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -126,14 +145,10 @@
                 <!-- Contenido -->
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between mb-1">
-                    <h3 class="text-sm font-medium text-gray-900 truncate">
-                      {{ notificacion.titulo }}
-                    </h3>
-                    <div class="flex items-center space-x-1">
-                      <span v-if="notificacion.tiene_archivo" class="text-xs text-green-600" title="Tiene archivo adjunto">
-                        📎
-                      </span>
-                      <span v-if="esReciente(notificacion.fecha_creacion)" class="w-2 h-2 bg-blue-500 rounded-full" title="Reciente"></span>
+                    <div class="flex items-center space-x-2 flex-1 min-w-0">
+                      <h3 class="text-sm font-medium text-gray-900 truncate">
+                        {{ notificacion.titulo }}
+                      </h3>
                     </div>
                   </div>
                   
@@ -206,17 +221,14 @@
                   
                   <!-- Botón Ver más centrado -->
                   <div class="flex justify-center mt-3">
-                    <button 
-                      @click="abrirDetalleNotificacion(notificacion)"
-                      class="group glass-button px-3 py-1 text-white text-xs font-medium rounded-full transition-all duration-300 hover:scale-105 focus:scale-105"
-                    >
+                    <div class="group glass-button px-3 py-1 text-white text-xs font-medium rounded-full transition-all duration-300 hover:scale-105 focus:scale-105">
                       <span class="relative z-10 flex items-center space-x-1">
                         <span>Ver más</span>
                         <svg class="w-3 h-3 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                       </span>
-                    </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -386,6 +398,7 @@ const cargando = ref(false)
 const cargandoMas = ref(false)
 const error = ref('')
 const soloRecientes = ref(true)
+const notificacionesLeidas = ref(new Set()) // IDs de notificaciones leídas
 
 // Paginación
 const limit = ref(10)
@@ -420,6 +433,10 @@ const notificacionesRecientes = computed(() => {
 
 const puedeCargarMas = computed(() => {
   return notificaciones.value.length < totalNotificaciones.value
+})
+
+const notificacionesNoLeidas = computed(() => {
+  return notificacionesFiltradas.value.filter(n => !esNotificacionLeida(n.id)).length
 })
 
 // Variables para interval
@@ -572,10 +589,52 @@ const abrirDetalleNotificacion = (notificacion) => {
     ...notificacion,
     tiene_archivo: notificacionesService.tieneArchivo(notificacion)
   }
+  
+  // Marcar como leída después de un pequeño retraso para que se vea la animación
+  setTimeout(() => {
+    marcarComoLeida(notificacion.id)
+  }, 500)
 }
 
 const cerrarDetalleNotificacion = () => {
   notificacionSeleccionada.value = null
+}
+
+const marcarComoLeida = (notificacionId) => {
+  if (!notificacionesLeidas.value.has(notificacionId)) {
+    notificacionesLeidas.value.add(notificacionId)
+    guardarNotificacionesLeidas()
+  }
+}
+
+const esNotificacionLeida = (notificacionId) => {
+  return notificacionesLeidas.value.has(notificacionId)
+}
+
+const guardarNotificacionesLeidas = () => {
+  const usuarioId = obtenerUsuarioId()
+  if (usuarioId) {
+    const key = `notificacionesLeidas_${usuarioId}`
+    const leidasArray = Array.from(notificacionesLeidas.value)
+    localStorage.setItem(key, JSON.stringify(leidasArray))
+  }
+}
+
+const cargarNotificacionesLeidas = () => {
+  const usuarioId = obtenerUsuarioId()
+  if (usuarioId) {
+    const key = `notificacionesLeidas_${usuarioId}`
+    const leidasGuardadas = localStorage.getItem(key)
+    if (leidasGuardadas) {
+      try {
+        const leidasArray = JSON.parse(leidasGuardadas)
+        notificacionesLeidas.value = new Set(leidasArray)
+      } catch (e) {
+        console.error('Error cargando notificaciones leídas:', e)
+        notificacionesLeidas.value = new Set()
+      }
+    }
+  }
 }
 
 const abrirArchivo = (notificacionId) => {
@@ -663,6 +722,9 @@ const cargarConfiguracion = () => {
   if (savedSoloRecientes !== null) {
     soloRecientes.value = savedSoloRecientes === 'true'
   }
+  
+  // Cargar notificaciones leídas
+  cargarNotificacionesLeidas()
 }
 
 // Ciclo de vida
@@ -821,12 +883,134 @@ onBeforeUnmount(() => {
 
 /* Estilos para notificaciones */
 .notification-item {
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .notification-item:hover {
-  transform: translateX(2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Notificaciones no leídas - Efecto guinda */
+.notification-item.border-red-300 {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.7) 0%, 
+    rgba(254, 226, 226, 0.8) 50%, 
+    rgba(255, 255, 255, 0.6) 100%) !important;
+  box-shadow: 
+    0 4px 12px rgba(220, 38, 38, 0.2),
+    0 2px 4px rgba(220, 38, 38, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 0 1px rgba(220, 38, 38, 0.1);
+  animation: subtle-red-glow 3s ease-in-out infinite;
+}
+
+.notification-item.border-red-300:hover {
+  border-color: #f87171 !important;
+  box-shadow: 
+    0 8px 25px rgba(220, 38, 38, 0.3),
+    0 4px 12px rgba(220, 38, 38, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 0 1px rgba(220, 38, 38, 0.2);
+}
+
+/* Notificaciones leídas */
+.notification-item.border-gray-200 {
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.notification-item.border-gray-200:hover {
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Campanita animada */
+.bell-container {
+  animation: bell-shake 0.8s ease-in-out infinite;
+  box-shadow: 
+    0 4px 12px rgba(220, 38, 38, 0.5),
+    0 2px 6px rgba(220, 38, 38, 0.3),
+    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 0 3px rgba(220, 38, 38, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.bell-icon {
+  animation: bell-ring 1.2s ease-in-out infinite;
+  transform-origin: top center;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes bell-shake {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-1px) rotate(-2deg);
+  }
+  50% {
+    transform: translateX(1px) rotate(2deg);
+  }
+  75% {
+    transform: translateX(-0.5px) rotate(-1deg);
+  }
+}
+
+@keyframes bell-ring {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: rotate(-8deg);
+  }
+  20%, 40%, 60%, 80% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes subtle-red-glow {
+  0%, 100% {
+    box-shadow: 
+      0 4px 12px rgba(220, 38, 38, 0.15),
+      0 2px 4px rgba(220, 38, 38, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 0 0 1px rgba(220, 38, 38, 0.08);
+  }
+  50% {
+    box-shadow: 
+      0 6px 18px rgba(220, 38, 38, 0.25),
+      0 3px 6px rgba(220, 38, 38, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 0 0 1px rgba(220, 38, 38, 0.15);
+  }
+}
+
+/* Badge de nueva notificación - Ahora sin uso pero mantengo por compatibilidad */
+.notification-badge {
+  animation: pulse-green 2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+
+@keyframes pulse-green {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
+  }
 }
 
 /* Limitador de líneas */

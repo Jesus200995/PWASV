@@ -74,16 +74,24 @@ export const useNotifications = () => {
       globalNotificationState.isLoading = true
       globalNotificationState.userId = currentUserId
       
-      console.log(`🔔 Actualizando conteo de no leídas para usuario ${currentUserId}`)
+      // Solo hacer log detallado si es la primera vez o si hay cambios
+      const isFirstLoad = globalNotificationState.lastUpdate === null
+      if (isFirstLoad) {
+        console.log(`🔔 Cargando conteo inicial de notificaciones para usuario ${currentUserId}`)
+      }
       
       const count = await notificacionesService.obtenerConteoNoLeidas(currentUserId)
       
       // Actualizar estado global
+      const prevCount = globalNotificationState.unreadCount
       globalNotificationState.unreadCount = count
       globalNotificationState.lastUpdate = new Date()
       unreadCount.value = count
       
-      console.log(`🔔 Badge actualizado: ${count} notificaciones no leídas`)
+      // Solo hacer log si cambió o es la primera carga
+      if (isFirstLoad || prevCount !== count) {
+        console.log(`🔔 Badge actualizado: ${prevCount || 0} → ${count} notificaciones no leídas`)
+      }
       
       return count
       
@@ -107,47 +115,72 @@ export const useNotifications = () => {
   }
 
   /**
-   * Marcar una notificación como leída y actualizar conteo
+   * Marcar una notificación como leída y actualizar conteo inmediatamente
    */
   const markAsRead = async (notificationId) => {
     try {
       const userId = getUserId()
       if (!userId) return false
 
+      console.log(`🔔 Marcando notificación ${notificationId} como leída...`)
+      
+      // Actualización optimista del badge (decrementar inmediatamente)
+      if (globalNotificationState.unreadCount > 0) {
+        globalNotificationState.unreadCount--
+        unreadCount.value = globalNotificationState.unreadCount
+        console.log(`🔔 Badge actualizado optimísticamente: ${unreadCount.value}`)
+      }
+
       const deviceId = `browser_${navigator.userAgent.split(' ').pop()}_${Date.now()}`
       
       await notificacionesService.marcarComoLeida(notificationId, userId, deviceId)
       
-      // Actualizar conteo después de marcar como leída
+      // Verificar el conteo real del servidor para confirmar
       await fetchUnreadCount(userId)
       
+      console.log(`✅ Notificación ${notificationId} marcada como leída correctamente`)
       return true
       
     } catch (error) {
       console.error('Error marcando como leída:', error)
+      
+      // Revertir actualización optimista en caso de error
+      if (globalNotificationState.unreadCount >= 0) {
+        globalNotificationState.unreadCount++
+        unreadCount.value = globalNotificationState.unreadCount
+        console.log(`🔄 Revirtiendo badge por error: ${unreadCount.value}`)
+      }
+      
       return false
     }
   }
 
   /**
-   * Inicializar polling automático del conteo
+   * Inicializar polling automático del conteo - cada segundo para respuesta inmediata
    */
-  const startPolling = (intervalMs = 2 * 60 * 1000) => { // 2 minutos por defecto
+  const startPolling = (intervalMs = 1000) => { // 1 segundo para respuesta inmediata
     const userId = getUserId()
     if (!userId) return null
 
-    console.log(`🔄 Iniciando polling cada ${intervalMs / 1000}s para notificaciones`)
+      console.log(`🔄 Iniciando polling silencioso cada ${intervalMs / 1000}s para notificaciones`)
     
     // Obtener conteo inicial
     fetchUnreadCount(userId)
     
-    // Configurar interval
-    const intervalId = setInterval(() => {
+    // Configurar interval silencioso - actualización constante cada segundo
+    const intervalId = setInterval(async () => {
       if (!isUpdating.value) {
-        fetchUnreadCount(userId)
+        // Actualización silenciosa - solo log cuando hay cambios
+        const prevCount = globalNotificationState.unreadCount
+        await fetchUnreadCount(userId)
+        
+        // Solo hacer log si cambió el conteo
+        if (prevCount !== globalNotificationState.unreadCount) {
+          console.log(`🔔 Badge actualizado: ${prevCount} → ${globalNotificationState.unreadCount}`)
+        }
       }
     }, intervalMs)
-
+    
     return intervalId
   }
 

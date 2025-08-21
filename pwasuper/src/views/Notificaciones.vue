@@ -389,6 +389,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import notificacionesService from '../services/notificacionesService.js'
+import { useNotifications } from '../composables/useNotifications.js'
 
 // Estados reactivos
 const notificaciones = ref([])
@@ -400,6 +401,9 @@ const error = ref('')
 const soloNoLeidas = ref(false) // CAMBIO: Cambiar a no leídas por defecto
 const notificacionesLeidas = ref(new Set()) // IDs de notificaciones leídas
 const conteoNoLeidas = ref(0) // NUEVO: Contador de no leídas
+
+// Sistema global de notificaciones para actualización inmediata del badge
+const { fetchUnreadCount, markAsRead } = useNotifications()
 
 // Paginación
 const limit = ref(10)
@@ -607,11 +611,10 @@ const abrirDetalleNotificacion = (notificacion) => {
     tiene_archivo: notificacionesService.tieneArchivo(notificacion)
   }
   
-  // MEJORADO: Marcar como leída usando el nuevo endpoint
+  // MEJORADO: Marcar como leída inmediatamente al abrir el modal
   if (!notificacion.leida) {
-    setTimeout(async () => {
-      await marcarComoLeidaRemoto(notificacion.id)
-    }, 500)
+    console.log(`📖 Abriendo notificación ${notificacion.id} - marcando como leída inmediatamente`)
+    marcarComoLeidaRemoto(notificacion.id)
   }
 }
 
@@ -619,31 +622,63 @@ const cerrarDetalleNotificacion = () => {
   notificacionSeleccionada.value = null
 }
 
-// NUEVA FUNCIÓN: Marcar como leída en el servidor
+// NUEVA FUNCIÓN: Marcar como leída en el servidor con actualización inmediata del badge
 const marcarComoLeidaRemoto = async (notificacionId) => {
   const usuarioId = obtenerUsuarioId()
   if (!usuarioId) return
   
   try {
-    // Generar un device_id simple basado en el navegador
-    const deviceId = `browser_${navigator.userAgent.split(' ').pop()}_${Date.now()}`
+    console.log(`📖 Marcando notificación ${notificacionId} como leída...`)
     
-    await notificacionesService.marcarComoLeida(notificacionId, usuarioId, deviceId)
-    
-    // Actualizar estado local de la notificación
+    // Actualizar estado local inmediatamente (UI optimista)
     const notificacion = notificaciones.value.find(n => n.id === notificacionId)
-    if (notificacion) {
+    if (notificacion && !notificacion.leida) {
       notificacion.leida = true
+      
+      // Decrementar conteo local inmediatamente
+      if (conteoNoLeidas.value > 0) {
+        conteoNoLeidas.value--
+      }
+      
+      console.log(`🔄 Estado local actualizado: ${conteoNoLeidas.value} no leídas`)
     }
     
-    // Actualizar conteo
-    await obtenerConteoNoLeidas(usuarioId)
+    // Usar el composable para marcar como leída y actualizar badge global inmediatamente
+    const success = await markAsRead(notificacionId)
     
-    console.log(`✅ Notificación ${notificacionId} marcada como leída`)
+    if (success) {
+      console.log(`✅ Notificación ${notificacionId} marcada como leída y badge actualizado`)
+      
+      // Si estamos en filtro de solo no leídas, remover la notificación de la vista
+      if (soloNoLeidas.value && notificacion) {
+        const index = notificaciones.value.findIndex(n => n.id === notificacionId)
+        if (index !== -1) {
+          notificaciones.value.splice(index, 1)
+          totalNotificaciones.value = Math.max(0, totalNotificaciones.value - 1)
+        }
+      }
+      
+      // Forzar actualización del conteo local
+      await obtenerConteoNoLeidas(usuarioId)
+      
+    } else {
+      // Revertir estado local si falló
+      if (notificacion) {
+        notificacion.leida = false
+        conteoNoLeidas.value++
+      }
+      console.error('❌ Error marcando como leída - revirtiendo estado local')
+    }
     
   } catch (error) {
     console.error('Error marcando como leída:', error)
-    // En caso de error, mantener el comportamiento existente
+    
+    // Revertir estado local en caso de error
+    const notificacion = notificaciones.value.find(n => n.id === notificacionId)
+    if (notificacion) {
+      notificacion.leida = false
+      conteoNoLeidas.value++
+    }
   }
 }
 
@@ -791,14 +826,13 @@ onMounted(async () => {
   // Cargar notificaciones inicial
   await cargarNotificaciones()
   
-  // Auto-actualizar cada 2 minutos (más frecuente para notificaciones)
+  // Auto-actualizar cada segundo para respuesta inmediata y silenciosa
   autoUpdateInterval = setInterval(async () => {
     if (!cargando.value && !cargandoMas.value) {
-      console.log('🔄 Auto-actualizando notificaciones y conteo...')
-      
-      // Solo actualizar conteo sin recargar lista completa
+      // Actualización silenciosa - sin log constante
       const usuarioId = obtenerUsuarioId()
       if (usuarioId) {
+        await fetchUnreadCount(usuarioId)
         await obtenerConteoNoLeidas(usuarioId)
       }
       
@@ -807,7 +841,7 @@ onMounted(async () => {
         await cargarNotificaciones()
       }
     }
-  }, 2 * 60 * 1000) // 2 minutos
+  }, 1000) // 1 segundo para actualización inmediata
 })
 
 onBeforeUnmount(() => {

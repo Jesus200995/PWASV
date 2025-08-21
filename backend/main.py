@@ -89,6 +89,10 @@ class NotificacionCreate(BaseModel):
     enviada_a_todos: bool = True
     usuario_ids: Optional[List[int]] = None  # Solo si enviada_a_todos = False
 
+class NotificacionLeer(BaseModel):
+    usuario_id: int
+    device_id: Optional[str] = None
+
 class NotificacionResponse(BaseModel):
     id: int
     titulo: str
@@ -2296,6 +2300,159 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0):
         print(f"❌ Error listando notificaciones: {e}")
         raise HTTPException(status_code=500, detail=f"Error al listar notificaciones: {str(e)}")
 
+# ==================== ENDPOINTS ESPECÍFICOS (DEBEN IR ANTES DEL GENÉRICO) ====================
+
+@app.get("/notificaciones/unread_count")
+async def obtener_conteo_no_leidas(usuario_id: int):
+    """Obtener conteo de notificaciones no leídas para un usuario"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            
+        if not usuario_id:
+            raise HTTPException(status_code=400, detail="usuario_id es obligatorio")
+        
+        print(f"📊 Obteniendo conteo de no leídas para usuario {usuario_id}")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (usuario_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Configurar zona horaria para la sesión
+        cursor.execute("SET TIME ZONE 'America/Mexico_City'")
+        
+        # Contar notificaciones visibles sin lectura
+        cursor.execute("""
+            SELECT COUNT(DISTINCT n.id)
+            FROM notificaciones n
+            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
+            LEFT JOIN notificacion_leidos nl ON n.id = nl.notificacion_id AND nl.usuario_id = %s
+            WHERE (n.enviada_a_todos = TRUE OR nu.usuario_id = %s)
+            AND n.fecha_envio IS NOT NULL
+            AND nl.id IS NULL
+        """, (usuario_id, usuario_id))
+        
+        count = cursor.fetchone()[0] or 0
+        
+        print(f"📊 Usuario {usuario_id} tiene {count} notificaciones no leídas")
+        
+        return {"count": count}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo conteo no leídas: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener conteo: {str(e)}")
+
+@app.get("/notificaciones/list")
+async def listar_notificaciones_usuario(
+    usuario_id: int,
+    filtro: str = "all",  # "unread" | "all"
+    limit: int = 200,
+    offset: int = 0
+):
+    """Listar notificaciones para un usuario con filtro de leídas/no leídas"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            
+        if not usuario_id:
+            raise HTTPException(status_code=400, detail="usuario_id es obligatorio")
+        
+        if filtro not in ["unread", "all"]:
+            raise HTTPException(status_code=400, detail="filtro debe ser 'unread' o 'all'")
+        
+        print(f"📋 Listando notificaciones para usuario {usuario_id} (filtro: {filtro})")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (usuario_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Configurar zona horaria para la sesión
+        cursor.execute("SET TIME ZONE 'America/Mexico_City'")
+        
+        # Construir consulta base
+        base_query = """
+            SELECT DISTINCT n.id, n.titulo, n.subtitulo, n.descripcion, n.enlace_url,
+                   n.archivo_nombre, n.archivo_tipo, n.enviada_a_todos,
+                   n.fecha_creacion, n.fecha_envio,
+                   CASE WHEN nl.id IS NOT NULL THEN TRUE ELSE FALSE END as leida
+            FROM notificaciones n
+            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
+            LEFT JOIN notificacion_leidos nl ON n.id = nl.notificacion_id AND nl.usuario_id = %s
+            WHERE (n.enviada_a_todos = TRUE OR nu.usuario_id = %s)
+            AND n.fecha_envio IS NOT NULL
+        """
+        
+        # Agregar filtro si es solo no leídas
+        if filtro == "unread":
+            base_query += " AND nl.id IS NULL"
+        
+        # Agregar orden y límites
+        query = base_query + """
+            ORDER BY n.fecha_envio DESC NULLS LAST, n.fecha_creacion DESC
+            LIMIT %s OFFSET %s
+        """
+        
+        cursor.execute(query, (usuario_id, usuario_id, limit, offset))
+        resultados = cursor.fetchall()
+        
+        # Obtener total sin límites para paginación
+        count_query = """
+            SELECT COUNT(DISTINCT n.id)
+            FROM notificaciones n
+            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
+            LEFT JOIN notificacion_leidos nl ON n.id = nl.notificacion_id AND nl.usuario_id = %s
+            WHERE (n.enviada_a_todos = TRUE OR nu.usuario_id = %s)
+            AND n.fecha_envio IS NOT NULL
+        """
+        
+        if filtro == "unread":
+            count_query += " AND nl.id IS NULL"
+            
+        cursor.execute(count_query, (usuario_id, usuario_id))
+        total = cursor.fetchone()[0] or 0
+        
+        # Convertir resultados
+        notificaciones = []
+        for row in resultados:
+            notificacion = {
+                "id": row[0],
+                "titulo": row[1],
+                "subtitulo": row[2],
+                "descripcion": row[3],
+                "enlace_url": row[4],
+                "archivo_nombre": row[5],
+                "archivo_tipo": row[6],
+                "enviada_a_todos": row[7],
+                "fecha_creacion": row[8].isoformat() if row[8] else None,
+                "fecha_envio": row[9].isoformat() if row[9] else None,
+                "leida": bool(row[10]),
+                "tiene_archivo": bool(row[5])
+            }
+            notificaciones.append(notificacion)
+        
+        print(f"📋 {len(notificaciones)} notificaciones listadas para usuario {usuario_id}")
+        
+        return {
+            "notificaciones": notificaciones,
+            "total": total,
+            "filtro": filtro,
+            "limit": limit,
+            "offset": offset,
+            "has_more": offset + limit < total
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error listando notificaciones del usuario: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al listar notificaciones: {str(e)}")
+
+# ==================== ENDPOINTS GENÉRICOS (VAN DESPUÉS DE LOS ESPECÍFICOS) ====================
+
 @app.get("/notificaciones/{notificacion_id}")
 async def obtener_notificacion(notificacion_id: int):
     """Obtener detalles de una notificación específica"""
@@ -2363,6 +2520,63 @@ async def obtener_notificacion(notificacion_id: int):
     except Exception as e:
         print(f"❌ Error obteniendo notificación: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener notificación: {str(e)}")
+
+@app.post("/notificaciones/{notificacion_id}/leer")
+async def marcar_notificacion_leida(notificacion_id: int, data: NotificacionLeer):
+    """Marcar una notificación como leída por un usuario"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"✅ Marcando notificación {notificacion_id} como leída para usuario {data.usuario_id}")
+        
+        # Verificar que la notificación existe
+        cursor.execute("SELECT id FROM notificaciones WHERE id = %s", (notificacion_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Notificación no encontrada")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (data.usuario_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Verificar que la notificación es visible para el usuario
+        cursor.execute("""
+            SELECT 1
+            FROM notificaciones n
+            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
+            WHERE n.id = %s 
+            AND (n.enviada_a_todos = TRUE OR nu.usuario_id = %s)
+        """, (notificacion_id, data.usuario_id))
+        
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Notificación no visible para este usuario")
+        
+        # Configurar zona horaria para la sesión
+        cursor.execute("SET TIME ZONE 'America/Mexico_City'")
+        
+        # Insertar o actualizar el registro de lectura
+        cursor.execute("""
+            INSERT INTO notificacion_leidos (notificacion_id, usuario_id, device_id)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (notificacion_id, usuario_id) 
+            DO UPDATE SET 
+                leida_en = NOW() AT TIME ZONE 'America/Mexico_City',
+                device_id = EXCLUDED.device_id
+        """, (notificacion_id, data.usuario_id, data.device_id))
+        
+        conn.commit()
+        
+        print(f"✅ Notificación {notificacion_id} marcada como leída para usuario {data.usuario_id}")
+        
+        return {"ok": True}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error marcando notificación como leída: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al marcar como leída: {str(e)}")
 
 @app.get("/notificaciones/{notificacion_id}/archivo")
 async def descargar_archivo_notificacion(notificacion_id: int):
@@ -2534,11 +2748,6 @@ async def obtener_notificaciones_usuario(usuario_id: int, limit: int = 20, offse
 
 # ==================== NUEVOS ENDPOINTS DE NOTIFICACIONES LEÍDAS/NO LEÍDAS ====================
 
-# Modelo para marcar como leída
-class NotificacionLeer(BaseModel):
-    usuario_id: int
-    device_id: Optional[str] = None
-
 # Función para crear tabla de notificación_leidos si no existe
 def crear_tabla_notificacion_leidos():
     """Crear tabla notificacion_leidos si no existe"""
@@ -2576,212 +2785,6 @@ def crear_tabla_notificacion_leidos():
 
 # Crear la tabla al inicializar
 crear_tabla_notificacion_leidos()
-
-@app.get("/notificaciones/unread_count")
-async def obtener_conteo_no_leidas(usuario_id: int):
-    """Obtener conteo de notificaciones no leídas para un usuario"""
-    try:
-        if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-            
-        if not usuario_id:
-            raise HTTPException(status_code=400, detail="usuario_id es obligatorio")
-        
-        print(f"📊 Obteniendo conteo de no leídas para usuario {usuario_id}")
-        
-        # Verificar que el usuario existe
-        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (usuario_id,))
-        if not cursor.fetchone():
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
-        
-        # Configurar zona horaria para la sesión
-        cursor.execute("SET TIME ZONE 'America/Mexico_City'")
-        
-        # Contar notificaciones visibles sin lectura
-        cursor.execute("""
-            SELECT COUNT(DISTINCT n.id)
-            FROM notificaciones n
-            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
-            LEFT JOIN notificacion_leidos nl ON n.id = nl.notificacion_id AND nl.usuario_id = %s
-            WHERE (n.enviada_a_todos = TRUE OR nu.usuario_id = %s)
-            AND n.fecha_envio IS NOT NULL
-            AND nl.id IS NULL
-        """, (usuario_id, usuario_id))
-        
-        count = cursor.fetchone()[0] or 0
-        
-        print(f"📊 Usuario {usuario_id} tiene {count} notificaciones no leídas")
-        
-        return {"count": count}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"❌ Error obteniendo conteo no leídas: {e}")
-        raise HTTPException(status_code=500, detail=f"Error al obtener conteo: {str(e)}")
-
-@app.get("/notificaciones/list")
-async def listar_notificaciones_usuario(
-    usuario_id: int,
-    filtro: str = "all",  # "unread" | "all"
-    limit: int = 200,
-    offset: int = 0
-):
-    """Listar notificaciones para un usuario con filtro de leídas/no leídas"""
-    try:
-        if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-            
-        if not usuario_id:
-            raise HTTPException(status_code=400, detail="usuario_id es obligatorio")
-        
-        if filtro not in ["unread", "all"]:
-            raise HTTPException(status_code=400, detail="filtro debe ser 'unread' o 'all'")
-        
-        print(f"📋 Listando notificaciones para usuario {usuario_id} (filtro: {filtro})")
-        
-        # Verificar que el usuario existe
-        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (usuario_id,))
-        if not cursor.fetchone():
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
-        
-        # Configurar zona horaria para la sesión
-        cursor.execute("SET TIME ZONE 'America/Mexico_City'")
-        
-        # Construir consulta base
-        base_query = """
-            SELECT DISTINCT n.id, n.titulo, n.subtitulo, n.descripcion, n.enlace_url,
-                   n.archivo_nombre, n.archivo_tipo, n.enviada_a_todos,
-                   n.fecha_creacion, n.fecha_envio,
-                   CASE WHEN nl.id IS NOT NULL THEN TRUE ELSE FALSE END as leida
-            FROM notificaciones n
-            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
-            LEFT JOIN notificacion_leidos nl ON n.id = nl.notificacion_id AND nl.usuario_id = %s
-            WHERE (n.enviada_a_todos = TRUE OR nu.usuario_id = %s)
-            AND n.fecha_envio IS NOT NULL
-        """
-        
-        # Agregar filtro si es solo no leídas
-        if filtro == "unread":
-            base_query += " AND nl.id IS NULL"
-        
-        # Agregar orden y límites
-        query = base_query + """
-            ORDER BY n.fecha_envio DESC NULLS LAST, n.fecha_creacion DESC
-            LIMIT %s OFFSET %s
-        """
-        
-        cursor.execute(query, (usuario_id, usuario_id, limit, offset))
-        resultados = cursor.fetchall()
-        
-        # Obtener total sin límites para paginación
-        count_query = """
-            SELECT COUNT(DISTINCT n.id)
-            FROM notificaciones n
-            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
-            LEFT JOIN notificacion_leidos nl ON n.id = nl.notificacion_id AND nl.usuario_id = %s
-            WHERE (n.enviada_a_todos = TRUE OR nu.usuario_id = %s)
-            AND n.fecha_envio IS NOT NULL
-        """
-        
-        if filtro == "unread":
-            count_query += " AND nl.id IS NULL"
-            
-        cursor.execute(count_query, (usuario_id, usuario_id))
-        total = cursor.fetchone()[0] or 0
-        
-        # Convertir resultados
-        notificaciones = []
-        for row in resultados:
-            notificacion = {
-                "id": row[0],
-                "titulo": row[1],
-                "subtitulo": row[2],
-                "descripcion": row[3],
-                "enlace_url": row[4],
-                "archivo_nombre": row[5],
-                "archivo_tipo": row[6],
-                "enviada_a_todos": row[7],
-                "fecha_creacion": row[8].isoformat() if row[8] else None,
-                "fecha_envio": row[9].isoformat() if row[9] else None,
-                "leida": bool(row[10]),
-                "tiene_archivo": bool(row[5])
-            }
-            notificaciones.append(notificacion)
-        
-        print(f"📋 {len(notificaciones)} notificaciones listadas para usuario {usuario_id}")
-        
-        return {
-            "notificaciones": notificaciones,
-            "total": total,
-            "filtro": filtro,
-            "limit": limit,
-            "offset": offset,
-            "has_more": offset + limit < total
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"❌ Error listando notificaciones del usuario: {e}")
-        raise HTTPException(status_code=500, detail=f"Error al listar notificaciones: {str(e)}")
-
-@app.post("/notificaciones/{notificacion_id}/leer")
-async def marcar_notificacion_leida(notificacion_id: int, data: NotificacionLeer):
-    """Marcar una notificación como leída por un usuario"""
-    try:
-        if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-        
-        print(f"✅ Marcando notificación {notificacion_id} como leída para usuario {data.usuario_id}")
-        
-        # Verificar que la notificación existe
-        cursor.execute("SELECT id FROM notificaciones WHERE id = %s", (notificacion_id,))
-        if not cursor.fetchone():
-            raise HTTPException(status_code=404, detail="Notificación no encontrada")
-        
-        # Verificar que el usuario existe
-        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (data.usuario_id,))
-        if not cursor.fetchone():
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
-        
-        # Verificar que la notificación es visible para el usuario
-        cursor.execute("""
-            SELECT 1
-            FROM notificaciones n
-            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
-            WHERE n.id = %s 
-            AND (n.enviada_a_todos = TRUE OR nu.usuario_id = %s)
-        """, (notificacion_id, data.usuario_id))
-        
-        if not cursor.fetchone():
-            raise HTTPException(status_code=404, detail="Notificación no visible para este usuario")
-        
-        # Configurar zona horaria para la sesión
-        cursor.execute("SET TIME ZONE 'America/Mexico_City'")
-        
-        # Insertar o actualizar el registro de lectura
-        cursor.execute("""
-            INSERT INTO notificacion_leidos (notificacion_id, usuario_id, device_id)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (notificacion_id, usuario_id) 
-            DO UPDATE SET 
-                leida_en = NOW() AT TIME ZONE 'America/Mexico_City',
-                device_id = EXCLUDED.device_id
-        """, (notificacion_id, data.usuario_id, data.device_id))
-        
-        conn.commit()
-        
-        print(f"✅ Notificación {notificacion_id} marcada como leída para usuario {data.usuario_id}")
-        
-        return {"ok": True}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        conn.rollback()
-        print(f"❌ Error marcando notificación como leída: {e}")
-        raise HTTPException(status_code=500, detail=f"Error al marcar como leída: {str(e)}")
 
 # Endpoint mejorado para obtener notificaciones de usuario (compatibilidad con PWASUPER)
 @app.get("/notificaciones/usuario/{usuario_id}")

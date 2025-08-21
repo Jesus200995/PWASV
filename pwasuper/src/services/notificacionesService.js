@@ -71,9 +71,48 @@ export const notificacionesService = {
       },
       {
         id: 2,
+        titulo: 'Imagen de ejemplo',
+        subtitulo: 'Notificación con imagen adjunta',
+        descripcion: 'Esta notificación incluye una imagen que se muestra directamente en la vista previa. Las imágenes se muestran en formato cuadrado para mantener consistencia visual.',
+        enlace_url: null,
+        archivo_nombre: 'imagen_ejemplo.jpg',
+        archivo_tipo: 'imagen',
+        enviada_a_todos: false,
+        fecha_creacion: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 min atrás
+        fecha_envio: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+        tiene_archivo: true
+      },
+      {
+        id: 3,
+        titulo: 'Video tutorial disponible',
+        subtitulo: 'Aprende a usar las nuevas funciones',
+        descripcion: 'Hemos preparado un video tutorial que muestra cómo aprovechar al máximo las nuevas funcionalidades del sistema.',
+        enlace_url: null,
+        archivo_nombre: 'tutorial.mp4',
+        archivo_tipo: 'video',
+        enviada_a_todos: true,
+        fecha_creacion: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 horas atrás
+        fecha_envio: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        tiene_archivo: true
+      },
+      {
+        id: 4,
+        titulo: 'Documento importante',
+        subtitulo: 'Política actualizada',
+        descripcion: 'Se ha actualizado la política de privacidad. Por favor revisa el documento adjunto para conocer los cambios más importantes.',
+        enlace_url: null,
+        archivo_nombre: 'politica_privacidad_v2.pdf',
+        archivo_tipo: 'pdf',
+        enviada_a_todos: true,
+        fecha_creacion: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 día atrás
+        fecha_envio: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        tiene_archivo: true
+      },
+      {
+        id: 5,
         titulo: 'Funcionalidades disponibles',
         subtitulo: 'Explora todas las características',
-        descripcion: 'Puedes ver notificaciones generales y personales, filtrar por fecha, ver archivos adjuntos y mucho más. Las notificaciones se actualizan automáticamente cada 5 minutos.',
+        descripción: 'Puedes ver notificaciones generales y personales, filtrar por fecha, ver archivos adjuntos y mucho más. Las notificaciones se actualizan automáticamente cada 5 minutos.',
         enlace_url: 'https://github.com/tu-repo',
         archivo_nombre: null,
         archivo_tipo: null,
@@ -81,19 +120,6 @@ export const notificacionesService = {
         fecha_creacion: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hora atrás
         fecha_envio: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
         tiene_archivo: false
-      },
-      {
-        id: 3,
-        titulo: 'Notificación con archivo adjunto',
-        subtitulo: 'Ejemplo de archivo PDF',
-        descripcion: 'Esta es una notificación de ejemplo que incluye un archivo adjunto. En un entorno real, podrías descargar o ver el archivo haciendo clic en el botón correspondiente.',
-        enlace_url: null,
-        archivo_nombre: 'documento_ejemplo.pdf',
-        archivo_tipo: 'pdf',
-        enviada_a_todos: false,
-        fecha_creacion: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 día atrás
-        fecha_envio: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        tiene_archivo: true
       }
     ]
 
@@ -129,6 +155,18 @@ export const notificacionesService = {
    * Obtener URL del archivo de una notificación
    */
   obtenerUrlArchivo(notificacionId) {
+    // En desarrollo, generar URLs de placeholder para testing
+    if (import.meta.env.DEV) {
+      switch (notificacionId) {
+        case 2: // Imagen
+          return 'https://picsum.photos/400/400?random=1'
+        case 3: // Video
+          return 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4'
+        default:
+          return `${API_BASE_URL}/notificaciones/${notificacionId}/archivo`
+      }
+    }
+    
     return `${API_BASE_URL}/notificaciones/${notificacionId}/archivo`
   },
 
@@ -143,12 +181,37 @@ export const notificacionesService = {
    * Obtener icono según el tipo de archivo
    */
   obtenerIconoArchivo(tipoArchivo) {
-    const iconos = {
-      'imagen': '🖼️',
-      'pdf': '📄',
-      'video': '🎥'
+    if (!tipoArchivo) return '📎'
+    
+    const tipo = tipoArchivo.toLowerCase()
+    
+    // Imágenes
+    if (tipo.includes('imagen') || tipo.includes('image') || 
+        ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(tipo)) {
+      return '🖼️'
     }
-    return iconos[tipoArchivo] || '📎'
+    
+    // Videos
+    if (tipo.includes('video') || 
+        ['mp4', 'webm', 'ogg', 'avi', 'mov'].includes(tipo)) {
+      return '🎥'
+    }
+    
+    // Documentos
+    if (tipo.includes('pdf')) return '📄'
+    if (tipo.includes('doc') || tipo.includes('word')) return '📝'
+    if (tipo.includes('xls') || tipo.includes('excel')) return '📊'
+    if (tipo.includes('ppt') || tipo.includes('powerpoint')) return '📽️'
+    if (tipo.includes('txt')) return '📃'
+    if (tipo.includes('zip') || tipo.includes('rar')) return '📦'
+    
+    // Audio
+    if (tipo.includes('audio') || 
+        ['mp3', 'wav', 'ogg', 'aac'].includes(tipo)) {
+      return '🎵'
+    }
+    
+    return '📎'
   },
 
   /**

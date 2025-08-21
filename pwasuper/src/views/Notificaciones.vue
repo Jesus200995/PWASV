@@ -113,8 +113,7 @@
             <div 
               v-for="notificacion in notificacionesFiltradas" 
               :key="notificacion.id"
-              class="notification-item bg-white bg-opacity-40 rounded-lg p-3 cursor-pointer hover:bg-opacity-60 transition-all"
-              @click="abrirDetalleNotificacion(notificacion)"
+              class="notification-item bg-white bg-opacity-40 rounded-lg p-3 hover:bg-opacity-60 transition-all"
             >
               <div class="flex items-start space-x-3">
                 <!-- Icono de tipo -->
@@ -145,19 +144,79 @@
                   <p class="text-xs text-gray-600 line-clamp-2 mb-2">
                     {{ notificacion.descripcion }}
                   </p>
+
+                  <!-- Vista previa de archivo -->
+                  <div v-if="notificacion.tiene_archivo" class="mb-3 w-full flex justify-center items-center">
+                    <div v-if="esImagen(notificacion.archivo_tipo)" class="aspect-square w-full max-w-[180px] bg-gray-100 rounded-lg overflow-hidden relative">
+                      <!-- Placeholder de carga -->
+                      <div class="absolute inset-0 flex items-center justify-center bg-gray-100 image-placeholder">
+                        <div class="text-gray-400 text-center">
+                          <div class="text-lg mb-1">🖼️</div>
+                          <div class="text-xs">Cargando...</div>
+                        </div>
+                      </div>
+                      <!-- Imagen real -->
+                      <img 
+                        :src="obtenerUrlArchivo(notificacion.id)" 
+                        :alt="notificacion.archivo_nombre"
+                        class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity relative z-10"
+                        @click.stop="abrirArchivo(notificacion.id)"
+                        @error="onImageError"
+                        @load="onImageLoad"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="aspect-video w-full max-w-[180px] bg-gray-100 rounded-lg overflow-hidden">
+                      <video 
+                        :src="obtenerUrlArchivo(notificacion.id)"
+                        class="w-full h-full object-cover cursor-pointer"
+                        controls
+                        preload="metadata"
+                        @click.stop
+                      >
+                        Tu navegador no soporta video.
+                      </video>
+                    </div>
+                    <div v-else class="bg-gray-50 rounded-lg p-2 max-w-[180px]">
+                      <div class="flex items-center space-x-2">
+                        <span class="text-lg">{{ obtenerIconoArchivo(notificacion.archivo_tipo) }}</span>
+                        <div class="flex-1 min-w-0">
+                          <div class="text-xs font-medium text-gray-800 truncate">
+                            {{ notificacion.archivo_nombre }}
+                          </div>
+                          <div class="text-xs text-gray-600 capitalize">
+                            {{ notificacion.archivo_tipo }}
+                          </div>
+                        </div>
+                        <button 
+                          @click.stop="abrirArchivo(notificacion.id)"
+                          class="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                        >
+                          Ver
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   
                   <div class="flex items-center justify-between">
                     <span class="text-xs text-gray-500">
                       {{ formatearFecha(notificacion.fecha_creacion) }}
                     </span>
-                    <div class="flex items-center space-x-2">
-                      <span v-if="notificacion.enviada_a_todos" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                        Todos
+                  </div>
+                  
+                  <!-- Botón Ver más centrado -->
+                  <div class="flex justify-center mt-3">
+                    <button 
+                      @click="abrirDetalleNotificacion(notificacion)"
+                      class="group glass-button px-3 py-1 text-white text-xs font-medium rounded-full transition-all duration-300 hover:scale-105 focus:scale-105"
+                    >
+                      <span class="relative z-10 flex items-center space-x-1">
+                        <span>Ver más</span>
+                        <svg class="w-3 h-3 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
                       </span>
-                      <span v-else class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                        Personal
-                      </span>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -252,8 +311,57 @@
           <!-- Archivo adjunto -->
           <div v-if="notificacionSeleccionada.tiene_archivo" class="mb-4">
             <h3 class="text-sm font-medium text-gray-800 mb-2">Archivo adjunto</h3>
-            <div class="bg-gray-50 rounded-lg p-3">
-              <div class="flex items-center justify-between">
+            
+            <!-- Vista previa de imagen -->
+            <div v-if="esImagen(notificacionSeleccionada.archivo_tipo)" class="mb-3">
+              <div class="bg-gray-50 rounded-lg p-2 relative">
+                <!-- Placeholder de carga -->
+                <div class="flex items-center justify-center min-h-32 bg-gray-100 image-placeholder rounded">
+                  <div class="text-gray-400 text-center">
+                    <div class="text-2xl mb-2">🖼️</div>
+                    <div class="text-sm">Cargando imagen...</div>
+                  </div>
+                </div>
+                <!-- Imagen real -->
+                <div class="flex justify-center">
+                  <img 
+                    :src="obtenerUrlArchivo(notificacionSeleccionada.id)" 
+                    :alt="notificacionSeleccionada.archivo_nombre"
+                    class="max-w-full max-h-64 object-contain rounded cursor-pointer hover:opacity-90 transition-opacity relative z-10 mx-auto"
+                    @click="abrirArchivo(notificacionSeleccionada.id)"
+                    @error="onImageError"
+                    @load="onImageLoad"
+                    loading="lazy"
+                  />
+                </div>
+                <div class="text-xs text-gray-600 text-center mt-2">
+                  {{ notificacionSeleccionada.archivo_nombre }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Vista previa de video -->
+            <div v-else-if="esVideo(notificacionSeleccionada.archivo_tipo)" class="mb-3">
+              <div class="bg-gray-50 rounded-lg p-2">
+                <div class="flex justify-center">
+                  <video 
+                    :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
+                    class="max-w-full max-h-64 object-contain rounded mx-auto"
+                    controls
+                    preload="metadata"
+                  >
+                    Tu navegador no soporta video.
+                  </video>
+                </div>
+                <div class="text-xs text-gray-600 text-center mt-2">
+                  {{ notificacionSeleccionada.archivo_nombre }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Otros archivos -->
+            <div v-else class="bg-gray-50 rounded-lg p-3">
+              <div class="flex items-center justify-between max-w-full mx-auto">
                 <div class="flex items-center space-x-2">
                   <span class="text-lg">{{ obtenerIconoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
                   <div>
@@ -496,8 +604,59 @@ const abrirArchivo = (notificacionId) => {
   window.open(url, '_blank')
 }
 
+const obtenerUrlArchivo = (notificacionId) => {
+  return notificacionesService.obtenerUrlArchivo(notificacionId)
+}
+
 const obtenerIconoArchivo = (tipoArchivo) => {
   return notificacionesService.obtenerIconoArchivo(tipoArchivo)
+}
+
+const esImagen = (tipoArchivo) => {
+  if (!tipoArchivo) return false
+  const tiposImagen = ['imagen', 'image', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
+  return tiposImagen.some(tipo => tipoArchivo.toLowerCase().includes(tipo))
+}
+
+const esVideo = (tipoArchivo) => {
+  if (!tipoArchivo) return false
+  const tiposVideo = ['video', 'mp4', 'webm', 'ogg', 'avi', 'mov']
+  return tiposVideo.some(tipo => tipoArchivo.toLowerCase().includes(tipo))
+}
+
+const onImageLoad = (event) => {
+  // Ocultar el placeholder de carga cuando la imagen se haya cargado
+  const placeholder = event.target.parentNode.querySelector('.image-placeholder')
+  if (placeholder) {
+    placeholder.style.display = 'none'
+  }
+}
+
+const onImageError = (event) => {
+  console.warn('Error cargando imagen:', event.target.src)
+  
+  // Ocultar el placeholder de carga
+  const placeholder = event.target.parentNode.querySelector('.image-placeholder')
+  if (placeholder) {
+    placeholder.style.display = 'none'
+  }
+  
+  // Crear elemento de reemplazo con mejor diseño
+  const parent = event.target.parentNode
+  const errorDiv = document.createElement('div')
+  errorDiv.className = 'flex flex-col items-center justify-center w-full h-full bg-gray-100 rounded text-xs text-gray-500 p-4 absolute inset-0 z-20'
+  
+  errorDiv.innerHTML = `
+    <div class="text-2xl mb-2">🖼️</div>
+    <div class="text-center">
+      <div class="font-medium">Error cargando imagen</div>
+      <div class="text-xs text-gray-400 mt-1">Archivo no disponible</div>
+    </div>
+  `
+  
+  // Ocultar imagen original y mostrar error
+  event.target.style.display = 'none'
+  parent.appendChild(errorDiv)
 }
 
 const formatearFecha = (fechaISO) => {
@@ -814,5 +973,219 @@ onBeforeUnmount(() => {
   .glass-card {
     background: rgba(255, 255, 255, 0.85);
   }
+}
+
+/* Estilos para vista previa de archivos */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+/* Centrado perfecto para contenido multimedia */
+.media-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.media-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
+}
+
+/* Efectos hover para imágenes */
+.notification-item img {
+  transition: all 0.3s ease;
+}
+
+.notification-item:hover img {
+  transform: scale(1.02);
+}
+
+/* Estilos para videos */
+video {
+  outline: none;
+}
+
+video::-webkit-media-controls {
+  outline: none;
+}
+
+/* Loading placeholder para imágenes */
+.image-placeholder {
+  background: linear-gradient(-90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+  background-size: 400% 400%;
+  animation: loading-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-shimmer {
+  0% { background-position: 0% 0%; }
+  100% { background-position: -200% 0%; }
+}
+
+/* Mejoras para archivos de error */
+.file-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px dashed rgba(239, 68, 68, 0.3);
+  color: rgb(127, 29, 29);
+}
+
+/* Estilos responsivos para archivos multimedia */
+@media (max-width: 480px) {
+  .aspect-square,
+  .aspect-video {
+    max-width: 160px;
+    margin: 0 auto;
+  }
+  
+  video,
+  img {
+    max-height: 160px;
+  }
+  
+  .media-container {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 375px) {
+  .aspect-square,
+  .aspect-video {
+    max-width: 140px;
+    margin: 0 auto;
+  }
+  
+  video,
+  img {
+    max-height: 140px;
+  }
+  
+  .media-container {
+    justify-content: center;
+  }
+}
+
+/* Centrado perfecto para contenido multimedia */
+.notification-item .aspect-square,
+.notification-item .aspect-video {
+  margin: 0 auto;
+}
+
+/* Centrado para elementos de notificación */
+.notification-media-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+/* Asegurar que las imágenes y videos estén siempre centrados */
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.center-content > * {
+  margin: 0 auto;
+}
+
+/* Botón Ver más con efecto de vidrio */
+.glass-button {
+  background: rgba(34, 197, 94, 0.75);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 8px 32px 0 rgba(34, 197, 94, 0.4),
+    0 4px 16px 0 rgba(34, 197, 94, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.glass-button:hover::before {
+  left: 100%;
+}
+
+.glass-button:hover {
+  background: rgba(22, 163, 74, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 16px 48px 0 rgba(34, 197, 94, 0.6),
+    0 8px 24px 0 rgba(34, 197, 94, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(34, 197, 94, 0.3);
+  transform: translateY(-3px) scale(1.05);
+}
+
+.glass-button:active {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 
+    0 8px 24px 0 rgba(34, 197, 94, 0.5),
+    0 4px 12px 0 rgba(34, 197, 94, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button:focus {
+  outline: none;
+  box-shadow: 
+    0 16px 48px 0 rgba(34, 197, 94, 0.6),
+    0 8px 24px 0 rgba(34, 197, 94, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
+    0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+/* Texto del botón con efecto de brillo */
+.glass-button span {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+/* Animación para el ícono */
+.glass-button:hover .group-hover\:translate-x-1 {
+  transform: translateX(0.25rem);
+}
+
+.ver-mas-btn {
+  background: linear-gradient(45deg, #16a34a, #22c55e);
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);
+  transition: all 0.2s ease;
+}
+
+.ver-mas-btn:hover {
+  background: linear-gradient(45deg, #15803d, #16a34a);
+  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.4);
+  transform: translateY(-1px);
 }
 </style>

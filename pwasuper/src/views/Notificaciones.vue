@@ -9,7 +9,7 @@
 
     <div class="absolute inset-0 overflow-hidden" style="z-index: 1;">
       <!-- Header fijo de notificaciones -->
-      <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-3 sm:px-4 lg:px-5">
+      <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-3 sm:px-4 lg:px-5 pt-4 sm:pt-6">
         <div class="w-full max-w-sm mx-auto">
           <div class="glass-card mb-2 relative">
             <div class="text-center mb-3">
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Contenido con scroll -->
-      <div class="absolute inset-0 overflow-y-auto pt-32 sm:pt-36 pb-3">
+      <div class="absolute inset-0 overflow-y-auto pt-40 sm:pt-44 pb-3">
         <div class="page-container w-full max-w-sm mx-auto relative z-10 p-3 sm:p-4 lg:p-5">
 
         <!-- Estado de carga -->

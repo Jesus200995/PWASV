@@ -3,6 +3,7 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConnectivityStatus from './components/ConnectivityStatus.vue';
 import UpdateNotification from './components/UpdateNotification.vue';
+import { useNotifications } from './composables/useNotifications.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -11,20 +12,9 @@ const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
 
-// Función para obtener el contador de notificaciones no leídas
-const unreadNotificationsCount = computed(() => {
-  try {
-    const saved = localStorage.getItem('notifications');
-    if (saved) {
-      const notifications = JSON.parse(saved);
-      return notifications.filter(n => !n.read).length;
-    }
-    return 2; // Mostrar un ejemplo inicial
-  } catch (error) {
-    console.error('Error loading notifications count:', error);
-    return 0;
-  }
-});
+// Sistema de notificaciones en tiempo real
+const { unreadCount, startPolling, stopPolling } = useNotifications();
+let notificationPollingId = null;
 
 // Watcher para detectar cambios de ruta y actualizar el estado
 watch(() => route.path, () => {
@@ -51,11 +41,25 @@ const handleStorageChange = (e) => {
       userData.value = null;
       showWelcome.value = false;
       showMobileMenu.value = false;
+      
+      // Detener polling de notificaciones
+      if (notificationPollingId) {
+        stopPolling(notificationPollingId);
+        notificationPollingId = null;
+      }
+      
       router.push('/login');
     } else if (e.newValue && !userData.value) {
       // Si se agregó un usuario y no tenemos datos, cargarlos
       try {
         userData.value = JSON.parse(e.newValue);
+        
+        // Reiniciar polling de notificaciones para el nuevo usuario
+        if (notificationPollingId) {
+          stopPolling(notificationPollingId);
+        }
+        notificationPollingId = startPolling();
+        
       } catch (error) {
         console.error('Error parsing user data:', error);
         localStorage.removeItem('user');
@@ -71,6 +75,9 @@ onMounted(() => {
   if (storedUser) {
     try {
       userData.value = JSON.parse(storedUser);
+      
+      // Inicializar sistema de notificaciones una vez que el usuario está identificado
+      notificationPollingId = startPolling();
       
       // Mostrar mensaje de bienvenida solo si recién inició sesión
       const justLoggedIn = sessionStorage.getItem('justLoggedIn');
@@ -104,6 +111,8 @@ onMounted(() => {
 onUnmounted(() => {
   // Limpiar listener
   window.removeEventListener('storage', handleStorageChange);
+  // Detener el polling de notificaciones
+  stopPolling(notificationPollingId);
 });
 
 const isLoggedIn = computed(() => {
@@ -137,6 +146,10 @@ const closeMobileMenu = () => {
 function logout() {
   isLoggingOut.value = true;
   showMobileMenu.value = false;
+  
+  // Detener el polling de notificaciones
+  stopPolling(notificationPollingId);
+  notificationPollingId = null;
   
   // Limpiar el estado reactivo primero
   userData.value = null;
@@ -232,12 +245,13 @@ function logout() {
               class="relative p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               :class="{ 'bg-blue-50 text-blue-600': route.name === 'Notificaciones' }"
             >
+              <!-- Icono de campanita -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-3.5-3.5a.928.928 0 010-1.314L20 8.5h-5M9 17H4l3.5-3.5a.928.928 0 000-1.314L4 8.5h5M12 3v18M10.5 21.5a1.5 1.5 0 003 0" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
               <!-- Badge de notificaciones no leídas -->
-              <span v-if="unreadNotificationsCount > 0" class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                {{ unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount }}
+              <span v-if="unreadCount > 0" class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                {{ unreadCount > 9 ? '9+' : unreadCount }}
               </span>
             </router-link>
             
@@ -294,12 +308,12 @@ function logout() {
               :class="{ 'bg-primary/10 text-primary': route.name === 'Notificaciones' }"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-3.5-3.5a.928.928 0 010-1.314L20 8.5h-5M9 17H4l3.5-3.5a.928.928 0 000-1.314L4 8.5h5M12 3v18M10.5 21.5a1.5 1.5 0 003 0" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
               <span class="font-medium">Notificaciones</span>
               <!-- Badge de notificaciones no leídas en el menú -->
-              <span v-if="unreadNotificationsCount > 0" class="ml-auto h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                {{ unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount }}
+              <span v-if="unreadCount > 0" class="ml-auto h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                {{ unreadCount > 9 ? '9+' : unreadCount }}
               </span>
             </router-link>
             

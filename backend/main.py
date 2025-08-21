@@ -2454,6 +2454,84 @@ async def eliminar_notificacion(notificacion_id: int):
         print(f"❌ Error eliminando notificación: {e}")
         raise HTTPException(status_code=500, detail=f"Error al eliminar notificación: {str(e)}")
 
+@app.get("/notificaciones/usuario/{usuario_id}")
+async def obtener_notificaciones_usuario(usuario_id: int, limit: int = 20, offset: int = 0):
+    """Obtener notificaciones específicas de un usuario (para PWASUPER)"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📱 Obteniendo notificaciones para usuario {usuario_id} (limit: {limit}, offset: {offset})")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, nombre_completo FROM usuarios WHERE id = %s", (usuario_id,))
+        usuario = cursor.fetchone()
+        
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Obtener notificaciones del usuario (enviadas a todos + específicas del usuario)
+        cursor.execute("""
+            SELECT DISTINCT n.id, n.titulo, n.subtitulo, n.descripcion, n.enlace_url,
+                   n.archivo_nombre, n.archivo_tipo, n.enviada_a_todos,
+                   n.fecha_creacion, n.fecha_envio
+            FROM notificaciones n
+            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
+            WHERE n.enviada_a_todos = TRUE 
+               OR nu.usuario_id = %s
+            ORDER BY n.fecha_creacion DESC
+            LIMIT %s OFFSET %s
+        """, (usuario_id, limit, offset))
+        
+        resultados = cursor.fetchall()
+        
+        # Obtener total de notificaciones del usuario
+        cursor.execute("""
+            SELECT COUNT(DISTINCT n.id)
+            FROM notificaciones n
+            LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
+            WHERE n.enviada_a_todos = TRUE 
+               OR nu.usuario_id = %s
+        """, (usuario_id,))
+        
+        total = cursor.fetchone()[0]
+        
+        notificaciones = []
+        for resultado in resultados:
+            notificacion = {
+                "id": resultado[0],
+                "titulo": resultado[1],
+                "subtitulo": resultado[2],
+                "descripcion": resultado[3],
+                "enlace_url": resultado[4],
+                "archivo_nombre": resultado[5],
+                "archivo_tipo": resultado[6],
+                "enviada_a_todos": resultado[7],
+                "fecha_creacion": resultado[8].isoformat() if resultado[8] else None,
+                "fecha_envio": resultado[9].isoformat() if resultado[9] else None,
+                "tiene_archivo": bool(resultado[5])
+            }
+            notificaciones.append(notificacion)
+        
+        print(f"✅ {len(notificaciones)} notificaciones obtenidas para usuario {usuario[1]}")
+        
+        return {
+            "usuario": {
+                "id": usuario[0],
+                "nombre_completo": usuario[1]
+            },
+            "notificaciones": notificaciones,
+            "total": total,
+            "limit": limit,
+            "offset": offset
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo notificaciones del usuario: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener notificaciones del usuario: {str(e)}")
+
 # ==================== FIN ENDPOINTS DE NOTIFICACIONES ====================
 
 if __name__ == "__main__":

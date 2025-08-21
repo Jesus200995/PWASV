@@ -106,10 +106,15 @@
               
               <div class="flex items-start space-x-3">
                 <!-- Icono de tipo -->
-                <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <span class="text-sm">
-                    {{ notificacion.tiene_archivo ? obtenerIconoArchivo(notificacion.archivo_tipo) : '📢' }}
-                  </span>
+                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                     :class="notificacion.leida 
+                       ? 'bg-green-600 shadow-lg shadow-green-200' 
+                       : 'bg-red-600 shadow-lg shadow-red-200'">
+                  <!-- Ícono de correo blanco -->
+                  <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                  </svg>
                 </div>
                 
                 <!-- Contenido -->
@@ -1038,6 +1043,61 @@ onBeforeUnmount(() => {
 .notification-item:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Círculos de notificación con efecto mejorado */
+.notification-item .bg-red-600 {
+  background: linear-gradient(135deg, #dc2626, #ef4444, #dc2626) !important;
+  box-shadow: 
+    0 4px 12px rgba(220, 38, 38, 0.4),
+    0 2px 6px rgba(220, 38, 38, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: pulse-red-circle 2s ease-in-out infinite;
+}
+
+.notification-item .bg-green-600 {
+  background: linear-gradient(135deg, #16a34a, #22c55e, #16a34a) !important;
+  box-shadow: 
+    0 4px 12px rgba(34, 197, 94, 0.4),
+    0 2px 6px rgba(34, 197, 94, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animación sutil para círculo rojo (no leído) */
+@keyframes pulse-red-circle {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 
+      0 4px 12px rgba(220, 38, 38, 0.4),
+      0 2px 6px rgba(220, 38, 38, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 
+      0 6px 16px rgba(220, 38, 38, 0.5),
+      0 3px 8px rgba(220, 38, 38, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+}
+
+/* Efecto hover para los círculos */
+.notification-item:hover .bg-red-600 {
+  transform: scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(220, 38, 38, 0.6),
+    0 3px 8px rgba(220, 38, 38, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.notification-item:hover .bg-green-600 {
+  transform: scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(34, 197, 94, 0.6),
+    0 3px 8px rgba(34, 197, 94, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Notificaciones no leídas - Efecto guinda */

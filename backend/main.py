@@ -2,6 +2,7 @@ from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import StreamingResponse
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
@@ -12,6 +13,9 @@ import os
 import re
 import bcrypt
 import pytz
+import json
+from typing import List, Optional
+import io
 
 app = FastAPI()
 
@@ -74,6 +78,31 @@ class UserInfoUpdate(BaseModel):
 
 class TerminosAceptados(BaseModel):
     usuario_id: int
+
+# ==================== MODELOS PARA NOTIFICACIONES ====================
+
+class NotificacionCreate(BaseModel):
+    titulo: str
+    subtitulo: Optional[str] = None
+    descripcion: Optional[str] = None
+    enlace_url: Optional[str] = None
+    enviada_a_todos: bool = True
+    usuario_ids: Optional[List[int]] = None  # Solo si enviada_a_todos = False
+
+class NotificacionResponse(BaseModel):
+    id: int
+    titulo: str
+    subtitulo: Optional[str] = None
+    descripcion: Optional[str] = None
+    enlace_url: Optional[str] = None
+    archivo_nombre: Optional[str] = None
+    archivo_tipo: Optional[str] = None
+    enviada_a_todos: bool
+    fecha_creacion: datetime
+    fecha_envio: Optional[datetime] = None
+    destinatarios: Optional[List[dict]] = None
+
+# ==================== FIN MODELOS NOTIFICACIONES ====================
 
 # Montar carpeta de fotos para servir estáticamente
 app.mount("/fotos", StaticFiles(directory="fotos"), name="fotos")
@@ -2059,6 +2088,373 @@ async def test_terminos():
         "version": "1.0.0",
         "timestamp": datetime.now().isoformat()
     }
+
+# ==================== ENDPOINTS DE NOTIFICACIONES ====================
+
+# Define el timezone de CDMX para notificaciones
+CDMX_TZ = pytz.timezone("America/Mexico_City")
+
+def obtener_fecha_hora_cdmx_notificaciones():
+    """Función de utilidad para obtener fecha y hora actual en zona CDMX para notificaciones"""
+    return datetime.now(CDMX_TZ)
+
+@app.post("/notificaciones")
+async def crear_notificacion(
+    titulo: str = Form(...),
+    subtitulo: str = Form(None),
+    descripcion: str = Form(None),
+    enlace_url: str = Form(None),
+    enviada_a_todos: bool = Form(True),
+    usuario_ids: str = Form(None),  # JSON string con lista de IDs
+    archivo: UploadFile = File(None)
+):
+    """Crear una nueva notificación"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🔔 Creando notificación: {titulo}")
+        
+        # Validaciones básicas
+        if len(titulo.strip()) == 0:
+            raise HTTPException(status_code=400, detail="El título es obligatorio")
+        
+        if len(titulo) > 150:
+            raise HTTPException(status_code=400, detail="El título no puede exceder 150 caracteres")
+        
+        if subtitulo and len(subtitulo) > 200:
+            raise HTTPException(status_code=400, detail="El subtítulo no puede exceder 200 caracteres")
+        
+        # Validar usuarios si no es para todos
+        usuarios_seleccionados = []
+        if not enviada_a_todos:
+            if not usuario_ids:
+                raise HTTPException(status_code=400, detail="Debe especificar usuarios si no se envía a todos")
+            
+            try:
+                usuarios_seleccionados = json.loads(usuario_ids)
+                if not isinstance(usuarios_seleccionados, list) or len(usuarios_seleccionados) == 0:
+                    raise HTTPException(status_code=400, detail="Debe seleccionar al menos un usuario")
+                
+                # Verificar que todos los usuarios existen
+                cursor.execute("SELECT id FROM usuarios WHERE id = ANY(%s)", (usuarios_seleccionados,))
+                usuarios_existentes = [row[0] for row in cursor.fetchall()]
+                
+                usuarios_inexistentes = set(usuarios_seleccionados) - set(usuarios_existentes)
+                if usuarios_inexistentes:
+                    raise HTTPException(status_code=400, detail=f"Usuarios no encontrados: {list(usuarios_inexistentes)}")
+                
+            except json.JSONDecodeError:
+                raise HTTPException(status_code=400, detail="Formato de usuarios inválido")
+        
+        # Procesar archivo si se proporciona
+        archivo_bytes = None
+        archivo_tipo = None
+        archivo_nombre = None
+        
+        if archivo and archivo.filename:
+            print(f"📎 Procesando archivo: {archivo.filename}")
+            
+            # Validar tipo de archivo
+            ext = os.path.splitext(archivo.filename)[1].lower()
+            tipos_permitidos = {
+                '.jpg': 'imagen', '.jpeg': 'imagen', '.png': 'imagen', '.gif': 'imagen',
+                '.pdf': 'pdf',
+                '.mp4': 'video', '.avi': 'video', '.mov': 'video', '.wmv': 'video'
+            }
+            
+            if ext not in tipos_permitidos:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Tipo de archivo no permitido. Formatos válidos: {', '.join(tipos_permitidos.keys())}"
+                )
+            
+            # Leer archivo
+            archivo_bytes = await archivo.read()
+            archivo_tipo = tipos_permitidos[ext]
+            archivo_nombre = archivo.filename
+            
+            # Validar tamaño (50MB máximo)
+            if len(archivo_bytes) > 50 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="El archivo no debe exceder 50MB")
+            
+            print(f"📎 Archivo procesado: {archivo_nombre} ({archivo_tipo}, {len(archivo_bytes)} bytes)")
+        
+        # Obtener fecha y hora actual en CDMX
+        fecha_creacion = obtener_fecha_hora_cdmx_notificaciones()
+        fecha_envio = fecha_creacion  # Se considera enviada inmediatamente
+        
+        # Insertar notificación
+        cursor.execute("""
+            INSERT INTO notificaciones (
+                titulo, subtitulo, descripcion, enlace_url,
+                archivo, archivo_tipo, archivo_nombre,
+                enviada_a_todos, fecha_creacion, fecha_envio
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (
+            titulo, subtitulo, descripcion, enlace_url,
+            archivo_bytes, archivo_tipo, archivo_nombre,
+            enviada_a_todos, fecha_creacion, fecha_envio
+        ))
+        
+        notificacion_id = cursor.fetchone()[0]
+        
+        # Si no es para todos, insertar relaciones con usuarios
+        if not enviada_a_todos and usuarios_seleccionados:
+            for usuario_id in usuarios_seleccionados:
+                cursor.execute(
+                    "INSERT INTO notificacion_usuarios (notificacion_id, usuario_id) VALUES (%s, %s)",
+                    (notificacion_id, usuario_id)
+                )
+            print(f"👥 Notificación asignada a {len(usuarios_seleccionados)} usuarios específicos")
+        
+        conn.commit()
+        
+        print(f"✅ Notificación creada exitosamente con ID: {notificacion_id}")
+        
+        return {
+            "id": notificacion_id,
+            "status": "success",
+            "message": "Notificación creada exitosamente",
+            "titulo": titulo,
+            "enviada_a_todos": enviada_a_todos,
+            "usuarios_destinatarios": len(usuarios_seleccionados) if not enviada_a_todos else "todos",
+            "tiene_archivo": archivo_nombre is not None,
+            "fecha_envio": fecha_envio.isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error creando notificación: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al crear notificación: {str(e)}")
+
+@app.get("/notificaciones")
+async def listar_notificaciones(limit: int = 50, offset: int = 0):
+    """Listar todas las notificaciones"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📋 Listando notificaciones (limit: {limit}, offset: {offset})")
+        
+        # Obtener notificaciones con información de destinatarios
+        cursor.execute("""
+            SELECT 
+                n.id, n.titulo, n.subtitulo, n.descripcion, n.enlace_url,
+                n.archivo_nombre, n.archivo_tipo, n.enviada_a_todos,
+                n.fecha_creacion, n.fecha_envio,
+                CASE 
+                    WHEN n.enviada_a_todos THEN 'Todos los usuarios'
+                    ELSE (
+                        SELECT COUNT(*)::text || ' usuarios seleccionados'
+                        FROM notificacion_usuarios nu 
+                        WHERE nu.notificacion_id = n.id
+                    )
+                END as destinatarios_texto
+            FROM notificaciones n
+            ORDER BY n.fecha_creacion DESC
+            LIMIT %s OFFSET %s
+        """, (limit, offset))
+        
+        resultados = cursor.fetchall()
+        
+        # Obtener total de notificaciones
+        cursor.execute("SELECT COUNT(*) FROM notificaciones")
+        total = cursor.fetchone()[0]
+        
+        notificaciones = []
+        for row in resultados:
+            notificacion = {
+                "id": row[0],
+                "titulo": row[1],
+                "subtitulo": row[2],
+                "descripcion": row[3],
+                "enlace_url": row[4],
+                "archivo_nombre": row[5],
+                "archivo_tipo": row[6],
+                "enviada_a_todos": row[7],
+                "fecha_creacion": row[8].isoformat() if row[8] else None,
+                "fecha_envio": row[9].isoformat() if row[9] else None,
+                "destinatarios_texto": row[10]
+            }
+            notificaciones.append(notificacion)
+        
+        print(f"📋 {len(notificaciones)} notificaciones listadas de {total} totales")
+        
+        return {
+            "notificaciones": notificaciones,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "has_more": offset + limit < total
+        }
+        
+    except Exception as e:
+        print(f"❌ Error listando notificaciones: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al listar notificaciones: {str(e)}")
+
+@app.get("/notificaciones/{notificacion_id}")
+async def obtener_notificacion(notificacion_id: int):
+    """Obtener detalles de una notificación específica"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🔍 Obteniendo notificación {notificacion_id}")
+        
+        # Obtener notificación
+        cursor.execute("""
+            SELECT id, titulo, subtitulo, descripcion, enlace_url,
+                   archivo_nombre, archivo_tipo, enviada_a_todos,
+                   fecha_creacion, fecha_envio
+            FROM notificaciones
+            WHERE id = %s
+        """, (notificacion_id,))
+        
+        resultado = cursor.fetchone()
+        
+        if not resultado:
+            raise HTTPException(status_code=404, detail="Notificación no encontrada")
+        
+        notificacion = {
+            "id": resultado[0],
+            "titulo": resultado[1],
+            "subtitulo": resultado[2],
+            "descripcion": resultado[3],
+            "enlace_url": resultado[4],
+            "archivo_nombre": resultado[5],
+            "archivo_tipo": resultado[6],
+            "enviada_a_todos": resultado[7],
+            "fecha_creacion": resultado[8].isoformat() if resultado[8] else None,
+            "fecha_envio": resultado[9].isoformat() if resultado[9] else None
+        }
+        
+        # Si no es para todos, obtener usuarios específicos
+        destinatarios = []
+        if not resultado[7]:  # Si enviada_a_todos es False
+            cursor.execute("""
+                SELECT u.id, u.nombre_completo, u.correo
+                FROM notificacion_usuarios nu
+                JOIN usuarios u ON nu.usuario_id = u.id
+                WHERE nu.notificacion_id = %s
+                ORDER BY u.nombre_completo
+            """, (notificacion_id,))
+            
+            usuarios = cursor.fetchall()
+            destinatarios = [
+                {
+                    "id": usuario[0],
+                    "nombre_completo": usuario[1],
+                    "correo": usuario[2]
+                }
+                for usuario in usuarios
+            ]
+        
+        notificacion["destinatarios"] = destinatarios
+        
+        print(f"✅ Notificación {notificacion_id} obtenida exitosamente")
+        return notificacion
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo notificación: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener notificación: {str(e)}")
+
+@app.get("/notificaciones/{notificacion_id}/archivo")
+async def descargar_archivo_notificacion(notificacion_id: int):
+    """Descargar o ver el archivo adjunto de una notificación"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📎 Descargando archivo de notificación {notificacion_id}")
+        
+        # Obtener archivo de la notificación
+        cursor.execute("""
+            SELECT archivo, archivo_tipo, archivo_nombre
+            FROM notificaciones
+            WHERE id = %s AND archivo IS NOT NULL
+        """, (notificacion_id,))
+        
+        resultado = cursor.fetchone()
+        
+        if not resultado:
+            raise HTTPException(status_code=404, detail="Notificación no encontrada o sin archivo adjunto")
+        
+        archivo_bytes = resultado[0]
+        archivo_tipo = resultado[1]
+        archivo_nombre = resultado[2]
+        
+        # Definir Content-Type según el tipo de archivo
+        content_types = {
+            'imagen': 'image/jpeg',
+            'pdf': 'application/pdf',
+            'video': 'video/mp4'
+        }
+        
+        content_type = content_types.get(archivo_tipo, 'application/octet-stream')
+        
+        print(f"📎 Enviando archivo: {archivo_nombre} ({archivo_tipo}, {len(archivo_bytes)} bytes)")
+        
+        # Crear stream del archivo
+        archivo_stream = io.BytesIO(archivo_bytes)
+        
+        return StreamingResponse(
+            io.BytesIO(archivo_bytes),
+            media_type=content_type,
+            headers={
+                "Content-Disposition": f"inline; filename=\"{archivo_nombre}\"",
+                "Content-Length": str(len(archivo_bytes))
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error descargando archivo: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al descargar archivo: {str(e)}")
+
+@app.delete("/notificaciones/{notificacion_id}")
+async def eliminar_notificacion(notificacion_id: int):
+    """Eliminar una notificación"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🗑️ Eliminando notificación {notificacion_id}")
+        
+        # Verificar que la notificación existe
+        cursor.execute("SELECT id, titulo FROM notificaciones WHERE id = %s", (notificacion_id,))
+        notificacion = cursor.fetchone()
+        
+        if not notificacion:
+            raise HTTPException(status_code=404, detail="Notificación no encontrada")
+        
+        # Eliminar notificación (las relaciones se eliminan automáticamente por CASCADE)
+        cursor.execute("DELETE FROM notificaciones WHERE id = %s", (notificacion_id,))
+        
+        conn.commit()
+        
+        print(f"✅ Notificación {notificacion_id} eliminada exitosamente")
+        
+        return {
+            "status": "success",
+            "message": f"Notificación '{notificacion[1]}' eliminada exitosamente",
+            "id": notificacion_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error eliminando notificación: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar notificación: {str(e)}")
+
+# ==================== FIN ENDPOINTS DE NOTIFICACIONES ====================
 
 if __name__ == "__main__":
     import uvicorn

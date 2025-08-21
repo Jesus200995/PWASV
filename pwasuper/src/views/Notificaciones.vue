@@ -255,71 +255,64 @@
 
     <!-- Modal de detalle de notificación -->
     <div v-if="notificacionSeleccionada" 
-         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50"
          @click="cerrarDetalleNotificacion">
-      <div class="bg-white rounded-2xl max-w-sm w-full max-h-[90vh] overflow-hidden" @click.stop>
+      <div class="bg-white rounded-xl max-w-xs sm:max-w-sm w-full max-h-[85vh] sm:max-h-[90vh] overflow-hidden" @click.stop>
         <!-- Header del modal -->
-        <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold truncate flex-1 mr-4">
-              {{ notificacionSeleccionada.titulo }}
-            </h2>
+        <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-3">
+          <div class="flex items-start justify-between">
+            <div class="flex-1 min-w-0 mr-3">
+              <h2 class="text-sm sm:text-base font-medium truncate">
+                {{ notificacionSeleccionada.titulo }}
+              </h2>
+              <p v-if="notificacionSeleccionada.subtitulo" class="text-xs sm:text-sm text-green-100 mt-1">
+                {{ notificacionSeleccionada.subtitulo }}
+              </p>
+            </div>
             <button 
               @click="cerrarDetalleNotificacion"
-              class="text-white hover:text-gray-200 transition-colors"
+              class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 transition-all duration-200 flex-shrink-0"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
           </div>
-          <p v-if="notificacionSeleccionada.subtitulo" class="text-sm text-green-100 mt-1">
-            {{ notificacionSeleccionada.subtitulo }}
-          </p>
         </div>
 
         <!-- Contenido del modal -->
-        <div class="p-4 overflow-y-auto" style="max-height: calc(90vh - 200px);">
-          <!-- Información de fecha -->
-          <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-            <div class="text-xs text-gray-600 mb-1">Fecha de envío</div>
-            <div class="text-sm font-medium">
-              {{ formatearFechaCompleta(notificacionSeleccionada.fecha_creacion) }}
-            </div>
-          </div>
-
+        <div class="p-3 overflow-y-auto" style="max-height: calc(85vh - 120px);">
           <!-- Descripción -->
-          <div class="mb-4">
-            <h3 class="text-sm font-medium text-gray-800 mb-2">Descripción</h3>
-            <p class="text-sm text-gray-700 whitespace-pre-wrap">
+          <div class="mb-3">
+            <h3 class="text-xs font-medium text-gray-800 mb-2">Descripción</h3>
+            <p class="text-xs text-gray-700 whitespace-pre-wrap">
               {{ notificacionSeleccionada.descripcion }}
             </p>
           </div>
 
           <!-- Enlace URL -->
-          <div v-if="notificacionSeleccionada.enlace_url" class="mb-4">
-            <h3 class="text-sm font-medium text-gray-800 mb-2">Enlace</h3>
+          <div v-if="notificacionSeleccionada.enlace_url" class="mb-3">
+            <h3 class="text-xs font-medium text-gray-800 mb-2">Enlace</h3>
             <a 
               :href="notificacionSeleccionada.enlace_url" 
               target="_blank"
-              class="text-sm text-blue-600 hover:text-blue-800 underline break-all"
+              class="text-xs text-blue-600 hover:text-blue-800 underline break-all"
             >
               {{ notificacionSeleccionada.enlace_url }}
             </a>
           </div>
 
           <!-- Archivo adjunto -->
-          <div v-if="notificacionSeleccionada.tiene_archivo" class="mb-4">
-            <h3 class="text-sm font-medium text-gray-800 mb-2">Archivo adjunto</h3>
+          <div v-if="notificacionSeleccionada.tiene_archivo" class="mb-3">
             
             <!-- Vista previa de imagen -->
-            <div v-if="esImagen(notificacionSeleccionada.archivo_tipo)" class="mb-3">
+            <div v-if="esImagen(notificacionSeleccionada.archivo_tipo)">
               <div class="bg-gray-50 rounded-lg p-2 relative">
                 <!-- Placeholder de carga -->
-                <div class="flex items-center justify-center min-h-32 bg-gray-100 image-placeholder rounded">
+                <div class="flex items-center justify-center min-h-24 bg-gray-100 image-placeholder rounded">
                   <div class="text-gray-400 text-center">
-                    <div class="text-2xl mb-2">🖼️</div>
-                    <div class="text-sm">Cargando imagen...</div>
+                    <div class="text-lg mb-1">🖼️</div>
+                    <div class="text-xs">Cargando...</div>
                   </div>
                 </div>
                 <!-- Imagen real -->
@@ -327,67 +320,53 @@
                   <img 
                     :src="obtenerUrlArchivo(notificacionSeleccionada.id)" 
                     :alt="notificacionSeleccionada.archivo_nombre"
-                    class="max-w-full max-h-64 object-contain rounded cursor-pointer hover:opacity-90 transition-opacity relative z-10 mx-auto"
+                    class="max-w-full max-h-48 object-contain rounded cursor-pointer hover:opacity-90 transition-opacity relative z-10 mx-auto"
                     @click="abrirArchivo(notificacionSeleccionada.id)"
                     @error="onImageError"
                     @load="onImageLoad"
                     loading="lazy"
                   />
                 </div>
-                <div class="text-xs text-gray-600 text-center mt-2">
-                  {{ notificacionSeleccionada.archivo_nombre }}
-                </div>
               </div>
             </div>
             
             <!-- Vista previa de video -->
-            <div v-else-if="esVideo(notificacionSeleccionada.archivo_tipo)" class="mb-3">
+            <div v-else-if="esVideo(notificacionSeleccionada.archivo_tipo)">
               <div class="bg-gray-50 rounded-lg p-2">
                 <div class="flex justify-center">
                   <video 
                     :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
-                    class="max-w-full max-h-64 object-contain rounded mx-auto"
+                    class="max-w-full max-h-48 object-contain rounded mx-auto"
                     controls
                     preload="metadata"
                   >
                     Tu navegador no soporta video.
                   </video>
                 </div>
-                <div class="text-xs text-gray-600 text-center mt-2">
-                  {{ notificacionSeleccionada.archivo_nombre }}
-                </div>
               </div>
             </div>
             
             <!-- Otros archivos -->
-            <div v-else class="bg-gray-50 rounded-lg p-3">
-              <div class="flex items-center justify-between max-w-full mx-auto">
+            <div v-else class="bg-gray-50 rounded-lg p-2">
+              <div class="flex items-center justify-center">
                 <div class="flex items-center space-x-2">
-                  <span class="text-lg">{{ obtenerIconoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
-                  <div>
-                    <div class="text-sm font-medium text-gray-800">
-                      {{ notificacionSeleccionada.archivo_nombre }}
-                    </div>
-                    <div class="text-xs text-gray-600 capitalize">
-                      {{ notificacionSeleccionada.archivo_tipo }}
-                    </div>
-                  </div>
+                  <span class="text-2xl">{{ obtenerIconoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
+                  <button 
+                    @click="abrirArchivo(notificacionSeleccionada.id)"
+                    class="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                  >
+                    Ver archivo
+                  </button>
                 </div>
-                <button 
-                  @click="abrirArchivo(notificacionSeleccionada.id)"
-                  class="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
-                >
-                  Ver
-                </button>
               </div>
             </div>
           </div>
-
-          <!-- Tipo de notificación -->
-          <div class="flex items-center justify-between text-xs text-gray-500">
-            <span>
-              {{ notificacionSeleccionada.enviada_a_todos ? 'Enviado a todos los usuarios' : 'Notificación personal' }}
-            </span>
+          
+          <!-- Fecha de recibido -->
+          <div class="px-3 pb-3 pt-2 border-t border-gray-100 mt-3">
+            <div class="text-xs text-gray-500 text-center">
+              Recibido: {{ formatearFechaCompleta(notificacionSeleccionada.fecha_creacion) }}
+            </div>
           </div>
         </div>
       </div>

@@ -13,15 +13,9 @@
         <!-- Header de notificaciones -->
         <div class="glass-card mb-2">
           <div class="text-center mb-3">
-            <div class="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full glass-avatar mb-2">
-              <span class="text-white text-xl font-bold">📨</span>
-            </div>
             <h1 class="text-base font-semibold text-gray-800 modern-title">
               Mis Notificaciones
             </h1>
-            <p class="text-xs text-gray-600 mt-1">
-              {{ usuario?.nombre_completo || 'Usuario' }}
-            </p>
           </div>
         </div>
 

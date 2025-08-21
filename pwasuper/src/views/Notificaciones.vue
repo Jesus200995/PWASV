@@ -194,16 +194,16 @@
                     </span>
                   </div>
                   
-                  <!-- Botón Ver más centrado -->
-                  <div class="flex justify-center mt-3">
-                    <div class="group glass-button px-3 py-1 text-white text-xs font-medium rounded-full transition-all duration-300 hover:scale-105 focus:scale-105">
-                      <span class="relative z-10 flex items-center space-x-1">
-                        <span>Ver más</span>
-                        <svg class="w-3 h-3 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <!-- Botón Ver completo más pequeño -->
+                  <div class="flex justify-center items-center w-full mt-3 px-2">
+                    <button class="group professional-button px-3 py-1.5 text-gray-700 text-2xs font-medium border border-gray-300 rounded-md transition-all duration-300 hover:border-green-500 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mx-auto">
+                      <span class="flex items-center justify-center space-x-1">
+                        <span class="whitespace-nowrap">Ver completo</span>
+                        <svg class="w-2.5 h-2.5 transition-transform duration-300 group-hover:translate-x-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                       </span>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1468,22 +1468,19 @@ video::-webkit-media-controls {
   margin: 0 auto;
 }
 
-/* Botón Ver más con efecto de vidrio */
-.glass-button {
-  background: rgba(34, 197, 94, 0.75);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 
-    0 8px 32px 0 rgba(34, 197, 94, 0.4),
-    0 4px 16px 0 rgba(34, 197, 94, 0.3),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+/* Botón profesional empresarial */
+.professional-button {
+  background: transparent;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   position: relative;
   overflow: hidden;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-.glass-button::before {
+.professional-button::before {
   content: '';
   position: absolute;
   top: 0;
@@ -1493,58 +1490,87 @@ video::-webkit-media-controls {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.4),
+    rgba(34, 197, 94, 0.08),
     transparent
   );
-  transform: skewX(-25deg);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1;
+  transition: all 0.6s ease;
 }
 
-.glass-button:hover::before {
+.professional-button:hover::before {
   left: 100%;
 }
 
-.glass-button:hover {
-  background: rgba(22, 163, 74, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+.professional-button:hover {
+  background: rgba(34, 197, 94, 0.02);
   box-shadow: 
-    0 16px 48px 0 rgba(34, 197, 94, 0.6),
-    0 8px 24px 0 rgba(34, 197, 94, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(34, 197, 94, 0.3);
-  transform: translateY(-3px) scale(1.05);
+    0 4px 12px rgba(34, 197, 94, 0.15),
+    0 2px 4px rgba(34, 197, 94, 0.1);
+  transform: translateY(-1px);
 }
 
-.glass-button:active {
-  transform: translateY(-1px) scale(1.02);
+.professional-button:active {
+  transform: translateY(0);
   box-shadow: 
-    0 8px 24px 0 rgba(34, 197, 94, 0.5),
-    0 4px 12px 0 rgba(34, 197, 94, 0.3),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+    0 2px 6px rgba(34, 197, 94, 0.2),
+    0 1px 2px rgba(34, 197, 94, 0.1);
 }
 
-.glass-button:focus {
-  outline: none;
+.professional-button:focus {
+  border-color: #22c55e;
   box-shadow: 
-    0 16px 48px 0 rgba(34, 197, 94, 0.6),
-    0 8px 24px 0 rgba(34, 197, 94, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
-    0 0 0 3px rgba(34, 197, 94, 0.2);
+    0 0 0 2px rgba(34, 197, 94, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Texto del botón con efecto de brillo */
-.glass-button span {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+/* Responsividad para el botón profesional */
+@media (max-width: 480px) {
+  .professional-button {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.625rem !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    max-width: fit-content !important;
+    border-radius: 0.375rem !important;
+  }
+  
+  .professional-button svg {
+    width: 0.625rem !important;
+    height: 0.625rem !important;
+  }
+  
+  .professional-button span {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+  }
 }
 
-/* Animación para el ícono */
-.glass-button:hover .group-hover\:translate-x-1 {
-  transform: translateX(0.25rem);
+@media (max-width: 375px) {
+  .professional-button {
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.55rem !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    max-width: fit-content !important;
+    border-radius: 0.3rem !important;
+  }
+  
+  .professional-button svg {
+    width: 0.55rem !important;
+    height: 0.55rem !important;
+  }
+  
+  .professional-button span {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.2rem !important;
+  }
 }
 
 .ver-mas-btn {

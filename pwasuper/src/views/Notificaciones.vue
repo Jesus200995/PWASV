@@ -340,29 +340,83 @@ let autoUpdateInterval = null
 
 // Funciones
 const obtenerUsuarioId = () => {
-  // Obtener ID del usuario del localStorage
-  const userData = localStorage.getItem('userData')
+  console.log('🔍 Buscando ID de usuario en localStorage...')
+  
+  // 1. Buscar en 'user' (formato principal de PWASUPER)
+  const userData = localStorage.getItem('user')
   if (userData) {
     try {
       const user = JSON.parse(userData)
-      return user.id || user.usuario_id
+      console.log('👤 Datos de usuario encontrados:', user)
+      const id = user.id || user.usuario_id || user.user_id
+      if (id) {
+        console.log(`✅ ID de usuario encontrado: ${id}`)
+        return parseInt(id)
+      }
     } catch (e) {
-      console.error('Error parseando userData:', e)
+      console.error('Error parseando datos de usuario:', e)
     }
   }
   
-  // Fallback: obtener de otras fuentes
-  const userId = localStorage.getItem('userId') || localStorage.getItem('user_id')
-  return userId ? parseInt(userId) : null
+  // 2. Buscar en 'userData' (formato alternativo)
+  const alternativeUserData = localStorage.getItem('userData')
+  if (alternativeUserData) {
+    try {
+      const user = JSON.parse(alternativeUserData)
+      console.log('👤 Datos alternativos encontrados:', user)
+      const id = user.id || user.usuario_id || user.user_id
+      if (id) {
+        console.log(`✅ ID de usuario encontrado (alternativo): ${id}`)
+        return parseInt(id)
+      }
+    } catch (e) {
+      console.error('Error parseando datos alternativos:', e)
+    }
+  }
+  
+  // 3. Fallback: buscar IDs directos
+  const directIds = ['userId', 'user_id', 'id']
+  for (const key of directIds) {
+    const id = localStorage.getItem(key)
+    if (id) {
+      console.log(`✅ ID directo encontrado (${key}): ${id}`)
+      return parseInt(id)
+    }
+  }
+  
+  // 4. Mostrar todo el localStorage para debug
+  console.log('🔍 Contenido completo de localStorage:')
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    const value = localStorage.getItem(key)
+    console.log(`  ${key}: ${value}`)
+  }
+  
+  console.error('❌ No se encontró ID de usuario en localStorage')
+  return null
 }
 
 const cargarNotificaciones = async (resetear = true) => {
   try {
-    const usuarioId = obtenerUsuarioId()
+    let usuarioId = obtenerUsuarioId()
     
+    // Si no se encuentra un usuario, crear uno de prueba para development
     if (!usuarioId) {
-      error.value = 'No se pudo identificar al usuario. Inicia sesión nuevamente.'
-      return
+      if (import.meta.env.DEV) {
+        console.log('🧪 Modo desarrollo: creando datos de prueba')
+        usuarioId = 1 // ID de prueba
+        // Crear datos de usuario de prueba
+        const testUser = {
+          id: 1,
+          nombre_completo: 'Usuario de Prueba',
+          correo: 'test@example.com'
+        }
+        localStorage.setItem('user', JSON.stringify(testUser))
+        usuario.value = testUser
+      } else {
+        error.value = 'No se pudo identificar al usuario. Inicia sesión nuevamente.'
+        return
+      }
     }
 
     if (resetear) {
@@ -384,7 +438,9 @@ const cargarNotificaciones = async (resetear = true) => {
 
     if (resetear) {
       notificaciones.value = response.notificaciones || []
-      usuario.value = response.usuario
+      if (response.usuario) {
+        usuario.value = response.usuario
+      }
     } else {
       notificaciones.value.push(...(response.notificaciones || []))
     }
@@ -396,7 +452,17 @@ const cargarNotificaciones = async (resetear = true) => {
     
   } catch (err) {
     console.error('Error cargando notificaciones:', err)
-    error.value = err.message || 'Error al cargar las notificaciones'
+    
+    // Manejo de errores específicos
+    if (err.message === 'No se puede establecer una conexión') {
+      error.value = 'Sin conexión a internet. Verifica tu conexión e inténtalo de nuevo.'
+    } else if (err.message.includes('404')) {
+      error.value = 'Usuario no encontrado. Contacta al administrador.'
+    } else if (err.message.includes('500')) {
+      error.value = 'Error del servidor. Inténtalo más tarde.'
+    } else {
+      error.value = err.message || 'Error al cargar las notificaciones'
+    }
   } finally {
     cargando.value = false
     cargandoMas.value = false
@@ -629,6 +695,7 @@ onBeforeUnmount(() => {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

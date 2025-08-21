@@ -30,6 +30,8 @@ export const notificacionesService = {
   async obtenerNotificacionesUsuario(usuarioId, limit = 20, offset = 0) {
     try {
       console.log(`📱 Obteniendo notificaciones para usuario ${usuarioId}`)
+      console.log(`🌐 URL: ${API_BASE_URL}/notificaciones/usuario/${usuarioId}`)
+      
       const response = await api.get(`/notificaciones/usuario/${usuarioId}`, {
         params: { limit, offset }
       })
@@ -38,7 +40,72 @@ export const notificacionesService = {
       return response.data
     } catch (error) {
       console.error('Error obteniendo notificaciones del usuario:', error)
+      
+      // Si es modo desarrollo y el endpoint no existe, crear datos de prueba
+      if (import.meta.env.DEV && (error.response?.status === 404 || error.code === 'ECONNREFUSED')) {
+        console.log('🧪 Modo desarrollo: creando notificaciones de prueba')
+        return this.crearNotificacionesPrueba(usuarioId)
+      }
+      
       throw this.handleError(error)
+    }
+  },
+
+  /**
+   * Crear notificaciones de prueba para desarrollo
+   */
+  crearNotificacionesPrueba(usuarioId) {
+    const notificacionesPrueba = [
+      {
+        id: 1,
+        titulo: 'Bienvenido al sistema de notificaciones',
+        subtitulo: 'Sistema configurado correctamente',
+        descripcion: 'El sistema de notificaciones de PWASUPER está funcionando correctamente. Aquí recibirás todas las notificaciones enviadas desde el panel de administración.',
+        enlace_url: null,
+        archivo_nombre: null,
+        archivo_tipo: null,
+        enviada_a_todos: true,
+        fecha_creacion: new Date().toISOString(),
+        fecha_envio: new Date().toISOString(),
+        tiene_archivo: false
+      },
+      {
+        id: 2,
+        titulo: 'Funcionalidades disponibles',
+        subtitulo: 'Explora todas las características',
+        descripcion: 'Puedes ver notificaciones generales y personales, filtrar por fecha, ver archivos adjuntos y mucho más. Las notificaciones se actualizan automáticamente cada 5 minutos.',
+        enlace_url: 'https://github.com/tu-repo',
+        archivo_nombre: null,
+        archivo_tipo: null,
+        enviada_a_todos: false,
+        fecha_creacion: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hora atrás
+        fecha_envio: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        tiene_archivo: false
+      },
+      {
+        id: 3,
+        titulo: 'Notificación con archivo adjunto',
+        subtitulo: 'Ejemplo de archivo PDF',
+        descripcion: 'Esta es una notificación de ejemplo que incluye un archivo adjunto. En un entorno real, podrías descargar o ver el archivo haciendo clic en el botón correspondiente.',
+        enlace_url: null,
+        archivo_nombre: 'documento_ejemplo.pdf',
+        archivo_tipo: 'pdf',
+        enviada_a_todos: false,
+        fecha_creacion: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 día atrás
+        fecha_envio: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        tiene_archivo: true
+      }
+    ]
+
+    return {
+      usuario: {
+        id: usuarioId,
+        nombre_completo: 'Usuario de Desarrollo'
+      },
+      notificaciones: notificacionesPrueba,
+      total: notificacionesPrueba.length,
+      limit: 20,
+      offset: 0
     }
   },
 
@@ -161,27 +228,38 @@ export const notificacionesService = {
    * Manejo centralizado de errores
    */
   handleError(error) {
+    console.error('🔥 Error detallado:', error)
+    
     if (error.response) {
       // Error con respuesta del servidor
       const status = error.response.status
       const message = error.response.data?.detail || error.response.data?.message || 'Error del servidor'
       
+      console.log(`📊 Status: ${status}, Message: ${message}`)
+      
       switch (status) {
         case 404:
-          return new Error('Recurso no encontrado')
+          return new Error('Usuario no encontrado o endpoint no disponible')
         case 500:
           return new Error('Error interno del servidor')
         case 503:
-          return new Error('Servicio no disponible')
+          return new Error('Servicio no disponible temporalmente')
         default:
           return new Error(message)
       }
     } else if (error.request) {
       // Error de red
+      console.log('🌐 Error de red:', error.code)
+      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        return new Error('No se puede conectar al servidor. Verifica tu conexión a internet.')
+      }
       return new Error('Error de conexión. Verifica tu internet.')
+    } else if (error.code === 'ENOTFOUND') {
+      return new Error('Servidor no encontrado. Verifica la URL de la API.')
     } else {
       // Error desconocido
-      return new Error('Error inesperado')
+      console.log('❓ Error desconocido:', error.message)
+      return new Error('Error inesperado: ' + error.message)
     }
   }
 }

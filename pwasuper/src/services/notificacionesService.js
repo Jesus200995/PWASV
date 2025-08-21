@@ -25,7 +25,7 @@ api.interceptors.response.use(
 
 export const notificacionesService = {
   /**
-   * Obtener notificaciones de un usuario específico
+   * Obtener notificaciones de un usuario específico (MEJORADO CON ESTADOS DE LECTURA)
    */
   async obtenerNotificacionesUsuario(usuarioId, limit = 20, offset = 0) {
     try {
@@ -52,7 +52,107 @@ export const notificacionesService = {
   },
 
   /**
-   * Crear notificaciones de prueba para desarrollo
+   * Obtener conteo de notificaciones no leídas
+   */
+  async obtenerConteoNoLeidas(usuarioId) {
+    try {
+      console.log(`📊 Obteniendo conteo no leídas para usuario ${usuarioId}`)
+      
+      const response = await api.get('/notificaciones/unread_count', {
+        params: { usuario_id: usuarioId }
+      })
+      
+      console.log(`✅ ${response.data.count} notificaciones no leídas`)
+      return response.data.count
+    } catch (error) {
+      console.error('Error obteniendo conteo no leídas:', error)
+      
+      // En desarrollo, simular conteo
+      if (import.meta.env.DEV) {
+        console.log('🧪 Modo desarrollo: simulando conteo no leídas')
+        return Math.floor(Math.random() * 5) // 0-4 notificaciones no leídas
+      }
+      
+      throw this.handleError(error)
+    }
+  },
+
+  /**
+   * Obtener lista de notificaciones con filtros
+   */
+  async obtenerListaNotificaciones(usuarioId, filtro = 'all', limit = 200, offset = 0) {
+    try {
+      console.log(`📋 Obteniendo lista filtrada para usuario ${usuarioId} (filtro: ${filtro})`)
+      
+      const response = await api.get('/notificaciones/list', {
+        params: {
+          usuario_id: usuarioId,
+          filtro: filtro,
+          limit: limit,
+          offset: offset
+        }
+      })
+      
+      console.log(`✅ ${response.data.notificaciones.length} notificaciones filtradas obtenidas`)
+      return response.data
+    } catch (error) {
+      console.error('Error obteniendo lista filtrada:', error)
+      
+      // En desarrollo, usar notificaciones de prueba filtradas
+      if (import.meta.env.DEV) {
+        console.log('🧪 Modo desarrollo: simulando lista filtrada')
+        const datosPrueba = this.crearNotificacionesPrueba(usuarioId)
+        
+        if (filtro === 'unread') {
+          // Simular algunas como no leídas
+          datosPrueba.notificaciones = datosPrueba.notificaciones.map((n, i) => ({
+            ...n,
+            leida: i > 2 // Solo las primeras 3 como no leídas
+          })).filter(n => !n.leida)
+        } else {
+          // Agregar estado de lectura a todas
+          datosPrueba.notificaciones = datosPrueba.notificaciones.map((n, i) => ({
+            ...n,
+            leida: i > 2 // Las primeras 3 como no leídas
+          }))
+        }
+        
+        return datosPrueba
+      }
+      
+      throw this.handleError(error)
+    }
+  },
+
+  /**
+   * Marcar notificación como leída
+   */
+  async marcarComoLeida(notificacionId, usuarioId, deviceId = null) {
+    try {
+      console.log(`✅ Marcando notificación ${notificacionId} como leída para usuario ${usuarioId}`)
+      
+      const response = await api.post(`/notificaciones/${notificacionId}/leer`, {
+        usuario_id: usuarioId,
+        device_id: deviceId
+      })
+      
+      console.log(`✅ Notificación marcada como leída exitosamente`)
+      return response.data
+    } catch (error) {
+      console.error('Error marcando como leída:', error)
+      
+      // En desarrollo, simular éxito
+      if (import.meta.env.DEV) {
+        console.log('🧪 Modo desarrollo: simulando marcar como leída')
+        return { ok: true }
+      }
+      
+      throw this.handleError(error)
+    }
+  },
+
+  /**
+   * Crear notificaciones de prueba para desarrollo (ACTUALIZADO CON ESTADOS)
    */
   crearNotificacionesPrueba(usuarioId) {
     const notificacionesPrueba = [
@@ -67,7 +167,8 @@ export const notificacionesService = {
         enviada_a_todos: true,
         fecha_creacion: new Date().toISOString(),
         fecha_envio: new Date().toISOString(),
-        tiene_archivo: false
+        tiene_archivo: false,
+        leida: false // NUEVO: Estado de lectura
       },
       {
         id: 2,
@@ -80,7 +181,8 @@ export const notificacionesService = {
         enviada_a_todos: false,
         fecha_creacion: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 min atrás
         fecha_envio: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        tiene_archivo: true
+        tiene_archivo: true,
+        leida: false // NUEVO: Estado de lectura
       },
       {
         id: 3,
@@ -93,7 +195,8 @@ export const notificacionesService = {
         enviada_a_todos: true,
         fecha_creacion: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 horas atrás
         fecha_envio: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        tiene_archivo: true
+        tiene_archivo: true,
+        leida: false // NUEVO: Estado de lectura
       },
       {
         id: 4,
@@ -106,20 +209,22 @@ export const notificacionesService = {
         enviada_a_todos: true,
         fecha_creacion: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 día atrás
         fecha_envio: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        tiene_archivo: true
+        tiene_archivo: true,
+        leida: true // NUEVO: Estado de lectura (esta ya fue leída)
       },
       {
         id: 5,
         titulo: 'Funcionalidades disponibles',
         subtitulo: 'Explora todas las características',
-        descripción: 'Puedes ver notificaciones generales y personales, filtrar por fecha, ver archivos adjuntos y mucho más. Las notificaciones se actualizan automáticamente cada 5 minutos.',
+        descripcion: 'Puedes ver notificaciones generales y personales, filtrar por fecha, ver archivos adjuntos y mucho más. Las notificaciones se actualizan automáticamente cada 5 minutos.',
         enlace_url: 'https://github.com/tu-repo',
         archivo_nombre: null,
         archivo_tipo: null,
         enviada_a_todos: false,
         fecha_creacion: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hora atrás
         fecha_envio: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-        tiene_archivo: false
+        tiene_archivo: false,
+        leida: true // NUEVO: Estado de lectura (esta ya fue leída)
       }
     ]
 

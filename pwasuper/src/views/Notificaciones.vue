@@ -48,10 +48,10 @@
           </div>
         </div>
 
-        <!-- Filtros y estadísticas -->
+        <!-- Filtros y estadísticas ACTUALIZADOS -->
         <div v-if="!cargando && !error" class="glass-card mb-2">
           <div class="flex justify-between items-center mb-2">
-            <h2 class="text-sm font-semibold text-gray-800 modern-title">Filtros</h2>
+            <h2 class="text-sm font-semibold text-gray-800 modern-title">📊 Estadísticas</h2>
             <button 
               @click="cargarNotificaciones"
               class="text-green-600 hover:text-green-700 transition-colors"
@@ -67,36 +67,36 @@
           
           <!-- Toggle para mostrar solo no leídas -->
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-gray-700">Solo recientes</span>
+            <span class="text-xs text-gray-700 font-medium">Solo no leídas</span>
             <button 
-              @click="toggleSoloRecientes"
+              @click="toggleFiltroNoLeidas"
               :class="[
                 'relative inline-flex h-5 w-9 items-center rounded-full transition-colors',
-                soloRecientes ? 'bg-green-500' : 'bg-gray-300'
+                soloNoLeidas ? 'bg-red-500' : 'bg-gray-300'
               ]"
             >
               <span 
                 :class="[
                   'inline-block h-3 w-3 transform rounded-full bg-white transition-transform',
-                  soloRecientes ? 'translate-x-5' : 'translate-x-1'
+                  soloNoLeidas ? 'translate-x-5' : 'translate-x-1'
                 ]"
               ></span>
             </button>
           </div>
           
-          <!-- Estadísticas -->
+          <!-- Estadísticas MEJORADAS -->
           <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="bg-white bg-opacity-30 rounded-lg p-2">
-              <div class="text-lg font-bold text-green-600">{{ totalNotificaciones }}</div>
+            <div class="bg-white bg-opacity-50 rounded-lg p-2 border border-white border-opacity-30">
+              <div class="text-lg font-bold text-gray-800">{{ totalNotificaciones }}</div>
               <div class="text-xs text-gray-600">Total</div>
             </div>
-            <div class="bg-white bg-opacity-30 rounded-lg p-2">
-              <div class="text-lg font-bold text-blue-600">{{ notificacionesRecientes }}</div>
-              <div class="text-xs text-gray-600">Recientes</div>
+            <div class="bg-red-50 bg-opacity-70 rounded-lg p-2 border border-red-200">
+              <div class="text-lg font-bold text-red-600">{{ conteoNoLeidas }}</div>
+              <div class="text-xs text-red-600">No leídas</div>
             </div>
-            <div class="bg-white bg-opacity-30 rounded-lg p-2">
-              <div class="text-lg font-bold text-orange-500">{{ notificacionesNoLeidas }}</div>
-              <div class="text-xs text-gray-600">No leídas</div>
+            <div class="bg-green-50 bg-opacity-70 rounded-lg p-2 border border-green-200">
+              <div class="text-lg font-bold text-green-600">{{ totalNotificaciones - conteoNoLeidas }}</div>
+              <div class="text-xs text-green-600">Leídas</div>
             </div>
           </div>
         </div>
@@ -119,14 +119,14 @@
               :key="notificacion.id"
               :class="[
                 'notification-item bg-white rounded-xl p-4 hover:bg-opacity-70 transition-all duration-300 cursor-pointer shadow-sm border-2 hover:shadow-lg relative',
-                esNotificacionLeida(notificacion.id) 
+                notificacion.leida 
                   ? 'bg-opacity-40 border-gray-200 hover:border-gray-300' 
                   : 'bg-opacity-60 border-red-300 hover:border-red-400 shadow-red-100'
               ]"
               @click="abrirDetalleNotificacion(notificacion)"
             >
               <!-- Campanita animada para notificaciones no leídas -->
-              <div v-if="!esNotificacionLeida(notificacion.id)" class="absolute -top-2 -right-2 z-20">
+              <div v-if="!notificacion.leida" class="absolute -top-2 -right-2 z-20">
                 <div class="bg-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-lg bell-container">
                   <svg class="bell-icon w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
@@ -397,52 +397,37 @@ const usuario = ref(null)
 const cargando = ref(false)
 const cargandoMas = ref(false)
 const error = ref('')
-const soloRecientes = ref(true)
+const soloNoLeidas = ref(false) // CAMBIO: Cambiar a no leídas por defecto
 const notificacionesLeidas = ref(new Set()) // IDs de notificaciones leídas
+const conteoNoLeidas = ref(0) // NUEVO: Contador de no leídas
 
 // Paginación
 const limit = ref(10)
 const offset = ref(0)
 const totalNotificaciones = ref(0)
 
-// Computed properties
+// Computed properties ACTUALIZADOS
 const notificacionesFiltradas = computed(() => {
-  if (!soloRecientes.value) {
-    return notificaciones.value
-  }
-  
-  // Mostrar notificaciones de los últimos 7 días
-  const hace7Dias = new Date()
-  hace7Dias.setDate(hace7Dias.getDate() - 7)
-  
-  return notificaciones.value.filter(notificacion => {
-    const fechaNotificacion = new Date(notificacion.fecha_creacion)
-    return fechaNotificacion >= hace7Dias
-  })
-})
-
-const notificacionesRecientes = computed(() => {
-  const hace7Dias = new Date()
-  hace7Dias.setDate(hace7Dias.getDate() - 7)
-  
-  return notificaciones.value.filter(notificacion => {
-    const fechaNotificacion = new Date(notificacion.fecha_creacion)
-    return fechaNotificacion >= hace7Dias
-  }).length
+  return notificaciones.value
 })
 
 const puedeCargarMas = computed(() => {
   return notificaciones.value.length < totalNotificaciones.value
 })
 
-const notificacionesNoLeidas = computed(() => {
-  return notificacionesFiltradas.value.filter(n => !esNotificacionLeida(n.id)).length
+// NUEVO: Computed para estadísticas
+const notificacionesNoLeidasLocales = computed(() => {
+  return notificacionesFiltradas.value.filter(n => !n.leida).length
+})
+
+const notificacionesTotales = computed(() => {
+  return notificacionesFiltradas.value.length
 })
 
 // Variables para interval
 let autoUpdateInterval = null
 
-// Funciones
+// Funciones MEJORADAS con nuevos endpoints
 const obtenerUsuarioId = () => {
   console.log('🔍 Buscando ID de usuario en localStorage...')
   
@@ -488,16 +473,27 @@ const obtenerUsuarioId = () => {
     }
   }
   
-  // 4. Mostrar todo el localStorage para debug
-  console.log('🔍 Contenido completo de localStorage:')
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i)
-    const value = localStorage.getItem(key)
-    console.log(`  ${key}: ${value}`)
-  }
-  
   console.error('❌ No se encontró ID de usuario en localStorage')
   return null
+}
+
+// NUEVO: Obtener conteo de no leídas
+const obtenerConteoNoLeidas = async (usuarioId) => {
+  try {
+    if (!usuarioId) return 0
+    
+    console.log(`📊 Obteniendo conteo de no leídas para usuario ${usuarioId}`)
+    
+    const conteo = await notificacionesService.obtenerConteoNoLeidas(usuarioId)
+    conteoNoLeidas.value = conteo
+    
+    console.log(`📊 ${conteo} notificaciones no leídas`)
+    return conteo
+    
+  } catch (err) {
+    console.error('Error obteniendo conteo no leídas:', err)
+    return 0
+  }
 }
 
 const cargarNotificaciones = async (resetear = true) => {
@@ -532,13 +528,27 @@ const cargarNotificaciones = async (resetear = true) => {
       cargandoMas.value = true
     }
 
-    console.log(`📱 Cargando notificaciones para usuario ${usuarioId}`)
+    console.log(`📱 Cargando notificaciones para usuario ${usuarioId} (filtro: ${soloNoLeidas.value ? 'no leídas' : 'todas'})`)
     
-    const response = await notificacionesService.obtenerNotificacionesUsuario(
-      usuarioId, 
-      limit.value, 
-      offset.value
-    )
+    // USAR NUEVO ENDPOINT CON FILTROS
+    let response
+    if (soloNoLeidas.value) {
+      // Usar endpoint de lista filtrada para no leídas
+      response = await notificacionesService.obtenerListaNotificaciones(
+        usuarioId, 
+        'unread', 
+        limit.value, 
+        offset.value
+      )
+    } else {
+      // Usar endpoint de lista filtrada para todas
+      response = await notificacionesService.obtenerListaNotificaciones(
+        usuarioId, 
+        'all', 
+        limit.value, 
+        offset.value
+      )
+    }
 
     if (resetear) {
       notificaciones.value = response.notificaciones || []
@@ -553,6 +563,9 @@ const cargarNotificaciones = async (resetear = true) => {
     offset.value += limit.value
 
     console.log(`✅ ${response.notificaciones?.length || 0} notificaciones cargadas`)
+    
+    // Obtener conteo de no leídas
+    await obtenerConteoNoLeidas(usuarioId)
     
   } catch (err) {
     console.error('Error cargando notificaciones:', err)
@@ -579,9 +592,13 @@ const cargarMasNotificaciones = () => {
   }
 }
 
-const toggleSoloRecientes = () => {
-  soloRecientes.value = !soloRecientes.value
-  localStorage.setItem('soloRecientes', soloRecientes.value.toString())
+// NUEVO: Toggle para filtro de no leídas
+const toggleFiltroNoLeidas = async () => {
+  soloNoLeidas.value = !soloNoLeidas.value
+  localStorage.setItem('soloNoLeidas', soloNoLeidas.value.toString())
+  
+  // Recargar notificaciones con nuevo filtro
+  await cargarNotificaciones(true)
 }
 
 const abrirDetalleNotificacion = (notificacion) => {
@@ -590,16 +607,47 @@ const abrirDetalleNotificacion = (notificacion) => {
     tiene_archivo: notificacionesService.tieneArchivo(notificacion)
   }
   
-  // Marcar como leída después de un pequeño retraso para que se vea la animación
-  setTimeout(() => {
-    marcarComoLeida(notificacion.id)
-  }, 500)
+  // MEJORADO: Marcar como leída usando el nuevo endpoint
+  if (!notificacion.leida) {
+    setTimeout(async () => {
+      await marcarComoLeidaRemoto(notificacion.id)
+    }, 500)
+  }
 }
 
 const cerrarDetalleNotificacion = () => {
   notificacionSeleccionada.value = null
 }
 
+// NUEVA FUNCIÓN: Marcar como leída en el servidor
+const marcarComoLeidaRemoto = async (notificacionId) => {
+  const usuarioId = obtenerUsuarioId()
+  if (!usuarioId) return
+  
+  try {
+    // Generar un device_id simple basado en el navegador
+    const deviceId = `browser_${navigator.userAgent.split(' ').pop()}_${Date.now()}`
+    
+    await notificacionesService.marcarComoLeida(notificacionId, usuarioId, deviceId)
+    
+    // Actualizar estado local de la notificación
+    const notificacion = notificaciones.value.find(n => n.id === notificacionId)
+    if (notificacion) {
+      notificacion.leida = true
+    }
+    
+    // Actualizar conteo
+    await obtenerConteoNoLeidas(usuarioId)
+    
+    console.log(`✅ Notificación ${notificacionId} marcada como leída`)
+    
+  } catch (error) {
+    console.error('Error marcando como leída:', error)
+    // En caso de error, mantener el comportamiento existente
+  }
+}
+
+// MANTENER COMPATIBILIDAD: Función legacy para el sistema local
 const marcarComoLeida = (notificacionId) => {
   if (!notificacionesLeidas.value.has(notificacionId)) {
     notificacionesLeidas.value.add(notificacionId)
@@ -608,6 +656,13 @@ const marcarComoLeida = (notificacionId) => {
 }
 
 const esNotificacionLeida = (notificacionId) => {
+  // Primero verificar en el estado de la notificación (desde servidor)
+  const notificacion = notificaciones.value.find(n => n.id === notificacionId)
+  if (notificacion && notificacion.hasOwnProperty('leida')) {
+    return notificacion.leida
+  }
+  
+  // Fallback al sistema local
   return notificacionesLeidas.value.has(notificacionId)
 }
 
@@ -717,17 +772,17 @@ const esReciente = (fechaISO) => {
 }
 
 const cargarConfiguracion = () => {
-  // Cargar configuración de solo recientes
-  const savedSoloRecientes = localStorage.getItem('soloRecientes')
-  if (savedSoloRecientes !== null) {
-    soloRecientes.value = savedSoloRecientes === 'true'
+  // Cargar configuración de filtro no leídas
+  const savedSoloNoLeidas = localStorage.getItem('soloNoLeidas')
+  if (savedSoloNoLeidas !== null) {
+    soloNoLeidas.value = savedSoloNoLeidas === 'true'
   }
   
-  // Cargar notificaciones leídas
+  // Cargar notificaciones leídas (sistema legacy - mantener compatibilidad)
   cargarNotificacionesLeidas()
 }
 
-// Ciclo de vida
+// Ciclo de vida ACTUALIZADO
 onMounted(async () => {
   console.log('📱 Componente Notificaciones montado')
   
@@ -736,13 +791,23 @@ onMounted(async () => {
   // Cargar notificaciones inicial
   await cargarNotificaciones()
   
-  // Auto-actualizar cada 5 minutos
-  autoUpdateInterval = setInterval(() => {
+  // Auto-actualizar cada 2 minutos (más frecuente para notificaciones)
+  autoUpdateInterval = setInterval(async () => {
     if (!cargando.value && !cargandoMas.value) {
-      console.log('🔄 Auto-actualizando notificaciones...')
-      cargarNotificaciones()
+      console.log('🔄 Auto-actualizando notificaciones y conteo...')
+      
+      // Solo actualizar conteo sin recargar lista completa
+      const usuarioId = obtenerUsuarioId()
+      if (usuarioId) {
+        await obtenerConteoNoLeidas(usuarioId)
+      }
+      
+      // Solo recargar lista si está en vista de no leídas y hay cambios
+      if (soloNoLeidas.value && conteoNoLeidas.value > 0) {
+        await cargarNotificaciones()
+      }
     }
-  }, 5 * 60 * 1000) // 5 minutos
+  }, 2 * 60 * 1000) // 2 minutos
 })
 
 onBeforeUnmount(() => {

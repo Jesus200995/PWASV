@@ -22,47 +22,6 @@
             <p class="text-xs text-gray-600 mt-1">
               {{ usuario?.nombre_completo || 'Usuario' }}
             </p>
-            
-            <!-- Control de Push Notifications -->
-            <div class="mt-3 flex items-center justify-center space-x-2">
-              <button 
-                @click="togglePushNotifications"
-                :disabled="pushSettings.loading"
-                :class="[
-                  'flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300',
-                  pushSettings.enabled ? 
-                    'bg-green-100 text-green-700 border border-green-200' : 
-                    'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-green-50'
-                ]"
-              >
-                <span class="mr-1">
-                  {{ pushSettings.loading ? '⏳' : (pushSettings.enabled ? '🔔' : '🔕') }}
-                </span>
-                {{ pushSettings.loading ? 'Configurando...' : (pushSettings.enabled ? 'Push ON' : 'Push OFF') }}
-              </button>
-              
-              <!-- Botón de prueba (solo si push está activado) -->
-              <button 
-                v-if="pushSettings.enabled && !pushSettings.loading"
-                @click="enviarPruebaPush"
-                :disabled="pushSettings.testLoading"
-                class="flex items-center px-2 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 transition-all duration-300"
-              >
-                <span class="mr-1">{{ pushSettings.testLoading ? '⏳' : '🧪' }}</span>
-                {{ pushSettings.testLoading ? 'Enviando...' : 'Prueba' }}
-              </button>
-              
-              <!-- Indicador de estado -->
-              <div :class="[
-                'w-2 h-2 rounded-full transition-all duration-300',
-                pushSettings.enabled ? 'bg-green-400 shadow-lg shadow-green-200' : 'bg-gray-300'
-              ]"></div>
-            </div>
-            
-            <!-- Info de push -->
-            <div v-if="pushSettings.showInfo" class="mt-2 text-xs text-gray-500 bg-blue-50 p-2 rounded-lg border border-blue-100">
-              {{ pushSettings.infoText }}
-            </div>
           </div>
         </div>
 
@@ -331,7 +290,6 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import notificacionesService from '../services/notificacionesService.js'
-import pushNotificationService from '../services/pushNotificationService.js'
 
 // Estados reactivos
 const notificaciones = ref([])
@@ -341,16 +299,6 @@ const cargando = ref(false)
 const cargandoMas = ref(false)
 const error = ref('')
 const soloRecientes = ref(true)
-
-// Estados para push notifications
-const pushSettings = ref({
-  enabled: false,
-  loading: false,
-  testLoading: false,
-  showInfo: false,
-  infoText: '',
-  stopPolling: null
-})
 
 // Paginación
 const limit = ref(10)
@@ -577,156 +525,6 @@ const cargarConfiguracion = () => {
   if (savedSoloRecientes !== null) {
     soloRecientes.value = savedSoloRecientes === 'true'
   }
-  
-  // Cargar configuración de push notifications
-  const savedPushEnabled = localStorage.getItem('pushNotificationsEnabled')
-  if (savedPushEnabled !== null) {
-    pushSettings.value.enabled = savedPushEnabled === 'true'
-  }
-}
-
-// Funciones para Push Notifications
-const togglePushNotifications = async () => {
-  if (pushSettings.value.loading) return
-  
-  try {
-    pushSettings.value.loading = true
-    pushSettings.value.showInfo = false
-    
-    if (!pushSettings.value.enabled) {
-      // Activar push notifications
-      console.log('🔔 Activando push notifications...')
-      
-      pushSettings.value.infoText = 'Solicitando permisos de notificación...'
-      pushSettings.value.showInfo = true
-      
-      const usuarioId = obtenerUsuarioId()
-      if (!usuarioId) {
-        throw new Error('No se pudo identificar al usuario')
-      }
-      
-      // Configurar push notifications completamente
-      const result = await pushNotificationService.setupPushNotifications(usuarioId)
-      
-      if (result.success) {
-        pushSettings.value.enabled = true
-        pushSettings.value.stopPolling = result.stopPolling
-        pushSettings.value.infoText = '¡Push notifications activadas! Recibirás notificaciones automáticamente.'
-        pushSettings.value.showInfo = true
-        
-        // Guardar configuración
-        localStorage.setItem('pushNotificationsEnabled', 'true')
-        
-        // Ocultar info después de 3 segundos
-        setTimeout(() => {
-          pushSettings.value.showInfo = false
-        }, 3000)
-        
-        console.log('✅ Push notifications activadas exitosamente')
-      } else {
-        throw new Error(result.error || 'Error desconocido al activar push notifications')
-      }
-    } else {
-      // Desactivar push notifications
-      console.log('🔕 Desactivando push notifications...')
-      
-      if (pushSettings.value.stopPolling) {
-        pushSettings.value.stopPolling()
-        pushSettings.value.stopPolling = null
-      }
-      
-      pushSettings.value.enabled = false
-      pushSettings.value.infoText = 'Push notifications desactivadas'
-      pushSettings.value.showInfo = true
-      
-      // Guardar configuración
-      localStorage.setItem('pushNotificationsEnabled', 'false')
-      
-      // Ocultar info después de 2 segundos
-      setTimeout(() => {
-        pushSettings.value.showInfo = false
-      }, 2000)
-      
-      console.log('✅ Push notifications desactivadas')
-    }
-  } catch (error) {
-    console.error('❌ Error en push notifications:', error)
-    
-    pushSettings.value.enabled = false
-    pushSettings.value.infoText = `Error: ${error.message}`
-    pushSettings.value.showInfo = true
-    
-    // Ocultar info después de 5 segundos
-    setTimeout(() => {
-      pushSettings.value.showInfo = false
-    }, 5000)
-  } finally {
-    pushSettings.value.loading = false
-  }
-}
-
-const initializePushNotifications = async () => {
-  // Solo inicializar automáticamente si estaba habilitado previamente
-  if (pushSettings.value.enabled) {
-    const usuarioId = obtenerUsuarioId()
-    if (usuarioId) {
-      try {
-        console.log('🔄 Reinicializando push notifications...')
-        const result = await pushNotificationService.setupPushNotifications(usuarioId)
-        if (result.success) {
-          pushSettings.value.stopPolling = result.stopPolling
-          console.log('✅ Push notifications reinicializadas')
-        }
-      } catch (error) {
-        console.error('❌ Error reinicializando push notifications:', error)
-        pushSettings.value.enabled = false
-        localStorage.setItem('pushNotificationsEnabled', 'false')
-      }
-    }
-  }
-}
-
-// Función para enviar notificación de prueba
-const enviarPruebaPush = async () => {
-  if (pushSettings.value.testLoading) return
-  
-  try {
-    pushSettings.value.testLoading = true
-    
-    const usuarioId = obtenerUsuarioId()
-    if (!usuarioId) {
-      throw new Error('No se pudo identificar al usuario')
-    }
-    
-    console.log('🧪 Enviando notificación de prueba...')
-    
-    // Enviar notificación de prueba usando el servicio
-    await pushNotificationService.sendTestNotification(usuarioId)
-    
-    // Mostrar confirmación temporal
-    pushSettings.value.infoText = '✅ Notificación de prueba enviada. Revisa si la recibiste.'
-    pushSettings.value.showInfo = true
-    
-    // Ocultar info después de 5 segundos
-    setTimeout(() => {
-      pushSettings.value.showInfo = false
-    }, 5000)
-    
-    console.log('✅ Notificación de prueba enviada exitosamente')
-    
-  } catch (error) {
-    console.error('❌ Error enviando prueba:', error)
-    
-    pushSettings.value.infoText = `Error enviando prueba: ${error.message}`
-    pushSettings.value.showInfo = true
-    
-    // Ocultar info después de 5 segundos
-    setTimeout(() => {
-      pushSettings.value.showInfo = false
-    }, 5000)
-  } finally {
-    pushSettings.value.testLoading = false
-  }
 }
 
 // Ciclo de vida
@@ -737,9 +535,6 @@ onMounted(async () => {
   
   // Cargar notificaciones inicial
   await cargarNotificaciones()
-  
-  // Inicializar push notifications si estaban habilitadas
-  await initializePushNotifications()
   
   // Auto-actualizar cada 5 minutos
   autoUpdateInterval = setInterval(() => {
@@ -753,11 +548,6 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (autoUpdateInterval) {
     clearInterval(autoUpdateInterval)
-  }
-  
-  // Detener polling de push notifications
-  if (pushSettings.value.stopPolling) {
-    pushSettings.value.stopPolling()
   }
 })
 </script>

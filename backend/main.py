@@ -16,11 +16,6 @@ import pytz
 import json
 from typing import List, Optional
 import io
-# Importaciones para Web Push
-from pywebpush import webpush, WebPushException
-import asyncio
-import aiohttp
-from concurrent.futures import ThreadPoolExecutor
 
 app = FastAPI()
 
@@ -53,31 +48,6 @@ except Exception as e:
 # Carpeta para guardar fotos
 FOTOS_DIR = "fotos"
 os.makedirs(FOTOS_DIR, exist_ok=True)
-
-# ==================== CONFIGURACIÓN VAPID PARA PUSH NOTIFICATIONS ====================
-
-# Cargar claves VAPID
-VAPID_KEYS = {
-    "private_key": """-----BEGIN PRIVATE KEY-----
-MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg9Vk9NeZ/wJxo7w2I
-CY+Mbv9mi+f5xUZ+8vAN/ffNwiuhRANCAAQZSHdq8I6A9GuSaH5YIpWCV0qOfjlA
-C5iOzzKAjFwnSWH5V/Xo8pvYFURmWienap6QZulsS0UdcQ2KuWyZe/3M
------END PRIVATE KEY-----""",
-    "public_key": "BBlId2rwjoD0a5JoflgilYJXSo5-OUALmI7PMoCMXCdJYflX9ejym9gVRGZaJ6dqnpBm6WxLRR1xDYq5bJl7_cw",
-    "subject": "mailto:admin@sembrandodatos.com"
-}
-
-# Configuración para push notifications
-PUSH_CONFIG = {
-    "private_key": VAPID_KEYS["private_key"],
-    "public_key": VAPID_KEYS["public_key"],
-    "claims": {
-        "sub": VAPID_KEYS["subject"]
-    }
-}
-
-# Thread pool para operaciones de push asíncronas
-push_executor = ThreadPoolExecutor(max_workers=10)
 
 # Modelos para autenticación
 class UserCreate(BaseModel):
@@ -131,26 +101,6 @@ class NotificacionResponse(BaseModel):
     fecha_creacion: datetime
     fecha_envio: Optional[datetime] = None
     destinatarios: Optional[List[dict]] = None
-
-# ==================== MODELOS PARA PUSH NOTIFICATIONS ====================
-
-class PushSubscription(BaseModel):
-    usuario_id: int
-    endpoint: str
-    p256dh: str
-    auth: str
-    user_agent: Optional[str] = None
-    dispositivo: Optional[str] = None
-
-class PushNotificationData(BaseModel):
-    title: str
-    body: Optional[str] = None
-    icon: Optional[str] = "/pwa-192x192.png"
-    badge: Optional[str] = "/pwa-192x192.png"
-    tag: Optional[str] = None
-    data: Optional[dict] = None
-    vibrate: Optional[List[int]] = [200, 100, 200]
-    requireInteraction: Optional[bool] = True
 
 # ==================== FIN MODELOS NOTIFICACIONES ====================
 
@@ -2148,162 +2098,6 @@ def obtener_fecha_hora_cdmx_notificaciones():
     """Función de utilidad para obtener fecha y hora actual en zona CDMX para notificaciones"""
     return datetime.now(CDMX_TZ)
 
-# ==================== FUNCIONES PARA PUSH NOTIFICATIONS ====================
-
-def send_push_notification(subscription_info, notification_data):
-    """Enviar push notification individual (función síncrona)"""
-    try:
-        # Preparar los datos de la notificación
-        payload = {
-            "title": notification_data["title"],
-            "body": notification_data.get("body", ""),
-            "icon": notification_data.get("icon", "/pwa-192x192.png"),
-            "badge": notification_data.get("badge", "/pwa-192x192.png"),
-            "tag": notification_data.get("tag", f"notification-{datetime.now().timestamp()}"),
-            "data": notification_data.get("data", {}),
-            "vibrate": notification_data.get("vibrate", [200, 100, 200]),
-            "requireInteraction": notification_data.get("requireInteraction", True)
-        }
-        
-        # Configurar suscripción
-        subscription = {
-            "endpoint": subscription_info["endpoint"],
-            "keys": {
-                "p256dh": subscription_info["p256dh"],
-                "auth": subscription_info["auth"]
-            }
-        }
-        
-        # Enviar push notification
-        response = webpush(
-            subscription_info=subscription,
-            data=json.dumps(payload),
-            vapid_private_key=PUSH_CONFIG["private_key"],
-            vapid_claims=PUSH_CONFIG["claims"]
-        )
-        
-        print(f"✅ Push notification enviada exitosamente (status: {response.status_code})")
-        return {"success": True, "status_code": response.status_code}
-        
-    except WebPushException as e:
-        print(f"❌ Error enviando push notification: {e}")
-        return {"success": False, "error": str(e)}
-    except Exception as e:
-        print(f"❌ Error inesperado enviando push: {e}")
-        return {"success": False, "error": str(e)}
-
-async def send_push_to_users(user_ids, notification_data):
-    """Enviar push notifications a una lista de usuarios (función asíncrona)"""
-    if not user_ids:
-        return {"sent": 0, "failed": 0, "results": []}
-    
-    try:
-        # Obtener suscripciones activas de los usuarios
-        cursor.execute("""
-            SELECT ps.usuario_id, ps.endpoint, ps.p256dh, ps.auth, u.nombre_completo
-            FROM push_subscriptions ps
-            JOIN usuarios u ON ps.usuario_id = u.id
-            WHERE ps.usuario_id = ANY(%s) AND ps.activa = TRUE
-        """, (user_ids,))
-        
-        subscriptions = cursor.fetchall()
-        
-        if not subscriptions:
-            print(f"⚠️ No se encontraron suscripciones activas para usuarios: {user_ids}")
-            return {"sent": 0, "failed": 0, "results": [], "message": "No hay dispositivos suscritos"}
-        
-        print(f"📱 Enviando push notifications a {len(subscriptions)} dispositivos...")
-        
-        # Enviar notificaciones en paralelo usando ThreadPoolExecutor
-        loop = asyncio.get_event_loop()
-        tasks = []
-        
-        for sub in subscriptions:
-            subscription_info = {
-                "endpoint": sub[1],
-                "p256dh": sub[2], 
-                "auth": sub[3]
-            }
-            
-            # Ejecutar en thread pool para evitar bloqueo
-            task = loop.run_in_executor(
-                push_executor,
-                send_push_notification,
-                subscription_info,
-                notification_data
-            )
-            tasks.append((sub[0], sub[4], task))  # (user_id, nombre, task)
-        
-        # Esperar todos los resultados
-        results = []
-        sent_count = 0
-        failed_count = 0
-        
-        for user_id, nombre, task in tasks:
-            try:
-                result = await task
-                if result["success"]:
-                    sent_count += 1
-                    results.append({
-                        "user_id": user_id,
-                        "nombre": nombre,
-                        "status": "sent",
-                        "message": "Enviado exitosamente"
-                    })
-                else:
-                    failed_count += 1
-                    results.append({
-                        "user_id": user_id,
-                        "nombre": nombre,
-                        "status": "failed",
-                        "error": result["error"]
-                    })
-            except Exception as e:
-                failed_count += 1
-                results.append({
-                    "user_id": user_id,
-                    "nombre": nombre,
-                    "status": "failed",
-                    "error": str(e)
-                })
-        
-        print(f"📊 Push notifications: {sent_count} enviadas, {failed_count} fallidas")
-        
-        return {
-            "sent": sent_count,
-            "failed": failed_count,
-            "total_devices": len(subscriptions),
-            "results": results
-        }
-        
-    except Exception as e:
-        print(f"❌ Error enviando push notifications: {e}")
-        return {"sent": 0, "failed": 0, "results": [], "error": str(e)}
-
-async def send_push_to_all_users(notification_data):
-    """Enviar push notification a todos los usuarios con suscripciones activas"""
-    try:
-        # Obtener todas las suscripciones activas
-        cursor.execute("""
-            SELECT DISTINCT ps.usuario_id
-            FROM push_subscriptions ps
-            WHERE ps.activa = TRUE
-        """)
-        
-        user_ids = [row[0] for row in cursor.fetchall()]
-        
-        if not user_ids:
-            print("⚠️ No hay usuarios con suscripciones activas")
-            return {"sent": 0, "failed": 0, "results": [], "message": "No hay dispositivos suscritos"}
-        
-        print(f"📢 Enviando push notification a todos los usuarios ({len(user_ids)} usuarios)")
-        
-        return await send_push_to_users(user_ids, notification_data)
-        
-    except Exception as e:
-        print(f"❌ Error enviando push a todos: {e}")
-        return {"sent": 0, "failed": 0, "results": [], "error": str(e)}
-
 @app.post("/notificaciones")
 async def crear_notificacion(
     titulo: str = Form(...),
@@ -2419,43 +2213,6 @@ async def crear_notificacion(
         
         print(f"✅ Notificación creada exitosamente con ID: {notificacion_id}")
         
-        # ==================== ENVIAR PUSH NOTIFICATIONS ====================
-        
-        # Preparar datos para push notification
-        push_notification_data = {
-            "title": titulo,
-            "body": subtitulo or descripcion or "Nueva notificación disponible",
-            "icon": "/pwa-192x192.png",
-            "badge": "/pwa-192x192.png", 
-            "tag": f"notification-{notificacion_id}",
-            "data": {
-                "notificacionId": notificacion_id,
-                "url": "/notificaciones",
-                "timestamp": fecha_creacion.timestamp()
-            },
-            "vibrate": [200, 100, 200],
-            "requireInteraction": True
-        }
-        
-        # Enviar push notifications según el tipo
-        push_results = {"sent": 0, "failed": 0, "results": []}
-        
-        try:
-            if enviada_a_todos:
-                print("📢 Enviando push notification a todos los usuarios...")
-                push_results = await send_push_to_all_users(push_notification_data)
-            else:
-                print(f"📱 Enviando push notification a {len(usuarios_seleccionados)} usuarios específicos...")
-                push_results = await send_push_to_users(usuarios_seleccionados, push_notification_data)
-            
-            print(f"📊 Push notifications: {push_results['sent']} enviadas, {push_results['failed']} fallidas")
-            
-        except Exception as e:
-            print(f"⚠️ Error enviando push notifications (la notificación se creó correctamente): {e}")
-            push_results = {"sent": 0, "failed": 0, "results": [], "error": str(e)}
-        
-        # ==================== FIN PUSH NOTIFICATIONS ====================
-        
         return {
             "id": notificacion_id,
             "status": "success",
@@ -2464,14 +2221,7 @@ async def crear_notificacion(
             "enviada_a_todos": enviada_a_todos,
             "usuarios_destinatarios": len(usuarios_seleccionados) if not enviada_a_todos else "todos",
             "tiene_archivo": archivo_nombre is not None,
-            "fecha_envio": fecha_envio.isoformat(),
-            # Información de push notifications
-            "push_notifications": {
-                "sent": push_results.get("sent", 0),
-                "failed": push_results.get("failed", 0),
-                "total_devices": push_results.get("total_devices", 0),
-                "error": push_results.get("error", None)
-            }
+            "fecha_envio": fecha_envio.isoformat()
         }
         
     except HTTPException:
@@ -2783,198 +2533,6 @@ async def obtener_notificaciones_usuario(usuario_id: int, limit: int = 20, offse
         raise HTTPException(status_code=500, detail=f"Error al obtener notificaciones del usuario: {str(e)}")
 
 # ==================== FIN ENDPOINTS DE NOTIFICACIONES ====================
-
-# ==================== ENDPOINTS PARA PUSH NOTIFICATIONS ====================
-
-@app.get("/vapid/public-key")
-async def get_vapid_public_key():
-    """Obtener la clave pública VAPID para suscripciones push"""
-    return {
-        "public_key": VAPID_KEYS["public_key"]
-    }
-
-@app.post("/push/subscribe")
-async def subscribe_to_push(subscription: PushSubscription):
-    """Suscribir un usuario a push notifications"""
-    try:
-        if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-        
-        print(f"📱 Suscribiendo usuario {subscription.usuario_id} a push notifications...")
-        
-        # Verificar que el usuario existe
-        cursor.execute("SELECT nombre_completo FROM usuarios WHERE id = %s", (subscription.usuario_id,))
-        usuario = cursor.fetchone()
-        
-        if not usuario:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
-        
-        # Verificar si ya existe una suscripción con el mismo endpoint
-        cursor.execute("SELECT id FROM push_subscriptions WHERE endpoint = %s", (subscription.endpoint,))
-        existing = cursor.fetchone()
-        
-        if existing:
-            # Actualizar suscripción existente
-            cursor.execute("""
-                UPDATE push_subscriptions 
-                SET usuario_id = %s, p256dh = %s, auth = %s, user_agent = %s, 
-                    dispositivo = %s, activa = TRUE, fecha_actualizacion = CURRENT_TIMESTAMP
-                WHERE endpoint = %s
-                RETURNING id
-            """, (
-                subscription.usuario_id, subscription.p256dh, subscription.auth,
-                subscription.user_agent, subscription.dispositivo, subscription.endpoint
-            ))
-            subscription_id = cursor.fetchone()[0]
-            action = "actualizada"
-        else:
-            # Crear nueva suscripción
-            cursor.execute("""
-                INSERT INTO push_subscriptions (
-                    usuario_id, endpoint, p256dh, auth, user_agent, dispositivo, activa
-                ) VALUES (%s, %s, %s, %s, %s, %s, TRUE)
-                RETURNING id
-            """, (
-                subscription.usuario_id, subscription.endpoint, subscription.p256dh,
-                subscription.auth, subscription.user_agent, subscription.dispositivo
-            ))
-            subscription_id = cursor.fetchone()[0]
-            action = "creada"
-        
-        conn.commit()
-        
-        print(f"✅ Suscripción {action} exitosamente para {usuario[0]} (ID: {subscription_id})")
-        
-        return {
-            "id": subscription_id,
-            "status": "success",
-            "message": f"Suscripción {action} exitosamente",
-            "usuario": usuario[0]
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        conn.rollback()
-        print(f"❌ Error en suscripción push: {e}")
-        raise HTTPException(status_code=500, detail=f"Error en suscripción: {str(e)}")
-
-@app.delete("/push/unsubscribe/{usuario_id}")
-async def unsubscribe_from_push(usuario_id: int, endpoint: str = None):
-    """Cancelar suscripción a push notifications"""
-    try:
-        if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-        
-        print(f"🔕 Cancelando suscripciones push para usuario {usuario_id}")
-        
-        if endpoint:
-            # Cancelar suscripción específica por endpoint
-            cursor.execute("""
-                UPDATE push_subscriptions 
-                SET activa = FALSE, fecha_actualizacion = CURRENT_TIMESTAMP
-                WHERE usuario_id = %s AND endpoint = %s
-                RETURNING id
-            """, (usuario_id, endpoint))
-        else:
-            # Cancelar todas las suscripciones del usuario
-            cursor.execute("""
-                UPDATE push_subscriptions 
-                SET activa = FALSE, fecha_actualizacion = CURRENT_TIMESTAMP
-                WHERE usuario_id = %s
-                RETURNING id
-            """, (usuario_id,))
-        
-        canceled = cursor.fetchall()
-        conn.commit()
-        
-        if canceled:
-            print(f"✅ {len(canceled)} suscripciones canceladas")
-            return {
-                "status": "success",
-                "message": f"{len(canceled)} suscripciones canceladas",
-                "canceled_count": len(canceled)
-            }
-        else:
-            raise HTTPException(status_code=404, detail="No se encontraron suscripciones activas")
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        conn.rollback()
-        print(f"❌ Error cancelando suscripciones: {e}")
-        raise HTTPException(status_code=500, detail=f"Error cancelando suscripciones: {str(e)}")
-
-@app.get("/push/subscriptions/{usuario_id}")
-async def get_user_subscriptions(usuario_id: int):
-    """Obtener suscripciones activas de un usuario"""
-    try:
-        if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-        
-        cursor.execute("""
-            SELECT id, endpoint, dispositivo, user_agent, fecha_creacion, fecha_actualizacion
-            FROM push_subscriptions
-            WHERE usuario_id = %s AND activa = TRUE
-            ORDER BY fecha_actualizacion DESC
-        """, (usuario_id,))
-        
-        suscripciones = []
-        for row in cursor.fetchall():
-            suscripciones.append({
-                "id": row[0],
-                "endpoint": row[1][-50:] + "..." if len(row[1]) > 50 else row[1],  # Truncar para mostrar
-                "dispositivo": row[2],
-                "user_agent": row[3],
-                "fecha_creacion": row[4].isoformat() if row[4] else None,
-                "fecha_actualizacion": row[5].isoformat() if row[5] else None
-            })
-        
-        return {
-            "usuario_id": usuario_id,
-            "suscripciones": suscripciones,
-            "total": len(suscripciones)
-        }
-        
-    except Exception as e:
-        print(f"❌ Error obteniendo suscripciones: {e}")
-        raise HTTPException(status_code=500, detail=f"Error obteniendo suscripciones: {str(e)}")
-
-@app.post("/push/test/{usuario_id}")
-async def test_push_notification(usuario_id: int, notification_data: PushNotificationData):
-    """Enviar push notification de prueba a un usuario específico"""
-    try:
-        if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-        
-        print(f"🧪 Enviando push notification de prueba a usuario {usuario_id}")
-        
-        # Preparar datos de notificación
-        push_data = {
-            "title": notification_data.title,
-            "body": notification_data.body or "Mensaje de prueba",
-            "icon": notification_data.icon or "/pwa-192x192.png",
-            "badge": notification_data.badge or "/pwa-192x192.png",
-            "tag": notification_data.tag or f"test-{datetime.now().timestamp()}",
-            "data": notification_data.data or {"test": True, "timestamp": datetime.now().timestamp()},
-            "vibrate": notification_data.vibrate or [200, 100, 200],
-            "requireInteraction": notification_data.requireInteraction
-        }
-        
-        # Enviar push notification
-        result = await send_push_to_users([usuario_id], push_data)
-        
-        return {
-            "status": "success",
-            "message": "Push notification de prueba enviada",
-            "result": result
-        }
-        
-    except Exception as e:
-        print(f"❌ Error enviando push de prueba: {e}")
-        raise HTTPException(status_code=500, detail=f"Error enviando push de prueba: {str(e)}")
-
-# ==================== FIN ENDPOINTS PUSH NOTIFICATIONS ====================
 
 if __name__ == "__main__":
     import uvicorn

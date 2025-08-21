@@ -20,7 +20,7 @@
               <button 
                 @click="refrescarNotificaciones"
                 :disabled="cargando"
-                class="absolute top-1/2 right-3 transform -translate-y-1/2 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all duration-200 group"
+                class="absolute top-1/2 right-3 transform -translate-y-1/2 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-colors duration-200 group"
                 :class="{ 'cursor-not-allowed opacity-50': cargando }"
                 title="Actualizar notificaciones"
               >
@@ -877,17 +877,15 @@ onBeforeUnmount(() => {
 .glass-card button {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
 }
 
 .glass-card button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.2) !important;
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .glass-card button:active:not(:disabled) {
-  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.15) !important;
 }
 
 /* Responsividad para el botón de refresh */

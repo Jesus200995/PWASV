@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col p-2 sm:p-3 relative overflow-auto">
+  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col p-2 sm:p-3 relative overflow-hidden">
     <!-- Elementos decorativos para mejorar el efecto de vidrio -->
-    <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute inset-0">
       <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
       <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
@@ -2508,26 +2508,9 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   }
 }
 
-/* Mejorar el comportamiento del scroll en pantallas pequeñas */
-@media (max-height: 700px) {
-  .min-h-screen {
-    min-height: 100vh;
-    height: auto;
-  }
-  
-  .page-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-  }
-}
-
 @media (max-height: 600px) {
   .page-container {
     max-width: 320px;
-    padding-top: 0.25rem;
-    padding-bottom: 0.5rem;
   }
   
   .glass-card {
@@ -2538,11 +2521,6 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 @media (max-height: 500px) {
   .glass-card {
     padding: 0.875rem;
-  }
-  
-  .glass-input {
-    font-size: 14px;
-    min-height: 34px;
   }
 }
 
@@ -2979,48 +2957,5 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   .location-button {
     padding: 0.75rem 1rem;
   }
-}
-
-/* Mejoras para el scroll responsivo */
-.min-h-screen {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* Personalizar la barra de scroll en navegadores WebKit */
-.min-h-screen::-webkit-scrollbar {
-  width: 4px;
-}
-
-.min-h-screen::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-
-.min-h-screen::-webkit-scrollbar-thumb {
-  background: rgba(76, 175, 80, 0.3);
-  border-radius: 2px;
-}
-
-.min-h-screen::-webkit-scrollbar-thumb:hover {
-  background: rgba(76, 175, 80, 0.5);
-}
-
-/* Para Firefox */
-.min-h-screen {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(76, 175, 80, 0.3) rgba(255, 255, 255, 0.1);
-}
-
-/* Asegurar que el contenido no se superponga con elementos decorativos */
-.page-container {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 32rem;
-  margin: 0 auto;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 </style>

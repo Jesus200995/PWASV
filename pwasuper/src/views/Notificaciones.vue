@@ -9,11 +9,11 @@
 
     <div class="absolute inset-0 overflow-hidden" style="z-index: 1;">
       <!-- Header fijo de notificaciones -->
-      <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-3 sm:px-4 lg:px-5 pt-4 sm:pt-6">
+      <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-3 sm:px-4 lg:px-5 pt-2 sm:pt-3">
         <div class="w-full max-w-sm mx-auto">
-          <div class="glass-card mb-2 relative">
-            <div class="text-center mb-3 relative py-1">
-              <h1 class="text-base font-semibold text-gray-800 modern-title">
+          <div class="glass-card mb-0 relative">
+            <div class="text-center mb-1 relative py-0.5">
+              <h1 class="text-sm font-medium text-gray-800 modern-title">
                 Mis Notificaciones
               </h1>
               <!-- Botón de refresh movido al lado derecho -->
@@ -43,8 +43,8 @@
           </div>
           
           <!-- Título de notificaciones fijo -->
-          <div class="bg-transparent rounded-xl p-3">
-            <h2 class="text-sm font-semibold text-gray-800 mb-2 modern-title flex items-center">
+          <div class="bg-transparent rounded-xl p-1">
+            <h2 class="text-sm font-semibold text-gray-800 mb-1 modern-title flex items-center">
               <span class="mr-2">📋</span>
               Notificaciones
               <span v-if="notificacionesFiltradas.length > 0" class="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
@@ -57,8 +57,8 @@
       </div>
 
       <!-- Contenido con scroll -->
-      <div class="absolute inset-0 overflow-hidden pt-52 sm:pt-56 pb-3">
-        <div class="page-container w-full max-w-sm mx-auto relative z-10 p-3 sm:p-4 lg:p-5 h-full">
+      <div class="absolute inset-0 overflow-hidden pt-40 sm:pt-44 pb-2">
+        <div class="page-container w-full max-w-sm mx-auto relative z-10 p-2 sm:p-3 lg:p-4 h-full">
 
         <!-- Estado de carga -->
         <div v-if="cargando" class="glass-card mb-2">
@@ -875,7 +875,7 @@ onBeforeUnmount(() => {
 /* Asegurar que no interfiera con el título */
 .glass-card {
   position: relative;
-  min-height: 60px;
+  min-height: 45px;
 }
 
 /* Botón de refresh con efecto glassmorphism */
@@ -929,7 +929,7 @@ onBeforeUnmount(() => {
     0 6px 25px 0 rgba(31, 38, 135, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.05),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  padding: 0.875rem;
+  padding: 0.6rem;
   position: relative;
   overflow: hidden;
 }

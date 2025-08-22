@@ -148,179 +148,191 @@
 
     <!-- Modal Crear Notificación -->
     <div v-if="mostrarModalCrear" class="modal-overlay" @click="cerrarModalCrear">
-      <div class="modal-content modal-compact" @click.stop>
+      <div 
+        class="modal-content" 
+        :class="{ 'modal-compact': formNotificacion.enviada_a_todos, 'modal-expanded': !formNotificacion.enviada_a_todos }"
+        @click.stop
+      >
         <div class="modal-header">
           <h3>Nueva Notificación</h3>
           <button class="btn-close" @click="cerrarModalCrear">×</button>
         </div>
         
-        <div class="modal-body">
-          <form @submit.prevent="crearNotificacion">
-            <!-- Título -->
-            <div class="form-group-compact">
-              <label for="titulo">Título *</label>
-              <input
-                id="titulo"
-                v-model="formNotificacion.titulo"
-                type="text"
-                class="form-input-compact"
-                placeholder="Título de la notificación"
-                maxlength="150"
-                required
-              />
-              <small class="char-count">{{ formNotificacion.titulo.length }}/150</small>
-            </div>
-
-            <!-- Subtítulo -->
-            <div class="form-group-compact">
-              <label for="subtitulo">Subtítulo</label>
-              <input
-                id="subtitulo"
-                v-model="formNotificacion.subtitulo"
-                type="text"
-                class="form-input-compact"
-                placeholder="Subtítulo opcional"
-                maxlength="200"
-              />
-              <small class="char-count">{{ formNotificacion.subtitulo.length }}/200</small>
-            </div>
-
-            <!-- Descripción -->
-            <div class="form-group-compact">
-              <label for="descripcion">Descripción</label>
-              <textarea
-                id="descripcion"
-                v-model="formNotificacion.descripcion"
-                class="form-textarea-compact"
-                placeholder="Descripción detallada"
-                rows="3"
-              ></textarea>
-            </div>
-
-            <!-- Enlace URL -->
-            <div class="form-group-compact">
-              <label for="enlace_url">Enlace URL (opcional)</label>
-              <input
-                id="enlace_url"
-                v-model="formNotificacion.enlace_url"
-                type="url"
-                class="form-input-compact"
-                placeholder="https://ejemplo.com"
-              />
-            </div>
-
-            <!-- Destinatarios -->
-            <div class="form-group-compact">
-              <label>Destinatarios</label>
-              <div class="radio-group-compact">
-                <label class="radio-option-compact">
-                  <input
-                    v-model="formNotificacion.enviada_a_todos"
-                    type="radio"
-                    :value="true"
-                    @change="limpiarUsuariosSeleccionados"
-                  />
-                  <span class="radio-text">Todos</span>
-                </label>
-                <label class="radio-option-compact">
-                  <input
-                    v-model="formNotificacion.enviada_a_todos"
-                    type="radio"
-                    :value="false"
-                    @change="cargarUsuarios"
-                  />
-                  <span class="radio-text">Específicos</span>
-                </label>
+        <div class="modal-body" :class="{ 'modal-body-two-columns': !formNotificacion.enviada_a_todos }">
+          <!-- Columna principal del formulario -->
+          <div class="form-column">
+            <form @submit.prevent="crearNotificacion">
+              <!-- Título -->
+              <div class="form-group-compact">
+                <label for="titulo">Título *</label>
+                <input
+                  id="titulo"
+                  v-model="formNotificacion.titulo"
+                  type="text"
+                  class="form-input-compact"
+                  placeholder="Título de la notificación"
+                  maxlength="150"
+                  required
+                />
+                <small class="char-count">{{ formNotificacion.titulo.length }}/150</small>
               </div>
-            </div>
 
-            <!-- Selector de usuarios específicos -->
-            <div v-if="!formNotificacion.enviada_a_todos" class="form-group-compact">
-              <label class="selector-label">Seleccionar usuarios</label>
-              <div v-if="cargandoUsuarios" class="loading-users-compact">
-                <div class="loading-spinner-small"></div>
-                <span>Cargando...</span>
+              <!-- Subtítulo -->
+              <div class="form-group-compact">
+                <label for="subtitulo">Subtítulo</label>
+                <input
+                  id="subtitulo"
+                  v-model="formNotificacion.subtitulo"
+                  type="text"
+                  class="form-input-compact"
+                  placeholder="Subtítulo opcional"
+                  maxlength="200"
+                />
+                <small class="char-count">{{ formNotificacion.subtitulo.length }}/200</small>
               </div>
-              <div v-else class="users-selector-compact">
-                <div class="search-input-wrapper">
-                  <input
-                    v-model="busquedaUsuarios"
-                    type="text"
-                    class="form-input-compact search-users"
-                    placeholder="🔍 Buscar por nombre, correo o CURP..."
-                    autocomplete="off"
-                  />
-                </div>
-                <div class="users-list-compact" v-show="usuariosFiltrados.length > 0">
-                  <div class="users-list-header" v-if="busquedaUsuarios">
-                    {{ usuariosFiltrados.length }} resultado(s) encontrado(s)
-                  </div>
-                  <label
-                    v-for="usuario in usuariosFiltrados"
-                    :key="usuario.id"
-                    class="user-option-compact"
-                    :class="{ 'selected': formNotificacion.usuario_ids.includes(usuario.id) }"
-                  >
+
+              <!-- Descripción -->
+              <div class="form-group-compact">
+                <label for="descripcion">Descripción</label>
+                <textarea
+                  id="descripcion"
+                  v-model="formNotificacion.descripcion"
+                  class="form-textarea-compact"
+                  placeholder="Descripción detallada"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <!-- Enlace URL -->
+              <div class="form-group-compact">
+                <label for="enlace_url">Enlace URL (opcional)</label>
+                <input
+                  id="enlace_url"
+                  v-model="formNotificacion.enlace_url"
+                  type="url"
+                  class="form-input-compact"
+                  placeholder="https://ejemplo.com"
+                />
+              </div>
+
+              <!-- Destinatarios -->
+              <div class="form-group-compact">
+                <label>Destinatarios</label>
+                <div class="radio-group-compact">
+                  <label class="radio-option-compact">
                     <input
-                      v-model="formNotificacion.usuario_ids"
-                      :value="usuario.id"
-                      type="checkbox"
+                      v-model="formNotificacion.enviada_a_todos"
+                      type="radio"
+                      :value="true"
+                      @change="limpiarUsuariosSeleccionados"
                     />
-                    <div class="user-info-compact">
-                      <span class="user-name-compact">{{ usuario.nombre_completo || usuario.nombre || 'Sin nombre' }}</span>
-                      <span class="user-email-compact">{{ usuario.correo || usuario.email || 'Sin email' }}</span>
-                      <span v-if="usuario.curp" class="user-curp-compact">CURP: {{ usuario.curp }}</span>
-                    </div>
+                    <span class="radio-text">Todos</span>
+                  </label>
+                  <label class="radio-option-compact">
+                    <input
+                      v-model="formNotificacion.enviada_a_todos"
+                      type="radio"
+                      :value="false"
+                      @change="cargarUsuarios"
+                    />
+                    <span class="radio-text">Específicos</span>
                   </label>
                 </div>
-                <div v-show="busquedaUsuarios && usuariosFiltrados.length === 0" class="no-users-found">
-                  ❌ No se encontraron usuarios que coincidan con "{{ busquedaUsuarios }}"
+              </div>
+
+              <!-- Archivo adjunto -->
+              <div class="form-group-compact">
+                <label for="archivo">Archivo adjunto</label>
+                <div class="file-input-container-compact">
+                  <input
+                    id="archivo"
+                    ref="archivoInput"
+                    type="file"
+                    class="file-input"
+                    accept=".jpg,.jpeg,.png,.gif,.pdf,.mp4,.avi,.mov,.wmv"
+                    @change="manejarArchivoSeleccionado"
+                  />
+                  <label for="archivo" class="file-input-label-compact">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14,2 14,8 20,8"/>
+                    </svg>
+                    <span class="file-text">{{ archivoSeleccionado ? archivoSeleccionado.name : 'Seleccionar archivo' }}</span>
+                  </label>
                 </div>
-                <div v-show="!busquedaUsuarios && usuarios.length === 0" class="no-users-loaded">
-                  📝 No hay usuarios disponibles
-                </div>
-                <div class="selected-count-wrapper">
-                  <small class="selected-count">
-                    ✅ {{ formNotificacion.usuario_ids.length }} usuario(s) seleccionado(s)
-                  </small>
-                </div>
+                <small class="file-help-compact">JPG, PNG, PDF, MP4 (máx. 50MB)</small>
+              </div>
+
+              <!-- Botones -->
+              <div class="modal-actions-compact">
+                <button type="button" class="btn-secondary-compact" @click="cerrarModalCrear">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-primary-compact" :disabled="enviandoNotificacion">
+                  <span v-if="enviandoNotificacion" class="loading-spinner-small"></span>
+                  {{ enviandoNotificacion ? 'Enviando...' : 'Enviar' }}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Columna del selector de usuarios (solo visible cuando "Específicos" está seleccionado) -->
+          <div v-if="!formNotificacion.enviada_a_todos" class="users-column">
+            <div class="users-column-header">
+              <h4>Seleccionar Usuarios</h4>
+              <div class="selected-count-badge">
+                {{ formNotificacion.usuario_ids.length }} seleccionados
               </div>
             </div>
-
-            <!-- Archivo adjunto -->
-            <div class="form-group-compact">
-              <label for="archivo">Archivo adjunto</label>
-              <div class="file-input-container-compact">
+            
+            <div v-if="cargandoUsuarios" class="loading-users-compact">
+              <div class="loading-spinner-small"></div>
+              <span>Cargando usuarios...</span>
+            </div>
+            
+            <div v-else class="users-selector-column">
+              <div class="search-input-wrapper">
                 <input
-                  id="archivo"
-                  ref="archivoInput"
-                  type="file"
-                  class="file-input"
-                  accept=".jpg,.jpeg,.png,.gif,.pdf,.mp4,.avi,.mov,.wmv"
-                  @change="manejarArchivoSeleccionado"
+                  v-model="busquedaUsuarios"
+                  type="text"
+                  class="form-input-compact search-users-column"
+                  placeholder="🔍 Buscar por nombre, correo o CURP..."
+                  autocomplete="off"
                 />
-                <label for="archivo" class="file-input-label-compact">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/>
-                  </svg>
-                  <span class="file-text">{{ archivoSeleccionado ? archivoSeleccionado.name : 'Seleccionar archivo' }}</span>
+              </div>
+              
+              <div class="users-list-column" v-show="usuariosFiltrados.length > 0">
+                <div class="users-list-header" v-if="busquedaUsuarios">
+                  {{ usuariosFiltrados.length }} resultado(s) encontrado(s)
+                </div>
+                <label
+                  v-for="usuario in usuariosFiltrados"
+                  :key="usuario.id"
+                  class="user-option-column"
+                  :class="{ 'selected': formNotificacion.usuario_ids.includes(usuario.id) }"
+                >
+                  <input
+                    v-model="formNotificacion.usuario_ids"
+                    :value="usuario.id"
+                    type="checkbox"
+                  />
+                  <div class="user-info-column">
+                    <span class="user-name-column">{{ usuario.nombre_completo || usuario.nombre || 'Sin nombre' }}</span>
+                    <span class="user-email-column">{{ usuario.correo || usuario.email || 'Sin email' }}</span>
+                    <span v-if="usuario.curp" class="user-curp-column">CURP: {{ usuario.curp }}</span>
+                  </div>
                 </label>
               </div>
-              <small class="file-help-compact">JPG, PNG, PDF, MP4 (máx. 50MB)</small>
+              
+              <div v-show="busquedaUsuarios && usuariosFiltrados.length === 0" class="no-users-found-column">
+                ❌ No se encontraron usuarios que coincidan con "{{ busquedaUsuarios }}"
+              </div>
+              
+              <div v-show="!busquedaUsuarios && usuarios.length === 0" class="no-users-loaded-column">
+                📝 No hay usuarios disponibles
+              </div>
             </div>
-
-            <!-- Botones -->
-            <div class="modal-actions-compact">
-              <button type="button" class="btn-secondary-compact" @click="cerrarModalCrear">
-                Cancelar
-              </button>
-              <button type="submit" class="btn-primary-compact" :disabled="enviandoNotificacion">
-                <span v-if="enviandoNotificacion" class="loading-spinner-small"></span>
-                {{ enviandoNotificacion ? 'Enviando...' : 'Enviar' }}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
@@ -1298,6 +1310,13 @@ export default {
   box-shadow: 
     0 24px 48px rgba(0, 0, 0, 0.2),
     0 12px 24px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* Modal expandido para dos columnas */
+.modal-expanded {
+  max-width: 1000px;
+  width: 95%;
 }
 
 .modal-compact {
@@ -1311,6 +1330,171 @@ export default {
 
 .modal-confirm {
   max-width: 400px;
+}
+
+/* Layout de dos columnas para el modal */
+.modal-body-two-columns {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  padding: 24px;
+}
+
+.form-column {
+  min-width: 0;
+}
+
+.users-column {
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height: 60vh;
+}
+
+.users-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.users-column-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2E7D32;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.selected-count-badge {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: fit-content;
+  white-space: nowrap;
+}
+
+.users-selector-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.search-users-column {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.search-users-column:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.users-list-column {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+  background: white;
+  max-height: 400px;
+}
+
+.user-option-column {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-option-column:hover {
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.user-option-column.selected {
+  background: rgba(76, 175, 80, 0.1);
+  border-left: 3px solid #4CAF50;
+}
+
+.user-option-column:last-child {
+  border-bottom: none;
+}
+
+.user-option-column input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #4CAF50;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.user-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name-column {
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email-column {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-curp-column {
+  font-size: 10px;
+  color: #4CAF50;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.no-users-found-column,
+.no-users-loaded-column {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.no-users-found-column {
+  color: #d32f2f;
+}
+
+.no-users-loaded-column {
+  color: #ff9800;
 }
 
 .modal-header {
@@ -2119,12 +2303,36 @@ export default {
     margin-left: 260px;
     max-width: calc(100vw - 260px);
   }
+  
+  .modal-expanded {
+    max-width: 900px;
+  }
+  
+  .modal-body-two-columns {
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+  }
+  
+  .users-column {
+    padding: 16px;
+  }
 }
 
 @media (max-width: 1024px) {
   .main-content {
     margin-left: 240px;
     max-width: calc(100vw - 240px);
+  }
+  
+  .modal-expanded {
+    max-width: 800px;
+    width: 98%;
+  }
+  
+  .modal-body-two-columns {
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    padding: 20px;
   }
 }
 
@@ -2167,6 +2375,30 @@ export default {
     width: 98%;
     max-width: none;
     max-height: 90vh;
+  }
+  
+  .modal-expanded {
+    width: 98%;
+    max-width: none;
+    max-height: 90vh;
+  }
+  
+  /* Cambiar a layout vertical en tablets */
+  .modal-body-two-columns {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .users-column {
+    order: 2;
+    max-height: 300px;
+    padding: 16px;
+  }
+  
+  .form-column {
+    order: 1;
   }
   
   .modal-body {
@@ -2230,6 +2462,52 @@ export default {
     width: 96%;
     margin: 2%;
     max-height: 95vh;
+  }
+  
+  .modal-expanded {
+    width: 96%;
+    margin: 2%;
+    max-height: 95vh;
+  }
+  
+  .modal-body-two-columns {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .users-column {
+    padding: 12px;
+    max-height: 250px;
+  }
+  
+  .users-column-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+  
+  .users-column-header h4 {
+    font-size: 14px;
+  }
+  
+  .selected-count-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+  
+  .user-option-column {
+    padding: 8px;
+  }
+  
+  .user-name-column {
+    font-size: 12px;
+  }
+  
+  .user-email-column {
+    font-size: 10px;
+  }
+  
+  .user-curp-column {
+    font-size: 9px;
   }
   
   .modal-compact .modal-body {

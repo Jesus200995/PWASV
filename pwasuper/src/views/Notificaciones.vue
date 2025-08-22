@@ -86,7 +86,7 @@
         <!-- Contenedor de scroll para notificaciones -->
         <div v-if="!cargando && !error" class="h-full flex flex-col">
           <!-- Lista de notificaciones con scroll propio -->
-          <div class="flex-1 overflow-y-auto bg-transparent rounded-xl p-3 pt-1 notifications-scroll-container">
+          <div class="flex-1 overflow-y-auto bg-transparent rounded-xl p-3 pt-4 notifications-scroll-container">
             <div v-if="notificacionesFiltradas.length > 0" class="space-y-2">
             <div 
               v-for="(notificacion, index) in notificacionesFiltradas" 

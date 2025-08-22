@@ -364,19 +364,22 @@ async def registrar(
     print(f"   foto: {foto.filename}")
     print(f"   timestamp_offline: {timestamp_offline}")
     
-    # ✅ SOLUCIÓN: Usar la misma función que asistencias para manejar zona horaria CDMX
+    # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
     if timestamp_offline:
-        # Usar la función especializada que maneja correctamente CDMX
-        fecha_cdmx, hora_cdmx_datetime, timestamp_for_filename = obtener_fecha_hora_cdmx(timestamp_offline)
-        # Convertir a UTC naive para guardar en BD (consistente con otras tablas)
-        fecha_hora = hora_cdmx_datetime.astimezone(pytz.UTC).replace(tzinfo=None)
-        print(f"📅 ✅ Usando timestamp offline con zona CDMX: {fecha_hora}")
+        try:
+            # Convertir string ISO a datetime
+            fecha_hora = datetime.fromisoformat(timestamp_offline.replace('Z', '+00:00'))
+            print(f"📅 ✅ Usando timestamp offline: {fecha_hora}")
+            # Usar el timestamp offline también para el nombre del archivo
+            timestamp_for_filename = fecha_hora.strftime('%Y%m%d%H%M%S')
+        except Exception as e:
+            print(f"⚠️ Error parseando timestamp offline: {e}, usando tiempo actual")
+            fecha_hora = datetime.utcnow()
+            timestamp_for_filename = fecha_hora.strftime('%Y%m%d%H%M%S')
     else:
-        # ✅ SOLUCIÓN: Usar función CDMX en lugar de datetime.utcnow()
-        fecha_cdmx, hora_cdmx_datetime, timestamp_for_filename = obtener_fecha_hora_cdmx()
-        # Convertir a UTC naive para guardar en BD
-        fecha_hora = hora_cdmx_datetime.astimezone(pytz.UTC).replace(tzinfo=None)
-        print(f"📅 ⏰ Usando timestamp actual CDMX: {fecha_hora}")
+        fecha_hora = datetime.utcnow()
+        timestamp_for_filename = fecha_hora.strftime('%Y%m%d%H%M%S')
+        print(f"📅 ⏰ Usando timestamp actual: {fecha_hora}")
 
     # Guardar la foto en disco usando el timestamp correcto
     ext = os.path.splitext(foto.filename)[1]

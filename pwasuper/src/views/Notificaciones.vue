@@ -72,7 +72,7 @@
         </div>
 
         <!-- Lista de notificaciones -->
-        <div v-if="!cargando && !error" class="bg-transparent backdrop-blur-sm rounded-xl p-3 border border-white border-opacity-20">
+        <div v-if="!cargando && !error" class="bg-transparent rounded-xl p-3">
           <h2 class="text-sm font-semibold text-gray-800 mb-2 modern-title flex items-center">
             <span class="mr-2">📋</span>
             Notificaciones
@@ -88,10 +88,10 @@
               v-for="(notificacion, index) in notificacionesFiltradas" 
               :key="notificacion.id"
               :class="[
-                'notification-item bg-white rounded-xl p-4 hover:bg-opacity-70 transition-all duration-300 cursor-pointer shadow-sm border-2 hover:shadow-lg relative',
+                'notification-item rounded-xl p-4 transition-all duration-300 cursor-pointer shadow-lg border-2 hover:shadow-xl relative',
                 notificacion.leida 
-                  ? 'bg-opacity-40 border-gray-200 hover:border-gray-300' 
-                  : 'bg-opacity-60 border-red-300 hover:border-red-400 shadow-red-100'
+                  ? 'bg-white border-gray-300 hover:border-gray-400 hover:bg-gray-50' 
+                  : 'bg-red-50 border-red-400 hover:border-red-500 hover:bg-red-100 shadow-red-200'
               ]"
               @click="abrirDetalleNotificacion(notificacion)"
             >
@@ -1034,13 +1034,11 @@ onBeforeUnmount(() => {
 /* Estilos para notificaciones */
 .notification-item {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* Eliminado backdrop-filter para hacer las notificaciones sólidas */
 }
 
 .notification-item:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* Círculos de notificación con efecto mejorado */
@@ -1098,42 +1096,38 @@ onBeforeUnmount(() => {
     inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
-/* Notificaciones no leídas - Efecto guinda */
-.notification-item.border-red-300 {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.7) 0%, 
-    rgba(254, 226, 226, 0.8) 50%, 
-    rgba(255, 255, 255, 0.6) 100%) !important;
+/* Notificaciones no leídas - Fondo rojo sólido */
+.notification-item.bg-red-50 {
+  background-color: #fef2f2 !important;
   box-shadow: 
-    0 4px 12px rgba(220, 38, 38, 0.2),
-    0 2px 4px rgba(220, 38, 38, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 0 1px rgba(220, 38, 38, 0.1);
-  animation: subtle-red-glow 3s ease-in-out infinite;
+    0 4px 12px rgba(220, 38, 38, 0.25),
+    0 2px 4px rgba(220, 38, 38, 0.15);
+  border-color: #f87171;
 }
 
-.notification-item.border-red-300:hover {
-  border-color: #f87171 !important;
+.notification-item.bg-red-50:hover {
+  background-color: #fee2e2 !important;
+  border-color: #ef4444 !important;
   box-shadow: 
-    0 8px 25px rgba(220, 38, 38, 0.3),
-    0 4px 12px rgba(220, 38, 38, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 0 0 1px rgba(220, 38, 38, 0.2);
+    0 8px 20px rgba(220, 38, 38, 0.3),
+    0 4px 8px rgba(220, 38, 38, 0.2);
 }
 
-/* Notificaciones leídas */
-.notification-item.border-gray-200 {
+/* Notificaciones leídas - Fondo blanco sólido */
+.notification-item.bg-white {
+  background-color: #ffffff !important;
   box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+  border-color: #d1d5db;
 }
 
-.notification-item.border-gray-200:hover {
+.notification-item.bg-white:hover {
+  background-color: #f9fafb !important;
+  border-color: #9ca3af !important;
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 /* Campanita animada */
@@ -1179,23 +1173,6 @@ onBeforeUnmount(() => {
   }
   20%, 40%, 60%, 80% {
     transform: rotate(8deg);
-  }
-}
-
-@keyframes subtle-red-glow {
-  0%, 100% {
-    box-shadow: 
-      0 4px 12px rgba(220, 38, 38, 0.15),
-      0 2px 4px rgba(220, 38, 38, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25),
-      0 0 0 1px rgba(220, 38, 38, 0.08);
-  }
-  50% {
-    box-shadow: 
-      0 6px 18px rgba(220, 38, 38, 0.25),
-      0 3px 6px rgba(220, 38, 38, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.35),
-      0 0 0 1px rgba(220, 38, 38, 0.15);
   }
 }
 

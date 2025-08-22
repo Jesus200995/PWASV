@@ -83,15 +83,15 @@
           <div class="green-line mb-3"></div>
           
           <!-- Lista de notificaciones -->
-          <div v-if="notificacionesFiltradas.length > 0" class="space-y-3">
+          <div v-if="notificacionesFiltradas.length > 0" class="space-y-2">
             <div 
               v-for="(notificacion, index) in notificacionesFiltradas" 
               :key="notificacion.id"
               :class="[
-                'notification-item rounded-xl p-4 transition-all duration-300 cursor-pointer shadow-lg border-2 hover:shadow-xl relative',
+                'notification-item rounded-xl p-3 transition-all duration-300 cursor-pointer shadow-lg border-2 hover:shadow-xl relative',
                 notificacion.leida 
                   ? 'bg-white border-gray-300 hover:border-gray-400 hover:bg-gray-50' 
-                  : 'bg-red-50 border-red-400 hover:border-red-500 hover:bg-red-100 shadow-red-200'
+                  : 'bg-red-50 border-red-400 hover:border-red-500 hover:bg-red-100'
               ]"
               @click="abrirDetalleNotificacion(notificacion)"
             >
@@ -108,8 +108,8 @@
                 <!-- Icono de tipo -->
                 <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
                      :class="notificacion.leida 
-                       ? 'bg-green-600 shadow-lg shadow-green-200' 
-                       : 'bg-red-600 shadow-lg shadow-red-200'">
+                       ? 'bg-green-600 shadow-lg shadow-gray-200' 
+                       : 'bg-red-600 shadow-lg shadow-gray-200'">
                   <!-- Ícono de correo blanco -->
                   <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
@@ -1100,8 +1100,8 @@ onBeforeUnmount(() => {
 .notification-item.bg-red-50 {
   background-color: #fef2f2 !important;
   box-shadow: 
-    0 4px 12px rgba(220, 38, 38, 0.25),
-    0 2px 4px rgba(220, 38, 38, 0.15);
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.05);
   border-color: #f87171;
 }
 
@@ -1109,8 +1109,8 @@ onBeforeUnmount(() => {
   background-color: #fee2e2 !important;
   border-color: #ef4444 !important;
   box-shadow: 
-    0 8px 20px rgba(220, 38, 38, 0.3),
-    0 4px 8px rgba(220, 38, 38, 0.2);
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 /* Notificaciones leídas - Fondo blanco sólido */
@@ -1134,10 +1134,9 @@ onBeforeUnmount(() => {
 .bell-container {
   animation: bell-shake 0.8s ease-in-out infinite;
   box-shadow: 
-    0 4px 12px rgba(220, 38, 38, 0.5),
-    0 2px 6px rgba(220, 38, 38, 0.3),
-    0 0 0 2px rgba(255, 255, 255, 0.9),
-    0 0 0 3px rgba(220, 38, 38, 0.4);
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgba(255, 255, 255, 0.9);
   border: 2px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -1245,8 +1244,8 @@ onBeforeUnmount(() => {
     margin-bottom: 0.5rem;
   }
   
-  .space-y-3 > * + * {
-    margin-top: 0.5rem;
+  .space-y-2 > * + * {
+    margin-top: 0.375rem;
   }
 }
 
@@ -1295,8 +1294,8 @@ onBeforeUnmount(() => {
     margin-bottom: 0.375rem;
   }
   
-  .space-y-3 > * + * {
-    margin-top: 0.375rem;
+  .space-y-2 > * + * {
+    margin-top: 0.25rem;
   }
 }
 

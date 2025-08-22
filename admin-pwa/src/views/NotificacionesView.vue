@@ -236,22 +236,30 @@
 
             <!-- Selector de usuarios específicos -->
             <div v-if="!formNotificacion.enviada_a_todos" class="form-group-compact">
+              <label class="selector-label">Seleccionar usuarios</label>
               <div v-if="cargandoUsuarios" class="loading-users-compact">
                 <div class="loading-spinner-small"></div>
                 <span>Cargando...</span>
               </div>
               <div v-else class="users-selector-compact">
-                <input
-                  v-model="busquedaUsuarios"
-                  type="text"
-                  class="form-input-compact"
-                  placeholder="Buscar usuarios..."
-                />
-                <div class="users-list-compact">
+                <div class="search-input-wrapper">
+                  <input
+                    v-model="busquedaUsuarios"
+                    type="text"
+                    class="form-input-compact search-users"
+                    placeholder="🔍 Buscar por nombre, correo o CURP..."
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="users-list-compact" v-show="usuariosFiltrados.length > 0">
+                  <div class="users-list-header" v-if="busquedaUsuarios">
+                    {{ usuariosFiltrados.length }} resultado(s) encontrado(s)
+                  </div>
                   <label
                     v-for="usuario in usuariosFiltrados"
                     :key="usuario.id"
                     class="user-option-compact"
+                    :class="{ 'selected': formNotificacion.usuario_ids.includes(usuario.id) }"
                   >
                     <input
                       v-model="formNotificacion.usuario_ids"
@@ -259,14 +267,23 @@
                       type="checkbox"
                     />
                     <div class="user-info-compact">
-                      <span class="user-name-compact">{{ usuario.nombre_completo }}</span>
-                      <span class="user-email-compact">{{ usuario.correo }}</span>
+                      <span class="user-name-compact">{{ usuario.nombre_completo || usuario.nombre || 'Sin nombre' }}</span>
+                      <span class="user-email-compact">{{ usuario.correo || usuario.email || 'Sin email' }}</span>
+                      <span v-if="usuario.curp" class="user-curp-compact">CURP: {{ usuario.curp }}</span>
                     </div>
                   </label>
                 </div>
-                <small class="selected-count">
-                  {{ formNotificacion.usuario_ids.length }} seleccionado(s)
-                </small>
+                <div v-show="busquedaUsuarios && usuariosFiltrados.length === 0" class="no-users-found">
+                  ❌ No se encontraron usuarios que coincidan con "{{ busquedaUsuarios }}"
+                </div>
+                <div v-show="!busquedaUsuarios && usuarios.length === 0" class="no-users-loaded">
+                  📝 No hay usuarios disponibles
+                </div>
+                <div class="selected-count-wrapper">
+                  <small class="selected-count">
+                    ✅ {{ formNotificacion.usuario_ids.length }} usuario(s) seleccionado(s)
+                  </small>
+                </div>
               </div>
             </div>
 
@@ -504,13 +521,21 @@ export default {
   
   computed: {
     usuariosFiltrados() {
-      if (!this.busquedaUsuarios) return this.usuarios
+      if (!this.busquedaUsuarios.trim()) return this.usuarios
       
-      const busqueda = this.busquedaUsuarios.toLowerCase()
-      return this.usuarios.filter(usuario =>
-        usuario.nombre_completo.toLowerCase().includes(busqueda) ||
-        usuario.correo.toLowerCase().includes(busqueda)
-      )
+      const busqueda = this.busquedaUsuarios.toLowerCase().trim()
+      return this.usuarios.filter(usuario => {
+        // Buscar en nombre completo, nombre, correo, email, CURP y cargo
+        const nombre = (usuario.nombre_completo || usuario.nombre || '').toLowerCase()
+        const email = (usuario.correo || usuario.email || '').toLowerCase()
+        const curp = (usuario.curp || '').toLowerCase()
+        const cargo = (usuario.cargo || '').toLowerCase()
+        
+        return nombre.includes(busqueda) || 
+               email.includes(busqueda) || 
+               curp.includes(busqueda) ||
+               cargo.includes(busqueda)
+      })
     }
   },
   
@@ -551,16 +576,45 @@ export default {
     // ==================== CREAR NOTIFICACIÓN ====================
     
     async cargarUsuarios() {
-      if (this.usuarios.length > 0) return
+      if (this.usuarios.length > 0) {
+        console.log('✅ Usuarios ya cargados:', this.usuarios.length)
+        return
+      }
       
       this.cargandoUsuarios = true
       try {
+        console.log('🔄 Iniciando carga de usuarios...')
         const respuesta = await usuariosService.obtenerUsuarios()
-        this.usuarios = respuesta.usuarios || []
-        console.log('✅ Usuarios cargados:', this.usuarios.length)
+        
+        if (Array.isArray(respuesta)) {
+          this.usuarios = respuesta
+        } else if (respuesta && Array.isArray(respuesta.usuarios)) {
+          this.usuarios = respuesta.usuarios
+        } else {
+          console.warn('⚠️ Respuesta inesperada del servicio:', respuesta)
+          this.usuarios = []
+        }
+        
+        console.log('✅ Usuarios cargados exitosamente:', this.usuarios.length)
+        
+        // Debug: mostrar estructura del primer usuario
+        if (this.usuarios.length > 0) {
+          console.log('🔍 Estructura del primer usuario:', {
+            id: this.usuarios[0].id,
+            nombre_completo: this.usuarios[0].nombre_completo,
+            correo: this.usuarios[0].correo,
+            curp: this.usuarios[0].curp,
+            cargo: this.usuarios[0].cargo,
+            propiedades: Object.keys(this.usuarios[0])
+          })
+        } else {
+          console.warn('⚠️ No se encontraron usuarios en la respuesta')
+        }
+        
       } catch (error) {
         console.error('❌ Error cargando usuarios:', error)
-        this.mostrarToast('Error al cargar usuarios', 'error')
+        this.mostrarToast('Error al cargar usuarios: ' + error.message, 'error')
+        this.usuarios = []
       } finally {
         this.cargandoUsuarios = false
       }
@@ -568,6 +622,7 @@ export default {
 
     limpiarUsuariosSeleccionados() {
       this.formNotificacion.usuario_ids = []
+      this.busquedaUsuarios = ''
     },
 
     manejarArchivoSeleccionado(evento) {
@@ -1438,34 +1493,79 @@ export default {
   padding: 8px;
 }
 
+.selector-label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+}
+
 .users-selector-compact {
   border: 1px solid rgba(76, 175, 80, 0.3);
   border-radius: 8px;
-  padding: 12px;
+  padding: 10px;
   background: #f9f9f9;
 }
 
+.search-input-wrapper {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.search-users {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  border-radius: 6px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.search-users:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
 .users-list-compact {
-  max-height: 150px;
+  max-height: 140px;
   overflow-y: auto;
   border: 1px solid rgba(76, 175, 80, 0.2);
   border-radius: 6px;
   background: white;
-  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.users-list-header {
+  padding: 6px 8px;
+  background: rgba(76, 175, 80, 0.1);
+  color: #2E7D32;
+  font-size: 11px;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.2);
 }
 
 .user-option-compact {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 6px 8px;
   border-bottom: 1px solid rgba(76, 175, 80, 0.1);
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .user-option-compact:hover {
   background: rgba(76, 175, 80, 0.05);
+}
+
+.user-option-compact.selected {
+  background: rgba(76, 175, 80, 0.1);
+  border-left: 3px solid #4CAF50;
 }
 
 .user-option-compact:last-child {
@@ -1476,6 +1576,8 @@ export default {
   width: 14px;
   height: 14px;
   accent-color: #4CAF50;
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .user-info-compact {
@@ -1483,17 +1585,61 @@ export default {
   flex-direction: column;
   gap: 1px;
   flex: 1;
+  min-width: 0;
 }
 
 .user-name-compact {
   font-weight: 500;
   color: #333;
-  font-size: 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-email-compact {
-  font-size: 11px;
+  font-size: 10px;
   color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-curp-compact {
+  font-size: 9px;
+  color: #4CAF50;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.no-users-found, .no-users-loaded {
+  padding: 12px 8px;
+  text-align: center;
+  color: #666;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.no-users-found {
+  color: #d32f2f;
+}
+
+.no-users-loaded {
+  color: #ff9800;
+}
+
+.selected-count-wrapper {
+  padding-top: 4px;
+  border-top: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.selected-count {
+  font-size: 11px;
+  color: #4CAF50;
+  font-weight: 500;
+  display: block;
 }
 
 .file-input-container-compact {
@@ -2101,6 +2247,18 @@ export default {
   
   .users-list-compact {
     max-height: 120px;
+  }
+  
+  .user-name-compact {
+    font-size: 10px;
+  }
+  
+  .user-email-compact {
+    font-size: 9px;
+  }
+  
+  .users-list-header {
+    font-size: 10px;
   }
   
   .attachment-preview {

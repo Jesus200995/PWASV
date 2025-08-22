@@ -9,8 +9,8 @@
 
     <div class="absolute inset-0 overflow-hidden" style="z-index: 1;">
       <!-- Header fijo de notificaciones -->
-      <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-3 sm:px-4 lg:px-5 pt-2 sm:pt-3">
-        <div class="w-full max-w-sm mx-auto">
+      <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-2 sm:px-3 lg:px-4 pt-2 sm:pt-3">
+        <div class="w-full max-w-md mx-auto">
           <div class="glass-card mb-0 relative">
             <div class="text-center mb-1 relative py-0.5">
               <h1 class="text-sm font-medium text-gray-800 modern-title">
@@ -58,7 +58,7 @@
 
       <!-- Contenido con scroll -->
       <div class="absolute inset-0 overflow-hidden pt-40 sm:pt-44 pb-2">
-        <div class="page-container w-full max-w-sm mx-auto relative z-10 p-2 sm:p-3 lg:p-4 h-full">
+        <div class="page-container w-full max-w-md mx-auto relative z-10 px-2 sm:px-3 lg:px-4 py-1 h-full">
 
         <!-- Estado de carga -->
         <div v-if="cargando" class="glass-card mb-2">
@@ -86,7 +86,7 @@
         <!-- Contenedor de scroll para notificaciones -->
         <div v-if="!cargando && !error" class="h-full flex flex-col">
           <!-- Lista de notificaciones con scroll propio -->
-          <div class="flex-1 overflow-y-auto bg-transparent rounded-xl p-3 pt-4 notifications-scroll-container">
+          <div class="flex-1 overflow-y-auto bg-transparent rounded-xl px-2 py-4 notifications-scroll-container">
             <div v-if="notificacionesFiltradas.length > 0" class="space-y-2">
             <div 
               v-for="(notificacion, index) in notificacionesFiltradas" 
@@ -100,8 +100,8 @@
               @click="abrirDetalleNotificacion(notificacion)"
             >
               <!-- Campanita animada para notificaciones no leídas -->
-              <div v-if="!notificacion.leida" class="absolute -top-2 -right-2 z-20">
-                <div class="bg-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-lg bell-container">
+              <div v-if="!notificacion.leida" class="absolute -top-1 -right-1 z-20">
+                <div class="bg-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-sm bell-container">
                   <svg class="bell-icon w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
                   </svg>
@@ -1139,18 +1139,15 @@ onBeforeUnmount(() => {
 .bell-container {
   animation: bell-shake 0.8s ease-in-out infinite;
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    0 2px 6px rgba(0, 0, 0, 0.1),
-    0 0 0 2px rgba(255, 255, 255, 0.9);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+    0 2px 6px rgba(0, 0, 0, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.9);
 }
 
 .bell-icon {
   animation: bell-ring 1.2s ease-in-out infinite;
   transform-origin: top center;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 @keyframes bell-shake {
@@ -1211,16 +1208,22 @@ onBeforeUnmount(() => {
 /* Mejoras de responsividad para pantallas móviles */
 @media (max-width: 480px) {
   .page-container {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    max-width: calc(100vw - 0.5rem);
   }
   
   .glass-card {
-    padding: 0.625rem;
-    margin-bottom: 0.375rem;
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
     border-radius: 12px;
+  }
+  
+  .notifications-scroll-container {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
   }
   
   .text-base {
@@ -1256,15 +1259,20 @@ onBeforeUnmount(() => {
 
 @media (max-width: 375px) {
   .page-container {
-    padding-left: 0.375rem;
-    padding-right: 0.375rem;
-    max-width: calc(100vw - 0.75rem);
+    padding-left: 0.125rem;
+    padding-right: 0.125rem;
+    max-width: calc(100vw - 0.25rem);
   }
   
   .glass-card {
-    padding: 0.5rem;
-    margin-bottom: 0.25rem;
+    padding: 0.375rem;
+    margin-bottom: 0.125rem;
     border-radius: 10px;
+  }
+  
+  .notifications-scroll-container {
+    padding-left: 0.125rem !important;
+    padding-right: 0.125rem !important;
   }
   
   .text-base {
@@ -1307,13 +1315,20 @@ onBeforeUnmount(() => {
 /* Para pantallas grandes */
 @media (min-width: 768px) {
   .page-container {
-    max-width: 350px;
+    max-width: 450px;
     padding: 0.75rem;
   }
   
   .glass-card {
     padding: 1rem;
     margin-bottom: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    max-width: 500px;
+    padding: 1rem;
   }
 }
 

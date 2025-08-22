@@ -41,12 +41,24 @@
               </button>
             </div>
           </div>
+          
+          <!-- Título de notificaciones fijo -->
+          <div class="bg-transparent rounded-xl p-3">
+            <h2 class="text-sm font-semibold text-gray-800 mb-2 modern-title flex items-center">
+              <span class="mr-2">📋</span>
+              Notificaciones
+              <span v-if="notificacionesFiltradas.length > 0" class="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                {{ notificacionesFiltradas.length }}
+              </span>
+            </h2>
+            <div class="green-line mb-0"></div>
+          </div>
         </div>
       </div>
 
       <!-- Contenido con scroll -->
-      <div class="absolute inset-0 overflow-y-auto pt-40 sm:pt-44 pb-3">
-        <div class="page-container w-full max-w-sm mx-auto relative z-10 p-3 sm:p-4 lg:p-5">
+      <div class="absolute inset-0 overflow-hidden pt-52 sm:pt-56 pb-3">
+        <div class="page-container w-full max-w-sm mx-auto relative z-10 p-3 sm:p-4 lg:p-5 h-full">
 
         <!-- Estado de carga -->
         <div v-if="cargando" class="glass-card mb-2">
@@ -71,19 +83,11 @@
           </div>
         </div>
 
-        <!-- Lista de notificaciones -->
-        <div v-if="!cargando && !error" class="bg-transparent rounded-xl p-3">
-          <h2 class="text-sm font-semibold text-gray-800 mb-2 modern-title flex items-center">
-            <span class="mr-2">📋</span>
-            Notificaciones
-            <span v-if="notificacionesFiltradas.length > 0" class="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-              {{ notificacionesFiltradas.length }}
-            </span>
-          </h2>
-          <div class="green-line mb-3"></div>
-          
-          <!-- Lista de notificaciones -->
-          <div v-if="notificacionesFiltradas.length > 0" class="space-y-2">
+        <!-- Contenedor de scroll para notificaciones -->
+        <div v-if="!cargando && !error" class="h-full flex flex-col">
+          <!-- Lista de notificaciones con scroll propio -->
+          <div class="flex-1 overflow-y-auto bg-transparent rounded-xl p-3 pt-1 notifications-scroll-container">
+            <div v-if="notificacionesFiltradas.length > 0" class="space-y-2">
             <div 
               v-for="(notificacion, index) in notificacionesFiltradas" 
               :key="notificacion.id"
@@ -225,17 +229,18 @@
               Ver todas las notificaciones
             </button>
           </div>
-        </div>
+          </div>
 
-        <!-- Botón cargar más -->
-        <div v-if="!cargando && !error && puedeCargarMas" class="text-center mt-3">
-          <button 
-            @click="cargarMasNotificaciones"
-            :disabled="cargandoMas"
-            class="px-4 py-2 bg-green-500 text-white text-xs rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
-          >
-            {{ cargandoMas ? 'Cargando...' : 'Cargar más' }}
-          </button>
+          <!-- Botón cargar más -->
+          <div v-if="puedeCargarMas" class="text-center mt-3 flex-shrink-0">
+            <button 
+              @click="cargarMasNotificaciones"
+              :disabled="cargandoMas"
+              class="px-4 py-2 bg-green-500 text-white text-xs rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+            >
+              {{ cargandoMas ? 'Cargando...' : 'Cargar más' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1317,6 +1322,29 @@ onBeforeUnmount(() => {
   .glass-card {
     background: rgba(255, 255, 255, 0.85);
   }
+}
+
+/* Contenedor de scroll de notificaciones */
+.notifications-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 197, 94, 0.3) transparent;
+}
+
+.notifications-scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.notifications-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notifications-scroll-container::-webkit-scrollbar-thumb {
+  background-color: rgba(34, 197, 94, 0.3);
+  border-radius: 2px;
+}
+
+.notifications-scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(34, 197, 94, 0.5);
 }
 
 /* Estilos para vista previa de archivos */

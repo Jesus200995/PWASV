@@ -148,7 +148,7 @@
 
     <!-- Modal Crear Notificación -->
     <div v-if="mostrarModalCrear" class="modal-overlay" @click="cerrarModalCrear">
-      <div class="modal-content" @click.stop>
+      <div class="modal-content modal-compact" @click.stop>
         <div class="modal-header">
           <h3>Nueva Notificación</h3>
           <button class="btn-close" @click="cerrarModalCrear">×</button>
@@ -157,126 +157,123 @@
         <div class="modal-body">
           <form @submit.prevent="crearNotificacion">
             <!-- Título -->
-            <div class="form-group">
+            <div class="form-group-compact">
               <label for="titulo">Título *</label>
               <input
                 id="titulo"
                 v-model="formNotificacion.titulo"
                 type="text"
-                class="form-input"
+                class="form-input-compact"
                 placeholder="Título de la notificación"
                 maxlength="150"
                 required
               />
-              <small class="char-count">{{ formNotificacion.titulo.length }}/150 caracteres</small>
+              <small class="char-count">{{ formNotificacion.titulo.length }}/150</small>
             </div>
 
             <!-- Subtítulo -->
-            <div class="form-group">
+            <div class="form-group-compact">
               <label for="subtitulo">Subtítulo</label>
               <input
                 id="subtitulo"
                 v-model="formNotificacion.subtitulo"
                 type="text"
-                class="form-input"
+                class="form-input-compact"
                 placeholder="Subtítulo opcional"
                 maxlength="200"
               />
-              <small class="char-count">{{ formNotificacion.subtitulo.length }}/200 caracteres</small>
+              <small class="char-count">{{ formNotificacion.subtitulo.length }}/200</small>
             </div>
 
             <!-- Descripción -->
-            <div class="form-group">
+            <div class="form-group-compact">
               <label for="descripcion">Descripción</label>
               <textarea
                 id="descripcion"
                 v-model="formNotificacion.descripcion"
-                class="form-textarea"
-                placeholder="Descripción detallada de la notificación"
-                rows="4"
+                class="form-textarea-compact"
+                placeholder="Descripción detallada"
+                rows="3"
               ></textarea>
             </div>
 
             <!-- Enlace URL -->
-            <div class="form-group">
+            <div class="form-group-compact">
               <label for="enlace_url">Enlace URL (opcional)</label>
               <input
                 id="enlace_url"
                 v-model="formNotificacion.enlace_url"
                 type="url"
-                class="form-input"
+                class="form-input-compact"
                 placeholder="https://ejemplo.com"
               />
             </div>
 
             <!-- Destinatarios -->
-            <div class="form-group">
+            <div class="form-group-compact">
               <label>Destinatarios</label>
-              <div class="radio-group">
-                <label class="radio-option">
+              <div class="radio-group-compact">
+                <label class="radio-option-compact">
                   <input
                     v-model="formNotificacion.enviada_a_todos"
                     type="radio"
                     :value="true"
                     @change="limpiarUsuariosSeleccionados"
                   />
-                  <span class="radio-text">Todos los usuarios</span>
+                  <span class="radio-text">Todos</span>
                 </label>
-                <label class="radio-option">
+                <label class="radio-option-compact">
                   <input
                     v-model="formNotificacion.enviada_a_todos"
                     type="radio"
                     :value="false"
                     @change="cargarUsuarios"
                   />
-                  <span class="radio-text">Usuarios específicos</span>
+                  <span class="radio-text">Específicos</span>
                 </label>
               </div>
             </div>
 
             <!-- Selector de usuarios específicos -->
-            <div v-if="!formNotificacion.enviada_a_todos" class="form-group">
-              <label>Seleccionar usuarios</label>
-              <div v-if="cargandoUsuarios" class="loading-users">
+            <div v-if="!formNotificacion.enviada_a_todos" class="form-group-compact">
+              <div v-if="cargandoUsuarios" class="loading-users-compact">
                 <div class="loading-spinner-small"></div>
-                <span>Cargando usuarios...</span>
+                <span>Cargando...</span>
               </div>
-              <div v-else class="users-selector">
-                <div class="users-search">
-                  <input
-                    v-model="busquedaUsuarios"
-                    type="text"
-                    class="form-input"
-                    placeholder="Buscar usuarios..."
-                  />
-                </div>
-                <div class="users-list">
+              <div v-else class="users-selector-compact">
+                <input
+                  v-model="busquedaUsuarios"
+                  type="text"
+                  class="form-input-compact"
+                  placeholder="Buscar usuarios..."
+                />
+                <div class="users-list-compact">
                   <label
                     v-for="usuario in usuariosFiltrados"
                     :key="usuario.id"
-                    class="user-option"
+                    class="user-option-compact"
                   >
                     <input
                       v-model="formNotificacion.usuario_ids"
                       :value="usuario.id"
                       type="checkbox"
                     />
-                    <span class="user-info">
-                      <span class="user-name">{{ usuario.nombre_completo }}</span>
-                      <span class="user-email">{{ usuario.correo }}</span>
-                    </span>
+                    <div class="user-info-compact">
+                      <span class="user-name-compact">{{ usuario.nombre_completo }}</span>
+                      <span class="user-email-compact">{{ usuario.correo }}</span>
+                    </div>
                   </label>
                 </div>
-                <div class="selected-count">
-                  {{ formNotificacion.usuario_ids.length }} usuario(s) seleccionado(s)
-                </div>
+                <small class="selected-count">
+                  {{ formNotificacion.usuario_ids.length }} seleccionado(s)
+                </small>
               </div>
             </div>
 
             <!-- Archivo adjunto -->
-            <div class="form-group">
+            <div class="form-group-compact">
               <label for="archivo">Archivo adjunto</label>
-              <div class="file-input-container">
+              <div class="file-input-container-compact">
                 <input
                   id="archivo"
                   ref="archivoInput"
@@ -285,29 +282,25 @@
                   accept=".jpg,.jpeg,.png,.gif,.pdf,.mp4,.avi,.mov,.wmv"
                   @change="manejarArchivoSeleccionado"
                 />
-                <label for="archivo" class="file-input-label">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <label for="archivo" class="file-input-label-compact">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14,2 14,8 20,8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
                   </svg>
-                  {{ archivoSeleccionado ? archivoSeleccionado.name : 'Seleccionar archivo' }}
+                  <span class="file-text">{{ archivoSeleccionado ? archivoSeleccionado.name : 'Seleccionar archivo' }}</span>
                 </label>
               </div>
-              <small class="file-help">
-                Formatos: JPG, PNG, PDF, MP4 (máximo 50MB)
-              </small>
+              <small class="file-help-compact">JPG, PNG, PDF, MP4 (máx. 50MB)</small>
             </div>
 
             <!-- Botones -->
-            <div class="modal-actions">
-              <button type="button" class="btn-secondary" @click="cerrarModalCrear">
+            <div class="modal-actions-compact">
+              <button type="button" class="btn-secondary-compact" @click="cerrarModalCrear">
                 Cancelar
               </button>
-              <button type="submit" class="btn-primary" :disabled="enviandoNotificacion">
+              <button type="submit" class="btn-primary-compact" :disabled="enviandoNotificacion">
                 <span v-if="enviandoNotificacion" class="loading-spinner-small"></span>
-                {{ enviandoNotificacion ? 'Enviando...' : 'Enviar Notificación' }}
+                {{ enviandoNotificacion ? 'Enviando...' : 'Enviar' }}
               </button>
             </div>
           </form>
@@ -1252,6 +1245,11 @@ export default {
     0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
+.modal-compact {
+  max-width: 480px;
+  width: 95%;
+}
+
 .modal-detail {
   max-width: 700px;
 }
@@ -1368,6 +1366,227 @@ export default {
 
 .radio-text {
   font-weight: 500;
+}
+
+/* === COMPACT FORM STYLES === */
+.form-group-compact {
+  margin-bottom: 14px;
+}
+
+.form-group-compact label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+}
+
+.form-input-compact, .form-textarea-compact {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-input-compact:focus, .form-textarea-compact:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.form-textarea-compact {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.radio-group-compact {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.radio-option-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+}
+
+.radio-option-compact input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #4CAF50;
+}
+
+.radio-option-compact .radio-text {
+  font-weight: 500;
+}
+
+.loading-users-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 12px;
+  padding: 8px;
+}
+
+.users-selector-compact {
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  background: #f9f9f9;
+}
+
+.users-list-compact {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  border-radius: 6px;
+  background: white;
+  margin-top: 8px;
+}
+
+.user-option-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.user-option-compact:hover {
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.user-option-compact:last-child {
+  border-bottom: none;
+}
+
+.user-option-compact input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #4CAF50;
+}
+
+.user-info-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+}
+
+.user-name-compact {
+  font-weight: 500;
+  color: #333;
+  font-size: 12px;
+}
+
+.user-email-compact {
+  font-size: 11px;
+  color: #666;
+}
+
+.file-input-container-compact {
+  position: relative;
+}
+
+.file-input-label-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px dashed rgba(76, 175, 80, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666;
+  font-weight: 500;
+  background: rgba(76, 175, 80, 0.05);
+  font-size: 12px;
+}
+
+.file-input-label-compact:hover {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.file-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.file-help-compact {
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+  display: block;
+}
+
+.modal-actions-compact {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.btn-secondary-compact {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  color: #333;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-secondary-compact:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary-compact {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary-compact:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-primary-compact:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* === USER SELECTOR === */
@@ -1798,8 +2017,18 @@ export default {
     max-height: 85vh;
   }
   
+  .modal-compact {
+    width: 98%;
+    max-width: none;
+    max-height: 90vh;
+  }
+  
   .modal-body {
     padding: 20px 16px;
+  }
+  
+  .modal-compact .modal-body {
+    padding: 16px 12px;
   }
   
   .notifications-table {
@@ -1851,9 +2080,27 @@ export default {
     margin: 1%;
   }
   
-  .radio-group {
+  .modal-compact {
+    width: 96%;
+    margin: 2%;
+    max-height: 95vh;
+  }
+  
+  .modal-compact .modal-body {
+    padding: 12px 8px;
+  }
+  
+  .form-group-compact {
+    margin-bottom: 12px;
+  }
+  
+  .radio-group-compact {
     flex-direction: column;
     gap: 8px;
+  }
+  
+  .users-list-compact {
+    max-height: 120px;
   }
   
   .attachment-preview {
@@ -1864,6 +2111,21 @@ export default {
   
   .attachment-actions {
     justify-content: center;
+  }
+  
+  .modal-actions-compact {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  
+  .btn-secondary-compact,
+  .btn-primary-compact {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .file-text {
+    max-width: 150px;
   }
 }
 </style>

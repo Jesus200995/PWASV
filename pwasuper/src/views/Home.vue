@@ -1283,6 +1283,8 @@ async function enviarRegistro() {
     formData.append("descripcion", descripcionRegistro.value);
     formData.append("foto", archivoFotoRegistro.value);
     formData.append("tipo", "actividad"); // Especificar explícitamente que es un registro de actividad
+    // ✅ SOLUCIÓN: Agregar timestamp para que el backend use hora CDMX
+    formData.append("timestamp_offline", new Date().toISOString());
 
     // Enviar datos al backend
     const response = await axios.post(`${API_URL}/registro`, formData, {

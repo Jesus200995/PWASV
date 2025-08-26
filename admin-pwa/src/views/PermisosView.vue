@@ -377,6 +377,7 @@ export default {
       this.error = null
       
       try {
+        console.log('🔄 Cargando usuarios con servicio original...')
         const respuesta = await permisosService.listarUsuarios()
         this.usuariosAdmin = respuesta.usuarios || []
         console.log('✅ Usuarios admin cargados:', this.usuariosAdmin.length)

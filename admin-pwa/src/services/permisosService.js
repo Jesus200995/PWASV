@@ -16,9 +16,12 @@ const api = axios.create({
 // Interceptor para agregar token de autorización
 api.interceptors.request.use(
   (config) => {
+    // Por ahora no requerir autenticación para estos endpoints
     const token = localStorage.getItem('admin_token')
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      // Solo agregar el token si es necesario
+      // config.headers.Authorization = `Bearer ${token}`
+      console.log('🔐 Token disponible:', token.substring(0, 20) + '...')
     }
     return config
   },
@@ -36,9 +39,11 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error('❌ Error en respuesta:', error.response?.status, error.config?.url)
+    console.error('❌ Detalles del error:', error.response?.data)
     
     // Si el token es inválido, redirigir al login
     if (error.response?.status === 401) {
+      console.log('🔄 Token inválido, eliminando token y redirigiendo al login')
       localStorage.removeItem('admin_token')
       window.location.href = '/login'
     }

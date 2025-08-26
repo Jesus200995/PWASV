@@ -8,6 +8,7 @@ import ConfiguracionView from '../views/ConfiguracionView.vue'
 import AsistenciaView from '../views/AsistenciaView.vue'
 import VisorMapView from '../views/VisorMap.vue'
 import NotificacionesView from '../views/NotificacionesView.vue'
+import PermisosView from '../views/PermisosView.vue'
 
 const routes = [
   {
@@ -59,6 +60,12 @@ const routes = [
     path: '/notificaciones',
     name: 'Notificaciones',
     component: NotificacionesView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/permisos',
+    name: 'Permisos',
+    component: PermisosView,
     meta: { requiresAuth: true }
   },
   {

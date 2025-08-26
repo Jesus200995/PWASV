@@ -323,6 +323,28 @@
           </router-link>
         </li>
         
+        <li class="nav-item" :class="{ active: $route.name === 'Permisos' }">
+          <router-link to="/permisos" class="nav-link">
+            <div class="nav-icon-wrapper">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Ícono de permisos con candado y usuario -->
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <circle cx="12" cy="16" r="1"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                <!-- Elementos decorativos premium -->
+                <circle cx="12" cy="16" r="0.5" opacity="0.4" fill="currentColor"/>
+                <path d="M9 11h6" opacity="0.3"/>
+                <path d="M10 19h4" opacity="0.2"/>
+                <!-- Usuario pequeño en la esquina -->
+                <circle cx="18" cy="6" r="2" opacity="0.6"/>
+                <path d="M16.5 8.5c0.5 0.5 1 0.5 1.5 0.5s1-0 1.5-0.5" opacity="0.6"/>
+              </svg>
+            </div>
+            <span class="nav-text">Permisos de Usuarios</span>
+            <div class="nav-glow"></div>
+          </router-link>
+        </li>
+        
         <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }">
           <router-link to="/configuracion" class="nav-link">
             <div class="nav-icon-wrapper">

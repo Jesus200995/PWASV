@@ -58,6 +58,7 @@ class UserCreate(BaseModel):
     contrasena: str
     curp: str  # CURP obligatoria
     telefono: str  # Teléfono obligatorio
+    rol: str = 'user'  # Rol por defecto es user
 
 class UserLogin(BaseModel):
     correo: str
@@ -210,12 +211,16 @@ async def aceptar_terminos(terminos: TerminosAceptados):
 
 @app.post("/usuarios")
 async def crear_usuario(usuario: UserCreate):
-    """Crear usuario y automáticamente registrar aceptación de términos"""
+    """Crear usuario con rol y automáticamente registrar aceptación de términos"""
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
             
-        print(f"👤 Creando usuario: {usuario.correo}")
+        print(f"👤 Creando usuario: {usuario.correo} con rol {usuario.rol}")
+        
+        # Validación de rol
+        if usuario.rol not in ['admin', 'user']:
+            raise HTTPException(status_code=400, detail="Rol inválido. Debe ser 'admin' o 'user'")
         
         # Validación de CURP obligatoria
         if not usuario.curp or not usuario.curp.strip():
@@ -252,10 +257,21 @@ async def crear_usuario(usuario: UserCreate):
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="La CURP ya está registrada")
         
-        # Insertar usuario con CURP y teléfono (contraseña sin encriptar)
+        # Verificar si la columna 'rol' existe, si no, agregarla
+        cursor.execute("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'usuarios' AND column_name = 'rol'
+        """)
+        
+        if not cursor.fetchone():
+            print("📝 Agregando columna 'rol' a la tabla usuarios")
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN rol VARCHAR(10) DEFAULT 'user'")
+            conn.commit()
+        
+        # Insertar usuario con CURP, teléfono y rol (contraseña sin encriptar)
         cursor.execute(
-            "INSERT INTO usuarios (correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
-            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, usuario.contrasena, curp_upper, usuario.telefono)
+            "INSERT INTO usuarios (correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono, rol) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, usuario.contrasena, curp_upper, usuario.telefono, usuario.rol)
         )
         
         user_id = cursor.fetchone()[0]
@@ -520,10 +536,24 @@ async def obtener_usuarios():
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Obtener todos los usuarios con CURP, teléfono y contraseña
-        cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono FROM usuarios ORDER BY id DESC"
-        )
+        # Verificar si la columna 'rol' existe
+        cursor.execute("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'usuarios' AND column_name = 'rol'
+        """)
+        
+        tiene_columna_rol = bool(cursor.fetchone())
+        
+        if tiene_columna_rol:
+            # Obtener todos los usuarios con rol
+            cursor.execute(
+                "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, rol FROM usuarios ORDER BY id DESC"
+            )
+        else:
+            # Obtener usuarios sin rol (por compatibilidad)
+            cursor.execute(
+                "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono FROM usuarios ORDER BY id DESC"
+            )
         
         resultados = cursor.fetchall()
         print(f"📊 Encontrados {len(resultados)} usuarios")
@@ -538,12 +568,13 @@ async def obtener_usuarios():
                 "cargo": row[3],
                 "supervisor": row[4],
                 "curp": row[5],
-                "contrasena": row[6],  # Incluir contraseña
-                "telefono": row[7] if len(row) > 7 else None  # Incluir teléfono si existe
+                "contrasena": row[6],
+                "telefono": row[7] if len(row) > 7 else None,
+                "rol": row[8] if tiene_columna_rol and len(row) > 8 else 'user'
             }
             usuarios.append(usuario)
         
-        print(f"✅ Usuarios procesados correctamente")
+        print(f"✅ Usuarios procesados correctamente con información de roles")
         return {"usuarios": usuarios}
         
     except psycopg2.Error as e:
@@ -638,14 +669,28 @@ async def obtener_usuario(user_id: int):
         raise HTTPException(status_code=500, detail=f"Error al obtener usuario: {str(e)}")
 
 # Endpoint para actualizar un usuario específico
+class UserUpdate(BaseModel):
+    correo: str
+    nombre_completo: str
+    cargo: str
+    supervisor: str = None
+    curp: str = None
+    telefono: str = None
+    rol: str = 'user'
+    nueva_contrasena: Optional[str] = None  # Contraseña opcional para actualización
+
 @app.put("/usuarios/{user_id}")
-async def actualizar_usuario(user_id: int, usuario: UserCreate):
-    """Actualiza los datos de un usuario específico"""
+async def actualizar_usuario(user_id: int, usuario: UserUpdate):
+    """Actualiza los datos de un usuario específico incluyendo rol y contraseña opcional"""
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
         print(f"✏️ Actualizando usuario {user_id}...")
+        
+        # Validación de rol
+        if usuario.rol not in ['admin', 'user']:
+            raise HTTPException(status_code=400, detail="Rol inválido. Debe ser 'admin' o 'user'")
         
         # Validación de CURP si se proporciona
         if usuario.curp and usuario.curp.strip():
@@ -669,25 +714,43 @@ async def actualizar_usuario(user_id: int, usuario: UserCreate):
             raise HTTPException(status_code=400, detail="Este correo ya está registrado por otro usuario")
         
         # Verificar que el usuario existe
-        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (user_id,))
-        if not cursor.fetchone():
+        cursor.execute("SELECT id, contrasena FROM usuarios WHERE id = %s", (user_id,))
+        usuario_actual = cursor.fetchone()
+        if not usuario_actual:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         
-        # Actualizar usuario (contraseña sin encriptar)
+        # Verificar si la columna 'rol' existe, si no, agregarla
+        cursor.execute("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'usuarios' AND column_name = 'rol'
+        """)
+        
+        if not cursor.fetchone():
+            print("📝 Agregando columna 'rol' a la tabla usuarios")
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN rol VARCHAR(10) DEFAULT 'user'")
+            conn.commit()
+        
+        # Determinar la contraseña a usar
+        contrasena_final = usuario_actual[1]  # Mantener la actual por defecto
+        if usuario.nueva_contrasena and usuario.nueva_contrasena.strip():
+            contrasena_final = usuario.nueva_contrasena.strip()
+            print("🔑 Actualizando contraseña del usuario")
+        
+        # Actualizar usuario con rol
         cursor.execute(
             """UPDATE usuarios 
                SET correo = %s, nombre_completo = %s, cargo = %s, 
-                   supervisor = %s, contrasena = %s, curp = %s, telefono = %s 
+                   supervisor = %s, contrasena = %s, curp = %s, telefono = %s, rol = %s 
                WHERE id = %s""",
             (usuario.correo, usuario.nombre_completo, usuario.cargo, 
-             usuario.supervisor, usuario.contrasena, curp_upper, usuario.telefono, user_id)
+             usuario.supervisor, contrasena_final, curp_upper, usuario.telefono, usuario.rol, user_id)
         )
         
         conn.commit()
         
         # Obtener usuario actualizado
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono FROM usuarios WHERE id = %s",
+            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono, rol FROM usuarios WHERE id = %s",
             (user_id,)
         )
         
@@ -700,10 +763,11 @@ async def actualizar_usuario(user_id: int, usuario: UserCreate):
             "supervisor": resultado[4],
             "contrasena": resultado[5],
             "curp": resultado[6],
-            "telefono": resultado[7] if len(resultado) > 7 else None
+            "telefono": resultado[7],
+            "rol": resultado[8] if len(resultado) > 8 else 'user'
         }
         
-        print(f"✅ Usuario {user_id} actualizado exitosamente")
+        print(f"✅ Usuario {user_id} actualizado exitosamente con rol {usuario.rol}")
         return {"mensaje": "Usuario actualizado exitosamente", "usuario": usuario_actualizado}
         
     except HTTPException:
@@ -2873,6 +2937,689 @@ async def obtener_notificaciones_usuario_mejorado(
         raise HTTPException(status_code=500, detail=f"Error al obtener notificaciones del usuario: {str(e)}")
 
 # ==================== FIN ENDPOINTS DE NOTIFICACIONES LEÍDAS/NO LEÍDAS ====================
+
+# ==================== ENDPOINTS PARA GESTIÓN DE ROLES Y PERMISOS ====================
+
+class UsuarioRolUpdate(BaseModel):
+    rol: str  # 'admin' o 'user'
+
+class UsuarioPasswordUpdate(BaseModel):
+    nueva_contrasena: str
+
+@app.put("/usuarios/{user_id}/rol")
+async def cambiar_rol_usuario(user_id: int, rol_data: UsuarioRolUpdate):
+    """Cambiar el rol de un usuario (admin/user)"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🔄 Cambiando rol del usuario {user_id} a {rol_data.rol}")
+        
+        # Validar rol
+        if rol_data.rol not in ['admin', 'user']:
+            raise HTTPException(status_code=400, detail="Rol inválido. Debe ser 'admin' o 'user'")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, nombre_completo FROM usuarios WHERE id = %s", (user_id,))
+        usuario = cursor.fetchone()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Verificar si la columna 'rol' existe, si no, agregarla
+        cursor.execute("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'usuarios' AND column_name = 'rol'
+        """)
+        
+        if not cursor.fetchone():
+            print("📝 Agregando columna 'rol' a la tabla usuarios")
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN rol VARCHAR(10) DEFAULT 'user'")
+            conn.commit()
+        
+        # Actualizar rol
+        cursor.execute("UPDATE usuarios SET rol = %s WHERE id = %s", (rol_data.rol, user_id))
+        conn.commit()
+        
+        print(f"✅ Rol del usuario {usuario[1]} cambiado a {rol_data.rol}")
+        return {"mensaje": f"Rol actualizado a {rol_data.rol}", "usuario_id": user_id}
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al cambiar rol: {str(e)}")
+
+@app.put("/usuarios/{user_id}/password")
+async def cambiar_contrasena_usuario(user_id: int, password_data: UsuarioPasswordUpdate):
+    """Cambiar la contraseña de un usuario"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🔄 Cambiando contraseña del usuario {user_id}")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, nombre_completo FROM usuarios WHERE id = %s", (user_id,))
+        usuario = cursor.fetchone()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Actualizar contraseña (sin encriptar, como en el resto del sistema)
+        cursor.execute("UPDATE usuarios SET contrasena = %s WHERE id = %s", (password_data.nueva_contrasena, user_id))
+        conn.commit()
+        
+        print(f"✅ Contraseña del usuario {usuario[1]} actualizada")
+        return {"mensaje": "Contraseña actualizada exitosamente", "usuario_id": user_id}
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al cambiar contraseña: {str(e)}")
+
+@app.get("/usuarios/estadisticas")
+async def obtener_estadisticas_usuarios():
+    """Obtener estadísticas de usuarios del sistema"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print("📊 Obteniendo estadísticas de usuarios...")
+        
+        # Verificar si la columna 'rol' existe
+        cursor.execute("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'usuarios' AND column_name = 'rol'
+        """)
+        
+        tiene_columna_rol = bool(cursor.fetchone())
+        
+        if tiene_columna_rol:
+            # Contar usuarios por rol
+            cursor.execute("""
+                SELECT 
+                    COUNT(*) as total,
+                    COUNT(CASE WHEN rol = 'admin' THEN 1 END) as admins,
+                    COUNT(CASE WHEN rol = 'user' OR rol IS NULL THEN 1 END) as users
+                FROM usuarios
+            """)
+            resultado = cursor.fetchone()
+            total, admins, users = resultado
+        else:
+            # Si no existe la columna rol, todos son users
+            cursor.execute("SELECT COUNT(*) FROM usuarios")
+            total = cursor.fetchone()[0]
+            admins = 0
+            users = total
+        
+        # Contar usuarios por cargo (top 5)
+        cursor.execute("""
+            SELECT cargo, COUNT(*) as cantidad 
+            FROM usuarios 
+            WHERE cargo IS NOT NULL AND cargo != ''
+            GROUP BY cargo 
+            ORDER BY cantidad DESC 
+            LIMIT 5
+        """)
+        cargos = [{"cargo": row[0], "cantidad": row[1]} for row in cursor.fetchall()]
+        
+        # Obtener usuarios recientes (últimos 10)
+        cursor.execute("""
+            SELECT id, nombre_completo, correo, cargo, rol
+            FROM usuarios 
+            ORDER BY id DESC 
+            LIMIT 10
+        """)
+        usuarios_recientes = []
+        for row in cursor.fetchall():
+            usuarios_recientes.append({
+                "id": row[0],
+                "nombre_completo": row[1],
+                "correo": row[2],
+                "cargo": row[3],
+                "rol": row[4] if tiene_columna_rol and row[4] else 'user'
+            })
+        
+        estadisticas = {
+            "total_usuarios": total,
+            "administradores": admins,
+            "usuarios_normales": users,
+            "cargos_populares": cargos,
+            "usuarios_recientes": usuarios_recientes,
+            "sistema_roles_activo": tiene_columna_rol
+        }
+        
+        print(f"✅ Estadísticas obtenidas: {total} usuarios total")
+        return estadisticas
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo estadísticas: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
+
+@app.get("/usuarios/buscar")
+async def buscar_usuarios(correo: Optional[str] = None, nombre: Optional[str] = None, 
+                         curp: Optional[str] = None, cargo: Optional[str] = None):
+    """Buscar usuarios por diferentes criterios"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Construir consulta dinámica
+        condiciones = []
+        parametros = []
+        
+        if correo:
+            condiciones.append("correo ILIKE %s")
+            parametros.append(f"%{correo}%")
+        
+        if nombre:
+            condiciones.append("nombre_completo ILIKE %s")
+            parametros.append(f"%{nombre}%")
+        
+        if curp:
+            condiciones.append("curp ILIKE %s")
+            parametros.append(f"%{curp.upper()}%")
+        
+        if cargo:
+            condiciones.append("cargo ILIKE %s")
+            parametros.append(f"%{cargo}%")
+        
+        if not condiciones:
+            raise HTTPException(status_code=400, detail="Debe proporcionar al menos un criterio de búsqueda")
+        
+        # Verificar si existe columna rol
+        cursor.execute("""
+            SELECT column_name FROM information_schema.columns 
+            WHERE table_name = 'usuarios' AND column_name = 'rol'
+        """)
+        tiene_rol = bool(cursor.fetchone())
+        
+        consulta = f"""
+            SELECT id, correo, nombre_completo, cargo, supervisor, curp, telefono, contrasena
+            {'rol' if tiene_rol else ''}
+            FROM usuarios 
+            WHERE {' AND '.join(condiciones)}
+            ORDER BY id DESC
+        """
+        
+        if tiene_rol:
+            consulta = consulta.replace("contrasena\n", "contrasena, ")
+        
+        print(f"🔍 Buscando usuarios con consulta: {consulta}")
+        cursor.execute(consulta, parametros)
+        
+        resultados = cursor.fetchall()
+        usuarios = []
+        
+        for row in resultados:
+            usuario = {
+                "id": row[0],
+                "correo": row[1],
+                "nombre_completo": row[2],
+                "cargo": row[3],
+                "supervisor": row[4],
+                "curp": row[5],
+                "telefono": row[6],
+                "contrasena": row[7],
+                "rol": row[8] if tiene_rol and len(row) > 8 else 'user'
+            }
+            usuarios.append(usuario)
+        
+        print(f"✅ Búsqueda completada: {len(usuarios)} usuarios encontrados")
+        return {"usuarios": usuarios}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en búsqueda: {e}")
+        raise HTTPException(status_code=500, detail=f"Error en la búsqueda: {str(e)}")
+
+# ==================== MODELOS PARA ADMINISTRADORES ====================
+
+class AdminUserCreate(BaseModel):
+    username: str
+    password: str
+    rol: str = 'user'  # admin o user
+
+class AdminUserUpdate(BaseModel):
+    username: Optional[str] = None
+    password: Optional[str] = None
+    rol: Optional[str] = None
+
+# ==================== ENDPOINTS PARA GESTIÓN DE USUARIOS ADMINISTRATIVOS ====================
+
+@app.get("/admin/usuarios")
+async def obtener_usuarios_admin():
+    """Obtener todos los usuarios administrativos de la tabla admin_users"""
+    try:
+        print("🔄 Obteniendo usuarios administrativos...")
+        
+        # Verificar conexión a la base de datos
+        if not conn or not cursor:
+            raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
+        
+        # Obtener todos los usuarios administrativos
+        cursor.execute("""
+            SELECT id, username, rol
+            FROM admin_users 
+            ORDER BY id ASC
+        """)
+        
+        rows = cursor.fetchall()
+        usuarios = []
+        
+        for row in rows:
+            usuario = {
+                "id": row[0],
+                "username": row[1],
+                "rol": row[2]
+            }
+            usuarios.append(usuario)
+        
+        print(f"✅ {len(usuarios)} usuarios administrativos obtenidos")
+        return {"usuarios": usuarios}
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo usuarios administrativos: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuarios: {str(e)}")
+
+@app.post("/admin/usuarios")
+async def crear_usuario_admin(usuario: AdminUserCreate):
+    """Crear un nuevo usuario administrativo"""
+    try:
+        print(f"🔄 Creando usuario administrativo: {usuario.username}")
+        
+        # Verificar conexión
+        if not conn or not cursor:
+            raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
+        
+        # Verificar que el username no existe
+        cursor.execute("SELECT id FROM admin_users WHERE username = %s", (usuario.username,))
+        if cursor.fetchone():
+            raise HTTPException(status_code=409, detail="El nombre de usuario ya existe")
+        
+        # Validar rol
+        if usuario.rol not in ['admin', 'user']:
+            raise HTTPException(status_code=400, detail="El rol debe ser 'admin' o 'user'")
+        
+        # Hashear la contraseña
+        hashed_password = pwd_context.hash(usuario.password)
+        
+        # Insertar nuevo usuario
+        cursor.execute("""
+            INSERT INTO admin_users (username, password, rol) 
+            VALUES (%s, %s, %s) 
+            RETURNING id
+        """, (usuario.username, hashed_password, usuario.rol))
+        
+        nuevo_id = cursor.fetchone()[0]
+        conn.commit()
+        
+        print(f"✅ Usuario administrativo creado con ID: {nuevo_id}")
+        return {
+            "message": "Usuario administrativo creado exitosamente",
+            "id": nuevo_id,
+            "username": usuario.username,
+            "rol": usuario.rol
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error creando usuario administrativo: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al crear usuario: {str(e)}")
+
+@app.get("/admin/usuarios/{user_id}")
+async def obtener_usuario_admin(user_id: int):
+    """Obtener información de un usuario administrativo específico"""
+    try:
+        print(f"🔄 Obteniendo usuario administrativo ID: {user_id}")
+        
+        cursor.execute("""
+            SELECT id, username, rol
+            FROM admin_users 
+            WHERE id = %s
+        """, (user_id,))
+        
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Usuario administrativo no encontrado")
+        
+        usuario = {
+            "id": row[0],
+            "username": row[1],
+            "rol": row[2]
+        }
+        
+        print(f"✅ Usuario administrativo obtenido: {usuario['username']}")
+        return usuario
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo usuario administrativo: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuario: {str(e)}")
+
+@app.put("/admin/usuarios/{user_id}")
+async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
+    """Actualizar información de un usuario administrativo"""
+    try:
+        print(f"🔄 Actualizando usuario administrativo ID: {user_id}")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM admin_users WHERE id = %s", (user_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario administrativo no encontrado")
+        
+        # Preparar campos a actualizar
+        campos_actualizar = []
+        valores = []
+        
+        if usuario.username:
+            # Verificar que el nuevo username no existe (excepto el actual)
+            cursor.execute("SELECT id FROM admin_users WHERE username = %s AND id != %s", 
+                          (usuario.username, user_id))
+            if cursor.fetchone():
+                raise HTTPException(status_code=409, detail="El nombre de usuario ya existe")
+            campos_actualizar.append("username = %s")
+            valores.append(usuario.username)
+        
+        if usuario.password:
+            hashed_password = pwd_context.hash(usuario.password)
+            campos_actualizar.append("password = %s")
+            valores.append(hashed_password)
+        
+        if usuario.rol:
+            if usuario.rol not in ['admin', 'user']:
+                raise HTTPException(status_code=400, detail="El rol debe ser 'admin' o 'user'")
+            campos_actualizar.append("rol = %s")
+            valores.append(usuario.rol)
+        
+        if not campos_actualizar:
+            raise HTTPException(status_code=400, detail="No hay campos para actualizar")
+        
+        # Actualizar usuario
+        valores.append(user_id)
+        query = f"UPDATE admin_users SET {', '.join(campos_actualizar)} WHERE id = %s"
+        cursor.execute(query, valores)
+        conn.commit()
+        
+        # Obtener usuario actualizado
+        cursor.execute("SELECT id, username, rol FROM admin_users WHERE id = %s", (user_id,))
+        row = cursor.fetchone()
+        
+        usuario_actualizado = {
+            "id": row[0],
+            "username": row[1],
+            "rol": row[2]
+        }
+        
+        print(f"✅ Usuario administrativo actualizado: {usuario_actualizado['username']}")
+        return {
+            "message": "Usuario administrativo actualizado exitosamente",
+            **usuario_actualizado
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error actualizando usuario administrativo: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al actualizar usuario: {str(e)}")
+
+@app.delete("/admin/usuarios/{user_id}")
+async def eliminar_usuario_admin(user_id: int):
+    """Eliminar un usuario administrativo"""
+    try:
+        print(f"🔄 Eliminando usuario administrativo ID: {user_id}")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT username FROM admin_users WHERE id = %s", (user_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Usuario administrativo no encontrado")
+        
+        username = row[0]
+        
+        # Eliminar usuario
+        cursor.execute("DELETE FROM admin_users WHERE id = %s", (user_id,))
+        conn.commit()
+        
+        print(f"✅ Usuario administrativo eliminado: {username}")
+        return {
+            "message": "Usuario administrativo eliminado exitosamente",
+            "username": username
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error eliminando usuario administrativo: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar usuario: {str(e)}")
+
+@app.put("/admin/usuarios/{user_id}/rol")
+async def cambiar_rol_usuario_admin(user_id: int, datos: dict):
+    """Cambiar el rol de un usuario administrativo"""
+    try:
+        print(f"🔄 Cambiando rol de usuario administrativo ID: {user_id}")
+        
+        rol = datos.get("rol")
+        if not rol or rol not in ['admin', 'user']:
+            raise HTTPException(status_code=400, detail="El rol debe ser 'admin' o 'user'")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT username FROM admin_users WHERE id = %s", (user_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Usuario administrativo no encontrado")
+        
+        username = row[0]
+        
+        # Actualizar rol
+        cursor.execute("UPDATE admin_users SET rol = %s WHERE id = %s", (rol, user_id))
+        conn.commit()
+        
+        print(f"✅ Rol cambiado para usuario {username} a: {rol}")
+        return {
+            "message": f"Rol cambiado exitosamente a {rol}",
+            "username": username,
+            "nuevo_rol": rol
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error cambiando rol: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al cambiar rol: {str(e)}")
+
+@app.put("/admin/usuarios/{user_id}/password")
+async def resetear_password_usuario_admin(user_id: int, datos: dict):
+    """Resetear la contraseña de un usuario administrativo"""
+    try:
+        print(f"🔄 Reseteando contraseña de usuario administrativo ID: {user_id}")
+        
+        password = datos.get("password")
+        if not password:
+            raise HTTPException(status_code=400, detail="La contraseña es requerida")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT username FROM admin_users WHERE id = %s", (user_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Usuario administrativo no encontrado")
+        
+        username = row[0]
+        
+        # Hashear nueva contraseña
+        hashed_password = pwd_context.hash(password)
+        
+        # Actualizar contraseña
+        cursor.execute("UPDATE admin_users SET password = %s WHERE id = %s", (hashed_password, user_id))
+        conn.commit()
+        
+        print(f"✅ Contraseña reseteada para usuario: {username}")
+        return {
+            "message": "Contraseña reseteada exitosamente",
+            "username": username
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error reseteando contraseña: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al resetear contraseña: {str(e)}")
+
+@app.get("/admin/usuarios/estadisticas")
+async def obtener_estadisticas_admin():
+    """Obtener estadísticas de usuarios administrativos"""
+    try:
+        print("🔄 Obteniendo estadísticas de usuarios administrativos...")
+        
+        # Total de usuarios admin
+        cursor.execute("SELECT COUNT(*) FROM admin_users")
+        total_usuarios = cursor.fetchone()[0]
+        
+        # Usuarios por rol
+        cursor.execute("SELECT rol, COUNT(*) FROM admin_users GROUP BY rol")
+        roles_data = cursor.fetchall()
+        
+        usuarios_por_rol = {}
+        for rol, count in roles_data:
+            usuarios_por_rol[rol] = count
+        
+        estadisticas = {
+            "total_usuarios": total_usuarios,
+            "usuarios_por_rol": usuarios_por_rol,
+            "roles_disponibles": ["admin", "user"]
+        }
+        
+        print(f"✅ Estadísticas obtenidas: {estadisticas}")
+        return estadisticas
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo estadísticas: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
+
+@app.get("/admin/usuarios/buscar")
+async def buscar_usuarios_admin(username: Optional[str] = None, rol: Optional[str] = None):
+    """Buscar usuarios administrativos por criterios específicos"""
+    try:
+        print(f"🔄 Buscando usuarios administrativos: username={username}, rol={rol}")
+        
+        # Construir consulta base
+        query = "SELECT id, username, rol FROM admin_users WHERE 1=1"
+        params = []
+        
+        # Agregar filtros
+        if username:
+            query += " AND username ILIKE %s"
+            params.append(f"%{username}%")
+        
+        if rol:
+            if rol not in ['admin', 'user']:
+                raise HTTPException(status_code=400, detail="El rol debe ser 'admin' o 'user'")
+            query += " AND rol = %s"
+            params.append(rol)
+        
+        query += " ORDER BY id ASC"
+        
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        
+        usuarios = []
+        for row in rows:
+            usuario = {
+                "id": row[0],
+                "username": row[1],
+                "rol": row[2]
+            }
+            usuarios.append(usuario)
+        
+        print(f"✅ Búsqueda completada: {len(usuarios)} usuarios encontrados")
+        return {"usuarios": usuarios}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en búsqueda: {e}")
+        raise HTTPException(status_code=500, detail=f"Error en la búsqueda: {str(e)}")
+
+@app.get("/admin/auth/validar")
+async def validar_permisos_admin():
+    """Validar los permisos del usuario administrativo actual"""
+    try:
+        print("🔐 Validando permisos de usuario administrativo")
+        
+        # Este endpoint simula la validación de permisos para admin
+        # En una implementación real, aquí se verificaría el token JWT
+        return {
+            "valido": True,
+            "rol": "admin",
+            "permisos": [
+                "leer_usuarios_admin",
+                "crear_usuarios_admin", 
+                "editar_usuarios_admin",
+                "eliminar_usuarios_admin",
+                "cambiar_roles_admin",
+                "gestionar_admin_sistema"
+            ]
+        }
+        
+    except Exception as e:
+        print(f"❌ Error validando permisos admin: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al validar permisos: {str(e)}")
+
+# ==================== FIN ENDPOINTS DE GESTIÓN DE USUARIOS ADMINISTRATIVOS ====================
+
+@app.get("/auth/validar")
+async def validar_permisos_usuario():
+    """Validar los permisos del usuario actual basado en el token"""
+    try:
+        # Este endpoint simula la validación de permisos
+        # En una implementación real, aquí se verificaría el token JWT
+        print("🔐 Validando permisos de usuario")
+        
+        return {
+            "valido": True,
+            "rol": "admin",  # Por ahora siempre admin para el panel de administración
+            "permisos": [
+                "leer_usuarios",
+                "crear_usuarios", 
+                "editar_usuarios",
+                "eliminar_usuarios",
+                "cambiar_roles",
+                "gestionar_notificaciones"
+            ]
+        }
+        
+    except Exception as e:
+        print(f"❌ Error validando permisos: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al validar permisos: {str(e)}")
+
+@app.get("/health")
+async def verificar_salud_api():
+    """Endpoint para verificar que la API está funcionando"""
+    return {
+        "status": "ok",
+        "timestamp": datetime.now().isoformat(),
+        "database_connected": bool(conn)
+    }
+
+# ==================== FIN ENDPOINTS DE GESTIÓN DE ROLES Y PERMISOS ====================
 
 if __name__ == "__main__":
     import uvicorn

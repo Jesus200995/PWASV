@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import authService from '../services/authService'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import UsuariosView from '../views/UsuariosView.vue'
@@ -13,7 +14,7 @@ import PermisosView from '../views/PermisosView.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/visor-map'  // Cambiado de /visor a /visor-map
+    redirect: '/visor-map'
   },
   {
     path: '/login',
@@ -30,7 +31,7 @@ const routes = [
     path: '/usuarios',
     name: 'Usuarios',
     component: UsuariosView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
     path: '/historiales',
@@ -54,7 +55,7 @@ const routes = [
     path: '/configuracion',
     name: 'Configuracion',
     component: ConfiguracionView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
     path: '/notificaciones',
@@ -66,7 +67,7 @@ const routes = [
     path: '/permisos',
     name: 'Permisos',
     component: PermisosView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
     path: '/visor-map',
@@ -84,17 +85,46 @@ const router = createRouter({
 })
 
 // Guard de navegación para proteger rutas
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('admin_token')
   const isAuthenticated = !!token
   
+  // Verificar si la ruta requiere autenticación
   if (to.meta.requiresAuth && !isAuthenticated) {
+    console.log('🔒 Redirigiendo a login - No autenticado')
     next('/login')
-  } else if (to.name === 'Login' && isAuthenticated) {
-    next('/visor-map')  // Cambiado de /visor a /visor-map
-  } else {
-    next()
+    return
   }
+  
+  // Si está autenticado y va al login, redirigir al dashboard
+  if (to.name === 'Login' && isAuthenticated) {
+    console.log('🔄 Ya autenticado, redirigiendo al mapa')
+    next('/visor-map')
+    return
+  }
+  
+  // Verificar permisos de admin si la ruta lo requiere
+  if (to.meta.requiresAdmin && isAuthenticated) {
+    const userRole = authService.getUserRole()
+    
+    if (userRole !== 'admin') {
+      console.log('🚫 Acceso denegado - Se requiere rol de administrador')
+      console.log('👤 Rol del usuario:', userRole)
+      
+      // Redirigir a una ruta accesible
+      if (from.path !== '/' && from.path !== '/login') {
+        // Si viene de una ruta válida, volver a ella
+        next(from.path)
+      } else {
+        // Si no, ir al dashboard
+        next('/dashboard')
+      }
+      return
+    }
+  }
+  
+  console.log('✅ Navegación permitida a:', to.path)
+  next()
 })
 
 export default router

@@ -259,7 +259,7 @@
           </router-link>
         </li>
         
-        <li class="nav-item" :class="{ active: $route.name === 'Usuarios' }">
+        <li class="nav-item" :class="{ active: $route.name === 'Usuarios' }" v-if="isAdmin">
           <router-link to="/usuarios" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -323,7 +323,7 @@
           </router-link>
         </li>
         
-        <li class="nav-item" :class="{ active: $route.name === 'Permisos' }">
+        <li class="nav-item" :class="{ active: $route.name === 'Permisos' }" v-if="isAdmin">
           <router-link to="/permisos" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -345,7 +345,7 @@
           </router-link>
         </li>
         
-        <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }">
+        <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }" v-if="isAdmin">
           <router-link to="/configuracion" class="nav-link">
             <div class="nav-icon-wrapper">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -413,29 +413,76 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import authService from '../services/authService'
 
-const emit = defineEmits(['logout'])
+const router = useRouter()
 
-// Estado del modal
+// Estado del sidebar
+const isCollapsed = ref(false)
 const showLogoutModal = ref(false)
 
-// Funciones del modal
+// Estado del usuario
+const currentUser = ref(null)
+
+// Computed properties para el rol
+const isAdmin = computed(() => {
+  return authService.isAdmin()
+})
+
+const isUser = computed(() => {
+  return authService.isUser()
+})
+
+const userDisplayName = computed(() => {
+  if (currentUser.value) {
+    return currentUser.value.nombre || currentUser.value.username || 'Usuario'
+  }
+  return 'Usuario'
+})
+
+const roleDisplayName = computed(() => {
+  const role = authService.getUserRole()
+  return role === 'admin' ? 'Administrador' : 'Usuario'
+})
+
+// Funciones del sidebar
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
+
+// Funciones del modal de logout
 const closeModal = () => {
   showLogoutModal.value = false
 }
 
 const confirmLogout = () => {
   showLogoutModal.value = false
-  emit('logout')
+  authService.logout()
+  router.push('/login')
 }
 
 // Cerrar modal con Escape
 const handleKeydown = (event) => {
-  if (event.key === 'Escape' && showLogoutModal.value) {
-    closeModal()
+  if (event.key === 'Escape' && showModal.value) {
+    hideLogoutModal()
   }
 }
+
+// Cargar información del usuario al montar
+onMounted(async () => {
+  try {
+    currentUser.value = authService.getCurrentUser()
+    // Refrescar información del usuario desde el servidor
+    if (currentUser.value) {
+      await authService.refreshUserInfo()
+      currentUser.value = authService.getCurrentUser()
+    }
+  } catch (error) {
+    console.error('Error cargando información del usuario:', error)
+  }
+})
 
 // Agregar listener para Escape
 if (typeof window !== 'undefined') {

@@ -111,7 +111,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import authService from '../services/authService'
 
 const router = useRouter()
 
@@ -123,8 +123,6 @@ const credentials = reactive({
 const loading = ref(false)
 const error = ref('')
 
-const API_URL = 'https://apipwa.sembrandodatos.com'
-
 const login = async () => {
   if (!credentials.username || !credentials.password) {
     error.value = 'Por favor completa todos los campos'
@@ -135,32 +133,17 @@ const login = async () => {
   error.value = ''
   
   try {
-    const formData = new URLSearchParams()
-    formData.append('grant_type', '')
-    formData.append('username', credentials.username)
-    formData.append('password', credentials.password)
-    formData.append('scope', '')
-    formData.append('client_id', '')
-    formData.append('client_secret', '')
+    const result = await authService.login(credentials)
     
-    const response = await axios.post(`${API_URL}/admin/login`, formData, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    })
-    
-    if (response.data.access_token) {
-      // Guardar token y usuario
-      localStorage.setItem('admin_token', response.data.access_token)
-      localStorage.setItem('admin_user', credentials.username)
-      
+    if (result.success) {
+      console.log('✅ Login exitoso:', result.user)
       // Redirigir al dashboard
       router.push('/dashboard')
     } else {
       error.value = 'Credenciales incorrectas'
     }
   } catch (err) {
-    console.error('Error de login:', err)
+    console.error('❌ Error de login:', err)
     if (err.response?.data?.detail) {
       error.value = err.response.data.detail
     } else {

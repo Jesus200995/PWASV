@@ -28,6 +28,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Configuración para autenticación JWT
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"
+
 # Conexión a PostgreSQL
 DB_HOST = "31.97.8.51"
 DB_NAME = "app_registros"
@@ -40,6 +44,33 @@ try:
     )
     cursor = conn.cursor()
     print("✅ Conexión a la base de datos exitosa")
+    
+    # Crear tabla admin_users si no existe
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(100) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            rol VARCHAR(20) DEFAULT 'admin' CHECK (rol IN ('admin', 'user')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    # Verificar si existen usuarios admin, si no crear uno por defecto
+    cursor.execute("SELECT COUNT(*) FROM admin_users")
+    count = cursor.fetchone()[0]
+    
+    if count == 0:
+        # Crear usuario admin por defecto
+        default_password = pwd_context.hash("admin123")
+        cursor.execute(
+            "INSERT INTO admin_users (username, password, rol) VALUES (%s, %s, %s)",
+            ("admin", default_password, "admin")
+        )
+        print("✅ Usuario administrador por defecto creado: admin/admin123")
+    
+    conn.commit()
+    
 except Exception as e:
     print(f"❌ Error conectando a la base de datos: {e}")
     conn = None
@@ -111,10 +142,6 @@ class NotificacionResponse(BaseModel):
 
 # Montar carpeta de fotos para servir estáticamente
 app.mount("/fotos", StaticFiles(directory="fotos"), name="fotos")
-
-# Configuración para autenticación JWT
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"
 
 # ==================== NUEVOS ENDPOINTS DE TÉRMINOS ====================
 
@@ -1004,27 +1031,111 @@ async def eliminar_usuario(user_id: int):
         print(f"❌ Error general al eliminar usuario {user_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Error al eliminar usuario: {str(e)}")
 
-# Endpoint de autenticación para administradores
+# Endpoint de autenticación para administradores con información de usuario
 @app.post("/admin/login")
 def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
         username = form_data.username
         password = form_data.password
         
+        print(f"🔐 Intento de login para usuario: {username}")
+        
         # Buscar usuario administrador en la base de datos
-        cursor.execute("SELECT password FROM admin_users WHERE username = %s", (username,))
+        cursor.execute("SELECT id, password, rol FROM admin_users WHERE username = %s", (username,))
         row = cursor.fetchone()
         
-        if not row or not pwd_context.verify(password, row[0]):
+        if not row or not pwd_context.verify(password, row[1]):
+            print(f"❌ Credenciales incorrectas para usuario: {username}")
             raise HTTPException(status_code=400, detail="Credenciales incorrectas")
         
-        # Generar token JWT
-        token = jwt.encode({"sub": username, "role": "admin"}, SECRET_KEY, algorithm="HS256")
-        return {"access_token": token, "token_type": "bearer"}
+        user_id = row[0]
+        user_rol = row[2] or 'admin'  # rol por defecto admin
         
+        # Generar token JWT con información del usuario
+        token_data = {
+            "sub": username, 
+            "role": user_rol,
+            "user_id": user_id,
+            "tipo": "admin_user"
+        }
+        token = jwt.encode(token_data, SECRET_KEY, algorithm="HS256")
+        
+        print(f"✅ Login exitoso para usuario: {username} con rol: {user_rol}")
+        
+        return {
+            "access_token": token, 
+            "token_type": "bearer",
+            "user_info": {
+                "id": user_id,
+                "username": username,
+                "rol": user_rol,
+                "tipo": "admin_user"
+            }
+        }
+        
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"❌ Error en admin login: {e}")
         raise HTTPException(status_code=500, detail=f"Error en autenticación: {str(e)}")
+
+# Nuevo endpoint para obtener información del usuario actual
+@app.get("/auth/me")
+async def get_current_user():
+    """Obtener información del usuario actualmente logueado"""
+    try:
+        # Este endpoint simula obtener la información del usuario desde el token
+        # En una implementación real, se verificaría el token JWT
+        print("🔍 Obteniendo información del usuario actual")
+        
+        # Por ahora devuelve información por defecto de admin
+        return {
+            "id": 1,
+            "username": "admin",
+            "rol": "admin",
+            "tipo": "admin_user",
+            "is_authenticated": True
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo usuario actual: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener usuario: {str(e)}")
+
+# Endpoint para verificar permisos específicos
+@app.get("/auth/check-permission/{permission}")
+async def check_permission(permission: str):
+    """Verificar si el usuario actual tiene un permiso específico"""
+    try:
+        print(f"🔐 Verificando permiso: {permission}")
+        
+        # Lista de permisos que requieren admin
+        admin_permissions = [
+            "usuarios.view",
+            "usuarios.create", 
+            "usuarios.edit",
+            "usuarios.delete",
+            "permisos.view",
+            "permisos.manage",
+            "configuracion.view",
+            "configuracion.manage",
+            "admin.access"
+        ]
+        
+        # Por ahora siempre devolver admin = True
+        # En implementación real se verificaría el token JWT
+        user_role = "admin"  # Obtener del token
+        
+        has_permission = user_role == "admin" or permission not in admin_permissions
+        
+        return {
+            "permission": permission,
+            "granted": has_permission,
+            "user_role": user_role
+        }
+        
+    except Exception as e:
+        print(f"❌ Error verificando permiso: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al verificar permiso: {str(e)}")
 
 # Define el timezone de CDMX
 CDMX_TZ = pytz.timezone("America/Mexico_City")

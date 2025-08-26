@@ -377,7 +377,7 @@ export default {
       this.error = null
       
       try {
-        const respuesta = await permisosService.obtenerUsuariosAdmin()
+        const respuesta = await permisosService.listarUsuarios()
         this.usuariosAdmin = respuesta.usuarios || []
         console.log('✅ Usuarios admin cargados:', this.usuariosAdmin.length)
       } catch (error) {
@@ -444,11 +444,11 @@ export default {
             datosActualizacion.password = this.formularioUsuario.password
           }
           
-          await permisosService.actualizarUsuarioAdmin(this.usuarioEditando.id, datosActualizacion)
+          await permisosService.actualizarUsuario(this.usuarioEditando.id, datosActualizacion)
           this.mostrarToast('Usuario administrativo actualizado exitosamente', 'success')
         } else {
           // Crear nuevo usuario
-          await permisosService.crearUsuarioAdmin(this.formularioUsuario)
+          await permisosService.crearUsuario(this.formularioUsuario)
           this.mostrarToast('Usuario administrativo creado exitosamente', 'success')
         }
         
@@ -498,7 +498,7 @@ export default {
       this.eliminando = true
       
       try {
-        await permisosService.eliminarUsuarioAdmin(this.usuarioAEliminar.id)
+        await permisosService.eliminarUsuario(this.usuarioAEliminar.id)
         
         this.mostrarToast('Usuario administrativo eliminado exitosamente', 'success')
         this.cargarUsuariosAdmin()

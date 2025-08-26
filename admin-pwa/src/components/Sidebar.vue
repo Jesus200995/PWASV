@@ -465,8 +465,8 @@ const confirmLogout = () => {
 
 // Cerrar modal con Escape
 const handleKeydown = (event) => {
-  if (event.key === 'Escape' && showModal.value) {
-    hideLogoutModal()
+  if (event.key === 'Escape' && showLogoutModal.value) {
+    closeModal()
   }
 }
 

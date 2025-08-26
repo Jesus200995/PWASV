@@ -80,51 +80,34 @@ class AuthService {
    */
   async fetchUserInfo(username) {
     try {
-      // Intentar obtener desde tabla admin_users (usuarios del panel admin)
-      const adminUsersResponse = await axios.get(`${API_URL}/admin/usuarios`, {
+      // Intentar obtener información desde el endpoint de usuarios admin
+      const adminUsersResponse = await axios.get(`${API_URL}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${this.token}`
         }
       })
 
-      const adminUser = adminUsersResponse.data.usuarios?.find(user => user.username === username)
-      if (adminUser) {
+      if (adminUsersResponse.data && adminUsersResponse.data.username) {
         return {
-          id: adminUser.id,
-          username: adminUser.username,
-          rol: adminUser.rol || 'admin',
+          id: adminUsersResponse.data.id,
+          username: adminUsersResponse.data.username,
+          rol: adminUsersResponse.data.rol || 'admin',
           tipo: 'admin_user'
         }
       }
 
-      // Si no se encuentra en admin_users, buscar en usuarios normales
-      const usuariosResponse = await axios.get(`${API_URL}/usuarios`)
-      const normalUser = usuariosResponse.data.usuarios?.find(user => 
-        user.correo === username || user.nombre_completo === username
-      )
-
-      if (normalUser) {
-        return {
-          id: normalUser.id,
-          username: normalUser.correo,
-          nombre: normalUser.nombre_completo,
-          rol: normalUser.rol || 'user',
-          tipo: 'usuario_normal'
-        }
-      }
-
-      // Usuario por defecto si no se encuentra
+      // Fallback - crear usuario básico con rol admin por defecto para usuarios del panel admin
       return {
         username,
-        rol: 'admin', // Por compatibilidad, asumir admin si no se encuentra
-        tipo: 'unknown'
+        rol: 'admin', // Por defecto admin para usuarios que acceden al panel admin
+        tipo: 'admin_user'
       }
     } catch (error) {
       console.error('Error obteniendo info del usuario:', error)
       // Retornar usuario básico como fallback
       return {
         username,
-        rol: 'admin',
+        rol: 'admin', // Por defecto admin para acceso al panel
         tipo: 'fallback'
       }
     }

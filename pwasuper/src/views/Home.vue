@@ -201,7 +201,7 @@
           </div>
           
           <!-- Info del usuario -->
-          <div class="bg-primary/10 rounded-lg p-2 mb-4">
+          <div class="bg-primary/10 rounded-lg p-2 mb-6">
             <div class="flex items-center">
               <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
                 <span class="text-white text-xs font-bold">{{ getUserInitials }}</span>
@@ -226,7 +226,7 @@
                 type="button"
                 @click="getUbicacion"
                 :disabled="obteniendoUbicacion"
-                class="location-button-circular relative flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 font-medium text-white rounded-full shadow-2xl transform transition-all duration-500 hover:scale-110 active:scale-95"
+                class="location-button-circular relative flex flex-col items-center justify-center w-28 h-28 sm:w-32 sm:h-32 font-medium text-white rounded-full shadow-2xl transform transition-all duration-500 hover:scale-110 active:scale-95"
                 :class="{
                   'opacity-50 cursor-not-allowed': obteniendoUbicacion,
                   'location-button-success-circular': latitud && longitud && !obteniendoUbicacion
@@ -234,13 +234,13 @@
               >
                 <!-- Spinner de carga -->
                 <div v-if="obteniendoUbicacion" class="flex flex-col items-center">
-                  <div class="animate-spin rounded-full h-5 w-5 border-t-3 border-b-3 border-white mb-1"></div>
+                  <div class="animate-spin rounded-full h-6 w-6 border-t-3 border-b-3 border-white mb-1"></div>
                   <span class="text-xs font-normal tracking-normal text-center leading-tight">Ubicando...</span>
                 </div>
                 
                 <!-- Estado completado -->
                 <div v-else-if="latitud && longitud" class="flex flex-col items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-emerald-800 glass-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1 text-emerald-800 glass-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span class="text-xs font-medium tracking-normal glass-text-circular text-center leading-tight">Ubicación Obtenida</span>
@@ -248,7 +248,7 @@
                 
                 <!-- Estado inicial -->
                 <div v-else class="flex flex-col items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-white location-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1 text-white location-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -369,7 +369,7 @@
       </div>
       
       <!-- Info del usuario -->
-      <div class="bg-primary/10 rounded-lg p-2 mb-3">
+      <div class="bg-primary/10 rounded-lg p-2 mb-6">
         <div class="flex items-center">
           <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
             <span class="text-white text-xs font-bold">{{ getUserInitials }}</span>
@@ -387,12 +387,12 @@
           <button
             type="button"
             @click="getUbicacionRegistro"
-            class="location-button-circular relative flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 font-medium text-white rounded-full shadow-2xl transform transition-all duration-500 hover:scale-110 active:scale-95"
+            class="location-button-circular relative flex flex-col items-center justify-center w-28 h-28 sm:w-32 sm:h-32 font-medium text-white rounded-full shadow-2xl transform transition-all duration-500 hover:scale-110 active:scale-95"
             :class="{'location-button-success-circular': latitudRegistro && longitudRegistro}"
           >
             <!-- Estado completado -->
             <div v-if="latitudRegistro && longitudRegistro" class="flex flex-col items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-emerald-800 glass-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1 text-emerald-800 glass-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span class="text-xs font-medium tracking-normal glass-text-circular text-center leading-tight">Ubicación Obtenida</span>
@@ -402,7 +402,7 @@
             <div v-else class="flex flex-col items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 mb-1 text-white location-icon-circular"
+                class="h-7 w-7 mb-1 text-white location-icon-circular"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -2966,25 +2966,25 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
 /* Responsive para botones circulares */
 @media (max-width: 480px) {
   .location-button-circular {
-    width: 4.5rem !important; /* 18 - más pequeño */
-    height: 4.5rem !important; /* 18 - más pequeño */
+    width: 6rem !important; /* 24 - más grande */
+    height: 6rem !important; /* 24 - más grande */
   }
   
   .location-icon-circular,
   .glass-icon-circular {
-    width: 1.25rem !important; /* h-5 w-5 */
-    height: 1.25rem !important;
+    width: 1.5rem !important; /* h-6 w-6 */
+    height: 1.5rem !important;
   }
   
   .location-text-circular,
   .glass-text-circular {
-    font-size: 0.5rem !important; /* text-2xs */
+    font-size: 0.625rem !important; /* text-xs */
     line-height: 1 !important;
   }
   
   .coordinates-display-circular {
     padding: 0.375rem;
-    max-width: 140px;
+    max-width: 160px;
   }
   
   .coordinate-label-circular {

@@ -1,5 +1,6 @@
 // Servicio para el manejo de asistencias
-const API_URL = 'https://apipwa.sembrandodatos.com';
+import axios from 'axios';
+import { API_URL } from '../config/api.js';
 
 class AsistenciasService {
   /**

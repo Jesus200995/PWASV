@@ -1,12 +1,9 @@
 // notificacionesService.js
 import axios from 'axios'
-
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://apipwa.sembrandodatos.com'
-  : 'http://localhost:8000'
+import { API_URL } from '../config/api.js'
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -14,7 +11,7 @@ const api = axios.create({
 
 // Crear FormData API para archivos
 const createFormDataApi = () => axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'multipart/form-data'
   }

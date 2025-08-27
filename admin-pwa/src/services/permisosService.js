@@ -1,12 +1,11 @@
 import axios from 'axios'
+import { API_URL } from '../config/api.js'
 
-// Configuración base de axios
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-console.log('🌐 PermisosService usando API:', API_BASE_URL)
+console.log('🌐 PermisosService usando API:', API_URL)
 
 // Crear instancia de axios con configuración
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

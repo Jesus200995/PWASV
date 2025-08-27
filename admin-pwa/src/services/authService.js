@@ -1,7 +1,7 @@
 // Servicio de autenticación con manejo de roles
 import axios from 'axios'
-
-const API_URL = 'https://apipwa.sembrandodatos.com'
+import { API_URL, API_CONFIG } from '../config/api.js'
+import healthCheckService from './healthCheckService.js'
 
 class AuthService {
   constructor() {
@@ -40,7 +40,10 @@ class AuthService {
       formData.append('client_id', '')
       formData.append('client_secret', '')
 
-      const response = await axios.post(`${API_URL}/admin/login`, formData, {
+      const loginUrl = `${API_URL}${API_CONFIG.endpoints.adminLogin}`
+      console.log(`🔐 Intentando login en: ${loginUrl}`)
+
+      const response = await axios.post(loginUrl, formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
@@ -55,6 +58,7 @@ class AuthService {
         let userData
         if (response.data.user_info) {
           userData = response.data.user_info
+          console.log('📋 Info de usuario desde respuesta de login:', userData)
         } else {
           userData = await this.fetchUserInfo(credentials.username)
         }
@@ -80,23 +84,30 @@ class AuthService {
    */
   async fetchUserInfo(username) {
     try {
-      // Intentar obtener información desde el endpoint de usuarios admin
-      const adminUsersResponse = await axios.get(`${API_URL}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${this.token}`
-        }
-      })
+      // Intentar primero con el endpoint /auth/me si existe
+      try {
+        const meUrl = `${API_URL}${API_CONFIG.endpoints.authMe}`
+        console.log(`📋 Obteniendo info de usuario desde: ${meUrl}`)
+        
+        const meResponse = await axios.get(meUrl, {
+          headers: {
+            'Authorization': `Bearer ${this.token}`
+          }
+        })
 
-      if (adminUsersResponse.data && adminUsersResponse.data.username) {
-        return {
-          id: adminUsersResponse.data.id,
-          username: adminUsersResponse.data.username,
-          rol: adminUsersResponse.data.rol || 'admin',
-          tipo: 'admin_user'
+        if (meResponse.data && meResponse.data.username) {
+          return {
+            id: meResponse.data.id,
+            username: meResponse.data.username,
+            rol: meResponse.data.rol || 'admin',
+            tipo: 'admin_user'
+          }
         }
+      } catch (meError) {
+        console.log('Endpoint /auth/me no disponible, usando fallback')
       }
 
-      // Fallback - crear usuario básico con rol admin por defecto para usuarios del panel admin
+      // Fallback para APIs que no tienen /auth/me implementado
       return {
         username,
         rol: 'admin', // Por defecto admin para usuarios que acceden al panel admin

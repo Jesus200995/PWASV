@@ -220,52 +220,52 @@
               <span v-if="latitud && longitud" class="text-green-600 text-xs">✓ Completado</span>
             </div>
             
-            <!-- Botón de ubicación con nuevo diseño azul -->
-            <div class="location-container">
+            <!-- Botón de ubicación circular con diseño moderno -->
+            <div class="location-container-circular">
               <button
                 type="button"
                 @click="getUbicacion"
                 :disabled="obteniendoUbicacion"
-                class="location-button w-full flex items-center justify-center px-4 py-3 font-semibold text-white rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
+                class="location-button-circular relative flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 font-medium text-white rounded-full shadow-2xl transform transition-all duration-500 hover:scale-110 active:scale-95"
                 :class="{
                   'opacity-50 cursor-not-allowed': obteniendoUbicacion,
-                  'location-button-success': latitud && longitud && !obteniendoUbicacion
+                  'location-button-success-circular': latitud && longitud && !obteniendoUbicacion
                 }"
               >
                 <!-- Spinner de carga -->
-                <div v-if="obteniendoUbicacion" class="flex items-center">
-                  <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-3"></div>
-                  <span class="text-sm font-medium tracking-wide">Obteniendo ubicación precisa...</span>
+                <div v-if="obteniendoUbicacion" class="flex flex-col items-center">
+                  <div class="animate-spin rounded-full h-5 w-5 border-t-3 border-b-3 border-white mb-1"></div>
+                  <span class="text-xs font-normal tracking-normal text-center leading-tight">Ubicando...</span>
                 </div>
                 
                 <!-- Estado completado -->
-                <div v-else-if="latitud && longitud" class="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-dark-green glass-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <div v-else-if="latitud && longitud" class="flex flex-col items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-emerald-800 glass-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span class="text-sm font-bold tracking-wide glass-text">Ubicación Obtenida</span>
+                  <span class="text-xs font-medium tracking-normal glass-text-circular text-center leading-tight">Ubicación Obtenida</span>
                 </div>
                 
                 <!-- Estado inicial -->
-                <div v-else class="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-white location-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                <div v-else class="flex flex-col items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-white location-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span class="text-sm font-bold tracking-wider text-white location-text">Obtener Ubicación</span>
+                  <span class="text-xs font-medium tracking-normal text-white location-text-circular text-center leading-tight">Obtener Ubicación</span>
                 </div>
               </button>
 
-              <!-- Coordenadas pegadas al botón -->
-              <div v-if="latitud && longitud" class="coordinates-display">
-                <div class="coordinates-grid">
-                  <div class="coordinate-item">
-                    <span class="coordinate-label">Lat:</span>
-                    <span class="coordinate-value">{{ latitud }}</span>
+              <!-- Coordenadas pegadas al botón circular -->
+              <div v-if="latitud && longitud" class="coordinates-display-circular">
+                <div class="coordinates-grid-circular">
+                  <div class="coordinate-item-circular">
+                    <span class="coordinate-label-circular">Lat:</span>
+                    <span class="coordinate-value-circular">{{ latitud }}</span>
                   </div>
-                  <div class="coordinate-item">
-                    <span class="coordinate-label">Lon:</span>
-                    <span class="coordinate-value">{{ longitud }}</span>
+                  <div class="coordinate-item-circular">
+                    <span class="coordinate-label-circular">Lon:</span>
+                    <span class="coordinate-value-circular">{{ longitud }}</span>
                   </div>
                 </div>
               </div>
@@ -382,27 +382,27 @@
       </div>
 
       <form @submit.prevent="enviarRegistro">
-        <!-- Botón para obtener ubicación con nuevo diseño azul -->
-        <div class="location-container mb-3">
+        <!-- Botón para obtener ubicación circular para actividades -->
+        <div class="location-container-circular mb-3 flex justify-center">
           <button
             type="button"
             @click="getUbicacionRegistro"
-            class="location-button w-full flex items-center justify-center px-4 py-3 font-semibold text-white rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95"
-            :class="{'location-button-success': latitudRegistro && longitudRegistro}"
+            class="location-button-circular relative flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 font-medium text-white rounded-full shadow-2xl transform transition-all duration-500 hover:scale-110 active:scale-95"
+            :class="{'location-button-success-circular': latitudRegistro && longitudRegistro}"
           >
             <!-- Estado completado -->
-            <div v-if="latitudRegistro && longitudRegistro" class="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-dark-green glass-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div v-if="latitudRegistro && longitudRegistro" class="flex flex-col items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 text-emerald-800 glass-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="text-sm font-bold tracking-wide glass-text">Ubicación Obtenida</span>
+              <span class="text-xs font-medium tracking-normal glass-text-circular text-center leading-tight">Ubicación Obtenida</span>
             </div>
             
             <!-- Estado inicial -->
-            <div v-else class="flex items-center">
+            <div v-else class="flex flex-col items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 mr-3 text-white location-icon"
+                class="h-6 w-6 mb-1 text-white location-icon-circular"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -410,30 +410,30 @@
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="2"
+                  stroke-width="2.5"
                   d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                 />
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="2"
+                  stroke-width="2.5"
                   d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              <span class="text-sm font-bold tracking-wider text-white location-text">Obtener Ubicación</span>
+              <span class="text-xs font-medium tracking-normal text-white location-text-circular text-center leading-tight">Obtener Ubicación</span>
             </div>
           </button>
 
-          <!-- Coordenadas pegadas al botón -->
-          <div v-if="latitudRegistro && longitudRegistro" class="coordinates-display">
-            <div class="coordinates-grid">
-              <div class="coordinate-item">
-                <span class="coordinate-label">Lat:</span>
-                <span class="coordinate-value">{{ latitudRegistro }}</span>
+          <!-- Coordenadas pegadas al botón circular -->
+          <div v-if="latitudRegistro && longitudRegistro" class="coordinates-display-circular">
+            <div class="coordinates-grid-circular">
+              <div class="coordinate-item-circular">
+                <span class="coordinate-label-circular">Lat:</span>
+                <span class="coordinate-value-circular">{{ latitudRegistro }}</span>
               </div>
-              <div class="coordinate-item">
-                <span class="coordinate-label">Lon:</span>
-                <span class="coordinate-value">{{ longitudRegistro }}</span>
+              <div class="coordinate-item-circular">
+                <span class="coordinate-label-circular">Lon:</span>
+                <span class="coordinate-value-circular">{{ longitudRegistro }}</span>
               </div>
             </div>
           </div>
@@ -2666,6 +2666,339 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   box-shadow: 
     0 4px 16px 0 rgba(31, 38, 135, 0.1),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Nuevos estilos para botones de ubicación circulares con diseño moderno */
+.location-container-circular {
+  position: relative;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.location-button-circular {
+  background: linear-gradient(135deg, 
+    rgba(96, 165, 250, 0.9) 0%,      /* Azul cielo más suave */
+    rgba(59, 130, 246, 0.85) 40%,    /* Azul intermedio suave */
+    rgba(37, 99, 235, 0.9) 100%      /* Azul más profundo pero suave */
+  );
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 
+    0 10px 35px 0 rgba(96, 165, 250, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 0 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.location-button-circular:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.12);
+  box-shadow: 
+    0 18px 55px 0 rgba(96, 165, 250, 0.5),
+    0 0 0 2px rgba(255, 255, 255, 0.4),
+    inset 0 3px 0 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 0 0 rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, 
+    rgba(96, 165, 250, 1) 0%,
+    rgba(59, 130, 246, 0.95) 40%,
+    rgba(37, 99, 235, 1) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.location-button-circular:active:not(:disabled) {
+  transform: translateY(-1px) scale(1.06);
+  box-shadow: 
+    0 6px 25px 0 rgba(96, 165, 250, 0.45),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Estado de éxito circular con efecto de vidrio premium */
+.location-button-success-circular {
+  background: linear-gradient(135deg, 
+    rgba(110, 231, 183, 0.5) 0%,     /* Verde claro translúcido */
+    rgba(52, 211, 153, 0.6) 50%,    /* Verde esmeralda medio */
+    rgba(16, 185, 129, 0.8) 100%    /* Verde más oscuro */
+  ) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 3px solid rgba(110, 231, 183, 0.8) !important;
+  border-top: 3px solid rgba(255, 255, 255, 0.6) !important;
+  border-left: 3px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 
+    0 15px 50px 0 rgba(52, 211, 153, 0.4),
+    0 0 20px 3px rgba(110, 231, 183, 0.3),
+    inset 0 3px 0 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 0 0 rgba(52, 211, 153, 0.3) !important;
+  animation: glass-glow-circular 4s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de brillo suave para botones circulares con éxito */
+@keyframes glass-glow-circular {
+  0% {
+    background: linear-gradient(135deg, 
+      rgba(110, 231, 183, 0.5) 0%,
+      rgba(52, 211, 153, 0.6) 50%,
+      rgba(16, 185, 129, 0.8) 100%
+    );
+    box-shadow: 
+      0 15px 50px 0 rgba(52, 211, 153, 0.4),
+      0 0 20px 3px rgba(110, 231, 183, 0.3),
+      inset 0 3px 0 0 rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    background: linear-gradient(135deg, 
+      rgba(110, 231, 183, 0.7) 0%,
+      rgba(52, 211, 153, 0.8) 50%,
+      rgba(16, 185, 129, 0.9) 100%
+    );
+    box-shadow: 
+      0 18px 60px 0 rgba(52, 211, 153, 0.6),
+      0 0 30px 5px rgba(110, 231, 183, 0.4),
+      inset 0 3px 0 0 rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    background: linear-gradient(135deg, 
+      rgba(110, 231, 183, 0.5) 0%,
+      rgba(52, 211, 153, 0.6) 50%,
+      rgba(16, 185, 129, 0.8) 100%
+    );
+    box-shadow: 
+      0 15px 50px 0 rgba(52, 211, 153, 0.4),
+      0 0 20px 3px rgba(110, 231, 183, 0.3),
+      inset 0 3px 0 0 rgba(255, 255, 255, 0.5);
+  }
+}
+
+.location-button-success-circular:hover:not(:disabled) {
+  background: linear-gradient(135deg, 
+    rgba(110, 231, 183, 0.8) 0%,
+    rgba(52, 211, 153, 0.9) 50%,
+    rgba(16, 185, 129, 1) 100%
+  ) !important;
+  border: 3px solid rgba(110, 231, 183, 1) !important;
+  border-top: 3px solid rgba(255, 255, 255, 0.8) !important;
+  border-left: 3px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 
+    0 25px 70px 0 rgba(52, 211, 153, 0.7),
+    0 0 40px 8px rgba(110, 231, 183, 0.5),
+    inset 0 3px 0 0 rgba(255, 255, 255, 0.7) !important;
+  transform: translateY(-5px) scale(1.18);
+}
+
+/* Efecto de destello en los botones de éxito circulares */
+.location-button-success-circular::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0) 0deg,
+    rgba(255, 255, 255, 0.2) 90deg,
+    rgba(255, 255, 255, 0) 180deg,
+    rgba(255, 255, 255, 0.1) 270deg,
+    rgba(255, 255, 255, 0) 360deg
+  );
+  animation: circular-sweep 8s infinite linear;
+}
+
+@keyframes circular-sweep {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.7;
+  }
+}
+
+/* Efecto de ondas para el botón normal circular */
+.location-button-circular::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+  opacity: 0;
+}
+
+.location-button-circular:hover::before {
+  width: 120%;
+  height: 120%;
+  opacity: 1;
+}
+
+/* Contenedor y estilos para las coordenadas circulares */
+.coordinates-display-circular {
+  margin-top: 0.5rem;
+  background: linear-gradient(135deg, 
+    rgba(110, 231, 183, 0.08) 0%,
+    rgba(52, 211, 153, 0.12) 100%
+  );
+  border: 1px solid rgba(110, 231, 183, 0.25);
+  border-radius: 12px;
+  padding: 0.5rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 
+    0 3px 12px 0 rgba(52, 211, 153, 0.12),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+  animation: slide-down-circular 0.4s ease-out;
+  max-width: 160px;
+  width: 100%;
+}
+
+.coordinates-grid-circular {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.coordinate-item-circular {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.25rem;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  border: 1px solid rgba(110, 231, 183, 0.15);
+}
+
+.coordinate-label-circular {
+  font-size: 0.5rem;
+  font-weight: 600;
+  color: rgba(52, 211, 153, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.125rem;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.coordinate-value-circular {
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.5rem;
+  font-weight: 500;
+  color: rgba(16, 185, 129, 0.9);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.125rem 0.25rem;
+  border-radius: 4px;
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  word-break: break-all;
+  line-height: 1.1;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Estilos para los elementos dentro del botón circular de vidrio */
+.glass-text-circular {
+  color: rgba(6, 78, 59, 0.95);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  line-height: 1.1;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.glass-icon-circular {
+  filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.6));
+  color: rgba(6, 78, 59, 0.8) !important;
+  opacity: 0.95;
+}
+
+/* Efectos para el botón circular Obtener Ubicación */
+.location-text-circular {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  line-height: 1.1;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+}
+
+.location-icon-circular {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+  transition: all 0.3s ease;
+}
+
+.location-button-circular:hover .location-text-circular {
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.location-button-circular:hover .location-icon-circular {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+/* Animaciones para botones circulares */
+@keyframes slide-down-circular {
+  0% {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive para botones circulares */
+@media (max-width: 480px) {
+  .location-button-circular {
+    width: 4.5rem !important; /* 18 - más pequeño */
+    height: 4.5rem !important; /* 18 - más pequeño */
+  }
+  
+  .location-icon-circular,
+  .glass-icon-circular {
+    width: 1.25rem !important; /* h-5 w-5 */
+    height: 1.25rem !important;
+  }
+  
+  .location-text-circular,
+  .glass-text-circular {
+    font-size: 0.5rem !important; /* text-2xs */
+    line-height: 1 !important;
+  }
+  
+  .coordinates-display-circular {
+    padding: 0.375rem;
+    max-width: 140px;
+  }
+  
+  .coordinate-label-circular {
+    font-size: 0.4rem;
+  }
+  
+  .coordinate-value-circular {
+    font-size: 0.4rem;
+    padding: 0.125rem 0.1875rem;
+  }
+  
+  .coordinates-grid-circular {
+    gap: 0.375rem;
+  }
 }
 
 /* Nuevos estilos para botones de ubicación con diseño azul moderno */

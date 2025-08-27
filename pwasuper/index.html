@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#667eea" />
+    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#10b981" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#065f46" />
     <meta name="description" content="Sistema de registro de asistencia y actividades con funcionalidad offline" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -22,14 +24,24 @@
     
     <!-- Windows Tiles -->
     <meta name="msapplication-TileImage" content="/pwa-192x192.png" />
-    <meta name="msapplication-TileColor" content="#667eea" />
+    <meta name="msapplication-TileColor" content="#10b981" />
     
     <!-- Offline Support -->
     <meta name="offline-support" content="true" />
     
     <title>Sembrando Vida: CONTROL</title>
+    
+    <style>
+      /* Fondo de vidrio para evitar color morado durante la carga */
+      html, body {
+        background: linear-gradient(to bottom right, #f0fdfa, #ecfdf5, #f0fdfa) !important;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+      }
+    </style>
   </head>
-  <body>
+  <body style="background: linear-gradient(to bottom right, #f0fdfa, #ecfdf5, #f0fdfa);">
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
     

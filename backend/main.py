@@ -3116,13 +3116,6 @@ class PushSubscription(BaseModel):
 class PushUnsubscribe(BaseModel):
     usuario_id: int
 
-class NotificationJson(BaseModel):
-    usuario_id: int
-    tipo: str
-    titulo: str
-    mensaje: str
-    datos_adicionales: Optional[dict] = None
-
 # Crear tablas para push subscriptions si no existen
 try:
     cursor.execute("""
@@ -3374,87 +3367,6 @@ async def test_push_notification(usuario_id: int):
     except Exception as e:
         print(f"❌ Error en push de prueba: {e}")
         raise HTTPException(status_code=500, detail=f"Error enviando push de prueba: {str(e)}")
-
-@app.post("/api/notifications/create")
-async def crear_notificacion_json(data: NotificationJson):
-    """Crear notificación usando JSON (compatible con sistema push)"""
-    try:
-        print(f"🔔 Creando notificación JSON: {data.titulo}")
-        
-        # Validaciones
-        if not data.titulo or len(data.titulo.strip()) == 0:
-            raise HTTPException(status_code=400, detail="El título es obligatorio")
-        
-        if len(data.titulo) > 150:
-            raise HTTPException(status_code=400, detail="El título no puede exceder 150 caracteres")
-        
-        # Obtener fecha CDMX
-        fecha_cdmx = obtener_fecha_hora_cdmx_notificaciones()
-        
-        # Insertar notificación en base de datos
-        cursor = conn.cursor()
-        
-        # Preparar datos adicionales como enlace_url (limitado)
-        enlace_url = None
-        if data.datos_adicionales and 'action_url' in data.datos_adicionales:
-            enlace_url = data.datos_adicionales['action_url']
-        
-        cursor.execute("""
-            INSERT INTO notificaciones (
-                titulo, subtitulo, descripcion, enlace_url, enviada_a_todos, fecha_creacion, fecha_envio
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
-        """, (
-            data.titulo,
-            data.tipo,  # Usar tipo como subtítulo
-            data.mensaje,
-            enlace_url,
-            False,  # No enviada a todos
-            fecha_cdmx,
-            fecha_cdmx  # Enviar inmediatamente
-        ))
-        
-        notificacion_id = cursor.fetchone()[0]
-        
-        # Insertar relación notificación-usuario
-        cursor.execute("""
-            INSERT INTO notificacion_usuarios (notificacion_id, usuario_id) 
-            VALUES (%s, %s)
-        """, (notificacion_id, data.usuario_id))
-        
-        conn.commit()
-        
-        print(f"✅ Notificación {notificacion_id} creada exitosamente")
-        
-        # Enviar push notification
-        push_enviadas = 0
-        try:
-            print(f"🚀 Enviando push notification para notificación {notificacion_id}")
-            push_enviadas = await enviar_notificacion_con_push(
-                usuario_id=data.usuario_id,
-                titulo=data.titulo,
-                descripcion=data.mensaje,
-                notificacion_id=notificacion_id
-            )
-            print(f"📊 Push notifications enviadas: {push_enviadas}")
-        except Exception as push_error:
-            print(f"⚠️ Error enviando push (notificación creada): {push_error}")
-        
-        return {
-            "success": True,
-            "id": notificacion_id,
-            "message": "Notificación creada exitosamente",
-            "push_sent": push_enviadas > 0,
-            "push_count": push_enviadas
-        }
-        
-    except psycopg2.Error as e:
-        conn.rollback()
-        print(f"❌ Error de PostgreSQL: {e}")
-        raise HTTPException(status_code=500, detail=f"Error de base de datos: {e}")
-    except Exception as e:
-        print(f"❌ Error creando notificación JSON: {e}")
-        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 @app.get("/api/push/subscriptions")
 async def get_all_push_subscriptions():

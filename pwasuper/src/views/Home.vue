@@ -158,12 +158,42 @@
       </div>
 
         <!-- Advertencia sobre registro de asistencia -->
-        <div v-if="!modoAsistencia" class="text-center mb-2">
-          <div class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-2 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        <div v-if="!modoAsistencia" class="text-center mb-2 relative">
+          <!-- Círculo con bandera en esquina izquierda arriba del aviso -->
+          <div class="absolute -left-1 -top-1 w-6 h-6 bg-gradient-to-br from-red-600 to-red-800 rounded-full shadow-lg flex items-center justify-center border border-white/50 z-30">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v12z"/>
+              <path d="M4 22v-7"/>
             </svg>
-            <strong>Aviso:</strong> El registro de entrada marca el inicio oficial de su jornada laboral. Se recomienda marcar salida únicamente al finalizar sus actividades, ya que esto concluye formalmente su jornada del día.
+          </div>
+          
+          <div class="relative bg-gradient-to-r from-red-600 via-red-500 to-red-700 rounded-xl shadow-xl backdrop-blur-sm overflow-hidden">
+            <!-- Patrón decorativo de fondo -->
+            <div class="absolute inset-0 opacity-10">
+              <div class="absolute top-2 right-4 w-16 h-16 border-2 border-white/30 rounded-full"></div>
+              <div class="absolute bottom-2 left-8 w-8 h-8 border border-white/20 rounded-full"></div>
+            </div>
+            
+            <!-- Badge superior de ancho completo pegado a los bordes -->
+            <div class="absolute top-1 left-0 right-0 flex items-center justify-center px-3 py-1 bg-white/20 backdrop-blur-sm rounded-t-xl">
+              <!-- Texto OBLIGATORIO con tipografía elegante -->
+              <span class="text-sm font-extrabold text-white uppercase tracking-[0.15em] font-['Roboto',sans-serif] text-shadow-lg antialiased text-center">OBLIGATORIO</span>
+            </div>
+            
+            <!-- Contenido principal -->
+            <div class="relative z-20 flex flex-col items-center justify-center pt-8 pb-4 px-4">
+              <div class="text-center w-full">
+                <!-- Mensaje principal -->
+                <div class="text-xs leading-relaxed text-white font-['Poppins',sans-serif]">
+                  <span class="font-bold text-yellow-200 drop-shadow-sm">REGISTRE SU ENTRADA Y SALIDA</span>
+                  <br>
+                  <span class="font-medium text-red-100">Control oficial de jornada laboral</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Borde brillante -->
+            <div class="absolute inset-0 rounded-xl border-2 border-gradient-to-r from-red-300/50 via-white/30 to-red-300/50 pointer-events-none"></div>
           </div>
         </div>
         

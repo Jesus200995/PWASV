@@ -42,16 +42,6 @@
             </div>
           </div>
           
-          <!-- Componente de configuración de notificaciones push -->
-          <div class="mb-2">
-            <PushNotificationSetup 
-              :usuario-id="usuario?.id || obtenerUsuarioId()"
-              @subscribed="onPushSubscribed"
-              @unsubscribed="onPushUnsubscribed"
-              @error="onPushError"
-            />
-          </div>
-          
           <!-- Título de notificaciones fijo -->
           <div class="bg-transparent rounded-xl p-1">
             <h2 class="text-sm font-semibold text-gray-800 mb-1 modern-title flex items-center">
@@ -67,7 +57,7 @@
       </div>
 
       <!-- Contenido con scroll -->
-      <div class="absolute inset-0 overflow-hidden pt-56 sm:pt-60 pb-2">
+      <div class="absolute inset-0 overflow-hidden pt-40 sm:pt-44 pb-2">
         <div class="page-container w-full max-w-md mx-auto relative z-10 px-2 sm:px-3 lg:px-4 py-1 h-full">
 
         <!-- Estado de carga -->
@@ -381,7 +371,6 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import notificacionesService from '../services/notificacionesService.js'
 import { useNotifications } from '../composables/useNotifications.js'
-import PushNotificationSetup from '../components/PushNotificationSetup.vue'
 
 // Estados reactivos
 const notificaciones = ref([])
@@ -864,22 +853,6 @@ onBeforeUnmount(() => {
     clearInterval(autoUpdateInterval)
   }
 })
-
-// Manejadores para eventos de push notifications
-const onPushSubscribed = () => {
-  console.log('✅ Usuario suscrito a notificaciones push')
-  // Aquí podrías mostrar un toast de confirmación
-}
-
-const onPushUnsubscribed = () => {
-  console.log('🔕 Usuario desuscrito de notificaciones push')
-  // Aquí podrías mostrar un toast de confirmación
-}
-
-const onPushError = (error) => {
-  console.error('❌ Error en notificaciones push:', error)
-  // Aquí podrías mostrar un toast de error
-}
 </script>
 
 <style scoped>

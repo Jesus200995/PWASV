@@ -1549,9 +1549,8 @@ watch([filtroTipo, filtroPeriodo], () => {
 </script>
 
 <style scoped>
-/* Importación de estilos externos */
+/* Importación de fuentes */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
-@import url('https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css');
 
 /* Estilos principales */
 .visor-map-container {
@@ -2215,6 +2214,9 @@ watch([filtroTipo, filtroPeriodo], () => {
   background: #27ae60;
   transform: translateY(-2px);
 }
+
+/* Estilos específicos para Mapbox */
+@import url('https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css');
 
 /* Personalización de popups personalizados */
 .custom-popup {

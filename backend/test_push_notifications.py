@@ -6,10 +6,8 @@ Script de prueba para notificaciones push
 import requests
 import json
 from pywebpush import webpush, WebPushException
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import sqlite3
 import time
-import os
 
 # Configuración
 BACKEND_URL = "http://localhost:8000"
@@ -33,8 +31,7 @@ def test_endpoints():
         return False
     
     # 2. Simular suscripción de prueba
-    test_subscription_data = {
-        "usuario_id": TEST_USER_ID,
+    test_subscription = {
         "endpoint": "https://fcm.googleapis.com/fcm/send/test-endpoint-123",
         "keys": {
             "p256dh": "BL7ELmBz1Y5-test-p256dh-key-content",
@@ -45,7 +42,7 @@ def test_endpoints():
     try:
         response = requests.post(
             f"{BACKEND_URL}/api/push/subscribe",
-            json=test_subscription_data
+            json={"subscription": test_subscription, "user_id": TEST_USER_ID}
         )
         print(f"🔔 Respuesta de suscripción: {response.status_code} - {response.text}")
     except Exception as e:
@@ -54,30 +51,21 @@ def test_endpoints():
     return True
 
 def check_database():
-    """Verifica el estado de la base de datos PostgreSQL"""
-    print("\n📊 Verificando base de datos PostgreSQL...")
+    """Verifica el estado de la base de datos"""
+    print("\n📊 Verificando base de datos...")
     
     try:
-        # Configuración de PostgreSQL (usar las mismas variables del main.py)
-        DB_HOST = "31.97.8.51"
-        DB_NAME = "app_registros"
-        DB_USER = "jesus"
-        DB_PASS = "2025"
-        
-        # Conectar a PostgreSQL
-        conn = psycopg2.connect(
-            host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASS
-        )
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        # Conectar a la base de datos
+        conn = sqlite3.connect('../sembrando_vida_asistencias.db')
+        cursor = conn.cursor()
         
         # Verificar tabla de suscripciones push
         cursor.execute("""
-            SELECT table_name FROM information_schema.tables 
-            WHERE table_schema='public' AND table_name='push_subscriptions'
+            SELECT name FROM sqlite_master 
+            WHERE type='table' AND name='push_subscriptions'
         """)
         
-        result = cursor.fetchone()
-        if result:
+        if cursor.fetchone():
             print("✅ Tabla push_subscriptions existe")
             
             # Contar suscripciones
@@ -86,20 +74,16 @@ def check_database():
             print(f"📊 Suscripciones registradas: {count}")
             
             if count > 0:
-                cursor.execute("SELECT user_id, created_at FROM push_subscriptions ORDER BY created_at DESC LIMIT 5")
+                cursor.execute("SELECT user_id, created_at FROM push_subscriptions LIMIT 5")
                 subs = cursor.fetchall()
-                print("🔍 Últimas 5 suscripciones:")
+                print("🔍 Primeras 5 suscripciones:")
                 for sub in subs:
-                    print(f"   Usuario: {sub['user_id']}, Creado: {sub['created_at']}")
+                    print(f"   Usuario: {sub[0]}, Creado: {sub[1]}")
         else:
             print("❌ Tabla push_subscriptions no existe")
-            print("💡 Ejecuta el backend para que se cree automáticamente")
         
         conn.close()
         
-    except psycopg2.Error as e:
-        print(f"❌ Error de PostgreSQL: {e}")
-        print("💡 Verificando si el VPS de PostgreSQL está accesible...")
     except Exception as e:
         print(f"❌ Error verificando base de datos: {e}")
 
@@ -110,13 +94,13 @@ def simulate_notification():
     # Crear una notificación de prueba
     notification_data = {
         "usuario_id": TEST_USER_ID,
-        "tipo": "info", 
+        "tipo": "info",
         "titulo": "🧪 Prueba de Push",
         "mensaje": "Esta es una notificación de prueba del sistema push",
-        "datos_adicionales": json.dumps({
+        "datos_adicionales": {
             "test": True,
             "timestamp": int(time.time())
-        })
+        }
     }
     
     try:

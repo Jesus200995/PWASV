@@ -52,38 +52,38 @@ class PushNotificationService {
     try {
       console.log('🔧 Cargando clave VAPID del servidor...');
       
-      // FORZAR el uso de la clave correcta directamente
-      // Esta es la clave que está funcionando en el backend
-      this.vapidPublicKey = 'BK2xdNLfyiFTLYObswC7XFi2ZFqU_VDqkteuiVxiPpJP6vzI6bvwL5xGB0ovqVpvngpQ8SdX1kF_eR3QsblHeN4';
-      console.log('✅ Clave VAPID fija configurada:', this.vapidPublicKey);
-      
-      // También intentar obtener del servidor para validar
-      const apiBaseUrl = 'http://localhost:8000'; // Forzar localhost en desarrollo
+      // Intentar obtener del servidor primero
+      const apiBaseUrl = import.meta.env.PROD 
+        ? 'https://apipwa.sembrandodatos.com' 
+        : 'http://localhost:8000';
       
       try {
         const response = await fetch(`${apiBaseUrl}/api/vapid-public-key`);
         if (response.ok) {
           const data = await response.json();
-          const serverKey = data.publicKey;
-          console.log('🔍 Clave del servidor:', serverKey);
-          
-          // Usar la del servidor solo si es diferente
-          if (serverKey && serverKey !== this.vapidPublicKey) {
-            console.log('⚠️ Clave del servidor diferente, mantiendo la fija');
-            // this.vapidPublicKey = serverKey; // Comentado para usar fija
-          }
+          this.vapidPublicKey = data.publicKey;
+          console.log('✅ Clave VAPID obtenida del servidor');
+          return;
         }
       } catch (serverError) {
-        console.warn('⚠️ No se pudo conectar al servidor para obtener clave VAPID, usando clave fija');
+        console.warn('⚠️ No se pudo conectar al servidor para obtener clave VAPID');
       }
 
-      console.log('✅ Clave VAPID final:', this.vapidPublicKey);
+      // En desarrollo o si falla el servidor, usar clave local
+      if (import.meta.env.DEV) {
+        // Usar la misma clave que está en el servidor
+        this.vapidPublicKey = 'BK2xdNLfyiFTLYObswC7XFi2ZFqU_VDqkteuiVxiPpJP6vzI6bvwL5xGB0ovqVpvngpQ8SdX1kF_eR3QsblHeN4';
+        console.log('🔧 Usando clave VAPID de desarrollo');
+        return;
+      }
+
+      throw new Error('No se pudo obtener la clave VAPID');
       
     } catch (error) {
       console.error('❌ Error cargando clave VAPID:', error);
-      // Usar clave de respaldo garantizada
+      // Usar clave de respaldo
       this.vapidPublicKey = 'BK2xdNLfyiFTLYObswC7XFi2ZFqU_VDqkteuiVxiPpJP6vzI6bvwL5xGB0ovqVpvngpQ8SdX1kF_eR3QsblHeN4';
-      console.log('🔧 Usando clave VAPID de respaldo garantizada');
+      console.log('🔧 Usando clave VAPID de respaldo');
     }
   }
 
@@ -174,24 +174,6 @@ class PushNotificationService {
       });
 
       console.log('✅ Nueva suscripción push creada exitosamente');
-      
-      // DEBUG: Verificar inmediatamente la suscripción creada
-      console.log('🔍 DEBUG: Suscripción creada:', {
-        endpoint: this.subscription.endpoint,
-        endpointLength: this.subscription.endpoint ? this.subscription.endpoint.length : 0,
-        endpointPreview: this.subscription.endpoint ? this.subscription.endpoint.substring(0, 50) + '...' : 'NULL',
-        hasKeys: {
-          p256dh: !!this.subscription.getKey('p256dh'),
-          auth: !!this.subscription.getKey('auth')
-        }
-      });
-
-      // Verificación crítica
-      if (!this.subscription.endpoint) {
-        console.error('❌ CRÍTICO: La suscripción se creó pero el endpoint está vacío!');
-        console.error('   Subscription object:', this.subscription);
-        throw new Error('Suscripción creada sin endpoint válido');
-      }
 
       // Enviar al servidor
       await this.sendSubscriptionToServer(usuarioId, this.subscription);
@@ -232,24 +214,6 @@ class PushNotificationService {
    */
   async sendSubscriptionToServer(usuarioId, subscription) {
     try {
-      // DEBUG: Verificar el contenido de la suscripción
-      console.log('🔍 DEBUG: Datos de suscripción recibidos:', {
-        endpoint: subscription.endpoint,
-        endpointLength: subscription.endpoint ? subscription.endpoint.length : 0,
-        hasP256dh: !!subscription.getKey('p256dh'),
-        hasAuth: !!subscription.getKey('auth')
-      });
-
-      // Validar que el endpoint no esté vacío
-      if (!subscription.endpoint || subscription.endpoint.trim().length === 0) {
-        throw new Error('❌ CRÍTICO: Endpoint de suscripción está vacío o nulo');
-      }
-
-      // Validar que las claves existan
-      if (!subscription.getKey('p256dh') || !subscription.getKey('auth')) {
-        throw new Error('❌ CRÍTICO: Claves de suscripción (p256dh/auth) no disponibles');
-      }
-
       const subscriptionData = {
         usuario_id: usuarioId,
         endpoint: subscription.endpoint,
@@ -264,18 +228,12 @@ class PushNotificationService {
         }
       };
 
-      console.log('📤 ENVIANDO SUSCRIPCIÓN AL SERVIDOR:');
-      console.log('   Usuario ID:', subscriptionData.usuario_id);
-      console.log('   Endpoint:', subscriptionData.endpoint.substring(0, 50) + '...');
-      console.log('   Endpoint completo:', subscriptionData.endpoint);
-      console.log('   P256DH key:', subscriptionData.keys.p256dh.substring(0, 20) + '...');
-      console.log('   Auth key:', subscriptionData.keys.auth.substring(0, 20) + '...');
-      console.log('   Platform:', subscriptionData.deviceInfo.platform);
+      console.log('📤 Enviando suscripción al servidor:', subscriptionData);
 
-      // En desarrollo, usar servidor local FORZADO
-      let apiBaseUrl = 'http://localhost:8000';  // FORZAR localhost siempre
-      
-      console.log('🌐 Enviando a API:', `${apiBaseUrl}/api/push/subscribe`);
+      // En desarrollo, usar servidor local
+      const apiBaseUrl = import.meta.env.PROD 
+        ? 'https://apipwa.sembrandodatos.com' 
+        : 'http://localhost:8000';
 
       const response = await fetch(`${apiBaseUrl}/api/push/subscribe`, {
         method: 'POST',
@@ -287,12 +245,11 @@ class PushNotificationService {
 
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('❌ Error del servidor:', response.status, errorData);
         throw new Error(`Error del servidor (${response.status}): ${errorData}`);
       }
 
       const result = await response.json();
-      console.log('✅ SUSCRIPCIÓN REGISTRADA EXITOSAMENTE:', result);
+      console.log('✅ Suscripción enviada al servidor exitosamente:', result);
 
     } catch (error) {
       console.error('❌ Error enviando suscripción al servidor:', error);

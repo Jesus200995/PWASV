@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Push Notifications - PWA Super</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .warning { border-left-color: #ffc107; background: #fff3cd; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 8px;
+            font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .log {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 6px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.ok { background: #28a745; color: white; }
+        .status.error { background: #dc3545; color: white; }
+        .status.warning { background: #ffc107; color: black; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test de Push Notifications</h1>
+        <p>Herramienta de diagnóstico para verificar el funcionamiento de las notificaciones push.</p>
+        
+        <div class="step">
+            <h3>Estado del Sistema</h3>
+            <p>Service Worker: <span id="sw-status" class="status warning">Verificando...</span></p>
+            <p>Push Manager: <span id="pm-status" class="status warning">Verificando...</span></p>
+            <p>Notificaciones: <span id="notif-status" class="status warning">Verificando...</span></p>
+            <p>Permisos: <span id="perm-status" class="status warning">Verificando...</span></p>
+        </div>
+        
+        <div class="step">
+            <h3>Acciones</h3>
+            <button onclick="checkSupport()">1. Verificar Soporte</button>
+            <button onclick="requestPermissions()" id="perm-btn" disabled>2. Solicitar Permisos</button>
+            <button onclick="createSubscription()" id="sub-btn" disabled>3. Crear Suscripción</button>
+            <button onclick="testPushNotification()" id="test-btn" disabled>4. Test Push</button>
+            <button onclick="clearLog()">Limpiar Log</button>
+        </div>
+        
+        <div class="step">
+            <h3>Información de Debugging</h3>
+            <p><strong>URL actual:</strong> <span id="current-url"></span></p>
+            <p><strong>User Agent:</strong> <span id="user-agent"></span></p>
+            <p><strong>Plataforma:</strong> <span id="platform"></span></p>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentSubscription = null;
+        let serviceWorkerRegistration = null;
+        
+        // Configuración
+        const VAPID_KEY = 'BK2xdNLfyiFTLYObswC7XFi2ZFqU_VDqkteuiVxiPpJP6vzI6bvwL5xGB0ovqVpvngpQ8SdX1kF_eR3QsblHeN4';
+        const API_BASE = 'http://localhost:8000';
+        const USER_ID = 2390; // Usuario de test
+        
+        // Funciones de logging
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : type === 'warning' ? '#ffd43b' : '#00ff00';
+            logDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        function setStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            element.className = `status ${status}`;
+            element.textContent = text;
+        }
+        
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/');
+            
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+        
+        // 1. Verificar soporte
+        async function checkSupport() {
+            log('🔍 Verificando soporte del navegador...');
+            
+            // Mostrar información básica
+            document.getElementById('current-url').textContent = window.location.href;
+            document.getElementById('user-agent').textContent = navigator.userAgent;
+            document.getElementById('platform').textContent = navigator.platform;
+            
+            // Service Worker
+            if ('serviceWorker' in navigator) {
+                setStatus('sw-status', 'ok', 'Soportado');
+                log('✅ Service Worker: Soportado');
+            } else {
+                setStatus('sw-status', 'error', 'No soportado');
+                log('❌ Service Worker: No soportado', 'error');
+                return;
+            }
+            
+            // Push Manager
+            if ('PushManager' in window) {
+                setStatus('pm-status', 'ok', 'Soportado');
+                log('✅ Push Manager: Soportado');
+            } else {
+                setStatus('pm-status', 'error', 'No soportado');
+                log('❌ Push Manager: No soportado', 'error');
+                return;
+            }
+            
+            // Notifications
+            if ('Notification' in window) {
+                setStatus('notif-status', 'ok', 'Soportado');
+                log('✅ Notifications API: Soportado');
+            } else {
+                setStatus('notif-status', 'error', 'No soportado');
+                log('❌ Notifications API: No soportado', 'error');
+                return;
+            }
+            
+            // Verificar permisos
+            const permission = Notification.permission;
+            if (permission === 'granted') {
+                setStatus('perm-status', 'ok', 'Concedidos');
+                log('✅ Permisos: Concedidos');
+                document.getElementById('sub-btn').disabled = false;
+            } else if (permission === 'default') {
+                setStatus('perm-status', 'warning', 'Pendientes');
+                log('⚠️ Permisos: Pendientes');
+                document.getElementById('perm-btn').disabled = false;
+            } else {
+                setStatus('perm-status', 'error', 'Denegados');
+                log('❌ Permisos: Denegados', 'error');
+            }
+            
+            // Registrar Service Worker
+            try {
+                log('📝 Registrando Service Worker...');
+                serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js');
+                await navigator.serviceWorker.ready;
+                log('✅ Service Worker registrado y listo');
+            } catch (error) {
+                log(`❌ Error registrando Service Worker: ${error.message}`, 'error');
+            }
+            
+            log('🎉 Verificación de soporte completada');
+        }
+        
+        // 2. Solicitar permisos
+        async function requestPermissions() {
+            log('🔔 Solicitando permisos de notificación...');
+            
+            try {
+                const permission = await Notification.requestPermission();
+                
+                if (permission === 'granted') {
+                    setStatus('perm-status', 'ok', 'Concedidos');
+                    log('✅ Permisos concedidos');
+                    document.getElementById('sub-btn').disabled = false;
+                } else if (permission === 'denied') {
+                    setStatus('perm-status', 'error', 'Denegados');
+                    log('❌ Permisos denegados', 'error');
+                } else {
+                    setStatus('perm-status', 'warning', 'Pendientes');
+                    log('⚠️ Permisos aún pendientes', 'warning');
+                }
+            } catch (error) {
+                log(`❌ Error solicitando permisos: ${error.message}`, 'error');
+            }
+        }
+        
+        // 3. Crear suscripción
+        async function createSubscription() {
+            log('📝 Creando suscripción push...');
+            
+            try {
+                if (!serviceWorkerRegistration) {
+                    throw new Error('Service Worker no registrado');
+                }
+                
+                // Verificar suscripción existente
+                let subscription = await serviceWorkerRegistration.pushManager.getSubscription();
+                
+                if (subscription) {
+                    log('🔍 Suscripción existente encontrada');
+                    log(`   Endpoint: ${subscription.endpoint.substring(0, 50)}...`);
+                    
+                    if (!subscription.endpoint || subscription.endpoint.length < 50) {
+                        log('❌ Suscripción existente inválida, eliminando...', 'warning');
+                        await subscription.unsubscribe();
+                        subscription = null;
+                    }
+                }
+                
+                // Crear nueva suscripción si es necesaria
+                if (!subscription) {
+                    log('🆕 Creando nueva suscripción...');
+                    
+                    const applicationServerKey = urlBase64ToUint8Array(VAPID_KEY);
+                    
+                    subscription = await serviceWorkerRegistration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: applicationServerKey
+                    });
+                    
+                    log('✅ Nueva suscripción creada');
+                }
+                
+                // Verificar datos críticos
+                log('🔍 Verificando datos de suscripción...');
+                log(`   Endpoint: ${subscription.endpoint}`);
+                log(`   Endpoint length: ${subscription.endpoint ? subscription.endpoint.length : 0}`);
+                log(`   Endpoint valid: ${subscription.endpoint && subscription.endpoint.startsWith('https://')}`);
+                log(`   Has P256DH: ${!!subscription.getKey('p256dh')}`);
+                log(`   Has AUTH: ${!!subscription.getKey('auth')}`);
+                
+                // Validaciones críticas
+                if (!subscription.endpoint) {
+                    throw new Error('❌ CRÍTICO: Endpoint está vacío');
+                }
+                
+                if (subscription.endpoint.length < 50) {
+                    throw new Error('❌ CRÍTICO: Endpoint demasiado corto');
+                }
+                
+                if (!subscription.endpoint.startsWith('https://')) {
+                    throw new Error('❌ CRÍTICO: Endpoint no es HTTPS');
+                }
+                
+                // Preparar datos para el servidor
+                const subscriptionData = {
+                    usuario_id: USER_ID,
+                    endpoint: subscription.endpoint,
+                    keys: {
+                        p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))),
+                        auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))))
+                    },
+                    userAgent: navigator.userAgent,
+                    deviceInfo: {
+                        type: 'desktop',
+                        platform: navigator.platform + '-TEST-MANUAL'
+                    }
+                };
+                
+                log('📤 Enviando suscripción al servidor...');
+                log(`   API: ${API_BASE}/api/push/subscribe`);
+                log(`   Usuario: ${subscriptionData.usuario_id}`);
+                log(`   Endpoint preview: ${subscriptionData.endpoint.substring(0, 50)}...`);
+                
+                // Enviar al servidor
+                const response = await fetch(`${API_BASE}/api/push/subscribe`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(subscriptionData)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error del servidor (${response.status}): ${errorText}`);
+                }
+                
+                const result = await response.json();
+                log('✅ SUSCRIPCIÓN REGISTRADA EN SERVIDOR');
+                log(`   Respuesta: ${JSON.stringify(result)}`);
+                
+                currentSubscription = subscription;
+                document.getElementById('test-btn').disabled = false;
+                
+                log('🎉 Proceso de suscripción completado exitosamente');
+                
+            } catch (error) {
+                log(`❌ Error en suscripción: ${error.message}`, 'error');
+                console.error('Stack:', error.stack);
+            }
+        }
+        
+        // 4. Test de notificación push
+        async function testPushNotification() {
+            log('🚀 Enviando notificación push de prueba...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/push/test/${USER_ID}`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                log('📋 RESULTADO DEL TEST PUSH:');
+                log(`   Success: ${result.success}`);
+                log(`   Message: ${result.message}`);
+                log(`   Dispositivos: ${result.dispositivos}`);
+                
+                if (result.dispositivos > 0) {
+                    log('🎉 ¡ÉXITO! Push notification enviada', 'success');
+                    log('📱 Revisa tu dispositivo/navegador para ver la notificación', 'success');
+                } else {
+                    log('⚠️ Push enviado pero sin dispositivos alcanzados', 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ Error en test push: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-inicializar cuando se carga la página
+        window.addEventListener('load', () => {
+            log('🚀 Test de Push Notifications iniciado');
+            log('📋 Instrucciones:');
+            log('   1. Hacer clic en "Verificar Soporte"');
+            log('   2. Hacer clic en "Solicitar Permisos" (si es necesario)');
+            log('   3. Hacer clic en "Crear Suscripción"');
+            log('   4. Hacer clic en "Test Push"');
+            log('   5. Verificar que llegue la notificación');
+            log('');
+        });
+    </script>
+</body>
+</html>

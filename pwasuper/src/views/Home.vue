@@ -159,25 +159,43 @@
 
         <!-- Advertencia sobre registro de asistencia -->
         <div v-if="!modoAsistencia" class="text-center mb-2 relative">
-          <!-- Círculo con bandera en esquina izquierda arriba del aviso -->
-          <div class="absolute -left-1 -top-1 w-6 h-6 bg-gradient-to-br from-red-600 to-red-800 rounded-full shadow-lg flex items-center justify-center border border-white/50 z-30">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v12z"/>
-              <path d="M4 22v-7"/>
-            </svg>
+          <!-- Círculo con ícono de obligatorio en esquina izquierda arriba del aviso -->
+          <div class="absolute -left-1 -top-1 w-6 h-6 bg-gradient-to-br from-red-500/90 via-red-600/85 to-red-700/90 rounded-full shadow-2xl backdrop-blur-xl border border-white/30 z-30 overflow-hidden">
+            <!-- Efecto vidrio en círculo -->
+            <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10 pointer-events-none rounded-full"></div>
+            
+            <!-- Reflejo superior del círculo -->
+            <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent rounded-full"></div>
+            
+            <!-- Ícono con efecto mejorado -->
+            <div class="relative z-10 w-full h-full flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white drop-shadow-lg filter brightness-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
           </div>
           
-          <div class="relative bg-gradient-to-r from-red-600 via-red-500 to-red-700 rounded-xl shadow-xl backdrop-blur-sm overflow-hidden">
-            <!-- Patrón decorativo de fondo -->
-            <div class="absolute inset-0 opacity-10">
-              <div class="absolute top-2 right-4 w-16 h-16 border-2 border-white/30 rounded-full"></div>
-              <div class="absolute bottom-2 left-8 w-8 h-8 border border-white/20 rounded-full"></div>
+          <div class="relative bg-gradient-to-br from-red-500/90 via-red-600/85 to-red-700/90 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/20 overflow-hidden">
+            <!-- Efecto vidrio superior -->
+            <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/5 pointer-events-none"></div>
+            
+            <!-- Reflejo de vidrio -->
+            <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/15 to-transparent rounded-t-2xl"></div>
+            
+            <!-- Patrón decorativo sutil -->
+            <div class="absolute inset-0 opacity-5">
+              <div class="absolute top-3 right-6 w-20 h-20 border border-white/30 rounded-full"></div>
+              <div class="absolute bottom-3 left-6 w-12 h-12 border border-white/20 rounded-full"></div>
+              <div class="absolute top-1/2 right-3 w-6 h-6 border border-white/25 rounded-full"></div>
             </div>
             
-            <!-- Badge superior de ancho completo pegado a los bordes -->
-            <div class="absolute top-1 left-0 right-0 flex items-center justify-center px-3 py-1 bg-white/20 backdrop-blur-sm rounded-t-xl">
+            <!-- Efecto shimmer sutil -->
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent transform skew-x-12 translate-x-[-100%] animate-shimmer opacity-60"></div>
+            
+            <!-- Badge superior con efecto vidrio -->
+            <div class="absolute top-1 left-0 right-0 flex items-center justify-center px-3 py-1 bg-white/25 backdrop-blur-md border-b border-white/10 rounded-t-2xl shadow-inner">
               <!-- Texto OBLIGATORIO con tipografía elegante -->
-              <span class="text-sm font-extrabold text-white uppercase tracking-[0.15em] font-['Roboto',sans-serif] text-shadow-lg antialiased text-center">OBLIGATORIO</span>
+              <span class="text-sm font-extrabold text-white uppercase tracking-[0.15em] font-['Roboto',sans-serif] drop-shadow-lg antialiased text-center filter brightness-110">OBLIGATORIO</span>
             </div>
             
             <!-- Contenido principal -->

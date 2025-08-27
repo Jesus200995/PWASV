@@ -117,19 +117,49 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
   console.log('🔔 Notificación push recibida:', event);
   
-  const options = {
-    body: event.data ? event.data.text() : 'Tienes nuevas actualizaciones disponibles',
+  let notificationData = {
+    title: 'Sembrando Vida',
+    body: 'Tienes nuevas notificaciones',
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
-    vibrate: [100, 50, 100],
+    tag: 'notification',
+    requireInteraction: true,
+    vibrate: [200, 100, 200],
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: '1'
-    },
+      primaryKey: '1',
+      url: '/notificaciones'
+    }
+  };
+
+  // Si el push tiene datos, parsearlos
+  if (event.data) {
+    try {
+      const pushData = event.data.json();
+      notificationData = {
+        ...notificationData,
+        title: pushData.title || notificationData.title,
+        body: pushData.body || pushData.descripcion || notificationData.body,
+        icon: pushData.icon || notificationData.icon,
+        data: {
+          ...notificationData.data,
+          id: pushData.id,
+          url: pushData.url || '/notificaciones',
+          ...pushData
+        }
+      };
+    } catch (e) {
+      // Si no es JSON, usar como texto simple
+      notificationData.body = event.data.text();
+    }
+  }
+
+  const options = {
+    ...notificationData,
     actions: [
       {
-        action: 'explore',
-        title: 'Ver',
+        action: 'open',
+        title: 'Ver notificación',
         icon: '/pwa-192x192.png'
       },
       {
@@ -141,7 +171,7 @@ self.addEventListener('push', (event) => {
   };
   
   event.waitUntil(
-    self.registration.showNotification('PWA Super', options)
+    self.registration.showNotification(notificationData.title, options)
   );
 });
 
@@ -151,19 +181,32 @@ self.addEventListener('notificationclick', (event) => {
   
   event.notification.close();
   
-  if (event.action === 'explore') {
-    // Abrir la aplicación
+  // Obtener la URL de la notificación
+  const notificationUrl = event.notification.data?.url || '/notificaciones';
+  
+  if (event.action === 'open' || !event.action) {
+    // Abrir o enfocar la aplicación en la página de notificaciones
     event.waitUntil(
-      clients.openWindow('/')
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        // Buscar si ya hay una ventana abierta
+        for (let client of clientList) {
+          if (client.url.includes(self.location.origin)) {
+            // Si hay una ventana abierta, enfocarla y navegar a notificaciones
+            return client.focus().then(() => {
+              return client.postMessage({
+                type: 'NAVIGATE_TO_NOTIFICATIONS',
+                data: event.notification.data
+              });
+            });
+          }
+        }
+        // Si no hay ventanas abiertas, abrir una nueva
+        return clients.openWindow(notificationUrl);
+      })
     );
   } else if (event.action === 'close') {
     // Solo cerrar la notificación
-    event.notification.close();
-  } else {
-    // Click general en la notificación
-    event.waitUntil(
-      clients.openWindow('/')
-    );
+    console.log('Notificación cerrada por el usuario');
   }
 });
 

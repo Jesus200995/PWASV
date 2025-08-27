@@ -2389,6 +2389,45 @@ async def crear_notificacion(
         
         print(f"✅ Notificación creada exitosamente con ID: {notificacion_id}")
         
+        # ==================== ENVIAR PUSH NOTIFICATIONS ====================
+        try:
+            print(f"🚀 Iniciando envío de push notifications...")
+            push_enviadas_total = 0
+            
+            if enviada_a_todos:
+                # Obtener todos los usuarios activos
+                cursor.execute("SELECT id FROM usuarios WHERE activo = TRUE")
+                todos_usuarios = [row[0] for row in cursor.fetchall()]
+                print(f"📤 Enviando push a {len(todos_usuarios)} usuarios (todos)")
+                
+                for user_id in todos_usuarios:
+                    push_count = await enviar_notificacion_con_push(
+                        usuario_id=user_id,
+                        titulo=titulo,
+                        descripcion=descripcion or subtitulo or "Nueva notificación disponible",
+                        notificacion_id=notificacion_id
+                    )
+                    push_enviadas_total += push_count
+            else:
+                # Enviar solo a usuarios seleccionados
+                print(f"📤 Enviando push a {len(usuarios_seleccionados)} usuarios específicos")
+                
+                for user_id in usuarios_seleccionados:
+                    push_count = await enviar_notificacion_con_push(
+                        usuario_id=user_id,
+                        titulo=titulo,
+                        descripcion=descripcion or subtitulo or "Nueva notificación disponible",
+                        notificacion_id=notificacion_id
+                    )
+                    push_enviadas_total += push_count
+            
+            print(f"📊 Total de push notifications enviadas: {push_enviadas_total}")
+            
+        except Exception as e:
+            # No fallar la creación de notificación si las push fallan
+            print(f"⚠️ Error enviando push notifications (notificación creada exitosamente): {e}")
+        # ==================== FIN PUSH NOTIFICATIONS ====================
+        
         return {
             "id": notificacion_id,
             "status": "success",
@@ -2397,7 +2436,8 @@ async def crear_notificacion(
             "enviada_a_todos": enviada_a_todos,
             "usuarios_destinatarios": len(usuarios_seleccionados) if not enviada_a_todos else "todos",
             "tiene_archivo": archivo_nombre is not None,
-            "fecha_envio": fecha_envio.isoformat()
+            "fecha_envio": fecha_envio.isoformat(),
+            "push_notifications_enviadas": push_enviadas_total if 'push_enviadas_total' in locals() else 0
         }
         
     except HTTPException:
@@ -3048,6 +3088,322 @@ async def obtener_notificaciones_usuario_mejorado(
         raise HTTPException(status_code=500, detail=f"Error al obtener notificaciones del usuario: {str(e)}")
 
 # ==================== FIN ENDPOINTS DE NOTIFICACIONES LEÍDAS/NO LEÍDAS ====================
+
+# ==================== ENDPOINTS PARA NOTIFICACIONES PUSH ====================
+
+import json
+from pywebpush import webpush, WebPushException
+
+# Configuración VAPID para notificaciones push
+# IMPORTANTE: Claves VAPID generadas específicamente para este proyecto
+VAPID_PRIVATE_KEY = """-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0w
+awIBAQQgHDh4ooWJe6rwobwx
+n7AK6bRKjo4nbWu6eZV8YVL818qhRANCAAStsXTS38ohUy2Dm7MAu1xYtmRalP1Q
+6pLXrolcYj6ST+r8yOm78C+cRgdKL6lab54KUPEnV9ZBf3kd0LG5R3je
+-----END PRIVATE KEY-----"""
+
+VAPID_PUBLIC_KEY = "BK2xdNLfyiFTLYObswC7XFi2ZFqU_VDqkteuiVxiPpJP6vzI6bvwL5xGB0ovqVpvngpQ8SdX1kF_eR3QsblHeN4"
+
+# Modelos para push notifications
+class PushSubscription(BaseModel):
+    usuario_id: int
+    endpoint: str
+    keys: dict
+    userAgent: Optional[str] = None
+    deviceInfo: Optional[dict] = None
+
+class PushUnsubscribe(BaseModel):
+    usuario_id: int
+
+# Crear tablas para push subscriptions si no existen
+try:
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS push_subscriptions (
+            id SERIAL PRIMARY KEY,
+            usuario_id INTEGER NOT NULL,
+            endpoint VARCHAR(500) NOT NULL UNIQUE,
+            p256dh_key VARCHAR(200) NOT NULL,
+            auth_key VARCHAR(50) NOT NULL,
+            user_agent TEXT,
+            device_type VARCHAR(50),
+            platform VARCHAR(50),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_active BOOLEAN DEFAULT TRUE
+        );
+    """)
+    
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_push_subscriptions_usuario 
+        ON push_subscriptions(usuario_id);
+    """)
+    
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_push_subscriptions_active 
+        ON push_subscriptions(is_active);
+    """)
+    
+    conn.commit()
+    print("✅ Tabla push_subscriptions creada/verificada")
+    
+except Exception as e:
+    print(f"⚠️ Error creando tabla push_subscriptions: {e}")
+
+@app.get("/api/vapid-public-key")
+async def get_vapid_public_key():
+    """Obtener clave pública VAPID para configurar push notifications en el cliente"""
+    return {"publicKey": VAPID_PUBLIC_KEY}
+
+@app.post("/api/push/subscribe")
+async def subscribe_to_push(subscription: PushSubscription):
+    """Registrar suscripción a notificaciones push"""
+    try:
+        print(f"🔔 Registrando suscripción push para usuario {subscription.usuario_id}")
+        
+        # Extraer claves de la suscripción
+        p256dh_key = subscription.keys.get('p256dh', '')
+        auth_key = subscription.keys.get('auth', '')
+        
+        device_type = 'mobile' if subscription.deviceInfo and subscription.deviceInfo.get('type') == 'mobile' else 'desktop'
+        platform = subscription.deviceInfo.get('platform', '') if subscription.deviceInfo else ''
+        
+        # Insertar o actualizar suscripción
+        cursor.execute("""
+            INSERT INTO push_subscriptions 
+            (usuario_id, endpoint, p256dh_key, auth_key, user_agent, device_type, platform, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (endpoint) 
+            DO UPDATE SET 
+                usuario_id = EXCLUDED.usuario_id,
+                p256dh_key = EXCLUDED.p256dh_key,
+                auth_key = EXCLUDED.auth_key,
+                user_agent = EXCLUDED.user_agent,
+                device_type = EXCLUDED.device_type,
+                platform = EXCLUDED.platform,
+                updated_at = EXCLUDED.updated_at,
+                is_active = TRUE
+        """, (
+            subscription.usuario_id,
+            subscription.endpoint,
+            p256dh_key,
+            auth_key,
+            subscription.userAgent,
+            device_type,
+            platform,
+            datetime.now()
+        ))
+        
+        conn.commit()
+        
+        print(f"✅ Suscripción push registrada para usuario {subscription.usuario_id}")
+        return {"success": True, "message": "Suscripción registrada exitosamente"}
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error registrando suscripción push: {e}")
+        raise HTTPException(status_code=500, detail=f"Error registrando suscripción: {str(e)}")
+
+@app.post("/api/push/unsubscribe")
+async def unsubscribe_from_push(data: PushUnsubscribe):
+    """Desuscribirse de notificaciones push"""
+    try:
+        print(f"🔕 Desuscribiendo usuario {data.usuario_id} de push notifications")
+        
+        # Desactivar todas las suscripciones del usuario
+        cursor.execute("""
+            UPDATE push_subscriptions 
+            SET is_active = FALSE, updated_at = %s 
+            WHERE usuario_id = %s AND is_active = TRUE
+        """, (datetime.now(), data.usuario_id))
+        
+        affected_rows = cursor.rowcount
+        conn.commit()
+        
+        print(f"✅ {affected_rows} suscripciones desactivadas para usuario {data.usuario_id}")
+        return {"success": True, "message": f"Desuscripción exitosa ({affected_rows} dispositivos)"}
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error desuscribiendo: {e}")
+        raise HTTPException(status_code=500, detail=f"Error en desuscripción: {str(e)}")
+
+async def send_push_notification(subscription_info, title, body, data=None):
+    """Enviar notificación push a un dispositivo específico"""
+    try:
+        payload = {
+            "title": title,
+            "body": body,
+            "icon": "/pwa-192x192.png",
+            "badge": "/pwa-192x192.png",
+            "data": data or {}
+        }
+        
+        response = webpush(
+            subscription_info={
+                "endpoint": subscription_info["endpoint"],
+                "keys": subscription_info["keys"]
+            },
+            data=json.dumps(payload),
+            vapid_private_key=VAPID_PRIVATE_KEY,
+            vapid_claims={
+                "sub": "mailto:admin@sembrandodatos.com"
+            }
+        )
+        
+        return True, response
+        
+    except WebPushException as ex:
+        print(f"❌ Error enviando push notification: {ex}")
+        return False, str(ex)
+    except Exception as ex:
+        print(f"❌ Error inesperado enviando push: {ex}")
+        return False, str(ex)
+
+async def obtener_suscripciones_usuario(usuario_id):
+    """Obtener suscripciones push activas de un usuario"""
+    try:
+        cursor.execute("""
+            SELECT endpoint, p256dh_key, auth_key, id
+            FROM push_subscriptions 
+            WHERE usuario_id = %s AND is_active = TRUE
+        """, (usuario_id,))
+        
+        suscripciones = []
+        for row in cursor.fetchall():
+            suscripciones.append({
+                'id': row[3],
+                'endpoint': row[0],
+                'keys': {
+                    'p256dh': row[1],
+                    'auth': row[2]
+                }
+            })
+        
+        return suscripciones
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo suscripciones: {e}")
+        return []
+
+async def desactivar_suscripcion(suscripcion_id):
+    """Desactivar suscripción que falló"""
+    try:
+        cursor.execute("""
+            UPDATE push_subscriptions 
+            SET is_active = FALSE, updated_at = %s 
+            WHERE id = %s
+        """, (datetime.now(), suscripcion_id))
+        conn.commit()
+        print(f"📱 Suscripción {suscripcion_id} desactivada por fallo")
+        
+    except Exception as e:
+        print(f"❌ Error desactivando suscripción {suscripcion_id}: {e}")
+
+async def enviar_notificacion_con_push(usuario_id, titulo, descripcion, notificacion_id=None):
+    """Enviar notificación push a un usuario específico"""
+    try:
+        print(f"🚀 Enviando push notification a usuario {usuario_id}")
+        
+        # Obtener suscripciones activas del usuario
+        suscripciones = await obtener_suscripciones_usuario(usuario_id)
+        
+        if not suscripciones:
+            print(f"⚠️ No hay suscripciones push activas para usuario {usuario_id}")
+            return 0
+        
+        push_enviadas = 0
+        
+        # Enviar push a cada dispositivo suscrito
+        for suscripcion in suscripciones:
+            success, response = await send_push_notification(
+                subscription_info={
+                    "endpoint": suscripcion['endpoint'],
+                    "keys": suscripcion['keys']
+                },
+                title=titulo,
+                body=descripcion,
+                data={
+                    "id": notificacion_id,
+                    "url": "/notificaciones",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+            
+            if success:
+                push_enviadas += 1
+                print(f"✅ Push enviada a dispositivo {suscripcion['id']}")
+            else:
+                print(f"❌ Error enviando push a dispositivo {suscripcion['id']}: {response}")
+                # Desactivar suscripción que falló
+                await desactivar_suscripcion(suscripcion['id'])
+        
+        print(f"📊 Push notifications enviadas: {push_enviadas}/{len(suscripciones)}")
+        return push_enviadas
+        
+    except Exception as e:
+        print(f"❌ Error enviando push notifications: {e}")
+        return 0
+
+@app.post("/api/push/test/{usuario_id}")
+async def test_push_notification(usuario_id: int):
+    """Endpoint para probar push notifications (solo desarrollo)"""
+    try:
+        print(f"🧪 Enviando push de prueba a usuario {usuario_id}")
+        
+        push_enviadas = await enviar_notificacion_con_push(
+            usuario_id=usuario_id,
+            titulo="Notificación de Prueba",
+            descripcion="Esta es una notificación push de prueba desde el servidor",
+            notificacion_id=None
+        )
+        
+        return {
+            "success": True, 
+            "message": f"Push de prueba enviada a {push_enviadas} dispositivos",
+            "dispositivos": push_enviadas
+        }
+        
+    except Exception as e:
+        print(f"❌ Error en push de prueba: {e}")
+        raise HTTPException(status_code=500, detail=f"Error enviando push de prueba: {str(e)}")
+
+@app.get("/api/push/subscriptions")
+async def get_all_push_subscriptions():
+    """Obtener todas las suscripciones push activas (solo para admin)"""
+    try:
+        cursor.execute("""
+            SELECT ps.id, ps.usuario_id, u.nombre_completo, ps.device_type, 
+                   ps.platform, ps.created_at, ps.updated_at, ps.is_active
+            FROM push_subscriptions ps
+            LEFT JOIN usuarios u ON ps.usuario_id = u.id
+            ORDER BY ps.updated_at DESC
+        """)
+        
+        subscriptions = []
+        for row in cursor.fetchall():
+            subscriptions.append({
+                "id": row[0],
+                "usuario_id": row[1],
+                "nombre_usuario": row[2],
+                "device_type": row[3],
+                "platform": row[4],
+                "created_at": row[5].isoformat() if row[5] else None,
+                "updated_at": row[6].isoformat() if row[6] else None,
+                "is_active": row[7]
+            })
+        
+        return {
+            "subscriptions": subscriptions,
+            "total": len(subscriptions),
+            "activas": len([s for s in subscriptions if s["is_active"]])
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo suscripciones: {e}")
+        raise HTTPException(status_code=500, detail=f"Error obteniendo suscripciones: {str(e)}")
+
+# ==================== FIN ENDPOINTS NOTIFICACIONES PUSH ====================
 
 # ==================== ENDPOINTS PARA GESTIÓN DE ROLES Y PERMISOS ====================
 

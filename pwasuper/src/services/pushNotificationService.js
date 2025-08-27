@@ -50,40 +50,27 @@ class PushNotificationService {
    */
   async loadVapidKey() {
     try {
-      console.log('🔧 Cargando clave VAPID del servidor...');
-      
-      // Intentar obtener del servidor primero
-      const apiBaseUrl = import.meta.env.PROD 
-        ? 'https://apipwa.sembrandodatos.com' 
-        : 'http://localhost:8000';
-      
-      try {
-        const response = await fetch(`${apiBaseUrl}/api/vapid-public-key`);
-        if (response.ok) {
-          const data = await response.json();
-          this.vapidPublicKey = data.publicKey;
-          console.log('✅ Clave VAPID obtenida del servidor');
-          return;
-        }
-      } catch (serverError) {
-        console.warn('⚠️ No se pudo conectar al servidor para obtener clave VAPID');
-      }
-
-      // En desarrollo o si falla el servidor, usar clave local
+      // En desarrollo, usar una clave de ejemplo
       if (import.meta.env.DEV) {
-        // Usar la misma clave que está en el servidor
-        this.vapidPublicKey = 'BK2xdNLfyiFTLYObswC7XFi2ZFqU_VDqkteuiVxiPpJP6vzI6bvwL5xGB0ovqVpvngpQ8SdX1kF_eR3QsblHeN4';
+        // Esta es una clave de ejemplo - en producción debe venir del servidor
+        this.vapidPublicKey = 'BCqXwzlcjKCh4YjQcOd5TnVw4PKZgKjOchWP-F_2c1fHzLlCdHtwt6ZoAAI5Q';
         console.log('🔧 Usando clave VAPID de desarrollo');
         return;
       }
 
-      throw new Error('No se pudo obtener la clave VAPID');
-      
+      // En producción, obtener del servidor
+      const response = await fetch('/api/vapid-public-key');
+      if (response.ok) {
+        const data = await response.json();
+        this.vapidPublicKey = data.publicKey;
+        console.log('✅ Clave VAPID obtenida del servidor');
+      } else {
+        throw new Error('No se pudo obtener la clave VAPID');
+      }
     } catch (error) {
       console.error('❌ Error cargando clave VAPID:', error);
-      // Usar clave de respaldo
-      this.vapidPublicKey = 'BK2xdNLfyiFTLYObswC7XFi2ZFqU_VDqkteuiVxiPpJP6vzI6bvwL5xGB0ovqVpvngpQ8SdX1kF_eR3QsblHeN4';
-      console.log('🔧 Usando clave VAPID de respaldo');
+      // Usar clave de respaldo para desarrollo
+      this.vapidPublicKey = 'BCqXwzlcjKCh4YjQcOd5TnVw4PKZgKjOchWP-F_2c1fHzLlCdHtwt6ZoAAI5Q';
     }
   }
 
@@ -144,36 +131,13 @@ class PushNotificationService {
         return this.subscription;
       }
 
-      // Validar que tenemos la clave VAPID
-      if (!this.vapidPublicKey) {
-        console.log('🔄 Cargando clave VAPID...');
-        await this.loadVapidKey();
-      }
-
-      if (!this.vapidPublicKey) {
-        throw new Error('No se pudo obtener la clave VAPID del servidor');
-      }
-
-      console.log('🔐 Usando clave VAPID:', this.vapidPublicKey);
-
-      // Convertir la clave VAPID
-      let applicationServerKey;
-      try {
-        applicationServerKey = this.urlBase64ToUint8Array(this.vapidPublicKey);
-        console.log('✅ Clave VAPID convertida correctamente');
-      } catch (keyError) {
-        console.error('❌ Error convirtiendo clave VAPID:', keyError);
-        throw new Error('Clave VAPID inválida: ' + keyError.message);
-      }
-
       // Crear nueva suscripción
-      console.log('📝 Creando nueva suscripción push...');
       this.subscription = await this.registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: applicationServerKey
+        applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey)
       });
 
-      console.log('✅ Nueva suscripción push creada exitosamente');
+      console.log('✅ Nueva suscripción push creada');
 
       // Enviar al servidor
       await this.sendSubscriptionToServer(usuarioId, this.subscription);
@@ -181,8 +145,7 @@ class PushNotificationService {
       return this.subscription;
 
     } catch (error) {
-      console.error('❌ Error detallado en suscripción push:', error);
-      console.error('Stack:', error.stack);
+      console.error('❌ Error en suscripción push:', error);
       throw error;
     }
   }
@@ -230,12 +193,15 @@ class PushNotificationService {
 
       console.log('📤 Enviando suscripción al servidor:', subscriptionData);
 
-      // En desarrollo, usar servidor local
-      const apiBaseUrl = import.meta.env.PROD 
-        ? 'https://apipwa.sembrandodatos.com' 
-        : 'http://localhost:8000';
+      // En desarrollo, solo hacer log
+      if (import.meta.env.DEV) {
+        console.log('🔧 Modo desarrollo - suscripción registrada localmente');
+        localStorage.setItem('pushSubscription', JSON.stringify(subscriptionData));
+        return;
+      }
 
-      const response = await fetch(`${apiBaseUrl}/api/push/subscribe`, {
+      // En producción, enviar al servidor
+      const response = await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -244,23 +210,13 @@ class PushNotificationService {
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Error del servidor (${response.status}): ${errorData}`);
+        throw new Error(`Error del servidor: ${response.status}`);
       }
 
-      const result = await response.json();
-      console.log('✅ Suscripción enviada al servidor exitosamente:', result);
+      console.log('✅ Suscripción enviada al servidor exitosamente');
 
     } catch (error) {
       console.error('❌ Error enviando suscripción al servidor:', error);
-      
-      // En desarrollo, guardar localmente como fallback
-      if (import.meta.env.DEV && error.message.includes('Failed to fetch')) {
-        console.log('🔧 Modo desarrollo - guardando suscripción localmente como fallback');
-        localStorage.setItem('pushSubscription', JSON.stringify(subscriptionData));
-        return;
-      }
-      
       throw error;
     }
   }
@@ -270,18 +226,13 @@ class PushNotificationService {
    */
   async removeSubscriptionFromServer(usuarioId) {
     try {
-      // En desarrollo, remover del localStorage
       if (import.meta.env.DEV) {
         console.log('🔧 Modo desarrollo - removiendo suscripción localmente');
         localStorage.removeItem('pushSubscription');
+        return;
       }
 
-      // Intentar remover del servidor siempre
-      const apiBaseUrl = import.meta.env.PROD 
-        ? 'https://apipwa.sembrandodatos.com' 
-        : 'http://localhost:8000';
-
-      const response = await fetch(`${apiBaseUrl}/api/push/unsubscribe`, {
+      const response = await fetch('/api/push/unsubscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -291,13 +242,10 @@ class PushNotificationService {
 
       if (response.ok) {
         console.log('✅ Suscripción removida del servidor');
-      } else {
-        console.warn('⚠️ No se pudo remover del servidor, pero se removió localmente');
       }
 
     } catch (error) {
       console.error('❌ Error removiendo suscripción del servidor:', error);
-      // No lanzar error, ya que se removió localmente
     }
   }
 
@@ -341,45 +289,18 @@ class PushNotificationService {
    * Convertir clave VAPID a formato Uint8Array
    */
   urlBase64ToUint8Array(base64String) {
-    // Limpiar la cadena y agregar padding si es necesario
-    const cleanBase64 = base64String.replace(/[^A-Za-z0-9+/]/g, '');
-    const padding = '='.repeat((4 - cleanBase64.length % 4) % 4);
-    const base64 = (cleanBase64 + padding)
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
       .replace(/\-/g, '+')
       .replace(/_/g, '/');
 
-    try {
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
 
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-      }
-      return outputArray;
-    } catch (error) {
-      console.error('❌ Error decodificando clave VAPID:', error);
-      console.error('Clave problemática:', base64String);
-      
-      // Intentar decodificación alternativa para claves URL-safe
-      try {
-        const urlSafeBase64 = base64String
-          .replace(/\-/g, '+')
-          .replace(/_/g, '/');
-        const padding = '='.repeat((4 - urlSafeBase64.length % 4) % 4);
-        const finalBase64 = urlSafeBase64 + padding;
-        
-        const rawData = window.atob(finalBase64);
-        const outputArray = new Uint8Array(rawData.length);
-        
-        for (let i = 0; i < rawData.length; ++i) {
-          outputArray[i] = rawData.charCodeAt(i);
-        }
-        return outputArray;
-      } catch (secondError) {
-        console.error('❌ Error en decodificación alternativa:', secondError);
-        throw new Error('No se pudo decodificar la clave VAPID');
-      }
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
     }
+    return outputArray;
   }
 
   /**

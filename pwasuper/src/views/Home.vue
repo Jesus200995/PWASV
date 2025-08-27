@@ -251,8 +251,15 @@
           <!-- Info del usuario -->
           <div class="bg-primary/10 rounded-lg p-2 mb-6">
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
-                <span class="text-white text-xs font-bold">{{ getUserInitials }}</span>
+              <div class="relative w-8 h-8 bg-gradient-to-br from-primary/90 via-primary/85 to-primary/90 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-2">
+                <!-- Efecto vidrio en círculo de iniciales -->
+                <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
+                
+                <!-- Reflejo superior del círculo -->
+                <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-full"></div>
+                
+                <!-- Iniciales con efecto mejorado -->
+                <span class="text-white text-xs font-bold drop-shadow-lg filter brightness-110 relative z-10">{{ getUserInitials }}</span>
               </div>
               <div>
                 <p class="font-medium text-primary text-sm">{{ user.nombre_completo }}</p>
@@ -419,8 +426,15 @@
       <!-- Info del usuario -->
       <div class="bg-primary/10 rounded-lg p-2 mb-6">
         <div class="flex items-center">
-          <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-2">
-            <span class="text-white text-xs font-bold">{{ getUserInitials }}</span>
+          <div class="relative w-8 h-8 bg-gradient-to-br from-primary/90 via-primary/85 to-primary/90 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-2">
+            <!-- Efecto vidrio en círculo de iniciales -->
+            <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
+            
+            <!-- Reflejo superior del círculo -->
+            <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-full"></div>
+            
+            <!-- Iniciales con efecto mejorado -->
+            <span class="text-white text-xs font-bold drop-shadow-lg filter brightness-110 relative z-10">{{ getUserInitials }}</span>
           </div>
           <div>
             <p class="font-medium text-primary text-sm">{{ user.nombre_completo }}</p>

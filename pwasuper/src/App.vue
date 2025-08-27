@@ -229,11 +229,18 @@ function logout() {
       <div class="max-w-sm mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3">
-              <span class="text-white text-xs font-bold">{{ getUserInitials }}</span>
+            <div class="relative w-8 h-8 bg-gradient-to-br from-primary/90 via-primary/85 to-primary/90 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-3">
+              <!-- Efecto vidrio en círculo de iniciales -->
+              <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
+              
+              <!-- Reflejo superior del círculo -->
+              <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-full"></div>
+              
+              <!-- Iniciales con efecto mejorado -->
+              <span class="text-white text-xs font-bold drop-shadow-lg filter brightness-110 relative z-10">{{ getUserInitials }}</span>
             </div>
             <div>
-              <h1 class="text-lg font-semibold text-gray-900">Sembrando Vida</h1>
+              <h1 class="text-lg font-semibold text-green-950" style="letter-spacing: 0.5px;">Sembrando Vida</h1>
               <p class="text-xs text-gray-500">{{ userName }}</p>
             </div>
           </div>
@@ -387,5 +394,42 @@ function logout() {
 .slide-down-leave-to {
   transform: translateY(-100%);
   opacity: 0;
+}
+
+/* Efecto vidrio líquido para el título */
+h1 {
+  position: relative;
+  overflow: hidden;
+  color: #052e16;
+}
+
+h1::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 70%
+  );
+  transform: rotate(45deg);
+  animation: liquidGlass 3s infinite;
+  pointer-events: none;
+}
+
+@keyframes liquidGlass {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  50% {
+    transform: translateX(0%) translateY(0%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
 }
 </style>

@@ -160,7 +160,7 @@
         <!-- Advertencia sobre registro de asistencia -->
         <div v-if="!modoAsistencia" class="text-center mb-2 relative">
           <!-- Círculo con ícono de obligatorio en esquina izquierda arriba del aviso -->
-          <div class="absolute -left-1 -top-1 w-6 h-6 bg-gradient-to-br from-red-500/90 via-red-600/85 to-red-700/90 rounded-full shadow-2xl backdrop-blur-xl border border-white/30 z-30 overflow-hidden">
+          <div class="absolute -left-1 -top-1 w-6 h-6 bg-gradient-to-br from-red-950/95 via-red-900/90 to-black/95 rounded-full shadow-2xl backdrop-blur-xl border border-white/30 z-30 overflow-hidden">
             <!-- Efecto vidrio en círculo -->
             <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10 pointer-events-none rounded-full"></div>
             
@@ -175,7 +175,7 @@
             </div>
           </div>
           
-          <div class="relative bg-gradient-to-br from-red-500/90 via-red-600/85 to-red-700/90 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/20 overflow-hidden">
+          <div class="relative bg-gradient-to-br from-red-950/95 via-red-900/90 to-black/95 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/20 overflow-hidden">
             <!-- Efecto vidrio superior -->
             <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/5 pointer-events-none"></div>
             

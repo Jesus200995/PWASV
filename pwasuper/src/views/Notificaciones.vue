@@ -245,119 +245,208 @@
       </div>
     </div>
 
-    <!-- Modal de detalle de notificación -->
+    <!-- Modal de detalle de notificación - Diseño Profesional Tipo Noticia -->
     <div v-if="notificacionSeleccionada" 
-         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50"
+         class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 transition-all duration-300"
          @click="cerrarDetalleNotificacion">
-      <div class="bg-white rounded-xl max-w-xs sm:max-w-sm w-full max-h-[85vh] sm:max-h-[90vh] overflow-hidden" @click.stop>
-        <!-- Header del modal -->
-        <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-3">
-          <div class="flex items-start justify-between">
-            <div class="flex-1 min-w-0 mr-3">
-              <h2 class="text-sm sm:text-base font-medium truncate">
+      <div class="news-modal bg-white rounded-2xl max-w-xs sm:max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300 scale-100" @click.stop>
+        
+        <!-- Header Profesional tipo Periódico -->
+        <div class="news-header relative overflow-hidden">
+          <!-- Patrón de fondo sutil -->
+          <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 opacity-95"></div>
+          <div class="absolute inset-0 bg-newspaper-pattern opacity-5"></div>
+          
+          <div class="relative z-10 p-4 sm:p-6">
+            <!-- Barra superior con logo y fecha -->
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-600">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="text-green-400 text-xs font-semibold tracking-wider uppercase">Notificación</div>
+                  <div class="text-gray-300 text-xs">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</div>
+                </div>
+              </div>
+              
+              <button 
+                @click="cerrarDetalleNotificacion"
+                class="close-button w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-all duration-200 group"
+              >
+                <svg class="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Título Principal -->
+            <div class="mb-2">
+              <h1 class="news-title text-sm sm:text-base lg:text-lg font-bold text-white leading-tight mb-2">
                 {{ notificacionSeleccionada.titulo }}
-              </h2>
-              <p v-if="notificacionSeleccionada.subtitulo" class="text-xs sm:text-sm text-green-100 mt-1">
+              </h1>
+              <p v-if="notificacionSeleccionada.subtitulo" class="news-subtitle text-xs sm:text-sm text-gray-300 font-medium">
                 {{ notificacionSeleccionada.subtitulo }}
               </p>
             </div>
-            <button 
-              @click="cerrarDetalleNotificacion"
-              class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 transition-all duration-200 flex-shrink-0"
-            >
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
+
+            <!-- Estado de lectura -->
+            <div class="flex items-center space-x-2">
+              <div class="flex items-center space-x-2">
+                <div :class="[
+                  'w-2 h-2 rounded-full',
+                  notificacionSeleccionada.leida ? 'bg-green-400' : 'bg-red-400 animate-pulse'
+                ]"></div>
+                <span class="text-xs text-gray-400">
+                  {{ notificacionSeleccionada.leida ? 'Leída' : 'Nueva' }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Contenido del modal -->
-        <div class="p-3 overflow-y-auto" style="max-height: calc(85vh - 120px);">
-          <!-- Descripción -->
-          <div class="mb-3">
-            <h3 class="text-xs font-medium text-gray-800 mb-2">Descripción</h3>
-            <p class="text-xs text-gray-700 whitespace-pre-wrap">
-              {{ notificacionSeleccionada.descripcion }}
-            </p>
+        <!-- Contenido del Artículo -->
+        <div class="news-content p-4 sm:p-6 overflow-y-auto" style="max-height: calc(90vh - 200px);">
+          
+          <!-- Lead/Entradilla con funcionalidad "Ver más" -->
+          <div class="news-lead mb-6">
+            <div class="text-gray-800 text-xs sm:text-sm leading-relaxed font-medium border-l-4 border-green-500 pl-4 bg-gray-50 py-3 rounded-r-lg">
+              <p v-if="!mostrarTextoCompleto && descripcionLarga" class="mb-2">
+                {{ descripcionCorta }}
+              </p>
+              <p v-else class="mb-2">
+                {{ notificacionSeleccionada.descripcion }}
+              </p>
+              
+              <!-- Botón Ver más/Ver menos -->
+              <button 
+                v-if="descripcionLarga"
+                @click="toggleTextoCompleto"
+                class="text-green-600 hover:text-green-700 text-xs font-medium underline transition-colors duration-200 mt-1"
+              >
+                {{ mostrarTextoCompleto ? 'Ver menos' : 'Ver más' }}
+              </button>
+            </div>
           </div>
 
-          <!-- Enlace URL -->
-          <div v-if="notificacionSeleccionada.enlace_url" class="mb-3">
-            <h3 class="text-xs font-medium text-gray-800 mb-2">Enlace</h3>
-            <a 
-              :href="notificacionSeleccionada.enlace_url" 
-              target="_blank"
-              class="text-xs text-blue-600 hover:text-blue-800 underline break-all"
-            >
-              {{ notificacionSeleccionada.enlace_url }}
-            </a>
+          <!-- Imagen destacada -->
+          <div v-if="notificacionSeleccionada.tiene_archivo && esImagen(notificacionSeleccionada.archivo_tipo)" class="news-featured-image mb-6">
+            <div class="relative rounded-xl overflow-hidden bg-gray-100 shadow-lg">
+              <!-- Placeholder de carga -->
+              <div class="flex items-center justify-center min-h-48 bg-gray-200 image-placeholder">
+                <div class="text-gray-400 text-center">
+                  <div class="text-2xl mb-2">�</div>
+                  <div class="text-sm font-medium">Cargando imagen...</div>
+                </div>
+              </div>
+              <!-- Imagen real -->
+              <img 
+                :src="obtenerUrlArchivo(notificacionSeleccionada.id)" 
+                :alt="notificacionSeleccionada.archivo_nombre"
+                class="w-full h-auto object-cover cursor-pointer hover:scale-105 transition-transform duration-300 relative z-10"
+                @click="abrirArchivo(notificacionSeleccionada.id)"
+                @error="onImageError"
+                @load="onImageLoad"
+                loading="lazy"
+              />
+              <!-- Overlay con información -->
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                <p class="text-white text-xs">{{ notificacionSeleccionada.archivo_nombre }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Video embebido -->
+          <div v-else-if="notificacionSeleccionada.tiene_archivo && esVideo(notificacionSeleccionada.archivo_tipo)" class="news-video mb-6">
+            <div class="relative rounded-xl overflow-hidden bg-gray-100 shadow-lg">
+              <video 
+                :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
+                class="w-full h-auto object-cover rounded-xl"
+                controls
+                preload="metadata"
+                poster=""
+              >
+                <div class="flex items-center justify-center min-h-48 bg-gray-200">
+                  <div class="text-gray-600 text-center">
+                    <div class="text-2xl mb-2">🎥</div>
+                    <div class="text-sm">Tu navegador no soporta video</div>
+                  </div>
+                </div>
+              </video>
+            </div>
           </div>
 
           <!-- Archivo adjunto -->
-          <div v-if="notificacionSeleccionada.tiene_archivo" class="mb-3">
-            
-            <!-- Vista previa de imagen -->
-            <div v-if="esImagen(notificacionSeleccionada.archivo_tipo)">
-              <div class="bg-gray-50 rounded-lg p-2 relative">
-                <!-- Placeholder de carga -->
-                <div class="flex items-center justify-center min-h-24 bg-gray-100 image-placeholder rounded">
-                  <div class="text-gray-400 text-center">
-                    <div class="text-lg mb-1">🖼️</div>
-                    <div class="text-xs">Cargando...</div>
-                  </div>
+          <div v-else-if="notificacionSeleccionada.tiene_archivo" class="news-attachment mb-6">
+            <div class="border border-gray-200 rounded-xl p-3 bg-gradient-to-r from-gray-50 to-white shadow-sm">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-lg">{{ obtenerIconoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
                 </div>
-                <!-- Imagen real -->
-                <div class="flex justify-center">
-                  <img 
-                    :src="obtenerUrlArchivo(notificacionSeleccionada.id)" 
-                    :alt="notificacionSeleccionada.archivo_nombre"
-                    class="max-w-full max-h-48 object-contain rounded cursor-pointer hover:opacity-90 transition-opacity relative z-10 mx-auto"
-                    @click="abrirArchivo(notificacionSeleccionada.id)"
-                    @error="onImageError"
-                    @load="onImageLoad"
-                    loading="lazy"
-                  />
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-xs font-semibold text-gray-800 truncate">Archivo adjunto</h4>
+                  <p class="text-xs text-gray-600 truncate">{{ notificacionSeleccionada.archivo_nombre }}</p>
+                  <p class="text-xs text-gray-500 capitalize mt-1">{{ notificacionSeleccionada.archivo_tipo }}</p>
                 </div>
-              </div>
-            </div>
-            
-            <!-- Vista previa de video -->
-            <div v-else-if="esVideo(notificacionSeleccionada.archivo_tipo)">
-              <div class="bg-gray-50 rounded-lg p-2">
-                <div class="flex justify-center">
-                  <video 
-                    :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
-                    class="max-w-full max-h-48 object-contain rounded mx-auto"
-                    controls
-                    preload="metadata"
-                  >
-                    Tu navegador no soporta video.
-                  </video>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Otros archivos -->
-            <div v-else class="bg-gray-50 rounded-lg p-2">
-              <div class="flex items-center justify-center">
-                <div class="flex items-center space-x-2">
-                  <span class="text-2xl">{{ obtenerIconoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
-                  <button 
-                    @click="abrirArchivo(notificacionSeleccionada.id)"
-                    class="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
-                  >
-                    Ver archivo
-                  </button>
-                </div>
+                <button 
+                  @click="abrirArchivo(notificacionSeleccionada.id)"
+                  class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-lg transition-colors duration-200 flex items-center space-x-1"
+                >
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <span>Abrir</span>
+                </button>
               </div>
             </div>
           </div>
-          
-          <!-- Fecha de recibido -->
-          <div class="px-3 pb-3 pt-2 border-t border-gray-100 mt-3">
-            <div class="text-xs text-gray-500 text-center">
+
+          <!-- Enlace relacionado -->
+          <div v-if="notificacionSeleccionada.enlace_url" class="news-related-link mb-6">
+            <div class="border border-blue-200 rounded-xl p-3 bg-gradient-to-r from-blue-50 to-white shadow-sm">
+              <h4 class="text-xs font-semibold text-gray-800 mb-2 flex items-center">
+                <svg class="w-3 h-3 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                </svg>
+                Enlace relacionado
+              </h4>
+              <a 
+                :href="notificacionSeleccionada.enlace_url" 
+                target="_blank"
+                class="text-xs text-blue-600 hover:text-blue-800 underline break-all font-medium"
+              >
+                {{ notificacionSeleccionada.enlace_url }}
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Footer del artículo -->
+        <div class="news-footer border-t border-gray-200 p-3 sm:p-4 bg-gray-50">
+          <div class="flex items-center justify-between">
+            <div class="text-xs text-gray-600">
               Recibido: {{ formatearFechaCompleta(notificacionSeleccionada.fecha_creacion) }}
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="flex space-x-2">
+              <button 
+                v-if="notificacionSeleccionada.enlace_url"
+                @click="window.open(notificacionSeleccionada.enlace_url, '_blank')"
+                class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors duration-200"
+              >
+                Visitar enlace
+              </button>
+              <button 
+                @click="cerrarDetalleNotificacion"
+                class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white text-xs font-medium rounded-lg transition-colors duration-200"
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>
@@ -383,6 +472,9 @@ const soloNoLeidas = ref(false) // CAMBIO: Cambiar a no leídas por defecto
 const notificacionesLeidas = ref(new Set()) // IDs de notificaciones leídas
 const conteoNoLeidas = ref(0) // NUEVO: Contador de no leídas
 
+// Estados para funcionalidad "Ver más"
+const mostrarTextoCompleto = ref(false)
+
 // Sistema global de notificaciones para actualización inmediata del badge
 const { fetchUnreadCount, markAsRead } = useNotifications()
 
@@ -407,6 +499,16 @@ const notificacionesNoLeidasLocales = computed(() => {
 
 const notificacionesTotales = computed(() => {
   return notificacionesFiltradas.value.length
+})
+
+// Computed para funcionalidad "Ver más"
+const descripcionLarga = computed(() => {
+  return notificacionSeleccionada.value?.descripcion?.length > 150
+})
+
+const descripcionCorta = computed(() => {
+  if (!notificacionSeleccionada.value?.descripcion) return ''
+  return notificacionSeleccionada.value.descripcion.substring(0, 150) + '...'
 })
 
 // Variables para interval
@@ -615,6 +717,9 @@ const abrirDetalleNotificacion = (notificacion) => {
     tiene_archivo: notificacionesService.tieneArchivo(notificacion)
   }
   
+  // Resetear estado del texto completo
+  mostrarTextoCompleto.value = false
+  
   // MEJORADO: Marcar como leída inmediatamente al abrir el modal
   if (!notificacion.leida) {
     console.log(`📖 Abriendo notificación ${notificacion.id} - marcando como leída inmediatamente`)
@@ -624,6 +729,12 @@ const abrirDetalleNotificacion = (notificacion) => {
 
 const cerrarDetalleNotificacion = () => {
   notificacionSeleccionada.value = null
+  mostrarTextoCompleto.value = false
+}
+
+// Función para toggle de texto completo
+const toggleTextoCompleto = () => {
+  mostrarTextoCompleto.value = !mostrarTextoCompleto.value
 }
 
 // NUEVA FUNCIÓN: Marcar como leída en el servidor con actualización inmediata del badge
@@ -1600,5 +1711,446 @@ video::-webkit-media-controls {
   background: linear-gradient(45deg, #15803d, #16a34a);
   box-shadow: 0 4px 8px rgba(34, 197, 94, 0.4);
   transform: translateY(-1px);
+}
+
+/* =================================
+   ESTILOS PARA MODAL PROFESIONAL TIPO NOTICIA
+   ================================= */
+
+/* Modal principal con animaciones suaves */
+.news-modal {
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header estilo periódico profesional */
+.news-header {
+  background: linear-gradient(135deg, 
+    #1e293b 0%, 
+    #334155 25%, 
+    #475569 50%, 
+    #334155 75%, 
+    #1e293b 100%);
+  background-size: 300% 300%;
+  animation: headerGradient 8s ease infinite;
+  position: relative;
+}
+
+@keyframes headerGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Patrón de periódico sutil */
+.bg-newspaper-pattern {
+  background-image: 
+    linear-gradient(45deg, transparent 35%, rgba(255,255,255,.1) 35%, rgba(255,255,255,.1) 65%, transparent 65%),
+    linear-gradient(-45deg, transparent 35%, rgba(255,255,255,.05) 35%, rgba(255,255,255,.05) 65%, transparent 65%);
+  background-size: 20px 20px;
+}
+
+/* Título estilo periódico */
+.news-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.025em;
+}
+
+.news-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-style: italic;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+/* Botón cerrar mejorado */
+.close-button {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.close-button:hover {
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Contenido del artículo */
+.news-content {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.7;
+  color: #374151;
+  max-height: calc(90vh - 200px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 197, 94, 0.3) transparent;
+}
+
+.news-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.news-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.news-content::-webkit-scrollbar-thumb {
+  background-color: rgba(34, 197, 94, 0.3);
+  border-radius: 3px;
+}
+
+.news-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(34, 197, 94, 0.5);
+}
+
+/* Entradilla/Lead del artículo */
+.news-lead {
+  position: relative;
+}
+
+.news-lead p {
+  font-size: 1.1em;
+  line-height: 1.6;
+  position: relative;
+}
+
+.news-lead::before {
+  content: '"';
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  font-size: 3rem;
+  color: #10b981;
+  opacity: 0.3;
+  font-family: serif;
+  z-index: -1;
+}
+
+/* Imagen destacada estilo revista */
+.news-featured-image {
+  position: relative;
+}
+
+.news-featured-image img {
+  filter: contrast(1.02) saturate(1.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.news-featured-image:hover img {
+  filter: contrast(1.05) saturate(1.1);
+}
+
+/* Video embebido profesional */
+.news-video video {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.news-video:hover video {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Archivo adjunto estilo profesional */
+.news-attachment {
+  position: relative;
+}
+
+.news-attachment::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #10b981, #059669);
+  border-radius: 2px;
+}
+
+/* Enlaces relacionados */
+.news-related-link {
+  position: relative;
+}
+
+.news-related-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #3b82f6, #2563eb);
+  border-radius: 2px;
+}
+
+/* Footer del artículo */
+.news-footer {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-top: 2px solid #e2e8f0;
+  position: relative;
+}
+
+.news-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #10b981, transparent);
+}
+
+/* Animaciones para elementos interactivos */
+.news-modal button {
+  position: relative;
+  overflow: hidden;
+}
+
+.news-modal button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: all 0.6s;
+}
+
+.news-modal button:hover::before {
+  left: 100%;
+}
+
+/* Efectos de carga mejorados */
+.news-content .image-placeholder {
+  background: linear-gradient(-90deg, #f7fafc 0%, #edf2f7 50%, #f7fafc 100%);
+  background-size: 400% 400%;
+  animation: shimmerNews 2s ease-in-out infinite;
+}
+
+@keyframes shimmerNews {
+  0% { background-position: 0% 0%; }
+  100% { background-position: -200% 0%; }
+}
+
+/* Responsividad para el modal profesional */
+@media (max-width: 640px) {
+  .news-modal {
+    margin: 0.5rem;
+    max-height: 95vh;
+    border-radius: 1rem;
+  }
+  
+  .news-header {
+    padding: 1rem;
+  }
+  
+  .news-title {
+    font-size: 0.875rem;
+    line-height: 1.3;
+  }
+  
+  .news-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .news-content {
+    padding: 1rem;
+    max-height: calc(95vh - 180px);
+    overflow-y: auto;
+  }
+  
+  .news-footer {
+    padding: 0.75rem;
+  }
+  
+  .news-lead p {
+    font-size: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .news-featured-image img {
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .news-modal {
+    margin: 0.25rem;
+    max-height: 97vh;
+    border-radius: 0.75rem;
+  }
+  
+  .news-header {
+    padding: 0.75rem;
+  }
+  
+  .news-title {
+    font-size: 0.8125rem;
+    line-height: 1.25;
+  }
+  
+  .news-subtitle {
+    font-size: 0.6875rem;
+  }
+  
+  .news-content {
+    padding: 0.75rem;
+    max-height: calc(97vh - 160px);
+    overflow-y: auto;
+  }
+  
+  .news-footer {
+    padding: 0.75rem;
+  }
+  
+  .news-footer .flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .news-lead p {
+    font-size: 0.6875rem;
+    padding: 0.625rem;
+  }
+  
+  .news-featured-image img {
+    max-height: 180px;
+  }
+}
+
+@media (max-height: 700px) {
+  .news-modal {
+    max-height: 90vh;
+  }
+  
+  .news-content {
+    max-height: calc(90vh - 250px);
+  }
+}
+
+/* Mejoras para accesibilidad y contraste */
+@media (prefers-reduced-motion: reduce) {
+  .news-modal,
+  .news-header,
+  .news-modal button,
+  .news-featured-image img,
+  .news-video video,
+  .close-button {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Modo oscuro (opcional para futuras implementaciones) */
+@media (prefers-color-scheme: dark) {
+  .news-modal {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .news-content {
+    color: #e5e7eb;
+  }
+  
+  .news-lead p {
+    background: rgba(31, 41, 55, 0.8);
+    border-color: #10b981;
+  }
+  
+  .news-footer {
+    background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+    border-color: #374151;
+  }
+}
+
+/* Efectos adicionales para elementos interactivos */
+.news-modal a {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.news-modal a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+
+.news-modal a:hover::after {
+  width: 100%;
+}
+
+/* Sombras y profundidad mejoradas */
+.news-attachment,
+.news-related-link {
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.news-attachment:hover,
+.news-related-link:hover {
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.1),
+    0 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Estado de carga y error para imágenes en el modal */
+.news-featured-image .image-placeholder {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: linear-gradient(-90deg, #f7fafc 0%, #edf2f7 50%, #f7fafc 100%);
+  background-size: 400% 400%;
+  animation: shimmerNews 2s ease-in-out infinite;
+}
+
+/* Print styles para cuando el usuario quiera imprimir */
+@media print {
+  .news-modal {
+    position: static !important;
+    box-shadow: none !important;
+    background: white !important;
+    border-radius: 0 !important;
+    max-height: none !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+  
+  .close-button,
+  .news-footer button {
+    display: none !important;
+  }
+  
+  .news-header {
+    background: #1e293b !important;
+    print-color-adjust: exact;
+  }
 }
 </style>

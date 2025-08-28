@@ -679,13 +679,30 @@
               
               <div class="form-group">
                 <label for="edit-contrasena">Contraseña</label>
-                <input 
-                  id="edit-contrasena"
-                  v-model="datosEdicion.contrasena" 
-                  type="password" 
-                  class="form-input"
-                  placeholder="Nueva contraseña (opcional)"
-                />
+                <div class="password-field-container">
+                  <input 
+                    id="edit-contrasena"
+                    v-model="datosEdicion.contrasena" 
+                    :type="showEditPassword ? 'text' : 'password'"
+                    class="form-input password-input"
+                    placeholder="Nueva contraseña (opcional)"
+                  />
+                  <button 
+                    @click="showEditPassword = !showEditPassword" 
+                    class="password-toggle-btn-edit" 
+                    type="button"
+                    title="Mostrar/Ocultar contraseña"
+                  >
+                    <svg v-if="showEditPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                    <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
               
               <div class="form-group">
@@ -784,6 +801,7 @@ const modalTitle = ref('')
 const modalContent = ref('')
 const usuarioSeleccionado = ref(null)
 const showPassword = ref(false)
+const showEditPassword = ref(false) // Nueva variable para el modal de edición
 
 // Variables para eliminación de usuarios
 const showDeleteModal = ref(false)
@@ -1357,6 +1375,7 @@ const eliminarUsuario = async () => {
 // Funciones para edición de usuarios
 const editarUsuario = (usuario) => {
   usuarioAEditar.value = usuario
+  showEditPassword.value = false // Resetear visibilidad de contraseña
   // Llenar el formulario con los datos del usuario
   datosEdicion.value = {
     correo: usuario.correo || '',
@@ -1374,6 +1393,7 @@ const cancelarEdicion = () => {
   showEditModal.value = false
   usuarioAEditar.value = null
   editandoUsuario.value = false
+  showEditPassword.value = false // Resetear visibilidad de contraseña
   // Limpiar formulario
   datosEdicion.value = {
     correo: '',
@@ -2757,6 +2777,55 @@ const logout = () => {
   font-style: italic;
 }
 
+/* Estilos para el campo de contraseña en el modal de edición */
+.password-field-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input {
+  padding-right: 50px !important;
+  width: 100%;
+}
+
+.password-toggle-btn-edit {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+  z-index: 2;
+}
+
+.password-toggle-btn-edit:hover {
+  background: linear-gradient(135deg, #45a049, #3d8b40);
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 3px 9px rgba(76, 175, 80, 0.4);
+}
+
+.password-toggle-btn-edit:active {
+  transform: translateY(-50%) scale(1.02);
+}
+
+.password-toggle-btn-edit svg {
+  width: 14px;
+  height: 14px;
+}
+
 .modal-footer-edit {
   display: flex;
   justify-content: flex-end;
@@ -3747,6 +3816,21 @@ const logout = () => {
   
   .edit-modal {
     max-width: 90vw !important;
+  }
+  
+  .password-toggle-btn-edit {
+    width: 30px;
+    height: 30px;
+    right: 12px;
+  }
+  
+  .password-toggle-btn-edit svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .password-input {
+    padding-right: 50px !important;
   }
   
   .modal-footer-edit {

@@ -370,9 +370,9 @@
 
           <!-- Imagen destacada -->
           <div v-if="notificacionSeleccionada.tiene_archivo && esImagen(notificacionSeleccionada.archivo_tipo)" class="news-featured-image mb-6">
-            <div class="relative rounded-xl overflow-hidden bg-gray-100 shadow-lg">
+            <div class="relative rounded-xl overflow-hidden bg-transparent">
               <!-- Placeholder de carga -->
-              <div class="flex items-center justify-center min-h-48 bg-gray-200 image-placeholder">
+              <div class="flex items-center justify-center min-h-48 bg-gray-50 image-placeholder">
                 <div class="text-gray-400 text-center">
                   <div class="text-2xl mb-2">�</div>
                   <div class="text-sm font-medium">Cargando imagen...</div>
@@ -382,7 +382,7 @@
               <img 
                 :src="obtenerUrlArchivo(notificacionSeleccionada.id)" 
                 :alt="notificacionSeleccionada.archivo_nombre"
-                class="w-full h-auto object-cover cursor-pointer hover:scale-105 transition-transform duration-300 relative z-10"
+                class="w-full h-auto object-contain cursor-pointer hover:scale-105 transition-transform duration-300 relative z-10 bg-white"
                 @click="abrirArchivo(notificacionSeleccionada.id)"
                 @error="onImageError"
                 @load="onImageLoad"
@@ -2132,13 +2132,15 @@ video::-webkit-media-controls {
 /* Imagen destacada estilo revista - tamaño reducido */
 .news-featured-image {
   position: relative;
-  max-width: 85%; /* Reduce el ancho al 85% */
+  max-width: 100%; /* Permitir ancho completo para imágenes grandes */
   margin: 0 auto; /* Centra la imagen */
 }
 
 .news-featured-image img {
+  max-height: 70vh; /* Máximo 70% de la altura de la ventana */
   filter: contrast(1.02) saturate(1.05);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #ffffff !important; /* Forzar fondo blanco */
 }
 
 .news-featured-image:hover img {
@@ -2446,7 +2448,7 @@ video::-webkit-media-controls {
   }
   
   .news-featured-image img {
-    max-height: 170px;
+    max-height: 50vh; /* 50% de altura en pantallas medianas */
   }
 }
 
@@ -2488,7 +2490,7 @@ video::-webkit-media-controls {
   }
   
   .news-featured-image img {
-    max-height: 128px;
+    max-height: 40vh; /* 40% de altura en pantallas pequeñas */
   }
 }
 
@@ -2530,7 +2532,7 @@ video::-webkit-media-controls {
   }
   
   .news-featured-image img {
-    max-height: 102px;
+    max-height: 30vh; /* 30% de altura en pantallas muy pequeñas */
   }
 }
 

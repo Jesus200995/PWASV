@@ -117,16 +117,16 @@
                   notificacion.leida ? 'bg-green-500' : 'bg-red-500'
                 ]"></div>
                 
-                <div class="flex items-start gap-3 p-4">
-                <!-- Avatar/Icono empresarial -->
-                <div class="flex-shrink-0">
+                <div class="flex items-start gap-2.5 px-3 py-4">
+                <!-- Avatar/Icono empresarial más pequeño -->
+                <div class="flex-shrink-0 mt-2">
                   <div :class="[
-                    'w-10 h-10 rounded-lg flex items-center justify-center shadow-sm border transition-all duration-300 group-hover:scale-105',
+                    'w-8 h-8 rounded-lg flex items-center justify-center shadow-sm border transition-all duration-300 group-hover:scale-105',
                     notificacion.leida 
                       ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200 text-green-600' 
                       : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200 text-red-600'
                   ]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
                   </div>
@@ -1285,9 +1285,12 @@ onBeforeUnmount(() => {
 }
 
 .enterprise-notification-card.notification-unread {
-  background: linear-gradient(to right, #fef2f2 0%, #ffffff 6%);
+  background: linear-gradient(to right, #fef2f2 0%, #fef7f7 6%);
   border-left-width: 3px;
   border-left-color: #ef4444;
+  position: relative;
+  overflow: hidden;
+  animation: unread-shimmer 2.5s ease-in-out infinite;
 }
 
 .enterprise-notification-card.notification-read {
@@ -1297,7 +1300,8 @@ onBeforeUnmount(() => {
 }
 
 .enterprise-notification-card.notification-unread:hover {
-  background: linear-gradient(to right, #fef2f2 0%, #f9fafb 6%);
+  background: linear-gradient(to right, #fee2e2 0%, #fef2f2 6%);
+  animation-play-state: paused;
 }
 
 .enterprise-notification-card.notification-read:hover {
@@ -1355,7 +1359,7 @@ onBeforeUnmount(() => {
   }
   
   .enterprise-notification-card .flex.items-start {
-    padding: 0.75rem;
+    padding: 0.5rem 0.75rem;
     gap: 0.5rem;
   }
   
@@ -1394,7 +1398,7 @@ onBeforeUnmount(() => {
 }
 
 .bell-icon {
-  animation: bell-swing 1.2s ease-in-out infinite;
+  animation: bell-swing 0.5s ease-in-out infinite;
   transform-origin: center 20%;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
   /* Solo el ícono se anima con movimiento pendular más rápido */
@@ -1425,6 +1429,25 @@ onBeforeUnmount(() => {
   }
   100% {
     transform: rotate(0deg);
+  }
+}
+
+/* Nueva animación shimmer/brillo para notificaciones no leídas */
+@keyframes unread-shimmer {
+  0% {
+    background: linear-gradient(to right, #fef2f2 0%, #fef7f7 6%);
+  }
+  25% {
+    background: linear-gradient(90deg, #fef2f2 0%, #fee2e2 25%, #fef7f7 50%, #fef2f2 100%);
+  }
+  50% {
+    background: linear-gradient(90deg, #fef7f7 0%, #fef2f2 25%, #fee2e2 50%, #fef7f7 100%);
+  }
+  75% {
+    background: linear-gradient(90deg, #fee2e2 0%, #fef7f7 25%, #fef2f2 50%, #fee2e2 100%);
+  }
+  100% {
+    background: linear-gradient(to right, #fef2f2 0%, #fef7f7 6%);
   }
 }
 

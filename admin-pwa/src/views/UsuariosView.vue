@@ -1414,8 +1414,29 @@ const guardarEdicion = async () => {
   try {
     console.log('✏️ Editando usuario:', usuarioAEditar.value.id, datosEdicion.value)
     
+    // Preparar datos para el backend con el formato correcto
+    const datosParaEnviar = {
+      correo: datosEdicion.value.correo,
+      nombre_completo: datosEdicion.value.nombre_completo,
+      cargo: datosEdicion.value.cargo,
+      supervisor: datosEdicion.value.supervisor,
+      curp: datosEdicion.value.curp,
+      telefono: datosEdicion.value.telefono,
+      rol: 'user' // Por defecto, los usuarios editados desde admin son 'user'
+    }
+    
+    // Solo incluir nueva_contrasena si se proporcionó una nueva contraseña
+    if (datosEdicion.value.contrasena && datosEdicion.value.contrasena.trim() !== '') {
+      datosParaEnviar.nueva_contrasena = datosEdicion.value.contrasena.trim()
+      console.log('🔑 Incluyendo nueva contraseña en la actualización')
+    } else {
+      console.log('⚪ No se proporcionó nueva contraseña, se mantendrá la actual')
+    }
+    
+    console.log('📤 Enviando datos al backend:', datosParaEnviar)
+    
     // Llamar al servicio para actualizar el usuario en la base de datos
-    const resultado = await usuariosService.actualizarUsuario(usuarioAEditar.value.id, datosEdicion.value)
+    const resultado = await usuariosService.actualizarUsuario(usuarioAEditar.value.id, datosParaEnviar)
     
     // Actualizar el usuario en el array local con los datos devueltos por el servidor
     const index = usuarios.value.findIndex(u => u.id === usuarioAEditar.value.id)

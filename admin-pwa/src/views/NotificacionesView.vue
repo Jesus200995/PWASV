@@ -481,7 +481,12 @@
       <div class="modal-content modal-stats" @click.stop>
         <div class="modal-header">
           <h3>Estadísticas de Lectura</h3>
-          <button class="btn-close" @click="cerrarModalEstadisticas">×</button>
+          <div class="header-actions">
+            <button class="btn-reload" @click="recargarEstadisticas" :disabled="cargandoEstadisticas" title="Recargar estadísticas">
+              <i class="fas fa-sync-alt" :class="{ 'spinning': cargandoEstadisticas }"></i>
+            </button>
+            <button class="btn-close" @click="cerrarModalEstadisticas">×</button>
+          </div>
         </div>
         
         <div class="modal-body" v-if="!cargandoEstadisticas">
@@ -694,6 +699,7 @@ export default {
       // Modal estadísticas
       mostrarModalEstadisticas: false,
       estadisticasNotificacion: null,
+      notificacionActualId: null,
       cargandoEstadisticas: false,
       tabActiva: 'leidos',
       
@@ -1014,6 +1020,7 @@ export default {
         this.cargandoEstadisticas = true
         this.mostrarModalEstadisticas = true
         this.tabActiva = 'leidos'
+        this.notificacionActualId = notificacion.id
         
         console.log('📊 Cargando estadísticas para notificación:', notificacion.id)
         
@@ -1034,8 +1041,31 @@ export default {
     cerrarModalEstadisticas() {
       this.mostrarModalEstadisticas = false
       this.estadisticasNotificacion = null
+      this.notificacionActualId = null
       this.cargandoEstadisticas = false
       this.tabActiva = 'leidos'
+    },
+
+    async recargarEstadisticas() {
+      if (!this.notificacionActualId) return
+      
+      try {
+        this.cargandoEstadisticas = true
+        
+        console.log('🔄 Recargando estadísticas para notificación:', this.notificacionActualId)
+        
+        const estadisticas = await notificacionesService.obtenerEstadisticasNotificacion(this.notificacionActualId)
+        this.estadisticasNotificacion = estadisticas
+        
+        console.log('✅ Estadísticas recargadas:', estadisticas)
+        this.mostrarToast('Estadísticas actualizadas correctamente', 'success')
+        
+      } catch (error) {
+        console.error('❌ Error recargando estadísticas:', error)
+        this.mostrarToast('Error al recargar las estadísticas: ' + error.message, 'error')
+      } finally {
+        this.cargandoEstadisticas = false
+      }
     },
     
     logout() {
@@ -1729,6 +1759,47 @@ export default {
   color: #2E7D32;
   margin: 0;
   font-family: 'Inter', sans-serif;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-reload {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #4CAF50;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.btn-reload:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2E7D32;
+}
+
+.btn-reload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-reload .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .btn-close {
@@ -2783,8 +2854,8 @@ export default {
 
 /* === MODAL ESTADÍSTICAS === */
 .modal-stats {
-  max-width: 1000px;
-  width: 95%;
+  max-width: 750px;
+  width: 90%;
 }
 
 .stats-notification-info {
@@ -2829,19 +2900,22 @@ export default {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
   margin-bottom: 20px;
+  justify-items: center;
 }
 
 .stat-card {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 12px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 2px solid transparent;
   transition: all 0.3s ease;
+  width: 100%;
+  max-width: 140px;
 }
 
 .stat-card:hover {
@@ -2862,23 +2936,26 @@ export default {
 }
 
 .stat-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
+  font-size: 20px;
+  margin-bottom: 6px;
 }
 
 .stat-value {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 700;
   color: #2E7D32;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   font-family: 'Inter', sans-serif;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 11px;
   color: #666;
   font-weight: 500;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
 }
 
 .stat-percentage {
@@ -2992,13 +3069,13 @@ export default {
 
 .user-card {
   background: #f8f9fa;
-  border-radius: 8px;
-  padding: 14px;
+  border-radius: 6px;
+  padding: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
-  border-left: 4px solid transparent;
+  border-left: 3px solid transparent;
 }
 
 .user-card:hover {
@@ -3019,20 +3096,20 @@ export default {
 }
 
 .user-name {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .user-email {
-  font-size: 12px;
+  font-size: 10px;
   color: #666;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .user-curp {
-  font-size: 11px;
+  font-size: 9px;
   color: #4CAF50;
   font-weight: 500;
 }
@@ -3041,18 +3118,18 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  text-align: center;
 }
 
 .read-icon {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .read-time {
-  font-size: 11px;
+  font-size: 10px;
   color: #4CAF50;
   font-weight: 500;
-  text-align: center;
 }
 
 .user-unread-status {

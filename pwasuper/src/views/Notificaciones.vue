@@ -249,58 +249,58 @@
     <div v-if="notificacionSeleccionada" 
          class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 transition-all duration-300"
          @click="cerrarDetalleNotificacion">
-      <div class="news-modal bg-white rounded-2xl max-w-xs sm:max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300 scale-100" @click.stop>
+      <div class="news-modal bg-white rounded-2xl w-full max-w-md sm:max-w-2xl lg:max-w-4xl h-[90vh] sm:h-[88vh] max-h-[700px] overflow-hidden shadow-2xl transform transition-all duration-300 scale-100 flex flex-col" @click.stop>
         
         <!-- Header Profesional tipo Periódico -->
-        <div class="news-header relative overflow-hidden">
+        <div class="news-header relative overflow-hidden flex-shrink-0">
           <!-- Patrón de fondo sutil -->
           <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 opacity-95"></div>
           <div class="absolute inset-0 bg-newspaper-pattern opacity-5"></div>
           
-          <div class="relative z-10 p-4 sm:p-6">
-            <!-- Barra superior con logo y fecha -->
-            <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-600">
-              <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <div class="relative z-10 p-1 sm:p-2">
+            <!-- Barra superior con logo y fecha - mucho más compacta -->
+            <div class="flex items-center justify-between mb-1 pb-1 border-b border-gray-600">
+              <div class="flex items-center space-x-1">
+                <div class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                   </svg>
                 </div>
                 <div>
-                  <div class="text-green-400 text-xs font-semibold tracking-wider uppercase">Notificación</div>
-                  <div class="text-gray-300 text-xs">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</div>
+                  <div style="font-size: 0.65rem;" class="text-green-400 font-semibold tracking-wider uppercase">Notificación</div>
+                  <div style="font-size: 0.65rem;" class="text-gray-300">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</div>
                 </div>
               </div>
               
               <button 
                 @click="cerrarDetalleNotificacion"
-                class="close-button w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-all duration-200 group"
+                class="close-button w-5 h-5 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-all duration-200 group"
               >
-                <svg class="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-2.5 h-2.5 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
             </div>
 
-            <!-- Título Principal -->
-            <div class="mb-2">
-              <h1 class="news-title text-sm sm:text-base lg:text-lg font-bold text-white leading-tight mb-2">
+            <!-- Título Principal - más compacto -->
+            <div class="mb-1">
+              <h1 class="news-title text-sm sm:text-base lg:text-lg font-bold text-white leading-tight mb-1">
                 {{ notificacionSeleccionada.titulo }}
               </h1>
-              <p v-if="notificacionSeleccionada.subtitulo" class="news-subtitle text-xs sm:text-sm text-gray-300 font-medium">
+              <p v-if="notificacionSeleccionada.subtitulo" style="font-size: 0.7rem;" class="news-subtitle text-gray-300 font-medium">
                 {{ notificacionSeleccionada.subtitulo }}
               </p>
             </div>
 
             <!-- Estado de lectura -->
-            <div class="flex items-center space-x-2">
-              <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-1">
+              <div class="flex items-center space-x-1">
                 <div :class="[
-                  'w-2 h-2 rounded-full',
+                  'w-1.5 h-1.5 rounded-full',
                   notificacionSeleccionada.leida ? 'bg-green-400' : 'bg-red-400 animate-pulse'
                 ]"></div>
-                <span class="text-xs text-gray-400">
+                <span style="font-size: 0.65rem;" class="text-gray-400">
                   {{ notificacionSeleccionada.leida ? 'Leída' : 'Nueva' }}
                 </span>
               </div>
@@ -309,11 +309,11 @@
         </div>
 
         <!-- Contenido del Artículo -->
-        <div class="news-content p-4 sm:p-6 overflow-y-auto" style="max-height: calc(90vh - 200px);">
+        <div class="news-content flex-1 p-4 sm:p-6 overflow-y-auto min-h-0">
           
           <!-- Lead/Entradilla con funcionalidad "Ver más" -->
           <div class="news-lead mb-6">
-            <div class="text-gray-800 text-xs sm:text-sm leading-relaxed font-medium border-l-4 border-green-500 pl-4 bg-gray-50 py-3 rounded-r-lg">
+            <div style="font-size: 0.75rem;" class="text-gray-800 leading-relaxed font-medium border-l-4 border-green-500 pl-4 bg-gray-50 py-3 rounded-r-lg">
               <p v-if="!mostrarTextoCompleto && descripcionLarga" class="mb-2">
                 {{ descripcionCorta }}
               </p>
@@ -325,7 +325,7 @@
               <button 
                 v-if="descripcionLarga"
                 @click="toggleTextoCompleto"
-                class="text-green-600 hover:text-green-700 text-xs font-medium underline transition-colors duration-200 mt-1"
+                style="font-size: 0.7rem;" class="text-green-600 hover:text-green-700 font-medium underline transition-colors duration-200 mt-1"
               >
                 {{ mostrarTextoCompleto ? 'Ver menos' : 'Ver más' }}
               </button>
@@ -405,48 +405,62 @@
             </div>
           </div>
 
-          <!-- Enlace relacionado -->
-          <div v-if="notificacionSeleccionada.enlace_url" class="news-related-link mb-6">
-            <div class="border border-blue-200 rounded-xl p-3 bg-gradient-to-r from-blue-50 to-white shadow-sm">
-              <h4 class="text-xs font-semibold text-gray-800 mb-2 flex items-center">
-                <svg class="w-3 h-3 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                </svg>
-                Enlace relacionado
-              </h4>
-              <a 
-                :href="notificacionSeleccionada.enlace_url" 
-                target="_blank"
-                class="text-xs text-blue-600 hover:text-blue-800 underline break-all font-medium"
-              >
-                {{ notificacionSeleccionada.enlace_url }}
-              </a>
+          <!-- Enlace relacionado - Diseño compacto y legible -->
+          <div v-if="notificacionSeleccionada.enlace_url" class="news-related-link mb-3">
+            <div class="compact-link-card">
+              <div class="link-compact-content">
+                <!-- Fila principal con icono, texto y botón -->
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center space-x-2">
+                    <div class="link-icon-mini">
+                      <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                      </svg>
+                    </div>
+                    <span class="link-mini-label">Enlace</span>
+                  </div>
+                  
+                  <!-- Botón mejorado con mejor UX -->
+                  <a 
+                    :href="notificacionSeleccionada.enlace_url" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="link-enhanced-btn"
+                    :title="`Abrir ${formatearEnlaceCorto(notificacionSeleccionada.enlace_url)} en nueva pestaña`"
+                  >
+                    <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                    Abrir enlace
+                  </a>
+                </div>
+                
+                <!-- URL más legible y prominente -->
+                <div class="link-url-enhanced">
+                  <a 
+                    :href="notificacionSeleccionada.enlace_url" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="link-url-clickable"
+                    :title="notificacionSeleccionada.enlace_url"
+                  >
+                    <span class="url-protocol">🌐</span>
+                    {{ formatearEnlaceLegible(notificacionSeleccionada.enlace_url) }}
+                  </a>
+                </div>
+              </div>
+              
+              <!-- Indicador de hover sutil -->
+              <div class="link-hover-indicator"></div>
             </div>
           </div>
         </div>
         
-        <!-- Footer del artículo -->
-        <div class="news-footer border-t border-gray-200 p-3 sm:p-4 bg-gray-50">
-          <div class="flex items-center justify-between">
-            <div class="text-xs text-gray-600">
+        <!-- Footer del artículo - solo fecha -->
+        <div class="news-footer flex-shrink-0 border-t border-gray-200 p-1 sm:p-2 bg-gray-50">
+          <div class="text-center">
+            <div style="font-size: 0.6rem;" class="text-gray-600">
               Recibido: {{ formatearFechaCompleta(notificacionSeleccionada.fecha_creacion) }}
-            </div>
-            
-            <!-- Botones de acción -->
-            <div class="flex space-x-2">
-              <button 
-                v-if="notificacionSeleccionada.enlace_url"
-                @click="window.open(notificacionSeleccionada.enlace_url, '_blank')"
-                class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors duration-200"
-              >
-                Visitar enlace
-              </button>
-              <button 
-                @click="cerrarDetalleNotificacion"
-                class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white text-xs font-medium rounded-lg transition-colors duration-200"
-              >
-                Cerrar
-              </button>
             </div>
           </div>
         </div>
@@ -735,6 +749,88 @@ const cerrarDetalleNotificacion = () => {
 // Función para toggle de texto completo
 const toggleTextoCompleto = () => {
   mostrarTextoCompleto.value = !mostrarTextoCompleto.value
+}
+
+// Función para formatear enlace de manera más legible
+const formatearEnlace = (url) => {
+  if (!url) return ''
+  
+  try {
+    const urlObj = new URL(url)
+    const domain = urlObj.hostname.replace('www.', '')
+    const path = urlObj.pathname
+    
+    // Si el path es muy largo, truncarlo
+    if (path.length > 30) {
+      return `${domain}${path.substring(0, 25)}...`
+    }
+    
+    return `${domain}${path}`
+  } catch (e) {
+    // Si no es una URL válida, truncar el texto
+    return url.length > 40 ? `${url.substring(0, 37)}...` : url
+  }
+}
+
+// Función para formatear enlace de manera muy corta
+const formatearEnlaceCorto = (url) => {
+  if (!url) return ''
+  
+  try {
+    const urlObj = new URL(url)
+    const domain = urlObj.hostname.replace('www.', '')
+    
+    // Solo mostrar el dominio, máximo 25 caracteres
+    return domain.length > 25 ? `${domain.substring(0, 22)}...` : domain
+  } catch (e) {
+    // Si no es una URL válida, mostrar solo los primeros caracteres
+    return url.length > 25 ? `${url.substring(0, 22)}...` : url
+  }
+}
+
+// Función para formatear enlace de manera más legible y atractiva
+const formatearEnlaceLegible = (url) => {
+  if (!url) return ''
+  
+  try {
+    const urlObj = new URL(url)
+    let domain = urlObj.hostname.replace('www.', '')
+    const path = urlObj.pathname
+    
+    // Hacer el dominio más legible
+    if (domain.includes('.')) {
+      const parts = domain.split('.')
+      if (parts.length >= 2) {
+        // Capitalizar el nombre principal del sitio
+        const mainName = parts[parts.length - 2]
+        const extension = parts[parts.length - 1]
+        const capitalizedName = mainName.charAt(0).toUpperCase() + mainName.slice(1)
+        
+        if (parts.length > 2) {
+          // Para subdominios
+          domain = `${parts.slice(0, -2).join('.')}.${capitalizedName}.${extension}`
+        } else {
+          domain = `${capitalizedName}.${extension}`
+        }
+      }
+    }
+    
+    // Agregar path si es corto y relevante
+    if (path && path !== '/' && path.length <= 20) {
+      return `${domain}${path}`
+    }
+    
+    // Si el dominio es muy largo, truncarlo elegantemente
+    if (domain.length > 30) {
+      return `${domain.substring(0, 27)}...`
+    }
+    
+    return domain
+  } catch (e) {
+    // Si no es una URL válida, intentar hacerla más legible
+    const cleaned = url.replace(/^https?:\/\//, '').replace(/^www\./, '')
+    return cleaned.length > 30 ? `${cleaned.substring(0, 27)}...` : cleaned
+  }
 }
 
 // NUEVA FUNCIÓN: Marcar como leída en el servidor con actualización inmediata del badge
@@ -1717,7 +1813,7 @@ video::-webkit-media-controls {
    ESTILOS PARA MODAL PROFESIONAL TIPO NOTICIA
    ================================= */
 
-/* Modal principal con animaciones suaves */
+/* Modal principal con animaciones suaves y tamaño fijo - aún más ancho y alto */
 .news-modal {
   animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 
@@ -1725,6 +1821,10 @@ video::-webkit-media-controls {
     0 0 0 1px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  /* Tamaño aún más ancho y estirando más hacia arriba y abajo */
+  height: 88vh;
+  max-height: 700px;
+  min-height: 500px;
 }
 
 @keyframes modalSlideIn {
@@ -1766,10 +1866,11 @@ video::-webkit-media-controls {
 
 /* Título estilo periódico */
 .news-title {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.2;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   letter-spacing: -0.025em;
+  font-weight: 600;
 }
 
 .news-subtitle {
@@ -1791,12 +1892,12 @@ video::-webkit-media-controls {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Contenido del artículo */
+/* Contenido del artículo con scroll interno */
 .news-content {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.7;
   color: #374151;
-  max-height: calc(90vh - 200px);
+  /* Scroll interno sin altura máxima específica - se ajusta al contenedor flex */
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(34, 197, 94, 0.3) transparent;
@@ -1883,20 +1984,185 @@ video::-webkit-media-controls {
   border-radius: 2px;
 }
 
-/* Enlaces relacionados */
+/* Enlaces relacionados - Diseño compacto */
 .news-related-link {
   position: relative;
 }
 
-.news-related-link::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(to bottom, #3b82f6, #2563eb);
-  border-radius: 2px;
+/* Diseño compacto para enlaces */
+.compact-link-card {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.compact-link-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
+}
+
+.link-compact-content {
+  padding: 0.625rem 0.75rem;
+}
+
+.link-icon-mini {
+  width: 1.25rem;
+  height: 1.25rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.link-mini-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: capitalize;
+}
+
+.link-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background: #3b82f6;
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+}
+
+.link-mini-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+}
+
+.link-mini-btn:active {
+  transform: translateY(0);
+}
+
+/* Estilos mejorados para la experiencia de usuario del enlace */
+.link-enhanced-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.link-enhanced-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  color: white;
+  text-decoration: none;
+}
+
+.link-enhanced-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.link-url-enhanced {
+  margin-top: 6px;
+}
+
+.link-url-clickable {
+  color: #4a5568;
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  line-height: 1.4;
+  background-color: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.link-url-clickable:hover {
+  color: #2d3748;
+  background-color: rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateY(-1px);
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+}
+
+.url-protocol {
+  font-size: 10px;
+  opacity: 0.8;
+  margin-right: 2px;
+}
+
+.link-url-preview {
+  font-size: 0.6875rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background: rgba(100, 116, 139, 0.1);
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  display: inline-block;
+  max-width: fit-content;
+}
+
+/* Responsividad para el enlace compacto */
+@media (max-width: 480px) {
+  .link-compact-content {
+    padding: 0.5rem;
+  }
+  
+  .link-icon-mini {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .link-icon-mini svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+  
+  .link-mini-label {
+    font-size: 0.6875rem;
+  }
+  
+  .link-mini-btn {
+    padding: 0.1875rem 0.375rem;
+    font-size: 0.625rem;
+  }
+  
+  .link-mini-btn svg {
+    width: 0.625rem;
+    height: 0.625rem;
+  }
+  
+  .link-url-preview {
+    font-size: 0.625rem;
+    margin-top: 0.1875rem;
+  }
 }
 
 /* Footer del artículo */
@@ -1949,16 +2215,20 @@ video::-webkit-media-controls {
   100% { background-position: -200% 0%; }
 }
 
-/* Responsividad para el modal profesional */
+/* Responsividad para el modal profesional - Tamaños más grandes y anchos */
 @media (max-width: 640px) {
   .news-modal {
-    margin: 0.5rem;
-    max-height: 95vh;
+    margin: 1rem;
+    height: 82vh;
+    max-height: 600px;
+    min-height: 420px;
     border-radius: 1rem;
+    width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
   }
   
   .news-header {
-    padding: 1rem;
+    padding: 0.5rem;
   }
   
   .news-title {
@@ -1972,12 +2242,10 @@ video::-webkit-media-controls {
   
   .news-content {
     padding: 1rem;
-    max-height: calc(95vh - 180px);
-    overflow-y: auto;
   }
   
   .news-footer {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
   
   .news-lead p {
@@ -1992,13 +2260,17 @@ video::-webkit-media-controls {
 
 @media (max-width: 480px) {
   .news-modal {
-    margin: 0.25rem;
-    max-height: 97vh;
+    margin: 0.75rem;
+    height: 80vh;
+    max-height: 550px;
+    min-height: 380px;
     border-radius: 0.75rem;
+    width: calc(100vw - 1.5rem);
+    max-width: calc(100vw - 1.5rem);
   }
   
   .news-header {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
   
   .news-title {
@@ -2012,18 +2284,10 @@ video::-webkit-media-controls {
   
   .news-content {
     padding: 0.75rem;
-    max-height: calc(97vh - 160px);
-    overflow-y: auto;
   }
   
   .news-footer {
-    padding: 0.75rem;
-  }
-  
-  .news-footer .flex {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+    padding: 0.5rem;
   }
   
   .news-lead p {
@@ -2032,17 +2296,112 @@ video::-webkit-media-controls {
   }
   
   .news-featured-image img {
-    max-height: 180px;
+    max-height: 150px;
+  }
+}
+
+/* Dispositivos extra pequeños - aún más anchos y altos */
+@media (max-width: 360px) {
+  .news-modal {
+    margin: 0.5rem;
+    height: 78vh;
+    max-height: 500px;
+    min-height: 350px;
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+  }
+  
+  .news-header {
+    padding: 0.375rem;
+  }
+  
+  .news-content {
+    padding: 0.5rem;
+  }
+  
+  .news-footer {
+    padding: 0.375rem;
+  }
+  
+  .news-title {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+  
+  .news-subtitle {
+    font-size: 0.625rem;
+  }
+  
+  .news-lead p {
+    font-size: 0.625rem;
+    padding: 0.5rem;
+  }
+  
+  .news-featured-image img {
+    max-height: 120px;
   }
 }
 
 @media (max-height: 700px) {
   .news-modal {
-    max-height: 90vh;
+    height: 75vh;
+    max-height: 500px;
+    min-height: 400px;
+  }
+}
+
+@media (max-height: 600px) {
+  .news-modal {
+    height: 70vh;
+    max-height: 450px;
+    min-height: 360px;
+    margin: 0.5rem;
+  }
+  
+  .news-header {
+    padding: 0.375rem;
   }
   
   .news-content {
-    max-height: calc(90vh - 250px);
+    padding: 0.5rem;
+  }
+  
+  .news-footer {
+    padding: 0.375rem;
+  }
+}
+
+@media (max-height: 500px) {
+  .news-modal {
+    height: 65vh;
+    max-height: 400px;
+    min-height: 320px;
+    margin: 0.25rem;
+  }
+  
+  .news-header {
+    padding: 0.25rem;
+  }
+  
+  .news-content {
+    padding: 0.375rem;
+  }
+  
+  .news-footer {
+    padding: 0.25rem;
+  }
+  
+  .news-title {
+    font-size: 0.75rem !important;
+  }
+  
+  .news-subtitle {
+    font-size: 0.625rem !important;
+  }
+  
+  .news-lead p {
+    font-size: 0.625rem !important;
+    padding: 0.5rem !important;
   }
 }
 

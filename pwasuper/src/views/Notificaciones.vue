@@ -88,79 +88,118 @@
           <!-- Lista de notificaciones con scroll propio -->
           <div class="flex-1 overflow-y-auto bg-transparent rounded-xl px-2 py-4 notifications-scroll-container">
             <div v-if="notificacionesFiltradas.length > 0" class="space-y-2">
-            <div 
-              v-for="(notificacion, index) in notificacionesFiltradas" 
-              :key="notificacion.id"
-              :class="[
-                'notification-item rounded-xl p-3 transition-all duration-300 cursor-pointer shadow-lg border-2 hover:shadow-xl relative',
-                notificacion.leida 
-                  ? 'bg-white border-gray-300 hover:border-gray-400 hover:bg-gray-50' 
-                  : 'bg-red-50 border-red-400 hover:border-red-500 hover:bg-red-100'
-              ]"
-              @click="abrirDetalleNotificacion(notificacion)"
-            >
-              <!-- Campanita animada para notificaciones no leídas -->
-              <div v-if="!notificacion.leida" class="absolute -top-1 -right-1 z-20">
-                <div class="bg-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-sm bell-container">
+            <!-- Contenedor relativo para cada notificación con campanita fuera -->
+            <div v-for="(notificacion, index) in notificacionesFiltradas" 
+                 :key="notificacion.id"
+                 class="relative notification-container">
+              
+              <!-- Campanita vibrante FUERA de la notificación -->
+              <div v-if="!notificacion.leida" class="absolute top-0 right-0 z-50">
+                <div class="notification-bell bg-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-lg border-2 border-white">
                   <svg class="bell-icon w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
                   </svg>
                 </div>
               </div>
-              
-              <div class="flex items-start space-x-3">
-                <!-- Icono de tipo -->
-                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
-                     :class="notificacion.leida 
-                       ? 'bg-green-600 shadow-lg shadow-gray-200' 
-                       : 'bg-red-600 shadow-lg shadow-gray-200'">
-                  <!-- Ícono de correo blanco -->
-                  <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-                  </svg>
+
+              <!-- Card de notificación -->
+              <div :class="[
+                'enterprise-notification-card group cursor-pointer transition-all duration-300 ease-out',
+                notificacion.leida 
+                  ? 'notification-read border-l-green-500' 
+                  : 'notification-unread border-l-red-500'
+              ]"
+              @click="abrirDetalleNotificacion(notificacion)"
+              >
+                <!-- Indicador lateral -->
+                <div :class="[
+                  'absolute left-0 top-0 h-full w-1 transition-all duration-300',
+                  notificacion.leida ? 'bg-green-500' : 'bg-red-500'
+                ]"></div>
+                
+                <div class="flex items-start gap-3 p-4">
+                <!-- Avatar/Icono empresarial -->
+                <div class="flex-shrink-0">
+                  <div :class="[
+                    'w-10 h-10 rounded-lg flex items-center justify-center shadow-sm border transition-all duration-300 group-hover:scale-105',
+                    notificacion.leida 
+                      ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200 text-green-600' 
+                      : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200 text-red-600'
+                  ]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
                 </div>
                 
-                <!-- Contenido -->
+                <!-- Contenido principal -->
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center justify-between mb-1">
-                    <div class="flex items-center space-x-2 flex-1 min-w-0">
-                      <h3 class="text-sm font-medium text-gray-900 truncate">
+                  <!-- Header con título y fecha -->
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex-1 min-w-0 pr-3">
+                      <h3 :class="[
+                        'text-sm font-semibold leading-tight mb-1 transition-colors duration-200 line-clamp-1',
+                        notificacion.leida ? 'text-gray-700 group-hover:text-gray-900' : 'text-gray-900 group-hover:text-black'
+                      ]">
                         {{ notificacion.titulo }}
                       </h3>
+                      <p v-if="notificacion.subtitulo" :class="[
+                        'text-xs font-medium transition-colors duration-200 line-clamp-1',
+                        notificacion.leida ? 'text-gray-500' : 'text-gray-600'
+                      ]">
+                        {{ notificacion.subtitulo }}
+                      </p>
+                    </div>
+                    <div class="flex flex-col items-end flex-shrink-0">
+                      <span :class="[
+                        'text-xs font-medium transition-colors duration-200',
+                        notificacion.leida ? 'text-gray-400' : 'text-gray-500'
+                      ]">
+                        {{ formatearFecha(notificacion.fecha_creacion) }}
+                      </span>
+                      <div :class="[
+                        'text-xs px-2 py-0.5 rounded-full mt-1 font-medium transition-all duration-200',
+                        notificacion.leida 
+                          ? 'bg-green-100 text-green-700 border border-green-200' 
+                          : 'bg-red-100 text-red-700 border border-red-200'
+                      ]">
+                        {{ notificacion.leida ? 'Leída' : 'Nueva' }}
+                      </div>
                     </div>
                   </div>
                   
-                  <p v-if="notificacion.subtitulo" class="text-xs text-gray-700 mb-1">
-                    {{ notificacion.subtitulo }}
-                  </p>
-                  
-                  <p class="text-xs text-gray-600 line-clamp-2 mb-2">
-                    {{ notificacion.descripcion }}
-                  </p>
+                  <!-- Descripción truncada con desvanecido -->
+                  <div class="relative mb-3">
+                    <p :class="[
+                      'text-xs leading-relaxed transition-colors duration-200 line-clamp-2',
+                      notificacion.leida ? 'text-gray-600' : 'text-gray-700'
+                    ]">
+                      {{ notificacion.descripcion }}
+                    </p>
+                    <!-- Gradiente de desvanecido -->
+                    <div class="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent w-16 h-5 pointer-events-none"></div>
+                  </div>
 
-                  <!-- Vista previa de archivo -->
-                  <div v-if="notificacion.tiene_archivo" class="mb-3 w-full flex justify-center items-center">
-                    <div v-if="esImagen(notificacion.archivo_tipo)" class="aspect-square w-full max-w-[180px] bg-gray-100 rounded-lg overflow-hidden relative">
-                      <!-- Placeholder de carga -->
-                      <div class="absolute inset-0 flex items-center justify-center bg-gray-100 image-placeholder">
+                  <!-- Vista previa de archivo compacta -->
+                  <div v-if="notificacion.tiene_archivo" class="mb-3">
+                    <div v-if="esImagen(notificacion.archivo_tipo)" class="aspect-video max-w-xs bg-gray-50 rounded-md overflow-hidden border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow duration-200">
+                      <div class="absolute inset-0 flex items-center justify-center bg-gray-50 image-placeholder">
                         <div class="text-gray-400 text-center">
                           <div class="text-lg mb-1">🖼️</div>
-                          <div class="text-xs">Cargando...</div>
+                          <div class="text-xs font-medium">Cargando...</div>
                         </div>
                       </div>
-                      <!-- Imagen real -->
                       <img 
                         :src="obtenerUrlArchivo(notificacion.id)" 
                         :alt="notificacion.archivo_nombre"
-                        class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity relative z-10"
+                        class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 relative z-10"
                         @click.stop="abrirArchivo(notificacion.id)"
                         @error="onImageError"
                         @load="onImageLoad"
                         loading="lazy"
                       />
                     </div>
-                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="aspect-video w-full max-w-[180px] bg-gray-100 rounded-lg overflow-hidden">
+                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="aspect-video max-w-xs bg-gray-50 rounded-md overflow-hidden border border-gray-200 shadow-sm">
                       <video 
                         :src="obtenerUrlArchivo(notificacion.id)"
                         class="w-full h-full object-cover cursor-pointer"
@@ -171,20 +210,22 @@
                         Tu navegador no soporta video.
                       </video>
                     </div>
-                    <div v-else class="bg-gray-50 rounded-lg p-2 max-w-[180px]">
-                      <div class="flex items-center space-x-2">
-                        <span class="text-lg">{{ obtenerIconoArchivo(notificacion.archivo_tipo) }}</span>
+                    <div v-else class="bg-gray-50 rounded-md p-3 border border-gray-200 max-w-xs shadow-sm group-hover:shadow-md transition-shadow duration-200">
+                      <div class="flex items-center gap-2.5">
+                        <div class="flex-shrink-0 w-8 h-8 bg-white rounded-md border border-gray-200 flex items-center justify-center">
+                          <span class="text-base">{{ obtenerIconoArchivo(notificacion.archivo_tipo) }}</span>
+                        </div>
                         <div class="flex-1 min-w-0">
                           <div class="text-xs font-medium text-gray-800 truncate">
                             {{ notificacion.archivo_nombre }}
                           </div>
-                          <div class="text-xs text-gray-600 capitalize">
+                          <div class="text-xs text-gray-500 capitalize">
                             {{ notificacion.archivo_tipo }}
                           </div>
                         </div>
                         <button 
                           @click.stop="abrirArchivo(notificacion.id)"
-                          class="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                          class="px-2.5 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                         >
                           Ver
                         </button>
@@ -192,26 +233,22 @@
                     </div>
                   </div>
                   
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">
-                      {{ formatearFecha(notificacion.fecha_creacion) }}
-                    </span>
-                  </div>
-                  
-                  <!-- Botón Ver completo más pequeño -->
-                  <div class="flex justify-center items-center w-full mt-3 px-2">
-                    <button class="group professional-button px-3 py-1.5 text-gray-700 text-2xs font-medium border border-gray-300 rounded-md transition-all duration-300 hover:border-green-500 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mx-auto">
-                      <span class="flex items-center justify-center space-x-1">
-                        <span class="whitespace-nowrap">Ver completo</span>
-                        <svg class="w-2.5 h-2.5 transition-transform duration-300 group-hover:translate-x-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                      </span>
+                  <!-- Botón Ver completo compacto -->
+                  <div class="flex justify-end">
+                    <button class="enterprise-view-button-compact group inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:border-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-all duration-200">
+                      <span>Ver completo</span>
+                      <svg class="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                      </svg>
                     </button>
                   </div>
                 </div>
               </div>
+              <!-- Fin del card de notificación -->
             </div>
+            <!-- Fin del contenedor de notificación -->
+            </div>
+            <!-- Fin del div con v-if -->
           </div>
 
           <!-- Estado vacío -->
@@ -1222,146 +1259,176 @@ onBeforeUnmount(() => {
   }
 }
 
-/* Estilos para notificaciones */
-.notification-item {
+/* Contenedor para notificaciones con campanita externa */
+.notification-container {
+  margin-bottom: 1rem;
+  padding-top: 0.5rem; /* Espacio para la campanita */
+}
+
+/* Estilos empresariales para notificaciones - Optimizado */
+.enterprise-notification-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Eliminado backdrop-filter para hacer las notificaciones sólidas */
 }
 
-.notification-item:hover {
-  transform: translateY(-2px) scale(1.02);
-}
-
-/* Círculos de notificación con efecto mejorado */
-.notification-item .bg-red-600 {
-  background: linear-gradient(135deg, #dc2626, #ef4444, #dc2626) !important;
-  box-shadow: 
-    0 4px 12px rgba(220, 38, 38, 0.4),
-    0 2px 6px rgba(220, 38, 38, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: pulse-red-circle 2s ease-in-out infinite;
-}
-
-.notification-item .bg-green-600 {
-  background: linear-gradient(135deg, #16a34a, #22c55e, #16a34a) !important;
-  box-shadow: 
-    0 4px 12px rgba(34, 197, 94, 0.4),
-    0 2px 6px rgba(34, 197, 94, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Animación sutil para círculo rojo (no leído) */
-@keyframes pulse-red-circle {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 
-      0 4px 12px rgba(220, 38, 38, 0.4),
-      0 2px 6px rgba(220, 38, 38, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 
-      0 6px 16px rgba(220, 38, 38, 0.5),
-      0 3px 8px rgba(220, 38, 38, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  }
-}
-
-/* Efecto hover para los círculos */
-.notification-item:hover .bg-red-600 {
-  transform: scale(1.1);
-  box-shadow: 
-    0 6px 16px rgba(220, 38, 38, 0.6),
-    0 3px 8px rgba(220, 38, 38, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-}
-
-.notification-item:hover .bg-green-600 {
-  transform: scale(1.1);
-  box-shadow: 
-    0 6px 16px rgba(34, 197, 94, 0.6),
-    0 3px 8px rgba(34, 197, 94, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Notificaciones no leídas - Fondo rojo sólido */
-.notification-item.bg-red-50 {
-  background-color: #fef2f2 !important;
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    0 1px 2px rgba(0, 0, 0, 0.05);
-  border-color: #f87171;
-}
-
-.notification-item.bg-red-50:hover {
-  background-color: #fee2e2 !important;
-  border-color: #ef4444 !important;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-/* Notificaciones leídas - Fondo blanco sólido */
-.notification-item.bg-white {
-  background-color: #ffffff !important;
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    0 1px 2px rgba(0, 0, 0, 0.05);
+.enterprise-notification-card:hover {
   border-color: #d1d5db;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
 }
 
-.notification-item.bg-white:hover {
-  background-color: #f9fafb !important;
-  border-color: #9ca3af !important;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    0 2px 4px rgba(0, 0, 0, 0.08);
+.enterprise-notification-card.notification-unread {
+  background: linear-gradient(to right, #fef2f2 0%, #ffffff 6%);
+  border-left-width: 3px;
+  border-left-color: #ef4444;
 }
 
-/* Campanita animada */
-.bell-container {
-  animation: bell-shake 0.8s ease-in-out infinite;
+.enterprise-notification-card.notification-read {
+  background: #ffffff;
+  border-left-width: 3px;
+  border-left-color: #22c55e;
+}
+
+.enterprise-notification-card.notification-unread:hover {
+  background: linear-gradient(to right, #fef2f2 0%, #f9fafb 6%);
+}
+
+.enterprise-notification-card.notification-read:hover {
+  background: #f9fafb;
+}
+
+/* Botón Ver completo compacto */
+.enterprise-view-button-compact {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.enterprise-view-button-compact:hover {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Utilidades para truncar texto */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* Animaciones suaves para elementos interactivos */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.enterprise-notification-card {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Estilos responsivos para notificaciones empresariales - Compacto */
+@media (max-width: 640px) {
+  .enterprise-notification-card {
+    margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+  }
+  
+  .enterprise-notification-card .flex.items-start {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+  
+  .enterprise-notification-card h3 {
+    font-size: 0.8125rem;
+  }
+  
+  .enterprise-notification-card p {
+    font-size: 0.75rem;
+  }
+  
+  .enterprise-view-button-compact {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .enterprise-view-button-compact svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+}
+
+/* Campanita vibrante para notificaciones no leídas - Nueva animación suave */
+.notification-bell {
   box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.15),
-    0 1px 3px rgba(0, 0, 0, 0.08);
+    0 2px 6px rgba(220, 38, 38, 0.4),
+    0 1px 3px rgba(220, 38, 38, 0.3);
+  position: relative;
+  z-index: 50;
   border: 2px solid rgba(255, 255, 255, 0.9);
+  /* El círculo NO se mueve */
+}
+
+.notification-bell:hover .bell-icon {
+  animation-play-state: paused;
 }
 
 .bell-icon {
-  animation: bell-ring 1.2s ease-in-out infinite;
-  transform-origin: top center;
+  animation: bell-swing 1.2s ease-in-out infinite;
+  transform-origin: center 20%;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  /* Solo el ícono se anima con movimiento pendular más rápido */
 }
 
-@keyframes bell-shake {
-  0%, 100% {
-    transform: translateX(0) rotate(0deg);
-  }
-  25% {
-    transform: translateX(-1px) rotate(-2deg);
-  }
-  50% {
-    transform: translateX(1px) rotate(2deg);
-  }
-  75% {
-    transform: translateX(-0.5px) rotate(-1deg);
-  }
-}
-
-@keyframes bell-ring {
-  0%, 100% {
+/* Nueva animación pendular suave - como una campanita real colgando */
+@keyframes bell-swing {
+  0% {
     transform: rotate(0deg);
   }
-  10%, 30%, 50%, 70%, 90% {
-    transform: rotate(-8deg);
+  15% {
+    transform: rotate(-12deg);
   }
-  20%, 40%, 60%, 80% {
+  30% {
     transform: rotate(8deg);
   }
+  45% {
+    transform: rotate(-5deg);
+  }
+  60% {
+    transform: rotate(3deg);
+  }
+  75% {
+    transform: rotate(-1deg);
+  }
+  90% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
+
+/* Eliminamos la animación del contenedor - solo se queda fijo */
 
 /* Badge de nueva notificación - Ahora sin uso pero mantengo por compatibilidad */
 .notification-badge {

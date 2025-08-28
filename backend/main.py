@@ -2862,11 +2862,10 @@ async def obtener_estadisticas_notificacion(notificacion_id: int):
         
         # Determinar el universo de usuarios que pueden ver esta notificación
         if notificacion[3]:  # enviada_a_todos
-            # Obtener todos los usuarios activos
+            # Obtener todos los usuarios (sin filtro de activo)
             cursor.execute("""
                 SELECT COUNT(*) as total_usuarios
                 FROM usuarios
-                WHERE activo = TRUE
             """)
             total_usuarios_objetivo = cursor.fetchone()[0]
             
@@ -2875,7 +2874,7 @@ async def obtener_estadisticas_notificacion(notificacion_id: int):
                 SELECT COUNT(DISTINCT nl.usuario_id) as usuarios_leido
                 FROM notificacion_leidos nl
                 INNER JOIN usuarios u ON nl.usuario_id = u.id
-                WHERE nl.notificacion_id = %s AND u.activo = TRUE
+                WHERE nl.notificacion_id = %s
             """, (notificacion_id,))
             usuarios_leido = cursor.fetchone()[0]
             
@@ -2885,7 +2884,7 @@ async def obtener_estadisticas_notificacion(notificacion_id: int):
                 SELECT COUNT(*) as total_usuarios
                 FROM notificacion_usuarios nu
                 INNER JOIN usuarios u ON nu.usuario_id = u.id
-                WHERE nu.notificacion_id = %s AND u.activo = TRUE
+                WHERE nu.notificacion_id = %s
             """, (notificacion_id,))
             total_usuarios_objetivo = cursor.fetchone()[0]
             
@@ -2896,8 +2895,7 @@ async def obtener_estadisticas_notificacion(notificacion_id: int):
                 INNER JOIN notificacion_usuarios nu ON nl.usuario_id = nu.usuario_id
                 INNER JOIN usuarios u ON nl.usuario_id = u.id
                 WHERE nl.notificacion_id = %s 
-                AND nu.notificacion_id = %s 
-                AND u.activo = TRUE
+                AND nu.notificacion_id = %s
             """, (notificacion_id, notificacion_id))
             usuarios_leido = cursor.fetchone()[0]
         
@@ -2913,7 +2911,7 @@ async def obtener_estadisticas_notificacion(notificacion_id: int):
                 SELECT u.id, u.nombre_completo, u.correo, u.curp, nl.leida_en
                 FROM notificacion_leidos nl
                 INNER JOIN usuarios u ON nl.usuario_id = u.id
-                WHERE nl.notificacion_id = %s AND u.activo = TRUE
+                WHERE nl.notificacion_id = %s
                 ORDER BY nl.leida_en DESC
                 LIMIT 20
             """, (notificacion_id,))
@@ -2924,8 +2922,7 @@ async def obtener_estadisticas_notificacion(notificacion_id: int):
                 INNER JOIN notificacion_usuarios nu ON nl.usuario_id = nu.usuario_id
                 INNER JOIN usuarios u ON nl.usuario_id = u.id
                 WHERE nl.notificacion_id = %s 
-                AND nu.notificacion_id = %s 
-                AND u.activo = TRUE
+                AND nu.notificacion_id = %s
                 ORDER BY nl.leida_en DESC
                 LIMIT 20
             """, (notificacion_id, notificacion_id))
@@ -2945,8 +2942,7 @@ async def obtener_estadisticas_notificacion(notificacion_id: int):
             cursor.execute("""
                 SELECT u.id, u.nombre_completo, u.correo, u.curp
                 FROM usuarios u
-                WHERE u.activo = TRUE
-                AND u.id NOT IN (
+                WHERE u.id NOT IN (
                     SELECT nl.usuario_id 
                     FROM notificacion_leidos nl 
                     WHERE nl.notificacion_id = %s
@@ -2960,7 +2956,6 @@ async def obtener_estadisticas_notificacion(notificacion_id: int):
                 FROM notificacion_usuarios nu
                 INNER JOIN usuarios u ON nu.usuario_id = u.id
                 WHERE nu.notificacion_id = %s 
-                AND u.activo = TRUE
                 AND u.id NOT IN (
                     SELECT nl.usuario_id 
                     FROM notificacion_leidos nl 

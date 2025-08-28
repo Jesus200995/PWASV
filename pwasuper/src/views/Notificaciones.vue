@@ -405,53 +405,32 @@
             </div>
           </div>
 
-          <!-- Enlace relacionado - Diseño compacto y legible -->
-          <div v-if="notificacionSeleccionada.enlace_url" class="news-related-link mb-3">
-            <div class="compact-link-card">
-              <div class="link-compact-content">
-                <!-- Fila principal con icono, texto y botón -->
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center space-x-2">
-                    <div class="link-icon-mini">
-                      <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                      </svg>
-                    </div>
-                    <span class="link-mini-label">Enlace</span>
-                  </div>
-                  
-                  <!-- Botón mejorado con mejor UX -->
-                  <a 
-                    :href="notificacionSeleccionada.enlace_url" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="link-enhanced-btn"
-                    :title="`Abrir ${formatearEnlaceCorto(notificacionSeleccionada.enlace_url)} en nueva pestaña`"
-                  >
-                    <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                    </svg>
-                    Abrir enlace
-                  </a>
+          <!-- Enlace relacionado - Diseño empresarial moderno -->
+          <div v-if="notificacionSeleccionada.enlace_url" class="enterprise-link-section mb-3">
+            <h4 class="link-section-title">Enlace</h4>
+            <div class="enterprise-link-card">
+              <!-- Header con icono y acción -->
+              <div class="link-header">
+                <div class="link-icon-container">
+                  <svg class="link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                  </svg>
                 </div>
-                
-                <!-- URL más legible y prominente -->
-                <div class="link-url-enhanced">
-                  <a 
-                    :href="notificacionSeleccionada.enlace_url" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="link-url-clickable"
-                    :title="notificacionSeleccionada.enlace_url"
-                  >
-                    <span class="url-protocol">🌐</span>
-                    {{ formatearEnlaceLegible(notificacionSeleccionada.enlace_url) }}
-                  </a>
+                <div class="link-content">
+                  <div class="link-url-display">{{ formatearEnlaceLegible(notificacionSeleccionada.enlace_url) }}</div>
                 </div>
+                <a 
+                  :href="notificacionSeleccionada.enlace_url" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="enterprise-action-btn"
+                  :title="notificacionSeleccionada.enlace_url"
+                >
+                  <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </a>
               </div>
-              
-              <!-- Indicador de hover sutil -->
-              <div class="link-hover-indicator"></div>
             </div>
           </div>
         </div>
@@ -1989,133 +1968,132 @@ video::-webkit-media-controls {
   position: relative;
 }
 
-/* Diseño compacto para enlaces */
-.compact-link-card {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  overflow: hidden;
+/* === DISEÑO EMPRESARIAL MODERNO PARA ENLACES === */
+/* Inspirado en Slack, GitHub, Notion y Microsoft Teams */
+
+.enterprise-link-section {
+  margin: 8px 0;
+}
+
+.link-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+
+.enterprise-link-card {
+  background: linear-gradient(135deg, #0f766e 0%, #1e40af 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 8px 12px;
   position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 10px rgba(15, 118, 110, 0.2);
+  overflow: hidden;
+  max-width: 280px;
+  margin: 0 auto;
 }
 
-.compact-link-card:hover {
-  border-color: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+.enterprise-link-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.enterprise-link-card:hover::before {
+  opacity: 1;
+}
+
+.enterprise-link-card:hover {
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.link-compact-content {
-  padding: 0.625rem 0.75rem;
+.link-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
 }
 
-.link-icon-mini {
-  width: 1.25rem;
-  height: 1.25rem;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 4px;
+.link-icon-container {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.link-mini-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #475569;
-  text-transform: capitalize;
+.link-icon {
+  width: 12px;
+  height: 12px;
+  color: #ffffff;
+  stroke-width: 2.5;
 }
 
-.link-mini-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.5rem;
-  background: #3b82f6;
-  color: white;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+.link-content {
+  flex: 1;
+  min-width: 0;
 }
 
-.link-mini-btn:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
-}
-
-.link-mini-btn:active {
-  transform: translateY(0);
-}
-
-/* Estilos mejorados para la experiencia de usuario del enlace */
-.link-enhanced-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.link-enhanced-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-  color: white;
-  text-decoration: none;
-}
-
-.link-enhanced-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.link-url-enhanced {
-  margin-top: 6px;
-}
-
-.link-url-clickable {
-  color: #4a5568;
-  font-size: 11px;
-  font-weight: 500;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 6px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  line-height: 1.4;
-  background-color: rgba(148, 163, 184, 0.1);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-.link-url-clickable:hover {
-  color: #2d3748;
-  background-color: rgba(102, 126, 234, 0.15);
-  border-color: rgba(102, 126, 234, 0.3);
-  transform: translateY(-1px);
-  text-decoration: none;
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
-}
-
-.url-protocol {
+.link-url-display {
   font-size: 10px;
-  opacity: 0.8;
-  margin-right: 2px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.3;
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+.enterprise-action-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  backdrop-filter: blur(10px);
+}
+
+.enterprise-action-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateX(1px);
+}
+
+.enterprise-action-btn:active {
+  transform: translateX(0) scale(0.95);
+}
+
+.action-icon {
+  width: 12px;
+  height: 12px;
+  color: #ffffff;
+  stroke-width: 2.5;
+}
+
+/* === ESTILOS ANTIGUOS DE ENLACES ELIMINADOS === */
+/* Reemplazados por el nuevo diseño empresarial arriba */
 
 .link-url-preview {
   font-size: 0.6875rem;

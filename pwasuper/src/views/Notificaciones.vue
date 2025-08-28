@@ -309,15 +309,15 @@
         </div>
 
         <!-- Contenido del Artículo -->
-        <div class="news-content flex-1 p-4 sm:p-6 overflow-y-auto min-h-0">
+        <div class="news-content flex-1 p-2 sm:p-3 overflow-y-auto min-h-0">
           
-          <!-- Lead/Entradilla con funcionalidad "Ver más" -->
-          <div class="news-lead mb-6">
-            <div style="font-size: 0.75rem;" class="text-gray-800 leading-relaxed font-medium border-l-4 border-green-500 pl-4 bg-gray-50 py-3 rounded-r-lg">
-              <p v-if="!mostrarTextoCompleto && descripcionLarga" class="mb-2">
+          <!-- Lead/Entradilla con funcionalidad "Ver más" - optimizado -->
+          <div class="news-lead mb-4">
+            <div style="font-size: 0.75rem;" class="text-gray-800 leading-relaxed font-medium border-l-3 border-green-500 pl-3 bg-gray-50 py-2 rounded-r-md">
+              <p v-if="!mostrarTextoCompleto && descripcionLarga" class="mb-1">
                 {{ descripcionCorta }}
               </p>
-              <p v-else class="mb-2">
+              <p v-else class="mb-1">
                 {{ notificacionSeleccionada.descripcion }}
               </p>
               
@@ -1792,7 +1792,7 @@ video::-webkit-media-controls {
    ESTILOS PARA MODAL PROFESIONAL TIPO NOTICIA
    ================================= */
 
-/* Modal principal con animaciones suaves y tamaño fijo - aún más ancho y alto */
+/* Modal principal con animaciones suaves y tamaño fijo - más ancho, altura moderada */
 .news-modal {
   animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 
@@ -1800,10 +1800,13 @@ video::-webkit-media-controls {
     0 0 0 1px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  /* Tamaño aún más ancho y estirando más hacia arriba y abajo */
-  height: 88vh;
-  max-height: 700px;
-  min-height: 500px;
+  /* Tamaño más ancho, altura reducida */
+  height: 85vh;
+  max-height: 720px;
+  min-height: 520px;
+  width: 95vw;
+  max-width: 900px;
+  min-width: 320px;
 }
 
 @keyframes modalSlideIn {
@@ -1899,15 +1902,17 @@ video::-webkit-media-controls {
   background-color: rgba(34, 197, 94, 0.5);
 }
 
-/* Entradilla/Lead del artículo */
+/* Entradilla/Lead del artículo - optimizado */
 .news-lead {
   position: relative;
+  margin: 0 -4px; /* Aprovecha más el ancho disponible */
 }
 
 .news-lead p {
-  font-size: 1.1em;
-  line-height: 1.6;
+  font-size: 1em;
+  line-height: 1.5;
   position: relative;
+  margin: 0; /* Elimina márgenes extra */
 }
 
 .news-lead::before {
@@ -2193,16 +2198,16 @@ video::-webkit-media-controls {
   100% { background-position: -200% 0%; }
 }
 
-/* Responsividad para el modal profesional - Tamaños más grandes y anchos */
+/* Responsividad para el modal profesional - Tamaños balanceados */
 @media (max-width: 640px) {
   .news-modal {
-    margin: 1rem;
-    height: 82vh;
-    max-height: 600px;
-    min-height: 420px;
+    margin: 0.75rem;
+    height: 80vh;
+    max-height: 620px;
+    min-height: 450px;
     border-radius: 1rem;
-    width: calc(100vw - 2rem);
-    max-width: calc(100vw - 2rem);
+    width: calc(100vw - 1.5rem);
+    max-width: calc(100vw - 1.5rem);
   }
   
   .news-header {
@@ -2219,7 +2224,7 @@ video::-webkit-media-controls {
   }
   
   .news-content {
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
   .news-footer {
@@ -2228,7 +2233,7 @@ video::-webkit-media-controls {
   
   .news-lead p {
     font-size: 0.75rem;
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
   
   .news-featured-image img {
@@ -2238,13 +2243,13 @@ video::-webkit-media-controls {
 
 @media (max-width: 480px) {
   .news-modal {
-    margin: 0.75rem;
-    height: 80vh;
-    max-height: 550px;
-    min-height: 380px;
+    margin: 0.5rem;
+    height: 78vh;
+    max-height: 580px;
+    min-height: 400px;
     border-radius: 0.75rem;
-    width: calc(100vw - 1.5rem);
-    max-width: calc(100vw - 1.5rem);
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
   }
   
   .news-header {
@@ -2261,7 +2266,7 @@ video::-webkit-media-controls {
   }
   
   .news-content {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
   
   .news-footer {
@@ -2270,7 +2275,7 @@ video::-webkit-media-controls {
   
   .news-lead p {
     font-size: 0.6875rem;
-    padding: 0.625rem;
+    padding: 0.5rem;
   }
   
   .news-featured-image img {
@@ -2278,15 +2283,15 @@ video::-webkit-media-controls {
   }
 }
 
-/* Dispositivos extra pequeños - aún más anchos y altos */
+/* Dispositivos extra pequeños - altura moderada */
 @media (max-width: 360px) {
   .news-modal {
-    margin: 0.5rem;
-    height: 78vh;
-    max-height: 500px;
-    min-height: 350px;
-    width: calc(100vw - 1rem);
-    max-width: calc(100vw - 1rem);
+    margin: 0.25rem;
+    height: 76vh;
+    max-height: 520px;
+    min-height: 360px;
+    width: calc(100vw - 0.5rem);
+    max-width: calc(100vw - 0.5rem);
   }
   
   .news-header {
@@ -2320,19 +2325,35 @@ video::-webkit-media-controls {
   }
 }
 
+/* Tablets - más ancho */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .news-modal {
+    width: 90vw;
+    max-width: 800px;
+  }
+}
+
+/* Desktop - más ancho */
+@media (min-width: 1025px) {
+  .news-modal {
+    width: 85vw;
+    max-width: 900px;
+  }
+}
+
 @media (max-height: 700px) {
   .news-modal {
-    height: 75vh;
-    max-height: 500px;
-    min-height: 400px;
+    height: 78vh;
+    max-height: 540px;
+    min-height: 420px;
   }
 }
 
 @media (max-height: 600px) {
   .news-modal {
-    height: 70vh;
-    max-height: 450px;
-    min-height: 360px;
+    height: 72vh;
+    max-height: 480px;
+    min-height: 380px;
     margin: 0.5rem;
   }
   
@@ -2351,9 +2372,9 @@ video::-webkit-media-controls {
 
 @media (max-height: 500px) {
   .news-modal {
-    height: 65vh;
-    max-height: 400px;
-    min-height: 320px;
+    height: 68vh;
+    max-height: 420px;
+    min-height: 340px;
     margin: 0.25rem;
   }
   
@@ -2379,7 +2400,7 @@ video::-webkit-media-controls {
   
   .news-lead p {
     font-size: 0.625rem !important;
-    padding: 0.5rem !important;
+    padding: 0.375rem !important;
   }
 }
 

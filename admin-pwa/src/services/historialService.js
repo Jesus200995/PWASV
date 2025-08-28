@@ -1,11 +1,5 @@
 // Servicio para manejo de historial completo de usuarios
-const API_CONFIG = {
-  local: 'http://localhost:8000',
-  production: 'https://apipwa.sembrandodatos.com'
-};
-
-// Configuración flexible para desarrollo y producción
-const API_BASE = API_CONFIG.production; // Cambiar a API_CONFIG.local para desarrollo
+import { API_URL } from '../config/api.js'
 
 class HistorialService {
   constructor() {
@@ -169,7 +163,7 @@ class HistorialService {
    */
   async obtenerRegistros(usuarioId) {
     try {
-      const url = `${API_BASE}/registros?usuario_id=${usuarioId}`;
+      const url = `${API_URL}/registros?usuario_id=${usuarioId}`;
       console.log('🔍 Obteniendo registros desde:', url);
 
       const response = await fetch(url, {
@@ -198,7 +192,7 @@ class HistorialService {
    */
   async obtenerAsistencias(usuarioId) {
     try {
-      const url = `${API_BASE}/asistencias?usuario_id=${usuarioId}`;
+      const url = `${API_URL}/asistencias?usuario_id=${usuarioId}`;
       console.log('🔍 Obteniendo asistencias desde:', url);
 
       const response = await fetch(url, {
@@ -258,7 +252,7 @@ class HistorialService {
         params.append('limit', filtros.limit);
       }
 
-      const url = `${API_BASE}/historial/${usuarioId}?${params.toString()}`;
+      const url = `${API_URL}/historial/${usuarioId}?${params.toString()}`;
       console.log('🔍 Obteniendo historial desde:', url);
 
       const response = await fetch(url, {
@@ -305,7 +299,7 @@ class HistorialService {
     try {
       console.log('📝 Creando registro de historial:', registro);
 
-      const response = await fetch(`${API_BASE}/historial`, {
+      const response = await fetch(`${API_URL}/historial`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -339,7 +333,7 @@ class HistorialService {
     try {
       console.log('📊 Obteniendo resumen de historial para usuario:', usuarioId);
 
-      const response = await fetch(`${API_BASE}/historial/resumen/${usuarioId}`, {
+      const response = await fetch(`${API_URL}/historial/resumen/${usuarioId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -514,7 +508,7 @@ class HistorialService {
    */
   async obtenerUsuarios() {
     try {
-      const url = `${API_BASE}/usuarios`;
+      const url = `${API_URL}/usuarios`;
       console.log('🔍 Obteniendo usuarios desde:', url);
 
       const response = await fetch(url, {
@@ -543,9 +537,9 @@ class HistorialService {
    */
   async probarConectividad() {
     try {
-      console.log('🔍 Probando conectividad con:', `${API_BASE}/historial`);
+      console.log('🔍 Probando conectividad con:', `${API_URL}/historial`);
       
-      const response = await fetch(`${API_BASE}/historial`, {
+      const response = await fetch(`${API_URL}/historial`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -24,9 +24,6 @@ const API_CONFIGS = {
 const getEnvironment = () => {
   const hostname = window.location.hostname
   
-  // TEMPORAL: Forzar a usar local para pruebas de estadísticas
-  return 'local'
-  
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'local'
   }

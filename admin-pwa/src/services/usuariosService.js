@@ -1,14 +1,7 @@
 // Servicio para manejo de usuarios usando la API real con endpoints GET
-// Configuración de API - cambia aquí para alternar entre local y producción
-const API_CONFIG = {
-  production: 'https://apipwa.sembrandodatos.com',
-  local: 'http://localhost:8000'
-};
+import { API_URL } from '../config/api.js'
 
-// Usar producción por defecto, cambiar a 'local' para desarrollo
-const API_BASE = API_CONFIG.production; // Cambiar entre 'production' y 'local'
-
-console.log(`🌐 Usando API: ${API_BASE}`);
+console.log(`🌐 Usando API: ${API_URL}`);
 
 class UsuariosService {
   constructor() {
@@ -18,7 +11,7 @@ class UsuariosService {
   async obtenerUsuarios() {
     try {
       console.log('🔍 Obteniendo usuarios desde la API real...');
-      const response = await fetch(`${API_BASE}/usuarios`, {
+      const response = await fetch(`${API_URL}/usuarios`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +68,7 @@ class UsuariosService {
       }
 
       console.log(`🔍 Obteniendo usuario ${id} desde la API real...`);
-      const response = await fetch(`${API_BASE}/usuarios/${id}`, {
+      const response = await fetch(`${API_URL}/usuarios/${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -201,7 +194,7 @@ class UsuariosService {
   async actualizarUsuario(id, datosUsuario) {
     try {
       console.log(`✏️ Actualizando usuario ${id} en la API...`, datosUsuario);
-      const response = await fetch(`${API_BASE}/usuarios/${id}`, {
+      const response = await fetch(`${API_URL}/usuarios/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -301,7 +294,7 @@ class UsuariosService {
   async eliminarUsuario(id) {
     try {
       console.log(`🗑️ Eliminando usuario ${id} desde la API...`);
-      const response = await fetch(`${API_BASE}/usuarios/${id}`, {
+      const response = await fetch(`${API_URL}/usuarios/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

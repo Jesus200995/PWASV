@@ -1,13 +1,14 @@
 // Servicio simplificado para probar conectividad
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-console.log('🌐 PermisosService Simple usando API:', API_BASE_URL)
+import { API_URL } from '../config/api.js'
+
+console.log('🌐 PermisosService Simple usando API:', API_URL)
 
 const permisosServiceSimple = {
   async listarUsuarios() {
     try {
       console.log('🔄 Obteniendo usuarios admin (versión simple)...')
       
-      const response = await fetch(`${API_BASE_URL}/admin/usuarios`, {
+      const response = await fetch(`${API_URL}/admin/usuarios`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

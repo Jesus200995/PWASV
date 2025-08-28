@@ -1,14 +1,6 @@
 // Servicio para obtener estadísticas del sistema
 import axios from 'axios'
-
-// Configuración de API - usar localhost para desarrollo, producción para deploy
-const API_CONFIG = {
-  production: 'https://apipwa.sembrandodatos.com',
-  local: 'http://localhost:8000'
-}
-
-// Durante el desarrollo usar localhost, en producción usar el servidor remoto
-const API_URL = API_CONFIG.production // Forzar uso de producción
+import { API_URL } from '../config/api.js'
 
 console.log(`🌐 EstadísticasService usando API: ${API_URL}`)
 

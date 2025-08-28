@@ -200,7 +200,7 @@
                         style="filter: none !important; box-shadow: none !important;"
                       />
                     </div>
-                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white rounded-md overflow-hidden cursor-pointer" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
+                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white rounded-md overflow-hidden cursor-pointer relative" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
                       <div class="absolute inset-0 flex items-center justify-center bg-gray-50 video-placeholder z-5">
                         <div class="text-gray-400 text-center">
                           <div class="text-lg mb-1">🎥</div>
@@ -210,12 +210,24 @@
                       <video 
                         :src="obtenerUrlArchivo(notificacion.id)"
                         muted
-                        preload="none"
+                        preload="metadata"
                         style="pointer-events: none; filter: none !important; box-shadow: none !important;"
-                        @loadeddata="onVideoLoaded"
+                        @loadedmetadata="onVideoLoaded"
+                        @canplay="onVideoLoaded"
+                        @error="onVideoError"
+                        @loadstart="(event) => setTimeout(() => onVideoFallback(event), 5000)"
                       >
                         Tu navegador no soporta video.
                       </video>
+                      <!-- Icono de play suave desvanecido -->
+                      <div class="absolute inset-0 flex items-center justify-center pointer-events-none video-play-overlay">
+                        <div class="video-play-icon">
+                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="12" fill="rgba(0, 0, 0, 0.25)" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1"/>
+                            <polygon points="10,8 16,12 10,16" fill="white" opacity="0.9"/>
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                     <div v-else class="bg-gray-50 rounded-md p-3 border border-gray-200 max-w-xs shadow-sm group-hover:shadow-md transition-shadow duration-200">
                       <div class="flex items-center gap-2.5">
@@ -997,9 +1009,61 @@ const onImageLoad = (event) => {
 
 const onVideoLoaded = (event) => {
   // Ocultar el placeholder de carga cuando el video se haya cargado
+  const video = event.target
+  const placeholder = video.parentNode.querySelector('.video-placeholder')
+  
+  if (placeholder && video.readyState >= 1) {
+    // readyState >= 1 significa que los metadatos han sido cargados
+    video.setAttribute('data-loaded', 'true')
+    placeholder.style.opacity = '0'
+    setTimeout(() => {
+      if (placeholder.style.opacity === '0') {
+        placeholder.style.display = 'none'
+      }
+    }, 300) // Transición suave
+  }
+}
+
+const onVideoError = (event) => {
+  console.warn('Error cargando video:', event.target.src)
+  
+  // Ocultar el placeholder de carga
   const placeholder = event.target.parentNode.querySelector('.video-placeholder')
   if (placeholder) {
     placeholder.style.display = 'none'
+  }
+  
+  // Crear elemento de reemplazo con mejor diseño
+  const parent = event.target.parentNode
+  const errorDiv = document.createElement('div')
+  errorDiv.className = 'flex flex-col items-center justify-center w-full h-full bg-gray-100 rounded text-xs text-gray-500 p-4 absolute inset-0 z-20'
+  
+  errorDiv.innerHTML = `
+    <div class="text-2xl mb-2">🎥</div>
+    <div class="text-center">
+      <div class="font-medium">Error cargando video</div>
+      <div class="text-xs text-gray-400 mt-1">Archivo no disponible</div>
+    </div>
+  `
+  
+  // Ocultar video original y mostrar error
+  event.target.style.display = 'none'
+  parent.appendChild(errorDiv)
+}
+
+const onVideoFallback = (event) => {
+  // Fallback para ocultar placeholder después de 5 segundos si no se ha cargado
+  const video = event.target
+  const placeholder = video.parentNode.querySelector('.video-placeholder')
+  
+  if (placeholder && !video.hasAttribute('data-loaded')) {
+    console.log('Video tardando en cargar, ocultando placeholder por fallback')
+    placeholder.style.opacity = '0'
+    setTimeout(() => {
+      if (placeholder && placeholder.style.opacity === '0') {
+        placeholder.style.display = 'none'
+      }
+    }, 300)
   }
 }
 
@@ -2720,6 +2784,25 @@ video::-webkit-media-controls {
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
   transition: opacity 0.3s ease;
+  opacity: 1;
+}
+
+/* Ocultamiento suave del placeholder */
+.notification-media-preview .image-placeholder[style*="opacity: 0"],
+.notification-media-preview .video-placeholder[style*="opacity: 0"] {
+  opacity: 0 !important;
+}
+
+/* Estado de carga para videos */
+.notification-media-preview video[preload="metadata"] + .video-placeholder {
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* Video cargado exitosamente - ocultar placeholder */
+.notification-media-preview video[data-loaded="true"] + .video-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 /* Animación de carga suave */
@@ -2740,7 +2823,45 @@ video::-webkit-media-controls {
 }
 
 .notification-media-preview img[loading="lazy"],
-.notification-media-preview video[preload="none"] {
+.notification-media-preview video[preload="metadata"] {
+  opacity: 1;
+}
+
+/* Videos que han cargado metadatos exitosamente */
+.notification-media-preview video:not([error]) {
+  opacity: 1;
+}
+
+/* Icono de play para videos */
+.video-play-overlay {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.notification-media-preview:hover .video-play-overlay {
+  opacity: 1;
+}
+
+.video-play-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: all 0.3s ease;
+}
+
+.notification-media-preview:hover .video-play-icon {
+  transform: scale(1.1);
+}
+
+.video-play-icon svg {
+  transition: all 0.3s ease;
+}
+
+/* Icono de play siempre visible pero muy sutil */
+.notification-media-preview .video-play-overlay {
+  opacity: 0.6;
+}
+
+.notification-media-preview:hover .video-play-overlay {
   opacity: 1;
 }
 

@@ -275,9 +275,9 @@
               
               <button 
                 @click="cerrarDetalleNotificacion"
-                class="close-button w-5 h-5 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-all duration-200 group"
+                class="close-button w-7 h-7 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-all duration-200 group"
               >
-                <svg class="w-2.5 h-2.5 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
@@ -1867,6 +1867,7 @@ video::-webkit-media-controls {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: -4px; /* Subir el botón un poquito más arriba */
 }
 
 .close-button:hover {

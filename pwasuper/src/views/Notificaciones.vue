@@ -144,7 +144,7 @@
                         {{ notificacion.titulo }}
                       </h3>
                       <p v-if="notificacion.subtitulo" :class="[
-                        'text-xs font-medium transition-colors duration-200 line-clamp-1',
+                        'notification-subtitle text-xs font-medium transition-colors duration-200 line-clamp-1',
                         notificacion.leida ? 'text-gray-500' : 'text-gray-600'
                       ]">
                         {{ notificacion.subtitulo }}
@@ -152,7 +152,7 @@
                     </div>
                     <div class="flex flex-col items-end flex-shrink-0">
                       <span :class="[
-                        'text-xs font-medium transition-colors duration-200',
+                        'notification-date text-xs font-medium transition-colors duration-200',
                         notificacion.leida ? 'text-gray-400' : 'text-gray-500'
                       ]">
                         {{ formatearFecha(notificacion.fecha_creacion) }}
@@ -1261,7 +1261,7 @@ onBeforeUnmount(() => {
 
 /* Contenedor para notificaciones con campanita externa */
 .notification-container {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Reducido de 1rem a 0.5rem */
   padding-top: 0.5rem; /* Espacio para la campanita */
 }
 
@@ -1274,6 +1274,34 @@ onBeforeUnmount(() => {
   position: relative;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+}
+
+/* Tipografía profesional para elementos de notificaciones */
+.enterprise-notification-card h3 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.enterprise-notification-card p {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.enterprise-notification-card .notification-subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+  font-weight: 500;
+  font-style: italic;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.enterprise-notification-card .notification-date {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.025em;
 }
 
 .enterprise-notification-card:hover {
@@ -1353,8 +1381,11 @@ onBeforeUnmount(() => {
 
 /* Estilos responsivos para notificaciones empresariales - Compacto */
 @media (max-width: 640px) {
+  .notification-container {
+    margin-bottom: 0.375rem; /* Aún más compacto en móviles */
+  }
+  
   .enterprise-notification-card {
-    margin-bottom: 0.5rem;
     border-radius: 0.375rem;
   }
   

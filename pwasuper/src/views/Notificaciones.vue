@@ -183,7 +183,7 @@
                   <!-- Vista previa de archivo compacta con efecto fade -->
                   <div v-if="notificacion.tiene_archivo" class="mb-3">
                     <div v-if="esImagen(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white rounded-md overflow-hidden cursor-pointer" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
-                      <div class="absolute inset-0 flex items-center justify-center bg-gray-50 image-placeholder">
+                      <div class="absolute inset-0 flex items-center justify-center bg-gray-50 image-placeholder z-5">
                         <div class="text-gray-400 text-center">
                           <div class="text-lg mb-1">🖼️</div>
                           <div class="text-xs font-medium">Cargando...</div>
@@ -196,15 +196,23 @@
                         @error="onImageError"
                         @load="onImageLoad"
                         loading="lazy"
+                        decoding="async"
                         style="filter: none !important; box-shadow: none !important;"
                       />
                     </div>
                     <div v-else-if="esVideo(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white rounded-md overflow-hidden cursor-pointer" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
+                      <div class="absolute inset-0 flex items-center justify-center bg-gray-50 video-placeholder z-5">
+                        <div class="text-gray-400 text-center">
+                          <div class="text-lg mb-1">🎥</div>
+                          <div class="text-xs font-medium">Video</div>
+                        </div>
+                      </div>
                       <video 
                         :src="obtenerUrlArchivo(notificacion.id)"
                         muted
-                        preload="metadata"
+                        preload="none"
                         style="pointer-events: none; filter: none !important; box-shadow: none !important;"
+                        @loadeddata="onVideoLoaded"
                       >
                         Tu navegador no soporta video.
                       </video>
@@ -386,7 +394,8 @@
                 @click="abrirArchivo(notificacionSeleccionada.id)"
                 @error="onImageError"
                 @load="onImageLoad"
-                loading="lazy"
+                loading="eager"
+                decoding="async"
               />
               <!-- Overlay con información -->
               <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
@@ -981,6 +990,14 @@ const esVideo = (tipoArchivo) => {
 const onImageLoad = (event) => {
   // Ocultar el placeholder de carga cuando la imagen se haya cargado
   const placeholder = event.target.parentNode.querySelector('.image-placeholder')
+  if (placeholder) {
+    placeholder.style.display = 'none'
+  }
+}
+
+const onVideoLoaded = (event) => {
+  // Ocultar el placeholder de carga cuando el video se haya cargado
+  const placeholder = event.target.parentNode.querySelector('.video-placeholder')
   if (placeholder) {
     placeholder.style.display = 'none'
   }
@@ -2691,13 +2708,40 @@ video::-webkit-media-controls {
 /* Estado de carga y error para imágenes en el modal */
 .news-featured-image .image-placeholder {
   min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.75rem;
-  background: linear-gradient(-90deg, #f7fafc 0%, #edf2f7 50%, #f7fafc 100%);
-  background-size: 400% 400%;
-  animation: shimmerNews 2s ease-in-out infinite;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+/* Placeholders para vista previa con animación de carga */
+.notification-media-preview .image-placeholder,
+.notification-media-preview .video-placeholder {
+  background: linear-gradient(90deg, #f9f9f9 25%, #f0f0f0 50%, #f9f9f9 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  transition: opacity 0.3s ease;
+}
+
+/* Animación de carga suave */
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Optimización de carga de imágenes y videos */
+.notification-media-preview img,
+.notification-media-preview video {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.notification-media-preview img[loading="lazy"],
+.notification-media-preview video[preload="none"] {
+  opacity: 1;
 }
 
 /* Print styles para cuando el usuario quiera imprimir */

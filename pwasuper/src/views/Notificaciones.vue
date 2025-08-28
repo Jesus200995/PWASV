@@ -182,7 +182,7 @@
 
                   <!-- Vista previa de archivo compacta con efecto fade -->
                   <div v-if="notificacion.tiene_archivo" class="mb-3">
-                    <div v-if="esImagen(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white rounded-md overflow-hidden cursor-pointer" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
+                    <div v-if="esImagen(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white overflow-hidden cursor-pointer" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
                       <div class="absolute inset-0 flex items-center justify-center bg-gray-50 image-placeholder z-5">
                         <div class="text-gray-400 text-center">
                           <div class="text-lg mb-1">🖼️</div>
@@ -200,11 +200,10 @@
                         style="filter: none !important; box-shadow: none !important;"
                       />
                     </div>
-                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white rounded-md overflow-hidden cursor-pointer relative" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
+                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white overflow-hidden cursor-pointer relative" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
                       <div class="absolute inset-0 flex items-center justify-center bg-gray-50 video-placeholder z-5">
                         <div class="text-gray-400 text-center">
-                          <div class="text-lg mb-1">🎥</div>
-                          <div class="text-xs font-medium">Video</div>
+                          <div class="text-xs font-medium">Cargando...</div>
                         </div>
                       </div>
                       <video 
@@ -390,7 +389,7 @@
 
           <!-- Imagen destacada -->
           <div v-if="notificacionSeleccionada.tiene_archivo && esImagen(notificacionSeleccionada.archivo_tipo)" class="news-featured-image mb-6">
-            <div class="relative rounded-xl overflow-hidden bg-transparent">
+            <div class="relative overflow-hidden bg-transparent">
               <!-- Placeholder de carga -->
               <div class="flex items-center justify-center min-h-48 bg-gray-50 image-placeholder">
                 <div class="text-gray-400 text-center">
@@ -418,17 +417,16 @@
 
           <!-- Video embebido - tamaño reducido -->
           <div v-else-if="notificacionSeleccionada.tiene_archivo && esVideo(notificacionSeleccionada.archivo_tipo)" class="news-video mb-6" style="max-width: 85%; margin: 0 auto;">
-            <div class="relative rounded-xl overflow-hidden bg-gray-100 shadow-lg">
+            <div class="relative overflow-hidden bg-gray-100 shadow-lg">
               <video 
                 :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
-                class="w-full h-auto object-cover rounded-xl"
+                class="w-full h-auto object-cover"
                 controls
                 preload="metadata"
                 poster=""
               >
                 <div class="flex items-center justify-center min-h-48 bg-gray-200">
                   <div class="text-gray-600 text-center">
-                    <div class="text-2xl mb-2">🎥</div>
                     <div class="text-sm">Tu navegador no soporta video</div>
                   </div>
                 </div>
@@ -1039,7 +1037,6 @@ const onVideoError = (event) => {
   errorDiv.className = 'flex flex-col items-center justify-center w-full h-full bg-gray-100 rounded text-xs text-gray-500 p-4 absolute inset-0 z-20'
   
   errorDiv.innerHTML = `
-    <div class="text-2xl mb-2">🎥</div>
     <div class="text-center">
       <div class="font-medium">Error cargando video</div>
       <div class="text-xs text-gray-400 mt-1">Archivo no disponible</div>

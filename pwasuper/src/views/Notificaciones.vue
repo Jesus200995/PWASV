@@ -168,8 +168,8 @@
                     </div>
                   </div>
                   
-                  <!-- Descripción truncada con desvanecido -->
-                  <div class="relative mb-3">
+                  <!-- Descripción truncada con desvanecido - solo si hay descripción -->
+                  <div v-if="notificacion.descripcion && notificacion.descripcion.trim()" class="relative mb-3">
                     <p :class="[
                       'text-xs leading-relaxed transition-colors duration-200 line-clamp-2',
                       notificacion.leida ? 'text-gray-600' : 'text-gray-700'
@@ -180,9 +180,9 @@
                     <div class="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent w-16 h-5 pointer-events-none"></div>
                   </div>
 
-                  <!-- Vista previa de archivo compacta -->
+                  <!-- Vista previa de archivo compacta con efecto fade -->
                   <div v-if="notificacion.tiene_archivo" class="mb-3">
-                    <div v-if="esImagen(notificacion.archivo_tipo)" class="aspect-video max-w-xs bg-gray-50 rounded-md overflow-hidden border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow duration-200">
+                    <div v-if="esImagen(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white rounded-md overflow-hidden cursor-pointer" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
                       <div class="absolute inset-0 flex items-center justify-center bg-gray-50 image-placeholder">
                         <div class="text-gray-400 text-center">
                           <div class="text-lg mb-1">🖼️</div>
@@ -192,20 +192,19 @@
                       <img 
                         :src="obtenerUrlArchivo(notificacion.id)" 
                         :alt="notificacion.archivo_nombre"
-                        class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 relative z-10"
-                        @click.stop="abrirArchivo(notificacion.id)"
+                        class="hover:scale-105 transition-transform duration-300"
                         @error="onImageError"
                         @load="onImageLoad"
                         loading="lazy"
+                        style="filter: none !important; box-shadow: none !important;"
                       />
                     </div>
-                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="aspect-video max-w-xs bg-gray-50 rounded-md overflow-hidden border border-gray-200 shadow-sm">
+                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white rounded-md overflow-hidden cursor-pointer" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
                       <video 
                         :src="obtenerUrlArchivo(notificacion.id)"
-                        class="w-full h-full object-cover cursor-pointer"
-                        controls
+                        muted
                         preload="metadata"
-                        @click.stop
+                        style="pointer-events: none; filter: none !important; box-shadow: none !important;"
                       >
                         Tu navegador no soporta video.
                       </video>
@@ -1461,6 +1460,87 @@ onBeforeUnmount(() => {
   100% {
     transform: rotate(0deg);
   }
+}
+
+/* Efecto de fade para vista previa de medios en notificaciones */
+.notification-media-preview {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 50% !important; /* Forzar altura a solo 50% */
+}
+
+/* Ajustar aspect ratio para que solo muestre la mitad */
+.notification-media-preview.aspect-video {
+  aspect-ratio: 16 / 4.5 !important; /* Cambiar aspect ratio para mostrar solo mitad */
+}
+
+/* Posicionar imagen/video para mostrar la parte superior */
+.notification-media-preview img,
+.notification-media-preview video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200% !important; /* Hacer el contenido el doble de alto */
+  object-fit: cover;
+  object-position: top; /* Alinear al top */
+}
+
+/* Overlay sólido para garantizar que no se vea nada debajo */
+.notification-media-preview::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; /* Ligeramente debajo para cubrir cualquier pixel residual */
+  left: -1px;
+  right: -1px;
+  height: 10px;
+  background: #ffffff;
+  z-index: 30;
+  pointer-events: none;
+}
+
+/* Efecto de desvanecido desde la parte inferior - SOLO para contenido multimedia */
+.notification-media-preview.notification-has-media::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to top, 
+    rgba(255,255,255,1) 0%,
+    rgba(255,255,255,0.95) 15%,
+    rgba(255,255,255,0.85) 25%,
+    rgba(255,255,255,0.7) 35%,
+    rgba(255,255,255,0.5) 45%,
+    rgba(255,255,255,0.3) 55%,
+    rgba(255,255,255,0.15) 70%,
+    rgba(255,255,255,0.05) 85%,
+    transparent 100%
+  );
+  z-index: 25;
+  pointer-events: none;
+  /* Agregar un blur sutil para hacer el efecto más suave */
+  filter: blur(0.5px);
+}
+
+/* Variante adicional con radial gradient - SOLO para contenido multimedia */
+.notification-media-preview.notification-has-media::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  right: -2px;
+  height: 25%;
+  background: radial-gradient(ellipse at center bottom, 
+    rgba(255,255,255,0.9) 0%,
+    rgba(255,255,255,0.6) 40%,
+    rgba(255,255,255,0.3) 70%,
+    transparent 100%
+  );
+  z-index: 26;
+  pointer-events: none;
 }
 
 /* Nueva animación shimmer/brillo para notificaciones no leídas */

@@ -116,6 +116,18 @@
                         </svg>
                       </button>
                       <button 
+                        class="btn-action btn-stats" 
+                        @click="verEstadisticas(notificacion)"
+                        title="Ver estadísticas de lectura"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M3 3v18h18"/>
+                          <path d="M18 17V9"/>
+                          <path d="M13 17V5"/>
+                          <path d="M8 17v-3"/>
+                        </svg>
+                      </button>
+                      <button 
                         class="btn-action btn-delete" 
                         @click="confirmarEliminar(notificacion)"
                         title="Eliminar notificación"
@@ -464,6 +476,163 @@
       </div>
     </div>
 
+    <!-- Modal Estadísticas -->
+    <div v-if="mostrarModalEstadisticas && estadisticasNotificacion" class="modal-overlay" @click="cerrarModalEstadisticas">
+      <div class="modal-content modal-stats" @click.stop>
+        <div class="modal-header">
+          <h3>Estadísticas de Lectura</h3>
+          <button class="btn-close" @click="cerrarModalEstadisticas">×</button>
+        </div>
+        
+        <div class="modal-body" v-if="!cargandoEstadisticas">
+          <!-- Título de la notificación -->
+          <div class="stats-notification-info">
+            <h4>{{ estadisticasNotificacion.titulo }}</h4>
+            <p v-if="estadisticasNotificacion.subtitulo" class="stats-subtitle">
+              {{ estadisticasNotificacion.subtitulo }}
+            </p>
+            <div class="stats-meta">
+              <span class="stats-audience">
+                {{ estadisticasNotificacion.enviada_a_todos ? '👥 Enviada a todos los usuarios' : '👤 Enviada a usuarios específicos' }}
+              </span>
+              <span class="stats-date">
+                📅 {{ formatearFecha(estadisticasNotificacion.fecha_envio) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Resumen de estadísticas -->
+          <div class="stats-summary">
+            <div class="stats-grid">
+              <div class="stat-card stat-total">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value">{{ estadisticasNotificacion.resumen.total_usuarios_objetivo }}</div>
+                <div class="stat-label">Total Destinatarios</div>
+              </div>
+              
+              <div class="stat-card stat-read">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value">{{ estadisticasNotificacion.resumen.usuarios_leido }}</div>
+                <div class="stat-label">Han Leído</div>
+                <div class="stat-percentage">{{ estadisticasNotificacion.resumen.porcentaje_leido }}%</div>
+              </div>
+              
+              <div class="stat-card stat-unread">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-value">{{ estadisticasNotificacion.resumen.usuarios_no_leido }}</div>
+                <div class="stat-label">No Han Leído</div>
+                <div class="stat-percentage">{{ estadisticasNotificacion.resumen.porcentaje_no_leido }}%</div>
+              </div>
+            </div>
+
+            <!-- Barra de progreso visual -->
+            <div class="progress-bar-container">
+              <div class="progress-bar">
+                <div 
+                  class="progress-fill" 
+                  :style="{ width: estadisticasNotificacion.resumen.porcentaje_leido + '%' }"
+                ></div>
+              </div>
+              <div class="progress-labels">
+                <span class="progress-read">{{ estadisticasNotificacion.resumen.porcentaje_leido }}% leído</span>
+                <span class="progress-unread">{{ estadisticasNotificacion.resumen.porcentaje_no_leido }}% sin leer</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestañas para usuarios -->
+          <div class="stats-tabs">
+            <div class="tabs-header">
+              <button 
+                class="tab-button" 
+                :class="{ 'active': tabActiva === 'leidos' }"
+                @click="tabActiva = 'leidos'"
+              >
+                ✅ Han Leído ({{ estadisticasNotificacion.resumen.usuarios_leido }})
+              </button>
+              <button 
+                class="tab-button" 
+                :class="{ 'active': tabActiva === 'no_leidos' }"
+                @click="tabActiva = 'no_leidos'"
+              >
+                ⏳ No Han Leído ({{ estadisticasNotificacion.resumen.usuarios_no_leido }})
+              </button>
+            </div>
+
+            <div class="tab-content">
+              <!-- Tab Usuarios que han leído -->
+              <div v-if="tabActiva === 'leidos'" class="users-list-stats">
+                <div v-if="estadisticasNotificacion.usuarios_que_leyeron.length === 0" class="empty-users">
+                  <div class="empty-icon">📭</div>
+                  <p>Ningún usuario ha leído esta notificación aún</p>
+                </div>
+                <div v-else>
+                  <div class="users-grid">
+                    <div 
+                      v-for="usuario in estadisticasNotificacion.usuarios_que_leyeron" 
+                      :key="'read-' + usuario.id"
+                      class="user-card user-read"
+                    >
+                      <div class="user-info">
+                        <div class="user-name">{{ usuario.nombre_completo }}</div>
+                        <div class="user-email">{{ usuario.correo }}</div>
+                        <div v-if="usuario.curp" class="user-curp">{{ usuario.curp }}</div>
+                      </div>
+                      <div class="user-read-date">
+                        <span class="read-icon">✅</span>
+                        <span class="read-time">{{ formatearFecha(usuario.leida_en) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="estadisticasNotificacion.usuarios_que_leyeron.length >= 20" class="more-users-note">
+                    📝 Mostrando los primeros 20 usuarios
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab Usuarios que no han leído -->
+              <div v-if="tabActiva === 'no_leidos'" class="users-list-stats">
+                <div v-if="estadisticasNotificacion.usuarios_que_no_leyeron.length === 0" class="empty-users">
+                  <div class="empty-icon">🎉</div>
+                  <p>¡Todos los usuarios han leído esta notificación!</p>
+                </div>
+                <div v-else>
+                  <div class="users-grid">
+                    <div 
+                      v-for="usuario in estadisticasNotificacion.usuarios_que_no_leyeron" 
+                      :key="'unread-' + usuario.id"
+                      class="user-card user-unread"
+                    >
+                      <div class="user-info">
+                        <div class="user-name">{{ usuario.nombre_completo }}</div>
+                        <div class="user-email">{{ usuario.correo }}</div>
+                        <div v-if="usuario.curp" class="user-curp">{{ usuario.curp }}</div>
+                      </div>
+                      <div class="user-unread-status">
+                        <span class="unread-icon">⏳</span>
+                        <span class="unread-text">Sin leer</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="estadisticasNotificacion.usuarios_que_no_leyeron.length >= 20" class="more-users-note">
+                    📝 Mostrando los primeros 20 usuarios
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado de carga -->
+        <div v-if="cargandoEstadisticas" class="modal-body">
+          <div class="loading-stats">
+            <div class="loading-spinner"></div>
+            <p>Cargando estadísticas...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast de notificaciones -->
     <div v-if="toast.show" class="toast" :class="toast.type">
       <div class="toast-content">
@@ -521,6 +690,12 @@ export default {
       mostrarModalEliminar: false,
       notificacionAEliminar: null,
       eliminandoNotificacion: false,
+      
+      // Modal estadísticas
+      mostrarModalEstadisticas: false,
+      estadisticasNotificacion: null,
+      cargandoEstadisticas: false,
+      tabActiva: 'leidos',
       
       // Toast
       toast: {
@@ -830,6 +1005,37 @@ export default {
       setTimeout(() => {
         this.toast.show = false
       }, 4000)
+    },
+
+    // ==================== ESTADÍSTICAS ====================
+    
+    async verEstadisticas(notificacion) {
+      try {
+        this.cargandoEstadisticas = true
+        this.mostrarModalEstadisticas = true
+        this.tabActiva = 'leidos'
+        
+        console.log('📊 Cargando estadísticas para notificación:', notificacion.id)
+        
+        const estadisticas = await notificacionesService.obtenerEstadisticasNotificacion(notificacion.id)
+        this.estadisticasNotificacion = estadisticas
+        
+        console.log('✅ Estadísticas cargadas:', estadisticas)
+        
+      } catch (error) {
+        console.error('❌ Error cargando estadísticas:', error)
+        this.mostrarToast(error.message, 'error')
+        this.cerrarModalEstadisticas()
+      } finally {
+        this.cargandoEstadisticas = false
+      }
+    },
+
+    cerrarModalEstadisticas() {
+      this.mostrarModalEstadisticas = false
+      this.estadisticasNotificacion = null
+      this.cargandoEstadisticas = false
+      this.tabActiva = 'leidos'
     },
     
     logout() {
@@ -1256,6 +1462,16 @@ export default {
 .btn-delete:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+}
+
+.btn-stats {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #2e7d32;
+}
+
+.btn-stats:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
 }
 
 /* === EMPTY STATE === */
@@ -2562,6 +2778,354 @@ export default {
   
   .file-text {
     max-width: 150px;
+  }
+}
+
+/* === MODAL ESTADÍSTICAS === */
+.modal-stats {
+  max-width: 1000px;
+  width: 95%;
+}
+
+.stats-notification-info {
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.stats-notification-info h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2E7D32;
+  margin: 0 0 8px 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.stats-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 12px 0;
+  font-style: italic;
+}
+
+.stats-meta {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stats-audience,
+.stats-date {
+  font-size: 13px;
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.stats-summary {
+  margin-bottom: 30px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.stat-total {
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+.stat-read {
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.stat-unread {
+  border-color: rgba(255, 152, 0, 0.3);
+}
+
+.stat-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2E7D32;
+  margin-bottom: 4px;
+  font-family: 'Inter', sans-serif;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.stat-percentage {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.progress-bar-container {
+  margin-top: 20px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-radius: 6px;
+  transition: width 0.8s ease;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.progress-read {
+  color: #4CAF50;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.progress-unread {
+  color: #ff9800;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stats-tabs {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tabs-header {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 16px 20px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.tab-button:hover {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.tab-content {
+  padding: 20px;
+}
+
+.users-list-stats {
+  min-height: 200px;
+}
+
+.empty-users {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.users-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.user-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.user-card:hover {
+  background: #e9ecef;
+  transform: translateX(4px);
+}
+
+.user-read {
+  border-left-color: #4CAF50;
+}
+
+.user-unread {
+  border-left-color: #ff9800;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.user-email {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.user-curp {
+  font-size: 11px;
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.user-read-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.read-icon {
+  font-size: 16px;
+}
+
+.read-time {
+  font-size: 11px;
+  color: #4CAF50;
+  font-weight: 500;
+  text-align: center;
+}
+
+.user-unread-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.unread-icon {
+  font-size: 16px;
+}
+
+.unread-text {
+  font-size: 11px;
+  color: #ff9800;
+  font-weight: 500;
+}
+
+.more-users-note {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 13px;
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.loading-stats {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.loading-stats .loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 16px;
+}
+
+/* Responsive para estadísticas */
+@media (max-width: 768px) {
+  .modal-stats {
+    width: 98%;
+    height: 95vh;
+    overflow-y: auto;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .stats-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .tabs-header {
+    flex-direction: column;
+  }
+  
+  .user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .user-read-date,
+  .user-unread-status {
+    align-self: flex-end;
   }
 }
 </style>

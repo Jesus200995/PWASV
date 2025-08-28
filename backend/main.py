@@ -2840,6 +2840,173 @@ async def eliminar_notificacion(notificacion_id: int):
         print(f"❌ Error eliminando notificación: {e}")
         raise HTTPException(status_code=500, detail=f"Error al eliminar notificación: {str(e)}")
 
+@app.get("/notificaciones/{notificacion_id}/estadisticas")
+async def obtener_estadisticas_notificacion(notificacion_id: int):
+    """Obtener estadísticas de lectura de una notificación específica"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📊 Obteniendo estadísticas para notificación {notificacion_id}")
+        
+        # Verificar que la notificación existe
+        cursor.execute("""
+            SELECT id, titulo, subtitulo, enviada_a_todos, fecha_envio 
+            FROM notificaciones 
+            WHERE id = %s
+        """, (notificacion_id,))
+        
+        notificacion = cursor.fetchone()
+        if not notificacion:
+            raise HTTPException(status_code=404, detail="Notificación no encontrada")
+        
+        # Determinar el universo de usuarios que pueden ver esta notificación
+        if notificacion[3]:  # enviada_a_todos
+            # Obtener todos los usuarios activos
+            cursor.execute("""
+                SELECT COUNT(*) as total_usuarios
+                FROM usuarios
+                WHERE activo = TRUE
+            """)
+            total_usuarios_objetivo = cursor.fetchone()[0]
+            
+            # Obtener usuarios que han leído la notificación
+            cursor.execute("""
+                SELECT COUNT(DISTINCT nl.usuario_id) as usuarios_leido
+                FROM notificacion_leidos nl
+                INNER JOIN usuarios u ON nl.usuario_id = u.id
+                WHERE nl.notificacion_id = %s AND u.activo = TRUE
+            """, (notificacion_id,))
+            usuarios_leido = cursor.fetchone()[0]
+            
+        else:  # enviada a usuarios específicos
+            # Obtener usuarios específicos destinatarios
+            cursor.execute("""
+                SELECT COUNT(*) as total_usuarios
+                FROM notificacion_usuarios nu
+                INNER JOIN usuarios u ON nu.usuario_id = u.id
+                WHERE nu.notificacion_id = %s AND u.activo = TRUE
+            """, (notificacion_id,))
+            total_usuarios_objetivo = cursor.fetchone()[0]
+            
+            # Obtener usuarios específicos que han leído la notificación
+            cursor.execute("""
+                SELECT COUNT(DISTINCT nl.usuario_id) as usuarios_leido
+                FROM notificacion_leidos nl
+                INNER JOIN notificacion_usuarios nu ON nl.usuario_id = nu.usuario_id
+                INNER JOIN usuarios u ON nl.usuario_id = u.id
+                WHERE nl.notificacion_id = %s 
+                AND nu.notificacion_id = %s 
+                AND u.activo = TRUE
+            """, (notificacion_id, notificacion_id))
+            usuarios_leido = cursor.fetchone()[0]
+        
+        usuarios_no_leido = total_usuarios_objetivo - usuarios_leido
+        
+        # Calcular porcentajes
+        porcentaje_leido = round((usuarios_leido / total_usuarios_objetivo * 100), 2) if total_usuarios_objetivo > 0 else 0
+        porcentaje_no_leido = round((usuarios_no_leido / total_usuarios_objetivo * 100), 2) if total_usuarios_objetivo > 0 else 0
+        
+        # Obtener detalles de usuarios que han leído (máximo 20 para no sobrecargar)
+        if notificacion[3]:  # enviada_a_todos
+            cursor.execute("""
+                SELECT u.id, u.nombre_completo, u.correo, u.curp, nl.leida_en
+                FROM notificacion_leidos nl
+                INNER JOIN usuarios u ON nl.usuario_id = u.id
+                WHERE nl.notificacion_id = %s AND u.activo = TRUE
+                ORDER BY nl.leida_en DESC
+                LIMIT 20
+            """, (notificacion_id,))
+        else:  # usuarios específicos
+            cursor.execute("""
+                SELECT u.id, u.nombre_completo, u.correo, u.curp, nl.leida_en
+                FROM notificacion_leidos nl
+                INNER JOIN notificacion_usuarios nu ON nl.usuario_id = nu.usuario_id
+                INNER JOIN usuarios u ON nl.usuario_id = u.id
+                WHERE nl.notificacion_id = %s 
+                AND nu.notificacion_id = %s 
+                AND u.activo = TRUE
+                ORDER BY nl.leida_en DESC
+                LIMIT 20
+            """, (notificacion_id, notificacion_id))
+        
+        usuarios_que_leyeron = []
+        for fila in cursor.fetchall():
+            usuarios_que_leyeron.append({
+                "id": fila[0],
+                "nombre_completo": fila[1],
+                "correo": fila[2],
+                "curp": fila[3],
+                "leida_en": fila[4].isoformat() if fila[4] else None
+            })
+        
+        # Obtener detalles de usuarios que NO han leído (máximo 20 para no sobrecargar)
+        if notificacion[3]:  # enviada_a_todos
+            cursor.execute("""
+                SELECT u.id, u.nombre_completo, u.correo, u.curp
+                FROM usuarios u
+                WHERE u.activo = TRUE
+                AND u.id NOT IN (
+                    SELECT nl.usuario_id 
+                    FROM notificacion_leidos nl 
+                    WHERE nl.notificacion_id = %s
+                )
+                ORDER BY u.nombre_completo
+                LIMIT 20
+            """, (notificacion_id,))
+        else:  # usuarios específicos
+            cursor.execute("""
+                SELECT u.id, u.nombre_completo, u.correo, u.curp
+                FROM notificacion_usuarios nu
+                INNER JOIN usuarios u ON nu.usuario_id = u.id
+                WHERE nu.notificacion_id = %s 
+                AND u.activo = TRUE
+                AND u.id NOT IN (
+                    SELECT nl.usuario_id 
+                    FROM notificacion_leidos nl 
+                    WHERE nl.notificacion_id = %s
+                )
+                ORDER BY u.nombre_completo
+                LIMIT 20
+            """, (notificacion_id, notificacion_id))
+        
+        usuarios_que_no_leyeron = []
+        for fila in cursor.fetchall():
+            usuarios_que_no_leyeron.append({
+                "id": fila[0],
+                "nombre_completo": fila[1],
+                "correo": fila[2],
+                "curp": fila[3]
+            })
+        
+        estadisticas = {
+            "notificacion_id": notificacion_id,
+            "titulo": notificacion[1],
+            "subtitulo": notificacion[2],
+            "enviada_a_todos": notificacion[3],
+            "fecha_envio": notificacion[4].isoformat() if notificacion[4] else None,
+            "resumen": {
+                "total_usuarios_objetivo": total_usuarios_objetivo,
+                "usuarios_leido": usuarios_leido,
+                "usuarios_no_leido": usuarios_no_leido,
+                "porcentaje_leido": porcentaje_leido,
+                "porcentaje_no_leido": porcentaje_no_leido
+            },
+            "usuarios_que_leyeron": usuarios_que_leyeron,
+            "usuarios_que_no_leyeron": usuarios_que_no_leyeron,
+            "nota": "Solo se muestran los primeros 20 usuarios de cada categoría"
+        }
+        
+        print(f"✅ Estadísticas obtenidas: {usuarios_leido}/{total_usuarios_objetivo} usuarios han leído la notificación")
+        
+        return estadisticas
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo estadísticas de notificación: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
+
 @app.get("/notificaciones/usuario/{usuario_id}")
 async def obtener_notificaciones_usuario(usuario_id: int, limit: int = 20, offset: int = 0):
     """Obtener notificaciones específicas de un usuario (para PWASUPER)"""

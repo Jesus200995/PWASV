@@ -179,6 +179,31 @@ export const notificacionesService = {
       
       throw new Error('Error al descargar el archivo')
     }
+  },
+
+  /**
+   * Obtener estadísticas de lectura de una notificación
+   * @param {number} id - ID de la notificación
+   * @returns {Promise} Estadísticas de lectura
+   */
+  async obtenerEstadisticasNotificacion(id) {
+    try {
+      console.log(`📊 Obteniendo estadísticas de notificación ${id}`)
+      
+      const response = await api.get(`/notificaciones/${id}/estadisticas`)
+      
+      console.log('✅ Estadísticas obtenidas:', response.data)
+      return response.data
+      
+    } catch (error) {
+      console.error(`❌ Error obteniendo estadísticas de notificación ${id}:`, error)
+      
+      if (error.response?.status === 404) {
+        throw new Error('Notificación no encontrada')
+      }
+      
+      throw new Error('Error al obtener las estadísticas de la notificación')
+    }
   }
 }
 

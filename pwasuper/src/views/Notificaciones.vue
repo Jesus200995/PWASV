@@ -359,8 +359,8 @@
             </div>
           </div>
 
-          <!-- Video embebido -->
-          <div v-else-if="notificacionSeleccionada.tiene_archivo && esVideo(notificacionSeleccionada.archivo_tipo)" class="news-video mb-6">
+          <!-- Video embebido - tamaño reducido -->
+          <div v-else-if="notificacionSeleccionada.tiene_archivo && esVideo(notificacionSeleccionada.archivo_tipo)" class="news-video mb-6" style="max-width: 85%; margin: 0 auto;">
             <div class="relative rounded-xl overflow-hidden bg-gray-100 shadow-lg">
               <video 
                 :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
@@ -494,14 +494,14 @@ const notificacionesTotales = computed(() => {
   return notificacionesFiltradas.value.length
 })
 
-// Computed para funcionalidad "Ver más"
+// Computed para funcionalidad "Ver más" - texto más largo
 const descripcionLarga = computed(() => {
-  return notificacionSeleccionada.value?.descripcion?.length > 150
+  return notificacionSeleccionada.value?.descripcion?.length > 300
 })
 
 const descripcionCorta = computed(() => {
   if (!notificacionSeleccionada.value?.descripcion) return ''
-  return notificacionSeleccionada.value.descripcion.substring(0, 150) + '...'
+  return notificacionSeleccionada.value.descripcion.substring(0, 300) + '...'
 })
 
 // Variables para interval
@@ -1927,9 +1927,11 @@ video::-webkit-media-controls {
   z-index: -1;
 }
 
-/* Imagen destacada estilo revista */
+/* Imagen destacada estilo revista - tamaño reducido */
 .news-featured-image {
   position: relative;
+  max-width: 85%; /* Reduce el ancho al 85% */
+  margin: 0 auto; /* Centra la imagen */
 }
 
 .news-featured-image img {
@@ -1941,7 +1943,12 @@ video::-webkit-media-controls {
   filter: contrast(1.05) saturate(1.1);
 }
 
-/* Video embebido profesional */
+/* Video embebido profesional - tamaño reducido */
+.news-video {
+  max-width: 85%;
+  margin: 0 auto;
+}
+
 .news-video video {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
@@ -2237,7 +2244,7 @@ video::-webkit-media-controls {
   }
   
   .news-featured-image img {
-    max-height: 200px;
+    max-height: 170px;
   }
 }
 
@@ -2279,7 +2286,7 @@ video::-webkit-media-controls {
   }
   
   .news-featured-image img {
-    max-height: 150px;
+    max-height: 128px;
   }
 }
 
@@ -2321,7 +2328,7 @@ video::-webkit-media-controls {
   }
   
   .news-featured-image img {
-    max-height: 120px;
+    max-height: 102px;
   }
 }
 

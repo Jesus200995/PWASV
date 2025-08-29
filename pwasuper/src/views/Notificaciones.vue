@@ -519,9 +519,117 @@ const error = ref('')
 const soloNoLeidas = ref(false) // CAMBIO: Cambiar a no leídas por defecto
 const notificacionesLeidas = ref(new Set()) // IDs de notificaciones leídas
 const conteoNoLeidas = ref(0) // NUEVO: Contador de no leídas
+const conteoAnterior = ref(0) // NUEVO: Para detectar cambios en el contador
 
 // Estados para funcionalidad "Ver más"
 const mostrarTextoCompleto = ref(false)
+
+// NUEVO: Audio para notificaciones
+let audioNotificacion = null
+
+// Inicializar audio en el navegador
+const inicializarAudio = () => {
+  try {
+    // Crear un beep utilizando Web Audio API
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    
+    // Función para crear un sonido de notificación suave tipo "ding" moderno
+    const crearSonidoNotificacion = () => {
+      const oscillator1 = audioContext.createOscillator()
+      const oscillator2 = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      
+      // Conectar los nodos
+      oscillator1.connect(gainNode)
+      oscillator2.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      
+      // Configurar el primer oscilador - tono principal
+      oscillator1.type = 'sine' // Onda sinusoidal suave
+      oscillator1.frequency.setValueAtTime(1000, audioContext.currentTime)
+      oscillator1.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1)
+      
+      // Configurar el segundo oscilador - armonía sutil
+      oscillator2.type = 'sine'
+      oscillator2.frequency.setValueAtTime(1200, audioContext.currentTime)
+      oscillator2.frequency.exponentialRampToValueAtTime(960, audioContext.currentTime + 0.1)
+      
+      // Configurar el volumen - envolvente muy suave tipo "ding"
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime)
+      gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.02) // Ataque rápido
+      gainNode.gain.exponentialRampToValueAtTime(0.05, audioContext.currentTime + 0.1) // Sustain suave
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6) // Decay largo y suave
+      
+      // Reproducir ambos osciladores
+      oscillator1.start(audioContext.currentTime)
+      oscillator1.stop(audioContext.currentTime + 0.6)
+      
+      oscillator2.start(audioContext.currentTime)
+      oscillator2.stop(audioContext.currentTime + 0.6)
+    }
+    
+    audioNotificacion = crearSonidoNotificacion
+    console.log('🔊 Audio de notificaciones inicializado correctamente')
+    
+  } catch (error) {
+    console.warn('⚠️ No se pudo inicializar el audio de notificaciones:', error)
+    
+    // Fallback: usar un beep del sistema si está disponible
+    audioNotificacion = () => {
+      try {
+        // Intentar usar el beep del sistema
+        if (navigator.vibrate) {
+          navigator.vibrate([100, 50, 100]) // Patrón de vibración suave
+        }
+        console.log('📳 Usando vibración como alternativa al sonido')
+      } catch (e) {
+        console.log('🔇 No hay alternativas de audio/vibración disponibles')
+      }
+    }
+  }
+}
+
+// NUEVO: Función para reproducir sonido de notificación
+const reproducirSonidoNotificacion = () => {
+  try {
+    if (audioNotificacion && typeof audioNotificacion === 'function') {
+      audioNotificacion()
+      console.log('🔊 Sonido de notificación reproducido')
+    } else {
+      console.log('🔇 Audio de notificaciones no disponible')
+    }
+  } catch (error) {
+    console.warn('⚠️ Error reproduciendo sonido de notificación:', error)
+  }
+}
+
+// NUEVO: Detectar nuevas notificaciones y reproducir sonido
+const detectarNuevasNotificaciones = (nuevoConteo) => {
+  // Solo reproducir sonido si:
+  // 1. No estamos cargando por primera vez
+  // 2. El nuevo conteo es mayor al anterior
+  // 3. El conteo anterior no es 0 (evitar sonido al cargar inicial)
+  if (!cargando.value && nuevoConteo > conteoAnterior.value && conteoAnterior.value >= 0) {
+    const nuevasNotificaciones = nuevoConteo - conteoAnterior.value
+    console.log(`🔔 ${nuevasNotificaciones} nueva(s) notificación(es) detectada(s)`)
+    
+    // Reproducir sonido para nuevas notificaciones
+    reproducirSonidoNotificacion()
+    
+    // Mostrar notificación del navegador si está permitido
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Nueva notificación', {
+        body: `Tienes ${nuevasNotificaciones} nueva(s) notificación(es)`,
+        icon: '/pwa-192x192.png',
+        tag: 'new-notification',
+        silent: false // Permitir que el navegador también haga sonido
+      })
+    }
+  }
+  
+  // Actualizar contador anterior para la próxima comparación
+  conteoAnterior.value = nuevoConteo
+}
 
 // Sistema global de notificaciones para actualización inmediata del badge
 const { fetchUnreadCount, markAsRead } = useNotifications()
@@ -612,14 +720,20 @@ const obtenerUsuarioId = () => {
   return null
 }
 
-// NUEVO: Obtener conteo de no leídas
-const obtenerConteoNoLeidas = async (usuarioId) => {
+// NUEVO: Obtener conteo de no leídas con detección de cambios
+const obtenerConteoNoLeidas = async (usuarioId, detectarCambios = true) => {
   try {
     if (!usuarioId) return 0
     
     console.log(`📊 Obteniendo conteo de no leídas para usuario ${usuarioId}`)
     
     const conteo = await notificacionesService.obtenerConteoNoLeidas(usuarioId)
+    
+    // Detectar cambios y reproducir sonido si corresponde
+    if (detectarCambios) {
+      detectarNuevasNotificaciones(conteo)
+    }
+    
     conteoNoLeidas.value = conteo
     
     console.log(`📊 ${conteo} notificaciones no leídas`)
@@ -699,8 +813,8 @@ const cargarNotificaciones = async (resetear = true) => {
 
     console.log(`✅ ${response.notificaciones?.length || 0} notificaciones cargadas`)
     
-    // Obtener conteo de no leídas
-    await obtenerConteoNoLeidas(usuarioId)
+    // Obtener conteo de no leídas (sin detectar cambios en la carga inicial)
+    await obtenerConteoNoLeidas(usuarioId, !resetear)
     
   } catch (err) {
     console.error('Error cargando notificaciones:', err)
@@ -904,7 +1018,7 @@ const marcarComoLeidaRemoto = async (notificacionId) => {
       }
       
       // Forzar actualización del conteo local
-      await obtenerConteoNoLeidas(usuarioId)
+      await obtenerConteoNoLeidas(usuarioId, false) // No detectar cambios en operaciones manuales
       
     } else {
       // Revertir estado local si falló
@@ -1125,27 +1239,46 @@ const cargarConfiguracion = () => {
 onMounted(async () => {
   console.log('📱 Componente Notificaciones montado')
   
+  // Inicializar audio de notificaciones
+  inicializarAudio()
+  
+  // Solicitar permisos de notificación si no están otorgados
+  if ('Notification' in window && Notification.permission === 'default') {
+    try {
+      const permission = await Notification.requestPermission()
+      console.log(`🔔 Permisos de notificación: ${permission}`)
+    } catch (error) {
+      console.warn('⚠️ Error solicitando permisos de notificación:', error)
+    }
+  }
+  
   cargarConfiguracion()
   
-  // Cargar notificaciones inicial
+  // Cargar notificaciones inicial (sin detección de cambios)
   await cargarNotificaciones()
   
-  // Auto-actualizar cada segundo para respuesta inmediata y silenciosa
+  // Establecer el contador inicial después de la primera carga
+  const usuarioId = obtenerUsuarioId()
+  if (usuarioId) {
+    conteoAnterior.value = conteoNoLeidas.value // Establecer el valor base
+  }
+  
+  // Auto-actualizar cada 2 segundos para detección de nuevas notificaciones
   autoUpdateInterval = setInterval(async () => {
     if (!cargando.value && !cargandoMas.value) {
-      // Actualización silenciosa - sin log constante
       const usuarioId = obtenerUsuarioId()
       if (usuarioId) {
+        // Actualizar badge global y detectar nuevas notificaciones con sonido
         await fetchUnreadCount(usuarioId)
-        await obtenerConteoNoLeidas(usuarioId)
-      }
-      
-      // Solo recargar lista si está en vista de no leídas y hay cambios
-      if (soloNoLeidas.value && conteoNoLeidas.value > 0) {
-        await cargarNotificaciones()
+        await obtenerConteoNoLeidas(usuarioId, true) // Habilitar detección de cambios
+        
+        // Solo recargar lista si está en vista de no leídas y hay cambios
+        if (soloNoLeidas.value && conteoNoLeidas.value > 0) {
+          await cargarNotificaciones()
+        }
       }
     }
-  }, 1000) // 1 segundo para actualización inmediata
+  }, 2000) // 2 segundos para balance entre respuesta y rendimiento
 })
 
 onBeforeUnmount(() => {

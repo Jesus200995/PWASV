@@ -20,6 +20,9 @@ Icon.Default.mergeOptions({
 // Importar utilidad de registro del Service Worker
 import { registerServiceWorker, waitForServiceWorkerReady } from './utils/serviceWorkerRegistration.js'
 
+// Importar composable de notificaciones para inicialización global
+import { useNotifications } from './composables/useNotifications.js'
+
 // Registrar el Service Worker para funcionalidad PWA offline
 window.addEventListener('load', async () => {
   try {
@@ -30,8 +33,22 @@ window.addEventListener('load', async () => {
     await waitForServiceWorkerReady();
     
     console.log('✅ Aplicación lista con soporte offline');
+    
+    // Inicializar sistema de notificaciones global con sonido
+    const { initializeGlobalAudio, requestNotificationPermission } = useNotifications();
+    
+    // Solicitar permisos de notificación al usuario
+    await requestNotificationPermission();
+    
+    // Inicializar audio global (después de interacción del usuario)
+    document.addEventListener('click', () => {
+      initializeGlobalAudio();
+    }, { once: true });
+    
+    console.log('🔔 Sistema de notificaciones con sonido inicializado');
+    
   } catch (error) {
-    console.error('❌ Error al inicializar el Service Worker:', error);
+    console.error('❌ Error al inicializar la aplicación:', error);
   }
 });
 

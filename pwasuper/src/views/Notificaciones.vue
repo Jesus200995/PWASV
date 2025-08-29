@@ -488,185 +488,6 @@
       </div>
     </div>
     </div>
-
-    <!-- Modal para visualizar archivos dentro de la app -->
-    <div v-if="archivoSeleccionado" 
-         class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 transition-all duration-300"
-         @click="cerrarModalArchivo">
-      <div class="file-viewer-modal bg-white rounded-2xl w-full max-w-5xl h-[90vh] max-h-[800px] overflow-hidden shadow-2xl transform transition-all duration-300 scale-100 flex flex-col" @click.stop>
-        
-        <!-- Header del modal de archivo -->
-        <div class="file-header bg-gradient-to-r from-slate-800 to-slate-700 text-white p-4 flex items-center justify-between flex-shrink-0">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-              <span class="text-lg">{{ obtenerIconoArchivo(archivoSeleccionado.tipo) }}</span>
-            </div>
-            <div>
-              <h3 class="font-semibold text-lg truncate max-w-md">{{ archivoSeleccionado.nombre }}</h3>
-              <p class="text-gray-300 text-sm capitalize">{{ archivoSeleccionado.tipo }}</p>
-            </div>
-          </div>
-          <button 
-            @click="cerrarModalArchivo"
-            class="w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-all duration-200 group"
-          >
-            <svg class="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Contenido del archivo -->
-        <div class="file-content flex-1 p-0 overflow-hidden bg-gray-50 flex items-center justify-center">
-          
-          <!-- Mensaje de error de encoding -->
-          <div v-if="archivoSeleccionado.error" class="text-center p-8 max-w-md">
-            <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-gray-800 mb-3">Error de Servidor</h3>
-            <p class="text-gray-600 mb-4 text-sm">{{ archivoSeleccionado.errorMessage }}</p>
-            
-            <div class="space-y-3">
-              <!-- Botón para intentar descarga directa -->
-              <a 
-                :href="archivoSeleccionado.fallbackUrl"
-                target="_blank"
-                class="block w-full px-4 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200"
-              >
-                🔗 Intentar abrir en nueva pestaña
-              </a>
-              
-              <!-- Botón de descarga forzada -->
-              <a 
-                :href="archivoSeleccionado.fallbackUrl"
-                :download="archivoSeleccionado.nombre"
-                class="block w-full px-4 py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors duration-200"
-              >
-                💾 Forzar descarga
-              </a>
-              
-              <!-- Información técnica -->
-              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs text-yellow-800">
-                <strong>Error técnico:</strong> El servidor tiene problemas con caracteres especiales en nombres de archivo.
-                <br><strong>Solución temporal:</strong> Usa las opciones de arriba.
-              </div>
-            </div>
-          </div>
-
-          <!-- Información de advertencia si hay problemas pero se puede mostrar -->
-          <div v-else-if="archivoSeleccionado.errorInfo" class="absolute top-4 right-4 z-10">
-            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-3 py-2 rounded-lg shadow-lg text-xs max-w-xs">
-              <strong>⚠️ Advertencia:</strong> {{ archivoSeleccionado.errorInfo }}
-            </div>
-          </div>
-          
-          <!-- Viewer para PDFs -->
-          <div v-if="!archivoSeleccionado.error && archivoSeleccionado.tipo.toLowerCase().includes('pdf')" class="w-full h-full">
-            <iframe 
-              :src="archivoSeleccionado.url + (archivoSeleccionado.esBlob ? '' : '#toolbar=1&navpanes=1&scrollbar=1')"
-              class="w-full h-full border-none"
-              title="Visualizador de PDF"
-              frameborder="0"
-              @error="manejarErrorIframe"
-            ></iframe>
-          </div>
-
-          <!-- Viewer para imágenes -->
-          <div v-else-if="!archivoSeleccionado.error && esImagen(archivoSeleccionado.tipo)" class="w-full h-full flex items-center justify-center p-4">
-            <img 
-              :src="archivoSeleccionado.url"
-              :alt="archivoSeleccionado.nombre"
-              class="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-              @error="manejarErrorImagen"
-            />
-          </div>
-
-          <!-- Viewer para videos -->
-          <div v-else-if="!archivoSeleccionado.error && esVideo(archivoSeleccionado.tipo)" class="w-full h-full flex items-center justify-center p-4">
-            <video 
-              :src="archivoSeleccionado.url"
-              class="max-w-full max-h-full rounded-lg shadow-lg"
-              controls
-              preload="metadata"
-              @error="manejarErrorVideo"
-            >
-              Tu navegador no soporta la reproducción de video.
-            </video>
-          </div>
-
-          <!-- Fallback para otros tipos de archivo -->
-          <div v-else-if="!archivoSeleccionado.error" class="text-center p-8">
-            <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span class="text-4xl">{{ obtenerIconoArchivo(archivoSeleccionado.tipo) }}</span>
-            </div>
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ archivoSeleccionado.nombre }}</h3>
-            <p class="text-gray-600 mb-6">Este tipo de archivo no se puede previsualizar dentro de la aplicación.</p>
-            
-            <!-- Botón para descargar -->
-            <a 
-              :href="archivoSeleccionado.url"
-              :download="archivoSeleccionado.nombre"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              Descargar archivo
-            </a>
-          </div>
-        </div>
-
-        <!-- Footer con controles -->
-        <div class="file-footer bg-gray-100 border-t border-gray-200 p-4 flex justify-between items-center flex-shrink-0">
-          <div class="flex items-center gap-2 text-sm text-gray-600">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span>{{ archivoSeleccionado.error ? 'Error de servidor' : 'Archivo de notificación' }}</span>
-          </div>
-          
-          <div class="flex gap-2">
-            <!-- Botones normales si no hay error -->
-            <template v-if="!archivoSeleccionado.error">
-              <a 
-                :href="archivoSeleccionado.url"
-                :download="archivoSeleccionado.nombre"
-                class="px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center gap-2"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Descargar
-              </a>
-            </template>
-            
-            <!-- Botones alternativos si hay error -->
-            <template v-else>
-              <a 
-                :href="archivoSeleccionado.fallbackUrl"
-                target="_blank"
-                class="px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center gap-2 text-sm"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-                Abrir en nueva pestaña
-              </a>
-            </template>
-            
-            <button 
-              @click="cerrarModalArchivo"
-              class="px-4 py-2 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600 transition-colors duration-200"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -678,7 +499,6 @@ import { useNotifications } from '../composables/useNotifications.js'
 // Estados reactivos
 const notificaciones = ref([])
 const notificacionSeleccionada = ref(null)
-const archivoSeleccionado = ref(null) // NUEVO: Para modal de archivo
 const usuario = ref(null)
 const cargando = ref(false)
 const cargandoMas = ref(false)
@@ -1272,136 +1092,160 @@ const cargarNotificacionesLeidas = () => {
 
 const abrirArchivo = async (notificacionId) => {
   try {
-    console.log(`📂 Abriendo archivo de notificación ${notificacionId}`)
+    console.log(`� Descargando archivo de notificación ${notificacionId} para abrir con app externa`)
     
     // Buscar la notificación para obtener información del archivo
     const notificacion = notificaciones.value.find(n => n.id === notificacionId) || 
                          (notificacionSeleccionada.value?.id === notificacionId ? notificacionSeleccionada.value : null)
     
     if (!notificacion) {
-      console.error('Notificación no encontrada')
-      alert('Error: No se encontró la notificación')
+      console.error('❌ Notificación no encontrada')
+      mostrarNotificacionError('No se encontró la notificación')
       return
     }
 
-    // Intentar múltiples estrategias para obtener el archivo
-    let archivoUrl = null
-    let errorMessage = ''
+    console.log(`📂 Iniciando descarga de: ${notificacion.archivo_nombre || `Archivo ${notificacionId}`}`)
 
-    // Estrategia 1: Intentar obtener como base64
+    // Crear enlace temporal para descarga automática
+    const link = document.createElement('a')
+    let descargaExitosa = false
+
+    // ESTRATEGIA 1: Intentar descargar con URL segura (mejor para archivos con caracteres especiales)
     try {
-      console.log('🔄 Intentando obtener archivo como base64...')
-      const archivoBase64 = await notificacionesService.obtenerArchivoBase64(notificacionId)
+      console.log('🔄 Intento 1: Descarga con URL segura...')
+      const urlSegura = notificacionesService.obtenerUrlArchivo(notificacionId, true)
       
-      if (archivoBase64.content && archivoBase64.mime_type) {
-        // Crear blob URL desde base64
-        const byteCharacters = atob(archivoBase64.content)
-        const byteNumbers = new Array(byteCharacters.length)
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i)
-        }
-        const byteArray = new Uint8Array(byteNumbers)
-        const blob = new Blob([byteArray], { type: archivoBase64.mime_type })
-        archivoUrl = URL.createObjectURL(blob)
-        
-        console.log('✅ Archivo cargado exitosamente desde base64')
-      }
+      link.href = urlSegura
+      link.download = notificacion.archivo_nombre || `archivo_${notificacionId}`
+      link.target = '_blank'
+      link.rel = 'noopener noreferrer'
+      
+      // Agregar al DOM temporalmente y hacer click
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      descargaExitosa = true
+      console.log('✅ Descarga iniciada con URL segura')
+      
     } catch (error) {
-      console.log('❌ Error con base64:', error.message)
-      errorMessage += `Base64: ${error.message}. `
-    }
-
-    // Estrategia 2: URL safe si base64 falla
-    if (!archivoUrl) {
+      console.log('❌ Error con URL segura:', error.message)
+      
+      // ESTRATEGIA 2: URL normal como fallback
       try {
-        console.log('🔄 Intentando URL safe...')
-        archivoUrl = notificacionesService.obtenerUrlArchivo(notificacionId, true)
+        console.log('🔄 Intento 2: Descarga con URL normal...')
+        const urlNormal = notificacionesService.obtenerUrlArchivo(notificacionId, false)
         
-        // Probar que la URL funciona
-        const testResponse = await fetch(archivoUrl, { method: 'HEAD' })
-        if (!testResponse.ok) {
-          throw new Error(`HTTP ${testResponse.status}`)
+        link.href = urlNormal
+        link.download = notificacion.archivo_nombre || `archivo_${notificacionId}`
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer'
+        
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        descargaExitosa = true
+        console.log('✅ Descarga iniciada con URL normal')
+        
+      } catch (error2) {
+        console.log('❌ Error con URL normal:', error2.message)
+        
+        // ESTRATEGIA 3: Abrir en nueva pestaña como último recurso
+        try {
+          console.log('🔄 Intento 3: Abriendo en nueva pestaña...')
+          const urlFallback = `${import.meta.env.PROD ? 'https://apipwa.sembrandodatos.com' : 'http://localhost:8000'}/notificaciones/${notificacionId}/archivo`
+          
+          const nuevaVentana = window.open(urlFallback, '_blank', 'noopener,noreferrer')
+          
+          if (nuevaVentana) {
+            descargaExitosa = true
+            console.log('✅ Archivo abierto en nueva pestaña')
+            mostrarNotificacionExito('Archivo abierto en nueva pestaña')
+          } else {
+            throw new Error('El navegador bloqueó la ventana emergente')
+          }
+          
+        } catch (error3) {
+          console.log('❌ Error abriendo en nueva pestaña:', error3.message)
+          throw new Error('No se pudo abrir el archivo con ningún método disponible')
         }
-        
-        console.log('✅ URL safe funciona')
-      } catch (error) {
-        console.log('❌ Error con URL safe:', error.message)
-        errorMessage += `URL Safe: ${error.message}. `
-        archivoUrl = null
       }
-    }
-
-    // Estrategia 3: URL normal como último recurso
-    if (!archivoUrl) {
-      console.log('🔄 Usando URL normal como último recurso...')
-      archivoUrl = notificacionesService.obtenerUrlArchivo(notificacionId)
-      errorMessage += 'Usando URL directa (puede tener problemas de encoding).'
-    }
-
-    // Configurar el archivo seleccionado para el modal
-    archivoSeleccionado.value = {
-      id: notificacionId,
-      nombre: notificacion.archivo_nombre,
-      tipo: notificacion.archivo_tipo,
-      url: archivoUrl,
-      esBlob: archivoUrl.startsWith('blob:'),
-      errorInfo: errorMessage || null
     }
     
-    console.log('📂 Archivo configurado para modal:', archivoSeleccionado.value)
+    // Mostrar confirmación si la descarga fue exitosa
+    if (descargaExitosa) {
+      // Feedback visual y háptico
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(100) // Vibración suave de confirmación
+      }
+      
+      mostrarNotificacionExito('Archivo enviado para descarga. Se abrirá con la aplicación predeterminada de tu dispositivo.')
+    }
     
   } catch (error) {
-    console.error('Error crítico abriendo archivo:', error)
+    console.error('❌ Error general abriendo archivo:', error)
     
-    // Como último recurso, mostrar un modal de error con opciones
-    archivoSeleccionado.value = {
-      id: notificacionId,
-      nombre: notificacion?.archivo_nombre || `Archivo ${notificacionId}`,
-      tipo: notificacion?.archivo_tipo || 'desconocido',
-      url: null,
-      error: true,
-      errorMessage: 'No se pudo cargar el archivo debido a problemas de encoding en el servidor.',
-      fallbackUrl: notificacionesService.obtenerUrlArchivo(notificacionId)
+    const mensaje = error.message || 'No se pudo abrir el archivo. Verifica tu conexión.'
+    mostrarNotificacionError(`Error: ${mensaje}`)
+    
+    // Vibración de error
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate([200, 100, 200])
     }
   }
 }
 
-// Función para cerrar el modal de archivo
-const cerrarModalArchivo = () => {
-  // Limpiar blob URLs si existen
-  if (archivoSeleccionado.value?.url && archivoSeleccionado.value?.esBlob) {
-    URL.revokeObjectURL(archivoSeleccionado.value.url)
-  }
-  archivoSeleccionado.value = null
+// Funciones auxiliares para notificaciones de estado
+const mostrarNotificacionExito = (mensaje) => {
+  const notificacion = crearNotificacionTemporal(mensaje, 'success')
+  document.body.appendChild(notificacion)
+  
+  setTimeout(() => {
+    if (document.body.contains(notificacion)) {
+      document.body.removeChild(notificacion)
+    }
+  }, 4000)
 }
 
-// Funciones para manejar errores de carga de archivos
-const manejarErrorIframe = (event) => {
-  console.error('Error cargando iframe PDF:', event)
-  // Mostrar error en el archivo seleccionado
-  if (archivoSeleccionado.value) {
-    archivoSeleccionado.value.error = true
-    archivoSeleccionado.value.errorMessage = 'No se pudo cargar el PDF. Problemas de encoding en el servidor.'
-    archivoSeleccionado.value.fallbackUrl = notificacionesService.obtenerUrlArchivo(archivoSeleccionado.value.id)
-  }
+const mostrarNotificacionError = (mensaje) => {
+  const notificacion = crearNotificacionTemporal(mensaje, 'error')
+  document.body.appendChild(notificacion)
+  
+  setTimeout(() => {
+    if (document.body.contains(notificacion)) {
+      document.body.removeChild(notificacion)
+    }
+  }, 6000)
 }
 
-const manejarErrorImagen = (event) => {
-  console.error('Error cargando imagen:', event)
-  if (archivoSeleccionado.value) {
-    archivoSeleccionado.value.error = true
-    archivoSeleccionado.value.errorMessage = 'No se pudo cargar la imagen. Problemas de encoding en el servidor.'
-    archivoSeleccionado.value.fallbackUrl = notificacionesService.obtenerUrlArchivo(archivoSeleccionado.value.id)
-  }
-}
-
-const manejarErrorVideo = (event) => {
-  console.error('Error cargando video:', event)
-  if (archivoSeleccionado.value) {
-    archivoSeleccionado.value.error = true
-    archivoSeleccionado.value.errorMessage = 'No se pudo cargar el video. Problemas de encoding en el servidor.'
-    archivoSeleccionado.value.fallbackUrl = notificacionesService.obtenerUrlArchivo(archivoSeleccionado.value.id)
-  }
+const crearNotificacionTemporal = (mensaje, tipo = 'success') => {
+  const notificacion = document.createElement('div')
+  
+  const estilos = tipo === 'success' 
+    ? 'bg-green-500 text-white' 
+    : 'bg-red-500 text-white'
+    
+  const icono = tipo === 'success' 
+    ? `<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+       </svg>`
+    : `<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+       </svg>`
+  
+  notificacion.className = `fixed top-4 right-4 ${estilos} px-4 py-3 rounded-lg shadow-lg z-50 max-w-sm animate-fade-in`
+  notificacion.innerHTML = `
+    <div class="flex items-start gap-3">
+      ${icono}
+      <div>
+        <div class="font-medium">${tipo === 'success' ? '¡Éxito!' : 'Error'}</div>
+        <div class="text-sm opacity-90 mt-1">${mensaje}</div>
+      </div>
+    </div>
+  `
+  
+  return notificacion
 }
 
 // Función para determinar si el archivo se puede mostrar inline

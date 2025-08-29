@@ -25,48 +25,56 @@ const initializeGlobalAudio = () => {
     // Crear un beep utilizando Web Audio API
     const audioContext = new (window.AudioContext || window.webkitAudioContext)()
     
-    // Función para crear un sonido de campanita suave y delicada
+    // Función para crear un sonido de notificación natural y moderno
     const createNotificationSound = () => {
       const oscillator1 = audioContext.createOscillator()
       const oscillator2 = audioContext.createOscillator()
+      const oscillator3 = audioContext.createOscillator()
       const gainNode = audioContext.createGain()
       const filterNode = audioContext.createBiquadFilter()
       
-      // Conectar los nodos con filtro para sonido de campanita
+      // Conectar los nodos con filtro para sonido más natural
       oscillator1.connect(filterNode)
       oscillator2.connect(filterNode)
+      oscillator3.connect(filterNode)
       filterNode.connect(gainNode)
       gainNode.connect(audioContext.destination)
       
-      // Configurar filtro para sonido de campanita cristalina
+      // Configurar filtro para sonido más suave y natural
       filterNode.type = 'lowpass'
-      filterNode.frequency.setValueAtTime(3000, audioContext.currentTime)
-      filterNode.frequency.exponentialRampToValueAtTime(1500, audioContext.currentTime + 0.8)
-      filterNode.Q.setValueAtTime(2, audioContext.currentTime)
+      filterNode.frequency.setValueAtTime(2000, audioContext.currentTime)
+      filterNode.Q.setValueAtTime(1, audioContext.currentTime)
       
-      // Primer oscilador - campanita principal (Do mayor)
+      // Primer oscilador - gota de agua / sonido natural (frecuencia fundamental)
       oscillator1.type = 'sine'
-      oscillator1.frequency.setValueAtTime(1046.5, audioContext.currentTime) // C6 (Do)
-      oscillator1.frequency.exponentialRampToValueAtTime(523.25, audioContext.currentTime + 0.4) // C5 (Do octava baja)
+      oscillator1.frequency.setValueAtTime(659.25, audioContext.currentTime) // E5 (Mi)
+      oscillator1.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.15) // A4 (La)
       
-      // Segundo oscilador - armonía de campanita (Mi mayor)
-      oscillator2.type = 'triangle'
-      oscillator2.frequency.setValueAtTime(1318.5, audioContext.currentTime) // E6 (Mi)
-      oscillator2.frequency.exponentialRampToValueAtTime(659.25, audioContext.currentTime + 0.4) // E5 (Mi)
+      // Segundo oscilador - armonía natural (tercera mayor)
+      oscillator2.type = 'triangle' // Forma de onda más orgánica
+      oscillator2.frequency.setValueAtTime(830.61, audioContext.currentTime) // G#5 (Sol#)
+      oscillator2.frequency.exponentialRampToValueAtTime(554.37, audioContext.currentTime + 0.15) // C#5 (Do#)
       
-      // Configurar volumen - envolvente de campanita suave
+      // Tercer oscilador - brillo sutil como campana tibetana
+      oscillator3.type = 'sine'
+      oscillator3.frequency.setValueAtTime(1318.51, audioContext.currentTime) // E6 (Mi octava alta)
+      oscillator3.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.15) // A5 (La)
+      
+      // Configurar el volumen - envolvente natural tipo "gota de agua zen"
       gainNode.gain.setValueAtTime(0, audioContext.currentTime)
-      gainNode.gain.rapidRampToValueAtTime(0.8, audioContext.currentTime + 0.01) // Ataque instantáneo de campanita
-      gainNode.gain.exponentialRampToValueAtTime(0.6, audioContext.currentTime + 0.1) // Sustain inicial
-      gainNode.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + 0.4) // Decaimiento suave
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5) // Eco largo de campanita
+      gainNode.gain.linearRampToValueAtTime(1.0, audioContext.currentTime + 0.03) // Ataque muy rápido
+      gainNode.gain.exponentialRampToValueAtTime(0.7, audioContext.currentTime + 0.1) // Sustain natural
+      gainNode.gain.exponentialRampToValueAtTime(0.3, audioContext.currentTime + 0.4) // Decaimiento gradual
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2) // Eco natural largo
       
-      // Reproducir campanitas con timing delicado
+      // Reproducir los tres osciladores con timing natural
       oscillator1.start(audioContext.currentTime)
-      oscillator2.start(audioContext.currentTime + 0.03) // Ligeramente desfasado para realismo
+      oscillator2.start(audioContext.currentTime + 0.02) // Ligeramente desfasado para efecto natural
+      oscillator3.start(audioContext.currentTime + 0.05) // Brillo que entra después
       
-      oscillator1.stop(audioContext.currentTime + 1.5)
-      oscillator2.stop(audioContext.currentTime + 1.2) // Se desvanece antes para efecto natural
+      oscillator1.stop(audioContext.currentTime + 1.2)
+      oscillator2.stop(audioContext.currentTime + 1.0) // Se desvanece antes
+      oscillator3.stop(audioContext.currentTime + 0.8) // El brillo se va primero
     }
     
     globalAudioNotification = createNotificationSound
@@ -136,92 +144,41 @@ const detectNewNotifications = (newCount) => {
   globalNotificationState.previousCount = newCount
 }
 
-// MEJORADO: Solicitar permisos de notificación y configurar push notifications
+// NUEVO: Solicitar permisos de notificación y configurar push notifications
 const requestNotificationPermission = async () => {
-  console.log('🔔 Iniciando proceso de permisos de notificación...');
-  
   if (!('Notification' in window)) {
-    console.warn('❌ Este navegador no soporta notificaciones');
-    return false;
+    console.warn('❌ Este navegador no soporta notificaciones')
+    return false
   }
 
   if (!('serviceWorker' in navigator)) {
-    console.warn('❌ Service Worker no disponible');
-    return false;
+    console.warn('❌ Service Worker no disponible')
+    return false
   }
 
-  let permission = Notification.permission;
-  console.log(`🔔 Permisos actuales: ${permission}`);
-
-  // Si los permisos están por defecto, solicitarlos de manera insistente
-  if (permission === 'default') {
+  if ('Notification' in window && Notification.permission === 'default') {
     try {
-      // Mostrar mensaje explicativo antes de solicitar
-      const userWantsNotifications = confirm(
-        '🔔 ¿Quieres recibir notificaciones de nuevas actividades incluso cuando la app esté cerrada?\n\n' +
-        'Esto te permitirá estar siempre al día con las novedades.'
-      );
+      const permission = await Notification.requestPermission()
+      console.log(`🔔 Permisos de notificación: ${permission}`)
       
-      if (userWantsNotifications) {
-        permission = await Notification.requestPermission();
-        console.log(`🔔 Resultado de solicitud: ${permission}`);
-        
-        // Notificar al service worker sobre el cambio de permisos
-        if (navigator.serviceWorker.controller) {
-          navigator.serviceWorker.controller.postMessage({
-            type: 'NOTIFICATION_PERMISSION_UPDATED',
-            granted: permission === 'granted'
-          });
-        }
-        
-        if (permission === 'granted') {
-          // Configurar push notifications inmediatamente
-          await setupPushNotifications();
-          
-          // Mostrar notificación de bienvenida
-          new Notification('✅ ¡Notificaciones activadas!', {
-            body: 'Ahora recibirás notificaciones incluso con la app cerrada',
-            icon: '/pwa-192x192.png',
-            tag: 'welcome-notification'
-          });
-          
-          return true;
-        } else {
-          // Si el usuario negó, intentar convencerlo una vez más
-          setTimeout(() => {
-            alert(
-              '❌ Sin permisos de notificación no podrás recibir alertas cuando la app esté cerrada.\n\n' +
-              '💡 Puedes activarlas después desde la configuración del navegador.'
-            );
-          }, 1000);
-          return false;
-        }
-      } else {
-        console.log('👤 Usuario decidió no recibir notificaciones');
-        return false;
+      if (permission === 'granted') {
+        // Configurar push notifications para funcionamiento en segundo plano
+        await setupPushNotifications()
+        return true
       }
+      return false
     } catch (error) {
-      console.error('❌ Error solicitando permisos de notificación:', error);
-      return false;
+      console.warn('⚠️ Error solicitando permisos de notificación:', error)
+      return false
     }
   }
   
-  if (permission === 'granted') {
-    await setupPushNotifications();
-    
-    // Notificar al service worker
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({
-        type: 'NOTIFICATION_PERMISSION_UPDATED',
-        granted: true
-      });
-    }
-    
-    return true;
+  if (Notification.permission === 'granted') {
+    await setupPushNotifications()
+    return true
   }
   
-  console.warn('❌ Permisos de notificación denegados');
-  return false;
+  return false
 }
 
 // NUEVO: Configurar push notifications para funcionamiento en segundo plano
@@ -323,7 +280,7 @@ const setupServiceWorkerPolling = async (registration) => {
         type: 'START_BACKGROUND_NOTIFICATIONS_POLLING',
         userId: userId,
         apiUrl: apiUrl,
-        interval: 8000 // Muy agresivo: cada 8 segundos para garantizar recepción
+        interval: 15000 // Polling más frecuente: cada 15 segundos para mejor experiencia
       })
       
       console.log('📡 Polling de notificaciones configurado en Service Worker')

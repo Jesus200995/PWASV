@@ -1523,12 +1523,103 @@ onBeforeUnmount(() => {
 }
 
 .enterprise-notification-card.notification-unread {
-  background: linear-gradient(to right, #fef2f2 0%, #fef7f7 6%);
+  background: #fef2f2; /* Fondo estático sin animación */
   border-left-width: 3px;
   border-left-color: #ef4444;
   position: relative;
   overflow: hidden;
-  animation: unread-shimmer 2.5s ease-in-out infinite;
+  box-shadow: 
+    0 1px 3px 0 rgba(239, 68, 68, 0.1),
+    0 1px 2px 0 rgba(239, 68, 68, 0.06);
+  will-change: auto; /* Solo el humo se anima */
+}
+
+/* Efecto de luz girando alrededor del contorno */
+.enterprise-notification-card.notification-unread::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 45deg,
+    rgba(239, 68, 68, 0.6) 90deg,
+    rgba(220, 38, 38, 0.8) 120deg,
+    rgba(185, 28, 28, 1) 135deg,
+    rgba(220, 38, 38, 0.8) 150deg,
+    rgba(239, 68, 68, 0.6) 180deg,
+    transparent 225deg,
+    transparent 360deg
+  );
+  border-radius: inherit;
+  animation: rotating-border-glow 3s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(1px);
+  opacity: 0.9;
+}
+
+/* Segunda capa de humo - ahora ajustada para z-index */
+.enterprise-notification-card.notification-unread::after {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -30%;
+  width: 160%;
+  height: 120%;
+  background: 
+    radial-gradient(ellipse 30px 60px at 25% 55%, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.015) 55%, transparent 90%),
+    radial-gradient(ellipse 20px 25px at 65% 20%, rgba(239, 68, 68, 0.04) 0%, rgba(239, 68, 68, 0.01) 65%, transparent 95%),
+    radial-gradient(ellipse 45px 35px at 80% 80%, rgba(239, 68, 68, 0.06) 0%, rgba(239, 68, 68, 0.025) 50%, transparent 85%),
+    radial-gradient(ellipse 15px 45px at 10% 85%, rgba(239, 68, 68, 0.03) 0%, rgba(239, 68, 68, 0.008) 70%, transparent 92%);
+  animation: smoke-drift-2 2s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.7;
+  filter: blur(1.2px);
+  will-change: transform, opacity, filter;
+}
+
+/* Crear un nuevo pseudo-elemento para la primera capa de humo */
+.enterprise-notification-card.notification-unread {
+  background: #fef2f2;
+  border-left-width: 3px;
+  border-left-color: #ef4444;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 1px 3px 0 rgba(239, 68, 68, 0.1),
+    0 1px 2px 0 rgba(239, 68, 68, 0.06);
+  will-change: auto;
+}
+
+.enterprise-notification-card.notification-unread .smoke-layer-1 {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -50%;
+  width: 200%;
+  height: 140%;
+  background: 
+    radial-gradient(ellipse 40px 20px at 15% 25%, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.04) 40%, transparent 75%),
+    radial-gradient(ellipse 35px 50px at 45% 70%, rgba(239, 68, 68, 0.06) 0%, rgba(239, 68, 68, 0.02) 50%, transparent 85%),
+    radial-gradient(ellipse 50px 30px at 75% 40%, rgba(239, 68, 68, 0.07) 0%, rgba(239, 68, 68, 0.03) 45%, transparent 80%),
+    radial-gradient(ellipse 25px 40px at 85% 15%, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 60%, transparent 90%);
+  animation: smoke-drift-1 2.5s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.9;
+  filter: blur(0.8px);
+  will-change: transform, opacity, filter;
+}
+
+/* Asegurar que el contenido esté por encima de todo */
+.enterprise-notification-card.notification-unread > * {
+  position: relative;
+  z-index: 2;
 }
 
 .enterprise-notification-card.notification-read {
@@ -1538,8 +1629,22 @@ onBeforeUnmount(() => {
 }
 
 .enterprise-notification-card.notification-unread:hover {
-  background: linear-gradient(to right, #fee2e2 0%, #fef2f2 6%);
+  background: #fecaca; /* Fondo estático más intenso en hover */
+  animation-play-state: running; /* No hay animación que pausar en el fondo */
+  border-left-color: #b91c1c;
+  box-shadow: 
+    0 3px 6px 0 rgba(239, 68, 68, 0.2),
+    0 2px 4px 0 rgba(239, 68, 68, 0.12),
+    0 0 0 1px rgba(239, 68, 68, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Pausar también las animaciones de humo al hacer hover */
+.enterprise-notification-card.notification-unread:hover::before,
+.enterprise-notification-card.notification-unread:hover::after {
   animation-play-state: paused;
+  opacity: 0.1; /* Casi invisible en hover para mejor legibilidad */
+  filter: blur(2px); /* Más desvanecido en hover */
 }
 
 .enterprise-notification-card.notification-read:hover {
@@ -1754,22 +1859,61 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
-/* Nueva animación shimmer/brillo para notificaciones no leídas */
-@keyframes unread-shimmer {
+/* Primera capa de humo - Movimiento fluido y continuo */
+@keyframes smoke-drift-1 {
   0% {
-    background: linear-gradient(to right, #fef2f2 0%, #fef7f7 6%);
+    transform: translate3d(-20%, -3%, 0) rotate(0deg) scale(0.9);
+    opacity: 0.9;
+    filter: blur(0.6px);
   }
   25% {
-    background: linear-gradient(90deg, #fef2f2 0%, #fee2e2 25%, #fef7f7 50%, #fef2f2 100%);
+    transform: translate3d(10%, 2%, 0) rotate(90deg) scale(1.1);
+    opacity: 1;
+    filter: blur(0.8px);
   }
   50% {
-    background: linear-gradient(90deg, #fef7f7 0%, #fef2f2 25%, #fee2e2 50%, #fef7f7 100%);
+    transform: translate3d(40%, -2%, 0) rotate(180deg) scale(0.95);
+    opacity: 0.95;
+    filter: blur(1px);
   }
   75% {
-    background: linear-gradient(90deg, #fee2e2 0%, #fef7f7 25%, #fef2f2 50%, #fee2e2 100%);
+    transform: translate3d(70%, 3%, 0) rotate(270deg) scale(1.05);
+    opacity: 0.8;
+    filter: blur(1.2px);
   }
   100% {
-    background: linear-gradient(to right, #fef2f2 0%, #fef7f7 6%);
+    transform: translate3d(100%, -1%, 0) rotate(360deg) scale(0.8);
+    opacity: 0.6;
+    filter: blur(1.5px);
+  }
+}
+
+/* Segunda capa de humo - Movimiento en contrafase */
+@keyframes smoke-drift-2 {
+  0% {
+    transform: translate3d(30%, 4%, 0) rotate(0deg) scale(0.8);
+    opacity: 0.7;
+    filter: blur(1px);
+  }
+  25% {
+    transform: translate3d(5%, -1%, 0) rotate(-90deg) scale(1.2);
+    opacity: 0.9;
+    filter: blur(1.2px);
+  }
+  50% {
+    transform: translate3d(-20%, 3%, 0) rotate(-180deg) scale(0.9);
+    opacity: 1;
+    filter: blur(1.4px);
+  }
+  75% {
+    transform: translate3d(-45%, -2%, 0) rotate(-270deg) scale(1.1);
+    opacity: 0.7;
+    filter: blur(1.6px);
+  }
+  100% {
+    transform: translate3d(-70%, 2%, 0) rotate(-360deg) scale(0.7);
+    opacity: 0.5;
+    filter: blur(1.8px);
   }
 }
 

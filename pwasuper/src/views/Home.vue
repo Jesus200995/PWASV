@@ -157,61 +157,74 @@
         </button>
       </div>
 
-        <!-- Advertencia sobre registro de asistencia -->
+        <!-- Aviso amigable sobre registro de asistencia -->
         <div v-if="!modoAsistencia" class="text-center mb-2 relative">
-          <!-- Círculo con ícono de obligatorio en esquina izquierda arriba del aviso -->
-          <div class="absolute -left-1 -top-1 w-6 h-6 bg-gradient-to-br from-red-950/95 via-red-900/90 to-black/95 rounded-full shadow-2xl backdrop-blur-xl border border-white/30 z-30 overflow-hidden">
-            <!-- Efecto vidrio en círculo -->
-            <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10 pointer-events-none rounded-full"></div>
+          <!-- Ícono suave en esquina izquierda (más pequeño) -->
+          <div class="absolute -left-0.5 -top-0.5 w-4 h-4 bg-gradient-to-br from-rose-300/80 via-red-300/70 to-rose-400/60 rounded-full shadow-md backdrop-blur-sm border border-rose-200/50 z-30 overflow-hidden">
+            <!-- Efecto vidrio líquido en círculo -->
+            <div class="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-rose-100/20 pointer-events-none rounded-full"></div>
             
-            <!-- Reflejo superior del círculo -->
-            <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent rounded-full"></div>
+            <!-- Reflejo líquido superior -->
+            <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/50 to-transparent rounded-full"></div>
             
-            <!-- Ícono con efecto mejorado -->
+            <!-- Ondas líquidas (más pequeñas) -->
+            <div class="absolute inset-0 opacity-30">
+              <div class="absolute top-0.5 left-0.5 w-1 h-1 bg-white/60 rounded-full animate-ping"></div>
+            </div>
+            
+            <!-- Ícono suave (más pequeño) -->
             <div class="relative z-10 w-full h-full flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white drop-shadow-lg filter brightness-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-rose-700/80 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
           
-          <div class="relative bg-gradient-to-br from-red-950/95 via-red-900/90 to-black/95 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/20 overflow-hidden">
-            <!-- Efecto vidrio superior -->
-            <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/5 pointer-events-none"></div>
+          <!-- Contenedor principal más delgado -->
+          <div class="relative bg-gradient-to-br from-rose-100/95 via-red-50/90 to-rose-200/85 rounded-lg shadow-md backdrop-blur-md border border-rose-200/40 overflow-hidden py-1">
+            <!-- Efecto vidrio líquido superior -->
+            <div class="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-rose-50/15 pointer-events-none"></div>
             
-            <!-- Reflejo de vidrio -->
-            <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/15 to-transparent rounded-t-2xl"></div>
+            <!-- Reflejo líquido principal (más delgado) -->
+            <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent rounded-t-lg"></div>
             
-            <!-- Patrón decorativo sutil -->
-            <div class="absolute inset-0 opacity-5">
-              <div class="absolute top-3 right-6 w-20 h-20 border border-white/30 rounded-full"></div>
-              <div class="absolute bottom-3 left-6 w-12 h-12 border border-white/20 rounded-full"></div>
-              <div class="absolute top-1/2 right-3 w-6 h-6 border border-white/25 rounded-full"></div>
+            <!-- Ondas líquidas decorativas (más pequeñas) -->
+            <div class="absolute inset-0 opacity-15">
+              <div class="absolute top-2 right-4 w-8 h-8 border border-rose-300/40 rounded-full animate-pulse"></div>
+              <div class="absolute bottom-2 left-4 w-4 h-4 border border-rose-300/30 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+              <div class="absolute top-1/2 right-2 w-2 h-2 border border-rose-300/35 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
             </div>
             
-            <!-- Efecto shimmer sutil -->
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent transform skew-x-12 translate-x-[-100%] animate-shimmer opacity-60"></div>
+            <!-- Efecto shimmer líquido -->
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform skew-x-6 translate-x-[-100%] animate-shimmer opacity-40"></div>
             
-            <!-- Badge superior con efecto vidrio -->
-            <div class="absolute top-1 left-0 right-0 flex items-center justify-center px-3 py-1 bg-white/25 backdrop-blur-md border-b border-white/10 rounded-t-2xl shadow-inner">
-              <!-- Texto OBLIGATORIO con tipografía elegante -->
-              <span class="text-sm font-extrabold text-white uppercase tracking-[0.15em] font-['Roboto',sans-serif] drop-shadow-lg antialiased text-center filter brightness-110">OBLIGATORIO</span>
+            <!-- Badge superior más delgado -->
+            <div class="absolute top-0 left-0 right-0 flex items-center justify-center px-3 py-0.5 bg-white/40 backdrop-blur-sm border-b border-rose-200/30 rounded-t-lg shadow-sm">
+              <!-- Texto más pequeño, rojo y negrita fuerte -->
+              <span class="text-[10px] font-black text-red-700 uppercase tracking-wide font-['Inter',sans-serif] drop-shadow-sm antialiased text-center">Recordatorio</span>
             </div>
             
-            <!-- Contenido principal -->
-            <div class="relative z-20 flex flex-col items-center justify-center pt-8 pb-4 px-4">
+            <!-- Contenido principal más compacto -->
+            <div class="relative z-20 flex flex-col items-center justify-center pt-4 pb-2 px-4">
               <div class="text-center w-full">
-                <!-- Mensaje principal -->
-                <div class="text-xs leading-relaxed text-white font-['Poppins',sans-serif]">
-                  <span class="font-bold text-yellow-200 drop-shadow-sm">REGISTRE SU ENTRADA Y SALIDA</span>
+                <!-- Mensaje principal más pequeño -->
+                <div class="text-xs leading-snug text-rose-800/85 font-['Inter',sans-serif]">
+                  <span class="font-medium text-rose-700 drop-shadow-sm">Por favor, registra tu asistencia</span>
                   <br>
-                  <span class="font-medium text-red-100">Control oficial de jornada laboral</span>
+                  <span class="font-normal text-rose-600/80 text-[10px]">Marca tu entrada y salida para el control diario</span>
                 </div>
               </div>
             </div>
             
-            <!-- Borde brillante -->
-            <div class="absolute inset-0 rounded-xl border-2 border-gradient-to-r from-red-300/50 via-white/30 to-red-300/50 pointer-events-none"></div>
+            <!-- Borde suave líquido -->
+            <div class="absolute inset-0 rounded-lg border border-rose-300/40 pointer-events-none shadow-inner"></div>
+            
+            <!-- Partículas flotantes (más pequeñas) -->
+            <div class="absolute inset-0 pointer-events-none">
+              <div class="absolute top-3 left-3 w-0.5 h-0.5 bg-rose-400/60 rounded-full animate-float"></div>
+              <div class="absolute top-4 right-6 w-0.5 h-0.5 bg-rose-300/60 rounded-full animate-float" style="animation-delay: 1.5s;"></div>
+              <div class="absolute bottom-3 right-4 w-0.5 h-0.5 bg-rose-400/60 rounded-full animate-float" style="animation-delay: 0.8s;"></div>
+            </div>
           </div>
         </div>
         
@@ -3351,6 +3364,85 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
   
   .location-button {
     padding: 0.75rem 1rem;
+  }
+}
+
+/* Animaciones para el efecto vidrio líquido */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-4px) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: skew(6deg) translateX(-200%);
+  }
+  100% {
+    transform: skew(6deg) translateX(200%);
+  }
+}
+
+@keyframes liquid-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-2px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(1px) rotate(-1deg);
+  }
+}
+
+/* Clases para las animaciones */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.animate-liquid-float {
+  animation: liquid-float 4s ease-in-out infinite;
+}
+
+/* Efectos adicionales para el vidrio líquido */
+.glass-liquid {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.1)
+  );
+}
+
+.liquid-glow {
+  box-shadow: 
+    0 4px 20px rgba(244, 63, 94, 0.15),
+    0 0 40px rgba(244, 63, 94, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.soft-pulse {
+  animation: soft-pulse 4s ease-in-out infinite;
+}
+
+@keyframes soft-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
   }
 }
 </style>

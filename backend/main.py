@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, HTMLResponse
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
@@ -2926,6 +2926,258 @@ async def obtener_archivo_base64(notificacion_id: int):
     except Exception as e:
         print(f"❌ Error obteniendo archivo base64: {e}")
         raise HTTPException(status_code=500, detail=f"Error al procesar archivo: {str(e)}")
+
+@app.get("/notificaciones/{notificacion_id}/archivo/mobile")
+async def pagina_carga_archivo_mobile(notificacion_id: int):
+    """Página de carga elegante que redirecciona automáticamente al archivo para móviles"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📱 Generando página de carga móvil para archivo de notificación {notificacion_id}")
+        
+        # Verificar que la notificación existe y tiene archivo
+        cursor.execute("""
+            SELECT archivo_nombre, archivo_tipo
+            FROM notificaciones
+            WHERE id = %s AND archivo IS NOT NULL
+        """, (notificacion_id,))
+        
+        resultado = cursor.fetchone()
+        
+        if not resultado:
+            # Página de error elegante
+            html_error = f"""
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Archivo no encontrado</title>
+                <style>
+                    body {{
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        margin: 0;
+                        padding: 0;
+                        min-height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }}
+                    .container {{
+                        text-align: center;
+                        padding: 2rem;
+                        max-width: 400px;
+                    }}
+                    .error-icon {{
+                        font-size: 4rem;
+                        margin-bottom: 1rem;
+                        opacity: 0.8;
+                    }}
+                    .title {{
+                        font-size: 1.5rem;
+                        margin-bottom: 1rem;
+                        font-weight: 600;
+                    }}
+                    .message {{
+                        opacity: 0.9;
+                        line-height: 1.6;
+                        margin-bottom: 2rem;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="error-icon">📄❌</div>
+                    <div class="title">Archivo no encontrado</div>
+                    <div class="message">El archivo que intentas abrir no está disponible o ha sido eliminado.</div>
+                </div>
+            </body>
+            </html>
+            """
+            return HTMLResponse(content=html_error, status_code=404)
+        
+        archivo_nombre = resultado[0]
+        archivo_tipo = resultado[1]
+        
+        # Determinar ícono según tipo de archivo
+        icono_archivo = "📄"
+        if archivo_tipo:
+            if "pdf" in archivo_tipo.lower():
+                icono_archivo = "📑"
+            elif "image" in archivo_tipo.lower():
+                icono_archivo = "🖼️"
+            elif "video" in archivo_tipo.lower():
+                icono_archivo = "🎥"
+            elif "audio" in archivo_tipo.lower():
+                icono_archivo = "🎵"
+            elif any(word in archivo_tipo.lower() for word in ["word", "doc"]):
+                icono_archivo = "📝"
+            elif any(word in archivo_tipo.lower() for word in ["excel", "sheet", "csv"]):
+                icono_archivo = "📊"
+            elif any(word in archivo_tipo.lower() for word in ["powerpoint", "presentation"]):
+                icono_archivo = "📽️"
+        
+        # URL del archivo actual
+        archivo_url = f"/notificaciones/{notificacion_id}/archivo"
+        
+        # Página HTML elegante de carga
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Abriendo archivo...</title>
+            <style>
+                body {{
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    margin: 0;
+                    padding: 0;
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                }}
+                .container {{
+                    text-align: center;
+                    padding: 2rem;
+                    max-width: 400px;
+                }}
+                .file-icon {{
+                    font-size: 4rem;
+                    margin-bottom: 1rem;
+                    animation: pulse 2s ease-in-out infinite;
+                }}
+                .title {{
+                    font-size: 1.5rem;
+                    margin-bottom: 1rem;
+                    font-weight: 600;
+                }}
+                .filename {{
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 25px;
+                    margin-bottom: 1.5rem;
+                    font-weight: 500;
+                    word-break: break-word;
+                }}
+                .loading-text {{
+                    opacity: 0.8;
+                    margin-bottom: 2rem;
+                    line-height: 1.6;
+                }}
+                .spinner {{
+                    width: 40px;
+                    height: 40px;
+                    border: 3px solid rgba(255, 255, 255, 0.3);
+                    border-top: 3px solid white;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto;
+                }}
+                @keyframes spin {{
+                    0% {{ transform: rotate(0deg); }}
+                    100% {{ transform: rotate(360deg); }}
+                }}
+                @keyframes pulse {{
+                    0%, 100% {{ transform: scale(1); opacity: 1; }}
+                    50% {{ transform: scale(1.1); opacity: 0.8; }}
+                }}
+                .fallback-button {{
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    color: white;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 25px;
+                    text-decoration: none;
+                    display: inline-block;
+                    margin-top: 1rem;
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                }}
+                .fallback-button:hover {{
+                    background: rgba(255, 255, 255, 0.3);
+                    border-color: rgba(255, 255, 255, 0.5);
+                    transform: translateY(-2px);
+                }}
+                .hidden {{
+                    display: none;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="file-icon">{icono_archivo}</div>
+                <div class="title">Abriendo archivo</div>
+                <div class="filename">{archivo_nombre or f'Archivo {notificacion_id}'}</div>
+                <div class="loading-text">Preparando para abrir con tu aplicación favorita...</div>
+                <div class="spinner"></div>
+                
+                <!-- Botón de respaldo que aparece después de unos segundos -->
+                <a href="{archivo_url}" class="fallback-button hidden" id="fallbackBtn">
+                    💾 Descargar manualmente si no se abre automáticamente
+                </a>
+            </div>
+
+            <script>
+                // Función para intentar abrir el archivo automáticamente
+                function abrirArchivo() {{
+                    console.log('🔄 Intentando abrir archivo automáticamente...');
+                    
+                    // Crear enlace temporal
+                    const link = document.createElement('a');
+                    link.href = '{archivo_url}';
+                    link.download = '{archivo_nombre or f'archivo_{notificacion_id}'}';
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    
+                    // Agregar al DOM y hacer click
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    console.log('✅ Enlace de descarga activado');
+                }}
+                
+                // Mostrar botón de respaldo después de 3 segundos
+                setTimeout(() => {{
+                    document.getElementById('fallbackBtn').classList.remove('hidden');
+                }}, 3000);
+                
+                // Intentar cerrar la pestaña después de 5 segundos (solo funciona si fue abierta por script)
+                setTimeout(() => {{
+                    try {{
+                        window.close();
+                    }} catch (e) {{
+                        console.log('No se pudo cerrar la pestaña automáticamente');
+                    }}
+                }}, 5000);
+                
+                // Ejecutar la descarga cuando la página cargue
+                window.addEventListener('load', () => {{
+                    setTimeout(abrirArchivo, 1000);
+                }});
+                
+                // También intentar si el usuario hace click en cualquier lugar
+                document.addEventListener('click', abrirArchivo);
+            </script>
+        </body>
+        </html>
+        """
+        
+        return HTMLResponse(content=html_content)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error generando página de carga móvil: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al procesar solicitud: {str(e)}")
 
 @app.delete("/notificaciones/{notificacion_id}")
 async def eliminar_notificacion(notificacion_id: int):

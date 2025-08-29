@@ -1151,23 +1151,23 @@ const abrirArchivo = async (notificacionId) => {
       } catch (error2) {
         console.log('❌ Error con URL normal:', error2.message)
         
-        // ESTRATEGIA 3: Abrir en nueva pestaña como último recurso
+        // ESTRATEGIA 3: Página de carga móvil elegante como último recurso
         try {
-          console.log('🔄 Intento 3: Abriendo en nueva pestaña...')
-          const urlFallback = `${import.meta.env.PROD ? 'https://apipwa.sembrandodatos.com' : 'http://localhost:8000'}/notificaciones/${notificacionId}/archivo`
+          console.log('🔄 Intento 3: Abriendo con página de carga móvil...')
+          const urlMobile = `${import.meta.env.PROD ? 'https://apipwa.sembrandodatos.com' : 'http://localhost:8000'}/notificaciones/${notificacionId}/archivo/mobile`
           
-          const nuevaVentana = window.open(urlFallback, '_blank', 'noopener,noreferrer')
+          const nuevaVentana = window.open(urlMobile, '_blank', 'noopener,noreferrer')
           
           if (nuevaVentana) {
             descargaExitosa = true
-            console.log('✅ Archivo abierto en nueva pestaña')
-            mostrarNotificacionExito('Archivo abierto en nueva pestaña')
+            console.log('✅ Página de carga móvil abierta')
+            mostrarNotificacionExito('Se abrió una página de carga. El archivo se descargará automáticamente.')
           } else {
             throw new Error('El navegador bloqueó la ventana emergente')
           }
           
         } catch (error3) {
-          console.log('❌ Error abriendo en nueva pestaña:', error3.message)
+          console.log('❌ Error abriendo página de carga móvil:', error3.message)
           throw new Error('No se pudo abrir el archivo con ningún método disponible')
         }
       }

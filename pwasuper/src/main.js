@@ -47,15 +47,6 @@ window.addEventListener('load', async () => {
     
     console.log('🔔 Sistema de notificaciones con sonido inicializado');
     
-    // Configurar listener para mensajes del Service Worker
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'NAVIGATE_TO_NOTIFICATIONS') {
-        // Navegar a notificaciones cuando se hace click en notificación push
-        router.push('/notificaciones');
-        console.log('📱 Navegando a notificaciones desde push notification');
-      }
-    });
-    
   } catch (error) {
     console.error('❌ Error al inicializar la aplicación:', error);
   }

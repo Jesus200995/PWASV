@@ -168,20 +168,18 @@
                     </div>
                   </div>
                   
-                  <!-- Descripción truncada con desvanecido - solo si hay descripción -->
-                  <div v-if="notificacion.descripcion && notificacion.descripcion.trim()" class="relative mb-3">
+                  <!-- Descripción truncada - solo si hay descripción -->
+                  <div v-if="notificacion.descripcion && notificacion.descripcion.trim()" class="mb-3">
                     <p :class="[
                       'text-xs leading-relaxed transition-colors duration-200 line-clamp-2',
                       notificacion.leida ? 'text-gray-600' : 'text-gray-700'
                     ]">
                       {{ notificacion.descripcion }}
                     </p>
-                    <!-- Gradiente de desvanecido -->
-                    <div class="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent w-16 h-5 pointer-events-none"></div>
                   </div>
 
-                  <!-- Vista previa de archivo compacta con efecto fade -->
-                  <div v-if="notificacion.tiene_archivo" class="mb-3">
+                  <!-- Vista previa de archivo compacta con efecto fade - SOLO para imágenes y videos -->
+                  <div v-if="notificacion.tiene_archivo && (esImagen(notificacion.archivo_tipo) || esVideo(notificacion.archivo_tipo))" class="mb-3">
                     <div v-if="esImagen(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white overflow-hidden cursor-pointer" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
                       <div class="absolute inset-0 flex items-center justify-center bg-gray-50 image-placeholder z-5">
                         <div class="text-gray-400 text-center">
@@ -228,34 +226,23 @@
                         </div>
                       </div>
                     </div>
-                    <div v-else class="bg-gray-50 rounded-md p-3 border border-gray-200 max-w-xs shadow-sm group-hover:shadow-md transition-shadow duration-200">
-                      <div class="flex items-center gap-2.5">
-                        <div class="flex-shrink-0 w-8 h-8 bg-white rounded-md border border-gray-200 flex items-center justify-center">
-                          <span class="text-base">{{ obtenerIconoArchivo(notificacion.archivo_tipo) }}</span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <div class="text-xs font-medium text-gray-800 truncate">
-                            {{ notificacion.archivo_nombre }}
-                          </div>
-                          <div class="text-xs text-gray-500 capitalize">
-                            {{ notificacion.archivo_tipo }}
-                          </div>
-                        </div>
-                        <button 
-                          @click.stop="abrirArchivo(notificacion.id)"
-                          class="px-2.5 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                        >
-                          Ver
-                        </button>
-                      </div>
+                  </div>
+
+                  <!-- Indicador sutil para archivos adjuntos (PDF, Word, etc.) - SOLO visible si hay archivo que no es imagen o video -->
+                  <div v-if="notificacion.tiene_archivo && !esImagen(notificacion.archivo_tipo) && !esVideo(notificacion.archivo_tipo)" class="mb-3">
+                    <div class="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-md px-3 py-1.5 border border-gray-200">
+                      <span class="text-sm">📎</span>
+                      <span class="font-medium">Archivo adjunto</span>
+                      <span class="text-gray-400">•</span>
+                      <span class="capitalize truncate">{{ notificacion.archivo_tipo }}</span>
                     </div>
                   </div>
                   
-                  <!-- Botón Ver completo compacto -->
+                  <!-- Botón Ver completo con efecto vidrio líquido - alineado a la derecha -->
                   <div class="flex justify-end">
-                    <button class="enterprise-view-button-compact group inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:border-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-all duration-200">
-                      <span>Ver completo</span>
-                      <svg class="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button class="liquid-glass-button group inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 rounded-md transition-all duration-300 relative overflow-hidden ml-auto">
+                      <span class="relative z-10">Ver completo</span>
+                      <svg class="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                       </svg>
                     </button>
@@ -887,6 +874,11 @@ const abrirDetalleNotificacion = (notificacion) => {
     console.log(`📖 Abriendo notificación ${notificacion.id} - marcando como leída inmediatamente`)
     marcarComoLeidaRemoto(notificacion.id)
   }
+}
+
+// Función para abrir directamente el modal completo (usado en los clicks de imágenes/videos)
+const verNotificacionCompleta = (notificacion) => {
+  abrirDetalleNotificacion(notificacion)
 }
 
 const cerrarDetalleNotificacion = () => {
@@ -1651,7 +1643,7 @@ onBeforeUnmount(() => {
   background: #f9fafb;
 }
 
-/* Botón Ver completo compacto */
+/* Botón Ver completo compacto - LEGACY */
 .enterprise-view-button-compact {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -1659,6 +1651,100 @@ onBeforeUnmount(() => {
 
 .enterprise-view-button-compact:hover {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Nuevo botón con efecto vidrio líquido */
+.liquid-glass-button {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+}
+
+/* Efecto de onda líquida */
+.liquid-glass-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(34, 197, 94, 0.15),
+    rgba(16, 185, 129, 0.2),
+    rgba(34, 197, 94, 0.15),
+    transparent
+  );
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 1;
+}
+
+/* Efecto de burbuja líquida */
+.liquid-glass-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(
+    circle,
+    rgba(34, 197, 94, 0.2) 0%,
+    rgba(16, 185, 129, 0.15) 50%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  opacity: 0;
+}
+
+.liquid-glass-button:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(34, 197, 94, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(34, 197, 94, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(34, 197, 94, 0.1);
+  transform: translateY(-1px);
+  color: #065f46;
+}
+
+/* Activar efectos en hover */
+.liquid-glass-button:hover::before {
+  left: 100%;
+}
+
+.liquid-glass-button:hover::after {
+  width: 150px;
+  height: 150px;
+  opacity: 1;
+}
+
+.liquid-glass-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 
+    0 4px 16px rgba(34, 197, 94, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 2px 4px rgba(34, 197, 94, 0.1);
+}
+
+.liquid-glass-button:focus {
+  outline: none;
+  box-shadow: 
+    0 8px 32px rgba(34, 197, 94, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 0 0 3px rgba(34, 197, 94, 0.2);
 }
 
 /* Utilidades para truncar texto */
@@ -2281,25 +2367,25 @@ video::-webkit-media-controls {
     0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Responsividad para el botón profesional */
+/* Responsividad para el botón profesional - mantener alineación derecha */
 @media (max-width: 480px) {
-  .professional-button {
+  .professional-button,
+  .liquid-glass-button {
     padding: 0.375rem 0.75rem !important;
     font-size: 0.625rem !important;
-    margin: 0 auto !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    max-width: fit-content !important;
     border-radius: 0.375rem !important;
+    /* Remover margin auto para mantener alineación derecha */
+    margin-left: auto !important;
   }
   
-  .professional-button svg {
+  .professional-button svg,
+  .liquid-glass-button svg {
     width: 0.625rem !important;
     height: 0.625rem !important;
   }
   
-  .professional-button span {
+  .professional-button span,
+  .liquid-glass-button span {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -2308,23 +2394,23 @@ video::-webkit-media-controls {
 }
 
 @media (max-width: 375px) {
-  .professional-button {
+  .professional-button,
+  .liquid-glass-button {
     padding: 0.3rem 0.6rem !important;
     font-size: 0.55rem !important;
-    margin: 0 auto !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    max-width: fit-content !important;
     border-radius: 0.3rem !important;
+    /* Remover margin auto para mantener alineación derecha */
+    margin-left: auto !important;
   }
   
-  .professional-button svg {
+  .professional-button svg,
+  .liquid-glass-button svg {
     width: 0.55rem !important;
     height: 0.55rem !important;
   }
   
-  .professional-button span {
+  .professional-button span,
+  .liquid-glass-button span {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;

@@ -2751,13 +2751,13 @@ async def marcar_notificacion_leida(notificacion_id: int, data: NotificacionLeer
         raise HTTPException(status_code=500, detail=f"Error al marcar como leída: {str(e)}")
 
 @app.get("/notificaciones/{notificacion_id}/archivo")
-async def descargar_archivo_notificacion(notificacion_id: int):
-    """Descargar o ver el archivo adjunto de una notificación"""
+async def descargar_archivo_notificacion(notificacion_id: int, safe: bool = False):
+    """Descargar o ver el archivo adjunto de una notificación con encoding mejorado"""
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        print(f"📎 Descargando archivo de notificación {notificacion_id}")
+        print(f"📎 Descargando archivo de notificación {notificacion_id} (safe={safe})")
         
         # Obtener archivo de la notificación
         cursor.execute("""
@@ -2775,6 +2775,32 @@ async def descargar_archivo_notificacion(notificacion_id: int):
         archivo_tipo = resultado[1]
         archivo_nombre = resultado[2]
         
+        # NUEVA LÓGICA DE MANEJO DE ENCODING DE NOMBRES DE ARCHIVO
+        try:
+            # Intentar usar el nombre original si no contiene caracteres problemáticos
+            nombre_seguro = archivo_nombre
+            # Verificar si el nombre es seguro para ASCII
+            nombre_seguro.encode('ascii')
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            # Si el nombre tiene caracteres especiales, crear un nombre seguro
+            import hashlib
+            from datetime import datetime
+            
+            # Generar nombre seguro basado en el hash y timestamp
+            hash_nombre = hashlib.md5(archivo_nombre.encode('utf-8', errors='replace')).hexdigest()[:8]
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            
+            # Mantener la extensión si es posible
+            try:
+                ext = archivo_nombre.split('.')[-1] if '.' in archivo_nombre else 'bin'
+                # Limpiar la extensión de caracteres especiales
+                ext_segura = ''.join(c for c in ext if c.isalnum())[:10]
+                nombre_seguro = f"archivo_{timestamp}_{hash_nombre}.{ext_segura}"
+            except:
+                nombre_seguro = f"archivo_{timestamp}_{hash_nombre}.bin"
+            
+            print(f"⚠️ Nombre original problemático: '{archivo_nombre}' -> nombre seguro: '{nombre_seguro}'")
+        
         # Definir Content-Type según el tipo de archivo
         content_types = {
             'imagen': 'image/jpeg',
@@ -2784,25 +2810,122 @@ async def descargar_archivo_notificacion(notificacion_id: int):
         
         content_type = content_types.get(archivo_tipo, 'application/octet-stream')
         
-        print(f"📎 Enviando archivo: {archivo_nombre} ({archivo_tipo}, {len(archivo_bytes)} bytes)")
+        # Ajustar Content-Type para modo seguro (forzar descarga)
+        if safe:
+            content_type = 'application/octet-stream'
         
-        # Crear stream del archivo
-        archivo_stream = io.BytesIO(archivo_bytes)
+        print(f"📎 Enviando archivo: {nombre_seguro} ({archivo_tipo}, {len(archivo_bytes)} bytes)")
         
-        return StreamingResponse(
-            io.BytesIO(archivo_bytes),
-            media_type=content_type,
-            headers={
-                "Content-Disposition": f"inline; filename=\"{archivo_nombre}\"",
-                "Content-Length": str(len(archivo_bytes))
-            }
-        )
+        # Preparar headers seguros
+        headers = {
+            "Content-Length": str(len(archivo_bytes)),
+            "Cache-Control": "public, max-age=3600"  # Cache por 1 hora
+        }
+        
+        # NUEVA LÓGICA MEJORADA PARA CONTENT-DISPOSITION
+        try:
+            # Para modo seguro o nombres problemáticos, usar attachment
+            if safe:
+                headers["Content-Disposition"] = f"attachment; filename=\"{nombre_seguro}\""
+            else:
+                # Para visualización inline, usar el nombre seguro
+                headers["Content-Disposition"] = f"inline; filename=\"{nombre_seguro}\""
+            
+        except Exception as e:
+            print(f"⚠️ Error configurando Content-Disposition: {e}")
+            # Fallback ultra-seguro
+            headers["Content-Disposition"] = f"attachment; filename=\"archivo_{notificacion_id}.bin\""
+        
+        # Crear stream del archivo con manejo de memoria mejorado
+        try:
+            archivo_stream = io.BytesIO(archivo_bytes)
+            
+            return StreamingResponse(
+                archivo_stream,
+                media_type=content_type,
+                headers=headers
+            )
+            
+        except Exception as e:
+            print(f"❌ Error creando stream: {e}")
+            raise HTTPException(status_code=500, detail=f"Error procesando archivo: {str(e)}")
         
     except HTTPException:
         raise
     except Exception as e:
         print(f"❌ Error descargando archivo: {e}")
-        raise HTTPException(status_code=500, detail=f"Error al descargar archivo: {str(e)}")
+        # Error más específico para debugging
+        error_msg = f"Error al descargar archivo: {str(e)}"
+        if "codec" in str(e).lower() or "encode" in str(e).lower():
+            error_msg = f"Error de codificación de caracteres: {str(e)}"
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.get("/notificaciones/{notificacion_id}/archivo/base64")
+async def obtener_archivo_base64(notificacion_id: int):
+    """Obtener el archivo como base64 para evitar problemas de encoding"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📎 Obteniendo archivo base64 de notificación {notificacion_id}")
+        
+        # Obtener archivo de la notificación
+        cursor.execute("""
+            SELECT archivo, archivo_tipo, archivo_nombre
+            FROM notificaciones
+            WHERE id = %s AND archivo IS NOT NULL
+        """, (notificacion_id,))
+        
+        resultado = cursor.fetchone()
+        
+        if not resultado:
+            raise HTTPException(status_code=404, detail="Notificación no encontrada o sin archivo adjunto")
+        
+        archivo_bytes = resultado[0]
+        archivo_tipo = resultado[1]
+        archivo_nombre = resultado[2]
+        
+        # Convertir a base64
+        import base64
+        archivo_base64 = base64.b64encode(archivo_bytes).decode('ascii')
+        
+        # Determinar MIME type
+        mime_types = {
+            'imagen': 'image/jpeg',
+            'pdf': 'application/pdf', 
+            'video': 'video/mp4'
+        }
+        
+        mime_type = mime_types.get(archivo_tipo, 'application/octet-stream')
+        
+        # Crear nombre seguro para el archivo
+        try:
+            nombre_seguro = archivo_nombre
+            # Verificar que no tenga caracteres problemáticos
+            nombre_seguro.encode('ascii')
+        except:
+            # Crear nombre seguro si hay problemas
+            import hashlib
+            hash_nombre = hashlib.md5(archivo_nombre.encode('utf-8', errors='replace')).hexdigest()[:8]
+            ext = archivo_nombre.split('.')[-1] if '.' in archivo_nombre else 'bin'
+            ext_segura = ''.join(c for c in ext if c.isalnum())[:10]
+            nombre_seguro = f"archivo_{hash_nombre}.{ext_segura}"
+        
+        print(f"📎 Archivo convertido a base64: {nombre_seguro} ({len(archivo_base64)} chars)")
+        
+        return {
+            "base64": archivo_base64,
+            "mime_type": mime_type,
+            "archivo_nombre": nombre_seguro,
+            "archivo_tipo": archivo_tipo,
+            "size": len(archivo_bytes)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo archivo base64: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al procesar archivo: {str(e)}")
 
 @app.delete("/notificaciones/{notificacion_id}")
 async def eliminar_notificacion(notificacion_id: int):

@@ -257,9 +257,14 @@ export const notificacionesService = {
   },
 
   /**
-   * Obtener URL del archivo de una notificación
+   * Obtener URL del archivo de una notificación con manejo de errores de encoding
    */
-  obtenerUrlArchivo(notificacionId) {
+  obtenerUrlArchivo(notificacionId, safe = false) {
+    // Si safe=true, usar parámetro safe en el endpoint principal
+    if (safe) {
+      return `${API_BASE_URL}/notificaciones/${notificacionId}/archivo?safe=true`
+    }
+    
     // En desarrollo, generar URLs de placeholder para testing
     if (import.meta.env.DEV) {
       switch (notificacionId) {
@@ -273,6 +278,44 @@ export const notificacionesService = {
     }
     
     return `${API_BASE_URL}/notificaciones/${notificacionId}/archivo`
+  },
+
+  /**
+   * Obtener contenido del archivo como base64 para evitar problemas de encoding
+   */
+  async obtenerArchivoBase64(notificacionId) {
+    try {
+      console.log(`📂 Obteniendo archivo base64 para notificación ${notificacionId}`)
+      
+      const response = await api.get(`/notificaciones/${notificacionId}/archivo/base64`)
+      
+      if (response.data.base64 && response.data.mime_type) {
+        console.log(`✅ Archivo base64 obtenido: ${response.data.mime_type}`)
+        
+        // Convertir base64 a blob URL
+        const byteCharacters = atob(response.data.base64)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], { type: response.data.mime_type })
+        
+        return {
+          url: URL.createObjectURL(blob),
+          nombre: response.data.archivo_nombre,
+          tipo: response.data.archivo_tipo,
+          mimeType: response.data.mime_type,
+          size: response.data.size,
+          esBlob: true
+        }
+      }
+      
+      throw new Error('Respuesta de archivo inválida')
+    } catch (error) {
+      console.error('Error obteniendo archivo base64:', error)
+      throw this.handleError(error)
+    }
   },
 
   /**

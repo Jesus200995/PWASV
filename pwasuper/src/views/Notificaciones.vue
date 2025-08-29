@@ -380,7 +380,7 @@
               <!-- Placeholder de carga -->
               <div class="flex items-center justify-center min-h-48 bg-gray-50 image-placeholder">
                 <div class="text-gray-400 text-center">
-                  <div class="text-2xl mb-2">�</div>
+                  <div class="text-2xl mb-2">🖼️</div>
                   <div class="text-sm font-medium">Cargando imagen...</div>
                 </div>
               </div>
@@ -488,6 +488,185 @@
       </div>
     </div>
     </div>
+
+    <!-- Modal para visualizar archivos dentro de la app -->
+    <div v-if="archivoSeleccionado" 
+         class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 transition-all duration-300"
+         @click="cerrarModalArchivo">
+      <div class="file-viewer-modal bg-white rounded-2xl w-full max-w-5xl h-[90vh] max-h-[800px] overflow-hidden shadow-2xl transform transition-all duration-300 scale-100 flex flex-col" @click.stop>
+        
+        <!-- Header del modal de archivo -->
+        <div class="file-header bg-gradient-to-r from-slate-800 to-slate-700 text-white p-4 flex items-center justify-between flex-shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+              <span class="text-lg">{{ obtenerIconoArchivo(archivoSeleccionado.tipo) }}</span>
+            </div>
+            <div>
+              <h3 class="font-semibold text-lg truncate max-w-md">{{ archivoSeleccionado.nombre }}</h3>
+              <p class="text-gray-300 text-sm capitalize">{{ archivoSeleccionado.tipo }}</p>
+            </div>
+          </div>
+          <button 
+            @click="cerrarModalArchivo"
+            class="w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-all duration-200 group"
+          >
+            <svg class="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Contenido del archivo -->
+        <div class="file-content flex-1 p-0 overflow-hidden bg-gray-50 flex items-center justify-center">
+          
+          <!-- Mensaje de error de encoding -->
+          <div v-if="archivoSeleccionado.error" class="text-center p-8 max-w-md">
+            <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Error de Servidor</h3>
+            <p class="text-gray-600 mb-4 text-sm">{{ archivoSeleccionado.errorMessage }}</p>
+            
+            <div class="space-y-3">
+              <!-- Botón para intentar descarga directa -->
+              <a 
+                :href="archivoSeleccionado.fallbackUrl"
+                target="_blank"
+                class="block w-full px-4 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200"
+              >
+                🔗 Intentar abrir en nueva pestaña
+              </a>
+              
+              <!-- Botón de descarga forzada -->
+              <a 
+                :href="archivoSeleccionado.fallbackUrl"
+                :download="archivoSeleccionado.nombre"
+                class="block w-full px-4 py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors duration-200"
+              >
+                💾 Forzar descarga
+              </a>
+              
+              <!-- Información técnica -->
+              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs text-yellow-800">
+                <strong>Error técnico:</strong> El servidor tiene problemas con caracteres especiales en nombres de archivo.
+                <br><strong>Solución temporal:</strong> Usa las opciones de arriba.
+              </div>
+            </div>
+          </div>
+
+          <!-- Información de advertencia si hay problemas pero se puede mostrar -->
+          <div v-else-if="archivoSeleccionado.errorInfo" class="absolute top-4 right-4 z-10">
+            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-3 py-2 rounded-lg shadow-lg text-xs max-w-xs">
+              <strong>⚠️ Advertencia:</strong> {{ archivoSeleccionado.errorInfo }}
+            </div>
+          </div>
+          
+          <!-- Viewer para PDFs -->
+          <div v-if="!archivoSeleccionado.error && archivoSeleccionado.tipo.toLowerCase().includes('pdf')" class="w-full h-full">
+            <iframe 
+              :src="archivoSeleccionado.url + (archivoSeleccionado.esBlob ? '' : '#toolbar=1&navpanes=1&scrollbar=1')"
+              class="w-full h-full border-none"
+              title="Visualizador de PDF"
+              frameborder="0"
+              @error="manejarErrorIframe"
+            ></iframe>
+          </div>
+
+          <!-- Viewer para imágenes -->
+          <div v-else-if="!archivoSeleccionado.error && esImagen(archivoSeleccionado.tipo)" class="w-full h-full flex items-center justify-center p-4">
+            <img 
+              :src="archivoSeleccionado.url"
+              :alt="archivoSeleccionado.nombre"
+              class="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+              @error="manejarErrorImagen"
+            />
+          </div>
+
+          <!-- Viewer para videos -->
+          <div v-else-if="!archivoSeleccionado.error && esVideo(archivoSeleccionado.tipo)" class="w-full h-full flex items-center justify-center p-4">
+            <video 
+              :src="archivoSeleccionado.url"
+              class="max-w-full max-h-full rounded-lg shadow-lg"
+              controls
+              preload="metadata"
+              @error="manejarErrorVideo"
+            >
+              Tu navegador no soporta la reproducción de video.
+            </video>
+          </div>
+
+          <!-- Fallback para otros tipos de archivo -->
+          <div v-else-if="!archivoSeleccionado.error" class="text-center p-8">
+            <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-4xl">{{ obtenerIconoArchivo(archivoSeleccionado.tipo) }}</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ archivoSeleccionado.nombre }}</h3>
+            <p class="text-gray-600 mb-6">Este tipo de archivo no se puede previsualizar dentro de la aplicación.</p>
+            
+            <!-- Botón para descargar -->
+            <a 
+              :href="archivoSeleccionado.url"
+              :download="archivoSeleccionado.nombre"
+              class="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Descargar archivo
+            </a>
+          </div>
+        </div>
+
+        <!-- Footer con controles -->
+        <div class="file-footer bg-gray-100 border-t border-gray-200 p-4 flex justify-between items-center flex-shrink-0">
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>{{ archivoSeleccionado.error ? 'Error de servidor' : 'Archivo de notificación' }}</span>
+          </div>
+          
+          <div class="flex gap-2">
+            <!-- Botones normales si no hay error -->
+            <template v-if="!archivoSeleccionado.error">
+              <a 
+                :href="archivoSeleccionado.url"
+                :download="archivoSeleccionado.nombre"
+                class="px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center gap-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Descargar
+              </a>
+            </template>
+            
+            <!-- Botones alternativos si hay error -->
+            <template v-else>
+              <a 
+                :href="archivoSeleccionado.fallbackUrl"
+                target="_blank"
+                class="px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center gap-2 text-sm"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+                Abrir en nueva pestaña
+              </a>
+            </template>
+            
+            <button 
+              @click="cerrarModalArchivo"
+              class="px-4 py-2 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600 transition-colors duration-200"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -499,6 +678,7 @@ import { useNotifications } from '../composables/useNotifications.js'
 // Estados reactivos
 const notificaciones = ref([])
 const notificacionSeleccionada = ref(null)
+const archivoSeleccionado = ref(null) // NUEVO: Para modal de archivo
 const usuario = ref(null)
 const cargando = ref(false)
 const cargandoMas = ref(false)
@@ -590,18 +770,30 @@ const reproducirSonidoNotificacion = () => {
   }
 }
 
-// NUEVO: Detectar nuevas notificaciones y reproducir sonido
+// NUEVO: Detectar nuevas notificaciones y reproducir sonido (MEJORADO - menos frecuente)
 const detectarNuevasNotificaciones = (nuevoConteo) => {
   // Solo reproducir sonido si:
   // 1. No estamos cargando por primera vez
   // 2. El nuevo conteo es mayor al anterior
   // 3. El conteo anterior no es 0 (evitar sonido al cargar inicial)
-  if (!cargando.value && nuevoConteo > conteoAnterior.value && conteoAnterior.value >= 0) {
+  // 4. Ha pasado al menos 10 segundos desde el último sonido
+  const ahora = Date.now()
+  const tiempoUltimoSonido = localStorage.getItem('ultimoSonidoNotificacion')
+  const INTERVALO_MINIMO = 10000 // 10 segundos entre sonidos
+  
+  if (!cargando.value && 
+      nuevoConteo > conteoAnterior.value && 
+      conteoAnterior.value >= 0 &&
+      (!tiempoUltimoSonido || (ahora - parseInt(tiempoUltimoSonido)) > INTERVALO_MINIMO)) {
+    
     const nuevasNotificaciones = nuevoConteo - conteoAnterior.value
     console.log(`🔔 ${nuevasNotificaciones} nueva(s) notificación(es) detectada(s)`)
     
     // Reproducir sonido para nuevas notificaciones
     reproducirSonidoNotificacion()
+    
+    // Guardar timestamp del último sonido
+    localStorage.setItem('ultimoSonidoNotificacion', ahora.toString())
     
     // Mostrar notificación del navegador si está permitido
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -1078,9 +1270,150 @@ const cargarNotificacionesLeidas = () => {
   }
 }
 
-const abrirArchivo = (notificacionId) => {
-  const url = notificacionesService.obtenerUrlArchivo(notificacionId)
-  window.open(url, '_blank')
+const abrirArchivo = async (notificacionId) => {
+  try {
+    console.log(`📂 Abriendo archivo de notificación ${notificacionId}`)
+    
+    // Buscar la notificación para obtener información del archivo
+    const notificacion = notificaciones.value.find(n => n.id === notificacionId) || 
+                         (notificacionSeleccionada.value?.id === notificacionId ? notificacionSeleccionada.value : null)
+    
+    if (!notificacion) {
+      console.error('Notificación no encontrada')
+      alert('Error: No se encontró la notificación')
+      return
+    }
+
+    // Intentar múltiples estrategias para obtener el archivo
+    let archivoUrl = null
+    let errorMessage = ''
+
+    // Estrategia 1: Intentar obtener como base64
+    try {
+      console.log('🔄 Intentando obtener archivo como base64...')
+      const archivoBase64 = await notificacionesService.obtenerArchivoBase64(notificacionId)
+      
+      if (archivoBase64.content && archivoBase64.mime_type) {
+        // Crear blob URL desde base64
+        const byteCharacters = atob(archivoBase64.content)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], { type: archivoBase64.mime_type })
+        archivoUrl = URL.createObjectURL(blob)
+        
+        console.log('✅ Archivo cargado exitosamente desde base64')
+      }
+    } catch (error) {
+      console.log('❌ Error con base64:', error.message)
+      errorMessage += `Base64: ${error.message}. `
+    }
+
+    // Estrategia 2: URL safe si base64 falla
+    if (!archivoUrl) {
+      try {
+        console.log('🔄 Intentando URL safe...')
+        archivoUrl = notificacionesService.obtenerUrlArchivo(notificacionId, true)
+        
+        // Probar que la URL funciona
+        const testResponse = await fetch(archivoUrl, { method: 'HEAD' })
+        if (!testResponse.ok) {
+          throw new Error(`HTTP ${testResponse.status}`)
+        }
+        
+        console.log('✅ URL safe funciona')
+      } catch (error) {
+        console.log('❌ Error con URL safe:', error.message)
+        errorMessage += `URL Safe: ${error.message}. `
+        archivoUrl = null
+      }
+    }
+
+    // Estrategia 3: URL normal como último recurso
+    if (!archivoUrl) {
+      console.log('🔄 Usando URL normal como último recurso...')
+      archivoUrl = notificacionesService.obtenerUrlArchivo(notificacionId)
+      errorMessage += 'Usando URL directa (puede tener problemas de encoding).'
+    }
+
+    // Configurar el archivo seleccionado para el modal
+    archivoSeleccionado.value = {
+      id: notificacionId,
+      nombre: notificacion.archivo_nombre,
+      tipo: notificacion.archivo_tipo,
+      url: archivoUrl,
+      esBlob: archivoUrl.startsWith('blob:'),
+      errorInfo: errorMessage || null
+    }
+    
+    console.log('📂 Archivo configurado para modal:', archivoSeleccionado.value)
+    
+  } catch (error) {
+    console.error('Error crítico abriendo archivo:', error)
+    
+    // Como último recurso, mostrar un modal de error con opciones
+    archivoSeleccionado.value = {
+      id: notificacionId,
+      nombre: notificacion?.archivo_nombre || `Archivo ${notificacionId}`,
+      tipo: notificacion?.archivo_tipo || 'desconocido',
+      url: null,
+      error: true,
+      errorMessage: 'No se pudo cargar el archivo debido a problemas de encoding en el servidor.',
+      fallbackUrl: notificacionesService.obtenerUrlArchivo(notificacionId)
+    }
+  }
+}
+
+// Función para cerrar el modal de archivo
+const cerrarModalArchivo = () => {
+  // Limpiar blob URLs si existen
+  if (archivoSeleccionado.value?.url && archivoSeleccionado.value?.esBlob) {
+    URL.revokeObjectURL(archivoSeleccionado.value.url)
+  }
+  archivoSeleccionado.value = null
+}
+
+// Funciones para manejar errores de carga de archivos
+const manejarErrorIframe = (event) => {
+  console.error('Error cargando iframe PDF:', event)
+  // Mostrar error en el archivo seleccionado
+  if (archivoSeleccionado.value) {
+    archivoSeleccionado.value.error = true
+    archivoSeleccionado.value.errorMessage = 'No se pudo cargar el PDF. Problemas de encoding en el servidor.'
+    archivoSeleccionado.value.fallbackUrl = notificacionesService.obtenerUrlArchivo(archivoSeleccionado.value.id)
+  }
+}
+
+const manejarErrorImagen = (event) => {
+  console.error('Error cargando imagen:', event)
+  if (archivoSeleccionado.value) {
+    archivoSeleccionado.value.error = true
+    archivoSeleccionado.value.errorMessage = 'No se pudo cargar la imagen. Problemas de encoding en el servidor.'
+    archivoSeleccionado.value.fallbackUrl = notificacionesService.obtenerUrlArchivo(archivoSeleccionado.value.id)
+  }
+}
+
+const manejarErrorVideo = (event) => {
+  console.error('Error cargando video:', event)
+  if (archivoSeleccionado.value) {
+    archivoSeleccionado.value.error = true
+    archivoSeleccionado.value.errorMessage = 'No se pudo cargar el video. Problemas de encoding en el servidor.'
+    archivoSeleccionado.value.fallbackUrl = notificacionesService.obtenerUrlArchivo(archivoSeleccionado.value.id)
+  }
+}
+
+// Función para determinar si el archivo se puede mostrar inline
+const puedeVerseInline = (tipo) => {
+  if (!tipo) return false
+  const tipoLower = tipo.toLowerCase()
+  
+  // Tipos que se pueden mostrar directamente en el navegador
+  return tipoLower.includes('pdf') || 
+         tipoLower.includes('image') || 
+         tipoLower.includes('imagen') ||
+         ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf'].includes(tipoLower)
 }
 
 const obtenerUrlArchivo = (notificacionId) => {
@@ -1255,7 +1588,7 @@ onMounted(async () => {
     conteoAnterior.value = conteoNoLeidas.value // Establecer el valor base
   }
   
-  // Auto-actualizar cada 2 segundos para detección de nuevas notificaciones
+  // Auto-actualizar cada 30 segundos para detección de nuevas notificaciones (reducido de 2 segundos)
   autoUpdateInterval = setInterval(async () => {
     if (!cargando.value && !cargandoMas.value) {
       const usuarioId = obtenerUsuarioId()
@@ -1270,7 +1603,7 @@ onMounted(async () => {
         }
       }
     }
-  }, 2000) // 2 segundos para balance entre respuesta y rendimiento
+  }, 30000) // 30 segundos para reducir el spam de sonidos
 })
 
 onBeforeUnmount(() => {
@@ -3246,5 +3579,194 @@ video::-webkit-media-controls {
     background: #1e293b !important;
     print-color-adjust: exact;
   }
+}
+
+/* =================================
+   ESTILOS PARA MODAL DE ARCHIVOS
+   ================================= */
+
+/* Modal principal para archivos */
+.file-viewer-modal {
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Header del modal de archivos */
+.file-header {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Contenido del archivo */
+.file-content {
+  background: #f8fafc;
+}
+
+/* Estilos para iframe de PDF */
+.file-content iframe {
+  background: white;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer del modal */
+.file-footer {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Botones del modal de archivos */
+.file-footer button,
+.file-footer a {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.file-footer button:hover,
+.file-footer a:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsividad para modal de archivos */
+@media (max-width: 640px) {
+  .file-viewer-modal {
+    margin: 0.5rem;
+    height: 85vh;
+    border-radius: 1rem;
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+  }
+  
+  .file-header {
+    padding: 0.75rem;
+  }
+  
+  .file-header h3 {
+    font-size: 1rem;
+    max-width: 200px;
+  }
+  
+  .file-footer {
+    padding: 0.75rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .file-footer > div:last-child {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .file-viewer-modal {
+    margin: 0.25rem;
+    height: 80vh;
+    width: calc(100vw - 0.5rem);
+    max-width: calc(100vw - 0.5rem);
+  }
+  
+  .file-header {
+    padding: 0.5rem;
+  }
+  
+  .file-header h3 {
+    font-size: 0.9rem;
+    max-width: 150px;
+  }
+  
+  .file-footer {
+    padding: 0.5rem;
+  }
+  
+  .file-footer button,
+  .file-footer a {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Estados de carga para archivos */
+.file-content iframe {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.file-content iframe[src] {
+  opacity: 1;
+}
+
+/* Placeholder para archivos que fallan al cargar */
+.file-error-placeholder {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px dashed #fca5a5;
+  color: #dc2626;
+}
+
+/* Animaciones para el modal de archivos */
+@keyframes fileModalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.file-viewer-modal {
+  animation: fileModalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mejoras de accesibilidad */
+.file-header button:focus,
+.file-footer button:focus,
+.file-footer a:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 3px rgba(59, 130, 246, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para diferentes tipos de archivos */
+.file-content .pdf-viewer {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.file-content .image-viewer {
+  background: #f9fafb;
+  padding: 1rem;
+}
+
+.file-content .video-viewer {
+  background: #111827;
+  padding: 1rem;
+}
+
+.file-content .document-viewer {
+  background: #ffffff;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Indicador de tipo de archivo */
+.file-type-indicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  z-index: 10;
 }
 </style>

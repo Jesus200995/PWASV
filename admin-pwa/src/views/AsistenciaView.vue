@@ -680,13 +680,33 @@ export default {
         : this.asistencias.length
     },
     totalAsistenciasHoy() {
+      console.log('🔍 AsistenciaView.vue - Calculando totalAsistenciasHoy...');
+      
       // Usar estadísticas del servidor si están disponibles, sino calcular localmente
       if (this.estadisticasServidor.totalAsistenciasHoy > 0) {
+        console.log(`✅ AsistenciaView.vue - Usando estadísticas del servidor: ${this.estadisticasServidor.totalAsistenciasHoy}`);
         return this.estadisticasServidor.totalAsistenciasHoy
       }
       
-      const hoy = new Date().toISOString().split('T')[0]
-      return this.asistencias.filter(a => a.fecha === hoy).length
+      // Calcular fecha de hoy en horario CDMX (UTC-6)
+      const fechaUTC = new Date();
+      const offsetCDMX = -6 * 60; // -6 horas en minutos
+      const utcOffset = fechaUTC.getTimezoneOffset();
+      const totalOffset = offsetCDMX + utcOffset;
+      const fechaCDMX = new Date(fechaUTC.getTime() + totalOffset * 60000);
+      const hoyCDMX = fechaCDMX.toISOString().split('T')[0]; // YYYY-MM-DD en CDMX
+      
+      console.log(`📅 AsistenciaView.vue - Fecha CDMX: ${hoyCDMX}`);
+      console.log(`📊 AsistenciaView.vue - Total asistencias disponibles: ${this.asistencias.length}`);
+      
+      const asistenciasHoy = this.asistencias.filter(a => a.fecha === hoyCDMX);
+      console.log(`✅ AsistenciaView.vue - Asistencias de hoy: ${asistenciasHoy.length}`);
+      
+      if (asistenciasHoy.length > 0) {
+        console.log(`📋 AsistenciaView.vue - Asistencias de hoy encontradas:`, asistenciasHoy.slice(0, 3));
+      }
+      
+      return asistenciasHoy.length;
     },
     usuariosPresentes() {
       // Usar estadísticas del servidor si están disponibles, sino calcular localmente
@@ -694,10 +714,17 @@ export default {
         return this.estadisticasServidor.usuariosPresentes
       }
       
-      const hoy = new Date().toISOString().split('T')[0]
+      // Calcular fecha de hoy en horario CDMX (UTC-6)
+      const fechaUTC = new Date();
+      const offsetCDMX = -6 * 60; // -6 horas en minutos
+      const utcOffset = fechaUTC.getTimezoneOffset();
+      const totalOffset = offsetCDMX + utcOffset;
+      const fechaCDMX = new Date(fechaUTC.getTime() + totalOffset * 60000);
+      const hoyCDMX = fechaCDMX.toISOString().split('T')[0]; // YYYY-MM-DD en CDMX
+      
       const usuariosHoy = new Set()
       this.asistencias.forEach(a => {
-        if (a.fecha === hoy && a.hora_entrada) {
+        if (a.fecha === hoyCDMX && a.hora_entrada) {
           usuariosHoy.add(a.usuario_id)
         }
       })
@@ -730,7 +757,13 @@ export default {
       return this.filtroFechaInicio || this.filtroFechaFin || this.filtroRapido
     },
     maxDate() {
-      return new Date().toISOString().split('T')[0]
+      // Fecha máxima en horario CDMX
+      const fechaUTC = new Date();
+      const offsetCDMX = -6 * 60;
+      const utcOffset = fechaUTC.getTimezoneOffset();
+      const totalOffset = offsetCDMX + utcOffset;
+      const fechaCDMX = new Date(fechaUTC.getTime() + totalOffset * 60000);
+      return fechaCDMX.toISOString().split('T')[0];
     },
     filtrosActivos() {
       const filtros = []
@@ -838,6 +871,16 @@ export default {
     this.configurarEventosConexion()
   },
   methods: {
+    // Helper para obtener fecha en horario CDMX
+    obtenerFechaCDMX() {
+      const fechaUTC = new Date();
+      const offsetCDMX = -6 * 60; // -6 horas en minutos
+      const utcOffset = fechaUTC.getTimezoneOffset();
+      const totalOffset = offsetCDMX + utcOffset;
+      const fechaCDMX = new Date(fechaUTC.getTime() + totalOffset * 60000);
+      return fechaCDMX.toISOString().split('T')[0]; // YYYY-MM-DD en CDMX
+    },
+
     async cargarAsistencias() {
       this.loading = true
       this.error = null
@@ -891,6 +934,7 @@ export default {
         this.estadisticasServidor = {
           totalAsistencias: estadisticas.totalAsistencias || 0,
           totalAsistenciasHoy: estadisticas.asistenciasHoy || 0,
+          salidasHoy: estadisticas.salidasHoy || 0,
           usuariosPresentes: estadisticas.usuariosPresentes || 0,
           totalRegistros: estadisticas.totalRegistros || 0,
           totalUsuarios: estadisticas.totalUsuarios || 0,
@@ -905,6 +949,7 @@ export default {
         this.estadisticasServidor = {
           totalAsistencias: 0,
           totalAsistenciasHoy: 0,
+          salidasHoy: 0,
           usuariosPresentes: 0,
           totalRegistros: 0,
           totalUsuarios: 0,
@@ -958,18 +1003,23 @@ export default {
 
       // Filtros por fechas rápidas
       if (this.filtroRapido) {
-        const hoy = new Date()
-        hoy.setHours(0, 0, 0, 0)
+        // Usar horario CDMX para filtros rápidos
+        const fechaUTC = new Date();
+        const offsetCDMX = -6 * 60;
+        const utcOffset = fechaUTC.getTimezoneOffset();
+        const totalOffset = offsetCDMX + utcOffset;
+        const hoyCDMX = new Date(fechaUTC.getTime() + totalOffset * 60000);
+        hoyCDMX.setHours(0, 0, 0, 0);
         
         switch (this.filtroRapido) {
           case 'hoy':
-            const fechaHoy = hoy.toISOString().split('T')[0]
+            const fechaHoy = hoyCDMX.toISOString().split('T')[0]
             filtradas = filtradas.filter(asistencia => asistencia.fecha === fechaHoy)
             break
           case 'ayer':
-            const ayer = new Date(hoy)
-            ayer.setDate(ayer.getDate() - 1)
-            const fechaAyer = ayer.toISOString().split('T')[0]
+            const ayerCDMX = new Date(hoyCDMX)
+            ayerCDMX.setDate(ayerCDMX.getDate() - 1)
+            const fechaAyer = ayerCDMX.toISOString().split('T')[0]
             filtradas = filtradas.filter(asistencia => asistencia.fecha === fechaAyer)
             break
           case 'semana':
@@ -1426,8 +1476,8 @@ export default {
     calcularEstadisticasCompletas(asistencias) {
       const totalAsistencias = asistencias.length
       const usuariosUnicos = [...new Set(asistencias.map(a => a.usuario_id))].length
-      const hoy = new Date().toISOString().split('T')[0]
-      const usuariosActivosHoy = [...new Set(asistencias.filter(a => a.fecha === hoy).map(a => a.usuario_id))].length
+      const hoyCDMX = this.obtenerFechaCDMX() // Usar horario CDMX
+      const usuariosActivosHoy = [...new Set(asistencias.filter(a => a.fecha === hoyCDMX).map(a => a.usuario_id))].length
       
       const asistenciasCompletas = asistencias.filter(a => a.hora_entrada && a.hora_salida).length
       const asistenciasEnCurso = asistencias.filter(a => a.hora_entrada && !a.hora_salida).length

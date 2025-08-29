@@ -78,7 +78,7 @@
           
           <div class="panel-section">
             <div class="section-header" @click="toggleFiltros">
-              <h4>Filtros</h4>
+              <h4>Clasificador</h4>
               <button class="toggle-btn" :class="{ 'rotated': mostrarFiltros }">
                 <svg v-if="mostrarFiltros" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -101,18 +101,6 @@
                     <option value="salida">Solo Salidas</option>
                     <option value="registro-hoy">Solo Actividades de Hoy</option>
                     <option value="registro-antiguo">Solo Registros Antiguos</option>
-                  </select>
-                </div>
-                
-                <div class="filter-item-compact">
-                  <svg class="filter-icon-small" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4-4v11c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h1V3c0-.55.45-1 1-1s1 .45 1 1v2h6V3c0-.55.45-1 1-1s1 .45 1 1v2h1c1.1 0 2 .9 2 2z"/>
-                  </svg>
-                  <select v-model="filtroPeriodo" class="compact-select" @change="aplicarFiltros">
-                    <option value="all">Todo el tiempo</option>
-                    <option value="today">Hoy</option>
-                    <option value="week">Esta semana</option>
-                    <option value="month">Este mes</option>
                   </select>
                 </div>
               </div>
@@ -1410,7 +1398,7 @@ const aplicarFiltros = () => {
   if (!map || !puntosSource) return
 
   try {
-    console.log('🎛️ Aplicando filtros:', { filtroTipo: filtroTipo.value, filtroPeriodo: filtroPeriodo.value })
+    console.log('🎛️ Aplicando clasificador:', { filtroTipo: filtroTipo.value })
     
     // Obtener las últimas actividades con los filtros aplicados
     const registrosFiltrados = filtrarRegistros()
@@ -1440,39 +1428,17 @@ const aplicarFiltros = () => {
     // Actualizar el mapa con los datos filtrados
     actualizarPuntosMapa(actividadesFinales)
     
-    console.log(`✅ Filtros aplicados. Puntos visibles: ${actividadesFinales.length}`)
+    console.log(`✅ Clasificador aplicado. Puntos visibles: ${actividadesFinales.length}`)
     
   } catch (error) {
-    console.error('❌ Error al aplicar filtros:', error)
+    console.error('❌ Error al aplicar clasificador:', error)
   }
 }
 
-// Función para filtrar registros según criterios (igual que en VisorView.vue)
+// Función para filtrar registros según criterios
 const filtrarRegistros = () => {
-  let resultado = [...registros.value]
-  
-  // Filtrar por periodo
-  if (filtroPeriodo.value !== 'all') {
-    const now = new Date()
-    
-    if (filtroPeriodo.value === 'today') {
-      // Hoy
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-      resultado = resultado.filter(r => new Date(r.fecha_hora) >= today)
-    } else if (filtroPeriodo.value === 'week') {
-      // Esta semana
-      const weekStart = new Date(now)
-      weekStart.setDate(now.getDate() - now.getDay())
-      weekStart.setHours(0, 0, 0, 0)
-      resultado = resultado.filter(r => new Date(r.fecha_hora) >= weekStart)
-    } else if (filtroPeriodo.value === 'month') {
-      // Este mes
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-      resultado = resultado.filter(r => new Date(r.fecha_hora) >= monthStart)
-    }
-  }
-  
-  return resultado
+  // Como ya no tenemos filtro de período, simplemente devolvemos todos los registros
+  return [...registros.value]
 }
 
 // Función para mostrar/ocultar filtros
@@ -1556,8 +1522,8 @@ onUnmounted(() => {
   window.removeEventListener('offline', () => {});
 });
 
-// Watcher para aplicar filtros automáticamente cuando cambien
-watch([filtroTipo, filtroPeriodo], () => {
+// Watcher para aplicar clasificador automáticamente cuando cambie
+watch(filtroTipo, () => {
   if (map && mapInitialized.value) {
     aplicarFiltros()
   }

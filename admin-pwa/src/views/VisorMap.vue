@@ -111,20 +111,20 @@
             <h4>Estadísticas</h4>
             <div class="stat-grid">
               <div class="stat-item">
-                <span class="stat-label">Total usuarios</span>
-                <span class="stat-value">{{ totalUsuariosUnicos }}</span>
+                <span class="stat-label">Total</span>
+                <span class="stat-value">{{ totalPuntosEnMapa }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Entradas del día</span>
-                <span class="stat-value entrada">{{ estadisticasHoy.entradas }}</span>
+                <span class="stat-label">Entradas</span>
+                <span class="stat-value entrada">{{ clusterInfo.entradas }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Salidas del día</span>
-                <span class="stat-value salida">{{ estadisticasHoy.salidas }}</span>
+                <span class="stat-label">Salidas</span>
+                <span class="stat-value salida">{{ clusterInfo.salidas }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Actividades del día</span>
-                <span class="stat-value hoy">{{ estadisticasHoy.actividades }}</span>
+                <span class="stat-label">Actividades</span>
+                <span class="stat-value hoy">{{ clusterInfo.registrosHoy }}</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Antiguos</span>
@@ -486,9 +486,6 @@ const filtroPeriodo = ref('all')
 // Estado de mostrar/ocultar filtros
 const mostrarFiltros = ref(true)
 
-// Variable para el total de usuarios únicos
-const totalUsuariosUnicos = ref(0)
-
 // Estado de los clusters y horario CDMX
 const clusterInfo = reactive({
   total: 0,
@@ -496,13 +493,6 @@ const clusterInfo = reactive({
   salidas: 0,
   registrosHoy: 0,
   registrosAntiguos: 0
-})
-
-// Estadísticas del día actual en CDMX (12:00 AM - 11:59 PM)
-const estadisticasHoy = reactive({
-  entradas: 0,
-  salidas: 0,
-  actividades: 0
 })
 
 // Función para obtener la fecha actual en CDMX (tiempo real)
@@ -516,42 +506,6 @@ const obtenerFechaCDMX = () => {
   
   const fechaCDMX = new Date(fechaUTC.getTime() + totalOffset * 60000);
   return fechaCDMX;
-}
-
-// Función para obtener la fecha de hoy en formato YYYY-MM-DD en horario CDMX
-const obtenerFechaHoyCDMX = () => {
-  const fechaCDMX = obtenerFechaCDMX();
-  return fechaCDMX.toISOString().split('T')[0];
-}
-
-// Función para verificar si una fecha es del día actual en CDMX (12:00 AM - 11:59 PM)
-const esDelDiaActualCDMX = (fechaStr) => {
-  try {
-    const fechaActividad = new Date(fechaStr);
-    
-    // Obtener la fecha actual en CDMX
-    const fechaActualCDMX = obtenerFechaCDMX();
-    
-    // Convertir la fecha de la actividad al horario CDMX
-    const offsetCDMX = -6 * 60; // -6 horas en minutos
-    const utcOffset = fechaActividad.getTimezoneOffset(); // Offset local en minutos
-    const totalOffset = offsetCDMX + utcOffset; // Diferencia entre local y CDMX
-    
-    const fechaActividadCDMX = new Date(fechaActividad.getTime() + totalOffset * 60000);
-    
-    // Crear las fechas de inicio y fin del día actual en CDMX
-    const inicioDiaActual = new Date(fechaActualCDMX);
-    inicioDiaActual.setHours(0, 0, 0, 0); // 12:00 AM
-    
-    const finDiaActual = new Date(fechaActualCDMX);
-    finDiaActual.setHours(23, 59, 59, 999); // 11:59:59.999 PM
-    
-    // Verificar si la actividad está dentro del rango del día actual
-    return fechaActividadCDMX >= inicioDiaActual && fechaActividadCDMX <= finDiaActual;
-  } catch (error) {
-    console.error('Error al verificar fecha del día actual:', error);
-    return false;
-  }
 }
 
 // Función para cargar datos
@@ -598,9 +552,6 @@ const cargarDatos = async () => {
     hasDatosUsuario.value = true
     loading.value = false
     totalPuntosEnMapa.value = ultimasActividades.length
-    
-    // Calcular estadísticas del día actual en tiempo real
-    calcularEstadisticasDelDia();
     
   } catch (err) {
     console.error('Error al cargar datos:', err)
@@ -1159,515 +1110,6 @@ const inicializarMapa = (datos) => {
 }
 
 // Función para actualizar los puntos en el mapa
-// Función alternativa simple para calcular estadísticas (sin timezone)
-const calcularEstadisticasSimple = () => {
-  console.log(`🔧 MÉTODO SIMPLE - Calculando estadísticas sin timezone...`);
-  
-  const hoy = new Date();
-  const hoyString = hoy.toISOString().split('T')[0]; // YYYY-MM-DD
-  
-  let entradasHoy = 0;
-  let salidasHoy = 0;
-  let actividadesHoy = 0;
-  const todosUsuarios = new Set();
-  
-  // Procesar registros
-  registros.value.forEach(registro => {
-    // Agregar a total de usuarios
-    if (registro.curp || registro.usuario_id) {
-      todosUsuarios.add(registro.curp || registro.usuario_id);
-    }
-    
-    // Buscar campo de fecha
-    const fechaCampos = ['timestamp', 'fecha_hora', 'created_at', 'fecha', 'date_created'];
-    let fechaRegistro = null;
-    
-    for (const campo of fechaCampos) {
-      if (registro[campo]) {
-        fechaRegistro = registro[campo];
-        break;
-      }
-    }
-    
-    if (fechaRegistro) {
-      const fechaObj = new Date(fechaRegistro);
-      const fechaObjString = fechaObj.toISOString().split('T')[0];
-      
-      if (fechaObjString === hoyString) {
-        actividadesHoy++;
-        
-        // Determinar tipo
-        if (registro.tipo === 'entrada' || registro.tipo === 'entry' || 
-            (registro.accion && registro.accion.toLowerCase().includes('entrada'))) {
-          entradasHoy++;
-        } else if (registro.tipo === 'salida' || registro.tipo === 'exit' || 
-                   (registro.accion && registro.accion.toLowerCase().includes('salida'))) {
-          salidasHoy++;
-        } else {
-          entradasHoy++; // Por defecto entrada
-        }
-      }
-    }
-  });
-  
-  // Procesar asistencias
-  if (asistencias.value && asistencias.value.length > 0) {
-    asistencias.value.forEach(asistencia => {
-      // Agregar a total de usuarios
-      if (asistencia.curp || asistencia.usuario_id) {
-        todosUsuarios.add(asistencia.curp || asistencia.usuario_id);
-      }
-      
-      // Para asistencias, el campo clave es 'fecha' (YYYY-MM-DD)
-      if (asistencia.fecha) {
-        if (asistencia.fecha === hoyString) {
-          actividadesHoy++;
-          entradasHoy++; // Asistencias se consideran entradas
-        }
-      } else {
-        // Si no hay campo fecha, buscar en otros campos
-        const fechaCampos = ['timestamp', 'fecha_hora', 'created_at', 'date_created'];
-        let fechaAsistencia = null;
-        
-        for (const campo of fechaCampos) {
-          if (asistencia[campo]) {
-            fechaAsistencia = asistencia[campo];
-            break;
-          }
-        }
-        
-        if (fechaAsistencia) {
-          const fechaObj = new Date(fechaAsistencia);
-          const fechaObjString = fechaObj.toISOString().split('T')[0];
-          
-          if (fechaObjString === hoyString) {
-            actividadesHoy++;
-            entradasHoy++; // Asistencias se consideran entradas
-          }
-        }
-      }
-    });
-  }
-  
-  // Actualizar valores
-  totalUsuariosUnicos.value = todosUsuarios.size;
-  estadisticasHoy.entradas = entradasHoy;
-  estadisticasHoy.salidas = salidasHoy;
-  estadisticasHoy.actividades = actividadesHoy;
-  
-  console.log(`🔧 MÉTODO SIMPLE - Resultados:`);
-  console.log(`   Total usuarios: ${todosUsuarios.size}`);
-  console.log(`   Entradas hoy: ${entradasHoy}`);
-  console.log(`   Salidas hoy: ${salidasHoy}`);
-  console.log(`   Actividades hoy: ${actividadesHoy}`);
-  console.log(`   Fecha hoy: ${hoyString}`);
-}
-
-// Función para calcular estadísticas en horario CDMX (12:00 AM - 11:59 PM)
-const calcularEstadisticasCDMX = () => {
-  console.log(`🇲🇽 MÉTODO CDMX - Calculando estadísticas en horario CDMX (12:00 AM - 11:59 PM)...`);
-  
-  // Obtener la fecha actual en CDMX
-  const fechaCDMX = obtenerFechaCDMX();
-  const inicioDiaCDMX = new Date(fechaCDMX);
-  inicioDiaCDMX.setHours(0, 0, 0, 0); // 12:00 AM CDMX
-  
-  const finDiaCDMX = new Date(fechaCDMX);
-  finDiaCDMX.setHours(23, 59, 59, 999); // 11:59 PM CDMX
-  
-  console.log(`🇲🇽 Rango del día CDMX: ${inicioDiaCDMX.toString()} a ${finDiaCDMX.toString()}`);
-  
-  let entradasHoy = 0;
-  let salidasHoy = 0;
-  let actividadesHoy = 0;
-  const todosUsuarios = new Set();
-  
-  // Procesar registros
-  registros.value.forEach(registro => {
-    // Agregar a total de usuarios
-    if (registro.curp || registro.usuario_id) {
-      todosUsuarios.add(registro.curp || registro.usuario_id);
-    }
-    
-    // Buscar campo de fecha y convertir a horario CDMX
-    const fechaCampos = ['timestamp', 'fecha_hora', 'created_at', 'fecha', 'date_created'];
-    let fechaRegistro = null;
-    
-    for (const campo of fechaCampos) {
-      if (registro[campo]) {
-        fechaRegistro = registro[campo];
-        break;
-      }
-    }
-    
-    if (fechaRegistro) {
-      // Convertir la fecha del registro al horario CDMX
-      const fechaObj = new Date(fechaRegistro);
-      const offsetCDMX = -6 * 60; // -6 horas en minutos
-      const utcOffset = fechaObj.getTimezoneOffset();
-      const totalOffset = offsetCDMX + utcOffset;
-      const fechaCDMXRegistro = new Date(fechaObj.getTime() + totalOffset * 60000);
-      
-      // Verificar si está dentro del rango del día actual CDMX
-      if (fechaCDMXRegistro >= inicioDiaCDMX && fechaCDMXRegistro <= finDiaCDMX) {
-        actividadesHoy++;
-        console.log(`✅ Registro del día CDMX: ${fechaRegistro} -> ${fechaCDMXRegistro.toString()}`);
-        
-        // Determinar tipo
-        if (registro.tipo === 'entrada' || registro.tipo === 'entry' || 
-            (registro.accion && registro.accion.toLowerCase().includes('entrada'))) {
-          entradasHoy++;
-        } else if (registro.tipo === 'salida' || registro.tipo === 'exit' || 
-                   (registro.accion && registro.accion.toLowerCase().includes('salida'))) {
-          salidasHoy++;
-        } else {
-          entradasHoy++; // Por defecto entrada
-        }
-      }
-    }
-  });
-  
-  // Procesar asistencias
-  if (asistencias.value && asistencias.value.length > 0) {
-    asistencias.value.forEach(asistencia => {
-      // Agregar a total de usuarios
-      if (asistencia.curp || asistencia.usuario_id) {
-        todosUsuarios.add(asistencia.curp || asistencia.usuario_id);
-      }
-      
-      // Para asistencias, verificar el campo 'fecha' primero (formato YYYY-MM-DD)
-      if (asistencia.fecha) {
-        // Convertir fecha YYYY-MM-DD a objeto Date en CDMX
-        const [year, month, day] = asistencia.fecha.split('-').map(Number);
-        const fechaAsistenciaCDMX = new Date(year, month - 1, day, 12, 0, 0); // Mediodía CDMX
-        
-        // Verificar si es el mismo día que hoy en CDMX
-        const fechaHoyCDMX = new Date(fechaCDMX);
-        fechaHoyCDMX.setHours(12, 0, 0, 0); // Mediodía para comparación
-        
-        if (fechaAsistenciaCDMX.toDateString() === fechaHoyCDMX.toDateString()) {
-          actividadesHoy++;
-          entradasHoy++; // Asistencias se consideran entradas
-          console.log(`✅ Asistencia del día CDMX: ${asistencia.fecha}`);
-        }
-      } else {
-        // Si no hay campo fecha, buscar en otros campos de fecha/hora
-        const fechaCampos = ['timestamp', 'fecha_hora', 'created_at', 'date_created'];
-        let fechaAsistencia = null;
-        
-        for (const campo of fechaCampos) {
-          if (asistencia[campo]) {
-            fechaAsistencia = asistencia[campo];
-            break;
-          }
-        }
-        
-        if (fechaAsistencia) {
-          // Convertir la fecha de la asistencia al horario CDMX
-          const fechaObj = new Date(fechaAsistencia);
-          const offsetCDMX = -6 * 60;
-          const utcOffset = fechaObj.getTimezoneOffset();
-          const totalOffset = offsetCDMX + utcOffset;
-          const fechaCDMXAsistencia = new Date(fechaObj.getTime() + totalOffset * 60000);
-          
-          // Verificar si está dentro del rango del día actual CDMX
-          if (fechaCDMXAsistencia >= inicioDiaCDMX && fechaCDMXAsistencia <= finDiaCDMX) {
-            actividadesHoy++;
-            entradasHoy++; // Asistencias se consideran entradas
-            console.log(`✅ Asistencia del día CDMX: ${fechaAsistencia} -> ${fechaCDMXAsistencia.toString()}`);
-          }
-        }
-      }
-    });
-  }
-  
-  // Actualizar valores
-  totalUsuariosUnicos.value = todosUsuarios.size;
-  estadisticasHoy.entradas = entradasHoy;
-  estadisticasHoy.salidas = salidasHoy;
-  estadisticasHoy.actividades = actividadesHoy;
-  
-  console.log(`🇲🇽 MÉTODO CDMX - Resultados:`);
-  console.log(`   Total usuarios: ${todosUsuarios.size}`);
-  console.log(`   Entradas hoy: ${entradasHoy}`);
-  console.log(`   Salidas hoy: ${salidasHoy}`);
-  console.log(`   Actividades hoy: ${actividadesHoy}`);
-  console.log(`   Fecha actual CDMX: ${fechaCDMX.toString()}`);
-}
-// Función de DEBUG para comparar con AsistenciaView.vue
-const debugComparacion = () => {
-  const hoyCDMX = obtenerFechaHoyCDMX();
-  
-  console.log(`🔍 DEBUG COMPARACIÓN - Fecha CDMX: ${hoyCDMX}`);
-  console.log(`📊 DATOS DISPONIBLES:`);
-  console.log(`   Registros totales: ${registros.value.length}`);
-  console.log(`   Asistencias totales: ${asistencias.value.length}`);
-  
-  // Mostrar muestra de asistencias
-  if (asistencias.value.length > 0) {
-    console.log(`📋 MUESTRA ASISTENCIAS (primeras 5):`);
-    asistencias.value.slice(0, 5).forEach((asistencia, index) => {
-      console.log(`   ${index}: fecha="${asistencia.fecha}", usuario_id="${asistencia.usuario_id}", curp="${asistencia.curp}"`);
-    });
-    
-    // Contar asistencias de hoy EXACTAMENTE como AsistenciaView.vue
-    const asistenciasHoy = asistencias.value.filter(a => a.fecha === hoyCDMX);
-    console.log(`✅ ASISTENCIAS DE HOY (${hoyCDMX}): ${asistenciasHoy.length}`);
-    
-    if (asistenciasHoy.length > 0) {
-      console.log(`📋 ASISTENCIAS DE HOY ENCONTRADAS:`);
-      asistenciasHoy.forEach((a, index) => {
-        console.log(`   ${index}: usuario_id="${a.usuario_id}", curp="${a.curp}", hora_entrada="${a.hora_entrada}", hora_salida="${a.hora_salida}"`);
-      });
-    }
-  }
-  
-  // Mostrar muestra de registros
-  if (registros.value.length > 0) {
-    console.log(`📋 MUESTRA REGISTROS (primeros 5):`);
-    registros.value.slice(0, 5).forEach((registro, index) => {
-      const fechaCampos = ['timestamp', 'fecha_hora', 'created_at', 'fecha', 'date_created'];
-      let fechaRegistro = null;
-      let campoUsado = '';
-      
-      for (const campo of fechaCampos) {
-        if (registro[campo]) {
-          fechaRegistro = registro[campo];
-          campoUsado = campo;
-          break;
-        }
-      }
-      
-      console.log(`   ${index}: ${campoUsado}="${fechaRegistro}", tipo="${registro.tipo}", curp="${registro.curp}", usuario_id="${registro.usuario_id}"`);
-    });
-  }
-}
-
-// Función FINAL para calcular estadísticas igual que AsistenciaView.vue pero con horario CDMX
-const calcularEstadisticasFinales = () => {
-  console.log(`✅ CÁLCULO FINAL - Estadísticas en horario CDMX (igual que AsistenciaView.vue)...`);
-  
-  // Ejecutar debug para comparar datos
-  debugComparacion();
-  
-  const hoyCDMX = obtenerFechaHoyCDMX(); // YYYY-MM-DD en horario CDMX
-  console.log(`📅 Fecha de hoy CDMX: ${hoyCDMX}`);
-  
-  let entradasHoy = 0;
-  let salidasHoy = 0;
-  let actividadesHoy = 0;
-  const todosUsuarios = new Set();
-  
-  // PROCESAR REGISTROS - Contar todos los usuarios únicos
-  registros.value.forEach(registro => {
-    if (registro.curp || registro.usuario_id) {
-      todosUsuarios.add(registro.curp || registro.usuario_id);
-    }
-    
-    // Buscar actividades del día de hoy (registros)
-    const fechaCampos = ['timestamp', 'fecha_hora', 'created_at', 'fecha', 'date_created'];
-    let fechaRegistro = null;
-    
-    for (const campo of fechaCampos) {
-      if (registro[campo]) {
-        fechaRegistro = registro[campo];
-        break;
-      }
-    }
-    
-    if (fechaRegistro) {
-      // Convertir fecha del registro a horario CDMX y extraer solo la fecha (YYYY-MM-DD)
-      const fechaObj = new Date(fechaRegistro);
-      const offsetCDMX = -6 * 60;
-      const utcOffset = fechaObj.getTimezoneOffset();
-      const totalOffset = offsetCDMX + utcOffset;
-      const fechaCDMXObj = new Date(fechaObj.getTime() + totalOffset * 60000);
-      const fechaCDMXStr = fechaCDMXObj.toISOString().split('T')[0];
-      
-      if (fechaCDMXStr === hoyCDMX) {
-        actividadesHoy++;
-        
-        // Determinar si es entrada o salida
-        if (registro.tipo === 'entrada' || registro.tipo === 'entry' || 
-            (registro.accion && registro.accion.toLowerCase().includes('entrada'))) {
-          entradasHoy++;
-        } else if (registro.tipo === 'salida' || registro.tipo === 'exit' || 
-                   (registro.accion && registro.accion.toLowerCase().includes('salida'))) {
-          salidasHoy++;
-        } else {
-          entradasHoy++; // Por defecto entrada
-        }
-      }
-    }
-  });
-  
-  // PROCESAR ASISTENCIAS - Igual que AsistenciaView.vue
-  if (asistencias.value && asistencias.value.length > 0) {
-    const asistenciasHoyCount = asistencias.value.filter(a => {
-      // Agregar a total de usuarios únicos
-      if (a.curp || a.usuario_id) {
-        todosUsuarios.add(a.curp || a.usuario_id);
-      }
-      
-      // Filtrar asistencias de hoy - IGUAL QUE AsistenciaView.vue
-      return a.fecha === hoyCDMX;
-    }).length;
-    
-    // Sumar las asistencias a las actividades del día
-    actividadesHoy += asistenciasHoyCount;
-    // Las asistencias se consideran entradas
-    entradasHoy += asistenciasHoyCount;
-    
-    console.log(`📊 Asistencias de hoy (${hoyCDMX}): ${asistenciasHoyCount}`);
-  }
-  
-  // ACTUALIZAR VALORES FINALES
-  totalUsuariosUnicos.value = todosUsuarios.size;
-  estadisticasHoy.entradas = entradasHoy;
-  estadisticasHoy.salidas = salidasHoy;
-  estadisticasHoy.actividades = actividadesHoy;
-  
-  console.log(`✅ ESTADÍSTICAS FINALES (CDMX):`);
-  console.log(`   📍 Total usuarios únicos: ${todosUsuarios.size}`);
-  console.log(`   ⬅️ Entradas de hoy: ${entradasHoy}`);
-  console.log(`   ➡️ Salidas de hoy: ${salidasHoy}`);
-  console.log(`   📊 Actividades de hoy: ${actividadesHoy}`);
-  console.log(`   📅 Fecha CDMX: ${hoyCDMX}`);
-  console.log(`   🕐 Hora CDMX: ${obtenerFechaCDMX().toLocaleTimeString()}`);
-}
-
-const verificarRegistrosDeHoy = () => {
-  const hoy = new Date();
-  const hoyString = hoy.toISOString().split('T')[0]; // YYYY-MM-DD
-  const hoyFechaLocal = hoy.toDateString(); // fecha local
-  
-  console.log(`🔍 Verificando registros de hoy:`);
-  console.log(`   Fecha actual: ${hoy.toString()}`);
-  console.log(`   Fecha ISO: ${hoyString}`);
-  console.log(`   Fecha local: ${hoyFechaLocal}`);
-  
-  let contadorHoy = 0;
-  registros.value.slice(0, 10).forEach((registro, index) => {
-    const fechaCampos = ['timestamp', 'fecha_hora', 'created_at', 'fecha', 'date_created'];
-    let fechaRegistro = null;
-    let campoUsado = '';
-    
-    for (const campo of fechaCampos) {
-      if (registro[campo]) {
-        fechaRegistro = registro[campo];
-        campoUsado = campo;
-        break;
-      }
-    }
-    
-    if (fechaRegistro) {
-      const fechaObj = new Date(fechaRegistro);
-      const fechaObjString = fechaObj.toISOString().split('T')[0];
-      
-      console.log(`   Registro ${index}: ${campoUsado}="${fechaRegistro}" -> ${fechaObjString} ${fechaObjString === hoyString ? '✅ ES HOY' : '❌ NO es hoy'}`);
-      
-      if (fechaObjString === hoyString) {
-        contadorHoy++;
-      }
-    } else {
-      console.log(`   Registro ${index}: Sin fecha válida`);
-    }
-  });
-  
-  console.log(`   Total registros de hoy (método simple): ${contadorHoy}`);
-}
-
-// Función para calcular estadísticas del día actual en horario CDMX (tiempo real)
-const calcularEstadisticasDelDia = async () => {
-  console.log(`✅ VisorMap.vue - Cargando estadísticas del servidor (igual que AsistenciaView.vue)...`);
-  
-  try {
-    const token = localStorage.getItem('admin_token');
-    
-    // Cargar estadísticas del servidor (igual que AsistenciaView.vue)
-    const response = await axios.get(`${API_URL}/estadisticas`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (response.data && response.data.estadisticas) {
-      const stats = response.data.estadisticas;
-      
-      // Usar exactamente las mismas estadísticas que AsistenciaView.vue
-      totalUsuariosUnicos.value = stats.total_usuarios || 0;
-      estadisticasHoy.entradas = stats.asistencias_hoy || 0;
-      estadisticasHoy.salidas = stats.salidas_hoy || 0; // Usar las salidas reales del servidor
-      estadisticasHoy.actividades = (stats.asistencias_hoy || 0) + (stats.salidas_hoy || 0); // Total = entradas + salidas
-      
-      console.log(`✅ ESTADÍSTICAS DEL SERVIDOR (VisorMap.vue igual que AsistenciaView.vue):`);
-      console.log(`   📍 Total usuarios: ${totalUsuariosUnicos.value}`);
-      console.log(`   ⬅️ Entradas/Asistencias hoy: ${estadisticasHoy.entradas}`);
-      console.log(`   ➡️ Salidas hoy: ${estadisticasHoy.salidas}`);
-      console.log(`   📊 Total actividades hoy: ${estadisticasHoy.actividades}`);
-    } else {
-      console.warn('⚠️ No se pudieron cargar las estadísticas del servidor');
-      // Fallback a cálculo local mínimo
-      await calcularEstadisticasLocal();
-    }
-  } catch (error) {
-    console.error('❌ Error al cargar estadísticas del servidor:', error);
-    // Fallback a cálculo local
-    await calcularEstadisticasLocal();
-  }
-}
-
-const calcularEstadisticasLocal = async () => {
-  console.log(`📊 FALLBACK: Calculando estadísticas locales...`);
-  
-  // Calcular fecha de hoy en horario CDMX
-  const fechaUTC = new Date();
-  const offsetCDMX = -6 * 60; // -6 horas en minutos
-  const utcOffset = fechaUTC.getTimezoneOffset();
-  const totalOffset = offsetCDMX + utcOffset;
-  const fechaCDMX = new Date(fechaUTC.getTime() + totalOffset * 60000);
-  const hoyCDMX = fechaCDMX.toISOString().split('T')[0]; // YYYY-MM-DD en CDMX
-  
-  console.log(`📅 Fecha CDMX para cálculo local: ${hoyCDMX}`);
-  
-  const todosUsuarios = new Set();
-  let entradasHoy = 0;
-  let salidasHoy = 0;
-  
-  // Contar entradas y salidas reales de hoy
-  if (asistencias.value && asistencias.value.length > 0) {
-    asistencias.value.forEach(a => {
-      if (a.usuario_id) {
-        todosUsuarios.add(a.usuario_id);
-      }
-      
-      if (a.fecha === hoyCDMX) {
-        // Contar entrada si existe
-        if (a.hora_entrada) {
-          entradasHoy++;
-        }
-        // Contar salida si existe (adicional)
-        if (a.hora_salida) {
-          salidasHoy++;
-        }
-      }
-    });
-  }
-  
-  // Actualizar estadísticas
-  totalUsuariosUnicos.value = todosUsuarios.size;
-  estadisticasHoy.entradas = entradasHoy;
-  estadisticasHoy.salidas = salidasHoy;
-  estadisticasHoy.actividades = entradasHoy + salidasHoy; // Total actividades = entradas + salidas
-  
-  console.log(`✅ ESTADÍSTICAS LOCALES CALCULADAS:`);
-  console.log(`   📍 Total usuarios: ${totalUsuariosUnicos.value}`);
-  console.log(`   ⬅️ Entradas hoy: ${estadisticasHoy.entradas}`);
-  console.log(`   ➡️ Salidas hoy: ${estadisticasHoy.salidas}`);
-  console.log(`   📊 Total actividades hoy: ${estadisticasHoy.actividades}`);
-}
-
 const actualizarPuntosMapa = (datos) => {
   if (!map || !puntosSource) return;
   
@@ -1745,9 +1187,6 @@ const actualizarPuntosMapa = (datos) => {
         maxZoom: 15
       });
     }
-    
-    // Calcular estadísticas del día actual en tiempo real
-    calcularEstadisticasDelDia();
     
   } catch (err) {
     console.error('Error al actualizar puntos en el mapa:', err);
@@ -2042,17 +1481,8 @@ const logout = () => {
   router.push('/login');
 }
 
-// Actualizar estadísticas cada 5 minutos para mantener los datos del día actualizados
-let intervalEstadisticas = null;
-
 // Ciclo de vida del componente
 onMounted(() => {
-  // Configurar intervalo para actualizar estadísticas cada 5 minutos
-  intervalEstadisticas = setInterval(() => {
-    console.log('Actualizando estadísticas del día por intervalo...');
-    calcularEstadisticasFinales(); // Función final con horario CDMX correcto
-  }, 5 * 60 * 1000); // 5 minutos
-  
   // Asegurar que el CSS de Mapbox esté cargado (por si falla la importación en el estilo)
   const addMapboxCSS = () => {
     if (!document.getElementById('mapbox-gl-css')) {
@@ -2080,20 +1510,7 @@ onMounted(() => {
   });
 });
 
-// Watcher para recalcular estadísticas cuando cambien los datos
-watch([registros, asistencias], () => {
-  console.log('Datos de registros o asistencias cambiaron, recalculando estadísticas...');
-  calcularEstadisticasFinales(); // Función final con horario CDMX correcto
-}, { deep: true });
-
 onUnmounted(() => {
-  // Limpiar intervalo de estadísticas
-  if (intervalEstadisticas) {
-    clearInterval(intervalEstadisticas);
-    intervalEstadisticas = null;
-    console.log('Intervalo de estadísticas limpiado');
-  }
-  
   // Destruir el mapa para liberar recursos
   if (map) {
     map.remove();

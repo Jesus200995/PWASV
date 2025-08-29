@@ -19,12 +19,6 @@ import io
 
 app = FastAPI()
 
-# Función para obtener la fecha actual en horario CDMX (UTC-6)
-def obtener_fecha_cdmx():
-    cdmx_tz = pytz.timezone('America/Mexico_City')
-    fecha_cdmx = datetime.now(cdmx_tz)
-    return fecha_cdmx.strftime('%Y-%m-%d')
-
 # Permitir requests desde el frontend
 app.add_middleware(
     CORSMiddleware,
@@ -524,32 +518,24 @@ def obtener_estadisticas():
         cursor.execute("SELECT COUNT(*) FROM usuarios")
         total_usuarios = cursor.fetchone()[0]
         
-        # Obtener registros de hoy (fecha CDMX)
-        fecha_cdmx = obtener_fecha_cdmx()
-        cursor.execute("SELECT COUNT(*) FROM registros WHERE DATE(fecha_hora) = %s", (fecha_cdmx,))
+        # Obtener registros de hoy
+        cursor.execute("SELECT COUNT(*) FROM registros WHERE DATE(fecha_hora) = CURRENT_DATE")
         registros_hoy = cursor.fetchone()[0]
         
         # Obtener total de asistencias
         cursor.execute("SELECT COUNT(*) FROM asistencias")
         total_asistencias = cursor.fetchone()[0]
         
-        # Obtener asistencias de hoy (fecha CDMX)
-        cursor.execute("SELECT COUNT(*) FROM asistencias WHERE fecha = %s", (fecha_cdmx,))
+        # Obtener asistencias de hoy
+        cursor.execute("SELECT COUNT(*) FROM asistencias WHERE fecha = CURRENT_DATE")
         asistencias_hoy = cursor.fetchone()[0]
         
-        # Obtener usuarios presentes hoy (que han marcado entrada - fecha CDMX)
+        # Obtener usuarios presentes hoy (que han marcado entrada)
         cursor.execute("""
             SELECT COUNT(DISTINCT usuario_id) FROM asistencias 
-            WHERE fecha = %s AND hora_entrada IS NOT NULL
-        """, (fecha_cdmx,))
+            WHERE fecha = CURRENT_DATE AND hora_entrada IS NOT NULL
+        """)
         usuarios_presentes = cursor.fetchone()[0]
-        
-        # Obtener salidas de hoy (fecha CDMX) 
-        cursor.execute("""
-            SELECT COUNT(*) FROM asistencias 
-            WHERE fecha = %s AND hora_salida IS NOT NULL
-        """, (fecha_cdmx,))
-        salidas_hoy = cursor.fetchone()[0]
         
         estadisticas = {
             "total_registros": total_registros,
@@ -557,7 +543,6 @@ def obtener_estadisticas():
             "registros_hoy": registros_hoy,
             "total_asistencias": total_asistencias,
             "asistencias_hoy": asistencias_hoy,
-            "salidas_hoy": salidas_hoy,
             "usuarios_presentes": usuarios_presentes
         }
         

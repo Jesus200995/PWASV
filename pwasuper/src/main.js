@@ -48,11 +48,18 @@ window.addEventListener('load', async () => {
     console.log('🔔 Sistema de notificaciones con sonido inicializado');
     
     // Configurar listener para mensajes del Service Worker
-    navigator.serviceWorker.addEventListener('message', (event) => {
+    navigator.serviceWorker.addEventListener('message', async (event) => {
       if (event.data && event.data.type === 'NAVIGATE_TO_NOTIFICATIONS') {
         // Navegar a notificaciones cuando se hace click en notificación push
         router.push('/notificaciones');
         console.log('📱 Navegando a notificaciones desde push notification');
+      }
+      
+      // NUEVO: Manejar solicitud urgente de permisos desde Service Worker
+      if (event.data && event.data.type === 'REQUEST_NOTIFICATION_PERMISSION' && event.data.urgent) {
+        console.log('🚨 Service Worker solicita permisos urgentes de notificación');
+        const { requestNotificationPermission } = useNotifications();
+        await requestNotificationPermission();
       }
     });
     

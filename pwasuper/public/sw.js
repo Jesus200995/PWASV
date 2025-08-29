@@ -1,11 +1,11 @@
 /**
  * Service Worker para la PWA
- * Maneja cache, notificaciones, actualizaciones obligatorias y sincronización en segundo plano
+ * Maneja cache, notificaciones push, actualizaciones obligatorias y sincronización en segundo plano
+ * VERSIÓN MEJORADA PARA NOTIFICACIONES GARANTIZADAS
  */
 
 // Incrementar la versión del cache cuando hay cambios importantes
-// Esto forzará a que se muestre la notificación de actualización
-const CACHE_NAME = 'pwa-super-v1.0.1';
+const CACHE_NAME = 'pwa-super-v1.0.2';
 const OFFLINE_URL = '/offline.html';
 
 // Archivos a cachear para funcionamiento offline
@@ -14,7 +14,9 @@ const urlsToCache = [
   '/src/main.js',
   '/src/style.css',
   '/src/assets/main.css',
-  // Agregar más archivos críticos según sea necesario
+  '/manifest.json',
+  '/pwa-192x192.png',
+  '/pwa-512x512.png'
 ];
 
 // Evento de instalación
@@ -111,119 +113,214 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// Variables para polling en segundo plano
+// Variables para polling en segundo plano - VERSIÓN MEJORADA
 let backgroundPollingUserId = null;
 let backgroundPollingInterval = null;
 let backgroundApiUrl = null;
 let isPollingActive = false;
+let pollingAttempts = 0;
+let maxPollingAttempts = 5;
 
-// NUEVO: Estado persistente para notificaciones
+// NUEVO: Estado persistente para notificaciones con mejor tracking
 let notificationState = {
   lastCheck: 0,
   lastCount: 0,
-  isAppOpen: false
+  isAppOpen: false,
+  consecutiveErrors: 0,
+  permissionGranted: false
 };
 
-// NUEVO: Función para verificar notificaciones en segundo plano
+// NUEVO: Cola de notificaciones pendientes
+let pendingNotifications = [];
+
+// MEJORADO: Función robusta para verificar notificaciones en segundo plano
 async function checkForNewNotifications() {
   if (!backgroundPollingUserId || !backgroundApiUrl) {
     console.log('⚠️ No hay configuración de polling disponible');
     return;
   }
 
+  // Si hay muchos errores consecutivos, reducir frecuencia
+  if (notificationState.consecutiveErrors > 3) {
+    console.log('⚠️ Demasiados errores, saltando esta verificación');
+    return;
+  }
+
   try {
-    console.log(`🔄 Verificando notificaciones para usuario ${backgroundPollingUserId}...`);
+    console.log(`🔄 [${new Date().toLocaleTimeString()}] Verificando notificaciones para usuario ${backgroundPollingUserId}...`);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout de 10s
     
     const response = await fetch(`${backgroundApiUrl}/notificaciones/no-leidas?usuario_id=${backgroundPollingUserId}`, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+        'User-Agent': 'PWA-ServiceWorker'
+      },
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     if (response.ok) {
       const data = await response.json();
       const unreadCount = data.total_no_leidas || 0;
       
-      // Obtener el contador anterior del almacenamiento
+      // Resetear contador de errores en caso de éxito
+      notificationState.consecutiveErrors = 0;
+      
+      // Obtener el contador anterior del almacenamiento persistente
       const stored = await caches.open('notification-cache');
       const cachedResponse = await stored.match('last-notification-count');
       let previousCount = notificationState.lastCount || 0;
       
       if (cachedResponse) {
-        const cachedData = await cachedResponse.json();
-        previousCount = cachedData.count || 0;
-      }
-      
-      console.log(`📊 Notificaciones: ${unreadCount} (anterior: ${previousCount})`);
-      
-      // Si hay nuevas notificaciones, mostrar notificación push
-      if (unreadCount > previousCount && unreadCount > 0) {
-        const newNotifications = unreadCount - previousCount;
-        
-        // Verificar si alguna ventana de la app está abierta
-        const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-        const appIsOpen = clients.length > 0;
-        
-        if (!appIsOpen) {
-          // Solo mostrar notificación push si la app NO está abierta
-          await self.registration.showNotification('🌿 PWA Super - Nueva Notificación', {
-            body: `Tienes ${newNotifications} nueva(s) notificación(es) por revisar`,
-            icon: '/pwa-192x192.png',
-            badge: '/pwa-192x192.png',
-            vibrate: [150, 50, 150, 50, 150, 50, 200], // Patrón de vibración natural
-            tag: 'new-notifications-' + Date.now(), // Tag único para evitar reemplazar
-            requireInteraction: true, // Mantiene la notificación hasta que el usuario interactúe
-            silent: false, // Permite sonido del sistema
-            renotify: true, // Permite mostrar nuevamente la notificación
-            timestamp: Date.now(),
-            image: '/pwa-512x512.png', // Imagen grande en la notificación
-            data: {
-              unreadCount: unreadCount,
-              newCount: newNotifications,
-              timestamp: Date.now(),
-              url: '/#/notificaciones'
-            },
-            actions: [
-              {
-                action: 'view',
-                title: '👀 Ver Notificaciones',
-                icon: '/pwa-192x192.png'
-              },
-              {
-                action: 'dismiss',
-                title: '✖️ Descartar',
-                icon: '/pwa-192x192.png'
-              },
-              {
-                action: 'open',
-                title: '🚀 Abrir App',
-                icon: '/pwa-192x192.png'
-              }
-            ]
-          });
-          
-          console.log(`🔔 Notificación push enviada: ${newNotifications} nueva(s) notificación(es) (App cerrada)`);
-        } else {
-          console.log(`📱 App abierta, no se envía notificación push (${newNotifications} nuevas)`);
+        try {
+          const cachedData = await cachedResponse.json();
+          previousCount = cachedData.count || 0;
+        } catch (e) {
+          console.warn('⚠️ Error leyendo cache, usando valor por defecto');
         }
       }
       
-      // Actualizar contador y estado en cache
+      console.log(`📊 Notificaciones: ${unreadCount} actual vs ${previousCount} anterior`);
+      
+      // MEJORADO: Solo mostrar notificación si hay incremento Y la app está cerrada
+      if (unreadCount > previousCount && unreadCount > 0) {
+        const newNotifications = unreadCount - previousCount;
+        
+        // Verificar estado de ventanas de forma más robusta
+        const clients = await self.clients.matchAll({ 
+          type: 'window', 
+          includeUncontrolled: true 
+        });
+        
+        let appIsOpen = false;
+        for (const client of clients) {
+          if (client.visibilityState === 'visible') {
+            appIsOpen = true;
+            break;
+          }
+        }
+        
+        console.log(`📱 Estado de app: ${appIsOpen ? 'Abierta' : 'Cerrada'} (${clients.length} cliente(s))`);
+        
+        if (!appIsOpen) {
+          // MEJORADO: Verificar permisos antes de mostrar notificación
+          if (notificationState.permissionGranted || Notification.permission === 'granted') {
+            await showNotificationWithFallback(newNotifications, unreadCount);
+          } else {
+            console.log('🔔 Permisos no concedidos, almacenando notificación pendiente');
+            pendingNotifications.push({ newCount: newNotifications, totalCount: unreadCount, timestamp: Date.now() });
+          }
+        } else {
+          console.log(`📱 App visible, notificación manejada internamente (${newNotifications} nuevas)`);
+        }
+      }
+      
+      // Actualizar estado y cache
       notificationState.lastCount = unreadCount;
       notificationState.lastCheck = Date.now();
       
       await stored.put('last-notification-count', new Response(JSON.stringify({ 
         count: unreadCount, 
         timestamp: Date.now(),
-        lastCheck: notificationState.lastCheck
+        lastCheck: notificationState.lastCheck,
+        userId: backgroundPollingUserId
       })));
       
+      pollingAttempts = 0; // Resetear intentos fallidos
+      
     } else {
-      console.warn('⚠️ Error obteniendo notificaciones:', response.status, response.statusText);
+      console.warn(`⚠️ Error HTTP obteniendo notificaciones: ${response.status} ${response.statusText}`);
+      notificationState.consecutiveErrors++;
+      
+      if (response.status === 401 || response.status === 403) {
+        console.error('❌ Error de autenticación, deteniendo polling');
+        if (backgroundPollingInterval) {
+          clearInterval(backgroundPollingInterval);
+          isPollingActive = false;
+        }
+      }
     }
   } catch (error) {
-    console.error('❌ Error en verificación de notificaciones en segundo plano:', error);
+    console.error(`❌ [${new Date().toLocaleTimeString()}] Error en verificación de notificaciones:`, error.message);
+    notificationState.consecutiveErrors++;
+    pollingAttempts++;
+    
+    // Si hay demasiados errores, reducir frecuencia
+    if (pollingAttempts >= maxPollingAttempts) {
+      console.warn('⚠️ Demasiados intentos fallidos, reiniciando polling con menos frecuencia');
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+        // Reiniciar con menos frecuencia (30s en lugar de 15s)
+        backgroundPollingInterval = setInterval(() => {
+          if (isPollingActive) checkForNewNotifications();
+        }, 30000);
+      }
+      pollingAttempts = 0;
+    }
+  }
+}
+
+// NUEVO: Función para mostrar notificaciones con fallbacks
+async function showNotificationWithFallback(newNotifications, totalCount) {
+  try {
+    const notificationOptions = {
+      body: `🔔 Tienes ${newNotifications} nueva(s) notificación(es)${totalCount > newNotifications ? ` (Total: ${totalCount})` : ''}`,
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-192x192.png',
+      vibrate: [200, 100, 200], // Vibración más simple y efectiva
+      tag: `notification-${Date.now()}`, // Tag único para evitar reemplazos
+      requireInteraction: true,
+      silent: false,
+      renotify: true,
+      timestamp: Date.now(),
+      image: '/pwa-512x512.png',
+      data: {
+        unreadCount: totalCount,
+        newCount: newNotifications,
+        timestamp: Date.now(),
+        url: '/#/notificaciones',
+        userId: backgroundPollingUserId
+      },
+      actions: [
+        {
+          action: 'view',
+          title: '👀 Ver Notificaciones',
+          icon: '/pwa-192x192.png'
+        },
+        {
+          action: 'open',
+          title: '🚀 Abrir App',
+          icon: '/pwa-192x192.png'
+        },
+        {
+          action: 'dismiss',
+          title: '❌ Descartar',
+          icon: '/pwa-192x192.png'
+        }
+      ]
+    };
+    
+    await self.registration.showNotification('🔔 PWA Super - Nuevas Notificaciones', notificationOptions);
+    
+    console.log(`✅ [${new Date().toLocaleTimeString()}] Notificación push enviada: ${newNotifications} nueva(s) notificación(es)`);
+    
+    // Limpiar notificaciones pendientes exitosamente enviadas
+    pendingNotifications = pendingNotifications.filter(n => n.timestamp < Date.now() - 60000);
+    
+  } catch (error) {
+    console.error('❌ Error mostrando notificación push:', error);
+    
+    // Fallback: almacenar para reintento posterior
+    pendingNotifications.push({
+      newCount: newNotifications,
+      totalCount: totalCount,
+      timestamp: Date.now(),
+      retryCount: 0
+    });
   }
 }
 
@@ -312,7 +409,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // Evento de mensaje (comunicación con la aplicación principal)
-self.addEventListener('message', (event) => {
+self.addEventListener('message', async (event) => {
   console.log('💬 Mensaje recibido en Service Worker:', event.data);
   
   // Al recibir mensaje para actualizar, saltar el waiting y activar el nuevo SW
@@ -329,47 +426,118 @@ self.addEventListener('message', (event) => {
     });
   }
   
-  // NUEVO: Configurar polling de notificaciones en segundo plano
+  // MEJORADO: Configurar polling de notificaciones en segundo plano
   if (event.data && event.data.type === 'START_BACKGROUND_NOTIFICATIONS_POLLING') {
     backgroundPollingUserId = event.data.userId;
     backgroundApiUrl = event.data.apiUrl;
-    const interval = event.data.interval || 15000;
+    const interval = event.data.interval || 10000; // Más agresivo: cada 10 segundos
     
-    console.log(`📡 Iniciando polling de notificaciones en segundo plano para usuario ${backgroundPollingUserId} cada ${interval/1000}s`);
+    console.log(`📡 [${new Date().toLocaleTimeString()}] Iniciando polling robusto para usuario ${backgroundPollingUserId} cada ${interval/1000}s`);
     
     // Limpiar intervalo anterior si existe
     if (backgroundPollingInterval) {
       clearInterval(backgroundPollingInterval);
     }
     
-    // Marcar como activo
+    // Resetear estado
     isPollingActive = true;
+    pollingAttempts = 0;
+    notificationState.consecutiveErrors = 0;
     
-    // Iniciar polling periódico
-    backgroundPollingInterval = setInterval(() => {
+    // NUEVO: Verificar permisos inmediatamente
+    notificationState.permissionGranted = Notification.permission === 'granted';
+    
+    if (!notificationState.permissionGranted) {
+      console.warn('⚠️ Permisos de notificación no concedidos, solicitando...');
+      // En un service worker no se puede solicitar permisos directamente
+      // Se enviará mensaje a la app principal
+      const clients = await self.clients.matchAll();
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'REQUEST_NOTIFICATION_PERMISSION',
+          urgent: true
+        });
+      });
+    }
+    
+    // Iniciar polling periódico robusto
+    backgroundPollingInterval = setInterval(async () => {
       if (isPollingActive) {
-        checkForNewNotifications();
+        await checkForNewNotifications();
+        
+        // Procesar notificaciones pendientes si ahora tenemos permisos
+        if (Notification.permission === 'granted' && pendingNotifications.length > 0) {
+          notificationState.permissionGranted = true;
+          const pending = pendingNotifications.splice(0, 3); // Procesar hasta 3 pendientes
+          for (const notification of pending) {
+            if (Date.now() - notification.timestamp < 300000) { // Solo si es menor a 5 minutos
+              await showNotificationWithFallback(notification.newCount, notification.totalCount);
+            }
+          }
+        }
       }
     }, interval);
     
     // Ejecutar verificación inmediata
-    checkForNewNotifications();
+    setTimeout(() => checkForNewNotifications(), 2000); // Esperar 2s para que la app se establezca
   }
   
-  // NUEVO: Detener polling de notificaciones
+  // MEJORADO: Detener polling de notificaciones
   if (event.data && event.data.type === 'STOP_BACKGROUND_NOTIFICATIONS_POLLING') {
     if (backgroundPollingInterval) {
       clearInterval(backgroundPollingInterval);
       backgroundPollingInterval = null;
       isPollingActive = false;
-      console.log('🛑 Polling de notificaciones en segundo plano detenido');
+      console.log('🛑 Polling de notificaciones detenido');
     }
   }
   
-  // NUEVO: Marcar app como abierta/cerrada
+  // MEJORADO: Marcar app como abierta/cerrada con más detalle
   if (event.data && event.data.type === 'APP_STATUS') {
+    const wasOpen = notificationState.isAppOpen;
     notificationState.isAppOpen = event.data.isOpen;
-    console.log(`📱 Estado de app actualizado: ${event.data.isOpen ? 'Abierta' : 'Cerrada'}`);
+    
+    console.log(`📱 Estado de app: ${wasOpen ? 'Abierta' : 'Cerrada'} → ${event.data.isOpen ? 'Abierta' : 'Cerrada'}`);
+    
+    // Si la app se acaba de cerrar, aumentar frecuencia de polling temporalmente
+    if (wasOpen && !event.data.isOpen && backgroundPollingInterval) {
+      console.log('📱 App recién cerrada, aumentando frecuencia de polling temporalmente');
+      clearInterval(backgroundPollingInterval);
+      
+      // Polling más frecuente cuando la app se acaba de cerrar (cada 5 segundos por 2 minutos)
+      let tempPollingCount = 0;
+      const tempInterval = setInterval(async () => {
+        if (isPollingActive && tempPollingCount < 24) { // 24 * 5s = 2 minutos
+          await checkForNewNotifications();
+          tempPollingCount++;
+        } else {
+          clearInterval(tempInterval);
+          // Volver al polling normal
+          if (isPollingActive) {
+            backgroundPollingInterval = setInterval(() => {
+              if (isPollingActive) checkForNewNotifications();
+            }, 10000);
+          }
+        }
+      }, 5000);
+    }
+  }
+  
+  // NUEVO: Actualizar permisos de notificación
+  if (event.data && event.data.type === 'NOTIFICATION_PERMISSION_UPDATED') {
+    notificationState.permissionGranted = event.data.granted;
+    console.log(`🔔 Permisos de notificación actualizados: ${event.data.granted ? 'Concedidos' : 'Denegados'}`);
+    
+    if (event.data.granted && pendingNotifications.length > 0) {
+      console.log(`📤 Procesando ${pendingNotifications.length} notificaciones pendientes`);
+      const pending = pendingNotifications.splice(0);
+      for (const notification of pending) {
+        if (Date.now() - notification.timestamp < 300000) { // Solo si es menor a 5 minutos
+          await showNotificationWithFallback(notification.newCount, notification.totalCount);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1s entre notificaciones
+        }
+      }
+    }
   }
 });
 

@@ -104,14 +104,86 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('sync', (event) => {
   console.log('🔄 Evento de sincronización:', event.tag);
   
-  if (event.tag === 'background-sync') {
+  if (event.tag === 'background-sync' || event.tag === 'background-sync-notifications') {
     event.waitUntil(
-      // Aquí se podría implementar lógica adicional de sincronización
-      // Por ahora, el syncService.js se encarga de la sincronización
-      console.log('📡 Sincronización en segundo plano ejecutada')
+      checkForNewNotifications()
     );
   }
 });
+
+// Variables para polling en segundo plano
+let backgroundPollingUserId = null;
+let backgroundPollingInterval = null;
+let backgroundApiUrl = null;
+
+// NUEVO: Función para verificar notificaciones en segundo plano
+async function checkForNewNotifications() {
+  if (!backgroundPollingUserId || !backgroundApiUrl) {
+    console.log('⚠️ No hay configuración de polling disponible');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${backgroundApiUrl}/notificaciones/no-leidas?usuario_id=${backgroundPollingUserId}`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      const unreadCount = data.total_no_leidas || 0;
+      
+      // Obtener el contador anterior del almacenamiento
+      const stored = await caches.open('notification-cache');
+      const cachedResponse = await stored.match('last-notification-count');
+      let previousCount = 0;
+      
+      if (cachedResponse) {
+        const cachedData = await cachedResponse.json();
+        previousCount = cachedData.count || 0;
+      }
+      
+      // Si hay nuevas notificaciones, mostrar notificación push
+      if (unreadCount > previousCount) {
+        const newNotifications = unreadCount - previousCount;
+        
+        await self.registration.showNotification('PWA Super - Nueva Notificación', {
+          body: `Tienes ${newNotifications} nueva(s) notificación(es)`,
+          icon: '/pwa-192x192.png',
+          badge: '/pwa-192x192.png',
+          vibrate: [200, 100, 200, 100, 200],
+          tag: 'new-notifications',
+          requireInteraction: true,
+          silent: false,
+          data: {
+            unreadCount: unreadCount,
+            newCount: newNotifications,
+            timestamp: Date.now()
+          },
+          actions: [
+            {
+              action: 'view',
+              title: 'Ver Notificaciones',
+              icon: '/pwa-192x192.png'
+            },
+            {
+              action: 'dismiss',
+              title: 'Descartar',
+              icon: '/pwa-192x192.png'
+            }
+          ]
+        });
+        
+        console.log(`🔔 Notificación push enviada: ${newNotifications} nueva(s) notificación(es)`);
+      }
+      
+      // Actualizar contador en cache
+      await stored.put('last-notification-count', new Response(JSON.stringify({ count: unreadCount, timestamp: Date.now() })));
+      
+    } else {
+      console.warn('⚠️ Error obteniendo notificaciones:', response.status);
+    }
+  } catch (error) {
+    console.error('❌ Error en verificación de notificaciones en segundo plano:', error);
+  }
+}
 
 // Evento de notificación push
 self.addEventListener('push', (event) => {
@@ -151,18 +223,38 @@ self.addEventListener('notificationclick', (event) => {
   
   event.notification.close();
   
-  if (event.action === 'explore') {
-    // Abrir la aplicación
+  if (event.action === 'view' || event.action === 'explore') {
+    // Abrir la aplicación en la sección de notificaciones
     event.waitUntil(
-      clients.openWindow('/')
+      clients.matchAll({ type: 'window' }).then(clients => {
+        // Si hay una ventana abierta, enfocarla y navegar a notificaciones
+        if (clients.length > 0) {
+          const client = clients[0];
+          client.focus();
+          client.postMessage({
+            type: 'NAVIGATE_TO_NOTIFICATIONS',
+            data: event.notification.data
+          });
+          return client;
+        } else {
+          // Si no hay ventanas abiertas, abrir nueva ventana en notificaciones
+          return clients.openWindow('/#/notificaciones');
+        }
+      })
     );
-  } else if (event.action === 'close') {
+  } else if (event.action === 'dismiss' || event.action === 'close') {
     // Solo cerrar la notificación
-    event.notification.close();
+    console.log('🔕 Notificación descartada por el usuario');
   } else {
-    // Click general en la notificación
+    // Click general en la notificación - abrir aplicación
     event.waitUntil(
-      clients.openWindow('/')
+      clients.matchAll({ type: 'window' }).then(clients => {
+        if (clients.length > 0) {
+          return clients[0].focus();
+        } else {
+          return clients.openWindow('/');
+        }
+      })
     );
   }
 });
@@ -183,6 +275,37 @@ self.addEventListener('message', (event) => {
       type: 'VERSION',
       version: CACHE_NAME
     });
+  }
+  
+  // NUEVO: Configurar polling de notificaciones en segundo plano
+  if (event.data && event.data.type === 'START_BACKGROUND_NOTIFICATIONS_POLLING') {
+    backgroundPollingUserId = event.data.userId;
+    backgroundApiUrl = event.data.apiUrl;
+    const interval = event.data.interval || 30000;
+    
+    console.log(`📡 Iniciando polling de notificaciones en segundo plano para usuario ${backgroundPollingUserId}`);
+    
+    // Limpiar intervalo anterior si existe
+    if (backgroundPollingInterval) {
+      clearInterval(backgroundPollingInterval);
+    }
+    
+    // Iniciar polling periódico
+    backgroundPollingInterval = setInterval(() => {
+      checkForNewNotifications();
+    }, interval);
+    
+    // Ejecutar verificación inmediata
+    checkForNewNotifications();
+  }
+  
+  // NUEVO: Detener polling de notificaciones
+  if (event.data && event.data.type === 'STOP_BACKGROUND_NOTIFICATIONS_POLLING') {
+    if (backgroundPollingInterval) {
+      clearInterval(backgroundPollingInterval);
+      backgroundPollingInterval = null;
+      console.log('🛑 Polling de notificaciones en segundo plano detenido');
+    }
   }
 });
 

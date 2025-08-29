@@ -127,19 +127,150 @@ const detectNewNotifications = (newCount) => {
   globalNotificationState.previousCount = newCount
 }
 
-// NUEVO: Solicitar permisos de notificación
+// NUEVO: Solicitar permisos de notificación y configurar push notifications
 const requestNotificationPermission = async () => {
+  if (!('Notification' in window)) {
+    console.warn('❌ Este navegador no soporta notificaciones')
+    return false
+  }
+
+  if (!('serviceWorker' in navigator)) {
+    console.warn('❌ Service Worker no disponible')
+    return false
+  }
+
   if ('Notification' in window && Notification.permission === 'default') {
     try {
       const permission = await Notification.requestPermission()
       console.log(`🔔 Permisos de notificación: ${permission}`)
-      return permission === 'granted'
+      
+      if (permission === 'granted') {
+        // Configurar push notifications para funcionamiento en segundo plano
+        await setupPushNotifications()
+        return true
+      }
+      return false
     } catch (error) {
       console.warn('⚠️ Error solicitando permisos de notificación:', error)
       return false
     }
   }
-  return Notification.permission === 'granted'
+  
+  if (Notification.permission === 'granted') {
+    await setupPushNotifications()
+    return true
+  }
+  
+  return false
+}
+
+// NUEVO: Configurar push notifications para funcionamiento en segundo plano
+const setupPushNotifications = async () => {
+  try {
+    const registration = await navigator.serviceWorker.ready
+    
+    // Verificar si ya hay una suscripción push activa
+    let subscription = await registration.pushManager.getSubscription()
+    
+    if (!subscription) {
+      // Crear nueva suscripción push
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: generateVAPIDKey()
+      })
+      
+      console.log('📡 Suscripción push creada para notificaciones en segundo plano')
+      
+      // Enviar suscripción al servidor (opcional, para push notifications desde servidor)
+      await sendSubscriptionToServer(subscription)
+    }
+    
+    // Configurar sincronización en segundo plano para polling
+    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+      await registration.sync.register('background-sync-notifications')
+    }
+    
+    // Configurar polling personalizado en el service worker
+    await setupServiceWorkerPolling(registration)
+    
+    console.log('✅ Push notifications configuradas para funcionamiento en segundo plano')
+    return true
+  } catch (error) {
+    console.error('❌ Error configurando push notifications:', error)
+    return false
+  }
+}
+
+// NUEVO: Generar clave VAPID básica (para demo, en producción usar clave del servidor)
+const generateVAPIDKey = () => {
+  // Clave VAPID de ejemplo (en producción debe venir del servidor)
+  const publicVapidKey = 'BCOlp6JlNfVlK1PTDX8Tth7hCNz_W5OWpRBb0F7N1E_rKxDfYLpHPF9KGQcA8KhJQ9yL3Tpb7XGbDXZ5FcD2kJw'
+  
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4)
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/')
+    
+    const rawData = window.atob(base64)
+    const outputArray = new Uint8Array(rawData.length)
+    
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i)
+    }
+    return outputArray
+  }
+  
+  return urlBase64ToUint8Array(publicVapidKey)
+}
+
+// NUEVO: Enviar suscripción al servidor (opcional)
+const sendSubscriptionToServer = async (subscription) => {
+  try {
+    const userId = getUserId()
+    if (!userId) return
+    
+    // Aquí se enviaría la suscripción al backend para enviar push notifications
+    console.log('📤 Enviando suscripción push al servidor:', {
+      userId,
+      endpoint: subscription.endpoint,
+      keys: subscription.keys
+    })
+    
+    // En el futuro, enviar al endpoint del backend:
+    // await fetch('/api/push-subscription', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ userId, subscription })
+    // })
+    
+  } catch (error) {
+    console.warn('⚠️ Error enviando suscripción al servidor:', error)
+  }
+}
+
+// NUEVO: Configurar polling en Service Worker
+const setupServiceWorkerPolling = async (registration) => {
+  try {
+    // Enviar mensaje al Service Worker para iniciar polling en segundo plano
+    if (registration.active) {
+      const userId = getUserId()
+      const apiUrl = import.meta.env.PROD 
+        ? 'https://apipwa.sembrandodatos.com' 
+        : 'http://localhost:8000'
+      
+      registration.active.postMessage({
+        type: 'START_BACKGROUND_NOTIFICATIONS_POLLING',
+        userId: userId,
+        apiUrl: apiUrl,
+        interval: 30000 // Polling cada 30 segundos
+      })
+      
+      console.log('📡 Polling de notificaciones configurado en Service Worker')
+    }
+  } catch (error) {
+    console.warn('⚠️ Error configurando polling en Service Worker:', error)
+  }
 }
 
 /**
@@ -399,12 +530,13 @@ export const useNotifications = () => {
     getState,
     getUserId,
     
-    // NUEVOS: Métodos de sonido
+    // NUEVOS: Métodos de sonido y push notifications
     enableSound,
     disableSound,
     playTestSound,
     requestNotificationPermission,
     initializeGlobalAudio,
+    setupPushNotifications,
     
     // Estado global (solo lectura)
     state: globalNotificationState

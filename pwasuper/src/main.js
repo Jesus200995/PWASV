@@ -56,6 +56,43 @@ window.addEventListener('load', async () => {
       }
     });
     
+    // Notificar al Service Worker que la app está abierta
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'APP_STATUS',
+        isOpen: true
+      });
+    }
+    
+    // Escuchar cuando la app se cierra o se oculta
+    document.addEventListener('visibilitychange', () => {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'APP_STATUS',
+          isOpen: !document.hidden
+        });
+      }
+    });
+    
+    // Escuchar cuando la ventana pierde/gana foco
+    window.addEventListener('blur', () => {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'APP_STATUS',
+          isOpen: false
+        });
+      }
+    });
+    
+    window.addEventListener('focus', () => {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'APP_STATUS',
+          isOpen: true
+        });
+      }
+    });
+    
   } catch (error) {
     console.error('❌ Error al inicializar la aplicación:', error);
   }

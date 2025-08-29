@@ -25,39 +25,56 @@ const initializeGlobalAudio = () => {
     // Crear un beep utilizando Web Audio API
     const audioContext = new (window.AudioContext || window.webkitAudioContext)()
     
-    // Función para crear un sonido de notificación suave tipo "ding" moderno
+    // Función para crear un sonido de notificación natural y moderno
     const createNotificationSound = () => {
       const oscillator1 = audioContext.createOscillator()
       const oscillator2 = audioContext.createOscillator()
+      const oscillator3 = audioContext.createOscillator()
       const gainNode = audioContext.createGain()
+      const filterNode = audioContext.createBiquadFilter()
       
-      // Conectar los nodos
-      oscillator1.connect(gainNode)
-      oscillator2.connect(gainNode)
+      // Conectar los nodos con filtro para sonido más natural
+      oscillator1.connect(filterNode)
+      oscillator2.connect(filterNode)
+      oscillator3.connect(filterNode)
+      filterNode.connect(gainNode)
       gainNode.connect(audioContext.destination)
       
-      // Configurar el primer oscilador - tono principal
-      oscillator1.type = 'sine' // Onda sinusoidal suave
-      oscillator1.frequency.setValueAtTime(1000, audioContext.currentTime)
-      oscillator1.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1)
+      // Configurar filtro para sonido más suave y natural
+      filterNode.type = 'lowpass'
+      filterNode.frequency.setValueAtTime(2000, audioContext.currentTime)
+      filterNode.Q.setValueAtTime(1, audioContext.currentTime)
       
-      // Configurar el segundo oscilador - armonía sutil
-      oscillator2.type = 'sine'
-      oscillator2.frequency.setValueAtTime(1200, audioContext.currentTime)
-      oscillator2.frequency.exponentialRampToValueAtTime(960, audioContext.currentTime + 0.1)
+      // Primer oscilador - gota de agua / sonido natural (frecuencia fundamental)
+      oscillator1.type = 'sine'
+      oscillator1.frequency.setValueAtTime(659.25, audioContext.currentTime) // E5 (Mi)
+      oscillator1.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.15) // A4 (La)
       
-      // Configurar el volumen - envolvente muy suave tipo "ding"
+      // Segundo oscilador - armonía natural (tercera mayor)
+      oscillator2.type = 'triangle' // Forma de onda más orgánica
+      oscillator2.frequency.setValueAtTime(830.61, audioContext.currentTime) // G#5 (Sol#)
+      oscillator2.frequency.exponentialRampToValueAtTime(554.37, audioContext.currentTime + 0.15) // C#5 (Do#)
+      
+      // Tercer oscilador - brillo sutil como campana tibetana
+      oscillator3.type = 'sine'
+      oscillator3.frequency.setValueAtTime(1318.51, audioContext.currentTime) // E6 (Mi octava alta)
+      oscillator3.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.15) // A5 (La)
+      
+      // Configurar el volumen - envolvente natural tipo "gota de agua zen"
       gainNode.gain.setValueAtTime(0, audioContext.currentTime)
-      gainNode.gain.linearRampToValueAtTime(1.0, audioContext.currentTime + 0.02) // Ataque rápido al 100%
-      gainNode.gain.exponentialRampToValueAtTime(0.8, audioContext.currentTime + 0.1) // Sustain fuerte
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6) // Decay largo y suave
+      gainNode.gain.linearRampToValueAtTime(1.0, audioContext.currentTime + 0.03) // Ataque muy rápido
+      gainNode.gain.exponentialRampToValueAtTime(0.7, audioContext.currentTime + 0.1) // Sustain natural
+      gainNode.gain.exponentialRampToValueAtTime(0.3, audioContext.currentTime + 0.4) // Decaimiento gradual
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2) // Eco natural largo
       
-      // Reproducir ambos osciladores
+      // Reproducir los tres osciladores con timing natural
       oscillator1.start(audioContext.currentTime)
-      oscillator1.stop(audioContext.currentTime + 0.6)
+      oscillator2.start(audioContext.currentTime + 0.02) // Ligeramente desfasado para efecto natural
+      oscillator3.start(audioContext.currentTime + 0.05) // Brillo que entra después
       
-      oscillator2.start(audioContext.currentTime)
-      oscillator2.stop(audioContext.currentTime + 0.6)
+      oscillator1.stop(audioContext.currentTime + 1.2)
+      oscillator2.stop(audioContext.currentTime + 1.0) // Se desvanece antes
+      oscillator3.stop(audioContext.currentTime + 0.8) // El brillo se va primero
     }
     
     globalAudioNotification = createNotificationSound
@@ -263,7 +280,7 @@ const setupServiceWorkerPolling = async (registration) => {
         type: 'START_BACKGROUND_NOTIFICATIONS_POLLING',
         userId: userId,
         apiUrl: apiUrl,
-        interval: 30000 // Polling cada 30 segundos
+        interval: 15000 // Polling más frecuente: cada 15 segundos para mejor experiencia
       })
       
       console.log('📡 Polling de notificaciones configurado en Service Worker')

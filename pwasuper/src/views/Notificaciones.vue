@@ -422,27 +422,136 @@
           </div>
 
           <!-- Archivo adjunto -->
+          <!-- Archivo adjunto con sistema de descarga y progreso -->
           <div v-else-if="notificacionSeleccionada.tiene_archivo" class="news-attachment mb-6">
-            <div class="border border-gray-200 rounded-xl p-3 bg-gradient-to-r from-gray-50 to-white shadow-sm">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-lg">{{ obtenerIconoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
+            <div class="border border-gray-200 rounded-xl p-4 bg-gradient-to-r from-gray-50 to-white shadow-sm">
+              
+              <!-- Información del archivo -->
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-xl">{{ obtenerIconoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <h4 class="text-xs font-semibold text-gray-800 truncate">Archivo adjunto</h4>
-                  <p class="text-xs text-gray-600 truncate">{{ notificacionSeleccionada.archivo_nombre }}</p>
-                  <p class="text-xs text-gray-500 capitalize mt-1">{{ notificacionSeleccionada.archivo_tipo }}</p>
+                  <h4 class="text-sm font-semibold text-gray-800 truncate">{{ notificacionSeleccionada.archivo_nombre }}</h4>
+                  <p class="text-xs text-gray-600 capitalize">{{ notificacionSeleccionada.archivo_tipo }}</p>
+                  <p v-if="notificacionSeleccionada.archivoDescargado" class="text-xs text-green-600 font-medium">
+                    ✅ Archivo listo para ver
+                  </p>
                 </div>
+              </div>
+
+              <!-- Estados del archivo -->
+              <!-- Estado inicial: Sin descarga -->
+              <div v-if="!notificacionSeleccionada.estadoDescarga" class="flex justify-end">
                 <button 
                   @click="abrirArchivo(notificacionSeleccionada.id)"
-                  class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-lg transition-colors duration-200 flex items-center space-x-1"
+                  class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2"
                 >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>
-                  <span>Abrir</span>
+                  <span>Descargar archivo</span>
                 </button>
+              </div>
+
+              <!-- Estado: Preparando descarga -->
+              <div v-else-if="notificacionSeleccionada.estadoDescarga === 'preparando'" class="space-y-3">
+                <div class="flex items-center justify-center space-x-2 text-blue-600">
+                  <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  <span class="text-sm font-medium">Preparando descarga...</span>
+                </div>
+              </div>
+
+              <!-- Estado: Descargando con barra de progreso -->
+              <div v-else-if="notificacionSeleccionada.estadoDescarga === 'descargando'" class="space-y-3">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-blue-600 font-medium">Descargando archivo...</span>
+                  <span class="text-gray-600">{{ notificacionSeleccionada.progresoDescarga }}%</span>
+                </div>
+                
+                <!-- Barra de progreso animada -->
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div 
+                    class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                    :style="{ width: `${notificacionSeleccionada.progresoDescarga}%` }"
+                  >
+                    <!-- Efecto de brillo en movimiento -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 -skew-x-12 animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Estado: Descarga completada -->
+              <div v-else-if="notificacionSeleccionada.estadoDescarga === 'completado'" class="space-y-3">
+                <div class="flex items-center space-x-2 text-green-600 mb-3">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span class="text-sm font-medium">¡Descarga completada!</span>
+                </div>
+                
+                <!-- Información del archivo descargado -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                  <p class="text-xs text-green-800 font-medium">
+                    📁 {{ notificacionSeleccionada.archivoDescargado?.nombre }}
+                  </p>
+                  <p class="text-xs text-green-600 mt-1">
+                    Tipo: {{ notificacionSeleccionada.archivoDescargado?.tipo }}
+                  </p>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="flex space-x-2 justify-end">
+                  <!-- Botón para ver con app nativa -->
+                  <button 
+                    @click="verArchivoDescargado()"
+                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    <span>Ver archivo</span>
+                  </button>
+                  
+                  <!-- Botón para descargar de nuevo -->
+                  <button 
+                    @click="abrirArchivo(notificacionSeleccionada.id)"
+                    class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                  >
+                    🔄
+                  </button>
+                </div>
+              </div>
+
+              <!-- Estado: Error en descarga -->
+              <div v-else-if="notificacionSeleccionada.estadoDescarga === 'error'" class="space-y-3">
+                <div class="flex items-center space-x-2 text-red-600 mb-3">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                  </svg>
+                  <span class="text-sm font-medium">Error en la descarga</span>
+                </div>
+                
+                <!-- Mensaje de error -->
+                <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+                  <p class="text-xs text-red-800">{{ notificacionSeleccionada.errorDescarga }}</p>
+                </div>
+
+                <!-- Botón para reintentar -->
+                <div class="flex justify-end">
+                  <button 
+                    @click="abrirArchivo(notificacionSeleccionada.id)"
+                    class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>Reintentar descarga</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1092,6 +1201,106 @@ const cargarNotificacionesLeidas = () => {
 
 const abrirArchivo = async (notificacionId) => {
   try {
+    console.log(`📂 Preparando descarga de archivo de notificación ${notificacionId}`)
+    
+    // Buscar la notificación para obtener información del archivo
+    const notificacion = notificaciones.value.find(n => n.id === notificacionId) || 
+                         (notificacionSeleccionada.value?.id === notificacionId ? notificacionSeleccionada.value : null)
+    
+    if (!notificacion) {
+      console.error('❌ Notificación no encontrada')
+      mostrarNotificacionError('No se encontró la notificación')
+      return
+    }
+
+    // Abrir el modal de la notificación si no está abierto
+    if (!notificacionSeleccionada.value || notificacionSeleccionada.value.id !== notificacionId) {
+      abrirDetalleNotificacion(notificacion)
+    }
+
+    // Crear estado de descarga en la notificación seleccionada
+    if (notificacionSeleccionada.value) {
+      notificacionSeleccionada.value.estadoDescarga = 'preparando'
+      notificacionSeleccionada.value.progresoDescarga = 0
+      notificacionSeleccionada.value.archivoDescargado = null
+      notificacionSeleccionada.value.errorDescarga = null
+    }
+
+    // Simular inicio de descarga
+    setTimeout(async () => {
+      try {
+        console.log(`🔄 Iniciando descarga: ${notificacion.archivo_nombre || `Archivo ${notificacionId}`}`)
+        
+        if (notificacionSeleccionada.value) {
+          notificacionSeleccionada.value.estadoDescarga = 'descargando'
+          notificacionSeleccionada.value.progresoDescarga = 10
+        }
+
+        // Obtener el archivo del servidor usando base64 para evitar problemas de encoding
+        const archivoBase64 = await notificacionesService.obtenerArchivoBase64(notificacionId)
+        
+        if (notificacionSeleccionada.value) {
+          notificacionSeleccionada.value.progresoDescarga = 60
+        }
+
+        // Convertir base64 a blob
+        const byteCharacters = atob(archivoBase64.base64)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], { type: archivoBase64.mime_type })
+        
+        if (notificacionSeleccionada.value) {
+          notificacionSeleccionada.value.progresoDescarga = 90
+        }
+
+        // Crear URL del blob
+        const blobUrl = URL.createObjectURL(blob)
+        
+        if (notificacionSeleccionada.value) {
+          notificacionSeleccionada.value.progresoDescarga = 100
+          notificacionSeleccionada.value.estadoDescarga = 'completado'
+          notificacionSeleccionada.value.archivoDescargado = {
+            url: blobUrl,
+            nombre: archivoBase64.archivo_nombre,
+            tipo: archivoBase64.mime_type,
+            tamano: archivoBase64.size
+          }
+        }
+
+        console.log('✅ Archivo preparado para visualización')
+        mostrarNotificacionExito('Archivo listo para ver')
+        
+      } catch (error) {
+        console.error('❌ Error descargando archivo:', error)
+        
+        if (notificacionSeleccionada.value) {
+          notificacionSeleccionada.value.estadoDescarga = 'error'
+          notificacionSeleccionada.value.errorDescarga = error.message || 'Error al descargar el archivo'
+        }
+        
+        mostrarNotificacionError(`Error: ${error.message || 'No se pudo descargar el archivo'}`)
+      }
+    }, 500) // Pequeño delay para mostrar el estado inicial
+
+  } catch (error) {
+    console.error('❌ Error general preparando archivo:', error)
+    
+    if (notificacionSeleccionada.value) {
+      notificacionSeleccionada.value.estadoDescarga = 'error'
+      notificacionSeleccionada.value.errorDescarga = error.message || 'Error preparando descarga'
+    }
+    
+    mostrarNotificacionError(`Error: ${error.message || 'No se pudo preparar el archivo'}`)
+  }
+}
+
+// Función original comentada como backup
+/*
+const abrirArchivoBackup = async (notificacionId) => {
+  try {
     console.log(`� Descargando archivo de notificación ${notificacionId} para abrir con app externa`)
     
     // Buscar la notificación para obtener información del archivo
@@ -1193,6 +1402,45 @@ const abrirArchivo = async (notificacionId) => {
     if (window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate([200, 100, 200])
     }
+  }
+}
+
+}
+*/
+
+// Nueva función para abrir el archivo descargado con aplicación nativa
+const verArchivoDescargado = () => {
+  if (!notificacionSeleccionada.value?.archivoDescargado) {
+    mostrarNotificacionError('No hay archivo descargado para ver')
+    return
+  }
+
+  try {
+    console.log('🔄 Abriendo archivo con aplicación nativa...')
+    
+    // Crear enlace temporal para descargar/abrir
+    const link = document.createElement('a')
+    link.href = notificacionSeleccionada.value.archivoDescargado.url
+    link.download = notificacionSeleccionada.value.archivoDescargado.nombre
+    link.target = '_blank'
+    link.rel = 'noopener noreferrer'
+    
+    // Agregar al DOM, hacer click y remover
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    console.log('✅ Archivo enviado para abrir con aplicación nativa')
+    mostrarNotificacionExito('Archivo abierto con aplicación del dispositivo')
+    
+    // Vibración de confirmación
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(100)
+    }
+    
+  } catch (error) {
+    console.error('❌ Error abriendo archivo:', error)
+    mostrarNotificacionError('No se pudo abrir el archivo')
   }
 }
 

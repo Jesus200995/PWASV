@@ -12,18 +12,34 @@
         <div class="header-content">
           <div class="header-main">
             <div class="header-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <path d="m9 9 5 12 1.8-5.2L21 14.8z"/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m0 0V11a1 1 0 011-1h2a1 1 0 011 1v10m3 0a1 1 0 001-1V10m0 0l2 2"/>
               </svg>
             </div>
             <div class="header-text">
-              <h1 class="header-title">Visor de seguimiento</h1>
+              <h1 class="header-title">Visor de seguimiento diario</h1>
               <p class="header-subtitle">Visualización de registros</p>
             </div>
           </div>
           <div class="header-actions">
-            <!-- Elementos de la barra superior removidos: En línea, contador de puntos y botón actualizar -->
+            <div class="connection-status" :class="{ online: isOnline, offline: !isOnline }">
+              <div class="status-indicator"></div>
+              <span>{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
+            </div>
+            <div class="lcd-counter">
+              <div class="lcd-display">
+                <span class="lcd-label">Puntos</span>
+                <span class="lcd-number">{{ totalPuntosEnMapa }}</span>
+              </div>
+            </div>
+            <button @click="recargarMapa" class="refresh-btn-icon" :class="{ loading }" :disabled="loading" title="Actualizar datos">
+              <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 2v6h-6"></path>
+                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                <path d="M3 22v-6h6"></path>
+                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -1576,21 +1592,35 @@ watch([filtroTipo, filtroPeriodo], () => {
   z-index: 1;
 }
 
-/* Header con diseño moderno y verde */
+/* Header con diseño de vidrio líquido verde responsivo */
 .page-header {
-  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-  border-bottom: none;
-  padding: clamp(0.4rem, 1.2vw, 0.7rem);
+  background: linear-gradient(135deg, 
+    rgba(34, 197, 94, 0.85) 0%, 
+    rgba(16, 185, 129, 0.9) 25%,
+    rgba(5, 150, 105, 0.95) 50%,
+    rgba(4, 120, 87, 0.9) 75%,
+    rgba(6, 95, 70, 0.85) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: clamp(0.3rem, 0.8vw, 0.5rem);
   position: sticky;
   top: 0;
   z-index: 100;
   width: 100%;
-  box-sizing: border-box;
   color: white;
-  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
+  box-shadow: 
+    0 8px 32px rgba(34, 197, 94, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
   overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 0;
+  box-sizing: border-box;
 }
 
+/* Efecto de ondas líquidas animadas */
 .page-header::before {
   content: '';
   position: absolute;
@@ -1598,8 +1628,50 @@ watch([filtroTipo, filtroPeriodo], () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+  animation: liquidFlow 8s ease-in-out infinite alternate;
   z-index: 1;
+}
+
+/* Efecto de brillo sutil */
+.page-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.15), 
+    transparent);
+  animation: shimmer 6s ease-in-out infinite;
+  z-index: 2;
+}
+
+@keyframes liquidFlow {
+  0% {
+    background-position: 0% 0%, 100% 100%, 50% 50%;
+    opacity: 0.8;
+  }
+  50% {
+    background-position: 30% 70%, 70% 30%, 80% 20%;
+    opacity: 1;
+  }
+  100% {
+    background-position: 100% 100%, 0% 0%, 20% 80%;
+    opacity: 0.9;
+  }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: -100%; }
 }
 
 .header-content {
@@ -1608,44 +1680,53 @@ watch([filtroTipo, filtroPeriodo], () => {
   align-items: center;
   max-width: 100%;
   margin: 0;
-  gap: clamp(0.3rem, 1.2vw, 0.6rem);
+  gap: clamp(0.3rem, 0.8vw, 0.5rem);
   flex-wrap: wrap;
   width: 100%;
   position: relative;
-  z-index: 2;
+  z-index: 3;
+  min-height: clamp(32px, 5vw, 44px);
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(0.3rem, 1.2vw, 0.6rem);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex: 1;
-  min-width: 150px;
+  min-width: 140px;
 }
 
 .header-icon {
-  width: clamp(28px, 4vw, 36px);
-  height: clamp(28px, 4vw, 36px);
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(6px, 1vw, 8px);
+  width: clamp(24px, 3vw, 30px);
+  height: clamp(24px, 3vw, 30px);
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: clamp(5px, 0.8vw, 7px);
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   flex-shrink: 0;
-  /* Animación removida para icono estático */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.header-icon:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .header-icon svg {
-  width: clamp(14px, 2.5vw, 18px);
-  height: clamp(14px, 2.5vw, 18px);
+  width: clamp(12px, 2vw, 16px);
+  height: clamp(12px, 2vw, 16px);
   color: white;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
+  stroke-width: 1.5;
+  transition: all 0.2s ease;
 }
 
 .header-text {
@@ -1656,38 +1737,57 @@ watch([filtroTipo, filtroPeriodo], () => {
 
 .header-title {
   margin: 0;
-  font-size: clamp(14px, 1.5vw, 20px);
+  font-size: clamp(12px, 1.3vw, 16px);
   font-weight: 600;
   color: white;
   line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .header-subtitle {
   margin: 0;
-  font-size: clamp(10px, 0.9vw, 14px);
+  font-size: clamp(8px, 0.8vw, 12px);
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.3;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 1vw, 16px);
+  gap: clamp(6px, 0.8vw, 12px);
+  position: relative;
+  z-index: 3;
 }
 
-/* Estado de conexión */
+/* Estado de conexión con vidrio líquido */
 .connection-status {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 16px;
+  font-size: clamp(9px, 0.8vw, 11px);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  min-height: clamp(20px, 3vw, 26px);
+}
+
+.connection-status:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .online {
@@ -1695,92 +1795,204 @@ watch([filtroTipo, filtroPeriodo], () => {
 }
 
 .offline {
-  color: rgba(255, 192, 203, 0.95);
+  color: rgba(255, 230, 230, 0.95);
 }
 
 .status-indicator {
-  width: 8px;
-  height: 8px;
+  width: clamp(6px, 1vw, 8px);
+  height: clamp(6px, 1vw, 8px);
   border-radius: 50%;
+  transition: all 0.2s ease;
 }
 
 .online .status-indicator {
-  background-color: #4ade80;
-  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+  background-color: #34d399;
+  box-shadow: 
+    0 0 8px rgba(52, 211, 153, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: pulseOnline 2s ease-in-out infinite;
 }
 
 .offline .status-indicator {
   background-color: #f87171;
-  box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);
+  box-shadow: 
+    0 0 8px rgba(248, 113, 113, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: pulseOffline 1.5s ease-in-out infinite;
 }
 
-/* Contador LCD */
+@keyframes pulseOnline {
+  0%, 100% { 
+    box-shadow: 
+      0 0 8px rgba(52, 211, 153, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  50% { 
+    box-shadow: 
+      0 0 15px rgba(52, 211, 153, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+}
+
+@keyframes pulseOffline {
+  0%, 100% { 
+    box-shadow: 
+      0 0 8px rgba(248, 113, 113, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  50% { 
+    box-shadow: 
+      0 0 12px rgba(248, 113, 113, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* Contador LCD con vidrio líquido */
 .lcd-counter {
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.4) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 6px 10px;
+  background: linear-gradient(135deg, 
+    rgba(0, 0, 0, 0.25) 0%, 
+    rgba(0, 0, 0, 0.35) 50%,
+    rgba(0, 0, 0, 0.3) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 4px 8px;
+  backdrop-filter: blur(15px) saturate(120%);
+  -webkit-backdrop-filter: blur(15px) saturate(120%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    inset 0 1px 3px rgba(0, 0, 0, 0.3),
+    inset 0 1px 3px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1),
     0 1px 0 rgba(255, 255, 255, 0.1);
+  min-height: clamp(20px, 3vw, 26px);
+}
+
+.lcd-counter:hover {
+  background: linear-gradient(135deg, 
+    rgba(0, 0, 0, 0.3) 0%, 
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.35) 100%);
+  transform: translateY(-1px);
+  box-shadow: 
+    inset 0 1px 3px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .lcd-display {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 
 .lcd-label {
-  font-size: 8px;
+  font-size: clamp(7px, 0.6vw, 9px);
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 .lcd-number {
-  font-family: 'Digital-7', 'Courier New', monospace;
-  font-size: 16px;
-  font-weight: 500;
-  color: #4ade80;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: clamp(11px, 1.2vw, 15px);
+  font-weight: 700;
+  color: #34d399;
   letter-spacing: 0.05em;
-  text-shadow: 0 0 10px rgba(74, 222, 128, 0.8);
+  text-shadow: 
+    0 0 10px rgba(52, 211, 153, 0.8),
+    0 0 20px rgba(52, 211, 153, 0.4);
+  animation: digitalGlow 3s ease-in-out infinite alternate;
 }
 
-/* Botón de actualización */
+@keyframes digitalGlow {
+  0% {
+    text-shadow: 
+      0 0 10px rgba(52, 211, 153, 0.8),
+      0 0 20px rgba(52, 211, 153, 0.4);
+  }
+  100% {
+    text-shadow: 
+      0 0 15px rgba(52, 211, 153, 1),
+      0 0 30px rgba(52, 211, 153, 0.6),
+      0 0 40px rgba(52, 211, 153, 0.2);
+  }
+}
+
+/* Botón de actualización con vidrio líquido */
 .refresh-btn-icon {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: clamp(28px, 4vw, 34px);
+  height: clamp(28px, 4vw, 34px);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(15px) saturate(150%);
+  -webkit-backdrop-filter: blur(15px) saturate(150%);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.refresh-btn-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.3), 
+    transparent);
+  transition: left 0.6s ease;
 }
 
 .refresh-btn-icon:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: rotate(15deg);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px) rotate(5deg);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.refresh-btn-icon:hover::before {
+  left: 100%;
+}
+
+.refresh-btn-icon:active {
+  transform: translateY(-1px) rotate(2deg) scale(0.95);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .refresh-icon {
   color: white;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: clamp(14px, 2vw, 16px);
+  height: clamp(14px, 2vw, 16px);
+  stroke-width: 2;
 }
 
 .refresh-btn-icon:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
+  background: rgba(156, 163, 175, 0.3);
+  backdrop-filter: blur(8px);
 }
 
 .spinning {
-  animation: spin 1.5s linear infinite;
+  animation: spin 1.2s linear infinite;
 }
 
 @keyframes spin {
@@ -3327,28 +3539,134 @@ watch([filtroTipo, filtroPeriodo], () => {
   background: #f0fff4;
 }
 
-/* Responsive design */
+/* Responsive design para el header y sidebar */
 @media (max-width: 1024px) {
   .main-content {
-    margin-left: 0;
-    width: 100%;
+    margin-left: clamp(160px, 16vw, 200px);
+    width: calc(100vw - clamp(160px, 16vw, 200px));
   }
   
   .lcd-counter {
-    display: none;
+    display: flex; /* Mantener visible en tablets */
   }
-}
-
-@media (max-width: 640px) {
+  
   .header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    gap: clamp(0.2rem, 0.6vw, 0.4rem);
   }
   
   .header-actions {
-    width: 100%;
+    gap: clamp(5px, 0.6vw, 10px);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: clamp(140px, 14vw, 180px);
+    width: calc(100vw - clamp(140px, 14vw, 180px));
+  }
+  
+  .page-header {
+    padding: clamp(0.25rem, 0.6vw, 0.4rem);
+  }
+  
+  .header-content {
+    flex-direction: row; /* Mantener horizontal */
+    align-items: center;
+    gap: clamp(0.2rem, 0.5vw, 0.3rem);
     justify-content: space-between;
+  }
+  
+  .header-main {
+    min-width: 100px;
+    gap: clamp(0.2rem, 0.6vw, 0.4rem);
+  }
+  
+  .header-actions {
+    gap: clamp(4px, 0.5vw, 8px);
+  }
+  
+  .lcd-counter {
+    display: none; /* Ocultar en móviles para ahorrar espacio */
+  }
+  
+  .connection-status {
+    padding: 2px 6px;
+    font-size: clamp(8px, 0.7vw, 10px);
+  }
+  
+  .connection-status span {
+    display: none; /* Solo mostrar indicador en móviles */
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    margin-left: 0;
+    width: 100vw;
+  }
+  
+  .page-header {
+    position: fixed; /* Cambiar a fixed en móviles pequeños */
+    padding: clamp(0.2rem, 0.4vw, 0.3rem);
+    left: 0;
+    right: 0;
+    width: 100vw;
+  }
+  
+  /* Compensar el header fixed */
+  .page-content {
+    padding-top: clamp(44px, 8vw, 56px);
+  }
+  
+  .header-content {
+    padding: 0 8px;
+  }
+  
+  .header-main {
+    min-width: 80px;
+  }
+  
+  .header-title {
+    font-size: clamp(10px, 2.5vw, 14px);
+  }
+  
+  .header-subtitle {
+    font-size: clamp(7px, 1.8vw, 10px);
+  }
+  
+  .header-icon {
+    width: clamp(20px, 4vw, 26px);
+    height: clamp(20px, 4vw, 26px);
+  }
+  
+  .header-icon svg {
+    width: clamp(10px, 2.5vw, 14px);
+    height: clamp(10px, 2.5vw, 14px);
+  }
+  
+  .refresh-btn-icon {
+    width: clamp(24px, 5vw, 30px);
+    height: clamp(24px, 5vw, 30px);
+  }
+  
+  .refresh-icon {
+    width: clamp(12px, 2.5vw, 14px);
+    height: clamp(12px, 2.5vw, 14px);
+  }
+}
+
+/* Breakpoint para pantallas muy pequeñas */
+@media (max-width: 320px) {
+  .header-subtitle {
+    display: none; /* Ocultar subtitle en pantallas muy pequeñas */
+  }
+  
+  .connection-status {
+    width: clamp(18px, 4vw, 24px);
+    height: clamp(18px, 4vw, 24px);
+    padding: 0;
+    justify-content: center;
+    min-width: auto;
   }
 }
 </style>

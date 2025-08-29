@@ -1237,36 +1237,25 @@ const abrirArchivo = async (notificacionId) => {
         }
 
         // Obtener el archivo del servidor usando base64 para evitar problemas de encoding
-        const archivoBase64 = await notificacionesService.obtenerArchivoBase64(notificacionId)
+        const archivoData = await notificacionesService.obtenerArchivoBase64(notificacionId)
         
         if (notificacionSeleccionada.value) {
           notificacionSeleccionada.value.progresoDescarga = 60
         }
 
-        // Convertir base64 a blob
-        const byteCharacters = atob(archivoBase64.base64)
-        const byteNumbers = new Array(byteCharacters.length)
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i)
-        }
-        const byteArray = new Uint8Array(byteNumbers)
-        const blob = new Blob([byteArray], { type: archivoBase64.mime_type })
-        
+        // El servicio ya convierte base64 a blob y devuelve la URL lista
         if (notificacionSeleccionada.value) {
           notificacionSeleccionada.value.progresoDescarga = 90
         }
-
-        // Crear URL del blob
-        const blobUrl = URL.createObjectURL(blob)
         
         if (notificacionSeleccionada.value) {
           notificacionSeleccionada.value.progresoDescarga = 100
           notificacionSeleccionada.value.estadoDescarga = 'completado'
           notificacionSeleccionada.value.archivoDescargado = {
-            url: blobUrl,
-            nombre: archivoBase64.archivo_nombre,
-            tipo: archivoBase64.mime_type,
-            tamano: archivoBase64.size
+            url: archivoData.url,
+            nombre: archivoData.nombre,
+            tipo: archivoData.mimeType,
+            tamano: archivoData.size
           }
         }
 

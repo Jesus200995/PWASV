@@ -428,8 +428,9 @@
               
               <!-- Información del archivo -->
               <div class="flex items-center space-x-3 mb-3">
-                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-xl">{{ obtenerIconoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
+                <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border-2 border-white"
+                     :style="{ backgroundColor: obtenerColorTipoArchivo(notificacionSeleccionada.archivo_tipo) }">
+                  <span class="text-xs font-bold text-white tracking-wider">{{ obtenerInicialesTipoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
                 </div>
                 <div class="flex-1 min-w-0">
                   <h4 class="text-sm font-semibold text-gray-800 truncate">{{ notificacionSeleccionada.archivo_nombre }}</h4>
@@ -445,12 +446,24 @@
               <div v-if="!notificacionSeleccionada.estadoDescarga" class="flex justify-end">
                 <button 
                   @click="abrirArchivo(notificacionSeleccionada.id)"
-                  class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                  class="glass-download-button group relative overflow-hidden px-3 py-1.5 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-95"
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                  <span>Descargar archivo</span>
+                  <!-- Fondo con efecto de vidrio líquido -->
+                  <div class="absolute inset-0 bg-gradient-to-br from-blue-400/80 via-blue-500/70 to-blue-600/80 rounded-full backdrop-blur-sm"></div>
+                  
+                  <!-- Efecto de brillo líquido -->
+                  <div class="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                  
+                  <!-- Contenido del botón -->
+                  <div class="relative flex items-center justify-center space-x-1.5 text-white">
+                    <svg class="w-3.5 h-3.5 transform group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span class="font-medium text-2xs tracking-wide">Descargar</span>
+                  </div>
+                  
+                  <!-- Sombra interna para efecto 3D -->
+                  <div class="absolute inset-1 rounded-full shadow-inner opacity-30"></div>
                 </button>
               </div>
 
@@ -1505,6 +1518,54 @@ const obtenerIconoArchivo = (tipoArchivo) => {
   return notificacionesService.obtenerIconoArchivo(tipoArchivo)
 }
 
+// Función para obtener las iniciales del tipo de archivo
+const obtenerInicialesTipoArchivo = (tipoArchivo) => {
+  if (!tipoArchivo) return 'AR'
+  
+  const tipo = tipoArchivo.toLowerCase()
+  
+  // Tipos específicos con iniciales personalizadas
+  if (tipo.includes('pdf')) return 'PDF'
+  if (tipo.includes('doc') || tipo.includes('word')) return 'DOC'
+  if (tipo.includes('xls') || tipo.includes('excel')) return 'XLS'
+  if (tipo.includes('ppt') || tipo.includes('powerpoint')) return 'PPT'
+  if (tipo.includes('txt')) return 'TXT'
+  if (tipo.includes('zip') || tipo.includes('rar')) return 'ZIP'
+  if (tipo.includes('imagen') || tipo.includes('image')) return 'IMG'
+  if (tipo.includes('video')) return 'VID'
+  if (tipo.includes('audio')) return 'AUD'
+  if (tipo.includes('csv')) return 'CSV'
+  if (tipo.includes('json')) return 'JSON'
+  if (tipo.includes('xml')) return 'XML'
+  
+  // Para tipos genéricos, tomar las primeras 3 letras y convertir a mayúsculas
+  return tipo.substring(0, 3).toUpperCase() || 'AR'
+}
+
+// Función para obtener el color de fondo según el tipo de archivo
+const obtenerColorTipoArchivo = (tipoArchivo) => {
+  if (!tipoArchivo) return '#6B7280' // Gris por defecto
+  
+  const tipo = tipoArchivo.toLowerCase()
+  
+  // Colores específicos por tipo de archivo
+  if (tipo.includes('pdf')) return '#EF4444' // Rojo para PDF
+  if (tipo.includes('doc') || tipo.includes('word')) return '#2563EB' // Azul para Word
+  if (tipo.includes('xls') || tipo.includes('excel')) return '#059669' // Verde para Excel
+  if (tipo.includes('ppt') || tipo.includes('powerpoint')) return '#DC2626' // Rojo oscuro para PowerPoint
+  if (tipo.includes('txt')) return '#6B7280' // Gris para TXT
+  if (tipo.includes('zip') || tipo.includes('rar')) return '#7C3AED' // Púrpura para archivos comprimidos
+  if (tipo.includes('imagen') || tipo.includes('image')) return '#EC4899' // Rosa para imágenes
+  if (tipo.includes('video')) return '#F59E0B' // Ámbar para videos
+  if (tipo.includes('audio')) return '#10B981' // Esmeralda para audio
+  if (tipo.includes('csv')) return '#059669' // Verde para CSV
+  if (tipo.includes('json')) return '#8B5CF6' // Violeta para JSON
+  if (tipo.includes('xml')) return '#F97316' // Naranja para XML
+  
+  // Color por defecto
+  return '#6366F1' // Índigo por defecto
+}
+
 const esImagen = (tipoArchivo) => {
   if (!tipoArchivo) return false
   const tiposImagen = ['imagen', 'image', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
@@ -2159,6 +2220,44 @@ onBeforeUnmount(() => {
     0 8px 32px rgba(34, 197, 94, 0.15),
     0 4px 16px rgba(0, 0, 0, 0.08),
     0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+/* Botón de descarga con efecto de vidrio líquido mejorado */
+.glass-download-button {
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-download-button:hover {
+  box-shadow: 
+    0 12px 40px rgba(59, 130, 246, 0.35),
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.glass-download-button:active {
+  transform: scale(0.95) !important;
+  box-shadow: 
+    0 4px 16px rgba(59, 130, 246, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.glass-download-button:focus {
+  outline: none;
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 0 0 3px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 /* Utilidades para truncar texto */

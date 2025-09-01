@@ -35,16 +35,24 @@
             </button>
             
             <button
-              @click="seccionActiva = 'actividades'"
+              @click="(!entradaMarcada || salidaMarcada) ? mostrarModalActividadesBloqueadas() : (seccionActiva = 'actividades')"
+              :disabled="false"
               :class="[
-                'section-nav-button flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300',
-                seccionActiva === 'actividades' 
+                'section-nav-button flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 relative',
+                seccionActiva === 'actividades' && entradaMarcada && !salidaMarcada
                   ? 'active bg-blue-500 text-white shadow-lg' 
-                  : 'text-gray-600 hover:bg-white/30'
+                  : (!entradaMarcada || salidaMarcada)
+                    ? 'bg-gray-300 text-gray-500 cursor-pointer'
+                    : 'text-gray-600 hover:bg-white/30'
               ]"
             >
               <div class="flex items-center justify-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- Icono de candado cuando está bloqueado -->
+                <svg v-if="!entradaMarcada || salidaMarcada" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <!-- Icono normal de actividades cuando está habilitado -->
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 <span>Actividades</span>
@@ -80,7 +88,7 @@
         <div v-if="!modoAsistencia" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
         <!-- Botón Marcar Entrada -->
         <button
-          @click="iniciarAsistencia('entrada')"
+          @click="mostrarModalEntrada"
           :disabled="entradaMarcada || verificandoAsistencia"
           class="relative overflow-hidden flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 transform"
           :class="{
@@ -120,7 +128,7 @@
 
         <!-- Botón Marcar Salida -->
         <button
-          @click="iniciarAsistencia('salida')"
+          @click="mostrarModalSalida"
           :disabled="!entradaMarcada || salidaMarcada || verificandoAsistencia"
           class="relative overflow-hidden flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 transform"
           :class="{
@@ -425,15 +433,75 @@
         </div>
       </div>
 
+    <!-- Modal de confirmación para entrada -->
+    <ConfirmModal 
+      :show="showEntradaModal" 
+      title="Registrar Entrada"
+      :message="entradaModalMessage"
+      type="confirm"
+      :showConfirm="true"
+      confirmText="Registrar Entrada"
+      cancelText="Cancelar"
+      @close="closeEntradaModal"
+      @confirm="confirmarEntradaModal"
+    />
+    
+    <!-- Modal de confirmación para salida -->
+    <ConfirmModal 
+      :show="showSalidaModal" 
+      title="Registrar Salida"
+      :message="salidaModalMessage"
+      type="confirm"
+      :showConfirm="true"
+      confirmText="Registrar Salida"
+      cancelText="Cancelar"
+      @close="closeSalidaModal"
+      @confirm="confirmarSalidaModal"
+    />
+
+    <!-- Modal de información para actividades bloqueadas -->
+    <ConfirmModal 
+      :show="showActividadesBloqueadasModal" 
+      title=""
+      :message="actividadesBloqueadasModalMessage"
+      type="info"
+      :showConfirm="false"
+      cancelText="Entendido"
+      @close="closeActividadesBloqueadasModal"
+    />
+
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
     <div v-if="seccionActiva === 'actividades' && !modoAsistencia" class="glass-card">
+      <!-- Mensaje de estado de actividades bloqueadas -->
+      <div v-if="!entradaMarcada || salidaMarcada" class="mb-4">
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded-lg">
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <div>
+              <h3 class="text-sm font-medium text-yellow-800">Registro de actividades bloqueado</h3>
+              <p class="text-xs text-yellow-700 mt-1">
+                <span v-if="!entradaMarcada">Debes marcar tu entrada primero para registrar actividades.</span>
+                <span v-else-if="salidaMarcada">Has marcado tu salida. No puedes registrar más actividades hoy.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="text-center mb-3">
-        <h2 class="text-lg font-bold text-gray-800 mb-1 modern-title">
+        <h2 class="text-lg font-bold text-gray-800 mb-1 modern-title"
+            :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }">
           Registra tus actividades
         </h2>
         <!-- Línea tipo marcatextos -->
-        <div class="green-line mx-auto mb-1"></div>
-        <p class="text-xs text-gray-500">Captura tu ubicación actual para el registro</p>
+        <div class="green-line mx-auto mb-1" :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"></div>
+        <p class="text-xs text-gray-500" :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }">
+          <span v-if="entradaMarcada && !salidaMarcada">Captura tu ubicación actual para el registro</span>
+          <span v-else-if="!entradaMarcada">Marca tu entrada primero</span>
+          <span v-else>Registro de actividades finalizado</span>
+        </p>
       </div>
       
       <!-- Info del usuario -->
@@ -456,21 +524,36 @@
         </div>
       </div>
 
-      <form @submit.prevent="enviarRegistro">
+      <form @submit.prevent="enviarRegistro" :class="{ 'opacity-50 pointer-events-none': !entradaMarcada || salidaMarcada }">
         <!-- Botón para obtener ubicación circular para actividades -->
         <div class="location-container-circular mb-3 flex justify-center">
           <button
             type="button"
             @click="getUbicacionRegistro"
+            :disabled="!entradaMarcada || salidaMarcada"
             class="location-button-circular relative flex flex-col items-center justify-center w-28 h-28 sm:w-32 sm:h-32 font-medium text-white rounded-full shadow-2xl transform transition-all duration-500 hover:scale-110 active:scale-95"
-            :class="{'location-button-success-circular': latitudRegistro && longitudRegistro}"
+            :class="{
+              'location-button-success-circular': latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada,
+              'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada
+            }"
           >
             <!-- Estado completado -->
-            <div v-if="latitudRegistro && longitudRegistro" class="flex flex-col items-center">
+            <div v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada" class="flex flex-col items-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1 text-emerald-800 glass-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span class="text-xs font-medium tracking-normal glass-text-circular text-center leading-tight">Ubicación Obtenida</span>
+            </div>
+            
+            <!-- Estado bloqueado -->
+            <div v-else-if="!entradaMarcada || salidaMarcada" class="flex flex-col items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-xs font-medium text-gray-400 text-center leading-tight">
+                <span v-if="!entradaMarcada">Marca Entrada Primero</span>
+                <span v-else>Actividades Bloqueadas</span>
+              </span>
             </div>
             
             <!-- Estado inicial -->
@@ -500,7 +583,7 @@
           </button>
 
           <!-- Coordenadas pegadas al botón circular -->
-          <div v-if="latitudRegistro && longitudRegistro" class="coordinates-display-circular">
+          <div v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada" class="coordinates-display-circular">
             <div class="coordinates-grid-circular">
               <div class="coordinate-item-circular">
                 <span class="coordinate-label-circular">Lat:</span>
@@ -516,13 +599,16 @@
 
         <!-- Input de archivo para foto -->
         <div class="mb-3">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Foto</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2" 
+                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">Foto</label>
           <div class="flex items-center justify-center w-full">
-            <label class="flex flex-col w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100">
+            <label class="flex flex-col w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100"
+                   :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': !entradaMarcada || salidaMarcada }">
               <div v-if="!fotoRegistro" class="flex flex-col items-center justify-center pt-7">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="w-8 h-8 text-gray-400"
+                  :class="{ 'text-gray-300': !entradaMarcada || salidaMarcada }"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -534,7 +620,12 @@
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-                <p class="pt-1 text-sm text-gray-400">Selecciona una foto</p>
+                <p class="pt-1 text-sm text-gray-400" 
+                   :class="{ 'text-gray-300': !entradaMarcada || salidaMarcada }">
+                  <span v-if="entradaMarcada && !salidaMarcada">Selecciona una foto</span>
+                  <span v-else-if="!entradaMarcada">Marca entrada primero</span>
+                  <span v-else>Función bloqueada</span>
+                </p>
               </div>
               <div v-else class="flex items-center justify-center h-full">
                 <img :src="fotoRegistro" class="h-full object-contain" />
@@ -543,6 +634,7 @@
                 type="file"
                 accept="image/*"
                 @change="onFileChangeRegistro"
+                :disabled="!entradaMarcada || salidaMarcada"
                 class="hidden"
                 ref="fileInputRegistro"
               />
@@ -552,21 +644,24 @@
 
         <!-- Descripción -->
         <div class="mb-3">
-          <label for="descripcionRegistro" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+          <label for="descripcionRegistro" class="block text-sm font-medium text-gray-700 mb-2"
+                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">Descripción</label>
           <textarea
             v-model="descripcionRegistro"
             id="descripcionRegistro"
             rows="3"
+            :disabled="!entradaMarcada || salidaMarcada"
             class="glass-input w-full"
-            placeholder="Describe el lugar o añade notas..."
+            :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"
+            :placeholder="entradaMarcada && !salidaMarcada ? 'Describe el lugar o añade notas...' : !entradaMarcada ? 'Marca entrada primero...' : 'Función bloqueada...'"
           ></textarea>
         </div>
 
         <!-- Botón enviar -->
         <button
           type="submit"
-          :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || enviando"
-          :class="['glass-button w-full', !latitudRegistro || !longitudRegistro || !fotoRegistro || enviando ? 'opacity-50 cursor-not-allowed' : '']"
+          :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || enviando || !entradaMarcada || salidaMarcada"
+          :class="['glass-button w-full', (!latitudRegistro || !longitudRegistro || !fotoRegistro || enviando || !entradaMarcada || salidaMarcada) ? 'opacity-50 cursor-not-allowed' : '']"
         >
           <span v-if="enviando" class="flex items-center justify-center">
             <svg
@@ -591,6 +686,8 @@
             </svg>
             Enviando...
           </span>
+          <span v-else-if="!entradaMarcada">Marca entrada primero</span>
+          <span v-else-if="salidaMarcada">Actividades finalizadas</span>
           <span v-else>Guardar registro</span>
         </button>
       </form>
@@ -690,6 +787,7 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 import Modal from '../components/Modal.vue';
+import ConfirmModal from '../components/ConfirmModal.vue';
 import asistenciasService from '../services/asistenciasService.js';
 import offlineService from '../services/offlineService.js';
 import syncService from '../services/syncService.js';
@@ -734,6 +832,14 @@ const router = useRouter();
 const isOnline = ref(true);
 const showModal = ref(false);
 const modalMessage = ref('');
+
+// Variables para modales de confirmación
+const showEntradaModal = ref(false);
+const showSalidaModal = ref(false);
+const showActividadesBloqueadasModal = ref(false);
+const entradaModalMessage = ref('');
+const salidaModalMessage = ref('');
+const actividadesBloqueadasModalMessage = ref('');
 
 // Control de secciones activas
 const seccionActiva = ref('asistencia'); // 'asistencia' o 'actividades'
@@ -1113,6 +1219,17 @@ async function getUbicacion() {
 }
 
 async function getUbicacionRegistro() {
+  // Verificar si está habilitado para registrar actividades
+  if (!entradaMarcada.value || salidaMarcada.value) {
+    if (!entradaMarcada.value) {
+      error.value = "Debes marcar tu entrada primero para obtener ubicación y registrar actividades.";
+    } else {
+      error.value = "Has marcado tu salida. No puedes registrar más actividades hoy.";
+    }
+    setTimeout(() => error.value = null, 4000);
+    return;
+  }
+
   error.value = null;
 
   try {
@@ -1281,6 +1398,19 @@ async function onFileChangeRegistro(e) {
 }
 
 async function enviarRegistro() {
+  // Verificar estado de asistencia
+  if (!entradaMarcada.value) {
+    error.value = "❌ Debes marcar tu entrada primero para poder registrar actividades.";
+    setTimeout(() => error.value = null, 5000);
+    return;
+  }
+  
+  if (salidaMarcada.value) {
+    error.value = "❌ Has marcado tu salida. No puedes registrar más actividades hoy.";
+    setTimeout(() => error.value = null, 5000);
+    return;
+  }
+
   if (!latitudRegistro.value || !longitudRegistro.value || !archivoFotoRegistro.value) {
     error.value = "Falta información: necesitas ubicación y foto";
     return;
@@ -1416,6 +1546,178 @@ async function enviarRegistro() {
 function closeSuccessModal() {
   showModal.value = false;
   modalMessage.value = '';
+}
+
+// Funciones para modales de confirmación
+function mostrarModalEntrada() {
+  entradaModalMessage.value = `
+    <div class="text-left">
+      <div class="flex items-center mb-4">
+        <div class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Registrar Entrada</h3>
+          <p class="text-sm text-gray-600">Inicia tu jornada laboral</p>
+        </div>
+      </div>
+      
+      <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-4">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-green-700 font-medium">Al registrar tu entrada podrás registrar actividades</p>
+        </div>
+        <p class="text-green-600 text-sm mt-1 ml-7">Durante tu jornada podrás capturar todas tus actividades laborales</p>
+      </div>
+
+      <div class="space-y-3 text-sm text-gray-600">
+        <div class="flex items-start">
+          <svg class="w-4 h-4 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          </svg>
+          <span>Se capturará tu ubicación actual y una fotografía</span>
+        </div>
+        
+        <div class="flex items-start">
+          <svg class="w-4 h-4 text-purple-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+          </svg>
+          <span>Funciona sin conexión (se sincroniza automáticamente)</span>
+        </div>
+        
+        <div class="flex items-start">
+          <svg class="w-4 h-4 text-amber-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+          <span>Una vez registrada no se puede cancelar</span>
+        </div>
+      </div>
+    </div>
+  `;
+  showEntradaModal.value = true;
+}
+
+function mostrarModalSalida() {
+  salidaModalMessage.value = `
+    <div class="text-left">
+      <div class="flex items-center mb-4">
+        <div class="flex-shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Registrar Salida</h3>
+          <p class="text-sm text-gray-600">Finaliza tu jornada laboral</p>
+        </div>
+      </div>
+      
+      <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 21l-5.197-5.197m0 0L12 12.803m0 0L5.196 17.996M12 12.803l5.198-5.197L21 3"/>
+          </svg>
+          <p class="text-red-700 font-medium">No podrás registrar más actividades</p>
+        </div>
+        <p class="text-red-600 text-sm mt-1 ml-7">El registro de actividades se bloqueará permanentemente hoy</p>
+      </div>
+
+      <div class="space-y-3 text-sm text-gray-600">
+        <div class="flex items-start">
+          <svg class="w-4 h-4 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          </svg>
+          <span>Se capturará tu ubicación actual y una fotografía</span>
+        </div>
+        
+        <div class="flex items-start">
+          <svg class="w-4 h-4 text-purple-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+          </svg>
+          <span>Funciona sin conexión (se sincroniza automáticamente)</span>
+        </div>
+        
+        <div class="flex items-start">
+          <svg class="w-4 h-4 text-amber-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+          <span>Una vez registrada no se puede cancelar</span>
+        </div>
+      </div>
+    </div>
+  `;
+  showSalidaModal.value = true;
+}
+
+function closeEntradaModal() {
+  showEntradaModal.value = false;
+  entradaModalMessage.value = '';
+}
+
+function closeSalidaModal() {
+  showSalidaModal.value = false;
+  salidaModalMessage.value = '';
+}
+
+function confirmarEntradaModal() {
+  closeEntradaModal();
+  iniciarAsistencia('entrada');
+}
+
+function confirmarSalidaModal() {
+  closeSalidaModal();
+  iniciarAsistencia('salida');
+}
+
+function mostrarModalActividadesBloqueadas() {
+  if (!entradaMarcada.value) {
+    actividadesBloqueadasModalMessage.value = `
+      <div class="text-center">
+        <div class="flex items-center justify-center mb-3">
+          <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mr-2">
+            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold text-gray-900">Acceso Bloqueado</h3>
+        </div>
+        
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-2 mb-2">
+          <p class="text-amber-800 text-xs font-medium">Inicia tu jornada laboral primero</p>
+          <p class="text-amber-600 text-xs mt-1">Marca tu entrada en "Asistencia"</p>
+        </div>
+      </div>
+    `;
+  } else if (salidaMarcada.value) {
+    actividadesBloqueadasModalMessage.value = `
+      <div class="text-center">
+        <div class="flex items-center justify-center mb-3">
+          <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-2">
+            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold text-gray-900">Salida Registrada</h3>
+        </div>
+        
+        <div class="bg-red-50 border border-red-200 rounded-lg p-2 mb-2">
+          <p class="text-red-800 text-xs font-medium">Salida de jornada ya marcada</p>
+          <p class="text-red-600 text-xs mt-1">Se restaurará el siguiente día</p>
+        </div>
+      </div>
+    `;
+  }
+  
+  showActividadesBloqueadasModal.value = true;
+}
+
+function closeActividadesBloqueadasModal() {
+  showActividadesBloqueadasModal.value = false;
+  actividadesBloqueadasModalMessage.value = '';
 }
 
 function verificarEstadoAsistencia() {
@@ -2195,6 +2497,23 @@ watch([entradaMarcada, salidaMarcada, datosEntrada, datosSalida], () => {
     asegurarEstadosConsistentes();
   }
 }, { deep: true });
+
+// Watcher para limpiar campos de registro cuando se bloquean las actividades
+watch([entradaMarcada, salidaMarcada], () => {
+  // Si las actividades se bloquean (no hay entrada o hay salida), limpiar campos de actividades
+  if (!entradaMarcada.value || salidaMarcada.value) {
+    console.log('🚫 Actividades bloqueadas, limpiando campos de registro');
+    descripcionRegistro.value = "";
+    fotoRegistro.value = null;
+    archivoFotoRegistro.value = null;
+    latitudRegistro.value = null;
+    longitudRegistro.value = null;
+    
+    if (fileInputRegistro.value) {
+      fileInputRegistro.value.value = "";
+    }
+  }
+});
 </script>
 
 <style scoped>

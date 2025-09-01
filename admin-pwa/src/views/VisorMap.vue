@@ -1,10 +1,9 @@
 <template>
   <div class="visor-map-container">
-    <!-- Importar fuentes modernas y estilos de Mapbox -->
+    <!-- Importar fuentes modernas -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
     
     <Sidebar @logout="logout" />
     
@@ -112,20 +111,20 @@
             <h4>Estadísticas</h4>
             <div class="stat-grid">
               <div class="stat-item">
-                <span class="stat-label">Total Usuarios</span>
-                <span class="stat-value">{{ estadisticasVisorMap.totalUsuarios }}</span>
+                <span class="stat-label">Total</span>
+                <span class="stat-value">{{ totalPuntosEnMapa }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Entradas del día</span>
-                <span class="stat-value entrada">{{ estadisticasVisorMap.entradasDelDia }}</span>
+                <span class="stat-label">Entradas</span>
+                <span class="stat-value entrada">{{ clusterInfo.entradas }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Salidas del día</span>
-                <span class="stat-value salida">{{ estadisticasVisorMap.salidasDelDia }}</span>
+                <span class="stat-label">Salidas</span>
+                <span class="stat-value salida">{{ clusterInfo.salidas }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Actividades de hoy</span>
-                <span class="stat-value hoy">{{ estadisticasVisorMap.actividadesDeHoy }}</span>
+                <span class="stat-label">Actividades</span>
+                <span class="stat-value hoy">{{ clusterInfo.registrosHoy }}</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Antiguos</span>
@@ -496,14 +495,6 @@ const clusterInfo = reactive({
   registrosAntiguos: 0
 })
 
-// Estado de las estadísticas específicas para VisorMap (tiempo real con horario CDMX)
-const estadisticasVisorMap = reactive({
-  totalUsuarios: 0,
-  entradasDelDia: 0,
-  salidasDelDia: 0,
-  actividadesDeHoy: 0
-})
-
 // Función para obtener la fecha actual en CDMX (tiempo real)
 const obtenerFechaCDMX = () => {
   // Horario de Ciudad de México: UTC-6 (normal) o UTC-5 (horario de verano)
@@ -525,8 +516,8 @@ const cargarDatos = async () => {
   try {
     const token = localStorage.getItem('admin_token')
     
-    // Cargar registros, asistencias, usuarios y estadísticas en paralelo
-    const [responseRegistros, asistenciasData, usuariosData, estadisticasData] = await Promise.all([
+    // Cargar registros, asistencias y usuarios en paralelo
+    const [responseRegistros, asistenciasData, usuariosData] = await Promise.all([
       axios.get(`${API_URL}/registros`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -534,8 +525,7 @@ const cargarDatos = async () => {
         }
       }),
       asistenciasService.obtenerAsistenciasConUsuarios(),
-      usuariosService.obtenerUsuarios(),
-      estadisticasService.obtenerEstadisticas()
+      usuariosService.obtenerUsuarios()
     ])
     
     // La respuesta puede ser directamente un array o tener una propiedad específica
@@ -548,23 +538,6 @@ const cargarDatos = async () => {
     registros.value = registrosEnriquecidos
     asistencias.value = asistenciasData
     usuarios.value = usuariosData
-    
-    // ==================== ACTUALIZAR ESTADÍSTICAS VISOR MAP ====================
-    
-    console.log('📊 Estadísticas recibidas del servidor:', estadisticasData)
-    
-    // Actualizar estadísticas tiempo real basadas en horario CDMX
-    estadisticasVisorMap.totalUsuarios = estadisticasData.totalUsuarios || 0
-    estadisticasVisorMap.entradasDelDia = estadisticasData.entradasDelDia || 0
-    estadisticasVisorMap.salidasDelDia = estadisticasData.salidasDelDia || 0
-    estadisticasVisorMap.actividadesDeHoy = estadisticasData.actividadesDeHoy || 0
-    
-    console.log('✅ Estadísticas VisorMap actualizadas:', {
-      'Total Usuarios': estadisticasVisorMap.totalUsuarios,
-      'Entradas del día': estadisticasVisorMap.entradasDelDia,
-      'Salidas del día': estadisticasVisorMap.salidasDelDia,
-      'Actividades de hoy': estadisticasVisorMap.actividadesDeHoy
-    })
     
     // Calcular las últimas actividades por usuario
     const ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosEnriquecidos, asistenciasData)
@@ -1475,8 +1448,6 @@ const toggleFiltros = () => {
 
 // Recargar mapa y datos
 const recargarMapa = async () => {
-  console.log('🔄 Recargando mapa y estadísticas en tiempo real...')
-  
   // Si hay un error grave, reiniciar completamente el mapa
   if (error.value && error.value.includes('token')) {
     // Destruir el mapa actual si existe
@@ -1499,10 +1470,8 @@ const recargarMapa = async () => {
     mapboxgl.accessToken = 'pk.eyJ1IjoibWFyaWVsMDgiLCJhIjoiY202emV3MDhhMDN6YjJscHVqaXExdGpjMyJ9.F_ACoKzS_4e280lD0XndEw';
   }
   
-  // Cargar los datos nuevamente (incluyendo estadísticas actualizadas)
+  // Cargar los datos nuevamente
   await cargarDatos();
-  
-  console.log('✅ Mapa y estadísticas recargados exitosamente')
 }
 
 // Función de cierre de sesión
@@ -1562,6 +1531,9 @@ watch(filtroTipo, () => {
 </script>
 
 <style scoped>
+/* Importación de fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
 /* Estilos principales */
 .visor-map-container {
   display: flex;
@@ -2420,6 +2392,9 @@ watch(filtroTipo, () => {
   background: #27ae60;
   transform: translateY(-2px);
 }
+
+/* Estilos específicos para Mapbox */
+@import url('https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css');
 
 /* Personalización de popups personalizados */
 .custom-popup {

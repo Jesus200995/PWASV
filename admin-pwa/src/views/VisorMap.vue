@@ -112,7 +112,7 @@
             <div class="stat-grid">
               <div class="stat-item">
                 <span class="stat-label">Total Usuarios</span>
-                <span class="stat-value">{{ estadisticasDiaActual.totalUsuariosDia }}</span>
+                <span class="stat-value">{{ totalUsuariosRegistrados }}</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Entradas del día</span>
@@ -500,6 +500,9 @@ const estadisticasDiaActual = reactive({
   fechaCDMX: null
 })
 
+// Estado para el total de usuarios registrados en el sistema
+const totalUsuariosRegistrados = ref('0')
+
 // Función para obtener la fecha actual en CDMX (tiempo real)
 const obtenerFechaCDMX = () => {
   // Horario de Ciudad de México: UTC-6 (normal) o UTC-5 (horario de verano)
@@ -557,6 +560,9 @@ const cargarDatos = async () => {
     // Cargar estadísticas del día actual en paralelo
     cargarEstadisticasDiaActual()
     
+    // Cargar total de usuarios registrados en el sistema
+    cargarTotalUsuarios()
+    
     hasDatosUsuario.value = true
     loading.value = false
     totalPuntosEnMapa.value = ultimasActividades.length
@@ -596,6 +602,25 @@ const cargarEstadisticasDiaActual = async () => {
     estadisticasDiaActual.entradasDia = 0
     estadisticasDiaActual.salidasDia = 0
     estadisticasDiaActual.actividadesDia = 0
+  }
+}
+
+// Función para cargar el total de usuarios registrados en el sistema
+const cargarTotalUsuarios = async () => {
+  try {
+    console.log('👥 Obteniendo total de usuarios registrados...')
+    
+    // Usar el servicio de usuarios para obtener todos los usuarios
+    const usuarios = await usuariosService.obtenerUsuarios()
+    
+    // Actualizar el contador con formato localizado
+    totalUsuariosRegistrados.value = usuarios.length.toLocaleString('es')
+    
+    console.log(`✅ Total de usuarios registrados: ${totalUsuariosRegistrados.value}`)
+    
+  } catch (error) {
+    console.error('❌ Error obteniendo total de usuarios:', error)
+    totalUsuariosRegistrados.value = '0'
   }
 }
 
@@ -1507,6 +1532,9 @@ const recargarMapa = async () => {
   
   // Cargar los datos nuevamente
   await cargarDatos();
+  
+  // También recargar el total de usuarios
+  await cargarTotalUsuarios();
 }
 
 // Función de cierre de sesión

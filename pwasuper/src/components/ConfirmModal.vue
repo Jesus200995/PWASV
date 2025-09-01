@@ -1,7 +1,7 @@
 <template>
   <transition name="modal">
     <div v-if="show" class="modal-overlay" @click="$emit('close')">
-      <div class="modal-container" :class="{ 'compact': type === 'info' }" @click.stop>
+      <div class="modal-container" :class="{ 'compact': type === 'info', 'compact-confirm': type === 'confirm' }" @click.stop>
         <!-- Header más elegante -->
         <div v-if="title" class="modal-header">
           <div class="flex items-center">
@@ -32,32 +32,32 @@
         <div class="modal-body">
           <!-- Iconos principales más grandes -->
           <div class="confirm-icon" v-if="type === 'confirm'">
-            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
           </div>
           
           <div class="success-icon" v-else-if="type === 'success'">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
             </div>
           </div>
           
           <div class="warning-icon" v-else-if="type === 'warning'">
-            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
               </svg>
             </div>
           </div>
           
           <div class="error-icon" v-else-if="type === 'error'">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
               </svg>
             </div>
@@ -197,6 +197,44 @@ defineEmits(['close', 'confirm']);
 /* Ajustes para modales compactos sin header */
 .modal-container.compact .modal-body:first-child {
   padding-top: 1rem;
+}
+
+/* Tamaño compacto para modales de confirmación */
+.modal-container.compact-confirm {
+  max-width: 420px;
+  border-radius: 14px;
+}
+
+.modal-container.compact-confirm .modal-header {
+  padding: 1rem 1.5rem 0 1.5rem;
+}
+
+.modal-container.compact-confirm .modal-body {
+  padding: 1rem 1.5rem;
+}
+
+.modal-container.compact-confirm .modal-footer {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.modal-container.compact-confirm .modal-title {
+  font-size: 1rem;
+}
+
+.modal-container.compact-confirm .btn {
+  padding: 0.7rem 1.2rem;
+  font-size: 0.85rem;
+}
+
+.modal-container.compact-confirm .confirm-icon > div {
+  width: 12rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+}
+
+.modal-container.compact-confirm .confirm-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .modal-container::before {

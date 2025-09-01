@@ -189,49 +189,49 @@
           </div>
           
           <!-- Contenedor principal más delgado -->
-          <div class="relative bg-gradient-to-br from-rose-100/95 via-red-50/90 to-rose-200/85 rounded-lg shadow-md backdrop-blur-md border border-rose-200/40 overflow-hidden py-1">
+          <div class="relative bg-gradient-to-br from-red-600/80 via-red-800/70 to-black/90 rounded-lg shadow-lg backdrop-blur-md border border-red-700/30 overflow-hidden py-1">
             <!-- Efecto vidrio líquido superior -->
-            <div class="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-rose-50/15 pointer-events-none"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-red-400/20 via-transparent to-red-900/10 pointer-events-none"></div>
             
             <!-- Reflejo líquido principal (más delgado) -->
-            <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent rounded-t-lg"></div>
+            <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-red-300/25 to-transparent rounded-t-lg"></div>
             
             <!-- Ondas líquidas decorativas (más pequeñas) -->
-            <div class="absolute inset-0 opacity-15">
-              <div class="absolute top-2 right-4 w-8 h-8 border border-rose-300/40 rounded-full animate-pulse"></div>
-              <div class="absolute bottom-2 left-4 w-4 h-4 border border-rose-300/30 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
-              <div class="absolute top-1/2 right-2 w-2 h-2 border border-rose-300/35 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+            <div class="absolute inset-0 opacity-10">
+              <div class="absolute top-2 right-4 w-8 h-8 border border-red-500/30 rounded-full animate-pulse"></div>
+              <div class="absolute bottom-2 left-4 w-4 h-4 border border-red-600/25 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+              <div class="absolute top-1/2 right-2 w-2 h-2 border border-red-500/25 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
             </div>
             
             <!-- Efecto shimmer líquido -->
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform skew-x-6 translate-x-[-100%] animate-shimmer opacity-40"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/15 to-transparent transform skew-x-6 translate-x-[-100%] animate-shimmer opacity-30"></div>
             
             <!-- Badge superior más delgado -->
-            <div class="absolute top-0 left-0 right-0 flex items-center justify-center px-3 py-0.5 bg-white/40 backdrop-blur-sm border-b border-rose-200/30 rounded-t-lg shadow-sm">
+            <div class="absolute top-0 left-0 right-0 flex items-center justify-center px-3 py-0.5 bg-gradient-to-r from-red-800/80 to-black/70 backdrop-blur-sm border-b border-red-700/40 rounded-t-lg shadow-sm">
               <!-- Texto más pequeño, rojo y negrita fuerte -->
-              <span class="text-[10px] font-black text-red-700 uppercase tracking-wide font-['Inter',sans-serif] drop-shadow-sm antialiased text-center">Recordatorio</span>
+              <span class="text-[10px] font-black text-red-100 uppercase tracking-wide font-['Inter',sans-serif] drop-shadow-lg antialiased text-center">OBLIGATORIO</span>
             </div>
             
             <!-- Contenido principal más compacto -->
             <div class="relative z-20 flex flex-col items-center justify-center pt-4 pb-2 px-4">
               <div class="text-center w-full">
                 <!-- Mensaje principal más pequeño -->
-                <div class="text-xs leading-snug text-rose-800/85 font-['Inter',sans-serif]">
-                  <span class="font-medium text-rose-700 drop-shadow-sm">Por favor, registra tu asistencia</span>
+                <div class="text-xs leading-snug text-red-100/95 font-['Inter',sans-serif]">
+                  <span class="font-bold text-white drop-shadow-md">Marcar entrada es necesario para usar actividades</span>
                   <br>
-                  <span class="font-normal text-rose-600/80 text-[10px]">Marca tu entrada y salida para el control diario</span>
+                  <span class="font-medium text-red-200/90 text-[10px]">Al marcar salida se finaliza el acceso del día</span>
                 </div>
               </div>
             </div>
             
             <!-- Borde suave líquido -->
-            <div class="absolute inset-0 rounded-lg border border-rose-300/40 pointer-events-none shadow-inner"></div>
+            <div class="absolute inset-0 rounded-lg border border-red-600/40 pointer-events-none shadow-inner"></div>
             
             <!-- Partículas flotantes (más pequeñas) -->
             <div class="absolute inset-0 pointer-events-none">
-              <div class="absolute top-3 left-3 w-0.5 h-0.5 bg-rose-400/60 rounded-full animate-float"></div>
-              <div class="absolute top-4 right-6 w-0.5 h-0.5 bg-rose-300/60 rounded-full animate-float" style="animation-delay: 1.5s;"></div>
-              <div class="absolute bottom-3 right-4 w-0.5 h-0.5 bg-rose-400/60 rounded-full animate-float" style="animation-delay: 0.8s;"></div>
+              <div class="absolute top-3 left-3 w-0.5 h-0.5 bg-red-400/50 rounded-full animate-float"></div>
+              <div class="absolute top-4 right-6 w-0.5 h-0.5 bg-red-300/50 rounded-full animate-float" style="animation-delay: 1.5s;"></div>
+              <div class="absolute bottom-3 right-4 w-0.5 h-0.5 bg-red-400/50 rounded-full animate-float" style="animation-delay: 0.8s;"></div>
             </div>
           </div>
         </div>
@@ -1552,48 +1552,48 @@ function closeSuccessModal() {
 function mostrarModalEntrada() {
   entradaModalMessage.value = `
     <div class="text-left">
-      <div class="flex items-center mb-4">
-        <div class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex items-center mb-3">
+        <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
         </div>
         <div>
-          <h3 class="text-lg font-semibold text-gray-900">Registrar Entrada</h3>
-          <p class="text-sm text-gray-600">Inicia tu jornada laboral</p>
+          <h3 class="text-base font-semibold text-gray-900">Registrar Entrada</h3>
+          <p class="text-xs text-gray-600">Inicia tu jornada laboral</p>
         </div>
       </div>
       
-      <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-4">
+      <div class="bg-green-50 border-l-4 border-green-400 p-3 mb-3">
         <div class="flex items-center">
-          <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <p class="text-green-700 font-medium">Al registrar tu entrada podrás registrar actividades</p>
+          <p class="text-green-700 font-medium text-sm">Al registrar tu entrada podrás registrar actividades</p>
         </div>
-        <p class="text-green-600 text-sm mt-1 ml-7">Durante tu jornada podrás capturar todas tus actividades laborales</p>
+        <p class="text-green-600 text-xs mt-1 ml-6">Durante tu jornada podrás capturar todas tus actividades</p>
       </div>
 
-      <div class="space-y-3 text-sm text-gray-600">
+      <div class="space-y-2 text-xs text-gray-600">
         <div class="flex items-start">
-          <svg class="w-4 h-4 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
           </svg>
-          <span>Se capturará tu ubicación actual y una fotografía</span>
+          <span>Se capturará ubicación y fotografía</span>
         </div>
         
         <div class="flex items-start">
-          <svg class="w-4 h-4 text-purple-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 text-purple-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
           </svg>
-          <span>Funciona sin conexión (se sincroniza automáticamente)</span>
+          <span>Funciona offline</span>
         </div>
         
         <div class="flex items-start">
-          <svg class="w-4 h-4 text-amber-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 text-amber-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
           </svg>
-          <span>Una vez registrada no se puede cancelar</span>
+          <span>No se puede cancelar una vez registrada</span>
         </div>
       </div>
     </div>
@@ -1604,26 +1604,26 @@ function mostrarModalEntrada() {
 function mostrarModalSalida() {
   salidaModalMessage.value = `
     <div class="text-left">
-      <div class="flex items-center mb-4">
-        <div class="flex-shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
-          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex items-center mb-3">
+        <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+          <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
         </div>
         <div>
-          <h3 class="text-lg font-semibold text-gray-900">Registrar Salida</h3>
-          <p class="text-sm text-gray-600">Finaliza tu jornada laboral</p>
+          <h3 class="text-base font-semibold text-gray-900">Registrar Salida</h3>
+          <p class="text-xs text-gray-600">Finaliza tu jornada laboral</p>
         </div>
       </div>
       
-      <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+      <div class="bg-red-50 border-l-4 border-red-400 p-3 mb-3">
         <div class="flex items-center">
-          <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 21l-5.197-5.197m0 0L12 12.803m0 0L5.196 17.996M12 12.803l5.198-5.197L21 3"/>
           </svg>
-          <p class="text-red-700 font-medium">No podrás registrar más actividades</p>
+          <p class="text-red-700 font-medium text-sm">No podrás registrar más actividades</p>
         </div>
-        <p class="text-red-600 text-sm mt-1 ml-7">El registro de actividades se bloqueará permanentemente hoy</p>
+        <p class="text-red-600 text-xs mt-1 ml-6">El registro se bloqueará hasta mañana</p>
       </div>
 
       <div class="space-y-3 text-sm text-gray-600">

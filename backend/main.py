@@ -503,34 +503,69 @@ def obtener_registros(usuario_id: int = None, limit: int = None):
 # NUEVO ENDPOINT PARA ESTADÍSTICAS COMPLETAS (SIN LÍMITES)
 @app.get("/estadisticas")
 def obtener_estadisticas():
-    """Obtener estadísticas completas del sistema sin límites"""
+    """Obtener estadísticas completas del sistema sin límites - ACTUALIZADO PARA VISOR MAP"""
     try:
-        print("🔍 Obteniendo estadísticas completas del sistema")
+        print("🔍 Obteniendo estadísticas completas del sistema con horario CDMX")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Obtener total real de registros (actividades)
+        # Obtener la fecha actual en horario CDMX
+        fecha_hoy_cdmx = datetime.now(CDMX_TZ).date()
+        print(f"📅 Fecha actual CDMX: {fecha_hoy_cdmx}")
+        
+        # ==================== NUEVAS ESTADÍSTICAS PARA VISOR MAP ====================
+        
+        # 1. TOTAL USUARIOS ÚNICOS (cambio de nombre de "Total" a "Total Usuarios")
+        cursor.execute("SELECT COUNT(DISTINCT id) FROM usuarios")
+        total_usuarios_unicos = cursor.fetchone()[0]
+        
+        # 2. ENTRADAS DEL DÍA (solo entradas que ocurrieron HOY en horario CDMX)
+        cursor.execute("""
+            SELECT COUNT(*) FROM asistencias 
+            WHERE fecha = %s AND hora_entrada IS NOT NULL
+        """, (fecha_hoy_cdmx,))
+        entradas_del_dia = cursor.fetchone()[0]
+        
+        # 3. SALIDAS DEL DÍA (solo salidas que ocurrieron HOY en horario CDMX)
+        cursor.execute("""
+            SELECT COUNT(*) FROM asistencias 
+            WHERE fecha = %s AND hora_salida IS NOT NULL
+        """, (fecha_hoy_cdmx,))
+        salidas_del_dia = cursor.fetchone()[0]
+        
+        # 4. ACTIVIDADES DE HOY (registros normales que ocurrieron HOY en horario CDMX)
+        # Convertir la fecha CDMX a rango UTC para consultar correctamente
+        inicio_dia_cdmx = datetime.combine(fecha_hoy_cdmx, datetime.min.time()).replace(tzinfo=CDMX_TZ)
+        fin_dia_cdmx = datetime.combine(fecha_hoy_cdmx, datetime.max.time()).replace(tzinfo=CDMX_TZ)
+        
+        inicio_dia_utc = inicio_dia_cdmx.astimezone(pytz.UTC).replace(tzinfo=None)
+        fin_dia_utc = fin_dia_cdmx.astimezone(pytz.UTC).replace(tzinfo=None)
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM registros 
+            WHERE fecha_hora >= %s AND fecha_hora <= %s
+        """, (inicio_dia_utc, fin_dia_utc))
+        actividades_de_hoy = cursor.fetchone()[0]
+        
+        # ==================== ESTADÍSTICAS LEGACY (para compatibilidad) ====================
+        
+        # Mantener estadísticas originales para otros componentes que las usen
         cursor.execute("SELECT COUNT(*) FROM registros")
         total_registros = cursor.fetchone()[0]
         
-        # Obtener total de usuarios
         cursor.execute("SELECT COUNT(*) FROM usuarios")
         total_usuarios = cursor.fetchone()[0]
         
-        # Obtener registros de hoy
         cursor.execute("SELECT COUNT(*) FROM registros WHERE DATE(fecha_hora) = CURRENT_DATE")
         registros_hoy = cursor.fetchone()[0]
         
-        # Obtener total de asistencias
         cursor.execute("SELECT COUNT(*) FROM asistencias")
         total_asistencias = cursor.fetchone()[0]
         
-        # Obtener asistencias de hoy
         cursor.execute("SELECT COUNT(*) FROM asistencias WHERE fecha = CURRENT_DATE")
         asistencias_hoy = cursor.fetchone()[0]
         
-        # Obtener usuarios presentes hoy (que han marcado entrada)
         cursor.execute("""
             SELECT COUNT(DISTINCT usuario_id) FROM asistencias 
             WHERE fecha = CURRENT_DATE AND hora_entrada IS NOT NULL
@@ -538,15 +573,35 @@ def obtener_estadisticas():
         usuarios_presentes = cursor.fetchone()[0]
         
         estadisticas = {
+            # ==================== NUEVAS ESTADÍSTICAS PARA VISOR MAP ====================
+            "total_usuarios_unicos": total_usuarios_unicos,
+            "entradas_del_dia": entradas_del_dia,
+            "salidas_del_dia": salidas_del_dia, 
+            "actividades_de_hoy": actividades_de_hoy,
+            
+            # ==================== ESTADÍSTICAS LEGACY ====================
             "total_registros": total_registros,
             "total_usuarios": total_usuarios,
             "registros_hoy": registros_hoy,
             "total_asistencias": total_asistencias,
             "asistencias_hoy": asistencias_hoy,
-            "usuarios_presentes": usuarios_presentes
+            "usuarios_presentes": usuarios_presentes,
+            
+            # ==================== INFORMACIÓN ADICIONAL ====================
+            "fecha_consulta_cdmx": fecha_hoy_cdmx.isoformat(),
+            "rango_utc_consulta": {
+                "inicio": inicio_dia_utc.isoformat(),
+                "fin": fin_dia_utc.isoformat()
+            }
         }
         
-        print(f"✅ Estadísticas obtenidas: {estadisticas}")
+        print(f"✅ Estadísticas obtenidas con horario CDMX: {estadisticas}")
+        print(f"📊 Resumen VisorMap:")
+        print(f"   👥 Total Usuarios: {total_usuarios_unicos}")
+        print(f"   ➡️  Entradas del día: {entradas_del_dia}")  
+        print(f"   ⬅️  Salidas del día: {salidas_del_dia}")
+        print(f"   📝 Actividades de hoy: {actividades_de_hoy}")
+        
         return {"estadisticas": estadisticas}
         
     except psycopg2.Error as e:

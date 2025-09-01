@@ -22,12 +22,23 @@ class EstadisticasService {
         console.log('✅ Estadísticas obtenidas:', stats)
         
         return {
+          // ==================== NUEVAS ESTADÍSTICAS PARA VISOR MAP ====================
+          totalUsuarios: stats.total_usuarios_unicos || 0,
+          entradasDelDia: stats.entradas_del_dia || 0,
+          salidasDelDia: stats.salidas_del_dia || 0,
+          actividadesDeHoy: stats.actividades_de_hoy || 0,
+          
+          // ==================== ESTADÍSTICAS LEGACY (para compatibilidad) ====================
           totalRegistros: stats.total_registros || 0,
-          totalUsuarios: stats.total_usuarios || 0,
+          totalUsuariosLegacy: stats.total_usuarios || 0,
           registrosHoy: stats.registros_hoy || 0,
           totalAsistencias: stats.total_asistencias || 0,
           asistenciasHoy: stats.asistencias_hoy || 0,
-          usuariosPresentes: stats.usuarios_presentes || 0
+          usuariosPresentes: stats.usuarios_presentes || 0,
+          
+          // ==================== INFORMACIÓN ADICIONAL ====================
+          fechaConsultaCDMX: stats.fecha_consulta_cdmx || null,
+          rangoConsulta: stats.rango_utc_consulta || null
         }
       }
       
@@ -73,13 +84,28 @@ class EstadisticasService {
         }
       })
       
+      // Calcular entradas y salidas del día para fallback
+      const entradasHoy = asistencias.filter(a => a.fecha === hoyISO && a.hora_entrada).length
+      const salidasHoy = asistencias.filter(a => a.fecha === hoyISO && a.hora_salida).length
+      
       return {
-        totalRegistros: registros.length,
+        // ==================== NUEVAS ESTADÍSTICAS PARA VISOR MAP ====================
         totalUsuarios: usuarios.length,
+        entradasDelDia: entradasHoy,
+        salidasDelDia: salidasHoy,
+        actividadesDeHoy: registrosHoy,
+        
+        // ==================== ESTADÍSTICAS LEGACY ====================
+        totalRegistros: registros.length,
+        totalUsuariosLegacy: usuarios.length,
         registrosHoy: registrosHoy,
         totalAsistencias: asistencias.length,
         asistenciasHoy: asistenciasHoy,
-        usuariosPresentes: usuariosPresentes.size
+        usuariosPresentes: usuariosPresentes.size,
+        
+        // ==================== INFORMACIÓN ADICIONAL ====================
+        fechaConsultaCDMX: hoyISO,
+        rangoConsulta: null
       }
     }
   }

@@ -126,10 +126,6 @@
                 <span class="stat-label">Actividades de hoy</span>
                 <span class="stat-value hoy">{{ estadisticasDiaActual.actividadesDia }}</span>
               </div>
-              <div class="stat-item">
-                <span class="stat-label">Antiguos</span>
-                <span class="stat-value antiguo">{{ clusterInfo.registrosAntiguos }}</span>
-              </div>
             </div>
           </div>
           

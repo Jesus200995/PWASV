@@ -556,6 +556,242 @@ def obtener_estadisticas():
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
 
+# NUEVOS ENDPOINTS PARA ESTADÍSTICAS DEL DÍA EN HORARIO CDMX
+@app.get("/estadisticas/dia-actual")
+def obtener_estadisticas_dia_actual():
+    """Obtener estadísticas del día actual en horario CDMX (America/Mexico_City)"""
+    try:
+        print("🔍 Obteniendo estadísticas del día actual en horario CDMX")
+        
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Configurar zona horaria CDMX
+        cdmx_tz = pytz.timezone('America/Mexico_City')
+        ahora_cdmx = datetime.now(cdmx_tz)
+        fecha_hoy_cdmx = ahora_cdmx.date()
+        
+        print(f"📅 Calculando para fecha CDMX: {fecha_hoy_cdmx}")
+        
+        # Obtener rango de fechas en UTC para el día actual CDMX
+        inicio_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.min.time()))
+        fin_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.max.time()))
+        
+        # Convertir a UTC para consultar la BD
+        inicio_utc = inicio_dia_cdmx.astimezone(pytz.UTC)
+        fin_utc = fin_dia_cdmx.astimezone(pytz.UTC)
+        
+        # 1. Total de usuarios únicos que tuvieron al menos un registro hoy
+        cursor.execute("""
+            SELECT COUNT(DISTINCT usuario_id) FROM (
+                SELECT usuario_id FROM registros 
+                WHERE fecha_hora >= %s AND fecha_hora <= %s
+                UNION
+                SELECT usuario_id FROM asistencias 
+                WHERE (hora_entrada >= %s AND hora_entrada <= %s) 
+                   OR (hora_salida >= %s AND hora_salida <= %s)
+            ) AS usuarios_activos
+        """, (inicio_utc, fin_utc, inicio_utc, fin_utc, inicio_utc, fin_utc))
+        total_usuarios_dia = cursor.fetchone()[0]
+        
+        # 2. Total de entradas del día
+        cursor.execute("""
+            SELECT COUNT(*) FROM asistencias 
+            WHERE hora_entrada >= %s AND hora_entrada <= %s
+        """, (inicio_utc, fin_utc))
+        entradas_dia = cursor.fetchone()[0]
+        
+        # 3. Total de salidas del día
+        cursor.execute("""
+            SELECT COUNT(*) FROM asistencias 
+            WHERE hora_salida >= %s AND hora_salida <= %s
+        """, (inicio_utc, fin_utc))
+        salidas_dia = cursor.fetchone()[0]
+        
+        # 4. Total de actividades/registros del día
+        cursor.execute("""
+            SELECT COUNT(*) FROM registros 
+            WHERE fecha_hora >= %s AND fecha_hora <= %s
+        """, (inicio_utc, fin_utc))
+        actividades_dia = cursor.fetchone()[0]
+        
+        estadisticas_dia = {
+            "total_usuarios_dia": total_usuarios_dia,
+            "entradas_dia": entradas_dia,
+            "salidas_dia": salidas_dia,
+            "actividades_dia": actividades_dia,
+            "fecha_cdmx": fecha_hoy_cdmx.isoformat()
+        }
+        
+        print(f"✅ Estadísticas del día CDMX obtenidas: {estadisticas_dia}")
+        return {"estadisticas": estadisticas_dia}
+        
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas del día: {str(e)}")
+
+@app.get("/estadisticas/usuarios-dia")
+def obtener_usuarios_activos_dia():
+    """Obtener total de usuarios únicos activos del día actual en horario CDMX"""
+    try:
+        print("👥 Obteniendo usuarios únicos activos del día CDMX")
+        
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Configurar zona horaria CDMX
+        cdmx_tz = pytz.timezone('America/Mexico_City')
+        ahora_cdmx = datetime.now(cdmx_tz)
+        fecha_hoy_cdmx = ahora_cdmx.date()
+        
+        # Obtener rango de fechas en UTC para el día actual CDMX
+        inicio_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.min.time()))
+        fin_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.max.time()))
+        
+        # Convertir a UTC para consultar la BD
+        inicio_utc = inicio_dia_cdmx.astimezone(pytz.UTC)
+        fin_utc = fin_dia_cdmx.astimezone(pytz.UTC)
+        
+        # Obtener usuarios únicos que tuvieron actividad hoy
+        cursor.execute("""
+            SELECT COUNT(DISTINCT usuario_id) FROM (
+                SELECT usuario_id FROM registros 
+                WHERE fecha_hora >= %s AND fecha_hora <= %s
+                UNION
+                SELECT usuario_id FROM asistencias 
+                WHERE (hora_entrada >= %s AND hora_entrada <= %s) 
+                   OR (hora_salida >= %s AND hora_salida <= %s)
+            ) AS usuarios_activos
+        """, (inicio_utc, fin_utc, inicio_utc, fin_utc, inicio_utc, fin_utc))
+        
+        total_usuarios = cursor.fetchone()[0]
+        
+        return {
+            "total_usuarios_dia": total_usuarios,
+            "fecha_cdmx": fecha_hoy_cdmx.isoformat()
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo usuarios del día: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@app.get("/estadisticas/entradas-dia")
+def obtener_entradas_dia():
+    """Obtener total de entradas del día actual en horario CDMX"""
+    try:
+        print("🚪➡️ Obteniendo entradas del día CDMX")
+        
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Configurar zona horaria CDMX
+        cdmx_tz = pytz.timezone('America/Mexico_City')
+        ahora_cdmx = datetime.now(cdmx_tz)
+        fecha_hoy_cdmx = ahora_cdmx.date()
+        
+        # Obtener rango de fechas en UTC para el día actual CDMX
+        inicio_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.min.time()))
+        fin_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.max.time()))
+        
+        # Convertir a UTC para consultar la BD
+        inicio_utc = inicio_dia_cdmx.astimezone(pytz.UTC)
+        fin_utc = fin_dia_cdmx.astimezone(pytz.UTC)
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM asistencias 
+            WHERE hora_entrada >= %s AND hora_entrada <= %s
+        """, (inicio_utc, fin_utc))
+        
+        entradas = cursor.fetchone()[0]
+        
+        return {
+            "entradas_dia": entradas,
+            "fecha_cdmx": fecha_hoy_cdmx.isoformat()
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo entradas del día: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@app.get("/estadisticas/salidas-dia")
+def obtener_salidas_dia():
+    """Obtener total de salidas del día actual en horario CDMX"""
+    try:
+        print("🚪⬅️ Obteniendo salidas del día CDMX")
+        
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Configurar zona horaria CDMX
+        cdmx_tz = pytz.timezone('America/Mexico_City')
+        ahora_cdmx = datetime.now(cdmx_tz)
+        fecha_hoy_cdmx = ahora_cdmx.date()
+        
+        # Obtener rango de fechas en UTC para el día actual CDMX
+        inicio_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.min.time()))
+        fin_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.max.time()))
+        
+        # Convertir a UTC para consultar la BD
+        inicio_utc = inicio_dia_cdmx.astimezone(pytz.UTC)
+        fin_utc = fin_dia_cdmx.astimezone(pytz.UTC)
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM asistencias 
+            WHERE hora_salida >= %s AND hora_salida <= %s
+        """, (inicio_utc, fin_utc))
+        
+        salidas = cursor.fetchone()[0]
+        
+        return {
+            "salidas_dia": salidas,
+            "fecha_cdmx": fecha_hoy_cdmx.isoformat()
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo salidas del día: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@app.get("/estadisticas/actividades-dia")
+def obtener_actividades_dia():
+    """Obtener total de actividades/registros del día actual en horario CDMX"""
+    try:
+        print("📝 Obteniendo actividades del día CDMX")
+        
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Configurar zona horaria CDMX
+        cdmx_tz = pytz.timezone('America/Mexico_City')
+        ahora_cdmx = datetime.now(cdmx_tz)
+        fecha_hoy_cdmx = ahora_cdmx.date()
+        
+        # Obtener rango de fechas en UTC para el día actual CDMX
+        inicio_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.min.time()))
+        fin_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.max.time()))
+        
+        # Convertir a UTC para consultar la BD
+        inicio_utc = inicio_dia_cdmx.astimezone(pytz.UTC)
+        fin_utc = fin_dia_cdmx.astimezone(pytz.UTC)
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM registros 
+            WHERE fecha_hora >= %s AND fecha_hora <= %s
+        """, (inicio_utc, fin_utc))
+        
+        actividades = cursor.fetchone()[0]
+        
+        return {
+            "actividades_dia": actividades,
+            "fecha_cdmx": fecha_hoy_cdmx.isoformat()
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo actividades del día: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 # Nuevo endpoint para obtener usuarios (para el panel de administración)
 @app.get("/usuarios")
 async def obtener_usuarios():

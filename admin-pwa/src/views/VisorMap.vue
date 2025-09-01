@@ -111,20 +111,20 @@
             <h4>Estadísticas</h4>
             <div class="stat-grid">
               <div class="stat-item">
-                <span class="stat-label">Total</span>
-                <span class="stat-value">{{ totalPuntosEnMapa }}</span>
+                <span class="stat-label">Total Usuarios</span>
+                <span class="stat-value">{{ estadisticasDiaActual.totalUsuariosDia }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Entradas</span>
-                <span class="stat-value entrada">{{ clusterInfo.entradas }}</span>
+                <span class="stat-label">Entradas del día</span>
+                <span class="stat-value entrada">{{ estadisticasDiaActual.entradasDia }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Salidas</span>
-                <span class="stat-value salida">{{ clusterInfo.salidas }}</span>
+                <span class="stat-label">Salidas del día</span>
+                <span class="stat-value salida">{{ estadisticasDiaActual.salidasDia }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Actividades</span>
-                <span class="stat-value hoy">{{ clusterInfo.registrosHoy }}</span>
+                <span class="stat-label">Actividades de hoy</span>
+                <span class="stat-value hoy">{{ estadisticasDiaActual.actividadesDia }}</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Antiguos</span>
@@ -495,6 +495,15 @@ const clusterInfo = reactive({
   registrosAntiguos: 0
 })
 
+// Estado para las estadísticas del día actual en horario CDMX
+const estadisticasDiaActual = reactive({
+  totalUsuariosDia: 0,
+  entradasDia: 0,
+  salidasDia: 0,
+  actividadesDia: 0,
+  fechaCDMX: null
+})
+
 // Función para obtener la fecha actual en CDMX (tiempo real)
 const obtenerFechaCDMX = () => {
   // Horario de Ciudad de México: UTC-6 (normal) o UTC-5 (horario de verano)
@@ -549,6 +558,9 @@ const cargarDatos = async () => {
       inicializarMapa(ultimasActividades)
     }
     
+    // Cargar estadísticas del día actual en paralelo
+    cargarEstadisticasDiaActual()
+    
     hasDatosUsuario.value = true
     loading.value = false
     totalPuntosEnMapa.value = ultimasActividades.length
@@ -561,6 +573,33 @@ const cargarDatos = async () => {
       error.value = 'Error al cargar los datos: ' + (err.response?.data?.detail || err.message)
       loading.value = false
     }
+  }
+}
+
+// Función para cargar estadísticas del día actual en horario CDMX
+const cargarEstadisticasDiaActual = async () => {
+  try {
+    console.log('📊 Cargando estadísticas del día actual CDMX...')
+    
+    // Obtener estadísticas completas del día actual
+    const estadisticas = await estadisticasService.obtenerEstadisticasDiaActual()
+    
+    // Actualizar el objeto reactivo
+    estadisticasDiaActual.totalUsuariosDia = estadisticas.totalUsuariosDia || 0
+    estadisticasDiaActual.entradasDia = estadisticas.entradasDia || 0
+    estadisticasDiaActual.salidasDia = estadisticas.salidasDia || 0
+    estadisticasDiaActual.actividadesDia = estadisticas.actividadesDia || 0
+    estadisticasDiaActual.fechaCDMX = estadisticas.fechaCDMX
+    
+    console.log('✅ Estadísticas del día actualizadas:', estadisticasDiaActual)
+    
+  } catch (error) {
+    console.error('❌ Error cargando estadísticas del día:', error)
+    // Si hay error, mantener valores en 0 o usar fallback local
+    estadisticasDiaActual.totalUsuariosDia = 0
+    estadisticasDiaActual.entradasDia = 0
+    estadisticasDiaActual.salidasDia = 0
+    estadisticasDiaActual.actividadesDia = 0
   }
 }
 

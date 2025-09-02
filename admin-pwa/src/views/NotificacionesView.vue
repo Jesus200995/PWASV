@@ -1087,50 +1087,74 @@ export default {
 
 .main-content {
   flex: 1;
-  margin-left: min(220px, 18vw);
-  max-width: calc(100vw - min(220px, 18vw));
+  margin-left: clamp(180px, 18vw, 240px);
+  width: calc(100vw - clamp(180px, 18vw, 240px));
   min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* === HEADER STYLES === */
 .page-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  background: linear-gradient(135deg, #00695c 0%, #004d40 50%, #00251a 100%);
   color: white;
-  padding: 16px 24px;
+  padding: clamp(0.3rem, 0.8vw, 0.5rem);
   box-shadow: 
-    0 2px 8px rgba(76, 175, 80, 0.3),
-    0 4px 16px rgba(76, 175, 80, 0.15);
+    0 2px 8px rgba(0, 105, 92, 0.3),
+    0 4px 16px rgba(0, 105, 92, 0.15);
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
+  box-sizing: border-box;
   backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
+  flex-wrap: wrap;
+  width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
+  flex: 1;
+  min-width: 140px;
 }
 
 .header-icon {
-  width: 40px;
-  height: 40px;
+  width: clamp(24px, 3vw, 30px);
+  height: clamp(24px, 3vw, 30px);
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: clamp(5px, 0.8vw, 6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1141,8 +1165,8 @@ export default {
 }
 
 .header-icon svg {
-  width: 20px;
-  height: 20px;
+  width: clamp(12px, 2.5vw, 16px);
+  height: clamp(12px, 2.5vw, 16px);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
@@ -1151,47 +1175,51 @@ export default {
 }
 
 .header-title {
-  font-size: 20px;
+  font-size: clamp(14px, 2.5vw, 16px);
   font-weight: 700;
-  margin: 0 0 4px 0;
+  margin: 0 0 clamp(1px, 0.3vw, 2px) 0;
   background: linear-gradient(135deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   font-family: 'Inter', sans-serif;
+  line-height: 1.2;
 }
 
 .header-subtitle {
-  font-size: 13px;
+  font-size: clamp(9px, 1.8vw, 11px);
   opacity: 0.9;
   margin: 0;
   font-weight: 400;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   font-family: 'Inter', sans-serif;
+  line-height: 1.3;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: clamp(0.5rem, 1.2vw, 0.75rem);
+  flex-shrink: 0;
 }
 
 .btn-primary {
   background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   color: #2E7D32;
   border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
+  padding: clamp(6px, 1.2vw, 8px) clamp(10px, 2vw, 12px);
+  border-radius: clamp(6px, 1.2vw, 8px);
   font-weight: 600;
-  font-size: 14px;
+  font-size: clamp(10px, 2vw, 12px);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: clamp(4px, 0.8vw, 6px);
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-family: 'Inter', sans-serif;
+  white-space: nowrap;
 }
 
 .btn-primary:hover {
@@ -1199,12 +1227,17 @@ export default {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
+.btn-primary svg {
+  width: clamp(10px, 1.8vw, 12px);
+  height: clamp(10px, 1.8vw, 12px);
+}
+
 .connection-status {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 16px;
+  gap: clamp(3px, 0.8vw, 4px);
+  padding: clamp(3px, 0.8vw, 4px) clamp(6px, 1.2vw, 8px);
+  border-radius: clamp(8px, 2vw, 12px);
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1212,8 +1245,8 @@ export default {
 }
 
 .status-indicator {
-  width: 6px;
-  height: 6px;
+  width: clamp(4px, 0.8vw, 5px);
+  height: clamp(4px, 0.8vw, 5px);
   border-radius: 50%;
   transition: all 0.3s ease;
 }
@@ -1229,9 +1262,10 @@ export default {
 }
 
 .status-text {
-  font-size: 12px;
+  font-size: clamp(8px, 1.6vw, 10px);
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
 }
 
 /* === CONTENT STYLES === */
@@ -2585,72 +2619,34 @@ export default {
 }
 
 /* === RESPONSIVE DESIGN === */
-@media (max-width: 1200px) {
-  .main-content {
-    margin-left: 260px;
-    max-width: calc(100vw - 260px);
-  }
-  
-  .modal-expanded {
-    max-width: 900px;
-  }
-  
-  .modal-body-two-columns {
-    grid-template-columns: 1fr 350px;
-    gap: 20px;
-  }
-  
-  .users-column {
-    padding: 16px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .main-content {
-    margin-left: 240px;
-    max-width: calc(100vw - 240px);
-  }
-  
-  .modal-expanded {
-    max-width: 800px;
-    width: 98%;
-  }
-  
-  .modal-body-two-columns {
-    grid-template-columns: 1fr 320px;
-    gap: 16px;
-    padding: 20px;
-  }
-}
-
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    max-width: 100vw;
   }
   
   .page-header {
-    padding: 12px 16px;
+    padding: 16px 20px;
   }
   
   .header-content {
     flex-direction: column;
-    gap: 12px;
-    text-align: center;
+    gap: 16px;
+    align-items: flex-start;
   }
   
   .header-main {
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: row;
+    gap: 12px;
+    align-items: center;
   }
   
   .header-actions {
     width: 100%;
-    justify-content: center;
+    justify-content: space-between;
   }
   
   .page-content {
-    padding: 16px;
+    padding: 16px 20px;
   }
   
   .modal-content {

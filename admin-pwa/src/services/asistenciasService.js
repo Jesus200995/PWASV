@@ -8,28 +8,44 @@ class AsistenciasService {
    * @returns {Promise<Array>} Lista de asistencias con información de usuarios
    */
   async obtenerAsistencias() {
-    try {
-      console.log('🔍 Solicitando asistencias desde:', `${API_URL}/asistencias`);
-      
-      const response = await fetch(`${API_URL}/asistencias`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    let ultimoError = null;
+    const maxReintentos = 3;
+    
+    for (let intento = 1; intento <= maxReintentos; intento++) {
+      try {
+        console.log(`🔍 Intento ${intento}/${maxReintentos} - Solicitando asistencias desde:`, `${API_URL}/asistencias`);
+        
+        const response = await fetch(`${API_URL}/asistencias`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Timeout de 10 segundos por intento
+          signal: AbortSignal.timeout(10000)
+        });
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Asistencias obtenidas exitosamente:', data);
+        
+        return data.asistencias || [];
+      } catch (error) {
+        ultimoError = error;
+        console.error(`❌ Error en intento ${intento}/${maxReintentos}:`, error.message);
+        
+        if (intento < maxReintentos) {
+          const tiempoEspera = Math.min(1000 * Math.pow(2, intento), 5000); // Backoff exponencial
+          console.log(`⏳ Esperando ${tiempoEspera}ms antes del siguiente intento...`);
+          await new Promise(resolve => setTimeout(resolve, tiempoEspera));
+        }
       }
-
-      const data = await response.json();
-      console.log('✅ Asistencias obtenidas:', data);
-      
-      return data.asistencias || [];
-    } catch (error) {
-      console.error('❌ Error al obtener asistencias:', error);
-      throw error;
     }
+    
+    console.error('❌ Todos los intentos fallaron:', ultimoError);
+    throw ultimoError;
   }
 
   /**

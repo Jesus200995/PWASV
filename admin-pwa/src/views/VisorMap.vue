@@ -420,6 +420,7 @@ import mapboxgl from 'mapbox-gl'
 import { usuariosService } from '../services/usuariosService.js'
 import asistenciasService from '../services/asistenciasService.js'
 import { estadisticasService } from '../services/estadisticasService.js'
+import healthCheckService from '../services/healthCheckService.js'
 
 // Token de acceso de Mapbox - En producción debe estar en variables de entorno
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFyaWVsMDgiLCJhIjoiY202emV3MDhhMDN6YjJscHVqaXExdGpjMyJ9.F_ACoKzS_4e280lD0XndEw';
@@ -434,6 +435,11 @@ const isOnline = ref(navigator.onLine)
 const loading = ref(true)
 const error = ref('')
 const totalPuntosEnMapa = ref(0)
+
+// Control de carga para evitar múltiples solicitudes simultáneas
+let cargaEnProceso = false
+let ultimaCarga = 0
+const INTERVALO_MINIMO_CARGA = 5000 // 5 segundos entre cargas
 
 // Referencias al mapa y capas
 let map = null
@@ -516,64 +522,195 @@ const obtenerFechaCDMX = () => {
   return fechaCDMX;
 }
 
-// Función para cargar datos
+// Función para cargar datos con manejo robusto de errores
 const cargarDatos = async () => {
+  // Evitar múltiples cargas simultáneas
+  const ahora = Date.now()
+  if (cargaEnProceso) {
+    console.log('🚫 Carga ya en proceso, omitiendo...')
+    return
+  }
+  
+  if (ahora - ultimaCarga < INTERVALO_MINIMO_CARGA) {
+    console.log('🚫 Demasiado pronto para recargar, omitiendo...')
+    return
+  }
+  
+  cargaEnProceso = true
+  ultimaCarga = ahora
   loading.value = true
   error.value = ''
   
   try {
+    console.log('🔄 Iniciando carga de datos para VisorMap...')
+    
     const token = localStorage.getItem('admin_token')
     
-    // Cargar registros, asistencias y usuarios en paralelo
-    const [responseRegistros, asistenciasData, usuariosData] = await Promise.all([
-      axios.get(`${API_URL}/registros`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }),
-      asistenciasService.obtenerAsistenciasConUsuarios(),
-      usuariosService.obtenerUsuarios()
+    // Cargar datos con manejo individual de errores y reintentos
+    const [registrosData, asistenciasData, usuariosData] = await Promise.allSettled([
+      cargarRegistrosConReintentos(token),
+      cargarAsistenciasConReintentos(),
+      cargarUsuariosConReintentos()
     ])
     
-    // La respuesta puede ser directamente un array o tener una propiedad específica
-    const registrosRaw = Array.isArray(responseRegistros.data) ? responseRegistros.data : (responseRegistros.data.registros || [])
+    // Procesar resultados de registros
+    let registrosEnriquecidos = []
+    if (registrosData.status === 'fulfilled') {
+      console.log('✅ Registros cargados exitosamente')
+      const registrosRaw = Array.isArray(registrosData.value) ? registrosData.value : (registrosData.value.registros || [])
+      registrosEnriquecidos = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
+      registros.value = registrosEnriquecidos
+    } else {
+      console.error('❌ Error al cargar registros:', registrosData.reason)
+      registros.value = []
+    }
     
-    // Enriquecer registros con información de usuarios
-    const registrosEnriquecidos = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
+    // Procesar resultados de asistencias
+    let asistenciasResult = []
+    if (asistenciasData.status === 'fulfilled') {
+      console.log('✅ Asistencias cargadas exitosamente')
+      asistenciasResult = asistenciasData.value || []
+      asistencias.value = asistenciasResult
+    } else {
+      console.error('❌ Error al cargar asistencias:', asistenciasData.reason)
+      asistencias.value = []
+    }
     
-    // Guardar datos
-    registros.value = registrosEnriquecidos
-    asistencias.value = asistenciasData
-    usuarios.value = usuariosData
+    // Procesar resultados de usuarios
+    if (usuariosData.status === 'fulfilled') {
+      console.log('✅ Usuarios cargados exitosamente')
+      usuarios.value = usuariosData.value || []
+    } else {
+      console.error('❌ Error al cargar usuarios:', usuariosData.reason)
+      usuarios.value = []
+    }
     
     // Calcular las últimas actividades por usuario
-    const ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosEnriquecidos, asistenciasData)
+    const ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosEnriquecidos, asistenciasResult)
+    console.log(`📊 Últimas actividades calculadas: ${ultimasActividades.length}`)
     
     // Si el mapa ya está cargado, actualizar puntos
-    if (map) {
+    if (map && mapInitialized.value) {
       actualizarPuntosMapa(ultimasActividades)
     } else {
       inicializarMapa(ultimasActividades)
     }
     
-    // Cargar estadísticas del día actual en paralelo
-    cargarEstadisticasDiaActual()
+    // Cargar estadísticas del día actual en paralelo (sin bloquear)
+    cargarEstadisticasDiaActual().catch(err => {
+      console.error('⚠️ Error al cargar estadísticas (no crítico):', err)
+    })
     
-    // Cargar total de usuarios registrados en el sistema
-    cargarTotalUsuarios()
+    // Cargar total de usuarios registrados en el sistema (sin bloquear)
+    cargarTotalUsuarios().catch(err => {
+      console.error('⚠️ Error al cargar total de usuarios (no crítico):', err)
+    })
     
     hasDatosUsuario.value = true
     loading.value = false
     totalPuntosEnMapa.value = ultimasActividades.length
     
+    console.log('✅ Carga de datos completada exitosamente')
+    
   } catch (err) {
-    console.error('Error al cargar datos:', err)
+    console.error('❌ Error crítico al cargar datos:', err)
     if (err.response?.status === 401) {
       logout()
     } else {
-      error.value = 'Error al cargar los datos: ' + (err.response?.data?.detail || err.message)
+      const errorMessage = err.response?.data?.detail || err.message || 'Error desconocido'
+      error.value = 'Error al cargar los datos: ' + errorMessage
       loading.value = false
+    }
+  } finally {
+    cargaEnProceso = false
+  }
+}
+
+// Función auxiliar para cargar registros con reintentos
+const cargarRegistrosConReintentos = async (token, maxReintentos = 3) => {
+  // Verificar salud de la API primero
+  const endpointDisponible = await healthCheckService.isEndpointAvailable('/registros')
+  if (!endpointDisponible) {
+    console.log('⚠️ Endpoint de registros no disponible según health check')
+  }
+  
+  for (let intento = 1; intento <= maxReintentos; intento++) {
+    try {
+      console.log(`🔄 Intento ${intento}/${maxReintentos} - Cargando registros...`)
+      
+      const response = await axios.get(`${API_URL}/registros`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000 // Timeout de 15 segundos
+      })
+      
+      return response.data
+      
+    } catch (err) {
+      console.error(`❌ Error en intento ${intento} al cargar registros:`, err.message)
+      
+      if (intento === maxReintentos) {
+        throw err
+      }
+      
+      // Esperar más tiempo entre reintentos
+      await new Promise(resolve => setTimeout(resolve, 2000 * intento))
+    }
+  }
+}
+
+// Función auxiliar para cargar asistencias con reintentos
+const cargarAsistenciasConReintentos = async (maxReintentos = 3) => {
+  // Verificar salud de la API primero
+  const endpointDisponible = await healthCheckService.isEndpointAvailable('/asistencias')
+  if (!endpointDisponible) {
+    console.log('⚠️ Endpoint de asistencias no disponible según health check')
+  }
+  
+  for (let intento = 1; intento <= maxReintentos; intento++) {
+    try {
+      console.log(`🔄 Intento ${intento}/${maxReintentos} - Cargando asistencias...`)
+      
+      return await asistenciasService.obtenerAsistenciasConUsuarios()
+      
+    } catch (err) {
+      console.error(`❌ Error en intento ${intento} al cargar asistencias:`, err.message)
+      
+      if (intento === maxReintentos) {
+        throw err
+      }
+      
+      // Esperar más tiempo entre reintentos
+      await new Promise(resolve => setTimeout(resolve, 2000 * intento))
+    }
+  }
+}
+
+// Función auxiliar para cargar usuarios con reintentos
+const cargarUsuariosConReintentos = async (maxReintentos = 3) => {
+  // Verificar salud de la API primero
+  const endpointDisponible = await healthCheckService.isEndpointAvailable('/usuarios')
+  if (!endpointDisponible) {
+    console.log('⚠️ Endpoint de usuarios no disponible según health check')
+  }
+  
+  for (let intento = 1; intento <= maxReintentos; intento++) {
+    try {
+      console.log(`🔄 Intento ${intento}/${maxReintentos} - Cargando usuarios...`)
+      
+      return await usuariosService.obtenerUsuarios()
+      
+    } catch (err) {
+      console.error(`❌ Error en intento ${intento} al cargar usuarios:`, err.message)
+      
+      if (intento === maxReintentos) {
+        throw err
+      }
+      
+      // Esperar más tiempo entre reintentos
+      await new Promise(resolve => setTimeout(resolve, 2000 * intento))
     }
   }
 }
@@ -1508,6 +1645,8 @@ const toggleFiltros = () => {
 
 // Recargar mapa y datos
 const recargarMapa = async () => {
+  console.log('🔄 Solicitud de recarga del mapa...')
+  
   // Si hay un error grave, reiniciar completamente el mapa
   if (error.value && error.value.includes('token')) {
     // Destruir el mapa actual si existe
@@ -1516,7 +1655,7 @@ const recargarMapa = async () => {
         map.remove();
         map = null;
         puntosSource = null;
-        clusterSource = null;
+        mapInitialized.value = false;
       } catch (e) {
         console.error('Error al destruir el mapa:', e);
       }
@@ -1530,11 +1669,19 @@ const recargarMapa = async () => {
     mapboxgl.accessToken = 'pk.eyJ1IjoibWFyaWVsMDgiLCJhIjoiY202emV3MDhhMDN6YjJscHVqaXExdGpjMyJ9.F_ACoKzS_4e280lD0XndEw';
   }
   
+  // Resetear los controles de carga para permitir una recarga inmediata
+  cargaEnProceso = false
+  ultimaCarga = 0
+  
   // Cargar los datos nuevamente
   await cargarDatos();
   
   // También recargar el total de usuarios
-  await cargarTotalUsuarios();
+  await cargarTotalUsuarios().catch(err => {
+    console.error('⚠️ Error al recargar total de usuarios (no crítico):', err)
+  });
+  
+  console.log('✅ Recarga del mapa completada')
 }
 
 // Función de cierre de sesión
@@ -1545,7 +1692,9 @@ const logout = () => {
 }
 
 // Ciclo de vida del componente
-onMounted(() => {
+onMounted(async () => {
+  console.log('🚀 VisorMap iniciando...')
+  
   // Asegurar que el CSS de Mapbox esté cargado (por si falla la importación en el estilo)
   const addMapboxCSS = () => {
     if (!document.getElementById('mapbox-gl-css')) {
@@ -1560,17 +1709,27 @@ onMounted(() => {
   
   addMapboxCSS();
   
+  // Esperar un poco para que el DOM esté completamente listo
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
   // Cargar datos y mapa
-  cargarDatos();
+  await cargarDatos();
   
   // Escuchar cambios de conexión
-  window.addEventListener('online', () => {
+  const handleOnline = () => {
+    console.log('🌐 Conexión restablecida')
     isOnline.value = true;
-  });
+  };
   
-  window.addEventListener('offline', () => {
+  const handleOffline = () => {
+    console.log('🚫 Conexión perdida')
     isOnline.value = false;
-  });
+  };
+  
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+  
+  console.log('✅ VisorMap inicializado completamente')
 });
 
 onUnmounted(() => {

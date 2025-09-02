@@ -9,54 +9,71 @@ class UsuariosService {
   }
 
   async obtenerUsuarios() {
-    try {
-      console.log('🔍 Obteniendo usuarios desde la API real...');
-      const response = await fetch(`${API_URL}/usuarios`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      if (!response.ok) {
-        console.error(`❌ Error HTTP: ${response.status} - ${response.statusText}`);
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log('✅ Respuesta de la API:', data);
-      
-      // El endpoint devuelve {usuarios: []} según la implementación del backend
-      let usuarios = [];
-      if (data.usuarios && Array.isArray(data.usuarios)) {
-        usuarios = data.usuarios;
-      } else if (Array.isArray(data)) {
-        usuarios = data;
-      }
-      
-      // Debug: verificar contraseñas en los datos recibidos
-      console.log('🔍 Verificando contraseñas en usuarios recibidos:');
-      usuarios.forEach((usuario, index) => {
-        console.log(`Usuario ${index + 1}:`, {
-          id: usuario.id,
-          nombre: usuario.nombre_completo,
-          contraseña: usuario.contrasena || 'NO FOUND',
-          propiedades: Object.keys(usuario)
+    let ultimoError = null;
+    const maxReintentos = 3;
+    
+    for (let intento = 1; intento <= maxReintentos; intento++) {
+      try {
+        console.log(`🔍 Intento ${intento}/${maxReintentos} - Obteniendo usuarios desde la API real...`);
+        
+        const response = await fetch(`${API_URL}/usuarios`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Timeout de 10 segundos por intento
+          signal: AbortSignal.timeout(10000)
         });
-      });
-      
-      // Actualizar cache con los usuarios obtenidos
-      usuarios.forEach(usuario => {
-        this.cache.set(usuario.id, usuario);
-      });
-      
-      console.log(`✅ ${usuarios.length} usuarios obtenidos desde la base de datos`);
-      return usuarios;
-      
-    } catch (error) {
-      console.error('❌ Error al obtener usuarios desde la base de datos:', error);
-      throw error; // Propagar el error para manejo en las vistas
+        
+        if (!response.ok) {
+          console.error(`❌ Error HTTP: ${response.status} - ${response.statusText}`);
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Respuesta de la API obtenida exitosamente:', data);
+        
+        // El endpoint devuelve {usuarios: []} según la implementación del backend
+        let usuarios = [];
+        if (data.usuarios && Array.isArray(data.usuarios)) {
+          usuarios = data.usuarios;
+        } else if (Array.isArray(data)) {
+          usuarios = data;
+        }
+        
+        // Debug: verificar contraseñas en los datos recibidos
+        console.log('🔍 Verificando contraseñas en usuarios recibidos:');
+        usuarios.forEach((usuario, index) => {
+          console.log(`Usuario ${index + 1}:`, {
+            id: usuario.id,
+            nombre: usuario.nombre_completo,
+            contraseña: usuario.contrasena || 'NO FOUND',
+            propiedades: Object.keys(usuario)
+          });
+        });
+        
+        // Actualizar cache con los usuarios obtenidos
+        usuarios.forEach(usuario => {
+          this.cache.set(usuario.id, usuario);
+        });
+        
+        console.log(`✅ ${usuarios.length} usuarios obtenidos desde la base de datos`);
+        return usuarios;
+        
+      } catch (error) {
+        ultimoError = error;
+        console.error(`❌ Error en intento ${intento}/${maxReintentos}:`, error.message);
+        
+        if (intento < maxReintentos) {
+          const tiempoEspera = Math.min(1000 * Math.pow(2, intento), 5000); // Backoff exponencial
+          console.log(`⏳ Esperando ${tiempoEspera}ms antes del siguiente intento...`);
+          await new Promise(resolve => setTimeout(resolve, tiempoEspera));
+        }
+      }
     }
+    
+    console.error('❌ Todos los intentos fallaron al obtener usuarios:', ultimoError);
+    throw ultimoError; // Propagar el último error para manejo en las vistas
   }
 
   async obtenerUsuario(id) {

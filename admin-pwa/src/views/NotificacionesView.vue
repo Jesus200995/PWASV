@@ -27,10 +27,6 @@
               </svg>
               Nueva Notificación
             </button>
-            <div class="connection-status" :class="{ 'online': isOnline, 'offline': !isOnline }">
-              <div class="status-indicator"></div>
-              <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
-            </div>
           </div>
         </div>
       </header>
@@ -1100,12 +1096,12 @@ export default {
 
 /* === HEADER STYLES === */
 .page-header {
-  background: linear-gradient(135deg, #00695c 0%, #004d40 50%, #00251a 100%);
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
   color: white;
   padding: clamp(0.3rem, 0.8vw, 0.5rem);
   box-shadow: 
-    0 2px 8px rgba(0, 105, 92, 0.3),
-    0 4px 16px rgba(0, 105, 92, 0.15);
+    0 2px 8px rgba(76, 175, 80, 0.3),
+    0 4px 16px rgba(76, 175, 80, 0.15);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -1149,25 +1145,65 @@ export default {
 }
 
 .header-icon {
-  width: clamp(24px, 3vw, 30px);
-  height: clamp(24px, 3vw, 30px);
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: clamp(5px, 0.8vw, 6px);
+  width: clamp(40px, 4vw, 48px);
+  height: clamp(40px, 4vw, 48px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.header-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+
+.header-icon:hover {
+  transform: translateY(-2px) rotate(5deg);
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.2),
+    0 6px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.header-icon:hover::before {
+  opacity: 1;
 }
 
 .header-icon svg {
-  width: clamp(12px, 2.5vw, 16px);
-  height: clamp(12px, 2.5vw, 16px);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  width: clamp(18px, 3vw, 22px);
+  height: clamp(18px, 3vw, 22px);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.header-icon:hover svg {
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
+  transform: scale(1.05);
 }
 
 .header-text {
@@ -1205,67 +1241,140 @@ export default {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
-  color: #2E7D32;
-  border: none;
-  padding: clamp(6px, 1.2vw, 8px) clamp(10px, 2vw, 12px);
-  border-radius: clamp(6px, 1.2vw, 8px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: clamp(6px, 1vw, 8px) clamp(12px, 2vw, 14px);
+  border-radius: clamp(12px, 2vw, 14px);
   font-weight: 600;
-  font-size: clamp(10px, 2vw, 12px);
+  font-size: clamp(10px, 1.8vw, 11px);
   display: flex;
   align-items: center;
   gap: clamp(4px, 0.8vw, 6px);
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   font-family: 'Inter', sans-serif;
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-primary:hover::before {
+  opacity: 1;
 }
 
 .btn-primary svg {
-  width: clamp(10px, 1.8vw, 12px);
-  height: clamp(10px, 1.8vw, 12px);
+  width: clamp(12px, 2vw, 14px);
+  height: clamp(12px, 2vw, 14px);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transform: scale(1.05);
 }
 
 .connection-status {
   display: flex;
   align-items: center;
-  gap: clamp(3px, 0.8vw, 4px);
-  padding: clamp(3px, 0.8vw, 4px) clamp(6px, 1.2vw, 8px);
-  border-radius: clamp(8px, 2vw, 12px);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  gap: clamp(4px, 1vw, 6px);
+  padding: clamp(6px, 1.2vw, 8px) clamp(10px, 2vw, 14px);
+  border-radius: clamp(14px, 2.5vw, 18px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   transition: all 0.3s ease;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .status-indicator {
-  width: clamp(4px, 0.8vw, 5px);
-  height: clamp(4px, 0.8vw, 5px);
+  width: clamp(6px, 1.2vw, 8px);
+  height: clamp(6px, 1.2vw, 8px);
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+.status-indicator::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.3;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 0.3; 
+  }
+  50% { 
+    transform: scale(1.2); 
+    opacity: 0.1; 
+  }
 }
 
 .connection-status.online .status-indicator {
   background: #66BB6A;
-  box-shadow: 0 0 8px rgba(102, 187, 106, 0.6);
+  box-shadow: 
+    0 0 12px rgba(102, 187, 106, 0.8),
+    0 0 24px rgba(102, 187, 106, 0.4);
 }
 
 .connection-status.offline .status-indicator {
   background: #FF7043;
-  box-shadow: 0 0 8px rgba(255, 112, 67, 0.6);
+  box-shadow: 
+    0 0 12px rgba(255, 112, 67, 0.8),
+    0 0 24px rgba(255, 112, 67, 0.4);
 }
 
 .status-text {
-  font-size: clamp(8px, 1.6vw, 10px);
+  font-size: clamp(10px, 1.8vw, 12px);
   font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   white-space: nowrap;
+  font-family: 'Inter', sans-serif;
 }
 
 /* === CONTENT STYLES === */

@@ -1028,7 +1028,7 @@ if (typeof window !== 'undefined') {
 .nav-link {
   display: flex;
   align-items: center;
-  gap: clamp(6px, 1vw, 8px);  /* Gap reducido para acercar más a la izquierda */
+  gap: 0px;  /* Eliminamos completamente el espacio entre el icono y el texto */
   padding: clamp(8px, 1.6vh, 14px) clamp(6px, 1.2vw, 10px);  /* Padding izquierdo reducido */
   color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
@@ -1174,6 +1174,7 @@ if (typeof window !== 'undefined') {
   -webkit-line-clamp: 2;
   line-clamp: 2;  /* Propiedad estándar */
   -webkit-box-orient: vertical;
+  margin-left: 2px;  /* Pequeño margen para evitar que el texto se pegue demasiado al icono */
 }
 
 .nav-glow {
@@ -1397,7 +1398,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 12px 14px;
-    gap: 12px;
+    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en tablets */
     min-height: 50px;
   }
   
@@ -1486,7 +1487,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 8px 12px;
-    gap: 10px;
+    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en landscape */
     min-height: 48px;
   }
   
@@ -1585,7 +1586,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 12px 16px;
-    gap: 14px;
+    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en portrait */
     min-height: 52px;
   }
   
@@ -1678,7 +1679,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 10px 14px;
-    gap: 12px;
+    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en móviles pequeños */
     border-radius: 10px;
     min-height: 46px;
   }
@@ -1750,7 +1751,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 8px 10px;
-    gap: 10px;
+    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en pantallas muy pequeñas */
     min-height: 44px;
   }
   

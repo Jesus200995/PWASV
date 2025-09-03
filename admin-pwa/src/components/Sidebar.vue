@@ -1028,7 +1028,7 @@ if (typeof window !== 'undefined') {
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 0px;  /* Eliminamos completamente el espacio entre el icono y el texto */
+  gap: 2px;  /* Pequeño espacio entre icono y texto para mejor legibilidad */
   padding: clamp(8px, 1.6vh, 14px) clamp(6px, 1.2vw, 10px);  /* Padding izquierdo reducido */
   color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
@@ -1156,8 +1156,8 @@ if (typeof window !== 'undefined') {
 
 .nav-text {
   font-size: clamp(8px, 0.9vw, 10px);  /* Ajustado para ser proporcional a los iconos */
-  font-weight: 600;
-  font-family: 'Daytona', Arial, Helvetica, sans-serif;
+  font-weight: 400;  /* Cambiado a normal (sin negritas) */
+  font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
   text-shadow: none;
   letter-spacing: 0.02em;
   white-space: normal;  /* Permitir múltiples líneas */
@@ -1174,7 +1174,7 @@ if (typeof window !== 'undefined') {
   -webkit-line-clamp: 2;
   line-clamp: 2;  /* Propiedad estándar */
   -webkit-box-orient: vertical;
-  margin-left: 2px;  /* Pequeño margen para evitar que el texto se pegue demasiado al icono */
+  margin-left: 4px;  /* Aumentado el margen para mejor separación del icono */
 }
 
 .nav-glow {
@@ -1398,17 +1398,18 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 12px 14px;
-    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en tablets */
+    gap: 2px;  /* Pequeño espacio entre icono y texto en tablets para mejor legibilidad */
     min-height: 50px;
   }
   
   .nav-text {
-    font-size: 7px;  /* Reducido para tablet */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
+    font-size: 9px;  /* Aumentado para mejor legibilidad en tablet */
+    font-weight: 400;  /* Normal (sin negritas) para tablets */
+    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;  /* Cambiado a Arial */
     white-space: normal;
     word-wrap: break-word;
-    line-height: 1.1;
-    max-height: 2.2em;
+    line-height: 1.2;
+    max-height: 2.4em;
   }
   
   .logout-btn {
@@ -1487,7 +1488,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 8px 12px;
-    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en landscape */
+    gap: 2px;  /* Pequeño espacio para mejor legibilidad en landscape */
     min-height: 48px;
   }
   
@@ -1498,7 +1499,8 @@ if (typeof window !== 'undefined') {
   
   .nav-text {
     font-size: 9px;  /* Ajustado para landscape móvil */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;
+    font-weight: 400;  /* Normal (sin negritas) para landscape */
+    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
     white-space: normal;
     word-wrap: break-word;
     line-height: 1.2;
@@ -1586,7 +1588,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 12px 16px;
-    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en portrait */
+    gap: 3px;  /* Pequeño espacio para mejor legibilidad en portrait */
     min-height: 52px;
   }
   
@@ -1597,7 +1599,8 @@ if (typeof window !== 'undefined') {
   
   .nav-text {
     font-size: 10px;  /* Mantenido para móvil portrait */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;
+    font-weight: 400;  /* Normal (sin negritas) para portrait */
+    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
     white-space: normal;
     word-wrap: break-word;
     line-height: 1.2;
@@ -1679,7 +1682,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 10px 14px;
-    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en móviles pequeños */
+    gap: 2px;  /* Pequeño espacio para mejor legibilidad en móviles pequeños */
     border-radius: 10px;
     min-height: 46px;
   }
@@ -1691,7 +1694,8 @@ if (typeof window !== 'undefined') {
   
   .nav-text {
     font-size: 9px;  /* Mantenido para móvil pequeño */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;
+    font-weight: 400;  /* Normal (sin negritas) para móvil pequeño */
+    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
     white-space: normal;
     word-wrap: break-word;
     line-height: 1.2;
@@ -1751,7 +1755,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 8px 10px;
-    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en pantallas muy pequeñas */
+    gap: 2px;  /* Pequeño espacio para mejor legibilidad en pantallas muy pequeñas */
     min-height: 44px;
   }
   
@@ -1762,7 +1766,8 @@ if (typeof window !== 'undefined') {
   
   .nav-text {
     font-size: 8px;  /* Mantenido para móvil muy pequeño */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;
+    font-weight: 400;  /* Normal (sin negritas) para móvil muy pequeño */
+    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
     white-space: normal;
     word-wrap: break-word;
     line-height: 1.2;

@@ -146,13 +146,8 @@
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             <path d="M8 12c0-2.5 1.8-4.5 4-4.5s4 2 4 4.5-1.8 4.5-4 4.5-4-2-4-4.5"/>
           </svg>
-          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M7 17l10-10"/>
-            <path d="M17 7v10"/>
-            <path d="M17 7H7"/>
-          </svg>
         </div>
-        <span class="geoportal-text">Ir a Inicio Geoportal</span>
+        <span class="geoportal-text">Geoportal</span>
         <div class="geoportal-glow"></div>
       </a>
       
@@ -162,11 +157,6 @@
           <svg class="mobile-app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
             <line x1="12" y1="18" x2="12.01" y2="18"/>
-          </svg>
-          <svg class="mobile-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M7 17l10-10"/>
-            <path d="M17 7v10"/>
-            <path d="M17 7H7"/>
           </svg>
         </div>
         <span class="mobile-app-text">App Móvil</span>
@@ -809,6 +799,9 @@ if (typeof window !== 'undefined') {
     rgba(27, 94, 32, 0.3) 100%);
   flex-shrink: 0;
   max-height: 12vh;
+  display: flex;
+  flex-direction: row;
+  gap: clamp(2px, 0.5vw, 4px);
 }
 
 .geoportal-section::after {
@@ -825,7 +818,8 @@ if (typeof window !== 'undefined') {
 }
 
 .geoportal-btn {
-  width: 100%;
+  width: 50%;
+  flex: 1;
   background: linear-gradient(135deg, 
     rgba(27, 94, 32, 0.3) 0%, 
     rgba(46, 125, 50, 0.25) 30%,
@@ -839,22 +833,48 @@ if (typeof window !== 'undefined') {
   border-radius: clamp(6px, 1.2vw, 10px);
   cursor: pointer;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(2px, 0.4vw, 4px);
+  gap: clamp(1px, 0.2vh, 2px);
   font-size: clamp(7px, 0.8vw, 9px);
   font-weight: 500;
   text-decoration: none;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
-  min-height: clamp(20px, 2.5vh, 26px);
+  min-height: clamp(32px, 4vh, 40px);
   box-shadow: 
     0 3px 12px rgba(0, 0, 0, 0.15),
     0 1px 4px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1),
     0 0 20px rgba(76, 175, 80, 0.1);
+}
+
+.geoportal-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    transparent 100%);
+  transition: left 0.6s ease-in-out;
+  z-index: 1;
+}
+
+.geoportal-btn:hover::before {
+  left: 100%;
+}
+
+.geoportal-btn i,
+.geoportal-btn span {
+  position: relative;
+  z-index: 2;
 }
 
 .geoportal-btn:hover {
@@ -892,12 +912,12 @@ if (typeof window !== 'undefined') {
   align-items: center;
   justify-content: center;
   position: relative;
-  gap: 6px;
+  flex-shrink: 0;
 }
 
 .geoportal-icon {
-  width: clamp(8px, 1vw, 10px);
-  height: clamp(8px, 1vw, 10px);
+  width: clamp(12px, 1.4vw, 14px);
+  height: clamp(12px, 1.4vw, 14px);
   stroke-width: 2;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
   transition: all 0.3s ease;
@@ -916,10 +936,11 @@ if (typeof window !== 'undefined') {
   font-size: clamp(7px, 0.8vw, 9px);
   font-weight: 500;
   text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.1);
-  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-shrink: 0;
+  text-align: center;
 }
 
 .geoportal-glow {
@@ -938,53 +959,75 @@ if (typeof window !== 'undefined') {
 
 /* Estilos modernos para el botón de la App Móvil */
 .mobile-app-btn {
-  width: 100%;
+  width: 50%;
+  flex: 1;
   background: linear-gradient(135deg, 
-    rgba(33, 150, 243, 0.3) 0%, 
-    rgba(25, 118, 210, 0.25) 50%,
-    rgba(100, 181, 246, 0.2) 100%);
+    rgba(21, 101, 192, 0.4) 0%, 
+    rgba(25, 118, 210, 0.35) 30%,
+    rgba(33, 150, 243, 0.3) 70%,
+    rgba(100, 181, 246, 0.25) 100%);
   backdrop-filter: blur(25px) saturate(200%);
   -webkit-backdrop-filter: blur(25px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(100, 181, 246, 0.3);
   color: rgba(255, 255, 255, 0.95);
   padding: clamp(3px, 0.5vh, 5px) clamp(4px, 0.6vw, 6px);
   border-radius: clamp(6px, 1.2vw, 10px);
   cursor: pointer;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(2px, 0.4vw, 4px);
+  gap: clamp(1px, 0.2vh, 2px);
   font-size: clamp(7px, 0.8vw, 9px);
   font-weight: 500;
   text-decoration: none;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
-  margin-top: clamp(2px, 0.5vh, 4px);
-  min-height: clamp(20px, 2.5vh, 26px);
+  min-height: clamp(32px, 4vh, 40px);
   box-shadow: 
     0 3px 12px rgba(0, 0, 0, 0.15),
     0 1px 4px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1),
-    0 0 20px rgba(33, 150, 243, 0.1);
+    0 0 20px rgba(33, 150, 243, 0.2);
+}
+
+.mobile-app-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.4) 50%, 
+    transparent 100%);
+  transition: left 0.6s ease-in-out;
+  z-index: 1;
+}
+
+.mobile-app-btn:hover::before {
+  left: 100%;
 }
 
 .mobile-app-btn:hover {
   background: linear-gradient(135deg, 
-    rgba(33, 150, 243, 0.45) 0%, 
-    rgba(25, 118, 210, 0.4) 50%,
-    rgba(100, 181, 246, 0.35) 100%);
+    rgba(21, 101, 192, 0.6) 0%, 
+    rgba(25, 118, 210, 0.55) 30%,
+    rgba(33, 150, 243, 0.5) 70%,
+    rgba(100, 181, 246, 0.45) 100%);
   backdrop-filter: blur(30px) saturate(250%);
   -webkit-backdrop-filter: blur(30px) saturate(250%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(100, 181, 246, 0.5);
   transform: translateY(-1px) scale(1.02);
   box-shadow: 
     0 6px 20px rgba(0, 0, 0, 0.2),
     0 2px 8px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
     inset 0 -1px 0 rgba(0, 0, 0, 0.15),
-    0 0 30px rgba(33, 150, 243, 0.3);
+    0 0 30px rgba(33, 150, 243, 0.5);
 }
 
 .mobile-app-btn:hover .mobile-app-glow {
@@ -996,6 +1039,12 @@ if (typeof window !== 'undefined') {
   transform: translateX(6px) rotate(45deg);
 }
 
+.mobile-app-btn i,
+.mobile-app-btn span {
+  position: relative;
+  z-index: 2;
+}
+
 .mobile-app-btn:active {
   transform: translateY(-1px) scale(1.01);
 }
@@ -1005,12 +1054,12 @@ if (typeof window !== 'undefined') {
   align-items: center;
   justify-content: center;
   position: relative;
-  gap: 6px;
+  flex-shrink: 0;
 }
 
 .mobile-app-icon {
-  width: clamp(8px, 1vw, 10px);
-  height: clamp(8px, 1vw, 10px);
+  width: clamp(12px, 1.4vw, 14px);
+  height: clamp(12px, 1.4vw, 14px);
   stroke-width: 2;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
   transition: all 0.3s ease;
@@ -1029,10 +1078,11 @@ if (typeof window !== 'undefined') {
   font-size: clamp(7px, 0.8vw, 9px);
   font-weight: 500;
   text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.1);
-  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-shrink: 0;
+  text-align: center;
 }
 
 .mobile-app-glow {

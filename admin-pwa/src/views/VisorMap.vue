@@ -22,10 +22,6 @@
             </div>
           </div>
           <div class="header-actions">
-            <div class="connection-status" :class="{ online: isOnline, offline: !isOnline }">
-              <div class="status-indicator"></div>
-              <span>{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
-            </div>
             <div class="lcd-counter">
               <div class="lcd-display">
                 <span class="lcd-label">Puntos</span>
@@ -34,11 +30,11 @@
             </div>
             <button @click="recargarMapa" class="refresh-btn-icon" :class="{ loading }" :disabled="loading" title="Actualizar datos">
               <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 2v6h-6"></path>
-                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-                <path d="M3 22v-6h6"></path>
-                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
               </svg>
+              {{ loading ? 'Cargando...' : 'Actualizar' }}
             </button>
           </div>
         </div>
@@ -1782,33 +1778,22 @@ watch(filtroTipo, () => {
 
 /* Header con diseño de vidrio líquido verde responsivo */
 .page-header {
-  background: linear-gradient(135deg, 
-    rgba(34, 197, 94, 0.85) 0%, 
-    rgba(16, 185, 129, 0.9) 25%,
-    rgba(5, 150, 105, 0.95) 50%,
-    rgba(4, 120, 87, 0.9) 75%,
-    rgba(6, 95, 70, 0.85) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  color: white;
   padding: clamp(0.3rem, 0.8vw, 0.5rem);
+  box-shadow: 
+    0 4px 16px rgba(76, 175, 80, 0.15);
   position: sticky;
   top: 0;
   z-index: 100;
   width: 100%;
-  color: white;
-  box-shadow: 
-    0 8px 32px rgba(34, 197, 94, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin: 0;
   box-sizing: border-box;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
 }
 
-/* Efecto de ondas líquidas animadas */
+/* Efecto de patrón sutil */
 .page-header::before {
   content: '';
   position: absolute;
@@ -1816,50 +1801,8 @@ watch(filtroTipo, () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
-  animation: liquidFlow 8s ease-in-out infinite alternate;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
   z-index: 1;
-}
-
-/* Efecto de brillo sutil */
-.page-header::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(255, 255, 255, 0.15), 
-    transparent);
-  animation: shimmer 6s ease-in-out infinite;
-  z-index: 2;
-}
-
-@keyframes liquidFlow {
-  0% {
-    background-position: 0% 0%, 100% 100%, 50% 50%;
-    opacity: 0.8;
-  }
-  50% {
-    background-position: 30% 70%, 70% 30%, 80% 20%;
-    opacity: 1;
-  }
-  100% {
-    background-position: 100% 100%, 0% 0%, 20% 80%;
-    opacity: 0.9;
-  }
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  50% { left: 100%; }
-  100% { left: -100%; }
 }
 
 .header-content {
@@ -1868,85 +1811,79 @@ watch(filtroTipo, () => {
   align-items: center;
   max-width: 100%;
   margin: 0;
-  gap: clamp(0.3rem, 0.8vw, 0.5rem);
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex-wrap: wrap;
   width: 100%;
   position: relative;
-  z-index: 3;
-  min-height: clamp(32px, 5vw, 44px);
+  z-index: 2;
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.5rem);
+  gap: clamp(0.5rem, 1.2vw, 0.8rem);
   flex: 1;
   min-width: 140px;
+  margin-left: clamp(0.3rem, 1vw, 0.6rem);
 }
 
 .header-icon {
-  width: clamp(24px, 3vw, 30px);
-  height: clamp(24px, 3vw, 30px);
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: clamp(5px, 0.8vw, 7px);
+  width: clamp(28px, 3vw, 32px);
+  height: clamp(28px, 3vw, 32px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  flex-shrink: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.header-icon:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
-  box-shadow: 
-    0 6px 16px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
 .header-icon svg {
-  width: clamp(12px, 2vw, 16px);
-  height: clamp(12px, 2vw, 16px);
-  color: white;
-  stroke-width: 1.5;
-  transition: all 0.2s ease;
+  width: clamp(14px, 2.5vw, 16px);
+  height: clamp(14px, 2.5vw, 16px);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
 }
 
 .header-text {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex: 1;
 }
 
 .header-title {
-  margin: 0;
-  font-size: clamp(12px, 1.3vw, 16px);
-  font-weight: 600;
-  color: white;
-  line-height: 1.2;
+  font-size: clamp(14px, 2.5vw, 16px);
+  font-weight: 700;
+  margin: 0 0 clamp(1px, 0.3vw, 2px) 0;
+  background: linear-gradient(135deg, #ffffff 0%, #e8f5e8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.2;
 }
 
 .header-subtitle {
+  font-size: clamp(9px, 1.8vw, 11px);
+  opacity: 0.9;
   margin: 0;
-  font-size: clamp(8px, 0.8vw, 12px);
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
   line-height: 1.3;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: clamp(6px, 0.8vw, 12px);
-  position: relative;
-  z-index: 3;
+  gap: clamp(0.5rem, 1.2vw, 0.75rem);
+  flex-shrink: 0;
 }
 
 /* Estado de conexión con vidrio líquido */
@@ -2110,57 +2047,77 @@ watch(filtroTipo, () => {
 
 /* Botón de actualización con vidrio líquido */
 .refresh-btn-icon {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  width: clamp(28px, 4vw, 34px);
-  height: clamp(28px, 4vw, 34px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: clamp(6px, 1vw, 8px) clamp(12px, 2vw, 14px);
+  border-radius: clamp(12px, 2vw, 14px);
+  font-weight: 600;
+  font-size: clamp(10px, 1.8vw, 11px);
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: clamp(4px, 0.8vw, 6px);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(15px) saturate(150%);
-  -webkit-backdrop-filter: blur(15px) saturate(150%);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
   position: relative;
   overflow: hidden;
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  min-width: auto;
+  width: auto;
+  height: auto;
 }
 
 .refresh-btn-icon::before {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(255, 255, 255, 0.3), 
-    transparent);
-  transition: left 0.6s ease;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
 }
 
 .refresh-btn-icon:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.35);
-  transform: translateY(-2px) rotate(5deg);
+  transform: translateY(-2px);
   box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .refresh-btn-icon:hover::before {
-  left: 100%;
+  opacity: 1;
+}
+
+.refresh-btn-icon svg {
+  width: clamp(12px, 2vw, 14px);
+  height: clamp(12px, 2vw, 14px);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn-icon:hover svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transform: scale(1.05);
 }
 
 .refresh-btn-icon:active {
-  transform: translateY(-1px) rotate(2deg) scale(0.95);
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.refresh-btn-icon:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .refresh-icon {
@@ -2180,12 +2137,12 @@ watch(filtroTipo, () => {
 }
 
 .spinning {
-  animation: spin 1.2s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Contenido principal */
@@ -3848,13 +3805,9 @@ watch(filtroTipo, () => {
   .header-subtitle {
     display: none; /* Ocultar subtitle en pantallas muy pequeñas */
   }
-  
-  .connection-status {
-    width: clamp(18px, 4vw, 24px);
-    height: clamp(18px, 4vw, 24px);
-    padding: 0;
-    justify-content: center;
-    min-width: auto;
-  }
 }
+</style>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 </style>

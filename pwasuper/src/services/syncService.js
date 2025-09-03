@@ -399,6 +399,7 @@ class SyncService {
       formData.append('latitud', registro.latitud);
       formData.append('longitud', registro.longitud);
       formData.append('descripcion', registro.descripcion || '');
+      formData.append('tipo_actividad', registro.tipo_actividad || 'campo'); // Nuevo: agregar tipo de actividad
       
       // MEJORA: Asegurar que se envía como tipo actividad explícitamente
       formData.append('tipo', 'actividad');

@@ -527,6 +527,7 @@ async def registrar(
     latitud: float = Form(...),
     longitud: float = Form(...),
     descripcion: str = Form(""),
+    tipo_actividad: str = Form(...),  # Nuevo campo obligatorio: 'campo' o 'gabinete'
     foto: UploadFile = File(...),
     timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
 ):
@@ -535,8 +536,15 @@ async def registrar(
     print(f"   latitud: {latitud}")
     print(f"   longitud: {longitud}")
     print(f"   descripcion: {descripcion}")
+    print(f"   tipo_actividad: {tipo_actividad}")
     print(f"   foto: {foto.filename}")
     print(f"   timestamp_offline: {timestamp_offline}")
+    
+    # Validar tipo de actividad
+    if tipo_actividad not in ['campo', 'gabinete']:
+        raise HTTPException(status_code=400, detail="tipo_actividad debe ser 'campo' o 'gabinete'")
+    
+    print(f"✅ Tipo de actividad válido: {tipo_actividad}")
     
     # ✅ SOLUCIÓN: Usar la misma función que asistencias para manejar zona horaria CDMX
     if timestamp_offline:
@@ -564,13 +572,13 @@ async def registrar(
 
     # Guardar registro en la base
     cursor.execute(
-        "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora) VALUES (%s, %s, %s, %s, %s, %s)",
-        (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora)
+        "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+        (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora, tipo_actividad)
     )
     conn.commit()
-    print(f"✅ Registro guardado en BD con fecha_hora: {fecha_hora}")
+    print(f"✅ Registro guardado en BD con fecha_hora: {fecha_hora} y tipo_actividad: {tipo_actividad}")
 
-    return {"status": "ok", "foto_url": ruta_archivo}
+    return {"status": "ok", "foto_url": ruta_archivo, "tipo_actividad": tipo_actividad}
 
 # ENDPOINT CORREGIDO - Esta es la parte importante que debe actualizarse
 @app.get("/registros")
@@ -581,17 +589,17 @@ def obtener_registros(usuario_id: int = None, limit: int = None):
         # Construir consulta según parámetros
         if usuario_id:
             if limit:
-                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC LIMIT %s"
+                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC LIMIT %s"
                 params = (usuario_id, limit)
             else:
-                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC"
+                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC"
                 params = (usuario_id,)
         else:
             if limit:
-                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros ORDER BY fecha_hora DESC LIMIT %s"
+                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad FROM registros ORDER BY fecha_hora DESC LIMIT %s"
                 params = (limit,)
             else:
-                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora FROM registros ORDER BY fecha_hora DESC"
+                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad FROM registros ORDER BY fecha_hora DESC"
                 params = None
         
         # Ejecutar consulta con manejo seguro
@@ -612,7 +620,8 @@ def obtener_registros(usuario_id: int = None, limit: int = None):
                 "longitud": float(row[3]) if row[3] else None,
                 "descripcion": row[4],
                 "foto_url": row[5],
-                "fecha_hora": row[6].isoformat() if row[6] else None
+                "fecha_hora": row[6].isoformat() if row[6] else None,
+                "tipo_actividad": row[7] if len(row) > 7 else "campo"  # Por compatibilidad con registros antiguos
             }
             registros.append(registro)
         
@@ -915,6 +924,81 @@ def obtener_actividades_dia():
         
     except Exception as e:
         print(f"❌ Error obteniendo actividades del día: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+# NUEVO ENDPOINT PARA ESTADÍSTICAS POR TIPO DE ACTIVIDAD
+@app.get("/estadisticas/tipo-actividad")
+def obtener_estadisticas_tipo_actividad():
+    """Obtener estadísticas de registros por tipo de actividad"""
+    try:
+        print("📊 Obteniendo estadísticas por tipo de actividad")
+        
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Obtener estadísticas generales por tipo
+        cursor.execute("""
+            SELECT 
+                COALESCE(tipo_actividad, 'campo') as tipo,
+                COUNT(*) as total
+            FROM registros 
+            GROUP BY COALESCE(tipo_actividad, 'campo')
+            ORDER BY total DESC
+        """)
+        tipos_general = cursor.fetchall()
+        
+        # Obtener estadísticas del día actual por tipo en CDMX
+        cdmx_tz = pytz.timezone('America/Mexico_City')
+        ahora_cdmx = datetime.now(cdmx_tz)
+        fecha_hoy_cdmx = ahora_cdmx.date()
+        
+        inicio_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.min.time()))
+        fin_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.max.time()))
+        
+        inicio_utc = inicio_dia_cdmx.astimezone(pytz.UTC)
+        fin_utc = fin_dia_cdmx.astimezone(pytz.UTC)
+        
+        cursor.execute("""
+            SELECT 
+                COALESCE(tipo_actividad, 'campo') as tipo,
+                COUNT(*) as total_dia
+            FROM registros 
+            WHERE fecha_hora >= %s AND fecha_hora <= %s
+            GROUP BY COALESCE(tipo_actividad, 'campo')
+            ORDER BY total_dia DESC
+        """, (inicio_utc, fin_utc))
+        tipos_dia = cursor.fetchall()
+        
+        # Convertir resultados
+        estadisticas_general = {tipo[0]: tipo[1] for tipo in tipos_general}
+        estadisticas_dia = {tipo[0]: tipo[1] for tipo in tipos_dia}
+        
+        # Asegurar que ambos tipos estén presentes
+        for tipo in ['campo', 'gabinete']:
+            if tipo not in estadisticas_general:
+                estadisticas_general[tipo] = 0
+            if tipo not in estadisticas_dia:
+                estadisticas_dia[tipo] = 0
+        
+        resultado = {
+            "total": {
+                "campo": estadisticas_general['campo'],
+                "gabinete": estadisticas_general['gabinete'],
+                "total_general": sum(estadisticas_general.values())
+            },
+            "dia_actual": {
+                "campo": estadisticas_dia['campo'],
+                "gabinete": estadisticas_dia['gabinete'],
+                "total_dia": sum(estadisticas_dia.values()),
+                "fecha_cdmx": fecha_hoy_cdmx.isoformat()
+            }
+        }
+        
+        print(f"📊 Estadísticas por tipo de actividad obtenidas: {resultado}")
+        return {"estadisticas_tipo": resultado}
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo estadísticas por tipo: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 # Nuevo endpoint para obtener usuarios (para el panel de administración)

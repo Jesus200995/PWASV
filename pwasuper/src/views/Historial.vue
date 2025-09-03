@@ -122,6 +122,16 @@
                   
                   <p class="text-xs text-gray-800 mt-0.5 line-clamp-2">{{ registro.descripcion || "Sin descripción" }}</p>
                   
+                  <!-- Nuevo: mostrar tipo de actividad -->
+                  <div v-if="registro.tipo_actividad" class="mt-1">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" 
+                          :class="registro.tipo_actividad === 'campo' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-blue-100 text-blue-800'">
+                      {{ registro.tipo_actividad === 'campo' ? '🌾 Campo' : '🏢 Gabinete' }}
+                    </span>
+                  </div>
+                  
                   <div class="mt-0.5 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />

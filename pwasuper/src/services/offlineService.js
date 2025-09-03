@@ -173,9 +173,10 @@ class OfflineService {
    * @param {string} longitud - Longitud de la ubicación
    * @param {string} descripcion - Descripción del registro
    * @param {File} archivo - Archivo de imagen adjunto
+   * @param {string} tipoActividad - Tipo de actividad ('campo' o 'gabinete')
    * @returns {Promise<number>} - ID del registro guardado en IndexedDB
    */
-  async guardarRegistroOffline(usuarioId, latitud, longitud, descripcion, archivo) {
+  async guardarRegistroOffline(usuarioId, latitud, longitud, descripcion, archivo, tipoActividad = 'campo') {
     try {
       console.log('🔄 Guardando registro offline para usuario ID:', usuarioId);
       await this.initDB();
@@ -208,6 +209,7 @@ class OfflineService {
         latitud,
         longitud,
         descripcion,
+        tipo_actividad: tipoActividad, // Nuevo: agregar tipo de actividad
         foto_base64: fotoBase64,
         foto_filename: archivo ? archivo.name : null,
         foto_type: archivo ? archivo.type : null,

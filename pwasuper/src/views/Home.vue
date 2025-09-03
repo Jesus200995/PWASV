@@ -657,11 +657,33 @@
           ></textarea>
         </div>
 
+        <!-- Tipo de Actividad -->
+        <div class="mb-3">
+          <label for="tipoActividad" class="block text-sm font-medium text-gray-700 mb-2"
+                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
+            Tipo de Actividad <span class="text-red-500">*</span>
+          </label>
+          <select
+            v-model="tipoActividad"
+            id="tipoActividad"
+            :disabled="!entradaMarcada || salidaMarcada"
+            class="glass-input w-full"
+            :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"
+            required
+          >
+            <option value="" disabled>
+              {{ entradaMarcada && !salidaMarcada ? 'Selecciona el tipo de actividad' : !entradaMarcada ? 'Marca entrada primero' : 'Función bloqueada' }}
+            </option>
+            <option value="campo">Actividad de Campo</option>
+            <option value="gabinete">Actividad de Gabinete</option>
+          </select>
+        </div>
+
         <!-- Botón enviar -->
         <button
           type="submit"
-          :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || enviando || !entradaMarcada || salidaMarcada"
-          :class="['glass-button w-full', (!latitudRegistro || !longitudRegistro || !fotoRegistro || enviando || !entradaMarcada || salidaMarcada) ? 'opacity-50 cursor-not-allowed' : '']"
+          :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || enviando || !entradaMarcada || salidaMarcada"
+          :class="['glass-button w-full', (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || enviando || !entradaMarcada || salidaMarcada) ? 'opacity-50 cursor-not-allowed' : '']"
         >
           <span v-if="enviando" class="flex items-center justify-center">
             <svg
@@ -749,6 +771,10 @@
               <p class="text-xs text-gray-800 truncate">
                 {{ r.descripcion || 'Sin descripción' }}
               </p>
+              <!-- Nuevo: mostrar tipo de actividad -->
+              <p v-if="r.tipo_actividad" class="text-xs text-blue-600 font-medium">
+                {{ r.tipo_actividad === 'campo' ? '🌾 Actividad de Campo' : '🏢 Actividad de Gabinete' }}
+              </p>
               <p class="text-xs font-mono text-gray-600">
                 Lat: {{ r.latitud }}, Lon: {{ r.longitud }}
               </p>
@@ -821,6 +847,7 @@ const longitudRegistro = ref(null);
 const fotoRegistro = ref(null);
 const archivoFotoRegistro = ref(null);
 const descripcionRegistro = ref("");
+const tipoActividad = ref(""); // Nuevo: campo para tipo de actividad
 
 // Referencias generales
 const fileInput = ref(null);
@@ -1411,8 +1438,8 @@ async function enviarRegistro() {
     return;
   }
 
-  if (!latitudRegistro.value || !longitudRegistro.value || !archivoFotoRegistro.value) {
-    error.value = "Falta información: necesitas ubicación y foto";
+  if (!latitudRegistro.value || !longitudRegistro.value || !archivoFotoRegistro.value || !tipoActividad.value) {
+    error.value = "Falta información: necesitas ubicación, foto y tipo de actividad";
     return;
   }
 
@@ -1433,7 +1460,8 @@ async function enviarRegistro() {
         latitudRegistro.value,
         longitudRegistro.value,
         descripcionRegistro.value,
-        archivoFotoRegistro.value
+        archivoFotoRegistro.value,
+        tipoActividad.value // Nuevo: incluir tipo de actividad
       );
       
       console.log(`✅ Registro offline guardado con ID: ${registroID}`);
@@ -1452,6 +1480,7 @@ async function enviarRegistro() {
         latitud: latitudRegistro.value,
         longitud: longitudRegistro.value,
         descripcion: descripcionRegistro.value,
+        tipo_actividad: tipoActividad.value, // Nuevo: agregar tipo de actividad
         foto: fotoRegistro.value,
         offline: true, // Marcador para indicar que está pendiente
         backend: null,
@@ -1461,6 +1490,7 @@ async function enviarRegistro() {
 
       // Limpiar campos
       descripcionRegistro.value = "";
+      tipoActividad.value = ""; // Nuevo: limpiar tipo de actividad
       fotoRegistro.value = null;
       archivoFotoRegistro.value = null;
       latitudRegistro.value = null;
@@ -1486,6 +1516,7 @@ async function enviarRegistro() {
     formData.append("latitud", latitudRegistro.value);
     formData.append("longitud", longitudRegistro.value);
     formData.append("descripcion", descripcionRegistro.value);
+    formData.append("tipo_actividad", tipoActividad.value); // Nuevo: agregar tipo de actividad
     formData.append("foto", archivoFotoRegistro.value);
     formData.append("tipo", "actividad"); // Especificar explícitamente que es un registro de actividad
     // ✅ SOLUCIÓN: Agregar timestamp para que el backend use hora CDMX
@@ -1508,6 +1539,7 @@ async function enviarRegistro() {
       latitud: latitudRegistro.value,
       longitud: longitudRegistro.value,
       descripcion: descripcionRegistro.value,
+      tipo_actividad: tipoActividad.value, // Nuevo: agregar tipo de actividad
       foto: fotoRegistro.value,
       offline: false, // Enviado exitosamente
       backend: response.data,
@@ -1516,6 +1548,7 @@ async function enviarRegistro() {
 
     // Limpiar campos
     descripcionRegistro.value = "";
+    tipoActividad.value = ""; // Nuevo: limpiar tipo de actividad
     fotoRegistro.value = null;
     archivoFotoRegistro.value = null;
     latitudRegistro.value = null;

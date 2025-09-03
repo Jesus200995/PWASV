@@ -1093,7 +1093,7 @@ if (typeof window !== 'undefined') {
 .nav-link.router-link-exact-active .nav-icon {
   filter: drop-shadow(0 1px 4px rgba(255, 255, 255, 0.4)) 
           drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
-  transform: scale(1.05);
+  transform: scale(1.1);  /* Aumentado para compensar el tamaño más pequeño */
 }
 
 .nav-icon-wrapper {
@@ -1147,28 +1147,28 @@ if (typeof window !== 'undefined') {
 }
 
 .nav-icon {
-  width: clamp(12px, 1.6vw, 15px);  /* Reducido de 18px máximo a 15px */
-  height: clamp(12px, 1.6vw, 15px);
-  stroke-width: 2;  /* Reducido de 2.2 a 2 para líneas más finas */
+  width: clamp(12px, 1.6vw, 14px);  /* Ajustado para un tamaño medio */
+  height: clamp(12px, 1.6vw, 14px);
+  stroke-width: 2;  /* Grosor de línea medio */
   transition: all 0.3s ease;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));  /* Sombra más sutil */
 }
 
 .nav-text {
-  font-size: clamp(5px, 0.6vw, 7px);  /* Reducido aún más: máximo 7px */
-  font-weight: 400;
-  font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
+  font-size: clamp(8px, 0.9vw, 10px);  /* Ajustado para ser proporcional a los iconos */
+  font-weight: 600;
+  font-family: 'Daytona', Arial, Helvetica, sans-serif;
   text-shadow: none;
   letter-spacing: 0.02em;
   white-space: normal;  /* Permitir múltiples líneas */
   word-wrap: break-word;  /* Romper palabras si es necesario */
   overflow-wrap: break-word;
-  line-height: 1.1;  /* Líneas aún más compactas */
+  line-height: 1.2;  /* Líneas más leíbles */
   flex: 1;
   min-width: 0;
   text-align: left;
   transition: all 0.2s ease;
-  max-height: 2.2em;  /* Máximo 2 líneas más compacto */
+  max-height: 2.4em;  /* Máximo 2 líneas */
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1491,17 +1491,17 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-icon {
-    width: 16px;
-    height: 16px;
+    width: 14px;  /* Ajustado para móviles */
+    height: 14px;
   }
   
   .nav-text {
-    font-size: 6px;  /* Muy pequeño en landscape móvil */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
+    font-size: 9px;  /* Ajustado para landscape móvil */
+    font-family: 'Daytona', Arial, Helvetica, sans-serif;
     white-space: normal;
     word-wrap: break-word;
-    line-height: 1.1;
-    max-height: 2.2em;
+    line-height: 1.2;
+    max-height: 2.4em;
   }
   
   .sidebar-footer {
@@ -1590,13 +1590,13 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-icon {
-    width: 18px;
-    height: 18px;
+    width: 14px;  /* Ajustado para móviles portrait */
+    height: 14px;
   }
   
   .nav-text {
-    font-size: 10px;  /* Reducido para móvil portrait */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
+    font-size: 10px;  /* Mantenido para móvil portrait */
+    font-family: 'Daytona', Arial, Helvetica, sans-serif;
     white-space: normal;
     word-wrap: break-word;
     line-height: 1.2;
@@ -1684,13 +1684,13 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-icon {
-    width: 16px;
-    height: 16px;
+    width: 14px;  /* Ajustado para móvil pequeño */
+    height: 14px;
   }
   
   .nav-text {
-    font-size: 9px;  /* Reducido para móvil pequeño */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
+    font-size: 9px;  /* Mantenido para móvil pequeño */
+    font-family: 'Daytona', Arial, Helvetica, sans-serif;
     white-space: normal;
     word-wrap: break-word;
     line-height: 1.2;
@@ -1755,13 +1755,13 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-icon {
-    width: 14px;
-    height: 14px;
+    width: 12px;  /* Ajustado para móviles muy pequeños */
+    height: 12px;
   }
   
   .nav-text {
-    font-size: 8px;  /* Reducido para móvil muy pequeño */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
+    font-size: 8px;  /* Mantenido para móvil muy pequeño */
+    font-family: 'Daytona', Arial, Helvetica, sans-serif;
     white-space: normal;
     word-wrap: break-word;
     line-height: 1.2;
@@ -2165,13 +2165,13 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-icon {
-    width: clamp(14px, 1.8vw, 20px);
-    height: clamp(14px, 1.8vw, 20px);
+    width: clamp(11px, 1.4vw, 14px);  /* Ajustado para zoom */
+    height: clamp(11px, 1.4vw, 14px);
   }
   
   .nav-text {
-    font-size: clamp(7px, 0.9vw, 12px);  /* Reducido para desktop amplio */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
+    font-size: clamp(8px, 1vw, 12px);  /* Ajustado para desktop amplio */
+    font-family: 'Daytona', Arial, Helvetica, sans-serif;
   }
   
   .sidebar-footer {
@@ -2292,8 +2292,8 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-icon {
-    width: clamp(12px, 1.5vw, 18px);
-    height: clamp(12px, 1.5vw, 18px);
+    width: clamp(10px, 1.3vw, 12px);  /* Ajustado para pantallas ultra bajas */
+    height: clamp(10px, 1.3vw, 12px);
   }
   
   .sidebar-footer {

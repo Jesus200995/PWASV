@@ -20,10 +20,6 @@
             </div>
           </div>
           <div class="header-actions">
-            <div class="connection-status" :class="{ 'online': isOnline, 'offline': !isOnline }">
-              <div class="status-indicator"></div>
-              <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
-            </div>
             <button @click="cargarRegistros" class="refresh-btn" :disabled="loading">
               <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10"></polyline>
@@ -2104,16 +2100,18 @@ const logout = () => {
 }
 
 .page-header {
-  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-  border-bottom: none;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  color: white;
   padding: clamp(0.3rem, 0.8vw, 0.5rem);
+  box-shadow: 
+    0 4px 16px rgba(76, 175, 80, 0.15);
   position: sticky;
   top: 0;
   z-index: 100;
   width: 100%;
   box-sizing: border-box;
-  color: white;
-  box-shadow: 0 2px 12px rgba(46, 204, 113, 0.12);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
 
@@ -2144,138 +2142,145 @@ const logout = () => {
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.5rem);
+  gap: clamp(0.5rem, 1.2vw, 0.8rem);
   flex: 1;
   min-width: 140px;
+  margin-left: clamp(0.3rem, 1vw, 0.6rem);
 }
 
 .header-icon {
-  width: clamp(24px, 3vw, 30px);
-  height: clamp(24px, 3vw, 30px);
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(5px, 0.8vw, 6px);
+  width: clamp(28px, 3vw, 32px);
+  height: clamp(28px, 3vw, 32px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0;
-  animation: float 3s ease-in-out infinite;
+  box-shadow: 
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
 .header-icon svg {
-  width: clamp(12px, 2vw, 15px);
-  height: clamp(12px, 2vw, 15px);
-  color: white;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
+  width: clamp(14px, 2.5vw, 16px);
+  height: clamp(14px, 2.5vw, 16px);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
 }
 
 .header-text {
   flex: 1;
-  min-width: 120px;
 }
 
 .header-title {
-  font-size: clamp(0.8rem, 2vw, 1rem);
+  font-size: clamp(14px, 2.5vw, 16px);
   font-weight: 700;
-  margin: 0;
-  background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
+  margin: 0 0 clamp(1px, 0.3vw, 2px) 0;
+  background: linear-gradient(135deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  letter-spacing: -0.3px;
-  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.2;
 }
 
 .header-subtitle {
-  margin: clamp(0.05rem, 0.2vw, 0.08rem) 0 0 0;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.55rem, 1vw, 0.65rem);
-  line-height: 1.1;
+  font-size: clamp(9px, 1.8vw, 11px);
+  opacity: 0.9;
+  margin: 0;
   font-weight: 400;
-  letter-spacing: 0.05px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.3;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.5rem);
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.connection-status {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.15rem, 0.4vw, 0.2rem);
-  padding: clamp(0.15rem, 0.4vw, 0.2rem) clamp(0.3rem, 0.8vw, 0.4rem);
-  border-radius: clamp(8px, 1.2vw, 10px);
-  font-size: clamp(0.55rem, 1vw, 0.6rem);
-  font-weight: 500;
-  white-space: nowrap;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.connection-status.online {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.connection-status.offline {
-  background: rgba(244, 67, 54, 0.2);
-  color: #fff2f0;
-  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
-}
-
-.status-indicator {
-  width: clamp(2px, 0.6vw, 3px);
-  height: clamp(2px, 0.6vw, 3px);
-  border-radius: 50%;
-  background: currentColor;
+  gap: clamp(0.5rem, 1.2vw, 0.75rem);
   flex-shrink: 0;
 }
 
 .refresh-btn {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: clamp(6px, 1vw, 8px) clamp(12px, 2vw, 14px);
+  border-radius: clamp(12px, 2vw, 14px);
+  font-weight: 600;
+  font-size: clamp(10px, 1.8vw, 11px);
   display: flex;
   align-items: center;
-  gap: clamp(0.15rem, 0.4vw, 0.2rem);
-  padding: clamp(0.2rem, 0.5vw, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: clamp(4px, 0.8vw, 5px);
-  font-weight: 500;
-  font-size: clamp(0.55rem, 1vw, 0.6rem);
+  gap: clamp(4px, 0.8vw, 6px);
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
   white-space: nowrap;
-  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.refresh-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.refresh-btn:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.refresh-btn svg {
+  width: clamp(12px, 2vw, 14px);
+  height: clamp(12px, 2vw, 14px);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover:not(:disabled) svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transform: scale(1.05);
 }
 
 .refresh-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
-}
-
-.refresh-icon {
-  transition: transform 0.3s ease;
+  transform: none;
 }
 
 .refresh-icon.spinning {
   animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes spin {
@@ -5054,4 +5059,8 @@ const logout = () => {
     transform: translateY(0);
   }
 }
+</style>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 </style>

@@ -1028,7 +1028,7 @@ if (typeof window !== 'undefined') {
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 1px;  /* Reducido el espacio entre icono y texto */
+  gap: 0px;  /* Eliminado completamente el espacio entre icono y texto */
   padding: clamp(8px, 1.6vh, 14px) clamp(6px, 1.2vw, 10px);  /* Padding izquierdo reducido */
   color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
@@ -1155,7 +1155,7 @@ if (typeof window !== 'undefined') {
 }
 
 .nav-text {
-  font-size: clamp(10px, 1.1vw, 12px);  /* Aumentado el tamaño de fuente */
+  font-size: clamp(12px, 1.3vw, 14px);  /* Aumentado aún más el tamaño de fuente */
   font-weight: 400;  /* Cambiado a normal (sin negritas) */
   font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
   text-shadow: none;
@@ -1174,7 +1174,7 @@ if (typeof window !== 'undefined') {
   -webkit-line-clamp: 2;
   line-clamp: 2;  /* Propiedad estándar */
   -webkit-box-orient: vertical;
-  margin-left: 2px;  /* Reducido el margen para acercar más al icono */
+  margin-left: 1px;  /* Mínimo margen para que no se pegue completamente */
 }
 
 .nav-glow {
@@ -1398,12 +1398,12 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 12px 14px;
-    gap: 1px;  /* Reducido el espacio entre icono y texto en tablets */
+    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en tablets */
     min-height: 50px;
   }
   
   .nav-text {
-    font-size: 11px;  /* Aumentado el tamaño de fuente para tablets */
+    font-size: 13px;  /* Aumentado significativamente el tamaño de fuente para tablets */
     font-weight: 400;  /* Normal (sin negritas) para tablets */
     font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;  /* Cambiado a Arial */
     white-space: normal;
@@ -1488,7 +1488,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 8px 12px;
-    gap: 1px;  /* Reducido el espacio para acercar más el texto */
+    gap: 0px;  /* Eliminado completamente el espacio */
     min-height: 48px;
   }
   
@@ -1498,7 +1498,7 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 10px;  /* Aumentado el tamaño para landscape móvil */
+    font-size: 12px;  /* Aumentado significativamente el tamaño para landscape móvil */
     font-weight: 400;  /* Normal (sin negritas) para landscape */
     font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
     white-space: normal;
@@ -1588,7 +1588,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 12px 16px;
-    gap: 1px;  /* Reducido el espacio para acercar más el texto */
+    gap: 0px;  /* Eliminado completamente el espacio */
     min-height: 52px;
   }
   
@@ -1598,7 +1598,7 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 11px;  /* Aumentado el tamaño para móvil portrait */
+    font-size: 13px;  /* Aumentado significativamente el tamaño para móvil portrait */
     font-weight: 400;  /* Normal (sin negritas) para portrait */
     font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
     white-space: normal;
@@ -1682,7 +1682,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 10px 14px;
-    gap: 1px;  /* Reducido el espacio para acercar más el texto */
+    gap: 0px;  /* Eliminado completamente el espacio */
     border-radius: 10px;
     min-height: 46px;
   }
@@ -1693,7 +1693,7 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 10px;  /* Aumentado el tamaño para móvil pequeño */
+    font-size: 12px;  /* Aumentado significativamente el tamaño para móvil pequeño */
     font-weight: 400;  /* Normal (sin negritas) para móvil pequeño */
     font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
     white-space: normal;
@@ -1755,7 +1755,7 @@ if (typeof window !== 'undefined') {
   
   .nav-link {
     padding: 8px 10px;
-    gap: 1px;  /* Reducido el espacio para acercar más el texto */
+    gap: 0px;  /* Eliminado completamente el espacio */
     min-height: 44px;
   }
   
@@ -1765,7 +1765,7 @@ if (typeof window !== 'undefined') {
   }
   
   .nav-text {
-    font-size: 9px;  /* Aumentado el tamaño para móvil muy pequeño */
+    font-size: 11px;  /* Aumentado significativamente el tamaño para móvil muy pequeño */
     font-weight: 400;  /* Normal (sin negritas) para móvil muy pequeño */
     font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
     white-space: normal;

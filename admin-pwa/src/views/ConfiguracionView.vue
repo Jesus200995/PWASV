@@ -8,17 +8,13 @@
             <div class="header-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"/>
-                <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
               </svg>
             </div>
             <div class="header-text">
               <h1 class="header-title">Configuración del Sistema</h1>
               <p class="header-subtitle">Administra las configuraciones generales de la aplicación</p>
             </div>
-          </div>
-          <div class="connection-status" :class="{ 'online': isOnline, 'offline': !isOnline }">
-            <div class="status-indicator"></div>
-            <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
           </div>
         </div>
       </header>
@@ -763,31 +759,42 @@ const logout = () => {
 </script>
 
 <style scoped>
-/* CONFIGURACION VIEW - ULTRA RESPONSIVE CON APROVECHAMIENTO TOTAL DEL ANCHO */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 .configuracion-container {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
 }
 
 .main-content {
   flex: 1;
   margin-left: clamp(180px, 18vw, 240px);
   width: calc(100vw - clamp(180px, 18vw, 240px));
-  background: transparent;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
   overflow-x: hidden;
 }
 
+/* === HEADER STYLES === */
 .page-header {
-  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-  border-bottom: none;
-  padding: clamp(0.75rem, 2vw, 1.25rem);
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
   color: white;
-  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
-  position: relative;
-  overflow: hidden;
+  padding: clamp(0.3rem, 0.8vw, 0.5rem);
+  box-shadow: 
+    0 4px 16px rgba(76, 175, 80, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
   width: 100%;
   box-sizing: border-box;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
 }
 
 .page-header::before {
@@ -805,44 +812,47 @@ const logout = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: relative;
-  z-index: 2;
-  flex-wrap: wrap;
-  gap: clamp(1rem, 3vw, 1.5rem);
   max-width: 100%;
   margin: 0;
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
+  flex-wrap: wrap;
   width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: clamp(0.5rem, 1.2vw, 0.8rem);
+  flex: 1;
+  min-width: 140px;
+  margin-left: clamp(0.3rem, 1vw, 0.6rem);
 }
 
 .header-icon {
-  width: clamp(36px, 5vw, 48px);
-  height: clamp(36px, 5vw, 48px);
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: clamp(8px, 1.5vw, 12px);
+  width: clamp(28px, 3vw, 32px);
+  height: clamp(28px, 3vw, 32px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0;
-  animation: float 3s ease-in-out infinite;
+  box-shadow: 
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
 .header-icon svg {
-  width: clamp(16px, 3vw, 24px);
-  height: clamp(16px, 3vw, 24px);
-  color: white;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
+  width: clamp(14px, 2.5vw, 16px);
+  height: clamp(14px, 2.5vw, 16px);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
 }
 
 .header-text {
@@ -850,85 +860,35 @@ const logout = () => {
 }
 
 .header-title {
-  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  font-size: clamp(14px, 2.5vw, 16px);
   font-weight: 700;
-  margin: 0;
-  background: linear-gradient(45deg, #ffffff 0%, #e8f5e8 100%);
+  margin: 0 0 clamp(1px, 0.3vw, 2px) 0;
+  background: linear-gradient(135deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  letter-spacing: -0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
   line-height: 1.2;
 }
 
 .header-subtitle {
-  margin: clamp(0.15rem, 0.5vw, 0.25rem) 0 0 0;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  line-height: 1.3;
-  font-weight: 400;
-  letter-spacing: 0.2px;
-}
-
-.connection-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.connection-status.online {
-  background: rgba(39, 174, 96, 0.2);
-  border-color: rgba(39, 174, 96, 0.3);
-}
-
-.connection-status.offline {
-  background: rgba(231, 76, 60, 0.2);
-  border-color: rgba(231, 76, 60, 0.3);
-}
-
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-.connection-status.online .status-indicator {
-  background: #27ae60;
-  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
-}
-
-.connection-status.offline .status-indicator {
-  background: #e74c3c;
-  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.status-text {
-  color: white;
-  font-weight: 500;
-}
-
-.page-content {
-  padding: clamp(1rem, 3vw, 2rem);
-  max-width: 100%;
+  font-size: clamp(9px, 1.8vw, 11px);
+  opacity: 0.9;
   margin: 0;
+  font-weight: 400;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.3;
+}
+
+/* === CONTENT STYLES === */
+.page-content {
+  flex: 1;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
   width: 100%;
-  box-sizing: border-box;
 }
 
 .config-section {
@@ -1387,10 +1347,6 @@ const logout = () => {
   
   .header-subtitle {
     font-size: 14px;
-  }
-  
-  .connection-status {
-    align-self: center;
   }
   
   .page-content {

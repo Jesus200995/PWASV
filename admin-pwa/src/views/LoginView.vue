@@ -137,8 +137,8 @@ const login = async () => {
     
     if (result.success) {
       console.log('✅ Login exitoso:', result.user)
-      // Redirigir al dashboard
-      router.push('/dashboard')
+      // Redirigir al visor de mapa
+      router.push('/visor-map')
     } else {
       error.value = 'Credenciales incorrectas'
     }

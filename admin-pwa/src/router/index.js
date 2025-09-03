@@ -116,8 +116,8 @@ router.beforeEach(async (to, from, next) => {
         // Si viene de una ruta válida, volver a ella
         next(from.path)
       } else {
-        // Si no, ir al dashboard
-        next('/dashboard')
+        // Si no, ir al visor de mapa
+        next('/visor-map')
       }
       return
     }

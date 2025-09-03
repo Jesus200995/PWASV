@@ -1101,7 +1101,7 @@ if (typeof window !== 'undefined') {
 
 .sidebar-nav {
   flex: 1;
-  padding: clamp(12px, 2vh, 24px) 0;
+  padding: clamp(12px, 2vh, 24px) 0 0 0;
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
@@ -1114,7 +1114,7 @@ if (typeof window !== 'undefined') {
 }
 
 .nav-item {
-  margin-bottom: clamp(2px, 0.4vh, 4px);
+  margin-bottom: 0;  /* Eliminado completamente el margin-bottom */
   padding: 0 clamp(2px, 0.3vw, 4px);  /* Padding lateral aún más reducido */
 }
 
@@ -1129,7 +1129,7 @@ if (typeof window !== 'undefined') {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  margin-bottom: clamp(2px, 0.4vh, 4px);
+  margin-bottom: 0;  /* Eliminado el margin-bottom */
   backdrop-filter: blur(5px);
   border: 1px solid transparent;
   min-height: clamp(44px, 5.5vh, 55px);  /* Altura aumentada para mejor proporción */
@@ -1285,19 +1285,17 @@ if (typeof window !== 'undefined') {
 }
 
 .sidebar-footer {
-  padding: clamp(8px, 1.6vh, 16px) clamp(8px, 1.6vw, 16px) clamp(12px, 2vh, 20px);
-  border-top: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 0 clamp(8px, 1.6vw, 16px) clamp(2px, 0.4vh, 4px);
   position: relative;
   display: flex;
   justify-content: center;
-  background: linear-gradient(135deg, 
-    rgba(13, 78, 20, 0.8) 0%, 
-    rgba(27, 94, 32, 0.6) 100%);
+  background: transparent;
   flex-shrink: 0;
-  margin-top: auto;
+  margin-top: 0;
   max-height: 15vh;
 }
 
+/* Línea decorativa eliminada para que no haya separación
 .sidebar-footer::before {
   content: '';
   position: absolute;
@@ -1310,42 +1308,51 @@ if (typeof window !== 'undefined') {
     rgba(255, 255, 255, 0.4) 50%, 
     transparent 100%);
 }
+*/
 
 .logout-btn {
   width: 100%;
-  max-width: min(180px, 90%);
+  max-width: min(180px, 95%);  /* Mucho más ancho */
   background: linear-gradient(135deg, 
-    #F44336 0%, 
-    #E53935 100%);
-  backdrop-filter: blur(12px);
-  border: 2px solid rgba(244, 67, 54, 0.2);
-  color: white;
-  padding: clamp(6px, 1vh, 10px) clamp(8px, 1.4vw, 12px);
-  border-radius: clamp(6px, 1vw, 10px);
+    rgba(220, 38, 127, 0.8) 0%, 
+    rgba(244, 67, 54, 0.75) 30%,
+    rgba(229, 57, 53, 0.7) 70%,
+    rgba(198, 40, 40, 0.65) 100%);  /* Rojo sólido sin difuminar */
+  border: 1px solid rgba(244, 67, 54, 0.9);  /* Borde rojo más visible */
+  color: rgba(255, 255, 255, 1);  /* Texto completamente blanco */
+  padding: clamp(2px, 0.3vh, 3px) clamp(8px, 1.2vw, 12px);  /* Padding vertical mínimo */
+  border-radius: clamp(12px, 2vw, 18px);  /* Mucho más redondeado */
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(4px, 0.8vw, 8px);
-  font-size: clamp(9px, 1vw, 11px);
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  gap: clamp(4px, 0.8vw, 8px);  /* Gap más grande */
+  font-size: clamp(9px, 1vw, 12px);  /* Fuente más grande */
+  font-weight: 600;  /* Peso más bold */
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
-  min-height: clamp(32px, 4vh, 40px);
+  min-height: clamp(24px, 2.5vh, 28px);  /* Altura mínima reducida al máximo */
   box-shadow: 
-    0 4px 15px rgba(244, 67, 54, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 4px 16px rgba(244, 67, 54, 0.4),  /* Sombra roja más intensa */
+    0 2px 8px rgba(220, 38, 127, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),  /* Brillo interno */
+    inset 0 -1px 0 rgba(198, 40, 40, 0.4);
 }
 
 .logout-btn:hover {
   background: linear-gradient(135deg, 
-    #D32F2F 0%, 
-    #C62828 100%);
-  transform: translateY(-2px) scale(1.02);
+    rgba(220, 38, 127, 0.9) 0%, 
+    rgba(244, 67, 54, 0.85) 30%,
+    rgba(229, 57, 53, 0.8) 70%,
+    rgba(198, 40, 40, 0.75) 100%);  /* Rojo más intenso sin blur */
+  border: 1px solid rgba(244, 67, 54, 1);  /* Borde rojo sólido */
+  transform: translateY(-1px) scale(1.02);
   box-shadow: 
-    0 8px 25px rgba(244, 67, 54, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 6px 24px rgba(244, 67, 54, 0.6),  /* Sombra roja más intensa */
+    0 3px 12px rgba(220, 38, 127, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),  /* Brillo interno */
+    inset 0 -1px 0 rgba(198, 40, 40, 0.5);
 }
 
 .logout-btn:hover .logout-glow {
@@ -1354,11 +1361,38 @@ if (typeof window !== 'undefined') {
 }
 
 .logout-btn:hover .logout-icon {
-  animation: logoutShake 0.6s ease-in-out;
+  animation: slideToSide 0.4s ease-in-out;
 }
 
 .logout-btn:active {
-  transform: translateY(-1px) scale(1.02);
+  transform: translateY(-1px) scale(1.01);
+  animation: slideActivation 0.25s ease-out;
+}
+
+/* Animación simplificada de lado a lado */
+@keyframes slideActivation {
+  0% {
+    transform: translateX(0) translateY(-1px) scale(1.01);
+  }
+  33% {
+    transform: translateX(-4px) translateY(-1px) scale(1.01);
+  }
+  66% {
+    transform: translateX(4px) translateY(-1px) scale(1.01);
+  }
+  100% {
+    transform: translateX(0) translateY(-1px) scale(1.01);
+  }
+}
+
+/* Animación simplificada para el icono */
+@keyframes slideToSide {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-2px);
+  }
 }
 
 /* Animación sutil de pulsación para el botón */
@@ -1388,57 +1422,63 @@ if (typeof window !== 'undefined') {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(18px, 2.2vw, 22px);  /* Aumentado para el círculo */
-  height: clamp(18px, 2.2vw, 22px);
+  width: clamp(20px, 2.2vw, 24px);  /* Más grande para el botón más ancho */
+  height: clamp(20px, 2.2vw, 24px);
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;  /* Por encima del efecto de onda */
   
-  /* Fondo liquid glass circular */
+  /* Fondo sólido sin blur */
   background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.03) 100%);
-  backdrop-filter: blur(10px) saturate(160%);
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(244, 67, 54, 0.2) 50%,  /* Toque de rojo */
+    rgba(255, 255, 255, 0.1) 100%);
   border-radius: 50%;  /* Completamente circular */
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(244, 67, 54, 0.4);  /* Borde rojo más visible */
   box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.08),
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+    0 2px 6px rgba(244, 67, 54, 0.2),  /* Sombra con tinte rojo */
+    0 1px 3px rgba(0, 0, 0, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);  /* Brillo interno */
   
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logout-btn:hover .btn-icon-wrapper {
   background: linear-gradient(135deg, 
-    rgba(244, 67, 54, 0.2) 0%,
-    rgba(244, 67, 54, 0.12) 50%,
-    rgba(244, 67, 54, 0.06) 100%);
-  border-color: rgba(244, 67, 54, 0.25);
+    rgba(244, 67, 54, 0.3) 0%,  /* Rojo más intenso */
+    rgba(244, 67, 54, 0.2) 50%,
+    rgba(244, 67, 54, 0.1) 100%);
+  border-color: rgba(244, 67, 54, 0.5);  /* Borde rojo más brillante */
   box-shadow: 
-    0 4px 10px rgba(244, 67, 54, 0.15),
-    0 2px 5px rgba(244, 67, 54, 0.08),
-    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    0 4px 12px rgba(244, 67, 54, 0.25),  /* Sombra roja más intensa */
+    0 2px 6px rgba(244, 67, 54, 0.15),
+    inset 0 1px 3px rgba(255, 255, 255, 0.4);  /* Brillo interno más fuerte */
   transform: translateY(-1px);
 }
 
 .logout-icon {
-  width: clamp(10px, 1.2vw, 14px);
-  height: clamp(10px, 1.2vw, 14px);
-  stroke-width: 2.2;
+  width: clamp(12px, 1.3vw, 16px);  /* Más grande para el botón más ancho */
+  height: clamp(12px, 1.3vw, 16px);
+  stroke-width: 2;  /* Línea un poco más fina */
   transition: all 0.3s ease;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 0.5px 2px rgba(0, 0, 0, 0.2));  /* Sombra más sutil */
+  position: relative;
+  z-index: 2;  /* Por encima del efecto de onda */
 }
 
 .logout-text {
-  font-size: clamp(9px, 1vw, 11px);
-  font-weight: 600;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  letter-spacing: -0.01em;
+  font-size: clamp(7px, 0.7vw, 9px);  /* Letra mucho más pequeña */
+  font-family: 'Arial', sans-serif;  /* Fuente Arial */
+  font-weight: 500;  /* Peso reducido */
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.15);  /* Sombra más sutil */
+  letter-spacing: 0.01em;  /* Espaciado más positivo para mejor legibilidad */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
+  position: relative;
+  z-index: 2;  /* Por encima del efecto de onda */
 }
 
 .logout-glow {

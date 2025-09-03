@@ -1113,14 +1113,15 @@ export default {
 .header-main {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.5rem);
+  gap: clamp(0.5rem, 1.2vw, 0.8rem);
   flex: 1;
   min-width: 140px;
+  margin-left: clamp(0.3rem, 1vw, 0.6rem);
 }
 
 .header-icon {
-  width: clamp(40px, 4vw, 48px);
-  height: clamp(40px, 4vw, 48px);
+  width: clamp(28px, 3vw, 32px);
+  height: clamp(28px, 3vw, 32px);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -1131,47 +1132,16 @@ export default {
   justify-content: center;
   box-shadow: 
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
-.header-icon::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  border-radius: inherit;
-}
-
-.header-icon:hover {
-  transform: translateY(-2px) rotate(5deg);
-  box-shadow: 
-    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.header-icon:hover::before {
-  opacity: 1;
-}
-
 .header-icon svg {
-  width: clamp(18px, 3vw, 22px);
-  height: clamp(18px, 3vw, 22px);
+  width: clamp(14px, 2.5vw, 16px);
+  height: clamp(14px, 2.5vw, 16px);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   z-index: 1;
   position: relative;
-  transition: all 0.3s ease;
-}
-
-.header-icon:hover svg {
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
-  transform: scale(1.05);
 }
 
 .header-text {

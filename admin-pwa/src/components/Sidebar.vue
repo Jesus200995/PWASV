@@ -1115,14 +1115,14 @@ if (typeof window !== 'undefined') {
 
 .nav-item {
   margin-bottom: clamp(2px, 0.4vh, 4px);
-  padding: 0 clamp(4px, 0.8vw, 8px);  /* Padding lateral reducido para acercar al borde */
+  padding: 0 clamp(2px, 0.3vw, 4px);  /* Padding lateral aún más reducido */
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 0px;  /* Eliminado completamente el espacio entre icono y texto */
-  padding: clamp(8px, 1.6vh, 14px) clamp(6px, 1.2vw, 10px);  /* Padding izquierdo reducido */
+  gap: clamp(6px, 0.8vw, 10px);  /* Añadido espacio entre icono y texto */
+  padding: clamp(8px, 1.6vh, 14px) clamp(4px, 0.8vw, 8px);  /* Padding izquierdo más reducido */
   color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
   border-radius: clamp(8px, 1.2vw, 12px);
@@ -1132,7 +1132,7 @@ if (typeof window !== 'undefined') {
   margin-bottom: clamp(2px, 0.4vh, 4px);
   backdrop-filter: blur(5px);
   border: 1px solid transparent;
-  min-height: clamp(40px, 5vh, 50px);  /* Altura reducida para compactar */
+  min-height: clamp(44px, 5.5vh, 55px);  /* Altura aumentada para mejor proporción */
 }
 
 .nav-link:hover {
@@ -1193,8 +1193,8 @@ if (typeof window !== 'undefined') {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(20px, 2.5vw, 24px);  /* Aumentado para el círculo */
-  height: clamp(20px, 2.5vw, 24px);
+  width: clamp(24px, 3vw, 28px);  /* Aumentado para mejor proporción */
+  height: clamp(24px, 3vw, 28px);
   position: relative;
   flex-shrink: 0;
   
@@ -1240,34 +1240,34 @@ if (typeof window !== 'undefined') {
 }
 
 .nav-icon {
-  width: clamp(12px, 1.6vw, 14px);  /* Ajustado para un tamaño medio */
-  height: clamp(12px, 1.6vw, 14px);
+  width: clamp(14px, 1.8vw, 16px);  /* Aumentado para mejor proporción */
+  height: clamp(14px, 1.8vw, 16px);
   stroke-width: 2;  /* Grosor de línea medio */
   transition: all 0.3s ease;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));  /* Sombra más sutil */
 }
 
 .nav-text {
-  font-size: clamp(12px, 1.3vw, 14px);  /* Aumentado aún más el tamaño de fuente */
-  font-weight: 400;  /* Cambiado a normal (sin negritas) */
-  font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
-  text-shadow: none;
-  letter-spacing: 0.02em;
+  font-size: clamp(15px, 1.6vw, 18px);  /* Aumentado significativamente el tamaño */
+  font-weight: 500;  /* Cambiado a semi-bold para mejor legibilidad */
+  font-family: 'Inter', 'Segoe UI', 'Arial', 'Helvetica', sans-serif;
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.01em;
   white-space: normal;  /* Permitir múltiples líneas */
   word-wrap: break-word;  /* Romper palabras si es necesario */
   overflow-wrap: break-word;
-  line-height: 1.2;  /* Líneas más leíbles */
+  line-height: 1.3;  /* Líneas más leíbles */
   flex: 1;
   min-width: 0;
   text-align: left;
   transition: all 0.2s ease;
-  max-height: 2.4em;  /* Máximo 2 líneas */
+  max-height: 2.6em;  /* Máximo 2 líneas con más altura */
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;  /* Propiedad estándar */
   -webkit-box-orient: vertical;
-  margin-left: 1px;  /* Mínimo margen para que no se pegue completamente */
+  margin-left: clamp(6px, 0.8vw, 10px);  /* Espacio del ícono */
 }
 
 .nav-glow {

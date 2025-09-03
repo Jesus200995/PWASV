@@ -8,10 +8,11 @@
           <div class="header-main">
             <div class="header-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 0-4-4H8a4 4 0 0 0-4 4 6 6 0 0 0 6 6z"/>
-                <path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/>
-                <path d="M16 12a4 4 0 0 0-8 0"/>
-                <circle cx="12" cy="8" r="2"/>
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6"/>
+                <path d="m21 12-6 0m-6 0-6 0"/>
+                <path d="m16.24 7.76-4.24 4.24m-4.24 0-4.24-4.24"/>
+                <path d="m16.24 16.24-4.24-4.24m-4.24 0-4.24 4.24"/>
               </svg>
             </div>
             <div class="header-text">
@@ -27,10 +28,6 @@
               </svg>
               Nuevo Usuario Admin
             </button>
-            <div class="connection-status" :class="{ 'online': isOnline, 'offline': !isOnline }">
-              <div class="status-indicator"></div>
-              <span class="status-text">{{ isOnline ? 'En línea' : 'Sin conexión' }}</span>
-            </div>
           </div>
         </div>
       </header>
@@ -546,63 +543,90 @@ export default {
 
 .main-content {
   flex: 1;
-  margin-left: min(220px, 18vw);
-  max-width: calc(100vw - min(220px, 18vw));
+  margin-left: clamp(180px, 18vw, 240px);
+  width: calc(100vw - clamp(180px, 18vw, 240px));
   min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* === HEADER STYLES === */
 .page-header {
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
   color: white;
-  padding: 16px 24px;
+  padding: clamp(0.3rem, 0.8vw, 0.5rem);
   box-shadow: 
-    0 2px 8px rgba(76, 175, 80, 0.3),
     0 4px 16px rgba(76, 175, 80, 0.15);
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
+  box-sizing: border-box;
   backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
+  flex-wrap: wrap;
+  width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(0.5rem, 1.2vw, 0.8rem);
+  flex: 1;
+  min-width: 140px;
+  margin-left: clamp(0.3rem, 1vw, 0.6rem);
 }
 
 .header-icon {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  width: clamp(28px, 3vw, 32px);
+  height: clamp(28px, 3vw, 32px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
 .header-icon svg {
-  width: 20px;
-  height: 20px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  width: clamp(14px, 2.5vw, 16px);
+  height: clamp(14px, 2.5vw, 16px);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
 }
 
 .header-text {
@@ -610,87 +634,94 @@ export default {
 }
 
 .header-title {
-  font-size: 20px;
+  font-size: clamp(14px, 2.5vw, 16px);
   font-weight: 700;
-  margin: 0 0 4px 0;
+  margin: 0 0 clamp(1px, 0.3vw, 2px) 0;
   background: linear-gradient(135deg, #ffffff 0%, #e8f5e8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   font-family: 'Inter', sans-serif;
+  line-height: 1.2;
 }
 
 .header-subtitle {
-  font-size: 13px;
+  font-size: clamp(9px, 1.8vw, 11px);
   opacity: 0.9;
   margin: 0;
   font-weight: 400;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   font-family: 'Inter', sans-serif;
+  line-height: 1.3;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: clamp(0.5rem, 1.2vw, 0.75rem);
+  flex-shrink: 0;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
-  color: #2E7D32;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: clamp(6px, 1vw, 8px) clamp(12px, 2vw, 14px);
+  border-radius: clamp(12px, 2vw, 14px);
   font-weight: 600;
-  font-size: 14px;
+  font-size: clamp(10px, 1.8vw, 11px);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: clamp(4px, 0.8vw, 6px);
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
-.connection-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.btn-primary:hover::before {
+  opacity: 1;
+}
+
+.btn-primary svg {
+  width: clamp(12px, 2vw, 14px);
+  height: clamp(12px, 2vw, 14px);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
   transition: all 0.3s ease;
 }
 
-.status-indicator {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
-
-.connection-status.online .status-indicator {
-  background: #66BB6A;
-  box-shadow: 0 0 8px rgba(102, 187, 106, 0.6);
-}
-
-.connection-status.offline .status-indicator {
-  background: #FF7043;
-  box-shadow: 0 0 8px rgba(255, 112, 67, 0.6);
-}
-
-.status-text {
-  font-size: 12px;
-  font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+.btn-primary:hover svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transform: scale(1.05);
 }
 
 /* === CONTENT STYLES === */

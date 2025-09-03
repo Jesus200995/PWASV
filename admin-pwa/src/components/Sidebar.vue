@@ -800,15 +800,15 @@ if (typeof window !== 'undefined') {
 
 /* Estilos modernos para el botón del geoportal */
 .geoportal-section {
-  padding: clamp(8px, 1.5vh, 16px) clamp(8px, 1.5vw, 16px) clamp(12px, 2vh, 20px);
-  margin-bottom: clamp(4px, 0.8vh, 8px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: clamp(4px, 0.8vh, 8px) clamp(4px, 0.8vw, 8px) clamp(6px, 1vh, 10px);
+  margin-bottom: clamp(2px, 0.4vh, 4px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
   background: linear-gradient(135deg, 
-    rgba(13, 78, 20, 0.6) 0%, 
-    rgba(27, 94, 32, 0.4) 100%);
+    rgba(13, 78, 20, 0.4) 0%, 
+    rgba(27, 94, 32, 0.3) 100%);
   flex-shrink: 0;
-  max-height: 20vh;
+  max-height: 12vh;
 }
 
 .geoportal-section::after {
@@ -827,43 +827,51 @@ if (typeof window !== 'undefined') {
 .geoportal-btn {
   width: 100%;
   background: linear-gradient(135deg, 
-    #2E7D32 0%, 
-    #4CAF50 30%,
-    #388E3C 70%,
-    #1B5E20 100%);
-  backdrop-filter: blur(12px);
-  border: 2px solid rgba(46, 125, 50, 0.4);
-  color: white;
-  padding: clamp(5px, 0.8vh, 8px) clamp(6px, 1vw, 10px);
-  border-radius: clamp(10px, 1.8vw, 16px);
+    rgba(27, 94, 32, 0.3) 0%, 
+    rgba(46, 125, 50, 0.25) 30%,
+    rgba(76, 175, 80, 0.2) 70%,
+    rgba(139, 195, 74, 0.15) 100%);
+  backdrop-filter: blur(25px) saturate(200%);
+  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.95);
+  padding: clamp(3px, 0.5vh, 5px) clamp(4px, 0.6vw, 6px);
+  border-radius: clamp(6px, 1.2vw, 10px);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(3px, 0.6vw, 6px);
-  font-size: clamp(9px, 1vw, 11px);
-  font-weight: 600;
+  gap: clamp(2px, 0.4vw, 4px);
+  font-size: clamp(7px, 0.8vw, 9px);
+  font-weight: 500;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
-  min-height: clamp(28px, 3.5vh, 36px);
+  min-height: clamp(20px, 2.5vh, 26px);
   box-shadow: 
-    0 4px 15px rgba(46, 125, 50, 0.4),
-    0 2px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 3px 12px rgba(0, 0, 0, 0.15),
+    0 1px 4px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(76, 175, 80, 0.1);
 }
 
 .geoportal-btn:hover {
   background: linear-gradient(135deg, 
-    #1B5E20 0%, 
-    #2E7D32 50%,
-    #0D4E14 100%);
-  transform: translateY(-3px) scale(1.05);
+    rgba(27, 94, 32, 0.45) 0%, 
+    rgba(46, 125, 50, 0.4) 50%,
+    rgba(76, 175, 80, 0.35) 100%);
+  backdrop-filter: blur(30px) saturate(250%);
+  -webkit-backdrop-filter: blur(30px) saturate(250%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px) scale(1.02);
   box-shadow: 
-    0 12px 30px rgba(46, 125, 50, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 0 3px rgba(46, 125, 50, 0.4);
+    0 6px 20px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 0 30px rgba(76, 175, 80, 0.3);
 }
 
 .geoportal-btn:hover .geoportal-glow {
@@ -888,26 +896,26 @@ if (typeof window !== 'undefined') {
 }
 
 .geoportal-icon {
-  width: clamp(10px, 1.2vw, 14px);
-  height: clamp(10px, 1.2vw, 14px);
-  stroke-width: 2.2;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  width: clamp(8px, 1vw, 10px);
+  height: clamp(8px, 1vw, 10px);
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
   transition: all 0.3s ease;
 }
 
 .arrow-icon {
-  width: clamp(8px, 1vw, 10px);
-  height: clamp(8px, 1vw, 10px);
+  width: clamp(6px, 0.8vw, 8px);
+  height: clamp(6px, 0.8vw, 8px);
   opacity: 0.8;
-  stroke-width: 2.5;
+  stroke-width: 2.2;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.15));
 }
 
 .geoportal-text {
-  font-size: clamp(9px, 1vw, 11px);
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: clamp(7px, 0.8vw, 9px);
+  font-weight: 500;
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.1);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -932,40 +940,51 @@ if (typeof window !== 'undefined') {
 .mobile-app-btn {
   width: 100%;
   background: linear-gradient(135deg, 
-    #2196F3 0%, 
-    #1976D2 100%);
-  backdrop-filter: blur(12px);
-  border: 2px solid rgba(33, 150, 243, 0.2);
-  color: white;
-  padding: clamp(5px, 0.8vh, 8px) clamp(6px, 1vw, 10px);
-  border-radius: clamp(10px, 1.8vw, 16px);
+    rgba(33, 150, 243, 0.3) 0%, 
+    rgba(25, 118, 210, 0.25) 50%,
+    rgba(100, 181, 246, 0.2) 100%);
+  backdrop-filter: blur(25px) saturate(200%);
+  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.95);
+  padding: clamp(3px, 0.5vh, 5px) clamp(4px, 0.6vw, 6px);
+  border-radius: clamp(6px, 1.2vw, 10px);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(3px, 0.6vw, 6px);
-  font-size: clamp(9px, 1vw, 11px);
-  font-weight: 600;
+  gap: clamp(2px, 0.4vw, 4px);
+  font-size: clamp(7px, 0.8vw, 9px);
+  font-weight: 500;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
-  margin-top: clamp(4px, 1vh, 8px);
-  min-height: clamp(28px, 3.5vh, 36px);
+  margin-top: clamp(2px, 0.5vh, 4px);
+  min-height: clamp(20px, 2.5vh, 26px);
   box-shadow: 
-    0 4px 15px rgba(33, 150, 243, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 3px 12px rgba(0, 0, 0, 0.15),
+    0 1px 4px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(33, 150, 243, 0.1);
 }
 
 .mobile-app-btn:hover {
   background: linear-gradient(135deg, 
-    #1976D2 0%, 
-    #1565C0 100%);
-  transform: translateY(-3px) scale(1.05);
+    rgba(33, 150, 243, 0.45) 0%, 
+    rgba(25, 118, 210, 0.4) 50%,
+    rgba(100, 181, 246, 0.35) 100%);
+  backdrop-filter: blur(30px) saturate(250%);
+  -webkit-backdrop-filter: blur(30px) saturate(250%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px) scale(1.02);
   box-shadow: 
-    0 12px 30px rgba(33, 150, 243, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 0 3px rgba(33, 150, 243, 0.3);
+    0 6px 20px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 0 30px rgba(33, 150, 243, 0.3);
 }
 
 .mobile-app-btn:hover .mobile-app-glow {
@@ -990,26 +1009,26 @@ if (typeof window !== 'undefined') {
 }
 
 .mobile-app-icon {
-  width: clamp(10px, 1.2vw, 14px);
-  height: clamp(10px, 1.2vw, 14px);
-  stroke-width: 2.2;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  width: clamp(8px, 1vw, 10px);
+  height: clamp(8px, 1vw, 10px);
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
   transition: all 0.3s ease;
 }
 
 .mobile-arrow-icon {
-  width: clamp(8px, 1vw, 10px);
-  height: clamp(8px, 1vw, 10px);
+  width: clamp(6px, 0.8vw, 8px);
+  height: clamp(6px, 0.8vw, 8px);
   opacity: 0.8;
-  stroke-width: 2.5;
+  stroke-width: 2.2;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.15));
 }
 
 .mobile-app-text {
-  font-size: clamp(9px, 1vw, 11px);
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-size: clamp(7px, 0.8vw, 9px);
+  font-weight: 500;
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.1);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;

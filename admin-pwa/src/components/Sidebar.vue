@@ -541,8 +541,8 @@ if (typeof window !== 'undefined') {
   font-size: clamp(12px, 1.2vw, 16px);
 }
 .sidebar-header {
-  padding: clamp(12px, 2.5vh, 28px) clamp(8px, 1.5vw, 20px) clamp(16px, 3vh, 32px);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  padding: clamp(2px, 0.5vh, 4px) clamp(2px, 0.4vw, 4px) clamp(3px, 0.6vh, 6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -553,16 +553,16 @@ if (typeof window !== 'undefined') {
     rgba(27, 94, 32, 0.6) 100%);
   flex-shrink: 0;
   min-height: fit-content;
-  max-height: 25vh;
+  max-height: 8vh;
 }
 
 .header-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(6px, 1.2vh, 12px);
+  gap: clamp(1px, 0.2vh, 2px);
   width: 100%;
-  max-width: min(180px, 90%);
+  max-width: min(120px, 85%);
 }
 
 .sidebar-header::after {
@@ -598,13 +598,13 @@ if (typeof window !== 'undefined') {
 
 /* Estilos para la animación de flor girando */
 .flower-animation {
-  width: clamp(20px, 3.5vw, 40px);
-  height: clamp(20px, 3.5vw, 40px);
+  width: clamp(10px, 1.5vw, 14px);
+  height: clamp(10px, 1.5vw, 14px);
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  filter: drop-shadow(0 4px 20px rgba(76, 175, 80, 0.4));
+  filter: drop-shadow(0 1px 4px rgba(76, 175, 80, 0.2));
   animation: flowerRotate 8s linear infinite;
 }
 
@@ -687,14 +687,14 @@ if (typeof window !== 'undefined') {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 4px;
+  gap: 0.5px;
   width: 100%;
 }
 
 .brand-title {
   margin: 0;
-  font-size: clamp(9px, 1.2vw, 14px);
-  font-weight: 800;
+  font-size: clamp(4px, 0.5vw, 6px);
+  font-weight: 600;
   background: linear-gradient(135deg, 
     #E8F5E8 0%, 
     #A5D6A7 25%,
@@ -704,8 +704,8 @@ if (typeof window !== 'undefined') {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: clamp(0.06em, 0.1vw, 0.12em);
-  line-height: 1.2;
+  letter-spacing: clamp(0.02em, 0.04vw, 0.06em);
+  line-height: 1.0;
   font-family: 'Source Sans Pro', 'SF Pro Display', 'system-ui', '-apple-system', sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -713,8 +713,8 @@ if (typeof window !== 'undefined') {
   text-transform: uppercase;
   position: relative;
   white-space: nowrap;
-  filter: drop-shadow(0 2px 4px rgba(76, 175, 80, 0.3));
-  padding-bottom: clamp(3px, 0.6vh, 6px);
+  filter: drop-shadow(0 0.5px 1px rgba(76, 175, 80, 0.15));
+  padding-bottom: clamp(0.5px, 0.1vh, 1px);
 }
 
 .brand-title::after {
@@ -723,8 +723,8 @@ if (typeof window !== 'undefined') {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 80%;
-  height: 2px;
+  width: 60%;
+  height: 0.5px;
   background: linear-gradient(90deg, 
     transparent 0%, 
     #E8F5E8 10%,
@@ -733,10 +733,10 @@ if (typeof window !== 'undefined') {
     #4CAF50 75%,
     #2E7D32 90%,
     transparent 100%);
-  border-radius: 2px;
+  border-radius: 0.5px;
   box-shadow: 
-    0 0 8px rgba(76, 175, 80, 0.4),
-    0 2px 4px rgba(0, 0, 0, 0.1);
+    0 0 2px rgba(76, 175, 80, 0.1),
+    0 0.5px 1px rgba(0, 0, 0, 0.03);
   animation: underlineGlow 3s ease-in-out infinite;
 }
 
@@ -757,14 +757,14 @@ if (typeof window !== 'undefined') {
 
 .brand-subtitle {
   margin: 0;
-  font-size: clamp(7px, 0.9vw, 10px);
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  letter-spacing: clamp(0.08em, 0.1vw, 0.12em);
+  font-size: clamp(3px, 0.3vw, 4px);
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 300;
+  text-shadow: 0 0.5px 0.5px rgba(0, 0, 0, 0.15);
+  letter-spacing: clamp(0.04em, 0.06vw, 0.08em);
   text-transform: uppercase;
   font-family: 'Montserrat', 'Inter', 'Source Sans Pro', sans-serif;
-  opacity: 0.9;
+  opacity: 0.7;
   transition: all 0.3s ease;
   font-variant: small-caps;
 }

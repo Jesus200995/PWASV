@@ -132,7 +132,7 @@
         </div>
         <div class="logo-text">
           <h1 class="brand-title">SEMBRANDO VIDA</h1>
-          <p class="brand-subtitle">Admin Panel</p>
+          <p class="brand-subtitle">App de Seguimiento</p>
         </div>
       </div>
     </div>
@@ -562,7 +562,7 @@ if (typeof window !== 'undefined') {
   align-items: center;
   gap: clamp(1px, 0.2vh, 2px);
   width: 100%;
-  max-width: min(120px, 85%);
+  max-width: min(140px, 90%);
 }
 
 .sidebar-header::after {
@@ -693,8 +693,8 @@ if (typeof window !== 'undefined') {
 
 .brand-title {
   margin: 0;
-  font-size: clamp(4px, 0.5vw, 6px);
-  font-weight: 600;
+  font-size: clamp(0.5px, 0.05vw, 1px);
+  font-weight: 500;
   background: linear-gradient(135deg, 
     #E8F5E8 0%, 
     #A5D6A7 25%,
@@ -704,8 +704,8 @@ if (typeof window !== 'undefined') {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: clamp(0.02em, 0.04vw, 0.06em);
-  line-height: 1.0;
+  letter-spacing: clamp(0.001em, 0.005vw, 0.01em);
+  line-height: 0.8;
   font-family: 'Source Sans Pro', 'SF Pro Display', 'system-ui', '-apple-system', sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -713,8 +713,9 @@ if (typeof window !== 'undefined') {
   text-transform: uppercase;
   position: relative;
   white-space: nowrap;
-  filter: drop-shadow(0 0.5px 1px rgba(76, 175, 80, 0.15));
-  padding-bottom: clamp(0.5px, 0.1vh, 1px);
+  filter: drop-shadow(0 0.2px 0.5px rgba(76, 175, 80, 0.1));
+  padding-bottom: clamp(3px, 0.5vh, 6px);
+  margin-bottom: clamp(2px, 0.3vh, 4px);
 }
 
 .brand-title::after {
@@ -723,8 +724,8 @@ if (typeof window !== 'undefined') {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 60%;
-  height: 0.5px;
+  width: 80%;
+  height: 1px;
   background: linear-gradient(90deg, 
     transparent 0%, 
     #E8F5E8 10%,
@@ -733,21 +734,41 @@ if (typeof window !== 'undefined') {
     #4CAF50 75%,
     #2E7D32 90%,
     transparent 100%);
-  border-radius: 0.5px;
+  border-radius: 1px;
   box-shadow: 
-    0 0 2px rgba(76, 175, 80, 0.1),
-    0 0.5px 1px rgba(0, 0, 0, 0.03);
-  animation: underlineGlow 3s ease-in-out infinite;
+    0 0 4px rgba(76, 175, 80, 0.3),
+    0 0 8px rgba(76, 175, 80, 0.2);
+  animation: lineGlow 2s ease-in-out infinite;
 }
 
-@keyframes underlineGlow {
+@keyframes lineGlow {
   0%, 100% {
-    opacity: 0.8;
-    transform: translateX(-50%) scaleX(1);
+    opacity: 0.6;
+    transform: translateX(-50%) scaleX(0.8);
+    box-shadow: 
+      0 0 4px rgba(76, 175, 80, 0.3),
+      0 0 8px rgba(76, 175, 80, 0.2);
+  }
+  25% {
+    opacity: 0.9;
+    transform: translateX(-50%) scaleX(1.1);
+    box-shadow: 
+      0 0 8px rgba(76, 175, 80, 0.5),
+      0 0 16px rgba(76, 175, 80, 0.3);
   }
   50% {
     opacity: 1;
-    transform: translateX(-50%) scaleX(1.05);
+    transform: translateX(-50%) scaleX(1.2);
+    box-shadow: 
+      0 0 12px rgba(76, 175, 80, 0.7),
+      0 0 24px rgba(76, 175, 80, 0.4);
+  }
+  75% {
+    opacity: 0.8;
+    transform: translateX(-50%) scaleX(1.0);
+    box-shadow: 
+      0 0 6px rgba(76, 175, 80, 0.4),
+      0 0 12px rgba(76, 175, 80, 0.25);
   }
 }
 
@@ -757,16 +778,19 @@ if (typeof window !== 'undefined') {
 
 .brand-subtitle {
   margin: 0;
-  font-size: clamp(3px, 0.3vw, 4px);
+  font-size: clamp(2.5px, 0.25vw, 3.5px);
   color: rgba(255, 255, 255, 0.6);
   font-weight: 300;
   text-shadow: 0 0.5px 0.5px rgba(0, 0, 0, 0.15);
-  letter-spacing: clamp(0.04em, 0.06vw, 0.08em);
+  letter-spacing: clamp(0.03em, 0.04vw, 0.06em);
   text-transform: uppercase;
   font-family: 'Montserrat', 'Inter', 'Source Sans Pro', sans-serif;
   opacity: 0.7;
   transition: all 0.3s ease;
   font-variant: small-caps;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .brand-subtitle:hover {

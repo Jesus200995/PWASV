@@ -597,6 +597,125 @@
           </div>
         </div>
 
+        <!-- Tipo de Actividad - Diseño Vidrio Líquido Compacto -->
+        <div class="mb-3">
+          <label class="block text-xs font-medium text-gray-700 mb-2 flex items-center"
+                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-emerald-600" :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            Tipo de Actividad <span class="text-red-500 text-sm">*</span>
+          </label>
+          
+          <!-- Contenedor de opciones con estilo vidrio líquido compacto -->
+          <div class="relative">
+            <div class="grid grid-cols-2 gap-2">
+              <!-- Opción Campo -->
+              <div 
+                @click="entradaMarcada && !salidaMarcada && (tipoActividad = 'campo')"
+                :class="[
+                  'relative overflow-hidden rounded-xl p-3 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] border',
+                  entradaMarcada && !salidaMarcada ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
+                  tipoActividad === 'campo' ? 
+                    'bg-gradient-to-br from-emerald-400/15 via-green-300/10 to-teal-400/15 border-emerald-400/50 shadow-lg shadow-emerald-500/10' : 
+                    'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:border-emerald-300/40 hover:from-emerald-50/30 hover:via-green-25/20 hover:to-teal-50/15'
+                ]"
+                style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
+              >
+                <!-- Efecto de vidrio líquido sutil -->
+                <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-60 rounded-xl"></div>
+                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-emerald-300/15 to-transparent rounded-full blur-lg"></div>
+                
+                <div class="relative z-10 text-center">
+                  <div class="flex justify-center mb-1.5">
+                    <div :class="[
+                      'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
+                      tipoActividad === 'campo' ? 
+                        'bg-emerald-500 text-white shadow-md shadow-emerald-500/30' : 
+                        'bg-gray-100 text-gray-500 border border-gray-200'
+                    ]">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <h3 :class="[
+                    'font-medium text-xs mb-0.5 transition-colors duration-300',
+                    tipoActividad === 'campo' ? 'text-emerald-800' : 'text-gray-600'
+                  ]">Campo</h3>
+                  <p :class="[
+                    'text-xs leading-tight transition-colors duration-300',
+                    tipoActividad === 'campo' ? 'text-emerald-600' : 'text-gray-400'
+                  ]">Trabajo en terreno</p>
+                </div>
+                
+                <!-- Indicador de selección pequeño -->
+                <div v-if="tipoActividad === 'campo'" class="absolute top-1.5 right-1.5">
+                  <div class="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Opción Gabinete -->
+              <div 
+                @click="entradaMarcada && !salidaMarcada && (tipoActividad = 'gabinete')"
+                :class="[
+                  'relative overflow-hidden rounded-xl p-3 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] border',
+                  entradaMarcada && !salidaMarcada ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
+                  tipoActividad === 'gabinete' ? 
+                    'bg-gradient-to-br from-blue-400/15 via-indigo-300/10 to-purple-400/15 border-blue-400/50 shadow-lg shadow-blue-500/10' : 
+                    'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:border-blue-300/40 hover:from-blue-50/30 hover:via-indigo-25/20 hover:to-purple-50/15'
+                ]"
+                style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
+              >
+                <!-- Efecto de vidrio líquido sutil -->
+                <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-60 rounded-xl"></div>
+                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-blue-300/15 to-transparent rounded-full blur-lg"></div>
+                
+                <div class="relative z-10 text-center">
+                  <div class="flex justify-center mb-1.5">
+                    <div :class="[
+                      'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
+                      tipoActividad === 'gabinete' ? 
+                        'bg-blue-500 text-white shadow-md shadow-blue-500/30' : 
+                        'bg-gray-100 text-gray-500 border border-gray-200'
+                    ]">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <h3 :class="[
+                    'font-medium text-xs mb-0.5 transition-colors duration-300',
+                    tipoActividad === 'gabinete' ? 'text-blue-800' : 'text-gray-600'
+                  ]">Gabinete</h3>
+                  <p :class="[
+                    'text-xs leading-tight transition-colors duration-300',
+                    tipoActividad === 'gabinete' ? 'text-blue-600' : 'text-gray-400'
+                  ]">Trabajo de oficina</p>
+                </div>
+                
+                <!-- Indicador de selección pequeño -->
+                <div v-if="tipoActividad === 'gabinete'" class="absolute top-1.5 right-1.5">
+                  <div class="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Mensaje de error si no está seleccionado -->
+            <div v-if="!tipoActividad && (entradaMarcada && !salidaMarcada)" class="mt-1.5 text-center">
+              <p class="text-xs text-red-500 font-medium animate-pulse">Por favor selecciona el tipo de actividad</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Input de archivo para foto -->
         <div class="mb-3">
           <label class="block text-sm font-medium text-gray-700 mb-2" 
@@ -655,28 +774,6 @@
             :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"
             :placeholder="entradaMarcada && !salidaMarcada ? 'Describe el lugar o añade notas...' : !entradaMarcada ? 'Marca entrada primero...' : 'Función bloqueada...'"
           ></textarea>
-        </div>
-
-        <!-- Tipo de Actividad -->
-        <div class="mb-3">
-          <label for="tipoActividad" class="block text-sm font-medium text-gray-700 mb-2"
-                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
-            Tipo de Actividad <span class="text-red-500">*</span>
-          </label>
-          <select
-            v-model="tipoActividad"
-            id="tipoActividad"
-            :disabled="!entradaMarcada || salidaMarcada"
-            class="glass-input w-full"
-            :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"
-            required
-          >
-            <option value="" disabled>
-              {{ entradaMarcada && !salidaMarcada ? 'Selecciona el tipo de actividad' : !entradaMarcada ? 'Marca entrada primero' : 'Función bloqueada' }}
-            </option>
-            <option value="campo">Actividad de Campo</option>
-            <option value="gabinete">Actividad de Gabinete</option>
-          </select>
         </div>
 
         <!-- Botón enviar -->

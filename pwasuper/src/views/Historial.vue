@@ -170,83 +170,102 @@
                 <h3 class="text-sm font-medium text-gray-800">{{ formatFecha(asistencia.fecha) }}</h3>
               </div>
 
-              <!-- Entrada -->
-              <div v-if="asistencia.hora_entrada" class="mb-2 bg-green-50 rounded-lg p-2 border-2 border-green-200 shadow-sm">
-                <h4 class="text-xs font-semibold text-green-800 mb-1 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
-                  Entrada - {{ formatHora(asistencia.hora_entrada) }}
-                </h4>
-                <div class="flex items-start gap-2">
-                  <div v-if="asistencia.foto_entrada_url" class="w-10 h-10 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_entrada_url}`)">
-                    <img :src="`${API_URL}/${asistencia.foto_entrada_url}`" class="w-full h-full object-cover" alt="Foto" />
-                    <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+              <!-- Diseño dividido: Entrada y Salida en dos columnas -->
+              <div class="grid grid-cols-2 gap-2">
+                <!-- Columna Entrada -->
+                <div class="bg-green-50 rounded-lg p-2 border-2 border-green-200 shadow-sm">
+                  <h4 class="text-xs font-semibold text-green-800 mb-1 flex items-center justify-center text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    ENTRADA
+                  </h4>
+                  
+                  <div v-if="asistencia.hora_entrada" class="space-y-2">
+                    <div class="text-center">
+                      <p class="text-xs font-bold text-green-700">{{ formatHora(asistencia.hora_entrada) }}</p>
                     </div>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs text-gray-700 mb-1 line-clamp-2">{{ asistencia.descripcion_entrada || "Sin descripción" }}</p>
-                    <div class="flex flex-wrap gap-2 text-xs text-gray-600">
-                      <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" class="text-green-600 hover:text-green-800 underline font-medium">
-                          Ver mapa
-                        </button>
+                    
+                    <div v-if="asistencia.foto_entrada_url" class="flex justify-center">
+                      <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_entrada_url}`)">
+                        <img :src="`${API_URL}/${asistencia.foto_entrada_url}`" class="w-full h-full object-cover" alt="Foto entrada" />
+                        <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
+                    
+                    <div class="text-center">
+                      <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" class="text-green-600 hover:text-green-800 text-xs font-medium underline">
+                        📍 Ver mapa
+                      </button>
+                    </div>
+                    
+                    <p class="text-xs text-gray-600 text-center line-clamp-2">{{ asistencia.descripcion_entrada || "Sin descripción" }}</p>
+                  </div>
+                  
+                  <div v-else class="text-center py-4">
+                    <p class="text-xs text-gray-400">Sin registro</p>
+                  </div>
+                </div>
+
+                <!-- Columna Salida -->
+                <div :class="[
+                  'rounded-lg p-2 border-2 shadow-sm',
+                  asistencia.hora_salida 
+                    ? 'bg-red-50 border-red-200' 
+                    : 'bg-gray-50 border-gray-200'
+                ]">
+                  <h4 :class="[
+                    'text-xs font-semibold mb-1 flex items-center justify-center text-center',
+                    asistencia.hora_salida ? 'text-red-800' : 'text-gray-500'
+                  ]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    SALIDA
+                  </h4>
+                  
+                  <div v-if="asistencia.hora_salida" class="space-y-2">
+                    <div class="text-center">
+                      <p class="text-xs font-bold text-red-700">{{ formatHora(asistencia.hora_salida) }}</p>
+                    </div>
+                    
+                    <div v-if="asistencia.foto_salida_url" class="flex justify-center">
+                      <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_salida_url}`)">
+                        <img :src="`${API_URL}/${asistencia.foto_salida_url}`" class="w-full h-full object-cover" alt="Foto salida" />
+                        <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="text-center">
+                      <button @click="verAsistenciaEnMapa(asistencia, 'salida')" class="text-red-600 hover:text-red-800 text-xs font-medium underline">
+                        📍 Ver mapa
+                      </button>
+                    </div>
+                    
+                    <p class="text-xs text-gray-600 text-center line-clamp-2">{{ asistencia.descripcion_salida || "Sin descripción" }}</p>
+                  </div>
+                  
+                  <div v-else class="text-center py-4">
+                    <div class="mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium">En curso</p>
+                    <p class="text-xs text-gray-400 mt-1">Sin registro de salida</p>
                   </div>
                 </div>
               </div>
 
-              <!-- Salida -->
-              <div v-if="asistencia.hora_salida" class="bg-red-50 rounded-lg p-2 border-2 border-red-200 shadow-sm">
-                <h4 class="text-xs font-semibold text-red-800 mb-1 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  Salida - {{ formatHora(asistencia.hora_salida) }}
-                </h4>
-                <div class="flex items-start gap-2">
-                  <div v-if="asistencia.foto_salida_url" class="w-10 h-10 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_salida_url}`)">
-                    <img :src="`${API_URL}/${asistencia.foto_salida_url}`" class="w-full h-full object-cover" alt="Foto" />
-                    <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs text-gray-700 mb-1 line-clamp-2">{{ asistencia.descripcion_salida || "Sin descripción" }}</p>
-                    <div class="flex flex-wrap gap-2 text-xs text-gray-600">
-                      <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <button @click="verAsistenciaEnMapa(asistencia, 'salida')" class="text-red-600 hover:text-red-800 underline font-medium">
-                          Ver mapa
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Estado incompleto -->
-              <div v-if="asistencia.hora_entrada && !asistencia.hora_salida" class="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-2">
-                <p class="text-xs text-yellow-800 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  En curso - Sin registro de salida
-                </p>
-              </div>
+              <!-- Estado incompleto eliminado - ahora se maneja en el recuadro de salida -->
             </div>
           </div>
         </div>

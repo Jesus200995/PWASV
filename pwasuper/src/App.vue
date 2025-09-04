@@ -6,6 +6,7 @@ import UpdateNotification from './components/UpdateNotification.vue';
 import MaintenanceScreen from './components/MaintenanceScreen.vue';
 import { useNotifications } from './composables/useNotifications.js';
 import maintenanceCheckService from './services/maintenanceCheckService.js';
+import { isMaintenanceMode, maintenanceMessage, setMaintenanceState } from './stores/maintenanceStore.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -13,10 +14,6 @@ const isLoggingOut = ref(false);
 const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
-
-// Sistema de modo mantenimiento
-const isMaintenanceMode = ref(false);
-const maintenanceMessage = ref('');
 
 // Sistema de notificaciones en tiempo real
 const { unreadCount, startPolling, stopPolling } = useNotifications();
@@ -162,8 +159,8 @@ const initMaintenanceCheck = () => {
   // Configurar listener para cambios de estado
   maintenanceCheckService.onStateChange(handleMaintenanceChange);
   
-  // Iniciar verificación periódica (cada 30 segundos)
-  maintenanceCheckService.startPeriodicCheck(30000);
+  // Iniciar verificación periódica (cada segundo para máxima responsividad)
+  maintenanceCheckService.startPeriodicCheck(1000);
   
   // Hacer una verificación inicial
   maintenanceCheckService.forceCheck();
@@ -177,8 +174,8 @@ const handleMaintenanceChange = (enabled, message) => {
   if (isMaintenanceMode.value !== enabled) {
     console.log(`🔄 Cambiando estado de ${isMaintenanceMode.value} a ${enabled}`);
     
-    isMaintenanceMode.value = enabled;
-    maintenanceMessage.value = message || 'Sistema en mantenimiento programado. Volveremos pronto.';
+    // Actualizar el store centralizado
+    setMaintenanceState(enabled, message || 'Sistema en mantenimiento programado. Volveremos pronto.');
     
     if (enabled) {
       console.log('🚨 ACTIVANDO modo mantenimiento - mostrando pantalla');
@@ -187,6 +184,8 @@ const handleMaintenanceChange = (enabled, message) => {
         stopPolling(notificationPollingId);
         notificationPollingId = null;
       }
+      // Cerrar menú móvil si está abierto
+      showMobileMenu.value = false;
     } else {
       console.log('✅ DESACTIVANDO modo mantenimiento - restaurando app');
       // Reiniciar polling de notificaciones si hay usuario logueado
@@ -196,29 +195,6 @@ const handleMaintenanceChange = (enabled, message) => {
     }
   } else {
     console.log(`ℹ️ Estado ya es ${enabled}, no hay cambios necesarios`);
-  }
-};
-
-const handleMaintenanceReload = async () => {
-  console.log('🔄 Verificación manual solicitada desde pantalla de mantenimiento');
-  try {
-    const result = await maintenanceCheckService.forceCheck();
-    console.log('📋 Resultado de verificación:', result);
-    
-    // IMPORTANTE: NO cambiar isMaintenanceMode aquí
-    // Solo el listener automático debe cambiar el estado
-    // La verificación manual NO debe cerrar la pantalla
-    
-    if (!result.enabled) {
-      console.log('✅ Mantenimiento ya está desactivado en el servidor');
-      // El listener automático detectará este cambio y cerrará la pantalla
-    } else {
-      console.log('ℹ️ Sistema sigue en mantenimiento - pantalla permanecerá visible');
-    }
-  } catch (error) {
-    console.error('❌ Error verificando estado de mantenimiento:', error);
-    // En caso de error, mantener la pantalla visible
-    console.log('⚠️ Manteniendo pantalla de mantenimiento por error de verificación');
   }
 };
 
@@ -443,7 +419,6 @@ function logout() {
       v-if="isMaintenanceMode"
       :message="maintenanceMessage"
       app-name="Sembrando Vida"
-      @reload="handleMaintenanceReload"
     />
 
     <!-- Contenido principal -->

@@ -47,7 +47,7 @@
                 <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
               </svg>
             </div>
-            <p>Esta página se verifica automáticamente cada 30 segundos</p>
+            <p>Esta página se actualiza automáticamente cada segundo</p>
           </div>
           <div class="info-item">
             <div class="info-icon">
@@ -61,35 +61,16 @@
         </div>
       </div>
       
-      <!-- Botón de verificación manual centrado -->
-      <div class="maintenance-actions">
-        <button @click="reloadPage" class="reload-button" :disabled="isReloading">
-          <svg v-if="!isReloading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 4 23 10 17 10"/>
-            <polyline points="1 20 1 14 7 14"/>
-            <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-          </svg>
-          <div v-else class="loading-spinner"></div>
-          {{ isReloading ? 'Verificando...' : 'Verificar disponibilidad' }}
-        </button>
-        
-        <!-- Mensaje temporal después de verificar -->
-        <transition name="fade">
-          <div v-if="showVerificationMessage && !isReloading" class="verification-message">
-            <div class="verification-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20,6 9,17 4,12"/>
-              </svg>
-            </div>
-            <p>Verificación completada. Si el mantenimiento ha terminado, esta pantalla se ocultará automáticamente.</p>
-          </div>
-        </transition>
+      <!-- Indicador de estado automático -->
+      <div class="auto-update-indicator">
+        <div class="pulse-dot"></div>
+        <p>Verificando automáticamente...</p>
       </div>
       
-      <!-- Footer con timestamp -->
+      <!-- Footer con información -->
       <div class="maintenance-footer">
-        <p>Última verificación: {{ lastCheck }}</p>
         <p class="app-name">{{ appName || 'Sembrando Vida' }}</p>
+        <p>Sistema completamente automatizado</p>
       </div>
     </div>
     
@@ -101,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 
 // Props
 const props = defineProps({
@@ -114,50 +95,6 @@ const props = defineProps({
     default: 'Sembrando Vida'
   }
 })
-
-// Emits
-const emit = defineEmits(['reload'])
-
-// Estado reactivo
-const isReloading = ref(false)
-const lastCheck = ref(new Date().toLocaleTimeString('es-ES'))
-const showVerificationMessage = ref(false)
-
-// Actualizar timestamp cada minuto
-let timestampInterval = null
-
-onMounted(() => {
-  // Actualizar timestamp cada minuto
-  timestampInterval = setInterval(() => {
-    lastCheck.value = new Date().toLocaleTimeString('es-ES')
-  }, 60000)
-})
-
-onUnmounted(() => {
-  if (timestampInterval) {
-    clearInterval(timestampInterval)
-  }
-})
-
-// Función para verificar estado (NO recargar la página)
-const reloadPage = async () => {
-  isReloading.value = true
-  lastCheck.value = new Date().toLocaleTimeString('es-ES')
-  showVerificationMessage.value = true
-  
-  // Emitir evento para que el componente padre maneje la verificación
-  // IMPORTANTE: Solo verificar, NO cerrar la pantalla automáticamente
-  emit('reload')
-  
-  // Tiempo de verificación más realista
-  setTimeout(() => {
-    isReloading.value = false
-    // Ocultar el mensaje después de unos segundos
-    setTimeout(() => {
-      showVerificationMessage.value = false
-    }, 3000)
-  }, 1500)
-}
 
 // Generar estilos aleatorios para las partículas
 const getParticleStyle = (index) => {
@@ -493,6 +430,51 @@ const getParticleStyle = (index) => {
   }
 }
 
+/* Indicador de estado automático */
+.auto-update-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 30px 0 20px 0;
+  padding: 16px 24px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 12px;
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pulse-dot {
+  width: 12px;
+  height: 12px;
+  background: #16a34a;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  70% {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.auto-update-indicator p {
+  margin: 0;
+  font-weight: 500;
+}
+
 /* Responsive - Móviles */
 @media (max-width: 768px) {
   .maintenance-container {
@@ -763,6 +745,23 @@ const getParticleStyle = (index) => {
   
   .verification-message p {
     font-size: 9px;
+  }
+  
+  .auto-update-indicator {
+    flex-direction: column;
+    gap: 6px;
+    margin: 15px 0 10px 0;
+    padding: 10px 12px;
+  }
+  
+  .auto-update-indicator p {
+    font-size: 10px;
+    text-align: center;
+  }
+  
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
   }
   
   .maintenance-footer {

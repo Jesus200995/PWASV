@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { isMaintenanceMode } from '../stores/maintenanceStore.js'
 
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
@@ -26,13 +25,6 @@ const router = createRouter({
 
 // Guard de navegación para proteger rutas
 router.beforeEach((to, from, next) => {
-  // PRIORIDAD 1: Verificar modo mantenimiento (bloquea TODA navegación)
-  if (isMaintenanceMode.value) {
-    console.log('🚫 Navegación bloqueada: Sistema en modo mantenimiento')
-    next(false) // Bloquear completamente la navegación
-    return
-  }
-
   const user = localStorage.getItem('user')
   const isLoggedIn = !!user
   

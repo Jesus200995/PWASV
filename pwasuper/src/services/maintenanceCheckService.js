@@ -65,7 +65,7 @@ class MaintenanceCheckService {
   /**
    * Iniciar verificación periódica
    */
-  startPeriodicCheck(intervalMs = 1000) { // 1 segundo para actualización constante
+  startPeriodicCheck(intervalMs = 30000) { // 30 segundos por defecto
     console.log(`🔄 Iniciando verificación periódica de mantenimiento cada ${intervalMs/1000}s`)
     
     // Hacer una verificación inicial

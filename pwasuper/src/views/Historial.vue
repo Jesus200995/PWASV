@@ -8,34 +8,34 @@
     </div>
     
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
-      <div class="page-container relative z-10 p-3 sm:p-4 lg:p-5 min-h-full">
+      <div class="page-container relative z-10 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 min-h-full max-w-full">
     <!-- Tabs para alternar entre registros normales y asistencias -->
-    <div class="glass-card mb-4">
-      <div class="flex justify-center border-b border-gray-200 mb-4 pb-2">
-        <div class="flex bg-gray-100/50 backdrop-blur-sm rounded-xl p-1 gap-1">
+    <div class="glass-card mb-4 w-full">
+      <div class="flex justify-center border-b border-white/20 mb-4 pb-4">
+        <div class="flex bg-gradient-to-r from-white/10 via-white/15 to-white/10 backdrop-blur-xl rounded-full p-1 gap-1 shadow-2xl border border-white/30">
           <button 
             @click="cambiarTab('registros')" 
             :class="[
-              'tab-button px-4 py-2 font-medium text-xs rounded-lg transition-all duration-300 ease-in-out relative overflow-hidden',
+              'tab-button-liquid px-4 py-2 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden',
               tabActiva === 'registros' 
-                ? 'tab-active bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg shadow-green-400/50' 
-                : 'text-gray-600 hover:text-gray-800 hover:bg-white/70'
+                ? 'tab-active-liquid bg-gradient-to-br from-emerald-400 via-green-500 to-teal-500 text-white shadow-xl shadow-green-500/40 border border-white/40' 
+                : 'text-gray-600 hover:text-gray-800 bg-gray-200/70 hover:bg-gray-300/80 border border-gray-300/50'
             ]"
           >
-            <span class="relative z-10">Actividades</span>
-            <div v-if="tabActiva === 'registros'" class="absolute inset-0 bg-gradient-to-r from-green-300 to-green-400 opacity-20 animate-pulse"></div>
+            <span class="relative z-20 font-bold tracking-wide">Actividades</span>
+            <div v-if="tabActiva === 'registros'" class="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20 rounded-full animate-pulse-gentle"></div>
           </button>
           <button 
             @click="cambiarTab('asistencias')" 
             :class="[
-              'tab-button px-4 py-2 font-medium text-xs rounded-lg transition-all duration-300 ease-in-out relative overflow-hidden',
+              'tab-button-liquid px-4 py-2 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden',
               tabActiva === 'asistencias' 
-                ? 'tab-active bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg shadow-green-400/50' 
-                : 'text-gray-600 hover:text-gray-800 hover:bg-white/70'
+                ? 'tab-active-liquid bg-gradient-to-br from-emerald-400 via-green-500 to-teal-500 text-white shadow-xl shadow-green-500/40 border border-white/40' 
+                : 'text-gray-600 hover:text-gray-800 bg-gray-200/70 hover:bg-gray-300/80 border border-gray-300/50'
             ]"
           >
-            <span class="relative z-10">Asistencias</span>
-            <div v-if="tabActiva === 'asistencias'" class="absolute inset-0 bg-gradient-to-r from-green-300 to-green-400 opacity-20 animate-pulse"></div>
+            <span class="relative z-20 font-bold tracking-wide">Asistencias</span>
+            <div v-if="tabActiva === 'asistencias'" class="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20 rounded-full animate-pulse-gentle"></div>
           </button>
         </div>
       </div>
@@ -162,19 +162,11 @@
               <!-- Información de la fecha -->
               <div class="flex justify-between items-center mb-2">
                 <h3 class="text-sm font-medium text-gray-800">{{ formatFecha(asistencia.fecha) }}</h3>
-                <div class="flex flex-wrap gap-1">
-                  <span v-if="asistencia.hora_entrada" class="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                    E: {{ formatHora(asistencia.hora_entrada) }}
-                  </span>
-                  <span v-if="asistencia.hora_salida" class="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                    S: {{ formatHora(asistencia.hora_salida) }}
-                  </span>
-                </div>
               </div>
 
               <!-- Entrada -->
-              <div v-if="asistencia.hora_entrada" class="mb-2 bg-green-50 rounded-lg p-2">
-                <h4 class="text-xs font-medium text-green-800 mb-1 flex items-center">
+              <div v-if="asistencia.hora_entrada" class="mb-2 bg-green-50 rounded-lg p-2 border-2 border-green-200 shadow-sm">
+                <h4 class="text-xs font-semibold text-green-800 mb-1 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>
@@ -197,7 +189,7 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" class="text-green-600 hover:text-green-800 underline">
+                        <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" class="text-green-600 hover:text-green-800 underline font-medium">
                           Ver mapa
                         </button>
                       </div>
@@ -207,8 +199,8 @@
               </div>
 
               <!-- Salida -->
-              <div v-if="asistencia.hora_salida" class="bg-blue-50 rounded-lg p-2">
-                <h4 class="text-xs font-medium text-blue-800 mb-1 flex items-center">
+              <div v-if="asistencia.hora_salida" class="bg-red-50 rounded-lg p-2 border-2 border-red-200 shadow-sm">
+                <h4 class="text-xs font-semibold text-red-800 mb-1 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
@@ -231,7 +223,7 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        <button @click="verAsistenciaEnMapa(asistencia, 'salida')" class="text-blue-600 hover:text-blue-800 underline">
+                        <button @click="verAsistenciaEnMapa(asistencia, 'salida')" class="text-red-600 hover:text-red-800 underline font-medium">
                           Ver mapa
                         </button>
                       </div>
@@ -963,84 +955,73 @@ function verImagen(url) {
   padding: 0.375rem 0.75rem;
 }
 
-/* Estilos modernos para pestañas */
-.tab-button {
+/* Estilos modernos para pestañas con efecto vidrio líquido */
+.tab-button-liquid {
   position: relative;
   cursor: pointer;
   font-weight: 600;
   letter-spacing: 0.025em;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid transparent;
-  min-width: 120px;
-  text-align: center;
-}
-
-.tab-button:not(.tab-active):hover {
-  transform: translateY(-1px);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.tab-active {
-  transform: translateY(-2px) scale(1.02);
-  border: 1px solid rgba(34, 197, 94, 0.3);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  min-width: 80px;
+  text-align: center;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(156, 163, 175, 0.4);
+  box-shadow: 0 2px 8px rgba(156, 163, 175, 0.2);
 }
 
-.tab-active::before {
+.tab-button-liquid:not(.tab-active-liquid):hover {
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  background: rgba(156, 163, 175, 0.6);
+  box-shadow: 0 4px 12px rgba(156, 163, 175, 0.3);
+  transform: translateY(-1px);
+}
+
+.tab-active-liquid {
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: 
+    0 8px 25px rgba(34, 197, 94, 0.4),
+    0 4px 15px rgba(16, 185, 129, 0.3),
+    0 0 20px rgba(34, 197, 94, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #10b981, #059669, #047857) !important;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.tab-active-liquid::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+  inset: 1px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.15), 
+    transparent 50%,
+    rgba(255, 255, 255, 0.05)
+  );
   border-radius: inherit;
   z-index: 1;
+  pointer-events: none;
 }
 
-.tab-active::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  border-radius: inherit;
-  opacity: 0;
-  animation: shimmer 2s infinite;
-  z-index: 2;
-}
-
-@keyframes shimmer {
-  0% {
-    opacity: 0;
-    transform: translateX(-100%);
+/* Animación suave de pulso para pestaña activa */
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 0.6;
   }
   50% {
-    opacity: 1;
-    transform: translateX(0%);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(100%);
+    opacity: 0.9;
   }
 }
 
-/* Efecto de brillo verde */
-.tab-active {
-  box-shadow: 
-    0 4px 20px rgba(34, 197, 94, 0.4),
-    0 0 30px rgba(34, 197, 94, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
 }
 
-/* Animación suave para el cambio de pestañas */
-.tab-button span {
-  transition: all 0.3s ease;
-}
-
-.tab-active span {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  font-weight: 700;
+/* Contenedor de pestañas con efecto vidrio líquido */
+.glass-card .flex.bg-gradient-to-r {
+  position: relative;
+  overflow: hidden;
 }
 
 /* Estilos para elementos individuales con efecto de vidrio */
@@ -1100,16 +1081,25 @@ function verImagen(url) {
 
 /* Responsividad mejorada */
 @media (max-width: 640px) {
-  .glass-card {
-    margin: 0.25rem;
-    padding: 0.75rem;
-    border-radius: 12px;
+  .page-container {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
   }
   
-  .tab-button {
-    font-size: 0.7rem;
+  .glass-card {
+    margin: 0.25rem 0;
+    padding: 0.75rem;
+    border-radius: 16px;
+  }
+  
+  .tab-button-liquid {
+    font-size: 0.65rem;
     padding: 6px 12px;
-    min-width: 100px;
+    min-width: 70px;
+  }
+  
+  .tab-button-liquid span {
+    font-size: 0.65rem;
   }
   
   .glass-button {
@@ -1129,24 +1119,57 @@ function verImagen(url) {
   }
 }
 
-/* Estilos específicos para pantallas muy pequeñas */
+/* Optimización para móviles extra pequeños */
 @media (max-width: 480px) {
-  .tab-button {
-    font-size: 0.65rem;
-    padding: 5px 8px;
-    min-width: 80px;
+  .page-container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
   
-  .tab-button span {
-    font-size: 0.65rem;
+  .glass-card {
+    margin: 0.125rem 0;
+    padding: 0.625rem;
+  }
+  
+  .tab-button-liquid {
+    font-size: 0.6rem;
+    padding: 4px 10px;
+    min-width: 65px;
+  }
+  
+  .tab-button-liquid span {
+    font-size: 0.6rem;
+    font-weight: 600;
   }
 }
 
-/* Mejoras para tablets y pantallas medianas */
+/* Optimización para tablets */
 @media (min-width: 641px) and (max-width: 1024px) {
-  .tab-button {
-    min-width: 140px;
+  .page-container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .tab-button-liquid {
+    min-width: 90px;
     padding: 8px 16px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Optimización para pantallas grandes */
+@media (min-width: 1025px) {
+  .page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+  
+  .tab-button-liquid {
+    min-width: 100px;
+    padding: 8px 18px;
+    font-size: 0.8rem;
   }
 }
 </style>

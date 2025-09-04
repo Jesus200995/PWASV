@@ -111,10 +111,13 @@
                 
                 <div class="flex-1 min-w-0">
                   <div class="flex justify-between items-start">
-                    <p class="text-xs text-gray-500 font-medium">{{ formatFecha(registro.fecha_hora) }}</p>
+                    <div class="flex flex-col">
+                      <p class="text-xs text-gray-500 font-medium">{{ formatFechaCompleta(registro.fecha_hora) }}</p>
+                      <p class="text-xs text-green-600 font-bold">{{ formatHoraCDMX(registro.fecha_hora) }}</p>
+                    </div>
                     <button @click="verEnMapa(registro)" class="text-primary hover:text-primary-dark text-xs flex items-center ml-1 whitespace-nowrap">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                       </svg>
                       Ver mapa
                     </button>
@@ -559,6 +562,60 @@ function formatHora(fechaStr) {
     });
   } catch (e) {
     console.error('Error al formatear hora:', e, fechaStr);
+    return fechaStr;
+  }
+}
+
+// Nueva función para mostrar fecha completa pero más compacta
+function formatFechaCompleta(fechaStr) {
+  try {
+    if (!fechaStr) return '';
+    
+    const fecha = new Date(fechaStr);
+    
+    // Verificar que la fecha sea válida
+    if (isNaN(fecha.getTime())) {
+      console.error('Fecha inválida:', fechaStr);
+      return fechaStr;
+    }
+    
+    // Formatear fecha en español mexicano de forma compacta
+    return fecha.toLocaleDateString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  } catch (e) {
+    console.error('Error al formatear fecha completa:', e, fechaStr);
+    return fechaStr;
+  }
+}
+
+// Nueva función para mostrar hora CDMX con segundos
+function formatHoraCDMX(fechaStr) {
+  try {
+    if (!fechaStr) return '';
+    
+    const fecha = new Date(fechaStr);
+    
+    // Verificar que la fecha sea válida
+    if (isNaN(fecha.getTime())) {
+      console.error('Fecha inválida para hora:', fechaStr);
+      return fechaStr;
+    }
+    
+    // Mostrar hora con segundos en zona CDMX
+    return fecha.toLocaleTimeString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }) + ' CDMX';
+  } catch (e) {
+    console.error('Error al formatear hora CDMX:', e, fechaStr);
     return fechaStr;
   }
 }

@@ -194,6 +194,17 @@
                     </svg>
                   </button>
                   <button 
+                    @click="ordenarPor('tipo')"
+                    :class="['sort-btn', { active: campoOrdenamiento === 'tipo' }]"
+                    title="Ordenar por Tipo"
+                  >
+                    Tipo
+                    <svg v-if="campoOrdenamiento === 'tipo'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                      <path v-else d="m7 9 5-5 5 5"/>
+                    </svg>
+                  </button>
+                  <button 
                     @click="ordenarPor('fecha')"
                     :class="['sort-btn', { active: campoOrdenamiento === 'fecha' }]"
                     title="Ordenar por Fecha"
@@ -357,24 +368,25 @@
             <table class="registros-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Usuario</th>
-                  <th>Foto</th>
-                  <th>Ubicación</th>
-                  <th>Descripción</th>
-                  <th>Fecha</th>
-                  <th>Acciones</th>
+                  <th class="col-id">ID</th>
+                  <th class="col-usuario">Usuario</th>
+                  <th class="col-foto">Foto</th>
+                  <th class="col-tipo">Tipo</th>
+                  <th class="col-ubicacion">Ubicación</th>
+                  <th class="col-descripcion">Descripción</th>
+                  <th class="col-fecha">Fecha</th>
+                  <th class="col-acciones">Acciones</th>
                 </tr>
               </thead>
               <tbody>                <tr v-for="registro in registrosPaginados" :key="registro.id">
-                  <td>#{{ registro.id }}</td>
-                  <td>
+                  <td class="col-id">#{{ registro.id }}</td>
+                  <td class="col-usuario">
                     <div class="usuario-info">
                       <strong>{{ registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}` }}</strong>
                       <small>{{ registro.usuario?.correo || 'No disponible' }}</small>
                     </div>
                   </td>
-                  <td>
+                  <td class="col-foto">
                     <img 
                       v-if="registro.foto_url" 
                       :src="`${API_URL}/${registro.foto_url}`"
@@ -384,17 +396,22 @@
                     >
                     <span v-else class="no-foto">Sin foto</span>
                   </td>
-                  <td class="ubicacion">
-                    {{ parseFloat(registro.latitud).toFixed(6) }},<br>
-                    {{ parseFloat(registro.longitud).toFixed(6) }}
+                  <td class="col-tipo">
+                    <span :class="['tipo-badge', getTipoClass(registro.tipo_actividad)]">
+                      {{ getTipoLabel(registro.tipo_actividad) }}
+                    </span>
                   </td>
-                  <td class="descripcion">
-                    {{ registro.descripcion || 'Sin descripción' }}
+                  <td class="col-ubicacion ubicacion">
+                    {{ parseFloat(registro.latitud).toFixed(4) }},<br>
+                    {{ parseFloat(registro.longitud).toFixed(4) }}
                   </td>
-                  <td class="fecha">
-                    {{ formatFecha(registro.fecha_hora) }}
+                  <td class="col-descripcion descripcion">
+                    {{ truncateText(registro.descripcion || 'Sin descripción', 40) }}
                   </td>
-                  <td>
+                  <td class="col-fecha fecha">
+                    {{ formatFechaCompacta(registro.fecha_hora) }}
+                  </td>
+                  <td class="col-acciones">
                     <div class="action-container">
                       <button @click="verDetalles(registro)" class="btn-ver" title="Ver detalles del registro">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -624,6 +641,22 @@
                   <div class="detail-content">
                     <span class="detail-label">Fecha y Hora</span>
                     <span class="detail-value">{{ formatFecha(selectedRegistro.fecha_hora) }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Tipo de Actividad</span>
+                    <span class="detail-value">
+                      <span :class="['tipo-badge-modal', getTipoClass(selectedRegistro.tipo_actividad)]">
+                        {{ getTipoLabel(selectedRegistro.tipo_actividad) }}
+                      </span>
+                    </span>
                   </div>
                 </div>
 
@@ -1230,6 +1263,7 @@ const exportarCSV = () => {
     'ID',
     'Usuario',
     'Email',
+    'Tipo Actividad',
     'Fecha y Hora',
     'Latitud',
     'Longitud',
@@ -1243,6 +1277,7 @@ const exportarCSV = () => {
       `"${r.id}"`,
       `"${r.usuario?.nombre_completo || 'Usuario ' + r.usuario_id}"`,
       `"${r.usuario?.correo || 'No disponible'}"`,
+      `"${getTipoLabel(r.tipo_actividad)}"`,
       `"${formatFecha(r.fecha_hora)}"`,
       `"${r.latitud || ''}"`,
       `"${r.longitud || ''}"`,
@@ -1321,7 +1356,7 @@ const exportarExcel = () => {
     
     // === HOJA 2: DATOS DETALLADOS ===
     const datosDetallados = [
-      ['ID', 'Usuario', 'Email', 'Fecha y Hora', 'Latitud', 'Longitud', 'Descripción', 'Estado Foto', 'URL Foto']
+      ['ID', 'Usuario', 'Email', 'Tipo Actividad', 'Fecha y Hora', 'Latitud', 'Longitud', 'Descripción', 'Estado Foto', 'URL Foto']
     ]
     
     registrosParaExportar.forEach(registro => {
@@ -1329,6 +1364,7 @@ const exportarExcel = () => {
         `REG-${registro.id.toString().padStart(5, '0')}`,
         registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`,
         registro.usuario?.correo || 'No disponible',
+        getTipoLabel(registro.tipo_actividad),
         formatFecha(registro.fecha_hora),
         parseFloat(registro.latitud).toFixed(6),
         parseFloat(registro.longitud).toFixed(6),
@@ -1443,12 +1479,13 @@ const exportarExcel = () => {
       { width: 12 }, // ID
       { width: 25 }, // Usuario
       { width: 30 }, // Email
+      { width: 15 }, // Tipo Actividad
       { width: 20 }, // Fecha
       { width: 12 }, // Latitud
       { width: 12 }, // Longitud
-      { width: 40 }, // Descripción
+      { width: 35 }, // Descripción (reducido para dar espacio)
       { width: 15 }, // Estado Foto
-      { width: 50 }  // URL Foto
+      { width: 45 }  // URL Foto (reducido para dar espacio)
     ]
     
     // Configurar anchos de columna para la hoja de usuarios
@@ -1693,6 +1730,28 @@ const imprimirRegistros = () => {
                 border: 1px solid #f5c6cb;
             }
             
+            .tipo-print {
+                display: inline-block;
+                padding: 2px 6px;
+                border-radius: 8px;
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+            }
+            
+            .tipo-print.tipo-campo {
+                background: #e8f5e8;
+                color: #2e7d32;
+                border: 1px solid #a5d6a7;
+            }
+            
+            .tipo-print.tipo-gabinete {
+                background: #e3f2fd;
+                color: #1565c0;
+                border: 1px solid #90caf9;
+            }
+            
             .print-footer {
                 margin-top: 30px;
                 padding: 20px 0;
@@ -1753,6 +1812,18 @@ const imprimirRegistros = () => {
                 
                 .sin-foto {
                     background: #f8d7da !important;
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                }
+                
+                .tipo-print.tipo-campo {
+                    background: #e8f5e8 !important;
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                }
+                
+                .tipo-print.tipo-gabinete {
+                    background: #e3f2fd !important;
                     -webkit-print-color-adjust: exact;
                     color-adjust: exact;
                 }
@@ -1820,11 +1891,12 @@ const imprimirRegistros = () => {
             <thead>
                 <tr>
                     <th style="width: 8%;">ID</th>
-                    <th style="width: 20%;">Usuario</th>
-                    <th style="width: 15%;">Fecha y Hora</th>
-                    <th style="width: 18%;">Ubicación</th>
-                    <th style="width: 25%;">Descripción</th>
-                    <th style="width: 14%;">Estado Foto</th>
+                    <th style="width: 18%;">Usuario</th>
+                    <th style="width: 10%;">Tipo</th>
+                    <th style="width: 13%;">Fecha y Hora</th>
+                    <th style="width: 16%;">Ubicación</th>
+                    <th style="width: 22%;">Descripción</th>
+                    <th style="width: 13%;">Estado Foto</th>
                 </tr>
             </thead>
             <tbody>
@@ -1838,6 +1910,11 @@ const imprimirRegistros = () => {
                                 <span class="usuario-nombre">${registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}`}</span>
                                 <span class="usuario-email">${registro.usuario?.correo || 'No disponible'}</span>
                             </div>
+                        </td>
+                        <td>
+                            <span class="tipo-print ${getTipoClass(registro.tipo_actividad)}">
+                                ${getTipoLabel(registro.tipo_actividad)}
+                            </span>
                         </td>
                         <td class="fecha-cell">
                             ${formatFecha(registro.fecha_hora)}
@@ -1975,6 +2052,10 @@ const aplicarOrdenamiento = () => {
         valorA = (a.usuario?.nombre_completo || `Usuario ${a.usuario_id}`).toLowerCase()
         valorB = (b.usuario?.nombre_completo || `Usuario ${b.usuario_id}`).toLowerCase()
         break
+      case 'tipo':
+        valorA = getTipoLabel(a.tipo_actividad).toLowerCase()
+        valorB = getTipoLabel(b.tipo_actividad).toLowerCase()
+        break
       case 'fecha':
         valorA = new Date(a.fecha_hora)
         valorB = new Date(b.fecha_hora)
@@ -2001,6 +2082,52 @@ const formatFecha = (fechaStr) => {
   } catch (e) {
     return fechaStr
   }
+}
+
+const formatFechaCompacta = (fechaStr) => {
+  try {
+    const fecha = new Date(fechaStr)
+    return fecha.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch (e) {
+    return fechaStr
+  }
+}
+
+const getTipoLabel = (tipo) => {
+  if (!tipo) return 'Campo' // Valor por defecto para registros antiguos
+  
+  switch (tipo.toLowerCase()) {
+    case 'campo':
+      return 'Campo'
+    case 'gabinete':
+      return 'Gabinete'
+    default:
+      return 'Campo'
+  }
+}
+
+const getTipoClass = (tipo) => {
+  if (!tipo) return 'tipo-campo' // Valor por defecto para registros antiguos
+  
+  switch (tipo.toLowerCase()) {
+    case 'campo':
+      return 'tipo-campo'
+    case 'gabinete':
+      return 'tipo-gabinete'
+    default:
+      return 'tipo-campo'
+  }
+}
+
+const truncateText = (text, maxLength) => {
+  if (!text) return ''
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength) + '...'
 }
 
 const verDetalles = async (registro) => {
@@ -3617,6 +3744,88 @@ const logout = () => {
   color: #43A047;
 }
 
+/* Estilos para columnas específicas de la tabla */
+.col-id {
+  width: 60px !important;
+  max-width: 60px !important;
+  min-width: 60px !important;
+}
+
+.col-usuario {
+  width: 180px !important;
+  max-width: 180px !important;
+  min-width: 180px !important;
+  text-align: left !important;
+}
+
+.col-foto {
+  width: 60px !important;
+  max-width: 60px !important;
+  min-width: 60px !important;
+}
+
+.col-tipo {
+  width: 80px !important;
+  max-width: 80px !important;
+  min-width: 80px !important;
+}
+
+.col-ubicacion {
+  width: 120px !important;
+  max-width: 120px !important;
+  min-width: 120px !important;
+}
+
+.col-descripcion {
+  width: 150px !important;
+  max-width: 150px !important;
+  min-width: 150px !important;
+  text-align: left !important;
+}
+
+.col-fecha {
+  width: 100px !important;
+  max-width: 100px !important;
+  min-width: 100px !important;
+}
+
+.col-acciones {
+  width: 80px !important;
+  max-width: 80px !important;
+  min-width: 80px !important;
+}
+
+/* Estilos para badges de tipo de actividad */
+.tipo-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.tipo-campo {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.tipo-gabinete {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+
+.tipo-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Modal styles modernos */
 .modal-overlay {
   position: fixed;
@@ -3875,6 +4084,35 @@ const logout = () => {
   max-height: 60px;
   overflow-y: auto;
   padding-right: 8px;
+}
+
+/* Estilos para badges de tipo en el modal */
+.tipo-badge-modal {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  margin-top: 4px;
+}
+
+.tipo-badge-modal.tipo-campo {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
+}
+
+.tipo-badge-modal.tipo-gabinete {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  color: #1565c0;
+  border: 1px solid #90caf9;
+  box-shadow: 0 2px 8px rgba(21, 101, 192, 0.15);
 }
 
 .photo-container {

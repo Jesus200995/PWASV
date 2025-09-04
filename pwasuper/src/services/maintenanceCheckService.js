@@ -33,13 +33,16 @@ class MaintenanceCheckService {
       const isMaintenanceEnabled = data.maintenance || false
       const message = data.message || 'Sistema en mantenimiento'
 
-      console.log(`📋 Estado de mantenimiento: ${isMaintenanceEnabled}`)
+      console.log(`📋 Estado de mantenimiento recibido: ${isMaintenanceEnabled}`)
+      console.log(`📋 Estado local anterior: ${this.lastKnownState}`)
       
-      // Si el estado cambió, notificar a los listeners
+      // IMPORTANTE: Solo notificar si HAY un cambio real
       if (isMaintenanceEnabled !== this.lastKnownState) {
-        console.log(`🔄 Estado cambió de ${this.lastKnownState} a ${isMaintenanceEnabled}`)
+        console.log(`🔄 CAMBIO DETECTADO: ${this.lastKnownState} → ${isMaintenanceEnabled}`)
         this.lastKnownState = isMaintenanceEnabled
         this.notifyListeners(isMaintenanceEnabled, message)
+      } else {
+        console.log(`ℹ️ Sin cambios en el estado de mantenimiento: ${isMaintenanceEnabled}`)
       }
 
       return {
@@ -49,9 +52,10 @@ class MaintenanceCheckService {
       }
     } catch (error) {
       console.log('⚠️ Error verificando mantenimiento (continuando normalmente):', error.message)
-      // En caso de error, asumir que no hay mantenimiento para no bloquear la app
+      // En caso de error, NO cambiar el estado actual
+      // Mantener el último estado conocido
       return {
-        enabled: false,
+        enabled: this.lastKnownState,
         message: '',
         error: error.message
       }

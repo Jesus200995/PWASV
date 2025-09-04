@@ -19,7 +19,7 @@
       
       <!-- Título principal -->
       <h1 class="maintenance-title">
-        🔧 Sistema en Mantenimiento
+        Sistema en Mantenimiento
       </h1>
       
       <!-- Mensaje personalizable -->
@@ -30,20 +30,36 @@
       <!-- Información adicional -->
       <div class="maintenance-info">
         <div class="info-item">
-          <div class="info-icon">🕐</div>
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+          </div>
           <p>Estimamos regresar pronto</p>
         </div>
         <div class="info-item">
-          <div class="info-icon">🔄</div>
-          <p>Esta página se actualizará automáticamente</p>
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"/>
+              <polyline points="1 20 1 14 7 14"/>
+              <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+          </div>
+          <p>Esta página se verifica automáticamente cada 30 segundos</p>
         </div>
         <div class="info-item">
-          <div class="info-icon">📧</div>
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
           <p>Para urgencias, contáctanos directamente</p>
         </div>
       </div>
       
-      <!-- Botón de recarga manual -->
+      <!-- Botón de verificación manual -->
       <div class="maintenance-actions">
         <button @click="reloadPage" class="reload-button" :disabled="isReloading">
           <svg v-if="!isReloading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -52,8 +68,20 @@
             <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
           <div v-else class="loading-spinner"></div>
-          {{ isReloading ? 'Verificando...' : 'Verificar Estado' }}
+          {{ isReloading ? 'Verificando...' : 'Verificar disponibilidad' }}
         </button>
+        
+        <!-- Mensaje temporal después de verificar -->
+        <transition name="fade">
+          <div v-if="showVerificationMessage && !isReloading" class="verification-message">
+            <div class="verification-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20,6 9,17 4,12"/>
+              </svg>
+            </div>
+            <p>Verificación completada. Si el mantenimiento ha terminado, esta pantalla se ocultará automáticamente.</p>
+          </div>
+        </transition>
       </div>
       
       <!-- Footer con timestamp -->
@@ -91,6 +119,7 @@ const emit = defineEmits(['reload'])
 // Estado reactivo
 const isReloading = ref(false)
 const lastCheck = ref(new Date().toLocaleTimeString('es-ES'))
+const showVerificationMessage = ref(false)
 
 // Actualizar timestamp cada minuto
 let timestampInterval = null
@@ -108,18 +137,24 @@ onUnmounted(() => {
   }
 })
 
-// Función para recargar la página
+// Función para verificar estado (NO recargar la página)
 const reloadPage = async () => {
   isReloading.value = true
   lastCheck.value = new Date().toLocaleTimeString('es-ES')
+  showVerificationMessage.value = true
   
   // Emitir evento para que el componente padre maneje la verificación
+  // IMPORTANTE: Solo verificar, NO cerrar la pantalla automáticamente
   emit('reload')
   
-  // Simular verificación
+  // Tiempo de verificación más realista
   setTimeout(() => {
     isReloading.value = false
-  }, 2000)
+    // Ocultar el mensaje después de unos segundos
+    setTimeout(() => {
+      showVerificationMessage.value = false
+    }, 3000)
+  }, 1500)
 }
 
 // Generar estilos aleatorios para las partículas
@@ -148,7 +183,7 @@ const getParticleStyle = (index) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 50%, #27ae60 100%);
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 50%, #34495e 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -160,11 +195,11 @@ const getParticleStyle = (index) => {
 
 .maintenance-container {
   text-align: center;
-  max-width: 500px;
-  padding: 40px 20px;
+  max-width: 450px;
+  padding: 30px 20px;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   position: relative;
@@ -174,9 +209,9 @@ const getParticleStyle = (index) => {
 /* Icono de mantenimiento animado */
 .maintenance-icon {
   position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 30px;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
 }
 
 .gear {
@@ -185,17 +220,17 @@ const getParticleStyle = (index) => {
 }
 
 .gear-1 {
-  width: 80px;
-  height: 80px;
+  width: 56px;
+  height: 56px;
   top: 0;
-  left: 20px;
+  left: 12px;
   animation: rotate-clockwise 8s linear infinite;
 }
 
 .gear-2 {
-  width: 60px;
-  height: 60px;
-  top: 30px;
+  width: 42px;
+  height: 42px;
+  top: 20px;
   left: 0;
   animation: rotate-counter-clockwise 6s linear infinite;
 }
@@ -212,21 +247,22 @@ const getParticleStyle = (index) => {
 
 /* Título */
 .maintenance-title {
-  font-size: 32px;
-  font-weight: 800;
-  margin: 0 0 20px 0;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: #27ae60;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 
 /* Mensaje */
 .maintenance-message {
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 .maintenance-message p {
-  font-size: 18px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.5;
   margin: 0;
   opacity: 0.95;
   font-weight: 400;
@@ -236,46 +272,60 @@ const getParticleStyle = (index) => {
 .maintenance-info {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 40px;
+  gap: 12px;
+  margin-bottom: 28px;
 }
 
 .info-item {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 10px;
+  padding: 10px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .info-icon {
-  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.info-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .info-item p {
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
 }
 
 /* Botón de recarga */
 .maintenance-actions {
-  margin-bottom: 30px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .reload-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 28px;
+  padding: 12px 24px;
   background: rgba(255, 255, 255, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50px;
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -296,13 +346,13 @@ const getParticleStyle = (index) => {
 }
 
 .reload-button svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .loading-spinner {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top: 2px solid white;
   border-radius: 50%;
@@ -314,14 +364,62 @@ const getParticleStyle = (index) => {
   to { transform: rotate(360deg); }
 }
 
+/* Mensaje de verificación */
+.verification-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 380px;
+  padding: 10px 14px;
+  background: rgba(46, 204, 113, 0.2);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  margin-top: 8px;
+}
+
+.verification-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: #27ae60;
+}
+
+.verification-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.verification-message p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.95);
+  text-align: left;
+  line-height: 1.4;
+}
+
+/* Transición para el mensaje */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 /* Footer */
 .maintenance-footer {
   opacity: 0.8;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .maintenance-footer p {
-  margin: 4px 0;
+  margin: 3px 0;
 }
 
 .app-name {
@@ -364,47 +462,256 @@ const getParticleStyle = (index) => {
   }
 }
 
-/* Responsive */
+/* Responsive - Móviles */
 @media (max-width: 768px) {
   .maintenance-container {
-    max-width: 90%;
-    padding: 30px 20px;
+    max-width: 95%;
+    padding: 18px 14px;
+    margin: 10px;
+    border-radius: 14px;
   }
   
   .maintenance-title {
-    font-size: 24px;
+    font-size: 18px;
+    line-height: 1.3;
+    margin-bottom: 14px;
   }
   
   .maintenance-message p {
-    font-size: 16px;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 0 6px;
   }
   
   .maintenance-icon {
-    width: 100px;
-    height: 100px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
   }
   
   .gear-1 {
-    width: 70px;
-    height: 70px;
-    left: 15px;
+    width: 44px;
+    height: 44px;
+    left: 10px;
   }
   
   .gear-2 {
-    width: 50px;
-    height: 50px;
-    top: 25px;
+    width: 32px;
+    height: 32px;
+    top: 16px;
+    left: 0;
+  }
+  
+  .maintenance-info {
+    gap: 10px;
+    margin-bottom: 20px;
   }
   
   .info-item {
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
-    text-align: center;
+    text-align: left;
+    padding: 8px 10px;
+  }
+  
+  .info-item p {
+    font-size: 11px;
+  }
+  
+  .info-icon {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+  }
+  
+  .info-icon svg {
+    width: 14px;
+    height: 14px;
   }
   
   .reload-button {
-    padding: 12px 24px;
+    padding: 10px 18px;
+    font-size: 12px;
+    width: 100%;
+    max-width: 240px;
+    margin: 0 auto;
+    display: flex;
+  }
+  
+  .reload-button svg,
+  .loading-spinner {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .verification-message {
+    max-width: 90%;
+    padding: 8px 10px;
+    margin-top: 10px;
+  }
+  
+  .verification-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .verification-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .verification-message p {
+    font-size: 11px;
+  }
+  
+  .maintenance-footer {
+    font-size: 10px;
+    margin-top: 14px;
+  }
+}
+
+/* Responsive - Móviles pequeños */
+@media (max-width: 480px) {
+  .maintenance-container {
+    max-width: 98%;
+    padding: 14px 10px;
+    margin: 5px;
+  }
+  
+  .maintenance-title {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .maintenance-message p {
+    font-size: 12px;
+    padding: 0 4px;
+  }
+  
+  .maintenance-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 14px;
+  }
+  
+  .gear-1 {
+    width: 38px;
+    height: 38px;
+    left: 9px;
+  }
+  
+  .gear-2 {
+    width: 28px;
+    height: 28px;
+    top: 14px;
+  }
+  
+  .info-item {
+    padding: 6px 8px;
+  }
+  
+  .info-item p {
+    font-size: 10px;
+  }
+  
+  .info-icon {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .info-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .reload-button {
+    padding: 8px 14px;
+    font-size: 11px;
+  }
+  
+  .reload-button svg,
+  .loading-spinner {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .verification-message {
+    max-width: 95%;
+    padding: 6px 8px;
+  }
+  
+  .verification-icon {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .verification-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .verification-message p {
+    font-size: 10px;
+  }
+}
+
+/* Responsive - Pantallas muy pequeñas */
+@media (max-width: 360px) {
+  .maintenance-container {
+    padding: 12px 8px;
+  }
+  
+  .maintenance-title {
     font-size: 14px;
+    margin-bottom: 10px;
+  }
+  
+  .maintenance-message p {
+    font-size: 11px;
+  }
+  
+  .maintenance-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+  }
+  
+  .gear-1 {
+    width: 32px;
+    height: 32px;
+    left: 8px;
+  }
+  
+  .gear-2 {
+    width: 24px;
+    height: 24px;
+    top: 12px;
+  }
+  
+  .info-item {
+    padding: 5px 6px;
+  }
+  
+  .info-item p {
+    font-size: 9px;
+  }
+  
+  .reload-button {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+  
+  .verification-message {
+    max-width: 98%;
+    padding: 5px 6px;
+  }
+  
+  .verification-message p {
+    font-size: 9px;
+  }
+  
+  .maintenance-footer {
+    font-size: 9px;
   }
 }
 </style>

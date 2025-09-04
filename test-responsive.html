@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba Responsive - Modo Mantenimiento</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a1a;
+    }
+    
+    .device-frame {
+      border: 2px solid #333;
+      border-radius: 20px;
+      margin: 20px;
+      padding: 10px;
+      background: #000;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    
+    .device-label {
+      color: #fff;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 5px;
+      background: #333;
+      border-radius: 10px;
+    }
+    
+    .maintenance-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .maintenance-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 
+        0 8px 32px rgba(31, 38, 135, 0.37),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      color: white;
+      max-width: 90%;
+      width: 100%;
+      max-width: 500px;
+      margin: 20px;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .gear-container {
+      position: relative;
+      margin-bottom: 2rem;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gear {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      position: relative;
+      animation: spin 3s linear infinite;
+      margin: 0 10px;
+    }
+
+    .gear::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+    }
+
+    .gear:nth-child(2) {
+      animation-direction: reverse;
+      animation-duration: 2s;
+    }
+
+    .gear:nth-child(3) {
+      animation-duration: 4s;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .maintenance-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .maintenance-message {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    .maintenance-button {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 1rem 2rem;
+      border-radius: 15px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px;
+    }
+
+    .maintenance-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .verification-message {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.95rem;
+      opacity: 0.8;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .maintenance-card {
+        padding: 1.5rem;
+        margin: 15px;
+        border-radius: 15px;
+      }
+
+      .maintenance-title {
+        font-size: 2rem;
+      }
+
+      .maintenance-message {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .gear-container {
+        height: 80px;
+        margin-bottom: 1.5rem;
+      }
+
+      .gear {
+        width: 50px;
+        height: 50px;
+        margin: 0 8px;
+      }
+
+      .gear::before {
+        width: 16px;
+        height: 16px;
+      }
+
+      .maintenance-button {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        margin: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .maintenance-card {
+        padding: 1.25rem;
+        margin: 10px;
+        border-radius: 12px;
+        max-width: 95%;
+      }
+
+      .maintenance-title {
+        font-size: 1.75rem;
+        margin-bottom: 0.875rem;
+      }
+
+      .maintenance-message {
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+        line-height: 1.5;
+      }
+
+      .gear-container {
+        height: 70px;
+        margin-bottom: 1.25rem;
+      }
+
+      .gear {
+        width: 45px;
+        height: 45px;
+        margin: 0 6px;
+        border-width: 3px;
+      }
+
+      .gear::before {
+        width: 14px;
+        height: 14px;
+      }
+
+      .maintenance-button {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+        margin: 6px;
+        border-radius: 12px;
+      }
+
+      .verification-message {
+        margin-top: 0.875rem;
+        padding: 0.875rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .maintenance-card {
+        padding: 1rem;
+        margin: 8px;
+        border-radius: 10px;
+      }
+
+      .maintenance-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .maintenance-message {
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+      }
+
+      .gear-container {
+        height: 60px;
+        margin-bottom: 1rem;
+      }
+
+      .gear {
+        width: 40px;
+        height: 40px;
+        margin: 0 5px;
+        border-width: 2px;
+      }
+
+      .gear::before {
+        width: 12px;
+        height: 12px;
+      }
+
+      .maintenance-button {
+        padding: 0.625rem 1rem;
+        font-size: 0.9rem;
+        margin: 5px;
+        border-radius: 10px;
+        display: block;
+        width: calc(100% - 20px);
+        text-align: center;
+      }
+
+      .verification-message {
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+      }
+    }
+
+    /* Simulaciones de dispositivos */
+    .desktop { width: 1200px; height: 800px; }
+    .tablet { width: 768px; height: 1024px; }
+    .mobile { width: 414px; height: 736px; }
+    .small-mobile { width: 360px; height: 640px; }
+    .tiny-mobile { width: 320px; height: 568px; }
+  </style>
+</head>
+<body>
+  <div style="padding: 20px; color: white; text-align: center;">
+    <h1>🧪 Prueba Responsive - Sistema de Mantenimiento</h1>
+    <p>Simulación de diferentes dispositivos para validar el diseño</p>
+  </div>
+
+  <!-- Desktop -->
+  <div class="device-frame desktop">
+    <div class="device-label">🖥️ Desktop (1200x800)</div>
+    <div class="maintenance-screen">
+      <div class="maintenance-card">
+        <div class="gear-container">
+          <div class="gear"></div>
+          <div class="gear"></div>
+          <div class="gear"></div>
+        </div>
+        <h1 class="maintenance-title">🔧 Mantenimiento</h1>
+        <p class="maintenance-message">
+          Estamos realizando mejoras en el sistema para ofrecerte una mejor experiencia. Por favor, regresa en unos momentos.
+        </p>
+        <button class="maintenance-button">
+          🔄 Verificar si ya está disponible
+        </button>
+        <div class="verification-message">
+          Última verificación: Hace 30 segundos
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tablet -->
+  <div class="device-frame tablet">
+    <div class="device-label">📱 Tablet (768x1024)</div>
+    <div class="maintenance-screen">
+      <div class="maintenance-card">
+        <div class="gear-container">
+          <div class="gear"></div>
+          <div class="gear"></div>
+          <div class="gear"></div>
+        </div>
+        <h1 class="maintenance-title">🔧 Mantenimiento</h1>
+        <p class="maintenance-message">
+          Estamos realizando mejoras en el sistema para ofrecerte una mejor experiencia. Por favor, regresa en unos momentos.
+        </p>
+        <button class="maintenance-button">
+          🔄 Verificar si ya está disponible
+        </button>
+        <div class="verification-message">
+          Última verificación: Hace 30 segundos
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile -->
+  <div class="device-frame mobile">
+    <div class="device-label">📱 Mobile (414x736)</div>
+    <div class="maintenance-screen">
+      <div class="maintenance-card">
+        <div class="gear-container">
+          <div class="gear"></div>
+          <div class="gear"></div>
+          <div class="gear"></div>
+        </div>
+        <h1 class="maintenance-title">🔧 Mantenimiento</h1>
+        <p class="maintenance-message">
+          Estamos realizando mejoras en el sistema para ofrecerte una mejor experiencia. Por favor, regresa en unos momentos.
+        </p>
+        <button class="maintenance-button">
+          🔄 Verificar si ya está disponible
+        </button>
+        <div class="verification-message">
+          Última verificación: Hace 30 segundos
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Small Mobile -->
+  <div class="device-frame small-mobile">
+    <div class="device-label">📱 Small Mobile (360x640)</div>
+    <div class="maintenance-screen">
+      <div class="maintenance-card">
+        <div class="gear-container">
+          <div class="gear"></div>
+          <div class="gear"></div>
+          <div class="gear"></div>
+        </div>
+        <h1 class="maintenance-title">🔧 Mantenimiento</h1>
+        <p class="maintenance-message">
+          Estamos realizando mejoras en el sistema para ofrecerte una mejor experiencia. Por favor, regresa en unos momentos.
+        </p>
+        <button class="maintenance-button">
+          🔄 Verificar si ya está disponible
+        </button>
+        <div class="verification-message">
+          Última verificación: Hace 30 segundos
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tiny Mobile -->
+  <div class="device-frame tiny-mobile">
+    <div class="device-label">📱 Tiny Mobile (320x568)</div>
+    <div class="maintenance-screen">
+      <div class="maintenance-card">
+        <div class="gear-container">
+          <div class="gear"></div>
+          <div class="gear"></div>
+          <div class="gear"></div>
+        </div>
+        <h1 class="maintenance-title">🔧 Mantenimiento</h1>
+        <p class="maintenance-message">
+          Estamos realizando mejoras en el sistema para ofrecerte una mejor experiencia. Por favor, regresa en unos momentos.
+        </p>
+        <button class="maintenance-button">
+          🔄 Verificar si ya está disponible
+        </button>
+        <div class="verification-message">
+          Última verificación: Hace 30 segundos
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Agregar interactividad a los botones
+    document.querySelectorAll('.maintenance-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const verificationMsg = this.parentElement.querySelector('.verification-message');
+        verificationMsg.innerHTML = '🔄 Verificando... Espera un momento';
+        
+        setTimeout(() => {
+          verificationMsg.innerHTML = 'Última verificación: Ahora mismo<br>ℹ️ El sistema sigue en mantenimiento';
+        }, 2000);
+      });
+    });
+
+    console.log('🧪 Prueba Responsive cargada correctamente');
+    console.log('📱 Simulando diferentes tamaños de dispositivos');
+  </script>
+</body>
+</html>

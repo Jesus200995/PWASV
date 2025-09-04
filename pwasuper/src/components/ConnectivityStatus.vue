@@ -79,29 +79,29 @@
       :class="getBannerClasses()"
       :style="{ top: '64px' }"
     >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between py-3">
+      <div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6">
+        <div class="flex items-center justify-between py-2">
           <div class="flex items-center">
             <!-- Icono de estado -->
-            <div class="flex-shrink-0 mr-3">
+            <div class="flex-shrink-0 mr-2">
               <!-- Offline -->
-              <svg v-if="!isOnline" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-if="!isOnline" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m2.829 2.829L18 18M8.464 15.536a5 5 0 010-7.072m0 0l2.829 2.829m-2.829-2.829L6 6M5.636 18.364a9 9 0 010-12.728m0 0l2.829 2.829m-2.829-2.829L3 3" />
               </svg>
               <!-- Syncing -->
-              <div v-else-if="isSyncing" class="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+              <div v-else-if="isSyncing" class="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
               <!-- Online -->
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
               </svg>
             </div>
 
             <!-- Texto de estado -->
             <div>
-              <p class="text-sm font-medium">
+              <p class="text-xs font-medium">
                 {{ getBannerTitle() }}
               </p>
-              <p v-if="getBannerSubtitle()" class="text-xs opacity-75">
+              <p v-if="getBannerSubtitle()" class="text-xs opacity-70">
                 {{ getBannerSubtitle() }}
               </p>
             </div>
@@ -112,7 +112,7 @@
             <button
               v-if="pendientes.total > 0"
               @click="openModal"
-              class="text-xs px-3 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors"
+              class="text-xs px-2 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors"
             >
               Ver detalles
             </button>

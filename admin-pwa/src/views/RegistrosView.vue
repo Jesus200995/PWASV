@@ -419,7 +419,10 @@
                     {{ truncateText(registro.descripcion || 'Sin descripción', 40) }}
                   </td>
                   <td class="col-fecha fecha">
-                    {{ formatFechaCompacta(registro.fecha_hora) }}
+                    <div class="fecha-hora-container">
+                      <div class="hora-display">{{ formatFechaCompacta(registro.fecha_hora).hora }}</div>
+                      <div class="fecha-display">{{ formatFechaCompacta(registro.fecha_hora).fecha }}</div>
+                    </div>
                   </td>
                   <td class="col-acciones">
                     <div class="action-container">
@@ -2119,14 +2122,19 @@ const formatFecha = (fechaStr) => {
 const formatFechaCompacta = (fechaStr) => {
   try {
     const fecha = new Date(fechaStr)
-    return fecha.toLocaleDateString('es-ES', {
+    const hora = fecha.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+    const fechaCorta = fecha.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: '2-digit'
     })
+    return { hora, fecha: fechaCorta }
   } catch (e) {
-    return fechaStr
+    return { hora: '--:--', fecha: '--/--/--' }
   }
 }
 
@@ -2540,6 +2548,20 @@ const logout = () => {
     font-size: 0.6rem;
     margin-top: 0.25rem;
   }
+  
+  /* Estilos responsive para fecha-hora */
+  .fecha-hora-container {
+    gap: 1px;
+  }
+  
+  .hora-display {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+  
+  .fecha-display {
+    font-size: 8px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2725,6 +2747,20 @@ const logout = () => {
   
   .descripcion {
     max-width: 100px;
+  }
+  
+  /* Estilos para fecha-hora en móvil */
+  .fecha-hora-container {
+    gap: 0px;
+  }
+  
+  .hora-display {
+    font-size: 9px;
+    padding: 1px 3px;
+  }
+  
+  .fecha-display {
+    font-size: 7px;
   }
 }
 
@@ -3825,6 +3861,37 @@ const logout = () => {
   width: 80px !important;
   max-width: 80px !important;
   min-width: 80px !important;
+}
+
+/* Estilos para contenedor de fecha y hora */
+.fecha-hora-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.1;
+}
+
+.hora-display {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ff8c00;
+  text-shadow: 0 1px 2px rgba(255, 140, 0, 0.2);
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(255, 165, 0, 0.05) 100%);
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.fecha-display {
+  font-size: 9px;
+  font-weight: 500;
+  color: #666;
+  white-space: nowrap;
+  opacity: 0.8;
+  letter-spacing: 0.2px;
 }
 
 /* Estilos para badges de tipo de actividad */

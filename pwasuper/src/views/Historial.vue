@@ -43,10 +43,10 @@
       <!-- Tab de Registros Normales -->
       <div v-show="tabActiva === 'registros'">
         <!-- Título centralizado para Actividades -->
-        <div class="text-center mb-2">
-          <h2 class="text-lg font-bold text-gray-800 mb-1">Historial de actividades</h2>
-          <div class="w-20 h-0.5 bg-gradient-to-r from-green-400 to-green-600 mx-auto mb-2"></div>
-          <p v-if="userInfo" class="text-sm text-gray-600">
+        <div class="text-center mb-1">
+          <h2 class="text-sm font-bold text-gray-800 mb-1">Historial de actividades</h2>
+          <div class="w-20 h-0.5 bg-gradient-to-r from-green-400 to-green-600 mx-auto mb-1"></div>
+          <p v-if="userInfo" class="text-xs text-gray-600">
             Registros de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
           </p>
         </div>
@@ -65,10 +65,10 @@
       <!-- Tab de Asistencias -->
       <div v-show="tabActiva === 'asistencias'">
         <!-- Título centralizado para Asistencias -->
-        <div class="text-center mb-2">
-          <h2 class="text-lg font-bold text-gray-800 mb-1">Historial de asistencias</h2>
-          <div class="w-20 h-0.5 bg-gradient-to-r from-green-400 to-green-600 mx-auto mb-2"></div>
-          <p v-if="userInfo" class="text-sm text-gray-600">
+        <div class="text-center mb-1">
+          <h2 class="text-sm font-bold text-gray-800 mb-1">Historial de asistencias</h2>
+          <div class="w-20 h-0.5 bg-gradient-to-r from-green-400 to-green-600 mx-auto mb-1"></div>
+          <p v-if="userInfo" class="text-xs text-gray-600">
             Asistencias de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
           </p>
         </div>

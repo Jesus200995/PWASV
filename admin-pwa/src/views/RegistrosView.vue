@@ -229,6 +229,16 @@
                 </select>
               </div>
 
+              <!-- Filtro por tipo de actividad -->
+              <div class="filter-group">
+                <label class="filter-label">Tipo de Actividad</label>
+                <select v-model="filtroTipoActividad" @change="filtrarRegistros" class="filter-select">
+                  <option value="">Todos los tipos</option>
+                  <option value="campo">Campo</option>
+                  <option value="gabinete">Gabinete</option>
+                </select>
+              </div>
+
               <!-- Filtro por estado de foto -->
               <div class="filter-group">
                 <label class="filter-label">Estado de Foto</label>
@@ -787,6 +797,7 @@ const filtroFechaInicio = ref('')
 const filtroFechaFin = ref('')
 const filtroRapido = ref('')
 const mostrarFiltrosAvanzados = ref(false)
+const filtroTipoActividad = ref('')
 const filtroConFoto = ref(false)
 const filtroSinFoto = ref(false)
 const filtroConDescripcion = ref(false)
@@ -1019,6 +1030,14 @@ const filtrarRegistros = () => {
     )
   }
   
+  // Filtro por tipo de actividad
+  if (filtroTipoActividad.value) {
+    filtrados = filtrados.filter(registro => {
+      const tipo = registro.tipo_actividad || 'campo' // Default para registros antiguos
+      return tipo.toLowerCase() === filtroTipoActividad.value.toLowerCase()
+    })
+  }
+  
   // Filtros por estado de foto y descripción
   if (filtroConFoto.value) {
     filtrados = filtrados.filter(registro => registro.foto_url)
@@ -1138,6 +1157,15 @@ const actualizarFiltrosActivos = () => {
     })
   }
   
+  if (filtroTipoActividad.value) {
+    const tipoLabel = filtroTipoActividad.value === 'campo' ? 'Campo' : 'Gabinete'
+    activos.push({ 
+      tipo: 'tipoActividad', 
+      valor: filtroTipoActividad.value, 
+      label: `Tipo: ${tipoLabel}` 
+    })
+  }
+  
   if (filtroConFoto.value) {
     activos.push({ tipo: 'conFoto', valor: true, label: 'Con foto' })
   }
@@ -1191,6 +1219,9 @@ const quitarFiltro = (tipo, valor) => {
     case 'usuario':
       filtroUsuario.value = ''
       break
+    case 'tipoActividad':
+      filtroTipoActividad.value = ''
+      break
     case 'conFoto':
       filtroConFoto.value = false
       break
@@ -1210,6 +1241,7 @@ const limpiarTodosFiltros = () => {
   filtroFechaFin.value = ''
   filtroRapido.value = ''
   filtroUsuario.value = ''
+  filtroTipoActividad.value = ''
   filtroConFoto.value = false
   filtroSinFoto.value = false
   filtroConDescripcion.value = false

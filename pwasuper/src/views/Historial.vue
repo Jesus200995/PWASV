@@ -593,7 +593,7 @@ function formatFechaCompleta(fechaStr) {
   }
 }
 
-// Nueva función para mostrar hora CDMX con segundos
+// Nueva función para mostrar hora CDMX en formato AM/PM (igual que asistencias)
 function formatHoraCDMX(fechaStr) {
   try {
     if (!fechaStr) return '';
@@ -606,14 +606,13 @@ function formatHoraCDMX(fechaStr) {
       return fechaStr;
     }
     
-    // Mostrar hora con segundos en zona CDMX
+    // Mostrar hora en formato AM/PM (igual que las asistencias)
     return fecha.toLocaleTimeString('es-MX', {
       timeZone: 'America/Mexico_City',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    }) + ' CDMX';
+      hour12: true
+    });
   } catch (e) {
     console.error('Error al formatear hora CDMX:', e, fechaStr);
     return fechaStr;

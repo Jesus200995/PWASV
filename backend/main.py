@@ -568,14 +568,14 @@ async def registrar(
     if timestamp_offline:
         # Usar la función especializada que maneja correctamente CDMX
         fecha_cdmx, hora_cdmx_datetime, timestamp_for_filename = obtener_fecha_hora_cdmx(timestamp_offline)
-        # Convertir a UTC naive para guardar en BD (consistente con otras tablas)
-        fecha_hora = hora_cdmx_datetime.astimezone(pytz.UTC).replace(tzinfo=None)
+        # ✅ CORRECCIÓN: Guardar en CDMX (igual que asistencias), no convertir a UTC
+        fecha_hora = hora_cdmx_datetime.replace(tzinfo=None)
         print(f"📅 ✅ Usando timestamp offline con zona CDMX: {fecha_hora}")
     else:
         # ✅ SOLUCIÓN: Usar función CDMX en lugar de datetime.utcnow()
         fecha_cdmx, hora_cdmx_datetime, timestamp_for_filename = obtener_fecha_hora_cdmx()
-        # Convertir a UTC naive para guardar en BD
-        fecha_hora = hora_cdmx_datetime.astimezone(pytz.UTC).replace(tzinfo=None)
+        # ✅ CORRECCIÓN: Guardar en CDMX (igual que asistencias), no convertir a UTC
+        fecha_hora = hora_cdmx_datetime.replace(tzinfo=None)
         print(f"📅 ⏰ Usando timestamp actual CDMX: {fecha_hora}")
 
     # Guardar la foto en disco usando el timestamp correcto

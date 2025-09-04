@@ -4719,13 +4719,134 @@ async def validar_permisos_usuario():
         print(f"❌ Error validando permisos: {e}")
         raise HTTPException(status_code=500, detail=f"Error al validar permisos: {str(e)}")
 
+# ==================== SISTEMA DE MODO MANTENIMIENTO ====================
+
+# Variable global para el estado de mantenimiento
+maintenance_state = {
+    "enabled": False,
+    "message": "",
+    "enabled_at": None,
+    "enabled_by": None
+}
+
+@app.post("/maintenance/enable")
+async def activar_modo_mantenimiento(datos: dict):
+    """Activar el modo mantenimiento para la PWA Super"""
+    global maintenance_state
+    
+    try:
+        print("🔧 Activando modo mantenimiento...")
+        
+        # Validar datos
+        message = datos.get('message', 'Sistema en mantenimiento. Volveremos pronto.')
+        enabled_by = datos.get('enabled_by', 'admin')
+        
+        # Actualizar estado global
+        maintenance_state = {
+            "enabled": True,
+            "message": message,
+            "enabled_at": datetime.now().isoformat(),
+            "enabled_by": enabled_by
+        }
+        
+        print(f"✅ Modo mantenimiento activado por: {enabled_by}")
+        print(f"📝 Mensaje: {message}")
+        
+        return {
+            "status": "success",
+            "message": "Modo mantenimiento activado correctamente",
+            "maintenance": maintenance_state
+        }
+        
+    except Exception as e:
+        print(f"❌ Error activando mantenimiento: {e}")
+        raise HTTPException(status_code=500, detail=f"Error activando mantenimiento: {str(e)}")
+
+@app.post("/maintenance/disable")
+async def desactivar_modo_mantenimiento(datos: dict):
+    """Desactivar el modo mantenimiento para la PWA Super"""
+    global maintenance_state
+    
+    try:
+        print("🔧 Desactivando modo mantenimiento...")
+        
+        disabled_by = datos.get('disabled_by', 'admin')
+        
+        # Actualizar estado global
+        maintenance_state = {
+            "enabled": False,
+            "message": "",
+            "disabled_at": datetime.now().isoformat(),
+            "disabled_by": disabled_by
+        }
+        
+        print(f"✅ Modo mantenimiento desactivado por: {disabled_by}")
+        
+        return {
+            "status": "success",
+            "message": "Modo mantenimiento desactivado correctamente",
+            "maintenance": maintenance_state
+        }
+        
+    except Exception as e:
+        print(f"❌ Error desactivando mantenimiento: {e}")
+        raise HTTPException(status_code=500, detail=f"Error desactivando mantenimiento: {str(e)}")
+
+@app.get("/maintenance/status")
+async def verificar_estado_mantenimiento():
+    """Verificar el estado actual del modo mantenimiento (público)"""
+    global maintenance_state
+    
+    try:
+        print(f"🔍 Estado de mantenimiento consultado: {maintenance_state['enabled']}")
+        
+        return {
+            "status": "success",
+            "maintenance": maintenance_state["enabled"],
+            "message": maintenance_state.get("message", ""),
+            "enabled_at": maintenance_state.get("enabled_at"),
+            "enabled_by": maintenance_state.get("enabled_by"),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"❌ Error verificando estado: {e}")
+        raise HTTPException(status_code=500, detail=f"Error verificando estado: {str(e)}")
+
+@app.post("/maintenance/notify")
+async def notificar_cambio_mantenimiento(datos: dict):
+    """Notificar a los clientes conectados sobre el cambio de estado de mantenimiento"""
+    try:
+        maintenance_enabled = datos.get('maintenance', False)
+        timestamp = datos.get('timestamp', datetime.now().isoformat())
+        source = datos.get('source', 'server')
+        
+        print(f"📡 Notificando cambio de mantenimiento: {maintenance_enabled} desde {source}")
+        
+        # Aquí se podría implementar WebSocket, Server-Sent Events, o notificaciones push
+        # Por ahora, solo registramos la notificación
+        
+        return {
+            "status": "success",
+            "message": "Notificación enviada correctamente",
+            "notified_at": timestamp,
+            "maintenance": maintenance_enabled
+        }
+        
+    except Exception as e:
+        print(f"❌ Error enviando notificación: {e}")
+        raise HTTPException(status_code=500, detail=f"Error enviando notificación: {str(e)}")
+
+# ==================== FIN SISTEMA DE MODO MANTENIMIENTO ====================
+
 @app.get("/health")
 async def verificar_salud_api():
     """Endpoint para verificar que la API está funcionando"""
     return {
         "status": "ok",
         "timestamp": datetime.now().isoformat(),
-        "database_connected": bool(conn)
+        "database_connected": bool(conn),
+        "maintenance_mode": maintenance_state["enabled"]
     }
 
 # ==================== FIN ENDPOINTS DE GESTIÓN DE ROLES Y PERMISOS ====================

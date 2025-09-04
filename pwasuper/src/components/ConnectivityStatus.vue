@@ -107,8 +107,15 @@
             </div>
           </div>
 
-          <!-- Botón de acción -->
-          <div class="flex items-center">
+          <!-- Hora/fecha y botón de acción -->
+          <div class="flex items-center space-x-3">
+            <!-- Reloj CDMX -->
+            <div class="text-xs text-right">
+              <div class="font-mono font-medium">{{ horaActual }}</div>
+              <div class="text-xs opacity-70">{{ fechaActual }}</div>
+            </div>
+            
+            <!-- Botón de acción -->
             <button
               v-if="pendientes.total > 0"
               @click="openModal"
@@ -162,6 +169,10 @@ const showModal = ref(false);
 const bannerDismissed = ref(false);
 const lastSyncResult = ref(null);
 const lastConnectionCheck = ref(new Date());
+
+// Estado para hora y fecha CDMX
+const horaActual = ref('');
+const fechaActual = ref('');
 
 // Computed para mostrar el tiempo transcurrido desde la última verificación
 const timeAgoText = computed(() => {
@@ -357,6 +368,31 @@ const actualizarPendientes = async () => {
 let pendientesInterval = null;
 let conectividadInterval = null;
 let uiUpdateInterval = null;
+let relojInterval = null;
+
+// Función para actualizar hora y fecha CDMX
+const actualizarHoraCDMX = () => {
+  const now = new Date();
+  
+  // Configurar para zona horaria de CDMX (America/Mexico_City)
+  const opcionesHora = {
+    timeZone: 'America/Mexico_City',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  };
+  
+  const opcionesFecha = {
+    timeZone: 'America/Mexico_City',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  };
+  
+  horaActual.value = now.toLocaleTimeString('es-MX', opcionesHora);
+  fechaActual.value = now.toLocaleDateString('es-MX', opcionesFecha);
+};
 
 // Función para verificar conectividad más frecuentemente
 const verificarConectividad = async () => {
@@ -387,6 +423,9 @@ onMounted(async () => {
   isOnline.value = status.isOnline;
   isSyncing.value = status.isSyncing;
   
+  // Inicializar hora y fecha CDMX
+  actualizarHoraCDMX();
+  
   // Actualizar pendientes inicialmente y cada 5 segundos
   await actualizarPendientes();
   pendientesInterval = setInterval(actualizarPendientes, 5000);
@@ -400,11 +439,15 @@ onMounted(async () => {
     lastConnectionCheck.value = lastConnectionCheck.value;
   }, 1000);
   
+  // Actualizar reloj CDMX cada segundo
+  relojInterval = setInterval(actualizarHoraCDMX, 1000);
+  
   // Limpiar intervalos al desmontar
   onUnmounted(() => {
     if (pendientesInterval) clearInterval(pendientesInterval);
     if (conectividadInterval) clearInterval(conectividadInterval);
     if (uiUpdateInterval) clearInterval(uiUpdateInterval);
+    if (relojInterval) clearInterval(relojInterval);
     syncService.removeListener(handleSyncEvent);
   });
 });

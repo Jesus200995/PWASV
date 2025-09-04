@@ -10,13 +10,13 @@
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
       <div class="page-container relative z-10 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 min-h-full max-w-full">
     <!-- Tabs para alternar entre registros normales y asistencias -->
-    <div class="glass-card mb-4 w-full">
-      <div class="flex justify-center border-b border-white/20 mb-4 pb-4">
+    <div class="glass-card mb-2">
+      <div class="flex justify-center border-b border-white/20 mb-2 pb-3">
         <div class="flex bg-gradient-to-r from-white/10 via-white/15 to-white/10 backdrop-blur-xl rounded-full p-1 gap-1 shadow-2xl border border-white/30">
           <button 
             @click="cambiarTab('registros')" 
             :class="[
-              'tab-button-liquid px-4 py-2 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden',
+              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden',
               tabActiva === 'registros' 
                 ? 'tab-active-liquid bg-gradient-to-br from-emerald-400 via-green-500 to-teal-500 text-white shadow-xl shadow-green-500/40 border border-white/40' 
                 : 'text-gray-600 hover:text-gray-800 bg-gray-200/70 hover:bg-gray-300/80 border border-gray-300/50'
@@ -28,7 +28,7 @@
           <button 
             @click="cambiarTab('asistencias')" 
             :class="[
-              'tab-button-liquid px-4 py-2 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden',
+              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden',
               tabActiva === 'asistencias' 
                 ? 'tab-active-liquid bg-gradient-to-br from-emerald-400 via-green-500 to-teal-500 text-white shadow-xl shadow-green-500/40 border border-white/40' 
                 : 'text-gray-600 hover:text-gray-800 bg-gray-200/70 hover:bg-gray-300/80 border border-gray-300/50'
@@ -42,14 +42,17 @@
 
       <!-- Tab de Registros Normales -->
       <div v-show="tabActiva === 'registros'">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
-          <div>
-            <h2 class="text-lg font-bold text-gray-800">Historial de actividades</h2>
-            <p v-if="userInfo" class="text-xs text-gray-600 mt-1">
-              Registros de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
-            </p>
-          </div>
-          <button @click="cargarRegistros" class="glass-button text-xs px-2 py-1 mt-2 sm:mt-0">
+        <!-- Título centralizado para Actividades -->
+        <div class="text-center mb-2">
+          <h2 class="text-lg font-bold text-gray-800 mb-1">Historial de actividades</h2>
+          <div class="w-20 h-0.5 bg-gradient-to-r from-green-400 to-green-600 mx-auto mb-2"></div>
+          <p v-if="userInfo" class="text-sm text-gray-600">
+            Registros de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
+          </p>
+        </div>
+        
+        <div class="flex justify-end items-center mb-3">
+          <button @click="cargarRegistros" class="glass-button text-xs px-2 py-1">
             <svg v-if="cargando" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -61,14 +64,17 @@
 
       <!-- Tab de Asistencias -->
       <div v-show="tabActiva === 'asistencias'">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
-          <div>
-            <h2 class="text-lg font-bold text-gray-800">Historial de asistencias</h2>
-            <p v-if="userInfo" class="text-xs text-gray-600 mt-1">
-              Asistencias de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
-            </p>
-          </div>
-          <button @click="cargarAsistencias" class="glass-button text-xs px-2 py-1 mt-2 sm:mt-0">
+        <!-- Título centralizado para Asistencias -->
+        <div class="text-center mb-2">
+          <h2 class="text-lg font-bold text-gray-800 mb-1">Historial de asistencias</h2>
+          <div class="w-20 h-0.5 bg-gradient-to-r from-green-400 to-green-600 mx-auto mb-2"></div>
+          <p v-if="userInfo" class="text-sm text-gray-600">
+            Asistencias de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
+          </p>
+        </div>
+        
+        <div class="flex justify-end items-center mb-3">
+          <button @click="cargarAsistencias" class="glass-button text-xs px-2 py-1">
             <svg v-if="cargandoAsistencias" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -963,7 +969,7 @@ function verImagen(url) {
   letter-spacing: 0.025em;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  min-width: 80px;
+  min-width: 160px;
   text-align: center;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   background: rgba(156, 163, 175, 0.4);
@@ -1094,8 +1100,8 @@ function verImagen(url) {
   
   .tab-button-liquid {
     font-size: 0.65rem;
-    padding: 6px 12px;
-    min-width: 70px;
+    padding: 6px 28px;
+    min-width: 130px;
   }
   
   .tab-button-liquid span {
@@ -1133,8 +1139,8 @@ function verImagen(url) {
   
   .tab-button-liquid {
     font-size: 0.6rem;
-    padding: 4px 10px;
-    min-width: 65px;
+    padding: 4px 24px;
+    min-width: 110px;
   }
   
   .tab-button-liquid span {
@@ -1151,8 +1157,8 @@ function verImagen(url) {
   }
   
   .tab-button-liquid {
-    min-width: 90px;
-    padding: 8px 16px;
+    min-width: 180px;
+    padding: 8px 36px;
     font-size: 0.75rem;
   }
 }
@@ -1167,8 +1173,8 @@ function verImagen(url) {
   }
   
   .tab-button-liquid {
-    min-width: 100px;
-    padding: 8px 18px;
+    min-width: 220px;
+    padding: 8px 48px;
     font-size: 0.8rem;
   }
 }

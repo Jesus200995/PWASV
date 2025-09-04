@@ -10,12 +10,40 @@
     <div class="page-container w-full max-w-md relative z-10 px-2">
       <!-- Header Section Compacto -->
       <div class="text-center mb-4">
-        <div class="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 mx-auto -mb-6">
+        <div class="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 mx-auto -mb-6 relative logo-container">
+          <!-- Placeholder/Loading state -->
+          <div 
+            v-if="imageLoading" 
+            class="placeholder w-full h-full rounded-full bg-gradient-to-br from-green-100 to-emerald-200 animate-pulse-soft flex items-center justify-center border-2 border-green-200"
+          >
+            <svg class="w-16 h-16 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          
+          <!-- Imagen principal con fallback -->
           <img 
+            v-if="!imageError"
+            ref="logoImage"
             src="/src/images/icono.png" 
             alt="Sembrando Vida Logo" 
-            class="w-full h-full object-contain rounded-full"
+            class="critical-image w-full h-full object-contain rounded-full transition-opacity duration-300"
+            :class="{ 'opacity-0': imageLoading, 'opacity-100': !imageLoading }"
+            loading="eager"
+            fetchpriority="high"
+            @load="handleImageLoad"
+            @error="handleImageError"
           />
+          
+          <!-- Fallback cuando hay error -->
+          <div 
+            v-if="imageError && !imageLoading"
+            class="w-full h-full rounded-full bg-gradient-to-br from-green-200 to-emerald-300 flex items-center justify-center border-2 border-green-300"
+          >
+            <svg class="w-16 h-16 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          </div>
         </div>
         <h1 class="text-lg font-semibold mb-1 text-center modern-title">Aplicación de Seguimiento</h1>
         <div class="green-line mx-auto mb-2"></div>
@@ -135,6 +163,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URL, getBestApiUrl, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+import { useAppLogo } from '../composables/useImageLoader.js';
 
 const router = useRouter();
 const email = ref('');
@@ -145,6 +174,15 @@ const errorMessage = ref('');
 const formError = ref(false);
 const isOnline = ref(true);
 const currentApiUrl = ref(API_URL);
+
+// Usar el composable para optimizar la carga del logo
+const { 
+  imageLoading, 
+  imageError, 
+  imageRef: logoImage, 
+  handleImageLoad, 
+  handleImageError 
+} = useAppLogo();
 
 // Verificar conexión a internet cuando carga el componente
 onMounted(async () => {
@@ -563,6 +601,51 @@ button[type="button"]:hover svg {
   .text-base {
     font-size: 0.875rem;
   }
+}
+
+/* Optimizaciones para carga de imágenes */
+.logo-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-container img {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.logo-container .placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Animación de pulso suave para el placeholder */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Preload hint para imágenes críticas */
+.critical-image {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  will-change: opacity;
 }
 
 @media (max-height: 600px) {

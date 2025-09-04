@@ -5,7 +5,7 @@
 
 // Incrementar la versión del cache cuando hay cambios importantes
 // Esto forzará a que se muestre la notificación de actualización
-const CACHE_NAME = 'pwa-super-v1.0.1';
+const CACHE_NAME = 'pwa-super-v1.0.2';
 const OFFLINE_URL = '/offline.html';
 
 // Archivos a cachear para funcionamiento offline
@@ -14,6 +14,9 @@ const urlsToCache = [
   '/src/main.js',
   '/src/style.css',
   '/src/assets/main.css',
+  '/src/images/icono.png', // Logo principal - cachear para carga rápida
+  '/pwa-192x192.png',
+  '/pwa-512x512.png',
   // Agregar más archivos críticos según sea necesario
 ];
 

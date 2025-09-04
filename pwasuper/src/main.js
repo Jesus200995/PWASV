@@ -23,14 +23,38 @@ import { registerServiceWorker, waitForServiceWorkerReady } from './utils/servic
 // Importar composable de notificaciones para inicialización global
 import { useNotifications } from './composables/useNotifications.js'
 
+// Importar utilidades de optimización de imágenes
+import { preloadCriticalImages, cacheImages } from './composables/useImageLoader.js'
+
 // Registrar el Service Worker para funcionalidad PWA offline
 window.addEventListener('load', async () => {
   try {
+    // Precargar imágenes críticas inmediatamente
+    const criticalImages = [
+      '/src/images/icono.png',
+      '/pwa-192x192.png',
+      '/pwa-512x512.png'
+    ];
+    
+    console.log('🖼️ Precargando imágenes críticas...');
+    await preloadCriticalImages(criticalImages);
+    console.log('✅ Imágenes críticas precargadas');
+    
     // Registrar el service worker
     const registration = await registerServiceWorker();
     
     // Esperar a que el service worker esté listo
     await waitForServiceWorkerReady();
+    
+    // Cachear imágenes adicionales para acceso offline
+    setTimeout(async () => {
+      try {
+        await cacheImages(criticalImages);
+        console.log('🗃️ Imágenes cacheadas para acceso offline');
+      } catch (error) {
+        console.warn('⚠️ Error cacheando imágenes:', error);
+      }
+    }, 2000); // Esperar 2 segundos para no bloquear la carga inicial
     
     console.log('✅ Aplicación lista con soporte offline');
     

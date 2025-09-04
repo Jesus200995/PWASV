@@ -176,7 +176,7 @@ class OfflineService {
    * @param {string} tipoActividad - Tipo de actividad ('campo' o 'gabinete')
    * @returns {Promise<number>} - ID del registro guardado en IndexedDB
    */
-  async guardarRegistroOffline(usuarioId, latitud, longitud, descripcion, archivo, tipoActividad = 'campo') {
+  async guardarRegistroOffline(usuarioId, latitud, longitud, descripcion, archivo, tipoActividad = 'campo', timestampCDMX = null) {
     try {
       console.log('🔄 Guardando registro offline para usuario ID:', usuarioId);
       await this.initDB();
@@ -213,7 +213,7 @@ class OfflineService {
         foto_base64: fotoBase64,
         foto_filename: archivo ? archivo.name : null,
         foto_type: archivo ? archivo.type : null,
-        timestamp: new Date().toISOString(), // Hora de creación offline
+        timestamp: timestampCDMX || new Date().toISOString(), // Usar timestamp CDMX si se proporciona
         sync_timestamp: null, // Se completará cuando se sincronice
         tipo: 'actividad', // Especificar explícitamente que es un registro de actividad
         fecha_creacion: new Date().toISOString(),

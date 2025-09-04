@@ -968,6 +968,34 @@ const actividadesBloqueadasModalMessage = ref('');
 // Control de secciones activas
 const seccionActiva = ref('asistencia'); // 'asistencia' o 'actividades'
 
+// Función para obtener timestamp CDMX exacto (igual que en la barra verde)
+function obtenerTimestampCDMX() {
+  const now = new Date();
+  
+  // Configurar para zona horaria de CDMX (America/Mexico_City)
+  const formatter = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    fractionalSecondDigits: 3
+  });
+  
+  // Obtener la fecha/hora formateada para CDMX
+  const fechaHoraCDMX = formatter.format(now);
+  
+  // Convertir a formato ISO con zona horaria de México
+  // El formato 'sv-SE' nos da: YYYY-MM-DD HH:mm:ss.sss
+  // Lo convertimos a: YYYY-MM-DDTHH:mm:ss.sss-06:00
+  const isoString = fechaHoraCDMX.replace(' ', 'T') + '-06:00';
+  
+  console.log(`🕐 Timestamp CDMX generado: ${isoString}`);
+  return isoString;
+}
+
 // Obtener información del usuario del localStorage
 const user = computed(() => {
   const storedUser = localStorage.getItem("user");
@@ -1552,13 +1580,15 @@ async function enviarRegistro() {
       console.log('📴 Sin conexión - Guardando registro offline');
       
       // MEJORA: Guardar con información más completa para garantizar sincronización
+      const timestampCDMX = obtenerTimestampCDMX();
       const registroID = await offlineService.guardarRegistroOffline(
         user.value.id,
         latitudRegistro.value,
         longitudRegistro.value,
         descripcionRegistro.value,
         archivoFotoRegistro.value,
-        tipoActividad.value // Nuevo: incluir tipo de actividad
+        tipoActividad.value, // Nuevo: incluir tipo de actividad
+        timestampCDMX // Nuevo: usar timestamp CDMX exacto
       );
       
       console.log(`✅ Registro offline guardado con ID: ${registroID}`);
@@ -1568,12 +1598,20 @@ async function enviarRegistro() {
       syncService.notifyListeners('pending_update', false, {
         tipo: 'registro', 
         id: registroID,
-        timestamp: new Date().toISOString()
+        timestamp: timestampCDMX
       });
       
       // Agregar a historial local con indicador offline
       historial.value.unshift({
-        fecha: new Date().toLocaleString(),
+        fecha: new Date(timestampCDMX).toLocaleString('es-MX', {
+          timeZone: 'America/Mexico_City',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }),
         latitud: latitudRegistro.value,
         longitud: longitudRegistro.value,
         descripcion: descripcionRegistro.value,
@@ -1616,8 +1654,8 @@ async function enviarRegistro() {
     formData.append("tipo_actividad", tipoActividad.value); // Nuevo: agregar tipo de actividad
     formData.append("foto", archivoFotoRegistro.value);
     formData.append("tipo", "actividad"); // Especificar explícitamente que es un registro de actividad
-    // ✅ SOLUCIÓN: Agregar timestamp para que el backend use hora CDMX
-    formData.append("timestamp_offline", new Date().toISOString());
+    // ✅ SOLUCIÓN: Agregar timestamp CDMX exacto (igual que en la barra verde)
+    formData.append("timestamp_offline", obtenerTimestampCDMX());
 
     // Enviar datos al backend
     const response = await axios.post(`${API_URL}/registro`, formData, {

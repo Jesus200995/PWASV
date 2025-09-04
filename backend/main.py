@@ -119,6 +119,15 @@ def ejecutar_consulta_segura(query, params=None, fetch_type='all'):
             
         except psycopg2.Error as e:
             print(f"❌ Error de PostgreSQL en intento {intento}: {e}")
+            
+            # Hacer rollback para limpiar la transacción corrupta
+            try:
+                if conn and not conn.closed:
+                    conn.rollback()
+                    print("🔄 Rollback ejecutado para limpiar transacción")
+            except Exception as rollback_error:
+                print(f"⚠️ Error en rollback: {rollback_error}")
+            
             if intento == max_reintentos:
                 raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
             
@@ -127,6 +136,15 @@ def ejecutar_consulta_segura(query, params=None, fetch_type='all'):
             
         except Exception as e:
             print(f"❌ Error general en intento {intento}: {e}")
+            
+            # Hacer rollback también para errores generales
+            try:
+                if conn and not conn.closed:
+                    conn.rollback()
+                    print("🔄 Rollback ejecutado para error general")
+            except Exception as rollback_error:
+                print(f"⚠️ Error en rollback: {rollback_error}")
+            
             if intento == max_reintentos:
                 raise HTTPException(status_code=500, detail=f"Error al ejecutar consulta: {str(e)}")
 
@@ -570,12 +588,12 @@ async def registrar(
         contenido = await foto.read()
         f.write(contenido)
 
-    # Guardar registro en la base
-    cursor.execute(
+    # Guardar registro en la base usando consulta segura
+    ejecutar_consulta_segura(
         "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-        (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora, tipo_actividad)
+        (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora, tipo_actividad),
+        fetch_type='none'
     )
-    conn.commit()
     print(f"✅ Registro guardado en BD con fecha_hora: {fecha_hora} y tipo_actividad: {tipo_actividad}")
 
     return {"status": "ok", "foto_url": ruta_archivo, "tipo_actividad": tipo_actividad}

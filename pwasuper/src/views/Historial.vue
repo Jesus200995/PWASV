@@ -12,30 +12,43 @@
     <!-- Tabs para alternar entre registros normales y asistencias -->
     <div class="glass-card mb-2">
       <div class="flex justify-center border-b border-white/20 mb-2 pb-3">
-        <div class="flex bg-gradient-to-r from-white/10 via-white/15 to-white/10 backdrop-blur-xl rounded-full p-1 gap-1 shadow-2xl border border-white/30">
+        <div class="flex bg-gradient-to-r from-white/10 via-white/15 to-white/10 backdrop-blur-xl rounded-full p-1 gap-1 shadow-2xl border border-white/30 relative overflow-hidden">
+          <!-- Indicador de fondo animado -->
+          <div 
+            class="absolute top-1 bottom-1 rounded-full transition-all duration-700 ease-in-out"
+            :style="{
+              left: tabActiva === 'registros' ? '4px' : '50%',
+              width: 'calc(50% - 8px)',
+              background: tabActiva === 'registros' 
+                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8, #1e40af)' 
+                : 'linear-gradient(135deg, #10b981, #059669, #047857)',
+              boxShadow: tabActiva === 'registros'
+                ? '0 8px 25px rgba(59, 130, 246, 0.4), 0 4px 15px rgba(29, 78, 216, 0.3), 0 0 20px rgba(59, 130, 246, 0.2)'
+                : '0 8px 25px rgba(16, 185, 129, 0.4), 0 4px 15px rgba(5, 150, 105, 0.3), 0 0 20px rgba(16, 185, 129, 0.2)'
+            }"
+          ></div>
+          
           <button 
             @click="cambiarTab('registros')" 
             :class="[
-              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden',
+              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-700 ease-in-out relative overflow-hidden z-10',
               tabActiva === 'registros' 
-                ? 'tab-active-liquid bg-gradient-to-br from-emerald-400 via-green-500 to-teal-500 text-white shadow-xl shadow-green-500/40 border border-white/40' 
-                : 'text-gray-600 hover:text-gray-800 bg-gray-200/70 hover:bg-gray-300/80 border border-gray-300/50'
+                ? 'text-white' 
+                : 'text-gray-600 hover:text-gray-800'
             ]"
           >
             <span class="relative z-20 font-bold tracking-wide">Actividades</span>
-            <div v-if="tabActiva === 'registros'" class="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20 rounded-full animate-pulse-gentle"></div>
           </button>
           <button 
             @click="cambiarTab('asistencias')" 
             :class="[
-              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden',
+              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-700 ease-in-out relative overflow-hidden z-10',
               tabActiva === 'asistencias' 
-                ? 'tab-active-liquid bg-gradient-to-br from-emerald-400 via-green-500 to-teal-500 text-white shadow-xl shadow-green-500/40 border border-white/40' 
-                : 'text-gray-600 hover:text-gray-800 bg-gray-200/70 hover:bg-gray-300/80 border border-gray-300/50'
+                ? 'text-white' 
+                : 'text-gray-600 hover:text-gray-800'
             ]"
           >
             <span class="relative z-20 font-bold tracking-wide">Asistencias</span>
-            <div v-if="tabActiva === 'asistencias'" class="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20 rounded-full animate-pulse-gentle"></div>
           </button>
         </div>
       </div>
@@ -990,63 +1003,35 @@ function verImagen(url) {
   -webkit-backdrop-filter: blur(20px);
   min-width: 160px;
   text-align: center;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(156, 163, 175, 0.4);
-  box-shadow: 0 2px 8px rgba(156, 163, 175, 0.2);
+  background: transparent;
+  border: none;
+  outline: none;
 }
 
 .tab-button-liquid:not(.tab-active-liquid):hover {
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
-  background: rgba(156, 163, 175, 0.6);
-  box-shadow: 0 4px 12px rgba(156, 163, 175, 0.3);
   transform: translateY(-1px);
 }
 
-.tab-active-liquid {
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  box-shadow: 
-    0 8px 25px rgba(34, 197, 94, 0.4),
-    0 4px 15px rgba(16, 185, 129, 0.3),
-    0 0 20px rgba(34, 197, 94, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  background: linear-gradient(135deg, #10b981, #059669, #047857) !important;
-  transform: translateY(-2px) scale(1.02);
+/* Animación suave para el contenedor de pestañas */
+.glass-card .flex.bg-gradient-to-r {
+  position: relative;
+  overflow: hidden;
 }
 
-.tab-active-liquid::after {
-  content: '';
-  position: absolute;
-  inset: 1px;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.15), 
-    transparent 50%,
-    rgba(255, 255, 255, 0.05)
-  );
-  border-radius: inherit;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Animación suave de pulso para pestaña activa */
+/* Animación de pulso suave para elementos activos */
 @keyframes pulse-gentle {
   0%, 100% {
-    opacity: 0.6;
+    opacity: 0.8;
   }
   50% {
-    opacity: 0.9;
+    opacity: 1;
   }
 }
 
 .animate-pulse-gentle {
-  animation: pulse-gentle 2s ease-in-out infinite;
-}
-
-/* Contenedor de pestañas con efecto vidrio líquido */
-.glass-card .flex.bg-gradient-to-r {
-  position: relative;
-  overflow: hidden;
+  animation: pulse-gentle 3s ease-in-out infinite;
 }
 
 /* Estilos para elementos individuales con efecto de vidrio */

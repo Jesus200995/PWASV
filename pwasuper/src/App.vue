@@ -18,6 +18,49 @@ const showMobileMenu = ref(false);
 const isMaintenanceMode = ref(false);
 const maintenanceMessage = ref('');
 
+// Función para verificar el estado de mantenimiento de forma síncrona
+const checkMaintenanceModeSync = () => {
+  // Verificar el estado global establecido por el router
+  if (window.maintenanceMode && window.maintenanceMode.enabled) {
+    console.log('🔧 Estado de mantenimiento detectado desde window.maintenanceMode');
+    return {
+      enabled: true,
+      message: window.maintenanceMode.message || 'Sistema en mantenimiento programado. Volveremos pronto.'
+    };
+  }
+  
+  // Verificar localStorage como respaldo
+  const storedMaintenance = localStorage.getItem('maintenance_mode');
+  if (storedMaintenance) {
+    try {
+      const parsed = JSON.parse(storedMaintenance);
+      if (parsed.enabled) {
+        console.log('🔧 Estado de mantenimiento detectado desde localStorage');
+        return {
+          enabled: true,
+          message: parsed.message || 'Sistema en mantenimiento programado. Volveremos pronto.'
+        };
+      }
+    } catch (error) {
+      console.error('Error parsing maintenance from localStorage:', error);
+    }
+  }
+  
+  return { enabled: false, message: '' };
+};
+
+// Computed property para verificar modo mantenimiento de forma reactiva
+const isInMaintenanceMode = computed(() => {
+  // Primero verificar el estado reactivo
+  if (isMaintenanceMode.value) {
+    return true;
+  }
+  
+  // Verificar fuentes síncronas como respaldo
+  const syncCheck = checkMaintenanceModeSync();
+  return syncCheck.enabled;
+});
+
 // Sistema de notificaciones en tiempo real
 const { unreadCount, startPolling, stopPolling } = useNotifications();
 let notificationPollingId = null;
@@ -156,46 +199,88 @@ const closeMobileMenu = () => {
 };
 
 // FUNCIONES DE MANTENIMIENTO
-const initMaintenanceCheck = () => {
+const initMaintenanceCheck = async () => {
   console.log('🔧 Inicializando verificación de mantenimiento...');
+  
+  // Verificación inicial inmediata
+  try {
+    const initialCheck = await maintenanceCheckService.checkMaintenanceStatus();
+    console.log('🔧 Verificación inicial de mantenimiento:', initialCheck);
+    
+    if (initialCheck.enabled) {
+      console.log('🚨 MANTENIMIENTO DETECTADO en verificación inicial');
+      isMaintenanceMode.value = true;
+      maintenanceMessage.value = initialCheck.message || 'Sistema en mantenimiento programado. Volveremos pronto.';
+      
+      // Establecer el estado global
+      window.maintenanceMode = {
+        enabled: true,
+        message: initialCheck.message
+      };
+      
+      // Detener polling de notificaciones
+      if (notificationPollingId) {
+        stopPolling(notificationPollingId);
+        notificationPollingId = null;
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error en verificación inicial de mantenimiento:', error);
+  }
   
   // Configurar listener para cambios de estado
   maintenanceCheckService.onStateChange(handleMaintenanceChange);
   
   // Iniciar verificación periódica (cada 30 segundos)
   maintenanceCheckService.startPeriodicCheck(30000);
-  
-  // Hacer una verificación inicial
-  maintenanceCheckService.forceCheck();
 };
 
 const handleMaintenanceChange = (enabled, message) => {
   console.log(`🔧 Cambio de mantenimiento detectado: ${enabled}`);
   console.log(`📝 Mensaje: ${message}`);
   
-  // Solo cambiar el estado si realmente hay un cambio
-  if (isMaintenanceMode.value !== enabled) {
-    console.log(`🔄 Cambiando estado de ${isMaintenanceMode.value} a ${enabled}`);
+  // Actualizar estado global SIEMPRE
+  window.maintenanceMode = {
+    enabled: enabled,
+    message: message || 'Sistema en mantenimiento programado. Volveremos pronto.'
+  };
+  
+  if (enabled) {
+    console.log('� ACTIVANDO modo mantenimiento - mostrando pantalla');
     
-    isMaintenanceMode.value = enabled;
+    // Activar el estado reactivo
+    isMaintenanceMode.value = true;
     maintenanceMessage.value = message || 'Sistema en mantenimiento programado. Volveremos pronto.';
     
-    if (enabled) {
-      console.log('🚨 ACTIVANDO modo mantenimiento - mostrando pantalla');
-      // Detener polling de notificaciones mientras esté en mantenimiento
-      if (notificationPollingId) {
-        stopPolling(notificationPollingId);
-        notificationPollingId = null;
-      }
-    } else {
-      console.log('✅ DESACTIVANDO modo mantenimiento - restaurando app');
-      // Reiniciar polling de notificaciones si hay usuario logueado
-      if (userData.value && !notificationPollingId) {
-        notificationPollingId = startPolling();
-      }
+    // Almacenar en localStorage como respaldo
+    localStorage.setItem('maintenance_mode', JSON.stringify({
+      enabled: true,
+      message: message || 'Sistema en mantenimiento programado. Volveremos pronto.'
+    }));
+    
+    // Detener polling de notificaciones
+    if (notificationPollingId) {
+      stopPolling(notificationPollingId);
+      notificationPollingId = null;
     }
+    
+    // Forzar que el menú móvil se cierre
+    showMobileMenu.value = false;
+    
   } else {
-    console.log(`ℹ️ Estado ya es ${enabled}, no hay cambios necesarios`);
+    console.log('✅ DESACTIVANDO modo mantenimiento - restaurando app');
+    
+    // Desactivar el estado reactivo
+    isMaintenanceMode.value = false;
+    maintenanceMessage.value = '';
+    
+    // Limpiar localStorage
+    localStorage.removeItem('maintenance_mode');
+    
+    // Reiniciar polling de notificaciones si hay usuario logueado
+    if (userData.value && !notificationPollingId) {
+      notificationPollingId = startPolling();
+    }
   }
 };
 
@@ -438,22 +523,160 @@ function logout() {
       class="fixed inset-0 bg-black bg-opacity-25 z-20"
     ></div>
 
-    <!-- Pantalla de modo mantenimiento -->
+    <!-- Pantalla de modo mantenimiento - PRIORIDAD ABSOLUTA -->
     <MaintenanceScreen 
-      v-if="isMaintenanceMode"
-      :message="maintenanceMessage"
+      v-if="isInMaintenanceMode"
+      :message="maintenanceMessage || (window.maintenanceMode && window.maintenanceMode.message) || 'Sistema en mantenimiento programado. Volveremos pronto.'"
       app-name="Sembrando Vida"
       @reload="handleMaintenanceReload"
     />
 
-    <!-- Contenido principal -->
-    <main v-else class="main-content" :style="{ paddingTop: isLoggedIn ? '48px' : '0' }">
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
-    </main>
+    <!-- Aplicación normal - SOLO si NO hay mantenimiento -->
+    <div v-if="!isInMaintenanceMode">
+      <!-- Header móvil con menú hamburguesa -->
+      <header v-if="isLoggedIn" class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-sm mx-auto px-4 py-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="relative w-8 h-8 bg-gradient-to-br from-primary/90 via-primary/85 to-primary/90 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-3">
+                <!-- Efecto vidrio en círculo de iniciales -->
+                <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
+                
+                <!-- Reflejo superior del círculo -->
+                <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-full"></div>
+                
+                <!-- Iniciales con efecto mejorado -->
+                <span class="text-white text-xs font-bold drop-shadow-lg filter brightness-110 relative z-10">{{ getUserInitials }}</span>
+              </div>
+              <div>
+                <h1 class="text-lg font-semibold text-green-950" style="letter-spacing: 0.5px;">Sembrando Vida</h1>
+                <p class="text-xs text-gray-500">{{ userName }}</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+              <!-- Botón de notificaciones -->
+              <router-link 
+                to="/notificaciones"
+                class="relative p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                :class="{ 'bg-blue-50 text-blue-600': route.name === 'Notificaciones' }"
+              >
+                <!-- Icono de campanita -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                </svg>
+                <!-- Badge de notificaciones no leídas -->
+                <span v-if="unreadCount > 0" class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {{ unreadCount > 9 ? '9+' : unreadCount }}
+                </span>
+              </router-link>
+              
+              <!-- Botón del menú hamburguesa -->
+            <button 
+              @click="showMobileMenu = !showMobileMenu"
+              class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Menú desplegable móvil -->
+      <transition name="slide-down">
+        <div 
+          v-if="isLoggedIn && showMobileMenu" 
+          class="fixed top-16 inset-x-0 z-30 bg-white border-b border-gray-200 shadow-lg"
+        >
+          <div class="max-w-sm mx-auto px-4 py-2">
+            <nav class="space-y-1">
+              <router-link 
+                to="/" 
+                @click="closeMobileMenu"
+                class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                :class="{ 'bg-primary/10 text-primary': route.name === 'Home' }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span class="font-medium">Inicio</span>
+              </router-link>
+              
+              <router-link 
+                to="/historial" 
+                @click="closeMobileMenu"
+                class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                :class="{ 'bg-primary/10 text-primary': route.name === 'Historial' }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <span class="font-medium">Historial</span>
+              </router-link>
+              
+              <router-link 
+                to="/notificaciones" 
+                @click="closeMobileMenu"
+                class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors relative"
+                :class="{ 'bg-primary/10 text-primary': route.name === 'Notificaciones' }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                </svg>
+                <span class="font-medium">Notificaciones</span>
+                <!-- Badge de notificaciones no leídas en el menú -->
+                <span v-if="unreadCount > 0" class="ml-auto h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {{ unreadCount > 9 ? '9+' : unreadCount }}
+                </span>
+              </router-link>
+              
+              <router-link 
+                to="/profile" 
+                @click="closeMobileMenu"
+                class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                :class="{ 'bg-primary/10 text-primary': route.name === 'Profile' }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span class="font-medium">Mi Perfil</span>
+              </router-link>
+              
+              <div class="border-t border-gray-200 pt-2 mt-2">
+                <button 
+                  @click="logout" 
+                  class="flex items-center w-full px-3 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span class="font-medium">Cerrar Sesión</span>
+                </button>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </transition>
+
+      <!-- Overlay para cerrar el menú -->
+      <div 
+        v-if="isLoggedIn && showMobileMenu"
+        @click="closeMobileMenu"
+        class="fixed inset-0 bg-black bg-opacity-25 z-20"
+      ></div>
+
+      <!-- Contenido principal -->
+      <main class="main-content" :style="{ paddingTop: isLoggedIn ? '48px' : '0' }">
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </main>
+    </div>
 
     <!-- Modal de actualización de la aplicación (obligatorio) -->
     <UpdateNotification />

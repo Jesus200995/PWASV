@@ -23,6 +23,32 @@ import { registerServiceWorker, waitForServiceWorkerReady } from './utils/servic
 // Importar composable de notificaciones para inicialización global
 import { useNotifications } from './composables/useNotifications.js'
 
+// Importar servicio de verificación de mantenimiento
+import { maintenanceCheckService } from './services/maintenanceCheckService.js'
+
+// Inicializar estado de mantenimiento al cargar la aplicación
+const initMaintenanceState = () => {
+  try {
+    const initialState = maintenanceCheckService.getInitialMaintenanceState()
+    console.log('🔧 Estado inicial de mantenimiento inicializado:', initialState)
+    
+    // Asegurar que el estado global esté configurado
+    window.maintenanceMode = {
+      enabled: initialState.enabled,
+      message: initialState.message || 'La aplicación está en mantenimiento'
+    }
+    
+    return initialState
+  } catch (error) {
+    console.error('❌ Error inicializando estado de mantenimiento:', error)
+    window.maintenanceMode = { enabled: false, message: '' }
+    return { enabled: false, message: '' }
+  }
+}
+
+// Inicializar estado de mantenimiento antes de crear la aplicación
+const maintenanceState = initMaintenanceState()
+
 // Registrar el Service Worker para funcionalidad PWA offline
 window.addEventListener('load', async () => {
   try {

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import maintenanceCheckService from '../services/maintenanceCheckService.js'
 
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
@@ -24,7 +25,44 @@ const router = createRouter({
 })
 
 // Guard de navegación para proteger rutas
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  console.log(`🧭 Navegando de ${from.name || 'unknown'} a ${to.name || 'unknown'}`);
+  
+  // PRIMERA PRIORIDAD: Verificar modo mantenimiento
+  try {
+    const maintenanceStatus = await maintenanceCheckService.checkMaintenanceStatus();
+    console.log('🔧 Estado de mantenimiento en router:', maintenanceStatus);
+    
+    if (maintenanceStatus.enabled) {
+      console.log('🚨 MODO MANTENIMIENTO ACTIVO - Bloqueando navegación');
+      
+      // Si estamos en modo mantenimiento, almacenar el estado globalmente
+      window.maintenanceMode = {
+        enabled: true,
+        message: maintenanceStatus.message
+      };
+      
+      // NO permitir navegación a ninguna vista
+      // La pantalla de mantenimiento se mostrará desde App.vue
+      next(false); // Bloquear la navegación
+      return;
+    } else {
+      // Si no hay mantenimiento, limpiar el estado global
+      window.maintenanceMode = {
+        enabled: false,
+        message: ''
+      };
+    }
+  } catch (error) {
+    console.error('❌ Error verificando mantenimiento en router:', error);
+    // En caso de error, asumir que NO hay mantenimiento para permitir funcionamiento
+    window.maintenanceMode = {
+      enabled: false,
+      message: ''
+    };
+  }
+  
+  // SEGUNDA PRIORIDAD: Verificar autenticación (solo si no hay mantenimiento)
   const user = localStorage.getItem('user')
   const isLoggedIn = !!user
   

@@ -64,13 +64,12 @@
           </p>
         </div>
         
-        <div class="flex justify-end items-center mb-3">
-          <button @click="cargarRegistros" class="glass-button text-xs px-2 py-1">
-            <svg v-if="cargando" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <div class="flex justify-end items-center mb-1">
+          <button @click="cargarRegistros" class="glass-button-refresh text-xs px-2 py-1 flex items-center gap-1">
+            <svg :class="['h-2.5 w-2.5 transition-transform duration-500', cargando ? 'animate-spin' : '']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span v-else>Actualizar</span>
+            <span class="text-xs">{{ cargando ? 'Cargando...' : 'Actualizar' }}</span>
           </button>
         </div>
       </div>
@@ -86,13 +85,12 @@
           </p>
         </div>
         
-        <div class="flex justify-end items-center mb-3">
-          <button @click="cargarAsistencias" class="glass-button text-xs px-2 py-1">
-            <svg v-if="cargandoAsistencias" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <div class="flex justify-end items-center mb-1">
+          <button @click="cargarAsistencias" class="glass-button-refresh text-xs px-2 py-1 flex items-center gap-1">
+            <svg :class="['h-2.5 w-2.5 transition-transform duration-500', cargandoAsistencias ? 'animate-spin' : '']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span v-else>Actualizar</span>
+            <span class="text-xs">{{ cargandoAsistencias ? 'Cargando...' : 'Actualizar' }}</span>
           </button>
         </div>
       </div>
@@ -991,6 +989,69 @@ function verImagen(url) {
   min-height: 30px;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
   padding: 0.375rem 0.75rem;
+}
+
+/* Botón de actualizar con efecto vidrio líquido mejorado */
+.glass-button-refresh {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #374151;
+  font-weight: 600;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 3px 15px 0 rgba(31, 38, 135, 0.15),
+    0 1px 6px 0 rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  min-height: 24px;
+  font-size: 0.7rem;
+}
+
+.glass-button-refresh::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.glass-button-refresh:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.15));
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 4px 20px 0 rgba(31, 38, 135, 0.2),
+    0 2px 8px 0 rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px) scale(1.02);
+}
+
+.glass-button-refresh:hover::before {
+  left: 100%;
+}
+
+.glass-button-refresh:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 
+    0 1px 8px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
 }
 
 /* Estilos modernos para pestañas con efecto vidrio líquido */

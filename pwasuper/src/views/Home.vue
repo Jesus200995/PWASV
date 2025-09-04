@@ -1163,6 +1163,9 @@ async function confirmarAsistencia() {
     formData.append("longitud", longitud.value);
     formData.append("descripcion", descripcion.value);
     formData.append("foto", archivoFoto.value);
+    
+    // ✅ NUEVO: Agregar timestamp CDMX exacto (igual que la barra verde)
+    formData.append("timestamp_offline", obtenerTimestampCDMX());
 
     // Determinar endpoint según tipo de asistencia y usar el servicio
     let response;

@@ -437,8 +437,8 @@ const handleKeydown = (event) => {
 }
 
 .logo-animation {
-  width: 55px;
-  height: 55px;
+  width: 42px;
+  height: 42px;
   position: relative;
   margin-bottom: 8px;
   display: flex;
@@ -455,76 +455,73 @@ const handleKeydown = (event) => {
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
-/* Pétalos naturales y redondeados - técnica basada en CSS Zen Garden y Lea Verou */
+/* Pétalos curvados y naturales - técnica basada en estudios botánicos */
 .petal {
   position: absolute;
-  width: 14px;
-  height: 26px;
+  width: 10px;
+  height: 20px;
   top: 50%;
   left: 50%;
   transform-origin: center bottom;
   background: linear-gradient(
     to top,
     #1B5E20 0%,
-    #2E7D32 20%,
-    #4CAF50 40%,
-    #66BB6A 60%,
-    #A5D6A7 80%,
-    rgba(255, 255, 255, 0.95) 95%,
-    rgba(255, 255, 255, 0.98) 100%
+    #2E7D32 25%,
+    #4CAF50 45%,
+    #66BB6A 65%,
+    #A5D6A7 82%,
+    rgba(255, 255, 255, 0.9) 95%,
+    rgba(255, 255, 255, 0.95) 100%
   );
-  /* Forma natural usando border-radius avanzado - técnica de Lea Verou */
-  border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
-  /* Efecto de curvatura natural */
+  /* Forma curvada natural que termina en punta */
+  border-radius: 45% 55% 45% 55% / 85% 85% 15% 15%;
+  /* Curvatura adicional usando clip-path sutil */
+  clip-path: ellipse(50% 100% at 50% 100%);
+  /* Sombras para curvatura natural */
   box-shadow: 
-    inset 1px 0 3px rgba(255, 255, 255, 0.4),
-    inset -0.5px 0 2px rgba(27, 94, 32, 0.2),
-    0 1px 2px rgba(0, 0, 0, 0.1);
+    inset 0.8px 0 2px rgba(255, 255, 255, 0.35),
+    inset -0.3px 0 1.5px rgba(27, 94, 32, 0.2),
+    0 0.5px 1.5px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Deformación sutil para naturalidad */
+  /* Curvatura lateral sutil */
   transform-style: preserve-3d;
 }
 
-/* Vena central sutil - técnica de CSS-Tricks para detalles botánicos */
+/* Efecto de curvatura lateral para naturalidad */
 .petal::before {
-  content: '';
-  position: absolute;
-  top: 15%;
-  left: 50%;
-  width: 0.5px;
-  height: 65%;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.6) 0%,
-    rgba(129, 199, 132, 0.4) 40%,
-    rgba(46, 125, 50, 0.3) 80%,
-    transparent 100%
-  );
-  transform: translateX(-50%);
-  border-radius: 0.5px;
-  opacity: 0.8;
-}
-
-/* Textura sutil en la superficie del pétalo */
-.petal::after {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(
-    ellipse at 30% 20%,
-    rgba(255, 255, 255, 0.15) 0%,
-    transparent 40%
-  ),
-  radial-gradient(
-    ellipse at 70% 60%,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 30%
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 30%,
+    transparent 70%
   );
   border-radius: inherit;
-  pointer-events: none;
+  transform: skewX(-2deg);
+}
+
+/* Vena central muy sutil */
+.petal::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  width: 0.3px;
+  height: 60%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(129, 199, 132, 0.25) 50%,
+    transparent 100%
+  );
+  transform: translateX(-50%);
+  border-radius: 0.3px;
+  opacity: 0.6;
 }
 
 /* Posicionamiento preciso de cada pétalo */
@@ -560,13 +557,13 @@ const handleKeydown = (event) => {
   transform: translate(-50%, -100%) rotate(315deg);
 }
 
-/* Centro de la flor con múltiples capas */
+/* Centro de la flor con múltiples capas - tamaño ajustado */
 .flower-center {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   transform: translate(-50%, -50%);
   z-index: 10;
 }
@@ -585,9 +582,9 @@ const handleKeydown = (event) => {
   );
   border-radius: 50%;
   box-shadow: 
-    0 0 8px rgba(255, 235, 59, 0.5),
-    inset 0 2px 4px rgba(255, 255, 255, 0.6),
-    inset 0 -1px 2px rgba(27, 94, 32, 0.3);
+    0 0 6px rgba(255, 235, 59, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.6),
+    inset 0 -0.5px 1px rgba(27, 94, 32, 0.3);
   animation: centerPulse 4s ease-in-out infinite;
 }
 
@@ -600,8 +597,8 @@ const handleKeydown = (event) => {
   height: 50%;
   background: radial-gradient(
     circle,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 235, 59, 0.7) 60%,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 235, 59, 0.6) 60%,
     transparent 100%
   );
   border-radius: 50%;
@@ -690,7 +687,7 @@ const handleKeydown = (event) => {
   letter-spacing: 0.5px;
   margin: 0;
   text-transform: uppercase;
-  background: linear-gradient(45deg, #FFFFFF 30%, #FFFF8D 70%);
+  background: linear-gradient(45deg, #F1F8E9 10%, #E8F5E8 30%, #DCEDC8 50%, #FFF9C4 70%, #FFEB3B 90%);
   -webkit-background-clip: text;
   color: transparent;
   background-clip: text;
@@ -718,35 +715,52 @@ const handleKeydown = (event) => {
 }
 
 .text-underline {
-  width: 70%;
-  height: 2px;
+  width: 80%;
+  height: 3px;
   background: linear-gradient(90deg, 
-    transparent, 
-    var(--accent-light),
-    transparent);
-  margin-top: 8px;
+    transparent 0%,
+    #1B5E20 25%,
+    #2E7D32 50%,
+    #1B5E20 75%,
+    transparent 100%);
+  margin: 8px auto 0 auto;
   border-radius: 2px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(27, 94, 32, 0.3);
 }
 
 .text-underline::after {
   content: "";
   position: absolute;
-  width: 50%;
+  width: 40%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.4);
-  left: -100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 20%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.3) 80%,
+    transparent 100%);
+  left: -50%;
   top: 0;
-  animation: underlineShine 3s infinite ease-in-out;
+  animation: underlineShine 2.5s infinite ease-in-out;
+  border-radius: 2px;
 }
 
 @keyframes underlineShine {
   0% {
-    left: -100%;
+    left: -50%;
+    opacity: 0;
   }
-  50%, 100% {
-    left: 100%;
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: 110%;
+    opacity: 0;
   }
 }
 

@@ -173,52 +173,37 @@ const handleMaintenanceChange = (enabled, message) => {
   console.log(`🔧 Cambio de mantenimiento detectado: ${enabled}`);
   console.log(`📝 Mensaje: ${message}`);
   
-  // Solo cambiar el estado si realmente hay un cambio
-  if (isMaintenanceMode.value !== enabled) {
-    console.log(`🔄 Cambiando estado de ${isMaintenanceMode.value} a ${enabled}`);
-    
-    isMaintenanceMode.value = enabled;
-    maintenanceMessage.value = message || 'Sistema en mantenimiento programado. Volveremos pronto.';
-    
-    if (enabled) {
-      console.log('🚨 ACTIVANDO modo mantenimiento - mostrando pantalla');
-      // Detener polling de notificaciones mientras esté en mantenimiento
-      if (notificationPollingId) {
-        stopPolling(notificationPollingId);
-        notificationPollingId = null;
-      }
-    } else {
-      console.log('✅ DESACTIVANDO modo mantenimiento - restaurando app');
-      // Reiniciar polling de notificaciones si hay usuario logueado
-      if (userData.value && !notificationPollingId) {
-        notificationPollingId = startPolling();
-      }
+  isMaintenanceMode.value = enabled;
+  maintenanceMessage.value = message || 'Sistema en mantenimiento programado. Volveremos pronto.';
+  
+  if (enabled) {
+    console.log('🚨 Activando modo mantenimiento - mostrando pantalla');
+    // Detener polling de notificaciones mientras esté en mantenimiento
+    if (notificationPollingId) {
+      stopPolling(notificationPollingId);
+      notificationPollingId = null;
     }
   } else {
-    console.log(`ℹ️ Estado ya es ${enabled}, no hay cambios necesarios`);
+    console.log('✅ Desactivando modo mantenimiento - restaurando app');
+    // Reiniciar polling de notificaciones si hay usuario logueado
+    if (userData.value && !notificationPollingId) {
+      notificationPollingId = startPolling();
+    }
   }
 };
 
 const handleMaintenanceReload = async () => {
-  console.log('🔄 Verificación manual solicitada desde pantalla de mantenimiento');
+  console.log('🔄 Recarga manual solicitada desde pantalla de mantenimiento');
   try {
     const result = await maintenanceCheckService.forceCheck();
-    console.log('📋 Resultado de verificación:', result);
-    
-    // IMPORTANTE: NO cambiar isMaintenanceMode aquí
-    // Solo el listener automático debe cambiar el estado
-    // La verificación manual NO debe cerrar la pantalla
-    
     if (!result.enabled) {
-      console.log('✅ Mantenimiento ya está desactivado en el servidor');
-      // El listener automático detectará este cambio y cerrará la pantalla
+      // Si ya no está en mantenimiento, la pantalla se ocultará automáticamente
+      console.log('✅ Mantenimiento desactivado - restaurando aplicación');
     } else {
-      console.log('ℹ️ Sistema sigue en mantenimiento - pantalla permanecerá visible');
+      console.log('ℹ️ Sistema sigue en mantenimiento');
     }
   } catch (error) {
     console.error('❌ Error verificando estado de mantenimiento:', error);
-    // En caso de error, mantener la pantalla visible
-    console.log('⚠️ Manteniendo pantalla de mantenimiento por error de verificación');
   }
 };
 

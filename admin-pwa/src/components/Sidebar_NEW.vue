@@ -12,120 +12,22 @@
     <!-- Cabecera del sidebar con logo animado -->
     <div class="sidebar-header">
       <div class="logo-container">
-        <!-- Logo animado con efecto de partículas -->
+        <!-- Flor con pétalos largos y detallados -->
         <div class="logo-animation">
-          <svg class="logo-svg" viewBox="0 0 120 120" fill="none">
-            <!-- Círculo de fondo con brillo -->
-            <circle cx="60" cy="60" r="50" fill="url(#circle-gradient)" opacity="0.8">
-              <animate attributeName="opacity" values="0.8;0.6;0.8" dur="3s" repeatCount="indefinite" />
-            </circle>
-            
-            <!-- Forma de hoja principal -->
-            <path d="M60 20C40 20 25 40 25 60C25 80 40 100 60 100C80 100 95 80 95 60C95 40 80 20 60 20Z" fill="url(#leaf-gradient)" opacity="0.9">
-              <animate attributeName="d" 
-                values="
-                  M60 20C40 20 25 40 25 60C25 80 40 100 60 100C80 100 95 80 95 60C95 40 80 20 60 20Z;
-                  M60 20C42 23 27 42 27 62C27 82 42 97 62 97C82 97 93 82 93 62C93 42 78 17 60 20Z;
-                  M60 20C40 20 25 40 25 60C25 80 40 100 60 100C80 100 95 80 95 60C95 40 80 20 60 20Z" 
-                dur="8s" repeatCount="indefinite" />
-            </path>
-            
-            <!-- Vena central de la hoja -->
-            <path d="M60 20C60 20 60 60 60 100" stroke="url(#vein-gradient)" stroke-width="2" opacity="0.7">
-              <animate attributeName="d" 
-                values="
-                  M60 20C60 20 60 60 60 100;
-                  M60 20C62 40 58 80 60 100;
-                  M60 20C60 20 60 60 60 100" 
-                dur="5s" repeatCount="indefinite" />
-            </path>
-            
-            <!-- Venas laterales -->
-            <path d="M60 40C70 50 80 50 90 50" stroke="url(#vein-gradient)" stroke-width="1.5" opacity="0.6">
-              <animate attributeName="d" 
-                values="
-                  M60 40C70 50 80 50 90 50;
-                  M60 40C70 48 82 47 90 48;
-                  M60 40C70 50 80 50 90 50" 
-                dur="4.5s" repeatCount="indefinite" />
-            </path>
-            <path d="M60 40C50 50 40 50 30 50" stroke="url(#vein-gradient)" stroke-width="1.5" opacity="0.6">
-              <animate attributeName="d" 
-                values="
-                  M60 40C50 50 40 50 30 50;
-                  M60 40C50 48 38 47 30 48;
-                  M60 40C50 50 40 50 30 50" 
-                dur="4.8s" repeatCount="indefinite" />
-            </path>
-            <path d="M60 60C70 70 80 70 90 70" stroke="url(#vein-gradient)" stroke-width="1.5" opacity="0.6">
-              <animate attributeName="d" 
-                values="
-                  M60 60C70 70 80 70 90 70;
-                  M60 60C70 68 82 67 90 68;
-                  M60 60C70 70 80 70 90 70" 
-                dur="5.2s" repeatCount="indefinite" />
-            </path>
-            <path d="M60 60C50 70 40 70 30 70" stroke="url(#vein-gradient)" stroke-width="1.5" opacity="0.6">
-              <animate attributeName="d" 
-                values="
-                  M60 60C50 70 40 70 30 70;
-                  M60 60C50 68 38 67 30 68;
-                  M60 60C50 70 40 70 30 70" 
-                dur="4.9s" repeatCount="indefinite" />
-            </path>
-            <path d="M60 80C70 90 80 85 85 85" stroke="url(#vein-gradient)" stroke-width="1.5" opacity="0.6">
-              <animate attributeName="d" 
-                values="
-                  M60 80C70 90 80 85 85 85;
-                  M60 80C70 88 80 82 85 82;
-                  M60 80C70 90 80 85 85 85" 
-                dur="4.2s" repeatCount="indefinite" />
-            </path>
-            <path d="M60 80C50 90 40 85 35 85" stroke="url(#vein-gradient)" stroke-width="1.5" opacity="0.6">
-              <animate attributeName="d" 
-                values="
-                  M60 80C50 90 40 85 35 85;
-                  M60 80C50 88 40 82 35 82;
-                  M60 80C50 90 40 85 35 85" 
-                dur="4.4s" repeatCount="indefinite" />
-            </path>
-
-            <!-- Partículas flotantes animadas -->
-            <circle cx="65" cy="45" r="1.5" fill="#E8F5E9" opacity="0.8">
-              <animate attributeName="cy" values="45;40;45" dur="3s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.8;0.4;0.8" dur="3s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="55" cy="65" r="1.2" fill="#E8F5E9" opacity="0.7">
-              <animate attributeName="cy" values="65;60;65" dur="2.5s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.7;0.3;0.7" dur="2.5s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="75" cy="55" r="1" fill="#E8F5E9" opacity="0.6">
-              <animate attributeName="cy" values="55;52;55" dur="4s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.6;0.2;0.6" dur="4s" repeatCount="indefinite" />
-            </circle>
-            
-            <!-- Definición de gradientes -->
-            <defs>
-              <radialGradient id="circle-gradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#E8F5E9" stop-opacity="0.4" />
-                <stop offset="100%" stop-color="#2E7D32" stop-opacity="0.05" />
-              </radialGradient>
-              
-              <linearGradient id="leaf-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#43A047" stop-opacity="0.9" />
-                <stop offset="50%" stop-color="#2E7D32" stop-opacity="0.85" />
-                <stop offset="100%" stop-color="#1B5E20" stop-opacity="0.8" />
-              </linearGradient>
-              
-              <linearGradient id="vein-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#81C784" stop-opacity="0.9" />
-                <stop offset="100%" stop-color="#C8E6C9" stop-opacity="0.7" />
-              </linearGradient>
-            </defs>
-          </svg>
-          
-          <!-- Efecto de destello -->
-          <div class="logo-shine"></div>
+          <div class="detailed-flower">
+            <div class="petal petal-1"></div>
+            <div class="petal petal-2"></div>
+            <div class="petal petal-3"></div>
+            <div class="petal petal-4"></div>
+            <div class="petal petal-5"></div>
+            <div class="petal petal-6"></div>
+            <div class="petal petal-7"></div>
+            <div class="petal petal-8"></div>
+            <div class="flower-center">
+              <div class="center-core"></div>
+              <div class="center-highlight"></div>
+            </div>
+          </div>
         </div>
         
         <!-- Texto del logo con efecto de brillo -->
@@ -535,55 +437,241 @@ const handleKeydown = (event) => {
 }
 
 .logo-animation {
-  width: 45px;
-  height: 45px;
+  width: 55px;
+  height: 55px;
   position: relative;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.logo-svg {
+/* Contenedor de la flor detallada */
+.detailed-flower {
+  position: relative;
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
-  transition: transform 0.3s ease;
+  animation: flowerRotate 18s linear infinite;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
-.logo-svg:hover {
-  transform: scale(1.05);
+/* Pétalos naturales y redondeados - técnica basada en CSS Zen Garden y Lea Verou */
+.petal {
+  position: absolute;
+  width: 14px;
+  height: 26px;
+  top: 50%;
+  left: 50%;
+  transform-origin: center bottom;
+  background: linear-gradient(
+    to top,
+    #1B5E20 0%,
+    #2E7D32 20%,
+    #4CAF50 40%,
+    #66BB6A 60%,
+    #A5D6A7 80%,
+    rgba(255, 255, 255, 0.95) 95%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+  /* Forma natural usando border-radius avanzado - técnica de Lea Verou */
+  border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+  /* Efecto de curvatura natural */
+  box-shadow: 
+    inset 1px 0 3px rgba(255, 255, 255, 0.4),
+    inset -0.5px 0 2px rgba(27, 94, 32, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Deformación sutil para naturalidad */
+  transform-style: preserve-3d;
 }
 
-.logo-shine {
+/* Vena central sutil - técnica de CSS-Tricks para detalles botánicos */
+.petal::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  width: 0.5px;
+  height: 65%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(129, 199, 132, 0.4) 40%,
+    rgba(46, 125, 50, 0.3) 80%,
+    transparent 100%
+  );
+  transform: translateX(-50%);
+  border-radius: 0.5px;
+  opacity: 0.8;
+}
+
+/* Textura sutil en la superficie del pétalo */
+.petal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 40%
+  ),
+  radial-gradient(
+    ellipse at 70% 60%,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 30%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Posicionamiento preciso de cada pétalo */
+.petal-1 {
+  transform: translate(-50%, -100%) rotate(0deg);
+}
+
+.petal-2 {
+  transform: translate(-50%, -100%) rotate(45deg);
+}
+
+.petal-3 {
+  transform: translate(-50%, -100%) rotate(90deg);
+}
+
+.petal-4 {
+  transform: translate(-50%, -100%) rotate(135deg);
+}
+
+.petal-5 {
+  transform: translate(-50%, -100%) rotate(180deg);
+}
+
+.petal-6 {
+  transform: translate(-50%, -100%) rotate(225deg);
+}
+
+.petal-7 {
+  transform: translate(-50%, -100%) rotate(270deg);
+}
+
+.petal-8 {
+  transform: translate(-50%, -100%) rotate(315deg);
+}
+
+/* Centro de la flor con múltiples capas */
+.flower-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+/* Núcleo principal del centro */
+.center-core {
   position: absolute;
   width: 100%;
   height: 100%;
   background: radial-gradient(
     circle at 30% 30%,
-    rgba(255, 255, 255, 0.3) 0%,
-    transparent 70%
+    #FFEB3B 0%,
+    #FFC107 40%,
+    #FF9800 70%,
+    #1B5E20 100%
   );
   border-radius: 50%;
-  animation: shineEffect 8s infinite linear;
+  box-shadow: 
+    0 0 8px rgba(255, 235, 59, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 2px rgba(27, 94, 32, 0.3);
+  animation: centerPulse 4s ease-in-out infinite;
 }
 
-@keyframes shineEffect {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(0.8) rotate(0deg);
+/* Punto de luz central */
+.center-highlight {
+  position: absolute;
+  top: 25%;
+  left: 25%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 235, 59, 0.7) 60%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  animation: highlight 3s ease-in-out infinite alternate;
+}
+
+/* Animaciones */
+@keyframes flowerRotate {
+  0% {
+    transform: rotate(0deg);
   }
-  25% {
-    opacity: 0.8;
-    transform: scale(0.9) rotate(90deg);
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes centerPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 
+      0 0 8px rgba(255, 235, 59, 0.5),
+      inset 0 2px 4px rgba(255, 255, 255, 0.6),
+      inset 0 -1px 2px rgba(27, 94, 32, 0.3);
   }
   50% {
+    transform: scale(1.1);
+    box-shadow: 
+      0 0 12px rgba(255, 235, 59, 0.7),
+      inset 0 2px 4px rgba(255, 255, 255, 0.8),
+      inset 0 -1px 2px rgba(27, 94, 32, 0.4);
+  }
+}
+
+@keyframes highlight {
+  0% {
     opacity: 0.6;
-    transform: scale(0.8) rotate(180deg);
+    transform: scale(0.8);
   }
-  75% {
-    opacity: 0.8;
-    transform: scale(0.9) rotate(270deg);
+  100% {
+    opacity: 0.9;
+    transform: scale(1.2);
   }
+}
+
+/* Efectos hover naturales */
+.logo-animation:hover .detailed-flower {
+  animation-duration: 12s;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.2));
+}
+
+.logo-animation:hover .petal {
+  box-shadow: 
+    inset 1.5px 0 4px rgba(255, 255, 255, 0.5),
+    inset -0.5px 0 3px rgba(27, 94, 32, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.12);
+  background: linear-gradient(
+    to top,
+    #1B5E20 0%,
+    #2E7D32 18%,
+    #4CAF50 38%,
+    #66BB6A 58%,
+    #A5D6A7 78%,
+    rgba(255, 255, 255, 0.97) 94%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  transform: scale(1.02);
+}
+
+.logo-animation:hover .center-core {
+  animation-duration: 2.5s;
 }
 
 .logo-text {

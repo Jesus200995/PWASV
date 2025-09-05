@@ -27,41 +27,39 @@
         <p>{{ message || 'Estamos realizando algunas mejoras para ofrecerte un mejor servicio.' }}</p>
       </div>
       
-      <!-- Información adicional en un solo recuadro -->
-      <div class="maintenance-info-single">
-        <div class="info-content">
-          <div class="info-item">
-            <div class="info-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12,6 12,12 16,14"/>
-              </svg>
-            </div>
-            <p>Estimamos regresar pronto</p>
+      <!-- Información adicional -->
+      <div class="maintenance-info">
+        <div class="info-item">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
           </div>
-          <div class="info-item">
-            <div class="info-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 4 23 10 17 10"/>
-                <polyline points="1 20 1 14 7 14"/>
-                <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-              </svg>
-            </div>
-            <p>Esta página se verifica automáticamente cada 30 segundos</p>
+          <p>Estimamos regresar pronto</p>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"/>
+              <polyline points="1 20 1 14 7 14"/>
+              <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
           </div>
-          <div class="info-item">
-            <div class="info-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-              </svg>
-            </div>
-            <p>Para urgencias, contáctanos directamente</p>
+          <p>Esta página se verifica automáticamente cada 30 segundos</p>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
           </div>
+          <p>Para urgencias, contáctanos directamente</p>
         </div>
       </div>
       
-      <!-- Botón de verificación manual centrado -->
+      <!-- Botón de verificación manual -->
       <div class="maintenance-actions">
         <button @click="reloadPage" class="reload-button" :disabled="isReloading">
           <svg v-if="!isReloading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -185,28 +183,25 @@ const getParticleStyle = (index) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 30%, #f0fdf4 70%, #ffffff 100%);
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 50%, #34495e 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Inter', sans-serif;
   z-index: 10000;
   overflow: hidden;
-  color: #374151;
+  color: white;
 }
 
 .maintenance-container {
   text-align: center;
   max-width: 450px;
   padding: 30px 20px;
-  background: rgba(240, 253, 244, 0.7);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   border-radius: 16px;
-  border: 1px solid rgba(34, 197, 94, 0.2);
-  box-shadow: 
-    0 20px 40px rgba(34, 197, 94, 0.1),
-    0 8px 32px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 2;
 }
@@ -221,7 +216,7 @@ const getParticleStyle = (index) => {
 
 .gear {
   position: absolute;
-  color: rgba(34, 197, 94, 0.8);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .gear-1 {
@@ -273,61 +268,46 @@ const getParticleStyle = (index) => {
   font-weight: 400;
 }
 
-/* Información adicional en un solo recuadro */
-.maintenance-info-single {
+/* Información adicional */
+.maintenance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-bottom: 28px;
-}
-
-.info-content {
-  background: rgba(240, 253, 244, 0.8);
-  backdrop-filter: blur(15px);
-  border-radius: 12px;
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  padding: 16px;
-  box-shadow: 
-    0 4px 15px rgba(34, 197, 94, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .info-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-}
-
-.info-item:not(:last-child) {
-  border-bottom: 1px solid rgba(34, 197, 94, 0.15);
-  margin-bottom: 8px;
-  padding-bottom: 12px;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .info-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  color: rgba(34, 197, 94, 0.8);
-  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .info-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .info-item p {
   margin: 0;
   font-size: 12px;
   font-weight: 500;
-  color: rgba(55, 65, 81, 0.9);
-  text-align: left;
-  line-height: 1.4;
 }
 
-/* Botón de recarga centrado */
+/* Botón de recarga */
 .maintenance-actions {
   margin-bottom: 24px;
   display: flex;
@@ -339,11 +319,10 @@ const getParticleStyle = (index) => {
 .reload-button {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  padding: 14px 28px;
-  background: rgba(34, 197, 94, 0.9);
-  border: 2px solid rgba(34, 197, 94, 1);
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50px;
   color: white;
   font-size: 14px;
@@ -351,19 +330,13 @@ const getParticleStyle = (index) => {
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
-  box-shadow: 
-    0 4px 15px rgba(34, 197, 94, 0.3),
-    0 2px 8px rgba(0, 0, 0, 0.1);
-  min-width: 200px;
 }
 
 .reload-button:hover:not(:disabled) {
-  background: rgba(34, 197, 94, 1);
-  border-color: rgba(34, 197, 94, 1);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
-  box-shadow: 
-    0 6px 20px rgba(34, 197, 94, 0.4),
-    0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .reload-button:disabled {
@@ -398,14 +371,11 @@ const getParticleStyle = (index) => {
   gap: 8px;
   max-width: 380px;
   padding: 10px 14px;
-  background: rgba(220, 252, 231, 0.8);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: rgba(46, 204, 113, 0.2);
+  border: 1px solid rgba(46, 204, 113, 0.3);
   border-radius: 10px;
   backdrop-filter: blur(10px);
   margin-top: 8px;
-  box-shadow: 
-    0 2px 8px rgba(34, 197, 94, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .verification-icon {
@@ -414,7 +384,7 @@ const getParticleStyle = (index) => {
   justify-content: center;
   width: 16px;
   height: 16px;
-  color: #22c55e;
+  color: #27ae60;
 }
 
 .verification-icon svg {
@@ -425,7 +395,7 @@ const getParticleStyle = (index) => {
 .verification-message p {
   margin: 0;
   font-size: 12px;
-  color: rgba(55, 65, 81, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   text-align: left;
   line-height: 1.4;
 }
@@ -444,9 +414,8 @@ const getParticleStyle = (index) => {
 
 /* Footer */
 .maintenance-footer {
-  opacity: 0.7;
+  opacity: 0.8;
   font-size: 11px;
-  color: rgba(55, 65, 81, 0.8);
 }
 
 .maintenance-footer p {
@@ -455,7 +424,7 @@ const getParticleStyle = (index) => {
 
 .app-name {
   font-weight: 700;
-  color: rgba(34, 197, 94, 0.9);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* Partículas de fondo */
@@ -471,7 +440,7 @@ const getParticleStyle = (index) => {
 
 .particle {
   position: absolute;
-  background: rgba(34, 197, 94, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   animation: float-up linear infinite;
 }
@@ -533,22 +502,16 @@ const getParticleStyle = (index) => {
     left: 0;
   }
   
-  .maintenance-info-single {
+  .maintenance-info {
+    gap: 10px;
     margin-bottom: 20px;
   }
   
-  .info-content {
-    padding: 12px;
-  }
-  
   .info-item {
-    gap: 10px;
-    padding: 6px 0;
-  }
-  
-  .info-item:not(:last-child) {
-    margin-bottom: 6px;
-    padding-bottom: 10px;
+    flex-direction: row;
+    gap: 8px;
+    text-align: left;
+    padding: 8px 10px;
   }
   
   .info-item p {
@@ -556,25 +519,29 @@ const getParticleStyle = (index) => {
   }
   
   .info-icon {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
   }
   
   .info-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
   
   .reload-button {
-    padding: 12px 24px;
-    font-size: 13px;
-    min-width: 180px;
+    padding: 10px 18px;
+    font-size: 12px;
+    width: 100%;
+    max-width: 240px;
+    margin: 0 auto;
+    display: flex;
   }
   
   .reload-button svg,
   .loading-spinner {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
   
   .verification-message {
@@ -639,18 +606,8 @@ const getParticleStyle = (index) => {
     top: 14px;
   }
   
-  .info-content {
-    padding: 10px;
-  }
-  
   .info-item {
-    gap: 8px;
-    padding: 5px 0;
-  }
-  
-  .info-item:not(:last-child) {
-    margin-bottom: 5px;
-    padding-bottom: 8px;
+    padding: 6px 8px;
   }
   
   .info-item p {
@@ -658,25 +615,24 @@ const getParticleStyle = (index) => {
   }
   
   .info-icon {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
   }
   
   .info-icon svg {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
   }
   
   .reload-button {
-    padding: 10px 20px;
-    font-size: 12px;
-    min-width: 160px;
+    padding: 8px 14px;
+    font-size: 11px;
   }
   
   .reload-button svg,
   .loading-spinner {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
   }
   
   .verification-message {
@@ -732,18 +688,8 @@ const getParticleStyle = (index) => {
     top: 12px;
   }
   
-  .info-content {
-    padding: 8px;
-  }
-  
   .info-item {
-    gap: 6px;
-    padding: 4px 0;
-  }
-  
-  .info-item:not(:last-child) {
-    margin-bottom: 4px;
-    padding-bottom: 6px;
+    padding: 5px 6px;
   }
   
   .info-item p {
@@ -751,9 +697,8 @@ const getParticleStyle = (index) => {
   }
   
   .reload-button {
-    padding: 8px 16px;
-    font-size: 11px;
-    min-width: 140px;
+    padding: 6px 10px;
+    font-size: 10px;
   }
   
   .verification-message {

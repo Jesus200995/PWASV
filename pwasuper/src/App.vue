@@ -3,9 +3,7 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConnectivityStatus from './components/ConnectivityStatus.vue';
 import UpdateNotification from './components/UpdateNotification.vue';
-import MaintenanceScreen from './components/MaintenanceScreen.vue';
 import { useNotifications } from './composables/useNotifications.js';
-import maintenanceCheckService from './services/maintenanceCheckService.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -13,10 +11,6 @@ const isLoggingOut = ref(false);
 const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
-
-// Sistema de modo mantenimiento
-const isMaintenanceMode = ref(false);
-const maintenanceMessage = ref('');
 
 // Sistema de notificaciones en tiempo real
 const { unreadCount, startPolling, stopPolling } = useNotifications();
@@ -110,9 +104,6 @@ onMounted(() => {
     }
   }
   
-  // Inicializar sistema de verificación de mantenimiento
-  initMaintenanceCheck();
-  
   // Escuchar cambios en localStorage
   window.addEventListener('storage', handleStorageChange);
 });
@@ -122,9 +113,6 @@ onUnmounted(() => {
   window.removeEventListener('storage', handleStorageChange);
   // Detener el polling de notificaciones
   stopPolling(notificationPollingId);
-  // Detener verificación de mantenimiento
-  maintenanceCheckService.stopPeriodicCheck();
-  maintenanceCheckService.removeStateChangeListener(handleMaintenanceChange);
 });
 
 const isLoggedIn = computed(() => {
@@ -153,58 +141,6 @@ const getUserInitials = computed(() => {
 // Función para cerrar el menú móvil cuando se navega
 const closeMobileMenu = () => {
   showMobileMenu.value = false;
-};
-
-// FUNCIONES DE MANTENIMIENTO
-const initMaintenanceCheck = () => {
-  console.log('🔧 Inicializando verificación de mantenimiento...');
-  
-  // Configurar listener para cambios de estado
-  maintenanceCheckService.onStateChange(handleMaintenanceChange);
-  
-  // Iniciar verificación periódica (cada 30 segundos)
-  maintenanceCheckService.startPeriodicCheck(30000);
-  
-  // Hacer una verificación inicial
-  maintenanceCheckService.forceCheck();
-};
-
-const handleMaintenanceChange = (enabled, message) => {
-  console.log(`🔧 Cambio de mantenimiento detectado: ${enabled}`);
-  console.log(`📝 Mensaje: ${message}`);
-  
-  isMaintenanceMode.value = enabled;
-  maintenanceMessage.value = message || 'Sistema en mantenimiento programado. Volveremos pronto.';
-  
-  if (enabled) {
-    console.log('🚨 Activando modo mantenimiento - mostrando pantalla');
-    // Detener polling de notificaciones mientras esté en mantenimiento
-    if (notificationPollingId) {
-      stopPolling(notificationPollingId);
-      notificationPollingId = null;
-    }
-  } else {
-    console.log('✅ Desactivando modo mantenimiento - restaurando app');
-    // Reiniciar polling de notificaciones si hay usuario logueado
-    if (userData.value && !notificationPollingId) {
-      notificationPollingId = startPolling();
-    }
-  }
-};
-
-const handleMaintenanceReload = async () => {
-  console.log('🔄 Recarga manual solicitada desde pantalla de mantenimiento');
-  try {
-    const result = await maintenanceCheckService.forceCheck();
-    if (!result.enabled) {
-      // Si ya no está en mantenimiento, la pantalla se ocultará automáticamente
-      console.log('✅ Mantenimiento desactivado - restaurando aplicación');
-    } else {
-      console.log('ℹ️ Sistema sigue en mantenimiento');
-    }
-  } catch (error) {
-    console.error('❌ Error verificando estado de mantenimiento:', error);
-  }
 };
 
 function logout() {
@@ -423,16 +359,8 @@ function logout() {
       class="fixed inset-0 bg-black bg-opacity-25 z-20"
     ></div>
 
-    <!-- Pantalla de modo mantenimiento -->
-    <MaintenanceScreen 
-      v-if="isMaintenanceMode"
-      :message="maintenanceMessage"
-      app-name="Sembrando Vida"
-      @reload="handleMaintenanceReload"
-    />
-
     <!-- Contenido principal -->
-    <main v-else class="main-content" :style="{ paddingTop: isLoggedIn ? '48px' : '0' }">
+    <main class="main-content" :style="{ paddingTop: isLoggedIn ? '48px' : '0' }">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />

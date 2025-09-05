@@ -356,26 +356,6 @@
                 <span class="load-icon">⚡</span>
                 <span class="load-text">
                   Mostrando {{ registros.length.toLocaleString('es') }} registros cargados
-                  <template v-if="totalRegistrosServidor > registros.length">
-                    de {{ totalRegistrosServidor.toLocaleString('es') }} totales
-                  </template>
-                </span>
-                <button 
-                  v-if="totalRegistrosServidor > registros.length && !cargandoMas" 
-                  @click="cargarMasRegistros"
-                  class="load-more-btn"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14m-7-7l7 7 7-7"/>
-                  </svg>
-                  Cargar más
-                </button>
-                <span v-if="cargandoMas" class="loading-more">
-                  <svg class="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    <path d="M9 12l2 2 4-4"/>
-                  </svg>
-                  Cargando...
                 </span>
               </div>
             </div>
@@ -834,50 +814,12 @@ const filtroConFoto = ref(false)
 const filtroSinFoto = ref(false)
 const filtroConDescripcion = ref(false)
 
-// Variables para paginación y carga eficiente
+// Variables para paginación (solo frontend)
 const paginaActual = ref(1)
 const registrosPorPagina = ref(50)
 const paginaSalto = ref('')
-const totalRegistrosServidor = ref(0)
-const cargandoMas = ref(false)
 
-// Función para cargar más registros cuando sea necesario
-const cargarMasRegistros = async () => {
-  if (cargandoMas.value) return
-  
-  try {
-    cargandoMas.value = true
-    const token = localStorage.getItem('admin_token')
-    
-    console.log('📊 Cargando más registros...')
-    
-    const response = await axios.get(`${API_URL}/admin/registros`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      params: {
-        page: Math.ceil(registros.value.length / 1000) + 1,
-        page_size: 1000,
-        usuario_id: filtroUsuario.value || undefined
-      },
-      timeout: 30000
-    })
-    
-    const { registros: registrosNuevos = [] } = response.data
-    
-    if (registrosNuevos.length > 0) {
-      const registrosEnriquecidos = await usuariosService.enriquecerRegistrosConUsuarios(registrosNuevos)
-      registros.value = [...registros.value, ...registrosEnriquecidos]
-      console.log(`✅ Cargados ${registrosNuevos.length} registros adicionales`)
-    }
-    
-  } catch (err) {
-    console.error('Error cargando más registros:', err)
-  } finally {
-    cargandoMas.value = false
-  }
-}
+// Función eliminada - ahora carga todos los registros automáticamente
 
 // Variables para contadores de estadísticas
 const actividadesHoy = ref('-')
@@ -985,37 +927,63 @@ const cargarRegistros = async () => {
   
   try {
     const token = localStorage.getItem('admin_token')
-    console.log('📊 Solicitando registros con límite seguro...')
+    console.log('📊 Cargando TODOS los registros con paginación automática...')
     console.time('Carga de registros')
     
-    // Usar el nuevo endpoint optimizado /admin/registros
-    const response = await axios.get(`${API_URL}/admin/registros`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      params: {
-        page: 1,
-        page_size: 1000, // Paginación optimizada
-        usuario_id: filtroUsuario.value || undefined
-      },
-      timeout: 30000 // Timeout de 30 segundos
-    })
+    let todosLosRegistros = []
+    let page = 1
+    let hasMore = true
+    let totalRegistros = 0
     
-    console.log('✅ Respuesta de la API obtenida exitosamente:', response.data)
+    // Cargar todas las páginas automáticamente
+    while (hasMore) {
+      console.log(`📄 Cargando página ${page}...`)
+      
+      const response = await axios.get(`${API_URL}/admin/registros`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        params: {
+          page: page,
+          page_size: 200, // Máximo por página
+          usuario_id: filtroUsuario.value || undefined
+        },
+        timeout: 30000
+      })
+      
+      const responseData = response.data
+      const registrosPagina = responseData.registros || []
+      
+      if (page === 1) {
+        totalRegistros = responseData.total || 0
+        console.log(`🔢 Total de registros en BD: ${totalRegistros.toLocaleString('es')}`)
+      }
+      
+      todosLosRegistros = [...todosLosRegistros, ...registrosPagina]
+      hasMore = responseData.has_more && registrosPagina.length > 0
+      
+      console.log(`📊 Página ${page}: ${registrosPagina.length} registros | Total cargados: ${todosLosRegistros.length}`)
+      
+      page++
+      
+      // Prevenir bucle infinito
+      if (page > 100) {
+        console.warn('⚠️ Límite de páginas alcanzado (100)')
+        break
+      }
+    }
     
-    // El nuevo endpoint devuelve un objeto con paginación
-    const { registros: registrosRaw = [], total = 0 } = response.data
-    console.log(`🔢 Recibidos ${registrosRaw.length} registros de ${total} totales`)
+    console.log(`✅ Carga completa: ${todosLosRegistros.length} registros de ${totalRegistros} totales`)
     
     // Enriquecer registros con información de usuarios
-    registros.value = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
+    registros.value = await usuariosService.enriquecerRegistrosConUsuarios(todosLosRegistros)
     registrosFiltrados.value = registros.value
     
     // Aplicar ordenamiento inicial
     aplicarOrdenamiento()
     
-    // Extraer usuarios únicos para el filtro (con información completa)
+    // Extraer usuarios únicos para el filtro
     const usuariosUnicosLista = []
     const usuariosVistos = new Set()
     

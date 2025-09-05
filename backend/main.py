@@ -16,9 +16,6 @@ import pytz
 import json
 from typing import List, Optional
 import io
-import requests
-import asyncio
-import httpx
 
 app = FastAPI()
 
@@ -35,21 +32,8 @@ app.add_middleware(
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"
 
-# Configuración de API remota como respaldo
-REMOTE_API_URL = "https://apipwa.sembrandodatos.com"
-LOCAL_API_MODE = False  # Cambiar a True para forzar modo API
-
 # Configuraciones de base de datos con múltiples opciones
 DB_CONFIGS = [
-    {
-        "name": "API Remota (apipwa)",
-        "host": "apipwa.sembrandodatos.com", 
-        "database": "remote_api",
-        "user": "api_user",
-        "password": "remote",
-        "timeout": 5,
-        "is_api": True  # Marca especial para modo API
-    },
     {
         "name": "Producción Principal",
         "host": "31.97.8.51",
@@ -72,11 +56,10 @@ DB_CONFIGS = [
 conn = None
 cursor = None
 current_db_config = None
-modo_api_activo = False  # Modo API remota activado
 
 def conectar_base_datos():
     """Función para establecer/reestablecer conexión a la base de datos con respaldos"""
-    global conn, cursor, current_db_config, modo_api_activo
+    global conn, cursor, current_db_config
     
     # Cerrar conexión existente si existe
     if conn:
@@ -89,13 +72,6 @@ def conectar_base_datos():
     for config in DB_CONFIGS:
         try:
             print(f"🔄 Intentando conectar a: {config['name']} ({config['host']})")
-            
-            # Si es modo API, activar modo especial
-            if config.get('is_api', False):
-                print("🌐 Activando modo API remota...")
-                modo_api_activo = True
-                current_db_config = config
-                return True
             
             conn = psycopg2.connect(
                 host=config['host'], 
@@ -111,7 +87,6 @@ def conectar_base_datos():
             
             cursor = conn.cursor()
             current_db_config = config
-            modo_api_activo = False
             
             # Verificar que la conexión funciona
             cursor.execute("SELECT 1")
@@ -132,11 +107,7 @@ def conectar_base_datos():
 
 def verificar_conexion_db():
     """Verificar y reestablecer conexión si es necesario con reintentos automáticos"""
-    global conn, cursor, current_db_config, modo_api_activo
-    
-    # Si estamos en modo API, siempre está "conectado"
-    if modo_api_activo and current_db_config:
-        return True
+    global conn, cursor, current_db_config
     
     # Si no hay conexión, intentar conectar
     if not conn or not current_db_config:
@@ -243,98 +214,40 @@ def ejecutar_consulta_segura(query, params=None, fetch_type='all'):
                     detail="Error interno del servidor. Intente más tarde."
                 )
 
-# ==================== FUNCIONES API REMOTA ====================
-
-async def hacer_request_api_remota(endpoint, method="GET", data=None, params=None):
-    """Hacer request a la API remota de apipwa"""
-    url = f"{REMOTE_API_URL}{endpoint}"
-    
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            if method == "GET":
-                response = await client.get(url, params=params)
-            elif method == "POST":
-                response = await client.post(url, json=data)
-            elif method == "PUT":
-                response = await client.put(url, json=data)
-            elif method == "DELETE":
-                response = await client.delete(url)
-            else:
-                raise ValueError(f"Método {method} no soportado")
-            
-            response.raise_for_status()
-            return response.json()
-            
-    except httpx.RequestError as e:
-        print(f"❌ Error de conexión con API remota: {e}")
-        raise HTTPException(status_code=503, detail="Servicio remoto no disponible")
-    except httpx.HTTPStatusError as e:
-        print(f"❌ Error HTTP de API remota: {e.response.status_code}")
-        if e.response.status_code == 404:
-            raise HTTPException(status_code=404, detail="Recurso no encontrado")
-        elif e.response.status_code == 401:
-            raise HTTPException(status_code=401, detail="No autorizado")
-        else:
-            raise HTTPException(status_code=e.response.status_code, detail="Error en servicio remoto")
-
-def ejecutar_consulta_api_o_bd(query_bd, params_bd=None, endpoint_api=None, method_api="GET", data_api=None, params_api=None, fetch_type='all'):
-    """Ejecutar consulta en BD local o hacer request a API remota según el modo activo"""
-    global modo_api_activo
-    
-    if modo_api_activo and endpoint_api:
-        print(f"🌐 Usando API remota: {method_api} {endpoint_api}")
-        # Convertir a función async si es necesario
-        import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-            return loop.run_until_complete(hacer_request_api_remota(endpoint_api, method_api, data_api, params_api))
-        except RuntimeError:
-            # Si no hay loop, crear uno nuevo
-            return asyncio.run(hacer_request_api_remota(endpoint_api, method_api, data_api, params_api))
-    else:
-        print(f"🗃️ Usando base de datos local")
-        return ejecutar_consulta_segura(query_bd, params_bd, fetch_type)
-
-# ==================== INICIALIZACIÓN ====================
-
 # Establecer conexión inicial con sistema de respaldo
 print("🚀 Iniciando sistema de base de datos...")
 try:
     if conectar_base_datos():
         print(f"✅ Sistema iniciado con: {current_db_config['name']}")
         
-        # Solo crear tablas si NO estamos en modo API
-        if not modo_api_activo:
-            # Crear tabla admin_users si no existe
-            try:
-                ejecutar_consulta_segura("""
-                    CREATE TABLE IF NOT EXISTS admin_users (
-                        id SERIAL PRIMARY KEY,
-                        username VARCHAR(100) UNIQUE NOT NULL,
-                        password VARCHAR(255) NOT NULL,
-                        rol VARCHAR(20) DEFAULT 'admin' CHECK (rol IN ('admin', 'user')),
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                """, fetch_type='none')
+        # Crear tabla admin_users si no existe
+        try:
+            ejecutar_consulta_segura("""
+                CREATE TABLE IF NOT EXISTS admin_users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(100) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL,
+                    rol VARCHAR(20) DEFAULT 'admin' CHECK (rol IN ('admin', 'user')),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """, fetch_type='none')
+            
+            # Verificar si existen usuarios admin, si no crear uno por defecto
+            count_result = ejecutar_consulta_segura("SELECT COUNT(*) FROM admin_users", fetch_type='one')
+            count = count_result[0] if count_result else 0
+            
+            if count == 0:
+                # Crear usuario admin por defecto
+                default_password = pwd_context.hash("admin123")
+                ejecutar_consulta_segura(
+                    "INSERT INTO admin_users (username, password, rol) VALUES (%s, %s, %s)",
+                    ("admin", default_password, "admin"),
+                    fetch_type='none'
+                )
+                print("✅ Usuario administrador por defecto creado: admin/admin123")
                 
-                # Verificar si existen usuarios admin, si no crear uno por defecto
-                count_result = ejecutar_consulta_segura("SELECT COUNT(*) FROM admin_users", fetch_type='one')
-                count = count_result[0] if count_result else 0
-                
-                if count == 0:
-                    # Crear usuario admin por defecto
-                    default_password = pwd_context.hash("admin123")
-                    ejecutar_consulta_segura(
-                        "INSERT INTO admin_users (username, password, rol) VALUES (%s, %s, %s)",
-                        ("admin", default_password, "admin"),
-                        fetch_type='none'
-                    )
-                    print("✅ Usuario administrador por defecto creado: admin/admin123")
-                    
-            except Exception as e:
-                print(f"⚠️ Error en inicialización de tablas de admin: {e}")
-        else:
-            print("🌐 Modo API activo - No se requiere inicialización de tablas locales")
+        except Exception as e:
+            print(f"⚠️ Error en inicialización de tablas de admin: {e}")
     else:
         print("❌ No se pudo conectar a ninguna base de datos")
         print("⚠️ La API funcionará en modo degradado (sin base de datos)")
@@ -1988,36 +1901,12 @@ async def eliminar_usuario(user_id: int):
 
 # Endpoint de autenticación para administradores con información de usuario
 @app.post("/admin/login")
-async def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
+def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
         username = form_data.username
         password = form_data.password
         
         print(f"🔐 Intento de login para usuario: {username}")
-        
-        # Si estamos en modo API, hacer request a la API remota
-        if modo_api_activo:
-            try:
-                print("🌐 Autenticando via API remota...")
-                response = await hacer_request_api_remota(
-                    "/admin/login", 
-                    method="POST",
-                    data={"username": username, "password": password}
-                )
-                print(f"✅ Autenticación remota exitosa para: {username}")
-                return response
-            except HTTPException as e:
-                print(f"❌ Error en autenticación remota: {e.detail}")
-                raise e
-            except Exception as e:
-                print(f"❌ Error inesperado en autenticación remota: {e}")
-                raise HTTPException(status_code=500, detail="Error en autenticación remota")
-        
-        # Usar base de datos local
-        print("🗃️ Autenticando via base de datos local...")
-        
-        if not verificar_conexion_db():
-            raise HTTPException(status_code=503, detail="Base de datos no disponible")
         
         # Buscar usuario administrador en la base de datos
         cursor.execute("SELECT id, password, rol FROM admin_users WHERE username = %s", (username,))
@@ -3457,33 +3346,13 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0):
 async def obtener_conteo_no_leidas(usuario_id: int):
     """Obtener conteo de notificaciones no leídas para un usuario"""
     try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            
         if not usuario_id:
             raise HTTPException(status_code=400, detail="usuario_id es obligatorio")
         
         print(f"📊 Obteniendo conteo de no leídas para usuario {usuario_id}")
-        
-        # Si estamos en modo API, hacer request a la API remota
-        if modo_api_activo:
-            try:
-                print("🌐 Obteniendo conteo via API remota...")
-                response = await hacer_request_api_remota(
-                    f"/notificaciones/unread_count?usuario_id={usuario_id}",
-                    method="GET"
-                )
-                print(f"✅ Conteo obtenido via API remota: {response}")
-                return response
-            except HTTPException as e:
-                print(f"❌ Error en API remota: {e.detail}")
-                raise e
-            except Exception as e:
-                print(f"❌ Error inesperado en API remota: {e}")
-                raise HTTPException(status_code=500, detail="Error en API remota")
-        
-        # Usar base de datos local
-        print("�️ Obteniendo conteo via base de datos local...")
-        
-        if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
         # Verificar que el usuario existe
         cursor.execute("SELECT id FROM usuarios WHERE id = %s", (usuario_id,))
@@ -3525,6 +3394,9 @@ async def listar_notificaciones_usuario(
 ):
     """Listar notificaciones para un usuario con filtro de leídas/no leídas"""
     try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            
         if not usuario_id:
             raise HTTPException(status_code=400, detail="usuario_id es obligatorio")
         
@@ -3532,36 +3404,6 @@ async def listar_notificaciones_usuario(
             raise HTTPException(status_code=400, detail="filtro debe ser 'unread' o 'all'")
         
         print(f"📋 Listando notificaciones para usuario {usuario_id} (filtro: {filtro})")
-        
-        # Si estamos en modo API, hacer request a la API remota
-        if modo_api_activo:
-            try:
-                print("🌐 Listando notificaciones via API remota...")
-                params = {
-                    "usuario_id": usuario_id,
-                    "filtro": filtro,
-                    "limit": limit,
-                    "offset": offset
-                }
-                response = await hacer_request_api_remota(
-                    "/notificaciones/list",
-                    method="GET",
-                    params_api=params
-                )
-                print(f"✅ Notificaciones obtenidas via API remota")
-                return response
-            except HTTPException as e:
-                print(f"❌ Error en API remota: {e.detail}")
-                raise e
-            except Exception as e:
-                print(f"❌ Error inesperado en API remota: {e}")
-                raise HTTPException(status_code=500, detail="Error en API remota")
-        
-        # Usar base de datos local
-        print("�️ Listando notificaciones via base de datos local...")
-        
-        if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
         # Verificar que el usuario existe
         cursor.execute("SELECT id FROM usuarios WHERE id = %s", (usuario_id,))

@@ -32,126 +32,70 @@ app.add_middleware(
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"
 
-# Configuraciones de base de datos con múltiples opciones
-DB_CONFIGS = [
-    {
-        "name": "Producción Principal",
-        "host": "31.97.8.51",
-        "database": "app_registros",
-        "user": "jesus",
-        "password": "2025",
-        "timeout": 5  # Timeout más corto para detectar problemas rápido
-    },
-    {
-        "name": "Respaldo Local", 
-        "host": "localhost",
-        "database": "app_registros_local",
-        "user": "postgres",
-        "password": "admin",
-        "timeout": 3
-    }
-]
+# Conexión a PostgreSQL con manejo robusto
+DB_HOST = "31.97.8.51"
+DB_NAME = "app_registros"
+DB_USER = "jesus"
+DB_PASS = "2025"
 
 # Variables globales para la conexión
 conn = None
 cursor = None
-current_db_config = None
 
 def conectar_base_datos():
-    """Función para establecer/reestablecer conexión a la base de datos con respaldos"""
-    global conn, cursor, current_db_config
-    
-    # Cerrar conexión existente si existe
-    if conn:
-        try:
+    """Función para establecer/reestablecer conexión a la base de datos"""
+    global conn, cursor
+    try:
+        if conn:
             conn.close()
-        except:
-            pass
-    
-    # Intentar conectar con cada configuración
-    for config in DB_CONFIGS:
-        try:
-            print(f"🔄 Intentando conectar a: {config['name']} ({config['host']})")
-            
-            conn = psycopg2.connect(
-                host=config['host'], 
-                database=config['database'], 
-                user=config['user'], 
-                password=config['password'],
-                connect_timeout=config['timeout'],
-                keepalives=1,
-                keepalives_idle=30,
-                keepalives_interval=5,
-                keepalives_count=3
-            )
-            
-            cursor = conn.cursor()
-            current_db_config = config
-            
-            # Verificar que la conexión funciona
-            cursor.execute("SELECT 1")
-            cursor.fetchone()
-            
-            print(f"✅ Conexión exitosa a: {config['name']}")
-            return True
-            
-        except Exception as e:
-            print(f"❌ Error conectando a {config['name']}: {e}")
-            conn = None
-            cursor = None
-            current_db_config = None
-            continue
-    
-    print("❌ No se pudo conectar a ninguna base de datos")
-    return False
+        
+        conn = psycopg2.connect(
+            host=DB_HOST, 
+            database=DB_NAME, 
+            user=DB_USER, 
+            password=DB_PASS,
+            # Configuraciones para mejor manejo de conexiones
+            connect_timeout=10,
+            keepalives=1,
+            keepalives_idle=30,
+            keepalives_interval=5,
+            keepalives_count=5
+        )
+        cursor = conn.cursor()
+        print("✅ Conexión a la base de datos exitosa")
+        return True
+    except Exception as e:
+        print(f"❌ Error conectando a la base de datos: {e}")
+        conn = None
+        cursor = None
+        return False
 
 def verificar_conexion_db():
-    """Verificar y reestablecer conexión si es necesario con reintentos automáticos"""
-    global conn, cursor, current_db_config
-    
-    # Si no hay conexión, intentar conectar
-    if not conn or not current_db_config:
-        print("🔄 No hay conexión, intentando establecer...")
-        return conectar_base_datos()
-    
+    """Verificar y reestablecer conexión si es necesario"""
+    global conn, cursor
     try:
-        # Si la conexión está cerrada, reconectar
-        if conn.closed:
-            print("🔄 Conexión cerrada, reestableciendo...")
+        if not conn or conn.closed:
+            print("🔄 Reestableciendo conexión cerrada...")
             return conectar_base_datos()
         
-        # Test de conexión simple con timeout corto
+        # Test de conexión simple
         cursor.execute("SELECT 1")
         cursor.fetchone()
         return True
-        
-    except (psycopg2.Error, psycopg2.OperationalError, AttributeError) as e:
-        print(f"🔄 Conexión perdida ({e}), reestableciendo...")
-        return conectar_base_datos()
-    except Exception as e:
-        print(f"🔄 Error inesperado en conexión ({e}), reestableciendo...")
+    except (psycopg2.Error, psycopg2.OperationalError, AttributeError):
+        print("🔄 Conexión perdida, reestableciendo...")
         return conectar_base_datos()
 
 def ejecutar_consulta_segura(query, params=None, fetch_type='all'):
-    """Ejecutar consulta con manejo robusto de errores y reconexión automática"""
-    global conn, cursor, current_db_config
+    """Ejecutar consulta con manejo robusto de errores y reconexión"""
+    global conn, cursor
     max_reintentos = 3
     
     for intento in range(1, max_reintentos + 1):
         try:
             # Verificar conexión antes de ejecutar
             if not verificar_conexion_db():
-                print(f"❌ Intento {intento}: No se pudo establecer conexión a la base de datos")
-                if intento == max_reintentos:
-                    raise HTTPException(
-                        status_code=503, 
-                        detail="Servicio de base de datos no disponible. Intente más tarde."
-                    )
-                continue
-            
-            # Mostrar qué base de datos estamos usando
-            if current_db_config and intento == 1:
-                print(f"🔍 Ejecutando en: {current_db_config['name']}")
+                raise HTTPException(status_code=500, detail="No se pudo establecer conexión a la base de datos")
             
             # Ejecutar la consulta
             if params:
@@ -185,16 +129,9 @@ def ejecutar_consulta_segura(query, params=None, fetch_type='all'):
                 print(f"⚠️ Error en rollback: {rollback_error}")
             
             if intento == max_reintentos:
-                error_msg = "Servicio de base de datos temporalmente no disponible"
-                if "timeout" in str(e).lower():
-                    error_msg = "Timeout de conexión a la base de datos"
-                elif "connection" in str(e).lower():
-                    error_msg = "Error de conexión a la base de datos"
-                
-                raise HTTPException(status_code=503, detail=error_msg)
+                raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
             
             # Intentar reconectar para el siguiente intento
-            print(f"🔄 Reintentando conexión... ({intento}/{max_reintentos})")
             conectar_base_datos()
             
         except Exception as e:
@@ -209,55 +146,41 @@ def ejecutar_consulta_segura(query, params=None, fetch_type='all'):
                 print(f"⚠️ Error en rollback: {rollback_error}")
             
             if intento == max_reintentos:
-                raise HTTPException(
-                    status_code=500, 
-                    detail="Error interno del servidor. Intente más tarde."
-                )
+                raise HTTPException(status_code=500, detail=f"Error al ejecutar consulta: {str(e)}")
 
-# Establecer conexión inicial con sistema de respaldo
-print("🚀 Iniciando sistema de base de datos...")
+# Establecer conexión inicial
 try:
-    if conectar_base_datos():
-        print(f"✅ Sistema iniciado con: {current_db_config['name']}")
-        
-        # Crear tabla admin_users si no existe
-        try:
-            ejecutar_consulta_segura("""
-                CREATE TABLE IF NOT EXISTS admin_users (
-                    id SERIAL PRIMARY KEY,
-                    username VARCHAR(100) UNIQUE NOT NULL,
-                    password VARCHAR(255) NOT NULL,
-                    rol VARCHAR(20) DEFAULT 'admin' CHECK (rol IN ('admin', 'user')),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """, fetch_type='none')
-            
-            # Verificar si existen usuarios admin, si no crear uno por defecto
-            count_result = ejecutar_consulta_segura("SELECT COUNT(*) FROM admin_users", fetch_type='one')
-            count = count_result[0] if count_result else 0
-            
-            if count == 0:
-                # Crear usuario admin por defecto
-                default_password = pwd_context.hash("admin123")
-                ejecutar_consulta_segura(
-                    "INSERT INTO admin_users (username, password, rol) VALUES (%s, %s, %s)",
-                    ("admin", default_password, "admin"),
-                    fetch_type='none'
-                )
-                print("✅ Usuario administrador por defecto creado: admin/admin123")
-                
-        except Exception as e:
-            print(f"⚠️ Error en inicialización de tablas de admin: {e}")
-    else:
-        print("❌ No se pudo conectar a ninguna base de datos")
-        print("⚠️ La API funcionará en modo degradado (sin base de datos)")
-        
+    conectar_base_datos()
+    
+    # Crear tabla admin_users si no existe
+    ejecutar_consulta_segura("""
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(100) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            rol VARCHAR(20) DEFAULT 'admin' CHECK (rol IN ('admin', 'user')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """, fetch_type='none')
+    
+    # Verificar si existen usuarios admin, si no crear uno por defecto
+    count_result = ejecutar_consulta_segura("SELECT COUNT(*) FROM admin_users", fetch_type='one')
+    count = count_result[0] if count_result else 0
+    
+    if count == 0:
+        # Crear usuario admin por defecto
+        default_password = pwd_context.hash("admin123")
+        ejecutar_consulta_segura(
+            "INSERT INTO admin_users (username, password, rol) VALUES (%s, %s, %s)",
+            ("admin", default_password, "admin"),
+            fetch_type='none'
+        )
+        print("✅ Usuario administrador por defecto creado: admin/admin123")
+    
 except Exception as e:
     print(f"❌ Error en inicialización de base de datos: {e}")
-    print("⚠️ La API funcionará en modo degradado (sin base de datos)")
     conn = None
     cursor = None
-    current_db_config = None
 
 # Carpeta para guardar fotos
 FOTOS_DIR = "fotos"
@@ -274,10 +197,8 @@ async def health_check():
             return {
                 "status": "unhealthy",
                 "database": "disconnected",
-                "current_db": "ninguna",
-                "message": "No se pudo conectar a ninguna base de datos disponible",
-                "timestamp": datetime.now().isoformat(),
-                "available_dbs": [config["name"] for config in DB_CONFIGS]
+                "message": "No se pudo conectar a la base de datos",
+                "timestamp": datetime.now().isoformat()
             }
         
         # Prueba simple de consulta
@@ -287,16 +208,13 @@ async def health_check():
             return {
                 "status": "healthy",
                 "database": "connected",
-                "current_db": current_db_config["name"] if current_db_config else "desconocida",
                 "message": "API y base de datos funcionando correctamente",
-                "timestamp": datetime.now().isoformat(),
-                "db_host": current_db_config["host"] if current_db_config else "N/A"
+                "timestamp": datetime.now().isoformat()
             }
         else:
             return {
                 "status": "unhealthy", 
                 "database": "error",
-                "current_db": current_db_config["name"] if current_db_config else "desconocida",
                 "message": "Error en consulta de prueba",
                 "timestamp": datetime.now().isoformat()
             }
@@ -305,181 +223,11 @@ async def health_check():
         return {
             "status": "unhealthy",
             "database": "error",
-            "current_db": current_db_config["name"] if current_db_config else "desconocida",
             "message": f"Error en health check: {str(e)}",
             "timestamp": datetime.now().isoformat()
         }
 
 # ==================== FIN ENDPOINT DE SALUD ====================
-
-# ==================== ENDPOINT DE DIAGNÓSTICO ====================
-
-@app.get("/diagnostico")
-async def diagnostico_sistema():
-    """Endpoint detallado de diagnóstico del sistema"""
-    diagnostico = {
-        "timestamp": datetime.now().isoformat(),
-        "api_status": "running",
-        "databases": [],
-        "connection_details": {},
-        "recommendations": []
-    }
-    
-    # Probar cada configuración de base de datos
-    for i, config in enumerate(DB_CONFIGS):
-        db_test = {
-            "name": config["name"],
-            "host": config["host"],
-            "database": config["database"],
-            "status": "unknown",
-            "response_time": None,
-            "error": None,
-            "is_current": False
-        }
-        
-        start_time = datetime.now()
-        try:
-            test_conn = psycopg2.connect(
-                host=config['host'], 
-                database=config['database'], 
-                user=config['user'], 
-                password=config['password'],
-                connect_timeout=config['timeout']
-            )
-            test_cursor = test_conn.cursor()
-            test_cursor.execute("SELECT 1")
-            test_cursor.fetchone()
-            
-            response_time = (datetime.now() - start_time).total_seconds()
-            db_test["status"] = "connected"
-            db_test["response_time"] = round(response_time, 3)
-            
-            if current_db_config and current_db_config["name"] == config["name"]:
-                db_test["is_current"] = True
-            
-            test_conn.close()
-            
-        except Exception as e:
-            db_test["status"] = "error"
-            db_test["error"] = str(e)
-            
-        diagnostico["databases"].append(db_test)
-    
-    # Información de la conexión actual
-    if current_db_config:
-        diagnostico["connection_details"] = {
-            "current_database": current_db_config["name"],
-            "host": current_db_config["host"],
-            "database": current_db_config["database"],
-            "connection_alive": conn is not None and not conn.closed if conn else False
-        }
-    else:
-        diagnostico["connection_details"] = {
-            "current_database": None,
-            "message": "No hay conexión activa"
-        }
-    
-    # Generar recomendaciones
-    connected_dbs = [db for db in diagnostico["databases"] if db["status"] == "connected"]
-    
-    if not connected_dbs:
-        diagnostico["recommendations"].append("⚠️ Ninguna base de datos está disponible")
-        diagnostico["recommendations"].append("🔧 Verificar conectividad de red")
-        diagnostico["recommendations"].append("🔧 Verificar estado de los servidores de base de datos")
-    elif len(connected_dbs) < len(DB_CONFIGS):
-        diagnostico["recommendations"].append("⚠️ Algunas bases de datos no están disponibles")
-        diagnostico["recommendations"].append("🔧 Verificar configuración de respaldo")
-    else:
-        diagnostico["recommendations"].append("✅ Todas las bases de datos están funcionando")
-    
-    return diagnostico
-
-# ==================== FIN ENDPOINT DE DIAGNÓSTICO ====================
-
-# ==================== ENDPOINTS DE CONECTIVIDAD ====================
-
-@app.get("/test-connection")
-async def test_connection():
-    """Endpoint para probar la conectividad en tiempo real"""
-    try:
-        # Forzar un intento de reconexión
-        success = conectar_base_datos()
-        
-        if success and current_db_config:
-            return {
-                "status": "success",
-                "message": f"Conectado exitosamente a {current_db_config['name']}",
-                "database": current_db_config["name"],
-                "host": current_db_config["host"],
-                "timestamp": datetime.now().isoformat()
-            }
-        else:
-            return {
-                "status": "error",
-                "message": "No se pudo conectar a ninguna base de datos",
-                "timestamp": datetime.now().isoformat()
-            }
-            
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Error probando conexión: {str(e)}",
-            "timestamp": datetime.now().isoformat()
-        }
-
-@app.post("/switch-database/{db_index}")
-async def switch_database(db_index: int):
-    """Endpoint para cambiar manualmente la base de datos"""
-    global current_db_config, conn, cursor
-    
-    try:
-        if db_index < 0 or db_index >= len(DB_CONFIGS):
-            raise HTTPException(status_code=400, detail="Índice de base de datos inválido")
-        
-        target_config = DB_CONFIGS[db_index]
-        
-        # Cerrar conexión actual
-        if conn:
-            conn.close()
-        
-        # Intentar conectar a la base de datos específica
-        try:
-            conn = psycopg2.connect(
-                host=target_config['host'], 
-                database=target_config['database'], 
-                user=target_config['user'], 
-                password=target_config['password'],
-                connect_timeout=target_config['timeout']
-            )
-            cursor = conn.cursor()
-            current_db_config = target_config
-            
-            # Verificar que funciona
-            cursor.execute("SELECT 1")
-            cursor.fetchone()
-            
-            return {
-                "status": "success",
-                "message": f"Cambiado exitosamente a {target_config['name']}",
-                "database": target_config["name"],
-                "host": target_config["host"]
-            }
-            
-        except Exception as e:
-            conn = None
-            cursor = None
-            current_db_config = None
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Error conectando a {target_config['name']}: {str(e)}"
-            )
-            
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error cambiando base de datos: {str(e)}")
-
-# ==================== FIN ENDPOINTS DE CONECTIVIDAD ====================
 
 # Modelos para autenticación
 class UserCreate(BaseModel):

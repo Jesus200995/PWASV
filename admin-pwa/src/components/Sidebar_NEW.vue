@@ -359,9 +359,9 @@ const handleKeydown = (event) => {
   max-width: 240px;
   min-width: 200px;
   background: linear-gradient(135deg, 
-    #4CAF50 0%, 
-    #45a049 50%, 
-    #2E7D32 100%);
+    #388E3C 0%, 
+    #2E7D32 50%, 
+    #1B5E20 100%);
   color: var(--text-light);
   display: flex;
   flex-direction: column;

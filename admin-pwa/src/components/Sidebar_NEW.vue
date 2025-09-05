@@ -896,6 +896,7 @@ const handleKeydown = (event) => {
 .nav-item {
   position: relative;
   margin-bottom: 5px;
+  overflow: hidden;
 }
 
 .nav-link {
@@ -904,8 +905,8 @@ const handleKeydown = (event) => {
   padding: 8px 10px;
   text-decoration: none;
   color: var(--text-light);
-  border-radius: 10px;
-  transition: all 0.3s ease;
+  border-radius: 15px;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   font-weight: 400;
@@ -920,26 +921,33 @@ const handleKeydown = (event) => {
   width: 100%;
   height: 100%;
   background: rgba(255, 255, 255, 0);
-  transition: all 0.3s ease;
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 0;
+  border-radius: 15px;
+  backdrop-filter: blur(0px);
+  transform: scale(0.95);
+  opacity: 0;
 }
 
 .nav-link:hover::before {
   background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  transform: scale(1);
+  opacity: 1;
 }
 
 .nav-icon-container {
   width: 26px;
   height: 26px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 7px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 8px;
   position: relative;
   z-index: 1;
-  transition: all 0.3s ease;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -976,16 +984,36 @@ const handleKeydown = (event) => {
   box-shadow: 0 0 10px rgba(255, 255, 141, 0.6);
 }
 
-/* Estado activo para items de navegación */
+/* Estado activo para items de navegación - Liquid Glass Effect */
 .nav-item.active .nav-link::before {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.3) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: scale(1);
+  opacity: 1;
 }
 
 .nav-item.active .nav-icon-container {
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.4) 100%);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px) scale(1.05);
+  border-radius: 12px;
 }
 
 .nav-item.active .nav-text {
@@ -1002,6 +1030,31 @@ const handleKeydown = (event) => {
 .nav-item.active .nav-indicator {
   opacity: 1;
   transform: translateY(-50%) scaleY(1);
+}
+
+/* Liquid Glass Transition Effect */
+.nav-item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 25%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 100%);
+  backdrop-filter: blur(10px);
+  transition: left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-radius: 15px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.nav-item.active::after {
+  left: 100%;
 }
 
 /* Hover effects */

@@ -600,56 +600,211 @@ async def registrar(
 
 # ENDPOINT CORREGIDO - Esta es la parte importante que debe actualizarse
 @app.get("/registros")
-def obtener_registros(usuario_id: int = None, limit: int = None):
+def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, page_size: int = 1000):
     try:
-        print(f"🔍 Obteniendo registros para usuario: {usuario_id}, límite: {limit if limit else 'Sin límite'}")
+        # Aplicar límite de seguridad para evitar saturación del servidor
+        if limit is None or limit > 5000:
+            limit = 5000  # Límite máximo de seguridad
+            print(f"⚠️ Aplicando límite de seguridad: {limit} registros")
         
-        # Construir consulta según parámetros
+        # Calcular offset para paginación
+        offset = (page - 1) * page_size if page > 1 else 0
+        
+        print(f"🔍 Obteniendo registros - Usuario: {usuario_id}, Límite: {limit}, Página: {page}, Offset: {offset}")
+        
+        # Construir consulta según parámetros con paginación optimizada
         if usuario_id:
             if limit:
-                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC LIMIT %s"
-                params = (usuario_id, limit)
+                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+                          FROM registros WHERE usuario_id = %s 
+                          ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
+                params = (usuario_id, min(limit, page_size), offset)
             else:
-                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad FROM registros WHERE usuario_id = %s ORDER BY fecha_hora DESC"
-                params = (usuario_id,)
+                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+                          FROM registros WHERE usuario_id = %s 
+                          ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
+                params = (usuario_id, page_size, offset)
         else:
             if limit:
-                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad FROM registros ORDER BY fecha_hora DESC LIMIT %s"
-                params = (limit,)
+                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+                          FROM registros ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
+                params = (min(limit, page_size), offset)
             else:
-                query = "SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad FROM registros ORDER BY fecha_hora DESC"
-                params = None
+                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+                          FROM registros ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
+                params = (page_size, offset)
         
-        # Ejecutar consulta con manejo seguro
-        resultados = ejecutar_consulta_segura(query, params, fetch_type='all')
+        # Ejecutar consulta con manejo seguro y timeout
+        try:
+            resultados = ejecutar_consulta_segura(query, params, fetch_type='all')
+        except Exception as db_error:
+            print(f"❌ Error de base de datos al obtener registros: {db_error}")
+            # Si hay error, devolver respuesta vacía en lugar de fallar
+            return {
+                "registros": [],
+                "total": 0,
+                "error": "Error temporal de base de datos",
+                "page": page,
+                "page_size": page_size
+            }
         
         if not resultados:
             resultados = []
         
         print(f"📊 Encontrados {len(resultados)} registros")
         
-        # Convertir tuplas a diccionarios manualmente
-        registros = []
-        for row in resultados:
-            registro = {
-                "id": row[0],
-                "usuario_id": row[1],
-                "latitud": float(row[2]) if row[2] else None,
-                "longitud": float(row[3]) if row[3] else None,
-                "descripcion": row[4],
-                "foto_url": row[5],
-                "fecha_hora": row[6].isoformat() if row[6] else None,
-                "tipo_actividad": row[7] if len(row) > 7 else "campo"  # Por compatibilidad con registros antiguos
-            }
-            registros.append(registro)
+        # Obtener total de registros para paginación (solo si es necesario)
+        total_registros = len(resultados)
+        if page == 1 and len(resultados) == page_size:
+            # Solo calcular total si podría haber más páginas
+            try:
+                if usuario_id:
+                    cursor.execute("SELECT COUNT(*) FROM registros WHERE usuario_id = %s", (usuario_id,))
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM registros")
+                total_registros = cursor.fetchone()[0]
+            except Exception:
+                total_registros = len(resultados)  # Fallback al conteo actual
         
-        print(f"✅ Registros procesados correctamente")
-        return {"registros": registros}
+        # Convertir tuplas a diccionarios manualmente con manejo de errores
+        registros = []
+        for i, row in enumerate(resultados):
+            try:
+                registro = {
+                    "id": row[0],
+                    "usuario_id": row[1],
+                    "latitud": float(row[2]) if row[2] is not None else None,
+                    "longitud": float(row[3]) if row[3] is not None else None,
+                    "descripcion": row[4] if row[4] is not None else "",
+                    "foto_url": row[5] if row[5] is not None else None,
+                    "fecha_hora": row[6].isoformat() if row[6] else None,
+                    "tipo_actividad": row[7] if len(row) > 7 and row[7] is not None else "campo"
+                }
+                registros.append(registro)
+            except Exception as row_error:
+                print(f"⚠️ Error procesando registro {i}: {row_error}")
+                continue  # Saltar registros problemáticos
+        
+        print(f"✅ {len(registros)} registros procesados correctamente")
+        
+        # Respuesta con información de paginación
+        response_data = {
+            "registros": registros,
+            "total": total_registros,
+            "page": page,
+            "page_size": page_size,
+            "has_more": len(registros) == page_size
+        }
+        
+        return response_data
         
     except HTTPException:
         raise
     except Exception as e:
         print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener registros: {str(e)}")
+
+# NUEVO ENDPOINT OPTIMIZADO PARA ADMIN-PWA
+@app.get("/admin/registros")
+def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int = None):
+    """Endpoint optimizado para el admin-pwa con paginación obligatoria"""
+    try:
+        # Límites de seguridad para admin
+        max_page_size = 200
+        page_size = min(page_size, max_page_size)
+        page = max(1, page)  # Asegurar página mínima
+        
+        offset = (page - 1) * page_size
+        
+        print(f"🔍 [ADMIN] Obteniendo registros - Página: {page}, Tamaño: {page_size}, Offset: {offset}, Usuario: {usuario_id}")
+        
+        # Verificar conexión antes de continuar
+        if not verificar_conexion_db():
+            raise HTTPException(status_code=503, detail="Servicio de base de datos no disponible")
+        
+        # Construir consulta optimizada con índices
+        base_query = """
+            SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+            FROM registros 
+        """
+        
+        count_query = "SELECT COUNT(*) FROM registros"
+        
+        if usuario_id:
+            where_clause = " WHERE usuario_id = %s"
+            base_query += where_clause
+            count_query += where_clause
+            query_params = (usuario_id,)
+            pagination_params = (usuario_id, page_size, offset)
+        else:
+            query_params = ()
+            pagination_params = (page_size, offset)
+        
+        # Obtener total de registros primero (para paginación)
+        try:
+            total_registros = ejecutar_consulta_segura(count_query, query_params, fetch_type='one')[0]
+        except Exception as count_error:
+            print(f"⚠️ Error obteniendo conteo: {count_error}")
+            total_registros = 0
+        
+        # Consulta principal con paginación y orden optimizado
+        main_query = base_query + " ORDER BY id DESC LIMIT %s OFFSET %s"
+        
+        try:
+            resultados = ejecutar_consulta_segura(main_query, pagination_params, fetch_type='all')
+        except Exception as query_error:
+            print(f"❌ Error en consulta principal: {query_error}")
+            return {
+                "registros": [],
+                "total": 0,
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0,
+                "has_more": False,
+                "error": "Error temporal de base de datos"
+            }
+        
+        if not resultados:
+            resultados = []
+        
+        # Procesar resultados de forma segura
+        registros = []
+        for row in resultados:
+            try:
+                registro = {
+                    "id": row[0],
+                    "usuario_id": row[1],
+                    "latitud": float(row[2]) if row[2] is not None else 0.0,
+                    "longitud": float(row[3]) if row[3] is not None else 0.0,
+                    "descripcion": row[4] if row[4] is not None else "",
+                    "foto_url": row[5] if row[5] is not None else None,
+                    "fecha_hora": row[6].isoformat() if row[6] else None,
+                    "tipo_actividad": row[7] if len(row) > 7 and row[7] is not None else "campo"
+                }
+                registros.append(registro)
+            except Exception as row_error:
+                print(f"⚠️ Error procesando registro: {row_error}")
+                continue
+        
+        # Calcular paginación
+        total_pages = (total_registros + page_size - 1) // page_size if total_registros > 0 else 0
+        has_more = page < total_pages
+        
+        print(f"✅ [ADMIN] {len(registros)} registros procesados - Total: {total_registros}, Páginas: {total_pages}")
+        
+        return {
+            "registros": registros,
+            "total": total_registros,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+            "has_more": has_more
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ [ADMIN] Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener registros: {str(e)}")
 
 # NUEVO ENDPOINT PARA ESTADÍSTICAS COMPLETAS (SIN LÍMITES)

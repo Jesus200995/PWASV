@@ -350,6 +350,35 @@
           </div>
           
           <div v-else class="table-container">
+            <!-- Información de carga optimizada -->
+            <div class="load-info">
+              <div class="load-status">
+                <span class="load-icon">⚡</span>
+                <span class="load-text">
+                  Mostrando {{ registros.length.toLocaleString('es') }} registros cargados
+                  <template v-if="totalRegistrosServidor > registros.length">
+                    de {{ totalRegistrosServidor.toLocaleString('es') }} totales
+                  </template>
+                </span>
+                <button 
+                  v-if="totalRegistrosServidor > registros.length && !cargandoMas" 
+                  @click="cargarMasRegistros"
+                  class="load-more-btn"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14m-7-7l7 7 7-7"/>
+                  </svg>
+                  Cargar más
+                </button>
+                <span v-if="cargandoMas" class="loading-more">
+                  <svg class="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <path d="M9 12l2 2 4-4"/>
+                  </svg>
+                  Cargando...
+                </span>
+              </div>
+            </div>
             <!-- 
             <div class="registros-info">
               <div class="registros-total">
@@ -805,10 +834,50 @@ const filtroConFoto = ref(false)
 const filtroSinFoto = ref(false)
 const filtroConDescripcion = ref(false)
 
-// Variables para paginación
+// Variables para paginación y carga eficiente
 const paginaActual = ref(1)
 const registrosPorPagina = ref(50)
 const paginaSalto = ref('')
+const totalRegistrosServidor = ref(0)
+const cargandoMas = ref(false)
+
+// Función para cargar más registros cuando sea necesario
+const cargarMasRegistros = async () => {
+  if (cargandoMas.value) return
+  
+  try {
+    cargandoMas.value = true
+    const token = localStorage.getItem('admin_token')
+    
+    console.log('📊 Cargando más registros...')
+    
+    const response = await axios.get(`${API_URL}/admin/registros`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      params: {
+        page: Math.ceil(registros.value.length / 1000) + 1,
+        page_size: 1000,
+        usuario_id: filtroUsuario.value || undefined
+      },
+      timeout: 30000
+    })
+    
+    const { registros: registrosNuevos = [] } = response.data
+    
+    if (registrosNuevos.length > 0) {
+      const registrosEnriquecidos = await usuariosService.enriquecerRegistrosConUsuarios(registrosNuevos)
+      registros.value = [...registros.value, ...registrosEnriquecidos]
+      console.log(`✅ Cargados ${registrosNuevos.length} registros adicionales`)
+    }
+    
+  } catch (err) {
+    console.error('Error cargando más registros:', err)
+  } finally {
+    cargandoMas.value = false
+  }
+}
 
 // Variables para contadores de estadísticas
 const actividadesHoy = ref('-')
@@ -916,18 +985,28 @@ const cargarRegistros = async () => {
   
   try {
     const token = localStorage.getItem('admin_token')
-    console.log('📊 Solicitando TODOS los registros sin límite...')
+    console.log('📊 Solicitando registros con límite seguro...')
     console.time('Carga de registros')
-    const response = await axios.get(`${API_URL}/registros`, {
+    
+    // Usar el nuevo endpoint optimizado /admin/registros
+    const response = await axios.get(`${API_URL}/admin/registros`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      params: {
+        page: 1,
+        page_size: 1000, // Paginación optimizada
+        usuario_id: filtroUsuario.value || undefined
+      },
+      timeout: 30000 // Timeout de 30 segundos
     })
     
-    // La respuesta puede ser directamente un array o tener una propiedad específica
-    const registrosRaw = Array.isArray(response.data) ? response.data : (response.data.registros || [])
-    console.log(`🔢 Recibidos ${registrosRaw.length} registros totales del servidor`)
+    console.log('✅ Respuesta de la API obtenida exitosamente:', response.data)
+    
+    // El nuevo endpoint devuelve un objeto con paginación
+    const { registros: registrosRaw = [], total = 0 } = response.data
+    console.log(`🔢 Recibidos ${registrosRaw.length} registros de ${total} totales`)
     
     // Enriquecer registros con información de usuarios
     registros.value = await usuariosService.enriquecerRegistrosConUsuarios(registrosRaw)
@@ -961,7 +1040,7 @@ const cargarRegistros = async () => {
     const conDescripcion = registros.value.filter(r => r.descripcion && r.descripcion.trim() !== '').length;
     const totalUsuariosUnicos = new Set(registros.value.map(r => r.usuario_id)).size;
     
-    console.log(`📈 Estadísticas: ${registros.value.length.toLocaleString('es')} registros | ${totalUsuariosUnicos} usuarios | ${conFotos} con foto (${(conFotos/registros.value.length*100).toFixed(1)}%) | ${conDescripcion} con descripción (${(conDescripcion/registros.value.length*100).toFixed(1)}%)`);
+    console.log(`📈 Estadísticas: ${registros.value.length.toLocaleString('es')} registros cargados | ${totalUsuariosUnicos} usuarios | ${conFotos} con foto (${(conFotos/registros.value.length*100).toFixed(1)}%) | ${conDescripcion} con descripción (${(conDescripcion/registros.value.length*100).toFixed(1)}%)`);
     
     // Aplicar filtros iniciales
     filtrarRegistros()
@@ -971,8 +1050,12 @@ const cargarRegistros = async () => {
     
   } catch (err) {
     console.error('Error al cargar registros:', err)
-    if (err.response?.status === 401) {
+    if (err.code === 'ECONNABORTED') {
+      error.value = 'Timeout: La consulta está tardando demasiado. Intenta filtrar por usuario específico.'
+    } else if (err.response?.status === 401) {
       logout()
+    } else if (err.response?.status === 503) {
+      error.value = 'Servicio temporalmente no disponible. Inténtalo de nuevo en unos momentos.'
     } else {
       error.value = 'Error al cargar los registros: ' + (err.response?.data?.detail || err.message)
     }
@@ -982,9 +1065,42 @@ const cargarRegistros = async () => {
 }
 
 // Función para calcular estadísticas
-const calcularEstadisticas = () => {
+const calcularEstadisticas = async () => {
   try {
-    // Total de actividades (registros)
+    // Obtener estadísticas del servidor para datos precisos
+    const token = localStorage.getItem('admin_token')
+    
+    try {
+      const response = await axios.get(`${API_URL}/estadisticas`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000 // Timeout corto para estadísticas
+      })
+      
+      const stats = response.data.estadisticas
+      
+      if (stats) {
+        totalActividades.value = stats.total_registros?.toLocaleString('es') || '0'
+        actividadesHoy.value = stats.registros_hoy?.toLocaleString('es') || '0'
+        totalRegistrosServidor.value = stats.total_registros || 0
+      }
+    } catch (statsError) {
+      console.warn('⚠️ No se pudieron obtener estadísticas del servidor, usando datos locales...')
+      // Fallback a cálculo local
+      calcularEstadisticasLocales()
+    }
+    
+  } catch (error) {
+    console.error('Error al calcular estadísticas:', error)
+    calcularEstadisticasLocales()
+  }
+}
+
+const calcularEstadisticasLocales = () => {
+  try {
+    // Total de actividades (registros locales)
     totalActividades.value = registros.value.length.toLocaleString('es')
     
     // Actividades de hoy
@@ -1000,19 +1116,25 @@ const calcularEstadisticas = () => {
     
     actividadesHoy.value = registrosHoy.length.toLocaleString('es')
     
-    console.log(`📊 Estadísticas calculadas: ${totalActividades.value} total, ${actividadesHoy.value} hoy`)
+    console.log(`📊 Estadísticas locales: ${totalActividades.value} total, ${actividadesHoy.value} hoy`)
   } catch (error) {
-    console.error('Error al calcular estadísticas:', error)
+    console.error('Error al calcular estadísticas locales:', error)
     actividadesHoy.value = '0'
     totalActividades.value = '0'
   }
 }
 
-const filtrarRegistros = () => {
+const filtrarRegistros = async () => {
   let filtrados = [...registros.value]
   
   // Actualizar usuariosUnicos basado en los registros actuales
   actualizarUsuariosUnicos()
+
+  // Si cambió el filtro de usuario, recargar del servidor
+  if (filtroUsuario.value && !registros.value.some(r => r.usuario_id === parseInt(filtroUsuario.value))) {
+    await cargarRegistrosParaUsuario(parseInt(filtroUsuario.value))
+    filtrados = [...registros.value]
+  }
 
   // Filtro por texto de búsqueda
   if (searchTerm.value) {
@@ -1116,6 +1238,47 @@ const filtrarRegistros = () => {
   
   actualizarFiltrosActivos()
   aplicarOrdenamiento()
+}
+
+// Nueva función para cargar registros de un usuario específico
+const cargarRegistrosParaUsuario = async (usuarioId) => {
+  if (!usuarioId) return
+  
+  try {
+    const token = localStorage.getItem('admin_token')
+    console.log(`🔍 Cargando registros para usuario ${usuarioId}...`)
+    
+    const response = await axios.get(`${API_URL}/admin/registros`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      params: {
+        page: 1,
+        page_size: 1000,
+        usuario_id: usuarioId
+      },
+      timeout: 15000
+    })
+    
+    const { registros: registrosUsuario = [] } = response.data
+    
+    if (registrosUsuario.length > 0) {
+      const registrosEnriquecidos = await usuariosService.enriquecerRegistrosConUsuarios(registrosUsuario)
+      
+      // Combinar con registros existentes (evitar duplicados)
+      const idsExistentes = new Set(registros.value.map(r => r.id))
+      const registrosNuevos = registrosEnriquecidos.filter(r => !idsExistentes.has(r.id))
+      
+      if (registrosNuevos.length > 0) {
+        registros.value = [...registros.value, ...registrosNuevos]
+        console.log(`✅ Agregados ${registrosNuevos.length} registros del usuario ${usuarioId}`)
+      }
+    }
+    
+  } catch (error) {
+    console.error(`Error cargando registros del usuario ${usuarioId}:`, error)
+  }
 }
 
 const actualizarUsuariosUnicos = () => {
@@ -2764,7 +2927,116 @@ const logout = () => {
   }
 }
 
-/* Contenido de la página */
+/* Estilos para información de carga optimizada */
+.load-info {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.04) 100%);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  animation: fadeInDown 0.4s ease-out;
+}
+
+.load-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.load-icon {
+  font-size: 1.2rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.load-text {
+  color: #4b5563;
+  font-weight: 500;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.load-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.load-more-btn:hover {
+  background: linear-gradient(135deg, #43A047 0%, #5CB85C 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.loading-more {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4CAF50;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.loading-more .spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive para información de carga */
+@media (max-width: 768px) {
+  .load-info {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .load-status {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .load-text {
+    text-align: center;
+    font-size: 0.8rem;
+  }
+  
+  .load-more-btn {
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+}
 
 .refresh-btn::before {
   content: '';

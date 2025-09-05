@@ -428,22 +428,23 @@ const handleKeydown = (event) => {
   --primary-dark: #1B5E20;
   --primary: #2E7D32;
   --primary-light: #4CAF50;
-  --accent: #81C784;
-  --accent-light: #A5D6A7;
-  --accent-very-light: #C8E6C9;
+  --accent: #FFFFFF;
+  --accent-light: #E8F5E9;
+  --accent-very-light: #F1F8E9;
   --background: #FFFFFF;
   --surface: #F5F5F5;
   --surface-hover: #EEEEEE;
   --text-primary: #212121;
   --text-secondary: #757575;
   --text-light: #FFFFFF;
-  --border-light: rgba(255, 255, 255, 0.2);
+  --text-highlight: #FFFF8D;
+  --border-light: rgba(255, 255, 255, 0.3);
   --border-dark: rgba(0, 0, 0, 0.1);
-  --shadow-color: rgba(0, 0, 0, 0.15);
-  --error: #D32F2F;
-  --warning: #FFA000;
-  --info: #1976D2;
-  --success: #388E3C;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --error: #FF5252;
+  --warning: #FFD740;
+  --info: #40C4FF;
+  --success: #69F0AE;
 }
 
 /* Base */
@@ -456,8 +457,9 @@ const handleKeydown = (event) => {
   max-width: 240px;
   min-width: 200px;
   background: linear-gradient(135deg, 
-    var(--primary-dark) 0%, 
-    var(--primary) 100%);
+    #4CAF50 0%, 
+    #45a049 50%, 
+    #2E7D32 100%);
   color: var(--text-light);
   display: flex;
   flex-direction: column;
@@ -466,7 +468,7 @@ const handleKeydown = (event) => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   overflow-x: hidden;
-  border-radius: 0 12px 12px 0;
+  border-radius: 0;
   font-family: 'Poppins', 'Segoe UI', sans-serif;
 }
 
@@ -521,7 +523,7 @@ const handleKeydown = (event) => {
 
 /* Header */
 .sidebar-header {
-  padding: 16px 16px 12px;
+  padding: 12px 12px 8px;
   position: relative;
 }
 
@@ -594,17 +596,19 @@ const handleKeydown = (event) => {
 
 .brand-name {
   font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 800;
   color: var(--text-light);
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
   margin: 0;
   text-transform: uppercase;
-  background: linear-gradient(45deg, #FFFFFF 30%, #C8E6C9 70%);
+  background: linear-gradient(45deg, #FFFFFF 30%, #FFFF8D 70%);
   -webkit-background-clip: text;
   color: transparent;
   background-clip: text;
   animation: gradientText 3s ease infinite;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
 }
 
 @keyframes gradientText {
@@ -617,11 +621,12 @@ const handleKeydown = (event) => {
 }
 
 .brand-tagline {
-  font-size: 10px;
-  font-weight: 300;
-  color: var(--accent-very-light);
-  opacity: 0.8;
-  margin: 2px 0 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #FFFFFF;
+  opacity: 0.95;
+  margin: 4px 0 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .text-underline {
@@ -660,26 +665,15 @@ const handleKeydown = (event) => {
 /* Links rápidos */
 .quick-links {
   display: flex;
-  justify-content: space-around;
-  padding: 12px 8px;
-  margin: 0 10px 12px;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin: 0 10px 8px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  border-radius: 8px;
   position: relative;
-}
-
-.quick-links::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 10px;
-  z-index: -1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .quick-link {
@@ -687,44 +681,44 @@ const handleKeydown = (event) => {
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  color: var(--text-light);
-  gap: 6px;
-  padding: 8px;
-  border-radius: 8px;
+  color: white;
+  gap: 3px;
+  padding: 4px;
+  border-radius: 6px;
   transition: all 0.3s ease;
-  flex: 1;
+  width: 45%;
+  max-width: 70px;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.quick-link::before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0);
-  transition: all 0.3s ease;
-  top: 0;
-  left: 0;
-  border-radius: 10px;
-  z-index: 0;
-}
-
-.quick-link:hover::before {
-  background: rgba(255, 255, 255, 0.1);
+.quick-link:hover {
+  transform: translateY(-2px);
 }
 
 .quick-link.geoportal {
-  color: #81D4FA;
+  color: white;
+  background: rgba(46, 125, 50, 0.8);
+}
+
+.quick-link.geoportal:hover {
+  background: rgba(46, 125, 50, 0.9);
 }
 
 .quick-link.app-movil {
-  color: #FFD54F;
+  color: white;
+  background: linear-gradient(135deg, rgba(38, 166, 154, 0.7) 0%, rgba(33, 150, 243, 0.7) 100%);
+}
+
+.quick-link.app-movil:hover {
+  background: linear-gradient(135deg, rgba(38, 166, 154, 0.8) 0%, rgba(33, 150, 243, 0.8) 100%);
 }
 
 .link-icon-container {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   display: flex;
@@ -733,31 +727,38 @@ const handleKeydown = (event) => {
   position: relative;
   z-index: 1;
   transition: all 0.3s ease;
+  border: none;
 }
 
 .quick-link:hover .link-icon-container {
-  transform: translateY(-3px);
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .quick-link.geoportal .link-icon-container {
-  box-shadow: 0 0 12px rgba(129, 212, 250, 0.3);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .quick-link.app-movil .link-icon-container {
-  box-shadow: 0 0 12px rgba(255, 213, 79, 0.3);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .link-icon {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   stroke-width: 2;
+  color: white;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
 }
 
 .quick-link span {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 8px;
+  font-weight: 400;
   position: relative;
   z-index: 1;
+  color: white;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
 }
 
 .quick-link:active .link-icon-container {
@@ -768,7 +769,7 @@ const handleKeydown = (event) => {
 .sidebar-nav {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 10px 16px;
+  padding: 6px 10px 12px;
 }
 
 .sidebar-nav::-webkit-scrollbar {
@@ -792,7 +793,7 @@ const handleKeydown = (event) => {
 
 .nav-item {
   position: relative;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .nav-link {
@@ -805,6 +806,8 @@ const handleKeydown = (event) => {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  font-weight: 400;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .nav-link::before {
@@ -820,13 +823,13 @@ const handleKeydown = (event) => {
 }
 
 .nav-link:hover::before {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .nav-icon-container {
   width: 30px;
   height: 30px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -835,6 +838,7 @@ const handleKeydown = (event) => {
   position: relative;
   z-index: 1;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .nav-icon {
@@ -842,14 +846,18 @@ const handleKeydown = (event) => {
   height: 16px;
   stroke-width: 2;
   transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  color: #FFFFFF;
 }
 
 .nav-text {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 400;
   position: relative;
   z-index: 1;
   flex: 1;
+  letter-spacing: 0.3px;
+  color: #FFFFFF;
 }
 
 .nav-indicator {
@@ -858,26 +866,35 @@ const handleKeydown = (event) => {
   top: 50%;
   transform: translateY(-50%) scaleY(0);
   width: 4px;
-  height: 60%;
-  background: var(--accent-light);
+  height: 70%;
+  background: var(--text-highlight);
   border-radius: 0 4px 4px 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 0;
+  box-shadow: 0 0 10px rgba(255, 255, 141, 0.6);
 }
 
 /* Estado activo para items de navegación */
 .nav-item.active .nav-link::before {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .nav-item.active .nav-icon-container {
-  background: var(--accent);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.nav-item.active .nav-text {
+  font-weight: 400;
+  color: #FFFFFF;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .nav-item.active .nav-icon {
-  color: #FFF;
+  color: #FFFFFF;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
 }
 
 .nav-item.active .nav-indicator {
@@ -888,7 +905,7 @@ const handleKeydown = (event) => {
 /* Hover effects */
 .nav-link:hover .nav-icon-container {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Notification badge */
@@ -913,37 +930,43 @@ const handleKeydown = (event) => {
 
 /* Footer */
 .sidebar-footer {
-  padding: 12px;
+  padding: 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   gap: 12px;
+  background: transparent;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px;
-  background: rgba(255, 255, 255, 0.07);
+  padding: 8px;
+  background: transparent;
   border-radius: 8px;
+  border: none;
+  box-shadow: none;
 }
 
 .user-avatar {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: var(--primary-light);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border: none;
+  box-shadow: none;
 }
 
 .user-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--text-light);
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.8);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .user-details {
@@ -953,56 +976,65 @@ const handleKeydown = (event) => {
 
 .user-name {
   margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 400;
+  color: #FFFFFF;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .user-role {
   margin: 0;
-  font-size: 10px;
-  color: var(--accent-very-light);
-  opacity: 0.8;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0.9;
+  font-weight: 400;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
 .logout-button {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 10px 14px;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 8px;
   background: linear-gradient(135deg, 
-    rgba(255, 87, 34, 0.8) 0%,
-    rgba(244, 67, 54, 0.8) 100%);
+    rgba(255, 87, 34, 0.9) 0%,
+    rgba(244, 67, 54, 0.9) 100%);
   color: white;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  width: 100%;
 }
 
 .logout-button:hover {
   background: linear-gradient(135deg,
-    rgba(255, 87, 34, 0.9) 0%,
-    rgba(244, 67, 54, 0.9) 100%);
+    rgba(255, 87, 34, 1) 0%,
+    rgba(244, 67, 54, 1) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .logout-button:active {
   transform: translateY(0);
-  box-shadow: 0 3px 8px rgba(244, 67, 54, 0.3);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .logout-icon {
   width: 18px;
   height: 18px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 /* Modal */
@@ -1194,7 +1226,6 @@ const handleKeydown = (event) => {
   .sidebar,
   .sidebar.collapsed {
     width: 100%;
-    border-radius: 0;
   }
 }
 </style>

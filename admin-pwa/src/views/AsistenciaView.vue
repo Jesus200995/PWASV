@@ -613,7 +613,7 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar.vue'
+import Sidebar from '../components/Sidebar_NEW.vue'
 import MapaAsistenciaModal from '../components/MapaAsistenciaModal.vue'
 import AsistenciasService from '../services/asistenciasService.js'
 import EstadisticasService from '../services/estadisticasService.js'
@@ -2493,9 +2493,9 @@ export default {
 
 .main-content {
   flex: 1;
-  margin-left: clamp(180px, 18vw, 240px);
+  margin-left: min(220px, 18vw);
   transition: all 0.3s ease;
-  width: calc(100vw - clamp(180px, 18vw, 240px));
+  width: calc(100vw - min(220px, 18vw));
   overflow-x: hidden;
 }
 

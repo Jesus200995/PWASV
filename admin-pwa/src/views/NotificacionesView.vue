@@ -647,7 +647,7 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar.vue'
+import Sidebar from '../components/Sidebar_NEW.vue'
 import notificacionesService from '../services/notificacionesService.js'
 import usuariosService from '../services/usuariosService.js'
 
@@ -1083,8 +1083,8 @@ export default {
 
 .main-content {
   flex: 1;
-  margin-left: clamp(180px, 18vw, 240px);
-  width: calc(100vw - clamp(180px, 18vw, 240px));
+  margin-left: min(220px, 18vw);
+  width: calc(100vw - min(220px, 18vw));
   min-width: 0;
   display: flex;
   flex-direction: column;

@@ -5,7 +5,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <Sidebar @logout="logout" />
+    <Sidebar_NEW @logout="logout" />
     
     <main class="main-content">
       <header class="page-header">
@@ -1757,8 +1757,8 @@ watch(filtroTipo, () => {
 
 .main-content {
   flex: 1;
-  margin-left: clamp(180px, 18vw, 240px);
-  width: calc(100vw - clamp(180px, 18vw, 240px));
+  margin-left: min(220px, 18vw);
+  width: calc(100vw - min(220px, 18vw));
   background: transparent;
   display: flex;
   flex-direction: column;

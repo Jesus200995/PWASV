@@ -480,7 +480,7 @@
 
 <script>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import Sidebar from '../components/Sidebar.vue'
+import Sidebar from '../components/Sidebar_NEW.vue'
 import { useRouter } from 'vue-router'
 import usuariosService from '../services/usuariosService.js'
 import historialService from '../services/historialService.js'
@@ -1061,8 +1061,8 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: clamp(180px, 18vw, 240px);
-  width: calc(100vw - clamp(180px, 18vw, 240px));
+  margin-left: min(220px, 18vw);
+  width: calc(100vw - min(220px, 18vw));
   background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
   min-height: 100vh;
   position: relative;

@@ -1,6 +1,6 @@
 <template>
   <div class="registros-container">
-    <Sidebar @logout="logout" />
+    <Sidebar_NEW @logout="logout" />
     
     <main class="main-content">      <header class="page-header">
         <div class="header-content">
@@ -2420,8 +2420,8 @@ const logout = () => {
 
 .main-content {
   flex: 1;
-  margin-left: clamp(180px, 18vw, 240px);
-  width: calc(100vw - clamp(180px, 18vw, 240px));
+  margin-left: min(220px, 18vw);
+  width: calc(100vw - min(220px, 18vw));
   background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
   min-height: 100vh;
   position: relative;

@@ -610,7 +610,7 @@
 import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import Sidebar from '../components/Sidebar.vue'
+import Sidebar from '../components/Sidebar_NEW.vue'
 import { usuariosService } from '../services/usuariosService.js'
 import AsistenciasService from '../services/asistenciasService.js'
 import { estadisticasService } from '../services/estadisticasService.js'
@@ -1273,12 +1273,12 @@ const logout = () => {
 
 .main-content {
   flex: 1;
-  margin-left: clamp(180px, 18vw, 240px);
+  margin-left: min(220px, 18vw);
   background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
   min-height: 100vh;
   position: relative;
-  width: calc(100vw - clamp(180px, 18vw, 240px));
-  max-width: calc(100vw - clamp(180px, 18vw, 240px));
+  width: calc(100vw - min(220px, 18vw));
+  max-width: calc(100vw - min(220px, 18vw));
   padding: 0;
   overflow-x: hidden;
 }

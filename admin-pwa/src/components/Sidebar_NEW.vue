@@ -895,13 +895,13 @@ const handleKeydown = (event) => {
 
 .nav-item {
   position: relative;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 8px 10px;
   text-decoration: none;
   color: var(--text-light);
   border-radius: 10px;
@@ -929,14 +929,14 @@ const handleKeydown = (event) => {
 }
 
 .nav-icon-container {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
+  margin-right: 8px;
   position: relative;
   z-index: 1;
   transition: all 0.3s ease;
@@ -944,8 +944,8 @@ const handleKeydown = (event) => {
 }
 
 .nav-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   stroke-width: 2;
   transition: all 0.3s ease;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
@@ -953,7 +953,7 @@ const handleKeydown = (event) => {
 }
 
 .nav-text {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   position: relative;
   z-index: 1;

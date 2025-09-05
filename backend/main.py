@@ -14,7 +14,6 @@ import re
 import bcrypt
 import pytz
 import json
-import sqlite3
 from typing import List, Optional
 import io
 
@@ -33,7 +32,7 @@ app.add_middleware(
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"
 
-# Configuración para bases de datos (PostgreSQL y SQLite)
+# Conexión a PostgreSQL con manejo robusto
 DB_HOST = "31.97.8.51"
 DB_NAME = "app_registros"
 DB_USER = "jesus"
@@ -42,17 +41,14 @@ DB_PASS = "2025"
 # Variables globales para la conexión
 conn = None
 cursor = None
-is_sqlite = False  # Flag para saber qué tipo de BD estamos usando
 
 def conectar_base_datos():
     """Función para establecer/reestablecer conexión a la base de datos"""
-    global conn, cursor, is_sqlite
+    global conn, cursor
     try:
         if conn:
             conn.close()
         
-        # Intentar conectar a PostgreSQL primero
-        print("🐘 Intentando conectar a PostgreSQL...")
         conn = psycopg2.connect(
             host=DB_HOST, 
             database=DB_NAME, 
@@ -65,52 +61,28 @@ def conectar_base_datos():
             keepalives_interval=5,
             keepalives_count=5
         )
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
-        is_sqlite = False
-        print("✅ Conectado a PostgreSQL exitosamente")
+        cursor = conn.cursor()
+        print("✅ Conexión a la base de datos exitosa")
         return True
     except Exception as e:
-        print(f"❌ Error conectando a PostgreSQL: {e}")
-        print("🔄 Cambiando a SQLite local...")
-        try:
-            # Usar SQLite como fallback
-            sqlite_db = "local_database.db"
-            conn = sqlite3.connect(sqlite_db, check_same_thread=False)
-            conn.row_factory = sqlite3.Row  # Para tener acceso por nombre de columna
-            cursor = conn.cursor()
-            is_sqlite = True
-            print(f"✅ Conectado a SQLite local: {sqlite_db}")
-            return True
-        except Exception as sqlite_error:
-            print(f"❌ Error conectando a SQLite: {sqlite_error}")
-            conn = None
-            cursor = None
-            return False
+        print(f"❌ Error conectando a la base de datos: {e}")
+        conn = None
+        cursor = None
+        return False
 
 def verificar_conexion_db():
     """Verificar y reestablecer conexión si es necesario"""
-    global conn, cursor, is_sqlite
+    global conn, cursor
     try:
-        if not conn:
+        if not conn or conn.closed:
             print("🔄 Reestableciendo conexión cerrada...")
             return conectar_base_datos()
         
-        if is_sqlite:
-            # Para SQLite, simplemente verificar que la conexión existe
-            cursor.execute("SELECT 1")
-            cursor.fetchone()
-            return True
-        else:
-            # Para PostgreSQL, verificar si está cerrada
-            if conn.closed:
-                print("🔄 Reestableciendo conexión cerrada...")
-                return conectar_base_datos()
-            
-            # Test de conexión simple
-            cursor.execute("SELECT 1")
-            cursor.fetchone()
-            return True
-    except (psycopg2.Error, psycopg2.OperationalError, AttributeError, sqlite3.Error):
+        # Test de conexión simple
+        cursor.execute("SELECT 1")
+        cursor.fetchone()
+        return True
+    except (psycopg2.Error, psycopg2.OperationalError, AttributeError):
         print("🔄 Conexión perdida, reestableciendo...")
         return conectar_base_datos()
 
@@ -145,15 +117,14 @@ def ejecutar_consulta_segura(query, params=None, fetch_type='all'):
             
             return result
             
-        except (psycopg2.Error, sqlite3.Error) as e:
-            print(f"❌ Error de base de datos en intento {intento}: {e}")
+        except psycopg2.Error as e:
+            print(f"❌ Error de PostgreSQL en intento {intento}: {e}")
             
             # Hacer rollback para limpiar la transacción corrupta
             try:
-                if conn:
-                    if is_sqlite or (not is_sqlite and not conn.closed):
-                        conn.rollback()
-                        print("🔄 Rollback ejecutado para limpiar transacción")
+                if conn and not conn.closed:
+                    conn.rollback()
+                    print("🔄 Rollback ejecutado para limpiar transacción")
             except Exception as rollback_error:
                 print(f"⚠️ Error en rollback: {rollback_error}")
             
@@ -168,127 +139,29 @@ def ejecutar_consulta_segura(query, params=None, fetch_type='all'):
             
             # Hacer rollback también para errores generales
             try:
-                if conn:
-                    if is_sqlite or (not is_sqlite and not conn.closed):
-                        conn.rollback()
-                        print("🔄 Rollback ejecutado para error general")
+                if conn and not conn.closed:
+                    conn.rollback()
+                    print("🔄 Rollback ejecutado para error general")
             except Exception as rollback_error:
                 print(f"⚠️ Error en rollback: {rollback_error}")
             
             if intento == max_reintentos:
                 raise HTTPException(status_code=500, detail=f"Error al ejecutar consulta: {str(e)}")
-            
-            # Intentar reconectar para el siguiente intento
-            conectar_base_datos()
-    
-    # Si llegamos aquí, todos los intentos fallaron
-    raise HTTPException(status_code=500, detail="Error: se agotaron todos los intentos de reconexión")
 
 # Establecer conexión inicial
 try:
     conectar_base_datos()
     
-    # Crear tabla admin_users si no existe (compatible con SQLite y PostgreSQL)
-    if is_sqlite:
-        admin_users_query = """
-            CREATE TABLE IF NOT EXISTS admin_users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL,
-                rol TEXT DEFAULT 'admin',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """
-    else:
-        admin_users_query = """
-            CREATE TABLE IF NOT EXISTS admin_users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(100) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                rol VARCHAR(20) DEFAULT 'admin' CHECK (rol IN ('admin', 'user')),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """
-    
-    ejecutar_consulta_segura(admin_users_query, fetch_type='none')
-    
-    # Crear otras tablas necesarias si estamos usando SQLite
-    if is_sqlite:
-        # Tabla usuarios
-        ejecutar_consulta_segura("""
-            CREATE TABLE IF NOT EXISTS usuarios (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                correo TEXT UNIQUE NOT NULL,
-                nombre_completo TEXT NOT NULL,
-                cargo TEXT NOT NULL,
-                supervisor TEXT,
-                contrasena TEXT NOT NULL,
-                curp TEXT,
-                telefono TEXT,
-                rol TEXT DEFAULT 'user',
-                terminos_aceptados BOOLEAN DEFAULT FALSE,
-                fecha_aceptacion_terminos TIMESTAMP,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """, fetch_type='none')
-        
-        # Tabla registros
-        ejecutar_consulta_segura("""
-            CREATE TABLE IF NOT EXISTS registros (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario_id INTEGER,
-                latitud REAL,
-                longitud REAL,
-                descripcion TEXT,
-                tipo_actividad TEXT,
-                foto_url TEXT,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                timestamp_offline TIMESTAMP
-            )
-        """, fetch_type='none')
-        
-        # Tabla asistencias
-        ejecutar_consulta_segura("""
-            CREATE TABLE IF NOT EXISTS asistencias (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario_id INTEGER,
-                fecha_entrada TIMESTAMP,
-                fecha_salida TIMESTAMP,
-                latitud_entrada REAL,
-                longitud_entrada REAL,
-                latitud_salida REAL,
-                longitud_salida REAL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """, fetch_type='none')
-        
-        # Tabla notificaciones
-        ejecutar_consulta_segura("""
-            CREATE TABLE IF NOT EXISTS notificaciones (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                titulo TEXT NOT NULL,
-                subtitulo TEXT,
-                descripcion TEXT,
-                enlace_url TEXT,
-                archivo_nombre TEXT,
-                archivo_tipo TEXT,
-                archivo_contenido BLOB,
-                enviada_a_todos BOOLEAN DEFAULT TRUE,
-                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                fecha_envio TIMESTAMP
-            )
-        """, fetch_type='none')
-        
-        # Tabla notificacion_leidos
-        ejecutar_consulta_segura("""
-            CREATE TABLE IF NOT EXISTS notificacion_leidos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                notificacion_id INTEGER,
-                usuario_id INTEGER,
-                fecha_lectura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                device_id TEXT
-            )
-        """, fetch_type='none')
+    # Crear tabla admin_users si no existe
+    ejecutar_consulta_segura("""
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(100) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            rol VARCHAR(20) DEFAULT 'admin' CHECK (rol IN ('admin', 'user')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """, fetch_type='none')
     
     # Verificar si existen usuarios admin, si no crear uno por defecto
     count_result = ejecutar_consulta_segura("SELECT COUNT(*) FROM admin_users", fetch_type='one')
@@ -297,18 +170,11 @@ try:
     if count == 0:
         # Crear usuario admin por defecto
         default_password = pwd_context.hash("admin123")
-        if is_sqlite:
-            ejecutar_consulta_segura(
-                "INSERT INTO admin_users (username, password, rol) VALUES (?, ?, ?)",
-                ("admin", default_password, "admin"),
-                fetch_type='none'
-            )
-        else:
-            ejecutar_consulta_segura(
-                "INSERT INTO admin_users (username, password, rol) VALUES (%s, %s, %s)",
-                ("admin", default_password, "admin"),
-                fetch_type='none'
-            )
+        ejecutar_consulta_segura(
+            "INSERT INTO admin_users (username, password, rol) VALUES (%s, %s, %s)",
+            ("admin", default_password, "admin"),
+            fetch_type='none'
+        )
         print("✅ Usuario administrador por defecto creado: admin/admin123")
     
 except Exception as e:
@@ -1790,23 +1656,9 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         
         print(f"🔐 Intento de login para usuario: {username}")
         
-        # Verificar conexión a la base de datos
-        if not verificar_conexion_db():
-            raise HTTPException(status_code=500, detail="No se pudo establecer conexión a la base de datos")
-        
-        # Buscar usuario administrador en la base de datos usando función segura
-        if is_sqlite:
-            row = ejecutar_consulta_segura(
-                "SELECT id, password, rol FROM admin_users WHERE username = ?", 
-                (username,), 
-                fetch_type='one'
-            )
-        else:
-            row = ejecutar_consulta_segura(
-                "SELECT id, password, rol FROM admin_users WHERE username = %s", 
-                (username,), 
-                fetch_type='one'
-            )
+        # Buscar usuario administrador en la base de datos
+        cursor.execute("SELECT id, password, rol FROM admin_users WHERE username = %s", (username,))
+        row = cursor.fetchone()
         
         if not row or not pwd_context.verify(password, row[1]):
             print(f"❌ Credenciales incorrectas para usuario: {username}")

@@ -2492,7 +2492,7 @@ export default {
 .main-content {
   flex: 1;
   margin-left: min(220px, 18vw);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   width: calc(100vw - min(220px, 18vw));
   overflow-x: hidden;
 }
@@ -4026,10 +4026,34 @@ export default {
 }
 
 /* ULTRA RESPONSIVE MÓVIL - ELIMINACIÓN TOTAL DE SCROLL HORIZONTAL */
+@media (max-width: 992px) {
+  .main-content {
+    margin-left: 200px;
+    width: calc(100vw - 200px);
+    overflow-x: hidden !important;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .main-content {
+    margin-left: 250px;
+    width: calc(100vw - 250px);
+    overflow-x: hidden !important;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .main-content {
+    margin-left: 160px;
+    width: calc(100vw - 160px);
+    overflow-x: hidden !important;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
-    margin-left: 0;
-    width: 100vw;
+    margin-left: 240px;
+    width: calc(100vw - 240px);
     overflow-x: hidden !important;
   }
   
@@ -4172,6 +4196,12 @@ export default {
 
 /* EXTRA PEQUEÑO - ULTRA COMPACTO */
 @media (max-width: 480px) {
+  .main-content {
+    margin-left: 200px;
+    width: calc(100vw - 200px);
+    overflow-x: hidden !important;
+  }
+  
   .asistencias-table {
     font-size: clamp(7px, 1.8vw, 8px); /* Tamaño más pequeño y consistente */
   }
@@ -4653,6 +4683,14 @@ export default {
     width: 24px;
     height: 36px;
     font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .main-content {
+    margin-left: 180px;
+    width: calc(100vw - 180px);
+    overflow-x: hidden !important;
   }
 }
 </style>

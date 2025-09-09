@@ -1775,6 +1775,7 @@ watch(filtroTipo, () => {
   box-sizing: border-box;
   position: relative;
   z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Header con diseño de vidrio líquido verde responsivo */
@@ -3686,10 +3687,10 @@ watch(filtroTipo, () => {
 }
 
 /* Responsive design para el header y sidebar */
-@media (max-width: 1024px) {
+@media (max-width: 992px) {
   .main-content {
-    margin-left: clamp(160px, 16vw, 200px);
-    width: calc(100vw - clamp(160px, 16vw, 200px));
+    margin-left: 200px;
+    width: calc(100vw - 200px);
   }
   
   .lcd-counter {
@@ -3705,10 +3706,24 @@ watch(filtroTipo, () => {
   }
 }
 
+@media (min-width: 481px) and (max-width: 768px) {
+  .main-content {
+    margin-left: 250px;
+    width: calc(100vw - 250px);
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .main-content {
+    margin-left: 160px;
+    width: calc(100vw - 160px);
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
-    margin-left: clamp(140px, 14vw, 180px);
-    width: calc(100vw - clamp(140px, 14vw, 180px));
+    margin-left: 240px;
+    width: calc(100vw - 240px);
   }
   
   .page-header {
@@ -3747,21 +3762,12 @@ watch(filtroTipo, () => {
 
 @media (max-width: 480px) {
   .main-content {
-    margin-left: 0;
-    width: 100vw;
+    margin-left: 200px;
+    width: calc(100vw - 200px);
   }
   
   .page-header {
-    position: fixed; /* Cambiar a fixed en móviles pequeños */
     padding: clamp(0.2rem, 0.4vw, 0.3rem);
-    left: 0;
-    right: 0;
-    width: 100vw;
-  }
-  
-  /* Compensar el header fixed */
-  .page-content {
-    padding-top: clamp(44px, 8vw, 56px);
   }
   
   .header-content {
@@ -3798,6 +3804,13 @@ watch(filtroTipo, () => {
   .refresh-icon {
     width: clamp(12px, 2.5vw, 14px);
     height: clamp(12px, 2.5vw, 14px);
+  }
+}
+
+@media (max-width: 375px) {
+  .main-content {
+    margin-left: 180px;
+    width: calc(100vw - 180px);
   }
 }
 

@@ -176,12 +176,12 @@
                 <tr>
                   <th class="col-id">ID</th>
                   <th class="col-nombre">Nombre Completo</th>
-                  <th>Correo</th>
-                  <th>Cargo</th>
-                  <th>Supervisor</th>
-                  <th>Fecha de Registro</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th class="col-correo">Correo</th>
+                  <th class="col-cargo">Cargo</th>
+                  <th class="col-supervisor">Supervisor</th>
+                  <th class="col-fecha">Fecha de Registro</th>
+                  <th class="col-estado">Estado</th>
+                  <th class="col-acciones">Acciones</th>
                 </tr>
               </thead>
               <tbody>                <tr v-for="usuario in usuariosPaginados" :key="usuario.id">
@@ -198,7 +198,7 @@
                       Activo
                     </span>
                   </td>
-                  <td>
+                  <td class="col-acciones">
                     <div class="actions-container">
                       <div class="action-container">
                         <button @click="verDetalles(usuario)" class="btn-ver" title="Ver detalles del usuario">
@@ -934,14 +934,14 @@ const imprimirUsuarios = () => {
         background-color: white !important; 
       }
       
-      .col-id { width: 7%; text-align: center; }
-      .col-correo { width: 20%; }
-      .col-nombre { width: 18%; }
-      .col-cargo { width: 13%; }
-      .col-supervisor { width: 13%; }
-      .col-curp { width: 12%; font-family: monospace; font-size: 8px; }
-      .col-telefono { width: 12%; font-family: monospace; font-size: 8px; }
-      .col-estado { width: 8%; text-align: center; }
+      .col-id { width: 80px; text-align: center; }
+      .col-correo { width: 220px; }
+      .col-nombre { width: 200px; }
+      .col-cargo { width: 150px; }
+      .col-supervisor { width: 180px; }
+      .col-curp { width: 120px; font-family: monospace; font-size: 8px; }
+      .col-telefono { width: 120px; font-family: monospace; font-size: 8px; }
+      .col-estado { width: 120px; text-align: center; }
       
       .estado-activo { 
         color: #28a745 !important; 
@@ -2048,6 +2048,8 @@ const logout = () => {
   /* Eliminar transición para mejor rendimiento */
   padding: clamp(16px, 4vw, 24px);
   box-sizing: border-box;
+  overflow-x: auto !important;
+  width: 100% !important;
 }
 
 .usuarios-section:hover {
@@ -2183,23 +2185,45 @@ const logout = () => {
 }
 
 .table-container {
-  overflow: hidden;
-  /* Eliminar animación para mejor rendimiento */
+  overflow-x: auto !important;
+  overflow-y: visible !important;
   border-radius: clamp(12px, 3vw, 16px);
-  background: white; /* Simplificar el fondo para mejor rendimiento */
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04); /* Sombra más ligera */
-  width: 100%;
-  max-width: 100%;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box;
+  display: block !important;
+}
+
+/* Estilos de scrollbar */
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #4CAF50;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #45a049;
 }
 
 .usuarios-table {
   width: 100%;
-  max-width: 100%;
+  min-width: 1200px !important;
+  table-layout: fixed !important;
   border-collapse: collapse;
   position: relative;
   background: transparent;
-  table-layout: fixed;
-  overflow: hidden;
+  display: table !important;
+  white-space: nowrap !important;
 }
 
 .usuarios-table th {
@@ -2223,79 +2247,62 @@ const logout = () => {
 
 /* Headers específicos */
 .usuarios-table th.col-id {
-  width: 5%;
-  min-width: 40px;
+  min-width: 80px;
   font-size: clamp(7px, 1.2vw, 9px);
   padding: clamp(8px, 1.5vw, 12px) clamp(2px, 0.5vw, 4px);
 }
 
 .usuarios-table th.col-nombre {
-  width: 20%;
+  min-width: 200px;
   text-align: left;
   padding-left: clamp(8px, 2vw, 12px);
   color: #4CAF50;
   font-weight: 700;
 }
 
+/* Anchos FIJOS específicos para cada columna */
+.usuarios-table th.col-id { width: 80px; }
+.usuarios-table th.col-nombre { width: 200px; }
+.usuarios-table th.col-correo { width: 220px; }
+.usuarios-table th.col-cargo { width: 150px; }
+.usuarios-table th.col-supervisor { width: 180px; }
+.usuarios-table th.col-fecha { width: 140px; }
+.usuarios-table th.col-estado { width: 120px; }
+.usuarios-table th.col-acciones { 
+  width: 200px !important; 
+  min-width: 200px !important;
+  white-space: normal !important;
+}
+.usuarios-table td.col-acciones { 
+  width: 200px !important; 
+  min-width: 200px !important;
+  white-space: normal !important;
+}
+
 .usuarios-table td {
-  padding: clamp(4px, 1vw, 6px) clamp(2px, 0.6vw, 4px);
+  padding: clamp(6px, 1.2vw, 8px) clamp(4px, 0.8vw, 6px);
   border-bottom: 1px solid rgba(224, 224, 224, 0.6);
-  font-size: clamp(8px, 1.5vw, 10px);
-  transition: all 0.3s ease;
+  font-size: clamp(9px, 1.5vw, 11px);
   color: #444;
   font-weight: 500;
   white-space: nowrap;
   vertical-align: middle;
-  overflow: hidden;
-  text-overflow: ellipsis;
   text-align: center;
 }
 
-.usuarios-table td:nth-child(1) { /* ID - Más pequeño */
-  width: 5%;
-  text-align: center;
-}
-
-.usuarios-table td:nth-child(2) { /* Nombre - Ahora segunda columna */
-  width: 20%;
-  text-align: left;
-  padding-left: clamp(8px, 2vw, 12px);
-}
-
-.usuarios-table td:nth-child(3) { /* Correo */
-  width: 22%;
-  text-align: center;
-}
-
-.usuarios-table td:nth-child(4) { /* Cargo */
-  width: 15%;
-  text-align: center;
-}
-
-.usuarios-table td:nth-child(5) { /* Supervisor */
-  width: 15%;
-  text-align: center;
-}
-
-.usuarios-table td:nth-child(6) { /* Fecha */
-  width: 12%;
-  text-align: center;
-}
-
-.usuarios-table td:nth-child(7) { /* Estado */
-  width: 10%;
-  text-align: center;
-}
-
-.usuarios-table td:nth-child(8) { /* Acciones */
-  width: 15%;
-  text-align: center;
-}
+/* Anchos mínimos simplificados para celdas */
+.usuarios-table td:nth-child(1) { min-width: 60px; }  /* ID */
+.usuarios-table td:nth-child(2) { min-width: 150px; text-align: left; padding-left: clamp(8px, 2vw, 12px); } /* Nombre */
+.usuarios-table td:nth-child(3) { min-width: 180px; } /* Correo */
+.usuarios-table td:nth-child(4) { min-width: 120px; } /* Cargo */
+.usuarios-table td:nth-child(5) { min-width: 120px; } /* Supervisor */
+.usuarios-table td:nth-child(6) { min-width: 110px; } /* Fecha */
+.usuarios-table td:nth-child(7) { min-width: 90px; }  /* Estado */
+.usuarios-table td:nth-child(8) { min-width: 140px; } /* Acciones */
 
 /* Estilos específicos para columnas */
 .col-id {
-  width: 5% !important;
-  min-width: 40px;
+  width: 80px;
   font-family: 'Courier New', monospace;
   font-weight: 700;
   color: #666;
@@ -2303,7 +2310,7 @@ const logout = () => {
 }
 
 .col-nombre {
-  width: 20% !important;
+  width: 200px;
   text-align: left !important;
   padding-left: clamp(8px, 2vw, 12px) !important;
 }
@@ -2381,22 +2388,25 @@ const logout = () => {
 }
 
 .btn-ver {
-  width: clamp(24px, 4.5vw, 28px);
-  height: clamp(24px, 4.5vw, 28px);
+  width: clamp(24px, 4.5vw, 28px) !important;
+  height: clamp(24px, 4.5vw, 28px) !important;
+  min-width: clamp(24px, 4.5vw, 28px) !important;
+  min-height: clamp(24px, 4.5vw, 28px) !important;
   padding: 0;
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
   border: none;
-  border-radius: 50%;
+  border-radius: 50% !important;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
   position: relative;
   overflow: hidden;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
+  white-space: normal !important;
 }
 
 .btn-ver::before {
@@ -2439,10 +2449,12 @@ const logout = () => {
 
 /* Estilos para contenedores de acciones */
 .actions-container {
-  display: flex;
+  display: flex !important;
   gap: 12px;
   align-items: center;
   justify-content: center;
+  white-space: normal !important;
+  flex-shrink: 0 !important;
 }
 
 /* Contenedor de acción individual */
@@ -2457,22 +2469,25 @@ const logout = () => {
 
 /* Estilos para el botón de eliminar */
 .btn-eliminar {
-  width: clamp(24px, 4.5vw, 28px);
-  height: clamp(24px, 4.5vw, 28px);
+  width: clamp(24px, 4.5vw, 28px) !important;
+  height: clamp(24px, 4.5vw, 28px) !important;
+  min-width: clamp(24px, 4.5vw, 28px) !important;
+  min-height: clamp(24px, 4.5vw, 28px) !important;
   padding: 0;
   background: linear-gradient(135deg, #f44336, #d32f2f);
   color: white;
   border: none;
-  border-radius: 50%;
+  border-radius: 50% !important;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 2px 8px rgba(244, 67, 54, 0.25);
   position: relative;
   overflow: hidden;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
+  white-space: normal !important;
 }
 
 .btn-eliminar::before {
@@ -2515,22 +2530,25 @@ const logout = () => {
 
 /* Estilos para el botón de editar */
 .btn-editar {
-  width: clamp(24px, 4.5vw, 28px);
-  height: clamp(24px, 4.5vw, 28px);
+  width: clamp(24px, 4.5vw, 28px) !important;
+  height: clamp(24px, 4.5vw, 28px) !important;
+  min-width: clamp(24px, 4.5vw, 28px) !important;
+  min-height: clamp(24px, 4.5vw, 28px) !important;
   padding: 0;
   background: linear-gradient(135deg, #ff9800, #f57c00);
   color: white;
   border: none;
-  border-radius: 50%;
+  border-radius: 50% !important;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 2px 8px rgba(255, 152, 0, 0.25);
   position: relative;
   overflow: hidden;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
+  white-space: normal !important;
 }
 
 .btn-editar::before {
@@ -3608,6 +3626,14 @@ const logout = () => {
   box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
 }
 
+/* === RESPONSIVIDAD ADICIONAL PARA TABLA === */
+/* En dispositivos más pequeños, asegurar que el scroll funcione */
+@media (max-width: 1024px) {
+  .usuarios-table {
+    min-width: 1000px; /* Forzar scroll horizontal en tablets */
+  }
+}
+
 /* Responsive para paginación */
 @media (max-width: 768px) {
   .pagination-container {
@@ -3742,6 +3768,10 @@ const logout = () => {
   .main-content {
     margin-left: 250px;
     width: calc(100vw - 250px);
+  }
+  
+  .usuarios-table {
+    min-width: 900px; /* Forzar scroll en tablets */
   }
 }
 
@@ -3923,57 +3953,18 @@ const logout = () => {
   
   .table-container {
     border-radius: clamp(4px, 1vw, 8px);
-    overflow: hidden;
-    width: 100%;
+    overflow-x: auto; /* Asegurar scroll horizontal */
   }
   
   .usuarios-table {
-    width: 100%;
-    max-width: 100%;
-    font-size: clamp(6px, 1.2vw, 9px);
-    table-layout: fixed;
+    min-width: 800px; /* Forzar scroll horizontal en móviles */
+    font-size: clamp(8px, 1.2vw, 10px);
   }
   
   .usuarios-table th,
   .usuarios-table td {
-    padding: clamp(3px, 0.6vw, 5px) clamp(1px, 0.3vw, 3px);
-    font-size: clamp(6px, 1.2vw, 9px);
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  .usuarios-table td:nth-child(1) { /* ID */
-    width: 5%;
-  }
-  
-  .usuarios-table td:nth-child(2) { /* Correo */
-    width: 28%;
-  }
-  
-  .usuarios-table td:nth-child(3) { /* Nombre */
-    width: 22%;
-  }
-  
-  .usuarios-table td:nth-child(4) { /* Cargo */
-    width: 13%;
-  }
-  
-  .usuarios-table td:nth-child(5) { /* Supervisor */
-    width: 10%;
-  }
-  
-  .usuarios-table td:nth-child(6) { /* Fecha */
-    width: 8%;
-  }
-  
-  .usuarios-table td:nth-child(7) { /* Estado */
-    width: 6%;
-  }
-  
-  .usuarios-table td:nth-child(8) { /* Acciones */
-    width: 8%;
+    padding: clamp(4px, 0.8vw, 6px) clamp(2px, 0.4vw, 4px);
+    font-size: clamp(8px, 1.2vw, 10px);
   }
   
   .btn-ver {
@@ -4579,6 +4570,29 @@ const logout = () => {
   }
 }
 
+/* Indicador visual para scroll horizontal en dispositivos muy pequeños */
+@media (max-width: 480px) {
+  .table-container::after {
+    content: "← Desliza para ver más →";
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #666;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    white-space: nowrap;
+    z-index: 1;
+  }
+  
+  .page-content {
+    padding-bottom: 40px; /* Espacio extra para el indicador */
+  }
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -4601,6 +4615,30 @@ const logout = () => {
   .main-content {
     margin-left: 180px;
     width: calc(100vw - 180px);
+  }
+}
+
+/* CSS específico para forzar scroll horizontal en tablets y móviles */
+@media (max-width: 1024px) {
+  .table-container {
+    overflow-x: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+    white-space: nowrap !important;
+  }
+  
+  .usuarios-table {
+    min-width: 1290px !important;
+    width: 1290px !important;
+    display: table !important;
+    table-layout: fixed !important;
+  }
+  
+  .usuarios-table td,
+  .usuarios-table th {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 }
 </style>

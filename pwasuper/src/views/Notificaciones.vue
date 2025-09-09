@@ -87,7 +87,7 @@
         <div v-if="!cargando && !error" class="h-full flex flex-col">
           <!-- Lista de notificaciones con scroll propio -->
           <div class="flex-1 overflow-y-auto bg-transparent rounded-xl px-2 py-4 notifications-scroll-container">
-            <div v-if="notificacionesFiltradas.length > 0" class="space-y-2">
+            <div v-if="notificacionesFiltradas.length > 0" class="space-y-1">
             <!-- Contenedor relativo para cada notificación con campanita fuera -->
             <div v-for="(notificacion, index) in notificacionesFiltradas" 
                  :key="notificacion.id"
@@ -1904,8 +1904,8 @@ onBeforeUnmount(() => {
 
 /* Contenedor para notificaciones con campanita externa */
 .notification-container {
-  margin-bottom: 0.5rem; /* Reducido de 1rem a 0.5rem */
-  padding-top: 0.5rem; /* Espacio para la campanita */
+  margin-bottom: 0.25rem; /* Reducido de 0.5rem a 0.25rem */
+  padding-top: 0.25rem; /* Espacio reducido para la campanita */
 }
 
 /* Estilos empresariales para notificaciones - Optimizado */
@@ -2262,7 +2262,7 @@ onBeforeUnmount(() => {
 /* Estilos responsivos para notificaciones empresariales - Compacto */
 @media (max-width: 640px) {
   .notification-container {
-    margin-bottom: 0.375rem; /* Aún más compacto en móviles */
+    margin-bottom: 0.2rem; /* Aún más compacto en móviles */
   }
   
   .enterprise-notification-card {
@@ -2559,8 +2559,8 @@ onBeforeUnmount(() => {
     margin-bottom: 0.5rem;
   }
   
-  .space-y-2 > * + * {
-    margin-top: 0.375rem;
+  .space-y-1 > * + * {
+    margin-top: 0.2rem;
   }
 }
 
@@ -2614,8 +2614,8 @@ onBeforeUnmount(() => {
     margin-bottom: 0.375rem;
   }
   
-  .space-y-2 > * + * {
-    margin-top: 0.25rem;
+  .space-y-1 > * + * {
+    margin-top: 0.15rem;
   }
 }
 

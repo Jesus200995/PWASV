@@ -229,31 +229,90 @@
     
     <!-- Modal de confirmación de cierre de sesión -->
     <Teleport to="body">
-      <transition name="fade">
-        <div v-if="showLogoutModal" class="modal-overlay" @click="closeModal">
-          <div class="modal-container" @click.stop>
-            <div class="modal-header">
-              <div class="modal-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                  <polyline points="16 17 21 12 16 7"/>
-                  <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
+      <transition name="modal">
+        <div v-if="showLogoutModal" class="logout-modal-overlay" @click="closeModal">
+          <div class="logout-modal-container" @click.stop>
+            
+            <!-- Header con gradiente rojo -->
+            <div class="logout-modal-header">
+              <div class="logout-header-content">
+                <div class="logout-icon-container">
+                  <div class="logout-icon-bg">
+                    <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                      <polyline points="16 17 21 12 16 7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="logout-header-text">
+                  <h3 class="logout-title">Cerrar Sesión</h3>
+                  <p class="logout-subtitle">Finalizar tu sesión actual</p>
+                </div>
               </div>
-              <h3>Cerrar Sesión</h3>
-              <button @click="closeModal" class="modal-close">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              
+              <!-- Botón cerrar elegante -->
+              <button @click="closeModal" class="logout-close-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
             </div>
-            <div class="modal-body">
-              <p>¿Estás seguro de que deseas cerrar sesión?</p>
+
+            <!-- Cuerpo del modal con iconografía -->
+            <div class="logout-modal-body">
+              <div class="logout-warning-section">
+                <div class="logout-warning-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <div class="logout-warning-content">
+                  <h4 class="logout-warning-title">¿Confirmar cierre de sesión?</h4>
+                  <p class="logout-warning-text">
+                    Se cerrará tu sesión actual y tendrás que iniciar sesión nuevamente para acceder al sistema.
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Información adicional -->
+              <div class="logout-info-section">
+                <div class="logout-info-item">
+                  <svg class="logout-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>Tu trabajo se ha guardado automáticamente</span>
+                </div>
+                <div class="logout-info-item">
+                  <svg class="logout-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <span>La sesión se cerrará de forma segura</span>
+                </div>
+              </div>
             </div>
-            <div class="modal-footer">
-              <button @click="closeModal" class="btn-cancel">Cancelar</button>
-              <button @click="confirmLogout" class="btn-confirm">Confirmar</button>
+
+            <!-- Footer con botones mejorados -->
+            <div class="logout-modal-footer">
+              <button @click="closeModal" class="logout-btn logout-btn-cancel">
+                <svg class="logout-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+                <span>Cancelar</span>
+              </button>
+              <button @click="confirmLogout" class="logout-btn logout-btn-confirm">
+                <svg class="logout-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span>Cerrar Sesión</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1226,147 +1285,531 @@ const handleKeydown = (event) => {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
-/* Modal */
-.modal-overlay {
+/* ===================================
+   MODAL DE LOGOUT MODERNO Y ELEGANTE
+   =================================== */
+
+/* Overlay con blur y animación */
+.logout-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, 
+    rgba(0, 0, 0, 0.4) 0%, 
+    rgba(20, 20, 20, 0.6) 50%, 
+    rgba(0, 0, 0, 0.8) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
-  backdrop-filter: blur(4px);
+  z-index: 9999;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px;
 }
 
-.modal-container {
+/* Contenedor principal del modal */
+.logout-modal-container {
   width: 100%;
-  max-width: 340px;
-  background-color: white;
-  border-radius: 14px;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  animation: modalAppear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  transform-origin: center;
 }
 
-@keyframes modalAppear {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* Header con gradiente rojo elegante */
+.logout-modal-header {
+  background: linear-gradient(135deg, 
+    #dc2626 0%, 
+    #ef4444 25%, 
+    #f87171 50%, 
+    #ef4444 75%, 
+    #dc2626 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
 }
 
-.modal-header {
-  background-color: var(--primary);
-  color: white;
-  padding: 14px 16px;
+/* Patrón de fondo sutil */
+.logout-modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  z-index: 1;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Contenido del header */
+.logout-header-content {
   display: flex;
   align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Contenedor del icono principal */
+.logout-icon-container {
   position: relative;
 }
 
-.modal-icon {
-  width: 30px;
-  height: 30px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+.logout-icon-bg {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.25) 0%, 
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
 }
 
-.modal-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.modal-close {
+.logout-icon-bg::before {
+  content: '';
   position: absolute;
-  right: 16px;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.1) 90deg,
+    transparent 180deg,
+    rgba(255, 255, 255, 0.1) 270deg,
+    transparent 360deg
+  );
+  animation: iconRotate 4s linear infinite;
+}
+
+@keyframes iconRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.logout-icon {
+  width: 28px;
+  height: 28px;
+  color: #ffffff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
+}
+
+/* Texto del header */
+.logout-header-text {
+  flex: 1;
+}
+
+.logout-title {
+  margin: 0 0 4px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-family: 'Inter', sans-serif;
+}
+
+.logout-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón cerrar elegante */
+.logout-close-btn {
+  position: absolute;
   top: 16px;
-  background: transparent;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 4px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  z-index: 3;
 }
 
-.modal-close svg {
+.logout-close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.logout-close-btn svg {
+  width: 18px;
+  height: 18px;
+  color: #ffffff;
+}
+
+/* Cuerpo del modal */
+.logout-modal-body {
+  padding: 32px 24px;
+  background: #ffffff;
+}
+
+/* Sección de advertencia */
+.logout-warning-section {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-radius: 12px;
+  border: 1px solid #fecaca;
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-warning-section::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, #dc2626, #ef4444);
+}
+
+.logout-warning-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.logout-warning-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+}
+
+.logout-warning-content {
+  flex: 1;
+}
+
+.logout-warning-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #7f1d1d;
+  font-family: 'Inter', sans-serif;
+}
+
+.logout-warning-text {
+  margin: 0;
+  font-size: 14px;
+  color: #991b1b;
+  line-height: 1.5;
+}
+
+/* Sección de información */
+.logout-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logout-info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.logout-info-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.logout-info-icon {
   width: 20px;
   height: 20px;
+  color: #64748b;
+  flex-shrink: 0;
 }
 
-.modal-body {
-  padding: 18px 16px;
-  color: var(--text-primary);
-  font-size: 14px;
-}
-
-.modal-footer {
-  padding: 12px 16px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  border-top: 1px solid var(--border-dark);
-}
-
-.btn-cancel,
-.btn-confirm {
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: none;
-  font-family: 'Poppins', sans-serif;
+.logout-info-item span {
   font-size: 13px;
+  color: #475569;
   font-weight: 500;
+}
+
+/* Footer con botones */
+.logout-modal-footer {
+  padding: 20px 24px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Botones del modal */
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.btn-cancel {
-  background-color: var(--surface);
-  color: var(--text-primary);
+.logout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
 }
 
-.btn-confirm {
-  background-color: var(--error);
-  color: white;
-  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
+.logout-btn:hover::before {
+  left: 100%;
 }
 
-.btn-cancel:hover {
-  background-color: var(--surface-hover);
+.logout-btn-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
 }
 
-.btn-confirm:hover {
-  background-color: #C62828;
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+.logout-btn:hover .logout-btn-icon {
+  transform: scale(1.1);
 }
 
-/* Transiciones */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+/* Botón cancelar */
+.logout-btn-cancel {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.logout-btn-cancel:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón confirmar */
+.logout-btn-confirm {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: #ffffff;
+  border: 2px solid #dc2626;
+  box-shadow: 
+    0 4px 12px rgba(220, 38, 38, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.logout-btn-confirm:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+  border-color: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(220, 38, 38, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.logout-btn-confirm:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px rgba(220, 38, 38, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Animaciones de transición del modal */
+.modal-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-enter-from {
   opacity: 0;
+  transform: scale(0.8) translateY(20px);
+}
+
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
+}
+
+.modal-enter-to,
+.modal-leave-from {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Responsividad */
+@media (max-width: 480px) {
+  .logout-modal-overlay {
+    padding: 16px;
+  }
+  
+  .logout-modal-container {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+  
+  .logout-modal-header {
+    padding: 20px;
+  }
+  
+  .logout-header-content {
+    gap: 12px;
+  }
+  
+  .logout-icon-bg {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .logout-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .logout-title {
+    font-size: 18px;
+  }
+  
+  .logout-subtitle {
+    font-size: 13px;
+  }
+  
+  .logout-modal-body {
+    padding: 24px 20px;
+  }
+  
+  .logout-warning-section {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .logout-warning-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .logout-warning-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .logout-modal-footer {
+    padding: 16px 20px;
+    flex-direction: column;
+  }
+  
+  .logout-btn {
+    justify-content: center;
+  }
+}
+
+/* Modo oscuro (opcional) */
+@media (prefers-color-scheme: dark) {
+  .logout-modal-container {
+    background: #1f2937;
+  }
+  
+  .logout-modal-body {
+    background: #1f2937;
+  }
+  
+  .logout-warning-section {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    border-color: #6b7280;
+  }
+  
+  .logout-warning-title {
+    color: #fca5a5;
+  }
+  
+  .logout-warning-text {
+    color: #f87171;
+  }
+  
+  .logout-info-item {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .logout-info-item:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+  }
+  
+  .logout-info-icon {
+    color: #9ca3af;
+  }
+  
+  .logout-info-item span {
+    color: #d1d5db;
+  }
+  
+  .logout-modal-footer {
+    background: #374151;
+    border-color: #4b5563;
+  }
 }
 
 /* Responsive Design */

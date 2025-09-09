@@ -3,12 +3,6 @@
     <!-- Liquid Glass Background con efectos mejorados -->
     <div class="liquid-background">
       <div class="gradient-overlay"></div>
-      
-      <!-- Elementos decorativos similares a Home.vue -->
-      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
-      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-25 animate-pulse-slow" style="animation-delay: 2s;"></div>
-      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-green-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow" style="animation-delay: 4s;"></div>
-      
       <div class="liquid-blob blob1"></div>
       <div class="liquid-blob blob2"></div>
       <div class="liquid-blob blob3"></div>
@@ -25,95 +19,89 @@
       <!-- Header con branding renovado -->
       <div class="login-header">
         <div class="logo-container">
-          <!-- Nueva flor estática girando -->
+          <!-- Nuevo logo de Sembrando Vida -->
           <div class="logo-bg">
-            <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <svg class="logo-icon" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <linearGradient id="petalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#dcfce7;stop-opacity:1" />
-                  <stop offset="30%" style="stop-color:#bbf7d0;stop-opacity:1" />
-                  <stop offset="60%" style="stop-color:#86efac;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#4ade80;stop-opacity:1" />
+                <linearGradient id="leafGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#2e7d32;stop-opacity:1" />
+                  <stop offset="30%" style="stop-color:#4caf50;stop-opacity:1" />
+                  <stop offset="70%" style="stop-color:#66bb6a;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#81c784;stop-opacity:1" />
                 </linearGradient>
-                <linearGradient id="centerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
-                  <stop offset="50%" style="stop-color:#16a34a;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#15803d;stop-opacity:1" />
+                <linearGradient id="stemGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#388e3c;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#2e7d32;stop-opacity:1" />
                 </linearGradient>
-                <filter id="petalGlow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                <filter id="leafGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
                   <feMerge> 
                     <feMergeNode in="coloredBlur"/>
                     <feMergeNode in="SourceGraphic"/>
                   </feMerge>
                 </filter>
-                <filter id="centerShadow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#15803d" flood-opacity="0.4"/>
+                <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1b5e20" flood-opacity="0.3"/>
                 </filter>
               </defs>
               
-              <!-- Grupo de la flor que girará como una unidad -->
-              <g class="flower-rotating">
-                <!-- Pétalos de la flor (8 pétalos) -->
-                <!-- Pétalo superior -->
-                <ellipse cx="50" cy="25" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"/>
-                
-                <!-- Pétalo superior derecho -->
-                <ellipse cx="65" cy="35" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(45 65 35)"/>
-                
-                <!-- Pétalo derecho -->
-                <ellipse cx="75" cy="50" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(90 75 50)"/>
-                
-                <!-- Pétalo inferior derecho -->
-                <ellipse cx="65" cy="65" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(135 65 65)"/>
-                
-                <!-- Pétalo inferior -->
-                <ellipse cx="50" cy="75" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(180 50 75)"/>
-                
-                <!-- Pétalo inferior izquierdo -->
-                <ellipse cx="35" cy="65" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(225 35 65)"/>
-                
-                <!-- Pétalo izquierdo -->
-                <ellipse cx="25" cy="50" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(270 25 50)"/>
-                
-                <!-- Pétalo superior izquierdo -->
-                <ellipse cx="35" cy="35" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(315 35 35)"/>
-                
-                <!-- Centro de la flor -->
-                <circle cx="50" cy="50" r="12" 
-                        fill="url(#centerGradient)" filter="url(#centerShadow)"/>
-                
-                <!-- Detalles del centro -->
-                <circle cx="50" cy="50" r="8" 
-                        fill="#22c55e" opacity="0.8"/>
-                <circle cx="47" cy="47" r="3" 
-                        fill="#86efac" opacity="0.6"/>
-                
-                <!-- Pequeños detalles en los pétalos -->
-                <circle cx="50" cy="30" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="62" cy="38" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="70" cy="50" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="62" cy="62" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="50" cy="70" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="38" cy="62" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="30" cy="50" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="38" cy="38" r="1.5" fill="#22c55e" opacity="0.7"/>
-              </g>
+              <!-- Tallo principal -->
+              <rect class="main-stem" x="57" y="60" width="6" height="50" fill="url(#stemGradient)" rx="3" filter="url(#dropShadow)"/>
+              
+              <!-- Hojas principales (izquierda) -->
+              <path class="leaf leaf-main-left" 
+                    d="M60 45 Q30 35 25 55 Q30 75 55 65 Q58 55 60 45" 
+                    fill="url(#leafGradient)" 
+                    filter="url(#leafGlow)"/>
+              
+              <!-- Hojas principales (derecha) -->
+              <path class="leaf leaf-main-right" 
+                    d="M60 45 Q90 35 95 55 Q90 75 65 65 Q62 55 60 45" 
+                    fill="url(#leafGradient)" 
+                    filter="url(#leafGlow)"/>
+              
+              <!-- Hojas secundarias (izquierda superior) -->
+              <path class="leaf leaf-secondary-left" 
+                    d="M58 35 Q40 25 35 40 Q40 55 55 45 Q57 40 58 35" 
+                    fill="url(#leafGradient)" 
+                    filter="url(#leafGlow)"
+                    opacity="0.8"/>
+              
+              <!-- Hojas secundarias (derecha superior) -->
+              <path class="leaf leaf-secondary-right" 
+                    d="M62 35 Q80 25 85 40 Q80 55 65 45 Q63 40 62 35" 
+                    fill="url(#leafGradient)" 
+                    filter="url(#leafGlow)"
+                    opacity="0.8"/>
+              
+              <!-- Hojas pequeñas (izquierda inferior) -->
+              <path class="leaf leaf-small-left" 
+                    d="M57 55 Q45 50 42 60 Q45 70 55 65 Q56 60 57 55" 
+                    fill="url(#leafGradient)" 
+                    filter="url(#leafGlow)"
+                    opacity="0.7"/>
+              
+              <!-- Hojas pequeñas (derecha inferior) -->
+              <path class="leaf leaf-small-right" 
+                    d="M63 55 Q75 50 78 60 Q75 70 65 65 Q64 60 63 55" 
+                    fill="url(#leafGradient)" 
+                    filter="url(#leafGlow)"
+                    opacity="0.7"/>
+              
+              <!-- Brotes y detalles -->
+              <circle class="growth-point point1" cx="60" cy="30" r="2" fill="#81c784" opacity="0.8"/>
+              <circle class="growth-point point2" cx="60" cy="115" r="3" fill="#2e7d32"/>
+              
+              <!-- Nervaduras de las hojas -->
+              <path class="vein vein1" d="M35 45 Q50 40 55 50" stroke="#2e7d32" stroke-width="0.5" fill="none" opacity="0.6"/>
+              <path class="vein vein2" d="M85 45 Q70 40 65 50" stroke="#2e7d32" stroke-width="0.5" fill="none" opacity="0.6"/>
+              <path class="vein vein3" d="M45 35 Q55 32 60 40" stroke="#2e7d32" stroke-width="0.4" fill="none" opacity="0.5"/>
+              <path class="vein vein4" d="M75 35 Q65 32 60 40" stroke="#2e7d32" stroke-width="0.4" fill="none" opacity="0.5"/>
+              
+              <!-- Efectos de luz -->
+              <ellipse class="light-effect effect1" cx="35" cy="45" rx="8" ry="4" fill="rgba(255,255,255,0.2)" opacity="0"/>
+              <ellipse class="light-effect effect2" cx="85" cy="45" rx="8" ry="4" fill="rgba(255,255,255,0.2)" opacity="0"/>
+              <ellipse class="light-effect effect3" cx="60" cy="35" rx="6" ry="3" fill="rgba(255,255,255,0.15)" opacity="0"/>
             </svg>
           </div>
         </div>
@@ -308,15 +296,13 @@ const login = async () => {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, 
-    #ffffff 0%, 
-    #f8fffe 15%, 
-    #f0fdf4 30%, 
-    #ecfdf5 45%, 
-    #d1fae5 60%, 
-    #a7f3d0 75%, 
-    #86efac 90%, 
-    #6ee7b7 100%
+    var(--primary-green) 0%, 
+    var(--secondary-green) 30%, 
+    var(--light-green) 60%, 
+    var(--accent-green) 100%
   );
+  background-size: 400% 400%;
+  animation: backgroundShift 20s ease infinite;
   z-index: 0;
 }
 
@@ -333,21 +319,13 @@ const login = async () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 25% 25%, 
-    rgba(167, 243, 208, 0.2) 0%, 
-    transparent 70%
+  background: radial-gradient(circle at 30% 20%, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    transparent 50%
   ),
-  radial-gradient(circle at 75% 25%, 
-    rgba(134, 239, 172, 0.15) 0%, 
-    transparent 65%
-  ),
-  radial-gradient(circle at 25% 75%, 
-    rgba(110, 231, 183, 0.12) 0%, 
-    transparent 60%
-  ),
-  radial-gradient(circle at 75% 75%, 
-    rgba(74, 222, 128, 0.1) 0%, 
-    transparent 55%
+  radial-gradient(circle at 70% 80%, 
+    rgba(255, 255, 255, 0.05) 0%, 
+    transparent 50%
   );
 }
 
@@ -356,15 +334,13 @@ const login = async () => {
   position: absolute;
   border-radius: 50%;
   background: linear-gradient(45deg, 
-    rgba(255, 255, 255, 0.6) 0%, 
-    rgba(248, 255, 254, 0.5) 20%, 
-    rgba(240, 253, 244, 0.4) 40%, 
-    rgba(236, 253, 245, 0.35) 60%, 
-    rgba(209, 250, 229, 0.3) 80%, 
-    rgba(167, 243, 208, 0.25) 100%
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.08) 50%, 
+    rgba(255, 255, 255, 0.03) 100%
   );
   backdrop-filter: blur(60px);
   filter: blur(2px);
+  animation: liquidFloat 25s ease-in-out infinite;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -373,6 +349,8 @@ const login = async () => {
   height: 350px;
   top: -175px;
   left: -175px;
+  animation-delay: 0s;
+  animation-duration: 28s;
 }
 
 .blob2 {
@@ -380,6 +358,8 @@ const login = async () => {
   height: 450px;
   top: 40%;
   right: -225px;
+  animation-delay: -7s;
+  animation-duration: 32s;
 }
 
 .blob3 {
@@ -387,6 +367,8 @@ const login = async () => {
   height: 300px;
   bottom: -150px;
   left: 30%;
+  animation-delay: -14s;
+  animation-duration: 30s;
 }
 
 .blob4 {
@@ -459,38 +441,33 @@ const login = async () => {
   width: var(--size);
   height: var(--size);
   background: radial-gradient(circle, 
-    rgba(255, 255, 255, 0.9) 0%, 
-    rgba(248, 255, 254, 0.7) 25%, 
-    rgba(240, 253, 244, 0.6) 50%, 
-    rgba(236, 253, 245, 0.4) 75%, 
-    rgba(209, 250, 229, 0.3) 90%, 
-    transparent 100%
+    rgba(255, 255, 255, 0.8) 0%, 
+    rgba(255, 255, 255, 0.2) 100%
   );
   border-radius: 50%;
   left: var(--left);
   top: var(--top);
   animation: particleFloat var(--duration) ease-in-out infinite;
   animation-delay: var(--delay);
-  opacity: 0.8;
-  box-shadow: 0 0 8px rgba(167, 243, 208, 0.3);
+  opacity: 0.6;
 }
 
 @keyframes particleFloat {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);
-    opacity: 0.6;
+    opacity: 0.3;
   }
   25% {
-    transform: translateY(-30px) rotate(90deg);
-    opacity: 0.9;
-  }
-  50% {
-    transform: translateY(-60px) rotate(180deg);
+    transform: translateY(-20px) rotate(90deg);
     opacity: 0.8;
   }
+  50% {
+    transform: translateY(-40px) rotate(180deg);
+    opacity: 0.6;
+  }
   75% {
-    transform: translateY(-30px) rotate(270deg);
-    opacity: 0.7;
+    transform: translateY(-20px) rotate(270deg);
+    opacity: 0.4;
   }
 }
 
@@ -502,14 +479,14 @@ const login = async () => {
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   border: 2px solid var(--glass-border);
-  border-radius: 20px;
+  border-radius: 24px;
   box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 30px 60px rgba(0, 0, 0, 0.15),
     0 0 0 1px rgba(255, 255, 255, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  padding: 32px;
+  padding: 40px;
   width: 100%;
-  max-width: 380px;
+  max-width: 440px;
   position: relative;
   z-index: 10;
   animation: cardFloat 8s ease-in-out infinite alternate;
@@ -568,23 +545,24 @@ const login = async () => {
 }
 
 .logo-bg {
-  width: 70px;
-  height: 70px;
+  width: 90px;
+  height: 90px;
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.3) 0%, 
     rgba(255, 255, 255, 0.1) 100%
   );
-  border-radius: 50%;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(20px);
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 
-    0 8px 25px var(--shadow-primary),
+    0 10px 30px var(--shadow-primary),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   position: relative;
   overflow: hidden;
+  animation: logoFloat 6s ease-in-out infinite;
 }
 
 .logo-bg::before {
@@ -605,83 +583,143 @@ const login = async () => {
   animation: logoRotate 8s linear infinite;
 }
 
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.05);
+  }
+}
+
 @keyframes logoRotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
 .logo-icon {
-  width: 55px;
-  height: 55px;
+  width: 70px;
+  height: 70px;
   position: relative;
   z-index: 1;
-  filter: drop-shadow(0 3px 10px var(--shadow-primary));
+  filter: drop-shadow(0 4px 12px var(--shadow-primary));
+  transition: all 0.3s ease;
 }
 
-/* Animaciones del logo de flor girando */
-.flower-rotating {
-  animation: smoothRotation 6s linear infinite;
-  transform-origin: 50px 50px;
+.logo-icon:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 6px 20px var(--shadow-primary));
 }
 
-@keyframes smoothRotation {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Animaciones del logo de Sembrando Vida */
+.main-stem {
+  animation: stemGrow 3s ease-in-out infinite alternate;
+  transform-origin: center bottom;
 }
 
-/* Sin animaciones individuales de pétalos para evitar conflictos */
-.petal {
-  opacity: 0.95;
+@keyframes stemGrow {
+  0% { transform: scaleY(1); }
+  100% { transform: scaleY(1.05); }
 }
 
-/* Animación sutil del centro de la flor */
-.flower-center {
-  animation: centerPulse 4s ease-in-out infinite;
+.leaf {
+  animation: leafSway 4s ease-in-out infinite;
+  transform-origin: center;
 }
 
-@keyframes centerPulse {
+.leaf-main-left {
+  animation-delay: 0s;
+}
+
+.leaf-main-right {
+  animation-delay: 0.5s;
+}
+
+.leaf-secondary-left {
+  animation-delay: 1s;
+}
+
+.leaf-secondary-right {
+  animation-delay: 1.5s;
+}
+
+.leaf-small-left {
+  animation-delay: 2s;
+}
+
+.leaf-small-right {
+  animation-delay: 2.5s;
+}
+
+@keyframes leafSway {
   0%, 100% {
-    r: 12;
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(2deg) scale(1.02);
+  }
+  75% {
+    transform: rotate(-2deg) scale(0.98);
+  }
+}
+
+.growth-point {
+  animation: pointPulse 2s ease-in-out infinite;
+}
+
+.point1 {
+  animation-delay: 0s;
+}
+
+.point2 {
+  animation-delay: 1s;
+}
+
+@keyframes pointPulse {
+  0%, 100% {
+    r: 2;
+    opacity: 0.8;
+  }
+  50% {
+    r: 3;
     opacity: 1;
   }
-  50% {
-    r: 13;
-    opacity: 0.9;
-  }
 }
 
-/* Animación de los detalles del centro */
-.center-detail {
-  animation: detailRotate 4s ease-in-out infinite reverse;
+.vein {
+  animation: veinFlow 3s ease-in-out infinite;
 }
 
-@keyframes detailRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.vein1 { animation-delay: 0s; }
+.vein2 { animation-delay: 0.5s; }
+.vein3 { animation-delay: 1s; }
+.vein4 { animation-delay: 1.5s; }
+
+@keyframes veinFlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
-/* Animación del highlight */
-.center-highlight {
-  animation: highlightShimmer 2.5s ease-in-out infinite;
+.light-effect {
+  animation: lightShimmer 4s ease-in-out infinite;
 }
 
-@keyframes highlightShimmer {
-  0%, 100% {
-    opacity: 0.4;
-    r: 3;
-  }
-  50% {
-    opacity: 0.8;
-    r: 4;
-  }
+.effect1 { animation-delay: 0s; }
+.effect2 { animation-delay: 1s; }
+.effect3 { animation-delay: 2s; }
+
+@keyframes lightShimmer {
+  0%, 80%, 100% { opacity: 0; }
+  10%, 70% { opacity: 0.3; }
+}
+
+/* Efectos hover para el logo */
+.logo-bg:hover .leaf {
+  animation-duration: 2s;
+}
+
+.logo-bg:hover .light-effect {
+  opacity: 0.4 !important;
 }
 
 /* Texto del branding */
@@ -690,32 +728,22 @@ const login = async () => {
 }
 
 .main-title {
+  color: var(--primary-green);
   margin: 0 0 8px 0;
-  font-size: 20px;
-  font-weight: 700;
-  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  letter-spacing: 1.2px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-shadow: 0 3px 6px rgba(46, 125, 50, 0.2);
   position: relative;
-  text-align: center;
-  display: block;
-  line-height: 1.2;
-  white-space: nowrap;
-  color: #4ade80;
-  background: linear-gradient(
-    90deg,
-    #4ade80 0%,
-    #22c55e 25%,
-    #ffffff 50%,
-    #22c55e 75%,
-    #4ade80 100%
+  background: linear-gradient(135deg, 
+    var(--primary-green) 0%, 
+    var(--secondary-green) 50%, 
+    var(--light-green) 100%
   );
-  background-size: 200% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: lightSweep 3s ease-in-out infinite;
-  text-shadow: 0 2px 4px rgba(74, 222, 128, 0.3);
-  -webkit-text-stroke: 0.5px #15803d;
+  animation: titleShine 3s ease-in-out infinite;
 }
 
 @keyframes titleShine {
@@ -727,26 +755,13 @@ const login = async () => {
   }
 }
 
-/* Animación de luz que pasa de lado a lado */
-@keyframes lightSweep {
-  0% {
-    background-position: -100% 0%;
-  }
-  50% {
-    background-position: 100% 0%;
-  }
-  100% {
-    background-position: -100% 0%;
-  }
-}
-
 .subtitle {
   color: var(--secondary-green);
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   margin: 0;
-  opacity: 0.85;
-  letter-spacing: 0.3px;
+  opacity: 0.9;
+  letter-spacing: 0.5px;
 }
 
 /* ===================================
@@ -755,7 +770,7 @@ const login = async () => {
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 .input-group {
@@ -765,17 +780,17 @@ const login = async () => {
 .input-group label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: var(--primary-green);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.3px;
+  font-size: 14px;
+  letter-spacing: 0.5px;
 }
 
 .input-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   stroke-width: 2;
 }
 
@@ -785,10 +800,10 @@ const login = async () => {
 
 .input-container input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 16px 20px;
   border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: 12px;
-  font-size: 14px;
+  border-radius: 14px;
+  font-size: 16px;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -850,18 +865,18 @@ const login = async () => {
   );
   color: var(--white);
   border: none;
-  padding: 14px;
-  border-radius: 12px;
-  font-size: 14px;
+  padding: 18px;
+  border-radius: 14px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 6px 20px var(--shadow-primary),
+    0 8px 25px var(--shadow-primary),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
 }
 
 .btn-content {
@@ -1127,69 +1142,25 @@ const login = async () => {
   }
 }
 
-/* Pantallas grandes y 2K */
+/* Pantallas grandes */
 @media (min-width: 1025px) {
   .login-card {
-    max-width: 420px;
-    padding: 38px 35px;
+    max-width: 500px;
+    padding: 50px 45px;
   }
   
   .logo-bg {
-    width: 80px;
-    height: 80px;
+    width: 110px;
+    height: 110px;
   }
   
   .logo-icon {
-    width: 65px;
-    height: 65px;
+    width: 90px;
+    height: 90px;
   }
   
   .main-title {
-    font-size: 22px;
-    letter-spacing: 1.4px;
-    margin-bottom: 10px;
-  }
-  
-  .subtitle {
-    font-size: 14px;
-  }
-}
-
-/* Para pantallas 2K y superiores */
-@media (min-width: 1440px) {
-  .main-title {
-    font-size: 24px;
-    letter-spacing: 1.6px;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-  
-  .subtitle {
-    font-size: 15px;
-    margin-top: 6px;
-  }
-}
-
-/* Para pantallas 4K y ultra anchas */
-@media (min-width: 2560px) {
-  .main-title {
-    font-size: 26px;
-    letter-spacing: 1.8px;
-    font-weight: 700;
-    margin-bottom: 15px;
-    line-height: 1.1;
-    text-shadow: 0 2px 6px rgba(74, 222, 128, 0.4);
-  }
-  
-  .subtitle {
-    font-size: 16px;
-    margin-top: 8px;
-    font-weight: 500;
-  }
-  
-  .login-card {
-    max-width: 600px;
-    padding: 60px 55px;
+    font-size: 32px;
   }
 }
 
@@ -1209,19 +1180,17 @@ const login = async () => {
   }
   
   .logo-bg {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .logo-icon {
     width: 55px;
     height: 55px;
   }
   
-  .logo-icon {
-    width: 40px;
-    height: 40px;
-  }
-  
   .main-title {
-    font-size: 16px;
-    letter-spacing: 0.8px;
-    font-weight: 700;
+    font-size: 24px;
   }
 }
 
@@ -1327,22 +1296,6 @@ const login = async () => {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* Animación pulse lenta similar a Home.vue */
-@keyframes animate-pulse-slow {
-  0%, 100% {
-    opacity: 0.15;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.25;
-    transform: scale(1.05);
-  }
-}
-
-.animate-pulse-slow {
-  animation: animate-pulse-slow 4s ease-in-out infinite;
 }
 
 .login-card {

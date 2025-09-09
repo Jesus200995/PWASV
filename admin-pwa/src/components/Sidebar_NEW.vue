@@ -12,22 +12,96 @@
     <!-- Cabecera del sidebar con logo animado -->
     <div class="sidebar-header">
       <div class="logo-container">
-        <!-- Flor con pétalos largos y detallados -->
+        <!-- Flor SVG girando como en LoginView -->
         <div class="logo-animation">
-          <div class="detailed-flower">
-            <div class="petal petal-1"></div>
-            <div class="petal petal-2"></div>
-            <div class="petal petal-3"></div>
-            <div class="petal petal-4"></div>
-            <div class="petal petal-5"></div>
-            <div class="petal petal-6"></div>
-            <div class="petal petal-7"></div>
-            <div class="petal petal-8"></div>
-            <div class="flower-center">
-              <div class="center-core"></div>
-              <div class="center-highlight"></div>
-            </div>
-          </div>
+          <svg class="logo-flower-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="petalGradientSidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#dcfce7;stop-opacity:1" />
+                <stop offset="30%" style="stop-color:#bbf7d0;stop-opacity:1" />
+                <stop offset="60%" style="stop-color:#86efac;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#4ade80;stop-opacity:1" />
+              </linearGradient>
+              <linearGradient id="centerGradientSidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#16a34a;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#15803d;stop-opacity:1" />
+              </linearGradient>
+              <filter id="petalGlowSidebar" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                <feMerge> 
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="centerShadowSidebar" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#15803d" flood-opacity="0.4"/>
+              </filter>
+            </defs>
+            
+            <!-- Grupo de la flor que girará como una unidad -->
+            <g class="flower-rotating-sidebar">
+              <!-- Pétalos de la flor (8 pétalos) -->
+              <!-- Pétalo superior -->
+              <ellipse cx="50" cy="25" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"/>
+              
+              <!-- Pétalo superior derecho -->
+              <ellipse cx="65" cy="35" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(45 65 35)"/>
+              
+              <!-- Pétalo derecho -->
+              <ellipse cx="75" cy="50" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(90 75 50)"/>
+              
+              <!-- Pétalo inferior derecho -->
+              <ellipse cx="65" cy="65" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(135 65 65)"/>
+              
+              <!-- Pétalo inferior -->
+              <ellipse cx="50" cy="75" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(180 50 75)"/>
+              
+              <!-- Pétalo inferior izquierdo -->
+              <ellipse cx="35" cy="65" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(225 35 65)"/>
+              
+              <!-- Pétalo izquierdo -->
+              <ellipse cx="25" cy="50" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(270 25 50)"/>
+              
+              <!-- Pétalo superior izquierdo -->
+              <ellipse cx="35" cy="35" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(315 35 35)"/>
+              
+              <!-- Centro de la flor -->
+              <circle cx="50" cy="50" r="12" 
+                      fill="url(#centerGradientSidebar)" filter="url(#centerShadowSidebar)"/>
+              
+              <!-- Detalles del centro -->
+              <circle cx="50" cy="50" r="8" 
+                      fill="#22c55e" opacity="0.8"/>
+              <circle cx="47" cy="47" r="3" 
+                      fill="#86efac" opacity="0.6"/>
+              
+              <!-- Pequeños detalles en los pétalos -->
+              <circle cx="50" cy="30" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="62" cy="38" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="70" cy="50" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="62" cy="62" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="50" cy="70" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="38" cy="62" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="30" cy="50" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="38" cy="38" r="1.5" fill="#22c55e" opacity="0.7"/>
+            </g>
+          </svg>
         </div>
         
         <!-- Texto del logo con efecto de brillo -->
@@ -520,229 +594,35 @@ const handleKeydown = (event) => {
   justify-content: center;
 }
 
-/* Contenedor de la flor detallada */
-.detailed-flower {
-  position: relative;
+/* SVG de la flor girando como en LoginView */
+.logo-flower-svg {
   width: 100%;
   height: 100%;
-  animation: flowerRotate 18s linear infinite;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
-/* Pétalos curvados y naturales - técnica basada en estudios botánicos */
-.petal {
-  position: absolute;
-  width: 10px;
-  height: 20px;
-  top: 50%;
-  left: 50%;
-  transform-origin: center bottom;
-  background: linear-gradient(
-    to top,
-    #1B5E20 0%,
-    #2E7D32 25%,
-    #4CAF50 45%,
-    #66BB6A 65%,
-    #A5D6A7 82%,
-    rgba(255, 255, 255, 0.9) 95%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  /* Forma curvada natural que termina en punta */
-  border-radius: 45% 55% 45% 55% / 85% 85% 15% 15%;
-  /* Curvatura adicional usando clip-path sutil */
-  clip-path: ellipse(50% 100% at 50% 100%);
-  /* Sombras para curvatura natural */
-  box-shadow: 
-    inset 0.8px 0 2px rgba(255, 255, 255, 0.35),
-    inset -0.3px 0 1.5px rgba(27, 94, 32, 0.2),
-    0 0.5px 1.5px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Curvatura lateral sutil */
-  transform-style: preserve-3d;
+/* Animaciones del logo de flor girando igual que en LoginView */
+.flower-rotating-sidebar {
+  animation: smoothRotationSidebar 6s linear infinite;
+  transform-origin: 50px 50px;
 }
 
-/* Efecto de curvatura lateral para naturalidad */
-.petal::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    45deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.08) 30%,
-    transparent 70%
-  );
-  border-radius: inherit;
-  transform: skewX(-2deg);
-}
-
-/* Vena central muy sutil */
-.petal::after {
-  content: '';
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  width: 0.3px;
-  height: 60%;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(129, 199, 132, 0.25) 50%,
-    transparent 100%
-  );
-  transform: translateX(-50%);
-  border-radius: 0.3px;
-  opacity: 0.6;
-}
-
-/* Posicionamiento preciso de cada pétalo */
-.petal-1 {
-  transform: translate(-50%, -100%) rotate(0deg);
-}
-
-.petal-2 {
-  transform: translate(-50%, -100%) rotate(45deg);
-}
-
-.petal-3 {
-  transform: translate(-50%, -100%) rotate(90deg);
-}
-
-.petal-4 {
-  transform: translate(-50%, -100%) rotate(135deg);
-}
-
-.petal-5 {
-  transform: translate(-50%, -100%) rotate(180deg);
-}
-
-.petal-6 {
-  transform: translate(-50%, -100%) rotate(225deg);
-}
-
-.petal-7 {
-  transform: translate(-50%, -100%) rotate(270deg);
-}
-
-.petal-8 {
-  transform: translate(-50%, -100%) rotate(315deg);
-}
-
-/* Centro de la flor con múltiples capas - tamaño ajustado */
-.flower-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 12px;
-  height: 12px;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-}
-
-/* Núcleo principal del centro */
-.center-core {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(
-    circle at 30% 30%,
-    #FFEB3B 0%,
-    #FFC107 40%,
-    #FF9800 70%,
-    #1B5E20 100%
-  );
-  border-radius: 50%;
-  box-shadow: 
-    0 0 6px rgba(255, 235, 59, 0.4),
-    inset 0 1px 3px rgba(255, 255, 255, 0.6),
-    inset 0 -0.5px 1px rgba(27, 94, 32, 0.3);
-  animation: centerPulse 4s ease-in-out infinite;
-}
-
-/* Punto de luz central */
-.center-highlight {
-  position: absolute;
-  top: 25%;
-  left: 25%;
-  width: 50%;
-  height: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 235, 59, 0.6) 60%,
-    transparent 100%
-  );
-  border-radius: 50%;
-  animation: highlight 3s ease-in-out infinite alternate;
-}
-
-/* Animaciones */
-@keyframes flowerRotate {
-  0% {
+@keyframes smoothRotationSidebar {
+  from {
     transform: rotate(0deg);
   }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
-@keyframes centerPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 
-      0 0 8px rgba(255, 235, 59, 0.5),
-      inset 0 2px 4px rgba(255, 255, 255, 0.6),
-      inset 0 -1px 2px rgba(27, 94, 32, 0.3);
-  }
-  50% {
-    transform: scale(1.1);
-    box-shadow: 
-      0 0 12px rgba(255, 235, 59, 0.7),
-      inset 0 2px 4px rgba(255, 255, 255, 0.8),
-      inset 0 -1px 2px rgba(27, 94, 32, 0.4);
-  }
-}
-
-@keyframes highlight {
-  0% {
-    opacity: 0.6;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 0.9;
-    transform: scale(1.2);
-  }
-}
-
-/* Efectos hover naturales */
-.logo-animation:hover .detailed-flower {
-  animation-duration: 12s;
+/* Efectos hover para la nueva animación SVG */
+.logo-animation:hover .logo-flower-svg {
   filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.2));
 }
 
-.logo-animation:hover .petal {
-  box-shadow: 
-    inset 1.5px 0 4px rgba(255, 255, 255, 0.5),
-    inset -0.5px 0 3px rgba(27, 94, 32, 0.25),
-    0 2px 4px rgba(0, 0, 0, 0.12);
-  background: linear-gradient(
-    to top,
-    #1B5E20 0%,
-    #2E7D32 18%,
-    #4CAF50 38%,
-    #66BB6A 58%,
-    #A5D6A7 78%,
-    rgba(255, 255, 255, 0.97) 94%,
-    rgba(255, 255, 255, 1) 100%
-  );
-  transform: scale(1.02);
-}
-
-.logo-animation:hover .center-core {
-  animation-duration: 2.5s;
+.logo-animation:hover .flower-rotating-sidebar {
+  animation-duration: 4s;
 }
 
 .logo-text {

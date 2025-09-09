@@ -2,7 +2,8 @@
   <div class="configuracion-container">
     <Sidebar @logout="logout" />
     
-    <main class="main-content">      <header class="page-header">
+    <main class="main-content">
+      <header class="page-header">
         <div class="header-content">
           <div class="header-main">
             <div class="header-icon">
@@ -20,147 +21,247 @@
       </header>
 
       <div class="page-content">
-        <!-- Configuraciones de API -->
-        <div class="config-section">
-          <h2>Configuración de API</h2>
+        <!-- Grid de configuraciones compacto -->
+        <div class="config-grid">
+          <!-- Configuración de API -->
           <div class="config-card">
-            <div class="config-item">
-              <label>URL del Servidor API:</label>
+            <div class="card-header">
+              <div class="card-icon api-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                  <polyline points="14,2 14,8 20,8"/>
+                  <line x1="12" y1="18" x2="12" y2="12"/>
+                  <line x1="9" y1="15" x2="15" y2="15"/>
+                </svg>
+              </div>
+              <h3>API Configuration</h3>
+            </div>
+            
+            <div class="form-group">
+              <label>URL del Servidor</label>
               <input 
                 v-model="apiConfig.url" 
                 type="url" 
-                class="config-input"
+                class="form-input"
                 placeholder="https://apipwa.sembrandodatos.com"
               >
             </div>
-            <div class="config-item">
-              <label>Timeout de Conexión (segundos):</label>
+            
+            <div class="form-group">
+              <label>Timeout (segundos)</label>
               <input 
                 v-model="apiConfig.timeout" 
                 type="number" 
-                class="config-input"
+                class="form-input"
                 min="5"
                 max="60"
               >
             </div>
-            <button @click="guardarConfigAPI" class="save-btn">
-              Guardar Configuración API
+            
+            <button @click="guardarConfigAPI" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+              </svg>
+              Guardar
             </button>
           </div>
-        </div>
 
-        <!-- Configuraciones de la Aplicación -->
-        <div class="config-section">
-          <h2>Configuración de la Aplicación</h2>
+          <!-- Configuración de la App -->
           <div class="config-card">
-            <div class="config-item">
-              <label>Nombre de la Aplicación:</label>
+            <div class="card-header">
+              <div class="card-icon app-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </div>
+              <h3>Aplicación</h3>
+            </div>
+            
+            <div class="form-group">
+              <label>Nombre de la App</label>
               <input 
                 v-model="appConfig.name" 
                 type="text" 
-                class="config-input"
+                class="form-input"
                 placeholder="Sembrando Vida Admin"
               >
             </div>
-            <div class="config-item">
-              <label>Registros por página:</label>
-              <select v-model="appConfig.recordsPerPage" class="config-select">
+            
+            <div class="form-group">
+              <label>Registros por página</label>
+              <select v-model="appConfig.recordsPerPage" class="form-select">
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
               </select>
             </div>
-            <div class="config-item">
-              <label>Actualización automática:</label>
-              <div class="checkbox-wrapper">
-                <input 
-                  id="autoRefresh"
-                  v-model="appConfig.autoRefresh" 
-                  type="checkbox" 
-                  class="config-checkbox"
-                >
-                <label for="autoRefresh">Activar actualización automática cada 30 segundos</label>
-              </div>
+            
+            <div class="checkbox-group">
+              <input 
+                id="autoRefresh"
+                v-model="appConfig.autoRefresh" 
+                type="checkbox" 
+                class="checkbox"
+              >
+              <label for="autoRefresh">Actualización automática</label>
             </div>
-            <button @click="guardarConfigApp" class="save-btn">
-              Guardar Configuración de App
+            
+            <button @click="guardarConfigApp" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+              </svg>
+              Guardar
             </button>
           </div>
-        </div>
 
-        <!-- Información del Sistema -->
-        <div class="config-section">
-          <h2>Información del Sistema</h2>
+          <!-- Información del Sistema -->
           <div class="config-card">
-            <div class="system-info">
+            <div class="card-header">
+              <div class="card-icon info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </div>
+              <h3>Sistema</h3>
+            </div>
+            
+            <div class="info-list">
               <div class="info-item">
-                <strong>Versión:</strong> v1.0.0
+                <span class="info-label">Versión</span>
+                <span class="info-value">v1.0.0</span>
               </div>
               <div class="info-item">
-                <strong>Última actualización:</strong> {{ new Date().toLocaleDateString('es-ES') }}
+                <span class="info-label">Última actualización</span>
+                <span class="info-value">{{ new Date().toLocaleDateString('es-ES') }}</span>
               </div>
               <div class="info-item">
-                <strong>Estado del servidor:</strong> 
-                <span :class="serverStatus.class">{{ serverStatus.text }}</span>
+                <span class="info-label">Estado del servidor</span>
+                <span :class="['status-badge', serverStatus.class]">{{ serverStatus.text }}</span>
               </div>
               <div class="info-item">
-                <strong>Administrador actual:</strong> {{ adminUser }}
+                <span class="info-label">Administrador</span>
+                <span class="info-value">{{ adminUser }}</span>
               </div>
             </div>
-            <button @click="verificarEstadoServidor" class="check-btn" :disabled="checking">
-              {{ checking ? 'Verificando...' : 'Verificar Estado del Servidor' }}
+            
+            <button @click="verificarEstadoServidor" class="btn btn-secondary" :disabled="checking">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12c0 1-.19 1.96-.55 2.84l1.34.82c.24-.94.35-1.94.35-2.96 0-3.22-1.2-6.15-3.15-8.37l-1.06 1.06C19.55 7 21 9.36 21 12z"/>
+                <path d="M3 12c0-1 .19-1.96.55-2.84L2.21 8.34C1.97 9.28 1.86 10.28 1.86 12c0 3.22 1.2 6.15 3.15 8.37l1.06-1.06C4.45 17 3 14.64 3 12z"/>
+                <path d="M19 12c0-1.66-.61-3.15-1.61-4.31l-1.06 1.06C17.09 9.64 17.5 10.77 17.5 12s-.41 2.36-1.17 3.25l1.06 1.06C18.39 15.15 19 13.66 19 12z"/>
+                <path d="M5 12c0 1.66.61 3.15 1.61 4.31l1.06-1.06C6.91 14.36 6.5 13.23 6.5 12s.41-2.36 1.17-3.25L6.61 7.69C5.61 8.85 5 10.34 5 12z"/>
+                <circle cx="12" cy="12" r="2"/>
+              </svg>
+              {{ checking ? 'Verificando...' : 'Verificar' }}
             </button>
           </div>
-        </div>
 
-        <!-- Acciones del Sistema -->
-        <div class="config-section">
-          <h2>Acciones del Sistema</h2>
+          <!-- Acciones del Sistema -->
           <div class="config-card">
+            <div class="card-header">
+              <div class="card-icon actions-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9,11 12,14 22,4"/>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+              </div>
+              <h3>Acciones</h3>
+            </div>
+            
             <div class="actions-grid">
               <button @click="exportarDatos" class="action-btn export-btn" :disabled="exporting">
-                {{ exporting ? 'Exportando...' : '📊 Exportar Datos' }}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7,10 12,15 17,10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                {{ exporting ? 'Exportando...' : 'Exportar Datos' }}
               </button>
-              <button @click="descargarBaseDatos" class="action-btn sql-btn" :disabled="descargandoBD">
-                {{ descargandoBD ? 'Descargando...' : '💾 Descargar BD SQL' }}
+              
+              <button @click="descargarBaseDatos" class="action-btn database-btn" :disabled="descargandoBD">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                </svg>
+                {{ descargandoBD ? 'Descargando...' : 'Descargar BD' }}
               </button>
+              
               <button @click="limpiarCache" class="action-btn cache-btn">
-                🗑️ Limpiar Cache
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+                Limpiar Cache
               </button>
+              
               <button @click="reiniciarContadores" class="action-btn reset-btn">
-                🔄 Reiniciar Contadores
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                  <path d="M8 16H3v5"/>
+                </svg>
+                Reiniciar Contadores
               </button>
+              
               <button @click="mostrarLogs" class="action-btn logs-btn">
-                📝 Ver Logs del Sistema
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14,2 14,8 20,8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10,9 9,9 8,9"/>
+                </svg>
+                Ver Logs
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- NUEVA SECCIÓN: Eliminación Masiva de Datos -->
-        <div class="config-section">
-          <h2>⚠️ Eliminación Masiva de Datos</h2>
+          <!-- Eliminación Masiva -->
           <div class="config-card danger-card">
+            <div class="card-header">
+              <div class="card-icon danger-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <path d="M12 9v4"/>
+                  <path d="m12 17 .01 0"/>
+                </svg>
+              </div>
+              <h3>Zona Peligrosa</h3>
+            </div>
+            
             <div class="danger-warning">
-              <div class="warning-icon">⚠️</div>
-              <div class="warning-text">
-                <strong>¡ATENCIÓN!</strong> Las siguientes acciones eliminarán datos de forma permanente y no se pueden deshacer.
-                <br>Úsalas solo si estás completamente seguro.
+              <div class="warning-content">
+                <strong>Atención:</strong> Las siguientes acciones eliminarán datos permanentemente y no se pueden deshacer.
               </div>
             </div>
             
-            <div class="danger-actions-grid">
+            <div class="danger-actions">
               <button @click="confirmarEliminarRegistros" class="danger-btn registros-btn" :disabled="eliminandoRegistros">
-                {{ eliminandoRegistros ? 'Eliminando...' : '📋 Eliminar TODOS los Registros' }}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14,2 14,8 20,8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10,9 9,9 8,9"/>
+                </svg>
+                {{ eliminandoRegistros ? 'Eliminando...' : 'Eliminar Registros' }}
               </button>
+              
               <button @click="confirmarEliminarAsistencias" class="danger-btn asistencias-btn" :disabled="eliminandoAsistencias">
-                {{ eliminandoAsistencias ? 'Eliminando...' : '🕐 Eliminar TODAS las Asistencias' }}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12,6 12,12 16,14"/>
+                </svg>
+                {{ eliminandoAsistencias ? 'Eliminando...' : 'Eliminar Asistencias' }}
               </button>
-            </div>
-            
-            <div class="danger-note">
-              <p><strong>Nota:</strong> Estas acciones requerirán múltiples confirmaciones por seguridad.</p>
             </div>
           </div>
         </div>
@@ -885,193 +986,435 @@ const logout = () => {
 /* === CONTENT STYLES === */
 .page-content {
   flex: 1;
-  padding: 24px;
+  padding: 16px;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
 }
 
-.config-section {
-  margin-bottom: 32px;
-}
-
-.config-section h2 {
-  color: #2c3e50;
+/* Grid moderno y compacto */
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
   margin-bottom: 16px;
-  font-size: 20px;
 }
 
+/* Cards modernos */
 .config-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.config-item {
-  margin-bottom: 20px;
+.config-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.config-item label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #2c3e50;
+/* Headers de cards con iconos */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.config-input, .config-select {
-  width: 100%;
-  max-width: 400px;
-  padding: 10px 12px;
-  border: 2px solid #e0e0e0;
+.card-icon {
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
-  font-size: 14px;
-  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.config-input:focus, .config-select:focus {
+.card-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+.api-icon {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.app-icon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.info-icon {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+}
+
+.actions-icon {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.danger-icon {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Formularios modernos */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.form-input:focus, .form-select:focus {
   outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: rgba(255, 255, 255, 0.95);
 }
 
-.checkbox-wrapper {
+/* Checkbox moderno */
+.checkbox-group {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 16px;
 }
 
-.config-checkbox {
-  width: auto;
+.checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  appearance: none;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.save-btn, .check-btn {
-  padding: 10px 20px;
-  background: #4CAF50;
-  color: white;
+.checkbox:checked {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e");
+}
+
+.checkbox-group label {
+  font-size: 13px;
+  font-weight: 400;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Botones modernos */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
   border: none;
   border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.save-btn:hover, .check-btn:hover {
-  background: #45a049;
+.btn svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.btn-primary:hover {
   transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }
 
-.save-btn:disabled, .check-btn:disabled {
+.btn-secondary {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
+.btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
+  transform: none !important;
 }
 
-.system-info {
-  display: grid;
+/* Info list moderna */
+.info-list {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .info-item:last-child {
   border-bottom: none;
 }
 
+.info-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .status-online {
-  color: #27ae60;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
 }
 
 .status-offline {
-  color: #e74c3c;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
 }
 
 .status-unknown {
-  color: #f39c12;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
 }
 
+/* Actions grid compacto */
 .actions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
 }
 
 .action-btn {
-  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
   border: none;
   border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 500;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  min-height: 60px;
   justify-content: center;
-  gap: 8px;
+}
+
+.action-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
 }
 
 .export-btn {
-  background: #3498db;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
-.export-btn:hover:not(:disabled) {
-  background: #2980b9;
-  transform: translateY(-1px);
-}
-
-.sql-btn {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+.database-btn {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-  border: 2px solid #1d4ed8;
-}
-
-.sql-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
 }
 
 .cache-btn {
-  background: #f39c12;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
-}
-
-.cache-btn:hover {
-  background: #d35400;
-  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
 }
 
 .reset-btn {
-  background: #9b59b6;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-}
-
-.reset-btn:hover {
-  background: #8e44ad;
-  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
 .logs-btn {
-  background: #34495e;
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   color: white;
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
 }
 
-.logs-btn:hover {
-  background: #2c3e50;
-  transform: translateY(-1px);
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
+  transform: none !important;
+}
+
+/* Zona peligrosa compacta */
+.danger-card {
+  border: 2px solid #ef4444;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 242, 242, 0.9) 100%);
+  position: relative;
+}
+
+.danger-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #ef4444 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.danger-warning {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.warning-content {
+  font-size: 13px;
+  color: #7f1d1d;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.4;
+}
+
+.danger-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.danger-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px solid;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  justify-content: center;
+}
+
+.danger-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.5;
+}
+
+.registros-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-color: #d97706;
+  color: white;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.asistencias-btn {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-color: #7c3aed;
+  color: white;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+}
+
+.danger-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.danger-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 /* Modal styles */
@@ -1086,6 +1429,7 @@ const logout = () => {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
@@ -1095,289 +1439,106 @@ const logout = () => {
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #2c3e50;
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
 }
 
 .btn-close {
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
-  color: #666;
-  padding: 0;
-  width: 30px;
-  height: 30px;
+  color: #6b7280;
+  padding: 4px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
 .btn-close:hover {
-  background: #f0f0f0;
-  border-radius: 4px;
+  background: #f3f4f6;
+  color: #1f2937;
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 16px;
+  font-family: 'Inter', sans-serif;
 }
 
 .modal-body pre {
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 8px;
-  font-size: 12px;
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 11px;
   overflow-x: auto;
+  border: 1px solid #e5e7eb;
 }
 
-/* ESTILOS PARA ELIMINACIÓN MASIVA */
-.danger-card {
-  border: 2px solid #e74c3c;
-  background: linear-gradient(135deg, #ffffff 0%, #ffeaa7 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.danger-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #e74c3c 100%);
-  animation: dangerGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes dangerGlow {
-  0% { opacity: 0.7; }
-  100% { opacity: 1; }
-}
-
-.danger-warning {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  background: rgba(231, 76, 60, 0.1);
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(231, 76, 60, 0.2);
-}
-
-.warning-icon {
-  font-size: 32px;
-  color: #e74c3c;
-  animation: shake 2s ease-in-out infinite;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-2px); }
-  75% { transform: translateX(2px); }
-}
-
-.warning-text {
-  flex: 1;
-  color: #2c3e50;
-  line-height: 1.5;
-}
-
-.warning-text strong {
-  color: #e74c3c;
-}
-
-.danger-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin-bottom: 20px;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.danger-btn {
-  padding: 16px 20px;
-  border: 2px solid;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  position: relative;
-  overflow: hidden;
-}
-
-.danger-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.danger-btn:hover::before {
-  left: 100%;
-}
-
-.usuarios-btn {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-  border-color: #c0392b;
-  color: white;
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-}
-
-.usuarios-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-}
-
-.registros-btn {
-  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-  border-color: #e67e22;
-  color: white;
-  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
-}
-
-.registros-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
-}
-
-.asistencias-btn {
-  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-  border-color: #8e44ad;
-  color: white;
-  box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
-}
-
-.asistencias-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4);
-}
-
-.danger-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-.danger-note {
-  background: rgba(52, 73, 94, 0.1);
-  padding: 16px;
-  border-radius: 8px;
-  border-left: 4px solid #34495e;
-}
-
-.danger-note p {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 14px;
-  font-style: italic;
-}
-
-/* RESPONSIVE ULTRA COMPLETO - USA TODO EL ANCHO */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .danger-actions-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    max-width: 600px;
-  }
-}
-
+/* Responsive */
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
     width: 100vw;
-    overflow-x: hidden;
-  }
-  
-  .page-header {
-    padding: clamp(1rem, 3vw, 1.5rem);
-    width: 100%;
-  }
-  
-  .header-content {
-    flex-direction: column;
-    gap: clamp(0.75rem, 2vw, 1rem);
-    align-items: center;
-    text-align: center;
-  }
-  
-  .header-main {
-    gap: 16px;
-  }
-  
-  .header-icon {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .header-icon svg {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .header-title {
-    font-size: 24px;
-  }
-  
-  .header-subtitle {
-    font-size: 14px;
   }
   
   .page-content {
-    padding: clamp(1rem, 4vw, 1.5rem);
+    padding: 12px;
+  }
+  
+  .config-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
   
   .config-card {
-    padding: clamp(1rem, 2vw, 1.5rem);
+    padding: 12px;
   }
   
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .danger-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-header h3 {
+    font-size: 14px;
+  }
+  
+  .form-input, .form-select {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
   .actions-grid {
     grid-template-columns: 1fr;
   }
   
-  .danger-actions-grid {
-    grid-template-columns: 1fr;
-    max-width: 100%;
-  }
-  
-  .danger-warning {
+  .card-header {
     flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-  
-  .warning-icon {
-    font-size: 28px;
-  }
-  
-  .config-input, .config-select {
-    max-width: 100%;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 </style>

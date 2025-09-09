@@ -8,11 +8,8 @@
           <div class="header-main">
             <div class="header-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M12 1v6m0 6v6"/>
-                <path d="m21 12-6 0m-6 0-6 0"/>
-                <path d="m16.24 7.76-4.24 4.24m-4.24 0-4.24-4.24"/>
-                <path d="m16.24 16.24-4.24-4.24m-4.24 0-4.24 4.24"/>
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
             </div>
             <div class="header-text">

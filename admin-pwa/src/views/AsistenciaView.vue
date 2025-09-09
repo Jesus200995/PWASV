@@ -8,10 +8,8 @@
           <div class="header-main">
             <div class="header-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6L9 17l-5-5"/>
-                <path d="M3 12h6m6-6h6m-6 12h6"/>
-                <rect x="7" y="3" width="3" height="18" rx="1"/>
-                <rect x="14" y="3" width="3" height="18" rx="1"/>
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
             </div>
             <div class="header-text">

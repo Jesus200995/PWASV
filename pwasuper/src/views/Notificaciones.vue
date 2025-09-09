@@ -353,24 +353,12 @@
         <!-- Contenido del Artículo -->
         <div class="news-content flex-1 p-2 sm:p-3 overflow-y-auto min-h-0">
           
-          <!-- Lead/Entradilla con funcionalidad "Ver más" - optimizado -->
+          <!-- Lead/Entradilla siempre completa -->
           <div class="news-lead mb-4">
             <div style="font-size: 0.75rem;" class="text-gray-800 leading-relaxed font-medium border-l-3 border-green-500 pl-3 bg-gray-50 py-2 rounded-r-md">
-              <p v-if="!mostrarTextoCompleto && descripcionLarga" class="mb-1">
-                {{ descripcionCorta }}
-              </p>
-              <p v-else class="mb-1">
+              <p class="mb-1">
                 {{ notificacionSeleccionada.descripcion }}
               </p>
-              
-              <!-- Botón Ver más/Ver menos -->
-              <button 
-                v-if="descripcionLarga"
-                @click="toggleTextoCompleto"
-                style="font-size: 0.7rem;" class="text-green-600 hover:text-green-700 font-medium underline transition-colors duration-200 mt-1"
-              >
-                {{ mostrarTextoCompleto ? 'Ver menos' : 'Ver más' }}
-              </button>
             </div>
           </div>
 
@@ -630,9 +618,6 @@ const notificacionesLeidas = ref(new Set()) // IDs de notificaciones leídas
 const conteoNoLeidas = ref(0) // NUEVO: Contador de no leídas
 const conteoAnterior = ref(0) // NUEVO: Para detectar cambios en el contador
 
-// Estados para funcionalidad "Ver más"
-const mostrarTextoCompleto = ref(false)
-
 // NUEVO: Audio para notificaciones
 let audioNotificacion = null
 
@@ -776,16 +761,6 @@ const notificacionesNoLeidasLocales = computed(() => {
 
 const notificacionesTotales = computed(() => {
   return notificacionesFiltradas.value.length
-})
-
-// Computed para funcionalidad "Ver más" - texto más largo
-const descripcionLarga = computed(() => {
-  return notificacionSeleccionada.value?.descripcion?.length > 300
-})
-
-const descripcionCorta = computed(() => {
-  if (!notificacionSeleccionada.value?.descripcion) return ''
-  return notificacionSeleccionada.value.descripcion.substring(0, 300) + '...'
 })
 
 // Variables para interval
@@ -1000,9 +975,6 @@ const abrirDetalleNotificacion = (notificacion) => {
     tiene_archivo: notificacionesService.tieneArchivo(notificacion)
   }
   
-  // Resetear estado del texto completo
-  mostrarTextoCompleto.value = false
-  
   // MEJORADO: Marcar como leída inmediatamente al abrir el modal
   if (!notificacion.leida) {
     console.log(`📖 Abriendo notificación ${notificacion.id} - marcando como leída inmediatamente`)
@@ -1017,12 +989,6 @@ const verNotificacionCompleta = (notificacion) => {
 
 const cerrarDetalleNotificacion = () => {
   notificacionSeleccionada.value = null
-  mostrarTextoCompleto.value = false
-}
-
-// Función para toggle de texto completo
-const toggleTextoCompleto = () => {
-  mostrarTextoCompleto.value = !mostrarTextoCompleto.value
 }
 
 // Función para formatear enlace de manera más legible

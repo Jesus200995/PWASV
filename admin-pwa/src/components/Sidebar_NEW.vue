@@ -523,9 +523,11 @@ const handleKeydown = (event) => {
   overflow-x: hidden;
   border-radius: 0;
   font-family: 'Poppins', 'Segoe UI', sans-serif;
+  /* Asegurar que siempre esté visible */
+  transform: translateX(0);
 }
 
-/* Modo colapsado (para responsive) */
+/* Modo colapsado (solo en desktop) */
 .sidebar.collapsed {
   width: 70px;
 }
@@ -544,7 +546,7 @@ const handleKeydown = (event) => {
   margin: 0 auto;
 }
 
-/* Toggle Button para móviles */
+/* Toggle Button para móviles - Oculto porque el sidebar siempre está visible */
 .sidebar-toggle {
   position: absolute;
   top: 16px;
@@ -555,7 +557,7 @@ const handleKeydown = (event) => {
   border: none;
   border-radius: 50%;
   color: white;
-  display: none;
+  display: none; /* Siempre oculto */
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -1863,32 +1865,40 @@ const handleKeydown = (event) => {
   }
 }
 
-/* Responsive Design */
+/* Responsive Design - Sidebar siempre visible */
 @media (max-width: 992px) {
   .sidebar {
-    width: 230px;
-    min-width: 220px;
+    width: 200px;
+    min-width: 180px;
+    max-width: 220px;
   }
 }
 
 @media (max-width: 768px) {
   .sidebar {
-    transform: translateX(-100%);
-    width: 230px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 240px;
     min-width: 220px;
-  }
-  
-  .sidebar.collapsed {
+    max-width: 260px;
+    z-index: 9999;
     transform: translateX(0);
-    width: 230px;
-    min-width: 220px;
+    transition: transform 0.3s ease;
   }
   
   .sidebar-toggle {
-    display: flex;
+    display: none; /* Ocultar botón toggle ya que siempre está visible */
   }
   
-  /* Mostrar textos aún colapsado en móvil */
+  /* Asegurar que el contenido principal tenga margen para el sidebar */
+  .main-content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+  }
+  
+  /* Mostrar todos los textos en móvil */
   .sidebar.collapsed .logo-text,
   .sidebar.collapsed .brand-tagline,
   .sidebar.collapsed .quick-links span,
@@ -1906,9 +1916,440 @@ const handleKeydown = (event) => {
 }
 
 @media (max-width: 480px) {
-  .sidebar,
-  .sidebar.collapsed {
-    width: 100%;
+  .sidebar {
+    width: 200px;
+    min-width: 180px;
+    max-width: 220px;
+  }
+  
+  .main-content {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+  
+  /* Reducir tamaños para aprovechar mejor el espacio en móviles */
+  .sidebar-header {
+    padding: 8px 10px 6px;
+  }
+  
+  .logo-animation {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 6px;
+  }
+  
+  .brand-name {
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+  
+  .brand-tagline {
+    font-size: 9px;
+    margin: 2px 0 0;
+  }
+  
+  .text-underline {
+    margin: 6px auto 0 auto;
+    height: 2px;
+  }
+  
+  .quick-links {
+    padding: 6px 10px;
+    margin: 0 8px 6px;
+    gap: 6px;
+  }
+  
+  .quick-link {
+    padding: 6px 4px;
+    gap: 2px;
+  }
+  
+  .link-icon-container {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .link-icon {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .quick-link span {
+    font-size: 7px;
+  }
+  
+  .sidebar-nav {
+    padding: 4px 8px 10px;
+  }
+  
+  .nav-item {
+    margin-bottom: 3px;
+  }
+  
+  .nav-link {
+    padding: 8px 10px;
+  }
+  
+  .nav-icon-container {
+    width: 22px;
+    height: 22px;
+    margin-right: 6px;
+  }
+  
+  .nav-icon {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .nav-text {
+    font-size: 11px;
+  }
+  
+  .sidebar-footer {
+    padding: 8px;
+    gap: 6px;
+  }
+  
+  .user-info {
+    padding: 4px;
+    gap: 6px;
+  }
+  
+  .user-avatar {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .user-icon {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .user-name {
+    font-size: 10px;
+  }
+  
+  .user-role {
+    font-size: 8px;
+  }
+  
+  .logout-button {
+    padding: 8px 10px;
+    font-size: 10px;
+    min-height: auto;
+  }
+  
+  .logout-icon {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Estilos específicos para orientación landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+  .sidebar {
+    width: 160px;
+    min-width: 140px;
+  }
+  
+  .main-content {
+    margin-left: 160px;
+    width: calc(100% - 160px);
+  }
+  
+  .sidebar-header {
+    padding: 6px 8px 4px;
+  }
+  
+  .logo-animation {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 3px;
+  }
+  
+  .brand-name {
+    font-size: 10px;
+    letter-spacing: 0.2px;
+  }
+  
+  .brand-tagline {
+    font-size: 7px;
+    margin: 1px 0 0;
+  }
+  
+  .text-underline {
+    margin: 3px auto 0 auto;
+    height: 1px;
+  }
+  
+  .quick-links {
+    padding: 3px 6px;
+    margin: 0 4px 3px;
+    gap: 3px;
+  }
+  
+  .quick-link {
+    padding: 3px 2px;
+    gap: 1px;
+  }
+  
+  .link-icon-container {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .link-icon {
+    width: 7px;
+    height: 7px;
+  }
+  
+  .quick-link span {
+    font-size: 5px;
+  }
+  
+  .sidebar-nav {
+    padding: 2px 4px 6px;
+  }
+  
+  .nav-item {
+    margin-bottom: 1px;
+  }
+  
+  .nav-link {
+    padding: 5px 6px;
+  }
+  
+  .nav-icon-container {
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+  }
+  
+  .nav-icon {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .nav-text {
+    font-size: 9px;
+  }
+  
+  .sidebar-footer {
+    padding: 4px;
+    gap: 3px;
+  }
+  
+  .user-info {
+    padding: 2px;
+    gap: 3px;
+  }
+  
+  .user-avatar {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .user-icon {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .user-name {
+    font-size: 8px;
+  }
+  
+  .user-role {
+    font-size: 6px;
+  }
+  
+  .logout-button {
+    padding: 4px 6px;
+    font-size: 8px;
+  }
+  
+  .logout-icon {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* Estilos para tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+  .sidebar {
+    width: 250px;
+    min-width: 230px;
+  }
+  
+  .main-content {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+  }
+}
+
+/* Estilos para pantallas muy pequeñas (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .sidebar {
+    width: 180px;
+    min-width: 160px;
+  }
+  
+  .main-content {
+    margin-left: 180px;
+    width: calc(100% - 180px);
+  }
+  
+  .sidebar-header {
+    padding: 6px 8px 4px;
+  }
+  
+  .logo-animation {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 4px;
+  }
+  
+  .brand-name {
+    font-size: 11px;
+    letter-spacing: 0.2px;
+  }
+  
+  .brand-tagline {
+    font-size: 8px;
+    margin: 1px 0 0;
+  }
+  
+  .text-underline {
+    margin: 4px auto 0 auto;
+    height: 2px;
+  }
+  
+  .quick-links {
+    padding: 4px 8px;
+    margin: 0 6px 4px;
+    gap: 4px;
+  }
+  
+  .quick-link {
+    padding: 4px 2px;
+    gap: 1px;
+  }
+  
+  .link-icon-container {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .link-icon {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .quick-link span {
+    font-size: 6px;
+  }
+  
+  .sidebar-nav {
+    padding: 3px 6px 8px;
+  }
+  
+  .nav-item {
+    margin-bottom: 2px;
+  }
+  
+  .nav-link {
+    padding: 6px 8px;
+  }
+  
+  .nav-icon-container {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+  }
+  
+  .nav-icon {
+    width: 11px;
+    height: 11px;
+  }
+  
+  .nav-text {
+    font-size: 10px;
+  }
+  
+  .sidebar-footer {
+    padding: 6px;
+    gap: 4px;
+  }
+  
+  .user-info {
+    padding: 3px;
+    gap: 4px;
+  }
+  
+  .user-avatar {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .user-icon {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .user-name {
+    font-size: 9px;
+  }
+  
+  .user-role {
+    font-size: 7px;
+  }
+  
+  .logout-button {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+  
+  .logout-icon {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Estilos para dispositivos con notch (iPhone X+, etc.) */
+@supports (padding: max(0px)) {
+  .sidebar {
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-left: max(0px, env(safe-area-inset-left));
+  }
+}
+
+/* Estilos para modo oscuro del sistema */
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Mejoras de accesibilidad táctil - Manteniendo compacto */
+@media (pointer: coarse) {
+  .nav-link {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .quick-link {
+    min-height: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .logout-button {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>

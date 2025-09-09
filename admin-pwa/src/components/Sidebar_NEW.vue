@@ -1118,28 +1118,28 @@ const handleKeydown = (event) => {
 
 /* Footer */
 .sidebar-footer {
-  padding: 14px;
+  padding: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   background: transparent;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px;
+  gap: 8px;
+  padding: 6px;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 6px;
   border: none;
   box-shadow: none;
 }
 
 .user-avatar {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: transparent;
   display: flex;
@@ -1151,8 +1151,8 @@ const handleKeydown = (event) => {
 }
 
 .user-icon {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   color: rgba(255, 255, 255, 0.8);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
@@ -1164,7 +1164,7 @@ const handleKeydown = (event) => {
 
 .user-name {
   margin: 0;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 400;
   color: #FFFFFF;
   white-space: nowrap;
@@ -1175,7 +1175,7 @@ const handleKeydown = (event) => {
 
 .user-role {
   margin: 0;
-  font-size: 11px;
+  font-size: 9px;
   color: rgba(255, 255, 255, 0.7);
   opacity: 0.9;
   font-weight: 400;
@@ -1186,23 +1186,24 @@ const handleKeydown = (event) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 6px;
+  padding: 10px 12px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+  border-radius: 6px;
   background: linear-gradient(135deg, 
     rgba(255, 87, 34, 0.9) 0%,
     rgba(244, 67, 54, 0.9) 100%);
   color: white;
   font-family: 'Poppins', sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  width: 100%;
+  width: 85%;
+  align-self: center;
 }
 
 .logout-button:hover {
@@ -1220,8 +1221,8 @@ const handleKeydown = (event) => {
 }
 
 .logout-icon {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 

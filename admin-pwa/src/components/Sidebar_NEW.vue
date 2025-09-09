@@ -60,6 +60,21 @@
         </div>
         <span>App Móvil</span>
       </a>
+      
+      <!-- Resumen Ejecutivo -->
+      <a href="http://dashboard.sembrandodatos.com/public/dashboard/a3a689e6-e359-4a29-a87f-6b5afb589163" target="_blank" class="quick-link resumen-ejecutivo">
+        <div class="link-icon-container">
+          <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <path d="M9 9h6v6H9z"/>
+            <path d="M9 3v6"/>
+            <path d="M21 9h-6"/>
+            <path d="M9 15v6"/>
+            <path d="M15 15h6"/>
+          </svg>
+        </div>
+        <span>Resumen Ejecutivo</span>
+      </a>
     </div>
 
     <!-- Navegación principal -->
@@ -767,7 +782,10 @@ const handleKeydown = (event) => {
 /* Links rápidos */
 .quick-links {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
   padding: 8px 12px;
   margin: 0 10px 8px;
   background: rgba(255, 255, 255, 0.1);
@@ -796,6 +814,13 @@ const handleKeydown = (event) => {
   -webkit-backdrop-filter: blur(10px);
 }
 
+/* Tercer botón ocupa toda la fila inferior */
+.quick-link.resumen-ejecutivo {
+  width: 100%;
+  max-width: none;
+  margin-top: 4px;
+}
+
 .quick-link:hover {
   transform: translateY(-2px);
 }
@@ -816,6 +841,14 @@ const handleKeydown = (event) => {
 
 .quick-link.app-movil:hover {
   background: linear-gradient(135deg, rgba(38, 166, 154, 0.8) 0%, rgba(33, 150, 243, 0.8) 100%);
+}
+
+.quick-link.resumen-ejecutivo {
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.7) 0%, rgba(103, 58, 183, 0.7) 100%);
+}
+
+.quick-link.resumen-ejecutivo:hover {
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.8) 0%, rgba(103, 58, 183, 0.8) 100%);
 }
 
 .link-icon-container {

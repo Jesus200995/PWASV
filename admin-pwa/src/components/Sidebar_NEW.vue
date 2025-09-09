@@ -160,8 +160,13 @@
             <div class="nav-icon-container">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
-                <path d="M2 12h20"/>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                <path d="M8 3h3a7 7 0 0 0 3 18h-3A17 17 0 0 1 8 3z"/>
+                <path d="M16 12h3"/>
+                <path d="M16 18h2"/>
+                <path d="M16 6h2"/>
+                <path d="M3 12h3"/>
+                <path d="M6 6h2"/>
+                <path d="M6 18h2"/>
               </svg>
             </div>
             <span class="nav-text">Visor de Seguimiento</span>

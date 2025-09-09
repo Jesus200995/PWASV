@@ -863,7 +863,7 @@ const determinarTipoActividad = (actividad) => {
         tipo: 'entrada',
         clase: 'entrada',
         descripcion: 'Entrada de Hoy',
-        color: '#AEEE2F' // Verde suave
+        color: '#32CD32' // Verde lima
       };
     } 
     // Si la entrada NO es de hoy (CDMX): Naranja (antigua)
@@ -1056,7 +1056,7 @@ const inicializarMapa = (datos) => {
           'circle-color': [
             'match',
             ['get', 'tipo_actividad'],
-            'entrada', '#AEEE2F', // Verde suave para entradas
+            'entrada', '#32CD32', // Verde para entradas
             'salida', '#DC2626', // Rojo para salidas
             'registro-hoy', '#1E3A8A', // Azul para registros de hoy
             'registro-antiguo', '#FF9800', // Naranja para registros antiguos
@@ -2430,7 +2430,7 @@ watch(filtroTipo, () => {
 }
 
 .stat-value.entrada {
-  color: #AEEE2F;
+  color: #2ecc71;
 }
 
 .stat-value.salida {
@@ -2466,7 +2466,7 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.entrada {
-  background-color: #AEEE2F;
+  background-color: #32CD32;
 }
 
 .color-marker.salida {
@@ -2609,7 +2609,7 @@ watch(filtroTipo, () => {
 /* Colores dinámicos según tipo de registro */
 .custom-popup.popup-entrada {
   background-color: #f0fdf4;
-  border: 1px solid rgba(174, 238, 47, 0.3);
+  border: 1px solid rgba(50, 205, 50, 0.3);
 }
 
 .custom-popup.popup-salida {
@@ -2653,8 +2653,8 @@ watch(filtroTipo, () => {
 /* Colores de la flecha según el tipo */
 .popup-entrada .popup-arrow::after {
   background-color: #f0fdf4;
-  border-right: 1px solid rgba(174, 238, 47, 0.3);
-  border-bottom: 1px solid rgba(174, 238, 47, 0.3);
+  border-right: 1px solid rgba(50, 205, 50, 0.3);
+  border-bottom: 1px solid rgba(50, 205, 50, 0.3);
 }
 
 .popup-salida .popup-arrow::after {
@@ -2722,7 +2722,7 @@ watch(filtroTipo, () => {
 
 /* Estilos específicos para el botón X en cada tipo de popup */
 .popup-entrada .popup-close-btn:hover svg {
-  color: #AEEE2F;
+  color: #22c55e;
 }
 
 .popup-salida .popup-close-btn:hover svg {
@@ -2753,7 +2753,7 @@ watch(filtroTipo, () => {
 .popup-entrada .popup-icon,
 .popup-entrada .popup-icon-small,
 .popup-entrada strong {
-  color: #AEEE2F;
+  color: #22c55e;
 }
 
 .popup-salida .popup-icon,

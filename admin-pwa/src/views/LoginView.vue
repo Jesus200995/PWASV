@@ -692,9 +692,9 @@ const login = async () => {
 .main-title {
   margin: 0 0 8px 0;
   font-size: 20px;
-  font-weight: 700;
-  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  letter-spacing: 1.2px;
+  font-weight: 800;
+  font-family: 'Poppins', 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 1.5px;
   position: relative;
   text-align: center;
   display: block;
@@ -716,6 +716,7 @@ const login = async () => {
   animation: lightSweep 3s ease-in-out infinite;
   text-shadow: 0 2px 4px rgba(74, 222, 128, 0.3);
   -webkit-text-stroke: 0.5px #15803d;
+  text-transform: uppercase;
 }
 
 @keyframes titleShine {
@@ -1146,8 +1147,9 @@ const login = async () => {
   
   .main-title {
     font-size: 22px;
-    letter-spacing: 1.4px;
+    letter-spacing: 1.6px;
     margin-bottom: 10px;
+    font-weight: 800;
   }
   
   .subtitle {
@@ -1159,8 +1161,8 @@ const login = async () => {
 @media (min-width: 1440px) {
   .main-title {
     font-size: 24px;
-    letter-spacing: 1.6px;
-    font-weight: 700;
+    letter-spacing: 1.8px;
+    font-weight: 800;
     margin-bottom: 12px;
   }
   
@@ -1174,8 +1176,8 @@ const login = async () => {
 @media (min-width: 2560px) {
   .main-title {
     font-size: 26px;
-    letter-spacing: 1.8px;
-    font-weight: 700;
+    letter-spacing: 2px;
+    font-weight: 800;
     margin-bottom: 15px;
     line-height: 1.1;
     text-shadow: 0 2px 6px rgba(74, 222, 128, 0.4);
@@ -1221,7 +1223,7 @@ const login = async () => {
   .main-title {
     font-size: 16px;
     letter-spacing: 0.8px;
-    font-weight: 700;
+    font-weight: 800;
   }
 }
 

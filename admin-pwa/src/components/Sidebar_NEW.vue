@@ -1313,12 +1313,12 @@ const handleKeydown = (event) => {
 /* Contenedor principal del modal */
 .logout-modal-container {
   width: 100%;
-  max-width: 420px;
+  max-width: 340px;
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.4),
+    0 20px 40px -12px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   position: relative;
@@ -1336,7 +1336,7 @@ const handleKeydown = (event) => {
   );
   background-size: 300% 300%;
   animation: gradientShift 6s ease infinite;
-  padding: 24px;
+  padding: 18px;
   position: relative;
   overflow: hidden;
 }
@@ -1364,7 +1364,7 @@ const handleKeydown = (event) => {
 .logout-header-content {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   position: relative;
   z-index: 2;
 }
@@ -1375,20 +1375,20 @@ const handleKeydown = (event) => {
 }
 
 .logout-icon-bg {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.25) 0%, 
     rgba(255, 255, 255, 0.1) 100%
   );
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 6px 24px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   position: relative;
   overflow: hidden;
@@ -1418,8 +1418,8 @@ const handleKeydown = (event) => {
 }
 
 .logout-icon {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   color: #ffffff;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   z-index: 1;
@@ -1432,8 +1432,8 @@ const handleKeydown = (event) => {
 }
 
 .logout-title {
-  margin: 0 0 4px 0;
-  font-size: 20px;
+  margin: 0 0 3px 0;
+  font-size: 18px;
   font-weight: 700;
   color: #ffffff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -1442,7 +1442,7 @@ const handleKeydown = (event) => {
 
 .logout-subtitle {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 400;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -1451,13 +1451,13 @@ const handleKeydown = (event) => {
 /* Botón cerrar elegante */
 .logout-close-btn {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1474,25 +1474,25 @@ const handleKeydown = (event) => {
 }
 
 .logout-close-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: #ffffff;
 }
 
 /* Cuerpo del modal */
 .logout-modal-body {
-  padding: 32px 24px;
+  padding: 24px 18px;
   background: #ffffff;
 }
 
 /* Sección de advertencia */
 .logout-warning-section {
   display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding: 20px;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid #fecaca;
   position: relative;
   overflow: hidden;
@@ -1510,19 +1510,19 @@ const handleKeydown = (event) => {
 
 .logout-warning-icon {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
 }
 
 .logout-warning-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   color: #ffffff;
 }
 
@@ -1531,8 +1531,8 @@ const handleKeydown = (event) => {
 }
 
 .logout-warning-title {
-  margin: 0 0 8px 0;
-  font-size: 16px;
+  margin: 0 0 6px 0;
+  font-size: 15px;
   font-weight: 600;
   color: #7f1d1d;
   font-family: 'Inter', sans-serif;
@@ -1540,25 +1540,25 @@ const handleKeydown = (event) => {
 
 .logout-warning-text {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   color: #991b1b;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* Sección de información */
 .logout-info-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .logout-info-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 10px 14px;
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
 }
@@ -1583,11 +1583,11 @@ const handleKeydown = (event) => {
 
 /* Footer con botones */
 .logout-modal-footer {
-  padding: 20px 24px;
+  padding: 16px 18px;
   background: #f9fafb;
   border-top: 1px solid #e5e7eb;
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: flex-end;
 }
 
@@ -1595,12 +1595,12 @@ const handleKeydown = (event) => {
 .logout-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 10px;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
   border: none;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1624,8 +1624,8 @@ const handleKeydown = (event) => {
 }
 
 .logout-btn-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   transition: transform 0.2s ease;
 }
 
@@ -1702,66 +1702,234 @@ const handleKeydown = (event) => {
 /* Responsividad */
 @media (max-width: 480px) {
   .logout-modal-overlay {
-    padding: 16px;
+    padding: 12px;
   }
   
   .logout-modal-container {
     max-width: 100%;
-    border-radius: 16px;
+    border-radius: 14px;
+    margin: 0 auto;
+  }
+  
+  .logout-modal-header {
+    padding: 16px;
+  }
+  
+  .logout-header-content {
+    gap: 10px;
+  }
+  
+  .logout-icon-bg {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .logout-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .logout-title {
+    font-size: 16px;
+  }
+  
+  .logout-subtitle {
+    font-size: 12px;
+  }
+  
+  .logout-close-btn {
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+  }
+  
+  .logout-close-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .logout-modal-body {
+    padding: 18px 16px;
+  }
+  
+  .logout-warning-section {
+    padding: 14px;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  
+  .logout-warning-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .logout-warning-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .logout-warning-title {
+    font-size: 14px;
+  }
+  
+  .logout-warning-text {
+    font-size: 12px;
+  }
+  
+  .logout-info-section {
+    gap: 8px;
+  }
+  
+  .logout-info-item {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  
+  .logout-info-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .logout-info-item span {
+    font-size: 12px;
+  }
+  
+  .logout-modal-footer {
+    padding: 14px 16px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .logout-btn {
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  
+  .logout-btn-icon {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Para pantallas extra pequeñas */
+@media (max-width: 320px) {
+  .logout-modal-overlay {
+    padding: 8px;
+  }
+  
+  .logout-modal-container {
+    border-radius: 12px;
+  }
+  
+  .logout-modal-header {
+    padding: 14px;
+  }
+  
+  .logout-title {
+    font-size: 15px;
+  }
+  
+  .logout-subtitle {
+    font-size: 11px;
+  }
+  
+  .logout-modal-body {
+    padding: 16px 14px;
+  }
+  
+  .logout-warning-section {
+    padding: 12px;
+  }
+  
+  .logout-modal-footer {
+    padding: 12px 14px;
+  }
+}
+
+/* Para tablets en orientación portrait */
+@media (min-width: 481px) and (max-width: 768px) {
+  .logout-modal-container {
+    max-width: 380px;
   }
   
   .logout-modal-header {
     padding: 20px;
   }
   
-  .logout-header-content {
-    gap: 12px;
-  }
-  
-  .logout-icon-bg {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .logout-icon {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .logout-title {
-    font-size: 18px;
-  }
-  
-  .logout-subtitle {
-    font-size: 13px;
-  }
-  
   .logout-modal-body {
-    padding: 24px 20px;
-  }
-  
-  .logout-warning-section {
-    padding: 16px;
-    gap: 12px;
-  }
-  
-  .logout-warning-icon {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .logout-warning-icon svg {
-    width: 20px;
-    height: 20px;
+    padding: 26px 20px;
   }
   
   .logout-modal-footer {
-    padding: 16px 20px;
-    flex-direction: column;
+    padding: 18px 20px;
+  }
+}
+
+/* Para tablets en orientación landscape y pantallas medianas */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .logout-modal-container {
+    max-width: 340px;
+  }
+}
+
+/* Para pantallas grandes */
+@media (min-width: 1025px) {
+  .logout-modal-container {
+    max-width: 340px;
+  }
+}
+
+/* Ajustes para altura de pantalla */
+@media (max-height: 600px) {
+  .logout-modal-overlay {
+    align-items: flex-start;
+    padding-top: 20px;
   }
   
-  .logout-btn {
-    justify-content: center;
+  .logout-modal-body {
+    padding: 18px 16px;
+  }
+  
+  .logout-warning-section {
+    margin-bottom: 16px;
+  }
+  
+  .logout-info-section {
+    gap: 8px;
+  }
+}
+
+@media (max-height: 500px) {
+  .logout-modal-overlay {
+    padding: 10px;
+    padding-top: 15px;
+  }
+  
+  .logout-modal-header {
+    padding: 14px;
+  }
+  
+  .logout-modal-body {
+    padding: 16px 14px;
+  }
+  
+  .logout-warning-section {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .logout-info-section {
+    gap: 6px;
+  }
+  
+  .logout-info-item {
+    padding: 6px 10px;
+  }
+  
+  .logout-modal-footer {
+    padding: 12px 14px;
   }
 }
 

@@ -96,7 +96,8 @@
                     <option value="">Todas las actividades</option>
                     <option value="entrada">Solo Entradas</option>
                     <option value="salida">Solo Salidas</option>
-                    <option value="registro-hoy">Solo Actividades de Hoy</option>
+                    <option value="campo-hoy">Solo Campo (hoy)</option>
+                    <option value="gabinete-hoy">Solo Gabinete (hoy)</option>
                     <option value="registro-antiguo">Solo Registros Antiguos</option>
                   </select>
                 </div>
@@ -120,8 +121,12 @@
                 <span class="stat-value salida">{{ estadisticasDiaActual.salidasDia }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Actividades de hoy</span>
-                <span class="stat-value hoy">{{ estadisticasDiaActual.actividadesDia }}</span>
+                <span class="stat-label">Campo (hoy)</span>
+                <span class="stat-value campo">{{ estadisticasDiaActual.campoHoy }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Gabinete (hoy)</span>
+                <span class="stat-value gabinete">{{ estadisticasDiaActual.gabineteHoy }}</span>
               </div>
             </div>
           </div>
@@ -137,10 +142,21 @@
                 <div class="color-marker salida"></div>
                 <span>Salida (hoy)</span>
               </div>
-              <div class="leyenda-item">
-                <div class="color-marker registro-hoy"></div>
-                <span>Actividades (hoy)</span>
+              
+              <!-- Subtítulo para Actividades -->
+              <div class="leyenda-subtitle">
+                <h5>Actividades</h5>
               </div>
+              
+              <div class="leyenda-item">
+                <div class="color-marker campo-hoy"></div>
+                <span>Campo (hoy)</span>
+              </div>
+              <div class="leyenda-item">
+                <div class="color-marker gabinete-hoy"></div>
+                <span>Gabinete (hoy)</span>
+              </div>
+              
               <div class="leyenda-item">
                 <div class="color-marker registro-antiguo"></div>
                 <span>Registro antiguo</span>
@@ -490,6 +506,8 @@ const clusterInfo = reactive({
   total: 0,
   entradas: 0,
   salidas: 0,
+  campoHoy: 0,
+  gabineteHoy: 0,
   registrosHoy: 0,
   registrosAntiguos: 0
 })
@@ -500,6 +518,8 @@ const estadisticasDiaActual = reactive({
   entradasDia: 0,
   salidasDia: 0,
   actividadesDia: 0,
+  campoHoy: 0,
+  gabineteHoy: 0,
   fechaCDMX: null
 })
 
@@ -727,6 +747,25 @@ const cargarEstadisticasDiaActual = async () => {
     estadisticasDiaActual.actividadesDia = estadisticas.actividadesDia || 0
     estadisticasDiaActual.fechaCDMX = estadisticas.fechaCDMX
     
+    // Obtener estadísticas por tipo de actividad
+    try {
+      const respuestaTipos = await axios.get(`${API_URL}/estadisticas/tipo-actividad`)
+      const estadisticasTipos = respuestaTipos.data.estadisticas_tipo
+      
+      // Actualizar contadores específicos por tipo
+      estadisticasDiaActual.campoHoy = estadisticasTipos.dia_actual?.campo || 0
+      estadisticasDiaActual.gabineteHoy = estadisticasTipos.dia_actual?.gabinete || 0
+      
+      console.log('📊 Estadísticas por tipo cargadas:', {
+        campo: estadisticasDiaActual.campoHoy,
+        gabinete: estadisticasDiaActual.gabineteHoy
+      })
+    } catch (errorTipos) {
+      console.warn('⚠️ Error cargando estadísticas por tipo:', errorTipos)
+      estadisticasDiaActual.campoHoy = 0
+      estadisticasDiaActual.gabineteHoy = 0
+    }
+    
     console.log('✅ Estadísticas del día actualizadas:', estadisticasDiaActual)
     
   } catch (error) {
@@ -736,6 +775,8 @@ const cargarEstadisticasDiaActual = async () => {
     estadisticasDiaActual.entradasDia = 0
     estadisticasDiaActual.salidasDia = 0
     estadisticasDiaActual.actividadesDia = 0
+    estadisticasDiaActual.campoHoy = 0
+    estadisticasDiaActual.gabineteHoy = 0
   }
 }
 
@@ -857,7 +898,7 @@ const determinarTipoActividad = (actividad) => {
   
   // CASO 1: Si la actividad es de tipo entrada
   if (actividad.tipo_actividad === 'entrada') {
-    // Si la entrada es de hoy (CDMX): Verde
+    // Si la entrada es de hoy (CDMX): Verde lima
     if (esActividadDeHoy) {
       return {
         tipo: 'entrada',
@@ -899,23 +940,67 @@ const determinarTipoActividad = (actividad) => {
     }
   }
   
-  // CASO 3: Si es un registro normal (ni entrada ni salida)
-  else {
-    // Si el registro es de hoy (CDMX): Azul
+  // CASO 3: Actividades de Campo
+  else if (actividad.tipo_actividad === 'campo') {
+    // Si la actividad de campo es de hoy (CDMX): Verde fuerte
     if (esActividadDeHoy) {
       return {
-        tipo: 'registro-hoy',
-        clase: 'registro-hoy',
-        descripcion: 'Actividades de Hoy',
+        tipo: 'campo-hoy',
+        clase: 'campo-hoy',
+        descripcion: 'Actividad de Campo Hoy',
+        color: '#16A34A' // Verde fuerte
+      };
+    }
+    // Si la actividad de campo NO es de hoy (CDMX): Naranja (antigua)
+    else {
+      return {
+        tipo: 'campo-antiguo',
+        clase: 'antiguo',
+        descripcion: 'Actividad de Campo Anterior',
+        color: '#FF9800' // Naranja
+      };
+    }
+  }
+  
+  // CASO 4: Actividades de Gabinete
+  else if (actividad.tipo_actividad === 'gabinete') {
+    // Si la actividad de gabinete es de hoy (CDMX): Azul
+    if (esActividadDeHoy) {
+      return {
+        tipo: 'gabinete-hoy',
+        clase: 'gabinete-hoy',
+        descripcion: 'Actividad de Gabinete Hoy',
         color: '#1E3A8A' // Azul marino
+      };
+    }
+    // Si la actividad de gabinete NO es de hoy (CDMX): Naranja (antigua)
+    else {
+      return {
+        tipo: 'gabinete-antiguo',
+        clase: 'antiguo',
+        descripcion: 'Actividad de Gabinete Anterior',
+        color: '#FF9800' // Naranja
+      };
+    }
+  }
+  
+  // CASO 5: Actividades sin tipo específico (por compatibilidad)
+  else {
+    // Si el registro es de hoy (CDMX): Verde fuerte (asumir campo por defecto)
+    if (esActividadDeHoy) {
+      return {
+        tipo: 'campo-hoy',
+        clase: 'campo-hoy',
+        descripcion: 'Actividad de Campo Hoy',
+        color: '#16A34A' // Verde fuerte (campo por defecto)
       };
     }
     // Si el registro NO es de hoy (CDMX): Naranja (antiguo)
     else {
       return {
-        tipo: 'registro-antiguo',
+        tipo: 'campo-antiguo',
         clase: 'antiguo',
-        descripcion: 'Registro Anterior',
+        descripcion: 'Actividad Anterior',
         color: '#FF9800' // Naranja
       };
     }
@@ -1056,9 +1141,13 @@ const inicializarMapa = (datos) => {
           'circle-color': [
             'match',
             ['get', 'tipo_actividad'],
-            'entrada', '#32CD32', // Verde para entradas
+            'entrada', '#32CD32', // Verde lima para entradas
             'salida', '#DC2626', // Rojo para salidas
-            'registro-hoy', '#1E3A8A', // Azul para registros de hoy
+            'campo-hoy', '#16A34A', // Verde fuerte para campo de hoy
+            'gabinete-hoy', '#1E3A8A', // Azul marino para gabinete de hoy
+            'campo-antiguo', '#FF9800', // Naranja para campo antiguo
+            'gabinete-antiguo', '#FF9800', // Naranja para gabinete antiguo
+            'registro-hoy', '#16A34A', // Verde fuerte para compatibilidad (campo por defecto)
             'registro-antiguo', '#FF9800', // Naranja para registros antiguos
             '#A9A9A9' // Gris por defecto (no debería llegar aquí)
           ],
@@ -1312,6 +1401,8 @@ const actualizarPuntosMapa = (datos) => {
     clusterInfo.total = 0;
     clusterInfo.entradas = 0;
     clusterInfo.salidas = 0;
+    clusterInfo.campoHoy = 0;
+    clusterInfo.gabineteHoy = 0;
     clusterInfo.registrosHoy = 0;
     clusterInfo.registrosAntiguos = 0;
     
@@ -1332,9 +1423,13 @@ const actualizarPuntosMapa = (datos) => {
         clusterInfo.entradas++;
       } else if (tipoActividad === 'salida') {
         clusterInfo.salidas++;
-      } else if (tipoActividad === 'registro-hoy') {
+      } else if (tipoActividad === 'campo-hoy') {
+        clusterInfo.campoHoy++;
         clusterInfo.registrosHoy++;
-      } else if (tipoActividad === 'registro-antiguo') {
+      } else if (tipoActividad === 'gabinete-hoy') {
+        clusterInfo.gabineteHoy++;
+        clusterInfo.registrosHoy++;
+      } else if (tipoActividad === 'campo-antiguo' || tipoActividad === 'gabinete-antiguo' || tipoActividad === 'registro-antiguo') {
         clusterInfo.registrosAntiguos++;
       }
       
@@ -1609,10 +1704,14 @@ const aplicarFiltros = () => {
             return tipoActividad.tipo === 'entrada'
           case 'salida':
             return tipoActividad.tipo === 'salida'
+          case 'campo-hoy':
+            return tipoActividad.tipo === 'campo-hoy'
+          case 'gabinete-hoy':
+            return tipoActividad.tipo === 'gabinete-hoy'
           case 'registro-hoy':
-            return tipoActividad.tipo === 'registro-hoy'
+            return tipoActividad.tipo === 'registro-hoy' || tipoActividad.tipo === 'campo-hoy' || tipoActividad.tipo === 'gabinete-hoy'
           case 'registro-antiguo':
-            return tipoActividad.tipo === 'registro-antiguo'
+            return tipoActividad.tipo === 'registro-antiguo' || tipoActividad.tipo === 'campo-antiguo' || tipoActividad.tipo === 'gabinete-antiguo'
           default:
             return true
         }
@@ -2437,6 +2536,14 @@ watch(filtroTipo, () => {
   color: #e53e3e;
 }
 
+.stat-value.campo {
+  color: #16A34A; /* Verde fuerte para campo */
+}
+
+.stat-value.gabinete {
+  color: #1E3A8A; /* Azul marino para gabinete */
+}
+
 .stat-value.hoy {
   color: #1e40af;
 }
@@ -2473,12 +2580,37 @@ watch(filtroTipo, () => {
   background-color: #DC2626;
 }
 
+.color-marker.campo-hoy {
+  background-color: #16A34A; /* Verde fuerte para campo */
+}
+
+.color-marker.gabinete-hoy {
+  background-color: #1E3A8A; /* Azul marino para gabinete */
+}
+
 .color-marker.registro-hoy {
-  background-color: #1E3A8A;
+  background-color: #1E3A8A; /* Para compatibilidad */
 }
 
 .color-marker.registro-antiguo {
   background-color: #FF9800;
+}
+
+/* Subtítulo en la leyenda */
+.leyenda-subtitle {
+  grid-column: 1 / -1;
+  margin: 8px 0 4px 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.leyenda-subtitle h5 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94A3B8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Ayuda */
@@ -2617,13 +2749,25 @@ watch(filtroTipo, () => {
   border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
-.custom-popup.popup-registro-hoy {
+.custom-popup.popup-campo-hoy {
+  background-color: #f0fdf4;
+  border: 1px solid rgba(22, 163, 74, 0.3);
+}
+
+.custom-popup.popup-gabinete-hoy {
   background-color: #eff6ff;
   border: 1px solid rgba(30, 58, 138, 0.3);
 }
 
+.custom-popup.popup-registro-hoy {
+  background-color: #f0fdf4;
+  border: 1px solid rgba(22, 163, 74, 0.3);
+}
+
 .custom-popup.popup-registro-antiguo, 
-.custom-popup.popup-antiguo {
+.custom-popup.popup-antiguo,
+.custom-popup.popup-campo-antiguo,
+.custom-popup.popup-gabinete-antiguo {
   background-color: #fff7ed;
   border: 1px solid rgba(255, 152, 0, 0.3);
 }
@@ -2663,14 +2807,28 @@ watch(filtroTipo, () => {
   border-bottom: 1px solid rgba(220, 38, 38, 0.3);
 }
 
-.popup-registro-hoy .popup-arrow::after {
+.popup-campo-hoy .popup-arrow::after {
+  background-color: #f0fdf4;
+  border-right: 1px solid rgba(22, 163, 74, 0.3);
+  border-bottom: 1px solid rgba(22, 163, 74, 0.3);
+}
+
+.popup-gabinete-hoy .popup-arrow::after {
   background-color: #eff6ff;
   border-right: 1px solid rgba(30, 58, 138, 0.3);
   border-bottom: 1px solid rgba(30, 58, 138, 0.3);
 }
 
+.popup-registro-hoy .popup-arrow::after {
+  background-color: #f0fdf4;
+  border-right: 1px solid rgba(22, 163, 74, 0.3);
+  border-bottom: 1px solid rgba(22, 163, 74, 0.3);
+}
+
 .popup-registro-antiguo .popup-arrow::after,
-.popup-antiguo .popup-arrow::after {
+.popup-antiguo .popup-arrow::after,
+.popup-campo-antiguo .popup-arrow::after,
+.popup-gabinete-antiguo .popup-arrow::after {
   background-color: #fff7ed;
   border-right: 1px solid rgba(255, 152, 0, 0.3);
   border-bottom: 1px solid rgba(255, 152, 0, 0.3);
@@ -2729,12 +2887,22 @@ watch(filtroTipo, () => {
   color: #ef4444;
 }
 
+.popup-campo-hoy .popup-close-btn:hover svg {
+  color: #16A34A; /* Verde fuerte para campo */
+}
+
+.popup-gabinete-hoy .popup-close-btn:hover svg {
+  color: #1e3a8a; /* Azul marino para gabinete */
+}
+
 .popup-registro-hoy .popup-close-btn:hover svg {
-  color: #1e40af;
+  color: #16A34A; /* Verde fuerte por defecto */
 }
 
 .popup-registro-antiguo .popup-close-btn:hover svg,
-.popup-antiguo .popup-close-btn:hover svg {
+.popup-antiguo .popup-close-btn:hover svg,
+.popup-campo-antiguo .popup-close-btn:hover svg,
+.popup-gabinete-antiguo .popup-close-btn:hover svg {
   color: #f59e0b;
 }
 
@@ -2762,18 +2930,36 @@ watch(filtroTipo, () => {
   color: #ef4444;
 }
 
+.popup-campo-hoy .popup-icon,
+.popup-campo-hoy .popup-icon-small,
+.popup-campo-hoy strong {
+  color: #16A34A; /* Verde fuerte para campo */
+}
+
+.popup-gabinete-hoy .popup-icon,
+.popup-gabinete-hoy .popup-icon-small,
+.popup-gabinete-hoy strong {
+  color: #1e3a8a; /* Azul marino para gabinete */
+}
+
 .popup-registro-hoy .popup-icon,
 .popup-registro-hoy .popup-icon-small,
 .popup-registro-hoy strong {
-  color: #1e40af;
+  color: #16A34A; /* Verde fuerte por defecto */
 }
 
 .popup-registro-antiguo .popup-icon,
 .popup-registro-antiguo .popup-icon-small,
 .popup-antiguo .popup-icon,
 .popup-antiguo .popup-icon-small,
+.popup-campo-antiguo .popup-icon,
+.popup-campo-antiguo .popup-icon-small,
+.popup-gabinete-antiguo .popup-icon,
+.popup-gabinete-antiguo .popup-icon-small,
 .popup-registro-antiguo strong,
-.popup-antiguo strong {
+.popup-antiguo strong,
+.popup-campo-antiguo strong,
+.popup-gabinete-antiguo strong {
   color: #f59e0b;
 }
 

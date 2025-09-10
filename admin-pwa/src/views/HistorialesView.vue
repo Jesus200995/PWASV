@@ -442,37 +442,146 @@
       </div>
     </main>
 
-    <!-- Modal de detalles -->
-    <div v-if="modalDetalles.visible" class="modal-overlay" @click="cerrarModalDetalles">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>Detalles del Registro</h3>
-          <button @click="cerrarModalDetalles" class="close-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
+    <!-- Modal de detalles moderno y compacto -->
+    <div v-if="modalDetalles.visible" class="modal-overlay-modern" @click="cerrarModalDetalles">
+      <div class="modal-content-modern" @click.stop>
+        <!-- Header del modal -->
+        <div class="modal-header-modern">
+          <div class="modal-title-section">
+            <div class="modal-icon-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+              </svg>
+            </div>
+            <h3 class="modal-title-text">Detalles del Registro</h3>
+          </div>
+          <button @click="cerrarModalDetalles" class="btn-close-modern">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
-        <div class="modal-body">
-          <div class="detail-grid">
-            <div class="detail-item">
-              <strong>Tipo:</strong>
-              <span :class="['tipo-badge', modalDetalles.registro?.tipo]">
-                {{ formatearTipo(modalDetalles.registro?.tipo) }}
-              </span>
+        
+        <!-- Body del modal -->
+        <div class="modal-body-modern">
+          <div v-if="modalDetalles.registro" class="details-grid-modern">
+            <!-- Imagen si existe -->
+            <div v-if="obtenerImagenUrl(modalDetalles.registro)" class="detail-image-section">
+              <div class="detail-image-container">
+                <img 
+                  :src="obtenerImagenUrl(modalDetalles.registro)" 
+                  :alt="'Imagen del registro'"
+                  class="detail-image"
+                  @error="onImageError"
+                  @load="onImageLoad"
+                />
+                <div class="image-overlay">
+                  <div class="image-info">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="9" cy="9" r="2"/>
+                      <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                    </svg>
+                    <span>Fotografía</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="detail-item">
-              <strong>Descripción:</strong>
-              <span>{{ modalDetalles.registro?.descripcion || 'Sin descripción' }}</span>
-            </div>
-            <div class="detail-item">
-              <strong>Fecha y Hora:</strong>
-              <span>{{ formatearFechaHora(modalDetalles.registro?.fecha, modalDetalles.registro?.hora) }}</span>
-            </div>
-            <div v-if="modalDetalles.registro?.detalles" class="detail-item full-width">
-              <strong>Información adicional:</strong>
-              <pre class="json-display">{{ JSON.stringify(modalDetalles.registro.detalles, null, 2) }}</pre>
+
+            <!-- Información principal -->
+            <div class="detail-main-info">
+              <!-- Tipo y descripción -->
+              <div class="detail-card-compact">
+                <div class="detail-header-compact">
+                  <div class="detail-icon-small">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 12l2 2 4-4"/>
+                      <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+                    </svg>
+                  </div>
+                  <span class="detail-label-compact">Información General</span>
+                </div>
+                <div class="detail-content-compact">
+                  <div class="info-row">
+                    <span class="info-label">Tipo:</span>
+                    <span :class="['tipo-badge-modal', modalDetalles.registro?.tipo]">
+                      {{ formatearTipo(modalDetalles.registro?.tipo) }}
+                    </span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Descripción:</span>
+                    <span class="info-value">{{ modalDetalles.registro?.descripcion || 'Sin descripción' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fecha y hora -->
+              <div class="detail-card-compact">
+                <div class="detail-header-compact">
+                  <div class="detail-icon-small">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                  </div>
+                  <span class="detail-label-compact">Fecha y Hora</span>
+                </div>
+                <div class="detail-content-compact">
+                  <div class="info-row">
+                    <span class="info-label">Fecha:</span>
+                    <span class="info-value">{{ formatearFecha(modalDetalles.registro?.fecha) }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Hora:</span>
+                    <span class="info-value">{{ formatearHora(modalDetalles.registro?.hora) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ubicación si existe -->
+              <div v-if="obtenerUbicacion(modalDetalles.registro)" class="detail-card-compact">
+                <div class="detail-header-compact">
+                  <div class="detail-icon-small">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                  </div>
+                  <span class="detail-label-compact">Ubicación</span>
+                </div>
+                <div class="detail-content-compact">
+                  <div class="location-info">
+                    <div class="coordinate-row">
+                      <span class="coordinate-label">Lat:</span>
+                      <span class="coordinate-value">{{ obtenerUbicacion(modalDetalles.registro).latitud }}</span>
+                    </div>
+                    <div class="coordinate-row">
+                      <span class="coordinate-label">Lng:</span>
+                      <span class="coordinate-value">{{ obtenerUbicacion(modalDetalles.registro).longitud }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Origen -->
+              <div class="detail-card-compact">
+                <div class="detail-header-compact">
+                  <div class="detail-icon-small">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                      <path d="M6.5 2H20v20l-5.5-6-5.5 6V2"/>
+                    </svg>
+                  </div>
+                  <span class="detail-label-compact">Origen de Datos</span>
+                </div>
+                <div class="detail-content-compact">
+                  <span :class="['origen-badge-modal', modalDetalles.registro?.origen]">
+                    {{ formatearOrigen(modalDetalles.registro?.origen) }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -891,6 +1000,73 @@ export default {
       }
     }
 
+    // Obtener URL de imagen desde los detalles
+    const obtenerImagenUrl = (registro) => {
+      if (!registro || !registro.detalles) return null
+      
+      try {
+        let detalles
+        if (typeof registro.detalles === 'string') {
+          detalles = JSON.parse(registro.detalles)
+        } else {
+          detalles = registro.detalles
+        }
+        
+        const baseUrl = 'https://apipwa.sembrandodatos.com'
+        
+        if (detalles.foto_url) {
+          // Si ya tiene el protocolo, usarla directamente
+          if (detalles.foto_url.startsWith('http')) {
+            return detalles.foto_url
+          }
+          // Si no, agregar la base URL
+          return `${baseUrl}${detalles.foto_url.startsWith('/') ? '' : '/'}${detalles.foto_url}`
+        }
+        
+        return null
+      } catch (error) {
+        console.error('Error al obtener URL de imagen:', error)
+        return null
+      }
+    }
+
+    // Obtener información de ubicación desde los detalles
+    const obtenerUbicacion = (registro) => {
+      if (!registro || !registro.detalles) return null
+      
+      try {
+        let detalles
+        if (typeof registro.detalles === 'string') {
+          detalles = JSON.parse(registro.detalles)
+        } else {
+          detalles = registro.detalles
+        }
+        
+        if (detalles.latitud && detalles.longitud) {
+          return {
+            latitud: detalles.latitud,
+            longitud: detalles.longitud
+          }
+        }
+        
+        return null
+      } catch (error) {
+        console.error('Error al obtener ubicación:', error)
+        return null
+      }
+    }
+
+    // Manejar error de carga de imagen
+    const onImageError = (event) => {
+      console.error('Error al cargar imagen:', event.target.src)
+      event.target.style.display = 'none'
+    }
+
+    // Manejar carga exitosa de imagen
+    const onImageLoad = (event) => {
+      console.log('Imagen cargada exitosamente:', event.target.src)
+    }
+
     // Exportar a Excel
     const exportarExcel = async () => {
       if (historial.value.length === 0) return
@@ -1029,6 +1205,10 @@ export default {
       // Métodos de modal
       mostrarDetalles,
       cerrarModalDetalles,
+      obtenerImagenUrl,
+      obtenerUbicacion,
+      onImageError,
+      onImageLoad,
       
       // Exportar
       exportarExcel,
@@ -2327,99 +2507,420 @@ export default {
   }
 }
 
-/* Modal de detalles */
-.modal-overlay {
+/* Modal de detalles moderno */
+.modal-overlay-modern {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: clamp(16px, 3vw, 20px);
+  z-index: 10000;
+  padding: clamp(12px, 2vw, 16px);
+  animation: fadeInOverlay 0.3s ease-out;
 }
 
-.modal-content {
-  background: white;
-  border-radius: clamp(12px, 2.5vw, 16px);
-  max-width: 600px;
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content-modern {
+  background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  border-radius: clamp(8px, 1.5vw, 12px);
+  max-width: clamp(320px, 85vw, 480px);
   width: 100%;
-  max-height: 80vh;
-  overflow: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 
+    0 10px 40px rgba(76, 175, 80, 0.15),
+    0 4px 20px rgba(0, 0, 0, 0.1);
+  animation: slideInModal 0.3s ease-out;
+  position: relative;
 }
 
-.modal-header {
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header-modern {
+  background: linear-gradient(135deg, #4CAF50 0%, #43A047 100%);
+  color: white;
+  padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: clamp(16px, 3vw, 20px);
-  border-bottom: 1px solid #e9ecef;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
 }
 
-.modal-header h3 {
-  margin: 0;
-  font-size: clamp(16px, 3vw, 18px);
+.modal-header-modern * {
+  user-select: none !important;
+}
+
+.modal-header-modern .modal-title-section * {
+  pointer-events: none !important;
+}
+
+.modal-header-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='20' cy='20' r='1.5'/%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
+}
+
+.modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.2vw, 8px);
+  position: relative;
+  z-index: 2;
+}
+
+.modal-icon-header {
+  width: clamp(20px, 3.5vw, 24px);
+  height: clamp(20px, 3.5vw, 24px);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-title-text {
+  font-size: clamp(12px, 2.2vw, 14px);
   font-weight: 600;
-  color: #2c5530;
+  margin: 0;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  cursor: default;
 }
 
-.close-btn {
-  background: none;
+.modal-title-text::before,
+.modal-title-text::after {
+  display: none !important;
+  content: none !important;
+}
+
+.modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.2vw, 8px);
+  position: relative;
+  z-index: 2;
+  user-select: none;
+  pointer-events: none;
+}
+
+.btn-close-modern {
+  background: rgba(255, 255, 255, 0.15);
   border: none;
+  border-radius: 50%;
+  width: clamp(24px, 4vw, 28px);
+  height: clamp(24px, 4vw, 28px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  padding: clamp(4px, 0.8vw, 6px);
+  transition: all 0.3s ease;
+  color: white;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.btn-close-modern:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.modal-body-modern {
+  padding: clamp(12px, 2vw, 16px);
+  max-height: calc(85vh - 60px);
+  overflow-y: auto;
+}
+
+.details-grid-modern {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.8vw, 12px);
+}
+
+/* Sección de imagen */
+.detail-image-section {
+  width: 100%;
+  margin-bottom: clamp(4px, 0.8vw, 6px);
+}
+
+.detail-image-container {
+  position: relative;
+  width: 100%;
+  height: clamp(120px, 25vw, 160px);
+  border-radius: clamp(6px, 1.2vw, 8px);
+  overflow: hidden;
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.detail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.detail-image:hover {
+  transform: scale(1.02);
+}
+
+.image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  padding: clamp(6px, 1.2vw, 8px) clamp(8px, 1.5vw, 10px);
+}
+
+.image-info {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 0.8vw, 6px);
+  color: white;
+  font-size: clamp(10px, 1.8vw, 11px);
+  font-weight: 500;
+}
+
+/* Información principal */
+.detail-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.5vw, 10px);
+}
+
+.detail-card-compact {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(76, 175, 80, 0.15);
   border-radius: clamp(4px, 0.8vw, 6px);
-  color: #6c757d;
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
-.close-btn:hover {
-  background: #f8f9fa;
-  color: #495057;
+.detail-card-compact:hover {
+  border-color: rgba(76, 175, 80, 0.25);
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
 }
 
-.modal-body {
-  padding: clamp(16px, 3vw, 20px);
+.detail-header-compact {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.05) 100%);
+  padding: clamp(6px, 1.2vw, 8px) clamp(8px, 1.5vw, 10px);
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 0.8vw, 6px);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
 }
 
-.detail-grid {
-  display: grid;
-  gap: clamp(12px, 2.5vw, 16px);
+.detail-icon-small {
+  width: clamp(16px, 3vw, 18px);
+  height: clamp(16px, 3vw, 18px);
+  background: linear-gradient(135deg, #4CAF50, #43A047);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
 }
 
-.detail-item {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: clamp(8px, 1.5vw, 12px);
-  align-items: start;
-}
-
-.detail-item.full-width {
-  grid-column: 1 / -1;
-  grid-template-columns: 1fr;
-}
-
-.detail-item strong {
-  color: #495057;
+.detail-label-compact {
+  font-size: clamp(9px, 1.6vw, 10px);
   font-weight: 600;
-  font-size: clamp(13px, 2.3vw, 14px);
+  color: #2c5530;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.json-display {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+.detail-content-compact {
+  padding: clamp(8px, 1.5vw, 10px);
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(3px, 0.6vw, 4px) 0;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.08);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: clamp(9px, 1.6vw, 10px);
+  font-weight: 500;
+  color: #6b7280;
+  min-width: clamp(40px, 15vw, 60px);
+}
+
+.info-value {
+  font-size: clamp(9px, 1.6vw, 10px);
+  color: #374151;
+  text-align: right;
+  flex: 1;
+}
+
+/* Badges del modal */
+.tipo-badge-modal {
+  display: inline-flex;
+  align-items: center;
+  padding: clamp(2px, 0.4vw, 3px) clamp(6px, 1.2vw, 8px);
+  border-radius: clamp(8px, 1.5vw, 10px);
+  font-size: clamp(8px, 1.4vw, 9px);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.tipo-badge-modal.entrada {
+  background: rgba(39, 174, 96, 0.15);
+  color: #27ae60;
+  border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.tipo-badge-modal.salida {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.tipo-badge-modal.actividad {
+  background: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.origen-badge-modal {
+  display: inline-flex;
+  align-items: center;
+  padding: clamp(2px, 0.4vw, 3px) clamp(6px, 1.2vw, 8px);
   border-radius: clamp(6px, 1.2vw, 8px);
-  padding: clamp(12px, 2.5vw, 16px);
+  font-size: clamp(8px, 1.4vw, 9px);
+  font-weight: 500;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.origen-badge-modal.historial {
+  background: rgba(156, 39, 176, 0.15);
+  color: #9c27b0;
+  border: 1px solid rgba(156, 39, 176, 0.3);
+}
+
+.origen-badge-modal.registros {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ff9800;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.origen-badge-modal.asistencias {
+  background: rgba(103, 58, 183, 0.15);
+  color: #673ab7;
+  border: 1px solid rgba(103, 58, 183, 0.3);
+}
+
+/* Información de ubicación */
+.location-info {
+  display: flex;
+  gap: clamp(8px, 1.5vw, 12px);
+}
+
+.coordinate-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  padding: clamp(4px, 0.8vw, 6px);
+  background: rgba(76, 175, 80, 0.05);
+  border-radius: clamp(3px, 0.6vw, 4px);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.coordinate-label {
+  font-size: clamp(8px, 1.4vw, 9px);
+  font-weight: 600;
+  color: #4CAF50;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: clamp(1px, 0.2vw, 2px);
+}
+
+.coordinate-value {
+  font-size: clamp(8px, 1.4vw, 9px);
+  color: #374151;
   font-family: 'Courier New', monospace;
-  font-size: clamp(11px, 2vw, 12px);
-  color: #495057;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  margin-top: clamp(8px, 1.5vw, 10px);
+}
+
+/* Responsive design para el modal */
+@media (max-width: 480px) {
+  .modal-content-modern {
+    max-width: 95vw;
+    max-height: 90vh;
+  }
+  
+  .detail-image-container {
+    height: clamp(100px, 20vw, 120px);
+  }
+  
+  .details-grid-modern {
+    gap: clamp(8px, 1.5vw, 10px);
+  }
+  
+  .location-info {
+    flex-direction: column;
+    gap: clamp(6px, 1.2vw, 8px);
+  }
+  
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(2px, 0.4vw, 3px);
+  }
+  
+  .info-value {
+    text-align: left;
+  }
+}
+
+@media (max-width: 360px) {
+  .modal-overlay-modern {
+    padding: clamp(8px, 1.5vw, 12px);
+  }
+  
+  .modal-content-modern {
+    max-width: 98vw;
+  }
 }
 
 /* Responsive Design */

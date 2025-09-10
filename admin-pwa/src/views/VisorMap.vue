@@ -1191,12 +1191,12 @@ const inicializarMapa = (datos) => {
             ['get', 'tipo_actividad'],
             'entrada', '#4ADE80', // Verde suave para entradas
             'salida', '#DC2626', // Rojo para salidas
-            'campo-hoy', '#15803D', // Verde fuerte para campo de hoy
-            'gabinete-hoy', '#00BFFF', // Deepskyblue para gabinete de hoy
-            'campo-antiguo', '#FF9800', // Naranja para campo antiguo
-            'gabinete-antiguo', '#FF9800', // Naranja para gabinete antiguo
-            'registro-hoy', '#15803D', // Verde fuerte para compatibilidad (campo por defecto)
-            'registro-antiguo', '#FF9800', // Naranja para registros antiguos
+            'campo-hoy', 'rgb(184, 134, 11)', // Darkgoldenrod para campo de hoy
+            'gabinete-hoy', 'rgb(0, 0, 205)', // Mediumblue para gabinete de hoy
+            'campo-antiguo', 'rgb(128, 128, 128)', // Gris para campo antiguo
+            'gabinete-antiguo', 'rgb(128, 128, 128)', // Gris para gabinete antiguo
+            'registro-hoy', 'rgb(184, 134, 11)', // Darkgoldenrod para compatibilidad (campo por defecto)
+            'registro-antiguo', 'rgb(128, 128, 128)', // Gris para registros antiguos
             '#A9A9A9' // Gris por defecto (no debería llegar aquí)
           ],
           // Tamaño un poco más grande pero manteniendo proporción según nivel de zoom
@@ -2725,11 +2725,11 @@ watch(filtroTipo, () => {
 }
 
 .stat-value.campo {
-  color: #15803D; /* Verde fuerte para campo */
+  color: rgb(184, 134, 11); /* Darkgoldenrod para campo */
 }
 
 .stat-value.gabinete {
-  color: #00BFFF; /* Deepskyblue para gabinete */
+  color: rgb(0, 0, 205); /* Mediumblue para gabinete */
 }
 
 .stat-value.hoy {
@@ -2793,11 +2793,11 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.campo-hoy {
-  background-color: #15803D; /* Verde fuerte para campo */
+  background-color: rgb(184, 134, 11); /* Darkgoldenrod para campo */
 }
 
 .color-marker.gabinete-hoy {
-  background-color: #00BFFF; /* Deepskyblue para gabinete */
+  background-color: rgb(0, 0, 205); /* Mediumblue para gabinete */
 }
 
 .color-marker.registro-hoy {
@@ -2805,7 +2805,7 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.registro-antiguo {
-  background-color: #FF9800;
+  background-color: rgb(128, 128, 128);
 }
 
 /* Subtítulo en la leyenda */
@@ -2976,13 +2976,13 @@ watch(filtroTipo, () => {
 }
 
 .custom-popup.popup-campo-hoy {
-  background-color: #f0fdf4;
-  border: 1px solid rgba(22, 163, 74, 0.3);
+  background-color: #fefdf8;
+  border: 1px solid rgba(184, 134, 11, 0.3);
 }
 
 .custom-popup.popup-gabinete-hoy {
-  background-color: #eff6ff;
-  border: 1px solid rgba(30, 58, 138, 0.3);
+  background-color: #f0f8ff;
+  border: 1px solid rgba(0, 0, 205, 0.3);
 }
 
 .custom-popup.popup-registro-hoy {
@@ -2994,8 +2994,8 @@ watch(filtroTipo, () => {
 .custom-popup.popup-antiguo,
 .custom-popup.popup-campo-antiguo,
 .custom-popup.popup-gabinete-antiguo {
-  background-color: #fff7ed;
-  border: 1px solid rgba(255, 152, 0, 0.3);
+  background-color: #f8f9fa;
+  border: 1px solid rgba(128, 128, 128, 0.3);
 }
 
 /* Estilos para la flecha indicadora */
@@ -3034,15 +3034,15 @@ watch(filtroTipo, () => {
 }
 
 .popup-campo-hoy .popup-arrow::after {
-  background-color: #f0fdf4;
-  border-right: 1px solid rgba(22, 163, 74, 0.3);
-  border-bottom: 1px solid rgba(22, 163, 74, 0.3);
+  background-color: #fefdf8;
+  border-right: 1px solid rgba(184, 134, 11, 0.3);
+  border-bottom: 1px solid rgba(184, 134, 11, 0.3);
 }
 
 .popup-gabinete-hoy .popup-arrow::after {
-  background-color: #eff6ff;
-  border-right: 1px solid rgba(30, 58, 138, 0.3);
-  border-bottom: 1px solid rgba(30, 58, 138, 0.3);
+  background-color: #f0f8ff;
+  border-right: 1px solid rgba(0, 0, 205, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 205, 0.3);
 }
 
 .popup-registro-hoy .popup-arrow::after {
@@ -3055,9 +3055,9 @@ watch(filtroTipo, () => {
 .popup-antiguo .popup-arrow::after,
 .popup-campo-antiguo .popup-arrow::after,
 .popup-gabinete-antiguo .popup-arrow::after {
-  background-color: #fff7ed;
-  border-right: 1px solid rgba(255, 152, 0, 0.3);
-  border-bottom: 1px solid rgba(255, 152, 0, 0.3);
+  background-color: #f8f9fa;
+  border-right: 1px solid rgba(128, 128, 128, 0.3);
+  border-bottom: 1px solid rgba(128, 128, 128, 0.3);
 }
 
 .popup-header {
@@ -3114,11 +3114,11 @@ watch(filtroTipo, () => {
 }
 
 .popup-campo-hoy .popup-close-btn:hover svg {
-  color: #15803D; /* Verde fuerte para campo */
+  color: rgb(184, 134, 11); /* Darkgoldenrod para campo */
 }
 
 .popup-gabinete-hoy .popup-close-btn:hover svg {
-  color: #00BFFF; /* Deepskyblue para gabinete */
+  color: rgb(0, 0, 205); /* Mediumblue para gabinete */
 }
 
 .popup-registro-hoy .popup-close-btn:hover svg {
@@ -3129,7 +3129,7 @@ watch(filtroTipo, () => {
 .popup-antiguo .popup-close-btn:hover svg,
 .popup-campo-antiguo .popup-close-btn:hover svg,
 .popup-gabinete-antiguo .popup-close-btn:hover svg {
-  color: #f59e0b;
+  color: rgb(128, 128, 128);
 }
 
 .popup-icon {
@@ -3159,13 +3159,13 @@ watch(filtroTipo, () => {
 .popup-campo-hoy .popup-icon,
 .popup-campo-hoy .popup-icon-small,
 .popup-campo-hoy strong {
-  color: #15803D; /* Verde fuerte para campo */
+  color: rgb(184, 134, 11); /* Darkgoldenrod para campo */
 }
 
 .popup-gabinete-hoy .popup-icon,
 .popup-gabinete-hoy .popup-icon-small,
 .popup-gabinete-hoy strong {
-  color: #00BFFF; /* Deepskyblue para gabinete */
+  color: rgb(0, 0, 205); /* Mediumblue para gabinete */
 }
 
 .popup-registro-hoy .popup-icon,
@@ -3186,7 +3186,7 @@ watch(filtroTipo, () => {
 .popup-antiguo strong,
 .popup-campo-antiguo strong,
 .popup-gabinete-antiguo strong {
-  color: #f59e0b;
+  color: rgb(128, 128, 128);
 }
 
 .popup-header strong {
@@ -3674,15 +3674,15 @@ watch(filtroTipo, () => {
 }
 
 .tipo-actividad-value.campo {
-  background-color: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background-color: #fefdf8;
+  color: rgb(184, 134, 11);
+  border: 1px solid rgba(184, 134, 11, 0.3);
 }
 
 .tipo-actividad-value.gabinete {
-  background-color: #e0f2fe;
-  color: #0c4a6e;
-  border: 1px solid #00BFFF;
+  background-color: #f0f8ff;
+  color: rgb(0, 0, 205);
+  border: 1px solid rgba(0, 0, 205, 0.3);
 }
 
 .tipo-actividad-value.oficina {
@@ -3692,9 +3692,9 @@ watch(filtroTipo, () => {
 }
 
 .tipo-actividad-value.registro {
-  background-color: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background-color: #f8f9fa;
+  color: rgb(128, 128, 128);
+  border: 1px solid rgba(128, 128, 128, 0.3);
 }
 
 /* Modal para imagen completa */

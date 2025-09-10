@@ -1189,8 +1189,8 @@ const inicializarMapa = (datos) => {
           'circle-color': [
             'match',
             ['get', 'tipo_actividad'],
-            'entrada', '#4ADE80', // Verde suave para entradas
-            'salida', '#DC2626', // Rojo para salidas
+            'entrada', 'rgb(50, 205, 50)', // Limegreen para entradas
+            'salida', 'rgb(220, 20, 60)', // Crimson para salidas
             'campo-hoy', 'rgb(184, 134, 11)', // Darkgoldenrod para campo de hoy
             'gabinete-hoy', 'rgb(0, 0, 205)', // Mediumblue para gabinete de hoy
             'campo-antiguo', 'rgb(128, 128, 128)', // Gris para campo antiguo
@@ -2785,11 +2785,11 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.entrada {
-  background-color: #4ADE80; /* Verde suave para entrada */
+  background-color: rgb(50, 205, 50); /* Limegreen para entrada */
 }
 
 .color-marker.salida {
-  background-color: #DC2626;
+  background-color: rgb(220, 20, 60); /* Crimson para salida */
 }
 
 .color-marker.campo-hoy {
@@ -2966,13 +2966,13 @@ watch(filtroTipo, () => {
 
 /* Colores dinámicos según tipo de registro */
 .custom-popup.popup-entrada {
-  background-color: #f0fdf4;
+  background-color: #f6fff6;
   border: 1px solid rgba(50, 205, 50, 0.3);
 }
 
 .custom-popup.popup-salida {
-  background-color: #fef2f2;
-  border: 1px solid rgba(220, 38, 38, 0.3);
+  background-color: #fff5f5;
+  border: 1px solid rgba(220, 20, 60, 0.3);
 }
 
 .custom-popup.popup-campo-hoy {
@@ -3022,15 +3022,15 @@ watch(filtroTipo, () => {
 
 /* Colores de la flecha según el tipo */
 .popup-entrada .popup-arrow::after {
-  background-color: #f0fdf4;
+  background-color: #f6fff6;
   border-right: 1px solid rgba(50, 205, 50, 0.3);
   border-bottom: 1px solid rgba(50, 205, 50, 0.3);
 }
 
 .popup-salida .popup-arrow::after {
-  background-color: #fef2f2;
-  border-right: 1px solid rgba(220, 38, 38, 0.3);
-  border-bottom: 1px solid rgba(220, 38, 38, 0.3);
+  background-color: #fff5f5;
+  border-right: 1px solid rgba(220, 20, 60, 0.3);
+  border-bottom: 1px solid rgba(220, 20, 60, 0.3);
 }
 
 .popup-campo-hoy .popup-arrow::after {
@@ -3106,11 +3106,11 @@ watch(filtroTipo, () => {
 
 /* Estilos específicos para el botón X en cada tipo de popup */
 .popup-entrada .popup-close-btn:hover svg {
-  color: #22c55e;
+  color: rgb(50, 205, 50);
 }
 
 .popup-salida .popup-close-btn:hover svg {
-  color: #ef4444;
+  color: rgb(220, 20, 60);
 }
 
 .popup-campo-hoy .popup-close-btn:hover svg {
@@ -3147,13 +3147,13 @@ watch(filtroTipo, () => {
 .popup-entrada .popup-icon,
 .popup-entrada .popup-icon-small,
 .popup-entrada strong {
-  color: #22c55e;
+  color: rgb(50, 205, 50);
 }
 
 .popup-salida .popup-icon,
 .popup-salida .popup-icon-small,
 .popup-salida strong {
-  color: #ef4444;
+  color: rgb(220, 20, 60);
 }
 
 .popup-campo-hoy .popup-icon,
@@ -3662,15 +3662,15 @@ watch(filtroTipo, () => {
 }
 
 .tipo-actividad-value.entrada {
-  background-color: #d1fae5;
-  color: #065f46;
-  border: 1px solid #4ade80;
+  background-color: #f6fff6;
+  color: rgb(50, 205, 50);
+  border: 1px solid rgba(50, 205, 50, 0.3);
 }
 
 .tipo-actividad-value.salida {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #dc2626;
+  background-color: #fff5f5;
+  color: rgb(220, 20, 60);
+  border: 1px solid rgba(220, 20, 60, 0.3);
 }
 
 .tipo-actividad-value.campo {

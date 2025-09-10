@@ -561,6 +561,8 @@
                   class="detail-image"
                   @error="onImageError"
                   @load="onImageLoad"
+                  @click="abrirFotoCompleta(obtenerImagenUrl(modalDetalles.registro))"
+                  style="cursor: pointer;"
                 />
                 <div class="image-overlay">
                   <div class="image-info">
@@ -652,6 +654,27 @@
         </div>
       </div>
     </div>
+
+    <!-- Lightbox para ver foto en pantalla completa -->
+    <Teleport to="body" v-if="showLightbox">
+      <div class="lightbox-overlay" @click="cerrarLightbox">
+        <!-- Contenedor centrado de la imagen -->
+        <div class="lightbox-container" @click.stop>
+          <div class="lightbox-image-wrapper">
+            <img 
+              :src="lightboxImageUrl" 
+              alt="Fotografía en pantalla completa"
+              class="lightbox-image"
+              @click.stop="requestFullscreen"
+            >
+            <!-- Botón de cerrar dentro de la imagen -->
+            <button class="lightbox-close-btn" @click.stop="cerrarLightbox">
+              ×
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -703,6 +726,10 @@ export default {
       visible: false,
       registro: null
     })
+
+    // Lightbox para imágenes
+    const showLightbox = ref(false)
+    const lightboxImageUrl = ref('')
 
     // Años disponibles
     const añosDisponibles = computed(() => {
@@ -1075,6 +1102,23 @@ export default {
       }
     }
 
+    // Métodos del lightbox
+    const abrirFotoCompleta = (fotoUrl) => {
+      lightboxImageUrl.value = fotoUrl
+      showLightbox.value = true
+    }
+
+    const cerrarLightbox = () => {
+      showLightbox.value = false
+      lightboxImageUrl.value = ''
+    }
+
+    const requestFullscreen = (event) => {
+      if (event.target.requestFullscreen) {
+        event.target.requestFullscreen()
+      }
+    }
+
     // Obtener URL de imagen desde los detalles
     const obtenerImagenUrl = (registro) => {
       if (!registro || !registro.detalles) return null
@@ -1350,6 +1394,13 @@ export default {
       window.addEventListener('offline', updateOnlineStatus)
       document.addEventListener('click', cerrarResultados)
       
+      // Event listener para cerrar lightbox con ESC
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && showLightbox.value) {
+          cerrarLightbox()
+        }
+      })
+      
       // Probar conectividad primero
       try {
         await historialService.probarConectividad()
@@ -1393,6 +1444,10 @@ export default {
       añosDisponibles,
       adminUser,
       
+      // Lightbox
+      showLightbox,
+      lightboxImageUrl,
+      
       // Estados de búsqueda
       terminoBusqueda,
       usuariosFiltrados,
@@ -1428,6 +1483,11 @@ export default {
       obtenerUbicacion,
       onImageError,
       onImageLoad,
+      
+      // Métodos de lightbox
+      abrirFotoCompleta,
+      cerrarLightbox,
+      requestFullscreen,
       
       // Exportar
       exportarExcel,
@@ -3497,6 +3557,157 @@ export default {
   
   .period-btn {
     text-align: center;
+  }
+}
+
+/* Lightbox Styles */
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.lightbox-container {
+  position: relative;
+  width: 90vw;
+  height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.lightbox-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.lightbox-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  animation: scaleIn 0.3s ease-in-out;
+  cursor: pointer;
+  display: block;
+}
+
+.lightbox-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  font-size: 28px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  z-index: 10002;
+  line-height: 1;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+
+.lightbox-close-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  font-size: 30px;
+}
+
+.lightbox-fullscreen-btn {
+  position: absolute;
+  bottom: -40px;
+  right: -10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  z-index: 10001;
+}
+
+.lightbox-fullscreen-btn:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.clickable-image {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.clickable-image:hover {
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .lightbox-container {
+    max-width: 98vw;
+    max-height: 98vh;
+    padding: 10px;
+  }
+  
+  .lightbox-close-btn {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
   }
 }
 

@@ -825,7 +825,8 @@ const obtenerUltimasActividadesPorUsuario = (registros, asistencias) => {
     
     const actividad = {
       ...registro,
-      tipo_actividad: 'registro',
+      // Conservar el tipo_actividad original (campo, gabinete, etc.)
+      tipo_actividad: registro.tipo_actividad || 'registro',
       fecha_actividad: fechaHora,
       latitud: parseFloat(registro.latitud),
       longitud: parseFloat(registro.longitud)
@@ -917,7 +918,7 @@ const determinarTipoActividad = (actividad) => {
         tipo: 'entrada',
         clase: 'entrada',
         descripcion: 'Entrada de Hoy',
-        color: '#32CD32' // Verde lima
+        color: '#4ADE80' // Verde suave
       };
     } 
     // Si la entrada NO es de hoy (CDMX): Naranja (antigua)
@@ -961,7 +962,7 @@ const determinarTipoActividad = (actividad) => {
         tipo: 'campo-hoy',
         clase: 'campo-hoy',
         descripcion: 'Actividad de Campo Hoy',
-        color: '#16A34A' // Verde fuerte
+        color: '#15803D' // Verde fuerte
       };
     }
     // Si la actividad de campo NO es de hoy (CDMX): Naranja (antigua)
@@ -983,7 +984,7 @@ const determinarTipoActividad = (actividad) => {
         tipo: 'gabinete-hoy',
         clase: 'gabinete-hoy',
         descripcion: 'Actividad de Gabinete Hoy',
-        color: '#1E3A8A' // Azul marino
+        color: '#00BFFF' // Deepskyblue
       };
     }
     // Si la actividad de gabinete NO es de hoy (CDMX): Naranja (antigua)
@@ -1005,7 +1006,7 @@ const determinarTipoActividad = (actividad) => {
         tipo: 'campo-hoy',
         clase: 'campo-hoy',
         descripcion: 'Actividad de Campo Hoy',
-        color: '#16A34A' // Verde fuerte (campo por defecto)
+        color: '#15803D' // Verde fuerte (campo por defecto)
       };
     }
     // Si el registro NO es de hoy (CDMX): Naranja (antiguo)
@@ -1154,13 +1155,13 @@ const inicializarMapa = (datos) => {
           'circle-color': [
             'match',
             ['get', 'tipo_actividad'],
-            'entrada', '#32CD32', // Verde lima para entradas
+            'entrada', '#4ADE80', // Verde suave para entradas
             'salida', '#DC2626', // Rojo para salidas
-            'campo-hoy', '#16A34A', // Verde fuerte para campo de hoy
-            'gabinete-hoy', '#1E3A8A', // Azul marino para gabinete de hoy
+            'campo-hoy', '#15803D', // Verde fuerte para campo de hoy
+            'gabinete-hoy', '#00BFFF', // Deepskyblue para gabinete de hoy
             'campo-antiguo', '#FF9800', // Naranja para campo antiguo
             'gabinete-antiguo', '#FF9800', // Naranja para gabinete antiguo
-            'registro-hoy', '#16A34A', // Verde fuerte para compatibilidad (campo por defecto)
+            'registro-hoy', '#15803D', // Verde fuerte para compatibilidad (campo por defecto)
             'registro-antiguo', '#FF9800', // Naranja para registros antiguos
             '#A9A9A9' // Gris por defecto (no debería llegar aquí)
           ],
@@ -2550,11 +2551,11 @@ watch(filtroTipo, () => {
 }
 
 .stat-value.campo {
-  color: #16A34A; /* Verde fuerte para campo */
+  color: #15803D; /* Verde fuerte para campo */
 }
 
 .stat-value.gabinete {
-  color: #1E3A8A; /* Azul marino para gabinete */
+  color: #00BFFF; /* Deepskyblue para gabinete */
 }
 
 .stat-value.hoy {
@@ -2610,7 +2611,7 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.entrada {
-  background-color: #32CD32;
+  background-color: #4ADE80; /* Verde suave para entrada */
 }
 
 .color-marker.salida {
@@ -2618,15 +2619,15 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.campo-hoy {
-  background-color: #16A34A; /* Verde fuerte para campo */
+  background-color: #15803D; /* Verde fuerte para campo */
 }
 
 .color-marker.gabinete-hoy {
-  background-color: #1E3A8A; /* Azul marino para gabinete */
+  background-color: #00BFFF; /* Deepskyblue para gabinete */
 }
 
 .color-marker.registro-hoy {
-  background-color: #1E3A8A; /* Para compatibilidad */
+  background-color: #00BFFF; /* Para compatibilidad */
 }
 
 .color-marker.registro-antiguo {
@@ -2939,15 +2940,15 @@ watch(filtroTipo, () => {
 }
 
 .popup-campo-hoy .popup-close-btn:hover svg {
-  color: #16A34A; /* Verde fuerte para campo */
+  color: #15803D; /* Verde fuerte para campo */
 }
 
 .popup-gabinete-hoy .popup-close-btn:hover svg {
-  color: #1e3a8a; /* Azul marino para gabinete */
+  color: #00BFFF; /* Deepskyblue para gabinete */
 }
 
 .popup-registro-hoy .popup-close-btn:hover svg {
-  color: #16A34A; /* Verde fuerte por defecto */
+  color: #15803D; /* Verde fuerte por defecto */
 }
 
 .popup-registro-antiguo .popup-close-btn:hover svg,
@@ -2984,19 +2985,19 @@ watch(filtroTipo, () => {
 .popup-campo-hoy .popup-icon,
 .popup-campo-hoy .popup-icon-small,
 .popup-campo-hoy strong {
-  color: #16A34A; /* Verde fuerte para campo */
+  color: #15803D; /* Verde fuerte para campo */
 }
 
 .popup-gabinete-hoy .popup-icon,
 .popup-gabinete-hoy .popup-icon-small,
 .popup-gabinete-hoy strong {
-  color: #1e3a8a; /* Azul marino para gabinete */
+  color: #00BFFF; /* Deepskyblue para gabinete */
 }
 
 .popup-registro-hoy .popup-icon,
 .popup-registro-hoy .popup-icon-small,
 .popup-registro-hoy strong {
-  color: #16A34A; /* Verde fuerte por defecto */
+  color: #15803D; /* Verde fuerte por defecto */
 }
 
 .popup-registro-antiguo .popup-icon,
@@ -3423,7 +3424,7 @@ watch(filtroTipo, () => {
 /* Estado Online */
 .status-value.online {
   background-color: #dcfce7;
-  color: #16a34a;
+  color: #15803d;
   border: 1px solid #bbf7d0;
 }
 
@@ -3726,7 +3727,7 @@ watch(filtroTipo, () => {
 }
 
 .popup-header.registro-hoy {
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  background: linear-gradient(135deg, #4682B4 0%, #00BFFF 100%);
   color: white;
 }
 

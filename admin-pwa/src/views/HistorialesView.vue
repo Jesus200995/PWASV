@@ -492,8 +492,6 @@
                     <span class="info-label">Correo:</span>
                     <span class="info-value">{{ modalDetalles.registro?.usuario_correo || 'Sin correo' }}</span>
                   </div>
-                  <!-- Campos temporalmente comentados hasta actualizar backend de producción -->
-                  <!-- 
                   <div class="info-row">
                     <span class="info-label">CURP:</span>
                     <span class="info-value">{{ modalDetalles.registro?.usuario_curp || 'Sin CURP' }}</span>
@@ -502,7 +500,6 @@
                     <span class="info-label">Cargo:</span>
                     <span class="info-value">{{ modalDetalles.registro?.usuario_cargo }}</span>
                   </div>
-                  -->
                 </div>
               </div>
 
@@ -1055,6 +1052,16 @@ export default {
 
     // Métodos de modal
     const mostrarDetalles = (registro) => {
+      console.log('🔍 DEBUG - Mostrando detalles del registro:', registro);
+      console.log('🔍 DEBUG - Datos de usuario en el registro:', {
+        usuario_nombre: registro?.usuario_nombre,
+        usuario_correo: registro?.usuario_correo,
+        usuario_curp: registro?.usuario_curp,
+        usuario_cargo: registro?.usuario_cargo,
+        origen: registro?.origen,
+        id: registro?.id
+      });
+      
       modalDetalles.value = {
         visible: true,
         registro: registro

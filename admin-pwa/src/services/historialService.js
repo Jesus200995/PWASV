@@ -13,17 +13,19 @@ class HistorialService {
     try {
       console.log('🔍 Obteniendo historial completo para usuario:', usuarioId, 'con filtros:', filtros);
 
-      // Ejecutar todas las consultas en paralelo
-      const [historialResp, registrosResp, asistenciasResp] = await Promise.all([
+      // Ejecutar todas las consultas en paralelo, incluyendo datos del usuario
+      const [historialResp, registrosResp, asistenciasResp, usuarioData] = await Promise.all([
         this.obtenerHistorial(usuarioId, filtros),
         this.obtenerRegistros(usuarioId),
-        this.obtenerAsistencias(usuarioId)
+        this.obtenerAsistencias(usuarioId),
+        this.obtenerDatosUsuario(usuarioId)
       ]);
 
       console.log('📊 Datos obtenidos:', {
         historial: historialResp?.historial?.length || 0,
         registros: registrosResp?.registros?.length || 0,
-        asistencias: asistenciasResp?.asistencias?.length || 0
+        asistencias: asistenciasResp?.asistencias?.length || 0,
+        usuario: usuarioData ? 'OK' : 'Error'
       });
 
       // Convertir todos los datos a un formato unificado
@@ -41,7 +43,12 @@ class HistorialService {
             detalles: item.detalles,
             creado_en: item.creado_en,
             fecha_hora_combinada: this.combinarFechaHora(item.fecha, item.hora),
-            origen: 'historial'
+            origen: 'historial',
+            // DATOS DE USUARIO - usar datos del historial o del usuario obtenido
+            usuario_nombre: item.usuario_nombre || usuarioData?.nombre_completo,
+            usuario_correo: item.usuario_correo || usuarioData?.correo,
+            usuario_curp: item.usuario_curp || usuarioData?.curp,
+            usuario_cargo: item.usuario_cargo || usuarioData?.cargo
           });
         });
       }
@@ -62,7 +69,12 @@ class HistorialService {
             }),
             creado_en: item.fecha_hora,
             fecha_hora_combinada: item.fecha_hora,
-            origen: 'registros'
+            origen: 'registros',
+            // AGREGAR DATOS DE USUARIO
+            usuario_nombre: usuarioData?.nombre_completo,
+            usuario_correo: usuarioData?.correo,
+            usuario_curp: usuarioData?.curp,
+            usuario_cargo: usuarioData?.cargo
           });
         });
       }
@@ -85,7 +97,12 @@ class HistorialService {
               }),
               creado_en: this.combinarFechaHora(item.fecha, item.hora_entrada),
               fecha_hora_combinada: this.combinarFechaHora(item.fecha, item.hora_entrada),
-              origen: 'asistencias'
+              origen: 'asistencias',
+              // AGREGAR DATOS DE USUARIO
+              usuario_nombre: usuarioData?.nombre_completo,
+              usuario_correo: usuarioData?.correo,
+              usuario_curp: usuarioData?.curp,
+              usuario_cargo: usuarioData?.cargo
             });
           }
 
@@ -104,7 +121,12 @@ class HistorialService {
               }),
               creado_en: this.combinarFechaHora(item.fecha, item.hora_salida),
               fecha_hora_combinada: this.combinarFechaHora(item.fecha, item.hora_salida),
-              origen: 'asistencias'
+              origen: 'asistencias',
+              // AGREGAR DATOS DE USUARIO
+              usuario_nombre: usuarioData?.nombre_completo,
+              usuario_correo: usuarioData?.correo,
+              usuario_curp: usuarioData?.curp,
+              usuario_cargo: usuarioData?.cargo
             });
           }
         });
@@ -706,6 +728,35 @@ class HistorialService {
       'actividad': '🔵'
     };
     return iconos[tipo] || '⚪';
+  }
+
+  /**
+   * Obtener datos básicos de un usuario
+   */
+  async obtenerDatosUsuario(usuarioId) {
+    try {
+      console.log('🔍 Obteniendo datos del usuario:', usuarioId);
+
+      const response = await fetch(`${API_URL}/usuarios/${usuarioId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Datos del usuario obtenidos:', data);
+      return data;
+
+    } catch (error) {
+      console.error('❌ Error al obtener datos del usuario:', error);
+      // No lanzar error, solo devolver null para que el resto funcione
+      return null;
+    }
   }
 }
 

@@ -41,12 +41,7 @@ class HistorialService {
             detalles: item.detalles,
             creado_en: item.creado_en,
             fecha_hora_combinada: this.combinarFechaHora(item.fecha, item.hora),
-            origen: 'historial',
-            // PRESERVAR DATOS DEL USUARIO
-            usuario_nombre: item.usuario_nombre,
-            usuario_correo: item.usuario_correo,
-            usuario_curp: item.usuario_curp,
-            usuario_cargo: item.usuario_cargo
+            origen: 'historial'
           });
         });
       }

@@ -1197,7 +1197,7 @@ const inicializarMapa = (datos) => {
             'entrada', 'rgb(50, 205, 50)', // Limegreen para entradas
             'salida', 'rgb(220, 20, 60)', // Crimson para salidas
             'campo-hoy', 'rgb(184, 134, 11)', // Darkgoldenrod para campo de hoy
-            'gabinete-hoy', 'rgb(0, 0, 205)', // Mediumblue para gabinete de hoy
+            'gabinete-hoy', 'rgb(30, 144, 255)', // Dodgerblue para gabinete de hoy
             'actividades-generales', 'rgb(148, 0, 211)', // Darkviolet para actividades generales
             'campo-antiguo', 'rgb(128, 128, 128)', // Gris para campo antiguo
             'gabinete-antiguo', 'rgb(128, 128, 128)', // Gris para gabinete antiguo
@@ -2784,7 +2784,7 @@ watch(filtroTipo, () => {
 }
 
 .stat-value.gabinete {
-  color: rgb(0, 0, 205); /* Mediumblue para gabinete */
+  color: rgb(30, 144, 255); /* Dodgerblue para gabinete */
 }
 
 .stat-value.actividades-total {
@@ -2857,7 +2857,7 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.gabinete-hoy {
-  background-color: rgb(0, 0, 205); /* Mediumblue para gabinete */
+  background-color: rgb(30, 144, 255); /* Dodgerblue para gabinete */
 }
 
 .color-marker.actividades-generales {
@@ -3046,7 +3046,7 @@ watch(filtroTipo, () => {
 
 .custom-popup.popup-gabinete-hoy {
   background-color: #f0f8ff;
-  border: 1px solid rgba(0, 0, 205, 0.3);
+  border: 1px solid rgba(30, 144, 255, 0.3);
 }
 
 .custom-popup.popup-registro-hoy {
@@ -3105,8 +3105,8 @@ watch(filtroTipo, () => {
 
 .popup-gabinete-hoy .popup-arrow::after {
   background-color: #f0f8ff;
-  border-right: 1px solid rgba(0, 0, 205, 0.3);
-  border-bottom: 1px solid rgba(0, 0, 205, 0.3);
+  border-right: 1px solid rgba(30, 144, 255, 0.3);
+  border-bottom: 1px solid rgba(30, 144, 255, 0.3);
 }
 
 .popup-registro-hoy .popup-arrow::after {
@@ -3182,7 +3182,7 @@ watch(filtroTipo, () => {
 }
 
 .popup-gabinete-hoy .popup-close-btn:hover svg {
-  color: rgb(0, 0, 205); /* Mediumblue para gabinete */
+  color: rgb(30, 144, 255); /* Dodgerblue para gabinete */
 }
 
 .popup-registro-hoy .popup-close-btn:hover svg {
@@ -3229,7 +3229,7 @@ watch(filtroTipo, () => {
 .popup-gabinete-hoy .popup-icon,
 .popup-gabinete-hoy .popup-icon-small,
 .popup-gabinete-hoy strong {
-  color: rgb(0, 0, 205); /* Mediumblue para gabinete */
+  color: rgb(30, 144, 255); /* Dodgerblue para gabinete */
 }
 
 .popup-registro-hoy .popup-icon,
@@ -3745,8 +3745,8 @@ watch(filtroTipo, () => {
 
 .tipo-actividad-value.gabinete {
   background-color: #f0f8ff;
-  color: rgb(0, 0, 205);
-  border: 1px solid rgba(0, 0, 205, 0.3);
+  color: rgb(30, 144, 255);
+  border: 1px solid rgba(30, 144, 255, 0.3);
 }
 
 .tipo-actividad-value.oficina {

@@ -380,12 +380,12 @@
                 </thead>
                 <tbody>
                   <tr v-for="registro in historial" :key="registro.id" class="registro-row">
-                    <td>
+                    <td class="origen-cell">
                       <span :class="['origen-badge', registro.origen]">
                         {{ formatearOrigen(registro.origen) }}
                       </span>
                     </td>
-                    <td>
+                    <td class="tipo-cell">
                       <span :class="['tipo-badge', registro.tipo]">
                         {{ formatearTipo(registro.tipo) }}
                       </span>
@@ -400,13 +400,15 @@
                       {{ formatearHora(registro.hora) }}
                     </td>
                     <td class="detalles-cell">
-                      <button 
-                        v-if="registro.detalles"
-                        @click="mostrarDetalles(registro)"
-                        class="details-btn"
-                      >
-                        Ver detalles
-                      </button>
+                      <div v-if="registro.detalles" class="action-container">
+                        <button @click="mostrarDetalles(registro)" class="btn-ver" title="Ver detalles del registro">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                        </button>
+                        <span class="btn-label">Detalles</span>
+                      </div>
                       <span v-else class="no-details">Sin detalles</span>
                     </td>
                   </tr>
@@ -1982,7 +1984,7 @@ export default {
 .historial-table th {
   background: #f8f9fa;
   padding: clamp(8px, 1.5vw, 10px);
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   color: #495057;
   border-bottom: 2px solid #e9ecef;
@@ -1993,6 +1995,7 @@ export default {
   padding: clamp(8px, 1.5vw, 10px);
   border-bottom: 1px solid #e9ecef;
   vertical-align: middle;
+  text-align: center;
 }
 
 .registro-row:hover {
@@ -2059,39 +2062,118 @@ export default {
   border: 1px solid rgba(103, 58, 183, 0.2);
 }
 
+.origen-cell, .tipo-cell {
+  text-align: center;
+  white-space: nowrap;
+}
+
 .descripcion-cell {
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: center;
 }
 
 .fecha-cell, .hora-cell {
   white-space: nowrap;
   color: #6c757d;
+  text-align: center;
 }
 
-.details-btn {
-  padding: clamp(3px, 0.6vw, 4px) clamp(6px, 1.2vw, 8px);
-  background: #3498db;
-  border: none;
-  border-radius: clamp(3px, 0.6vw, 4px);
+.detalles-cell {
+  text-align: center;
+}
+
+.action-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.btn-ver {
+  width: clamp(24px, 4.5vw, 28px) !important;
+  height: clamp(24px, 4.5vw, 28px) !important;
+  min-width: clamp(24px, 4.5vw, 28px) !important;
+  min-height: clamp(24px, 4.5vw, 28px) !important;
+  padding: 0;
+  background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
-  font-size: clamp(9px, 1.6vw, 10px);
-  font-weight: 500;
+  border: none;
+  border-radius: 50% !important;
   cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0 !important;
+  white-space: normal !important;
 }
 
-.details-btn:hover {
-  background: #2980b9;
+.btn-ver::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-ver:hover::before {
+  left: 100%;
+}
+
+.btn-ver:hover {
+  background: linear-gradient(135deg, #43A047, #388E3C);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(76, 175, 80, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-ver:active {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+}
+
+.btn-ver svg {
+  width: clamp(12px, 2.5vw, 14px);
+  height: clamp(12px, 2.5vw, 14px);
+  transition: all 0.3s ease;
+}
+
+.btn-ver:hover svg {
+  transform: scale(1.1);
+}
+
+.btn-label {
+  font-size: 10px;
+  color: #4CAF50;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.action-container:hover .btn-label {
+  opacity: 1;
+  color: #43A047;
 }
 
 .no-details {
   color: #adb5bd;
   font-style: italic;
   font-size: clamp(9px, 1.6vw, 10px);
+  text-align: center;
 }
 
 /* Welcome section moderna */

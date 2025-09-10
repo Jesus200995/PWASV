@@ -492,17 +492,14 @@
                     <span class="info-label">Correo:</span>
                     <span class="info-value">{{ modalDetalles.registro?.usuario_correo || 'Sin correo' }}</span>
                   </div>
-                  <!-- Campos temporalmente comentados hasta actualizar backend de producción -->
-                  <!-- 
-                  <div class="info-row">
+                  <div class="info-row" v-if="modalDetalles.registro?.usuario_curp">
                     <span class="info-label">CURP:</span>
-                    <span class="info-value">{{ modalDetalles.registro?.usuario_curp || 'Sin CURP' }}</span>
+                    <span class="info-value">{{ modalDetalles.registro?.usuario_curp }}</span>
                   </div>
                   <div class="info-row" v-if="modalDetalles.registro?.usuario_cargo">
                     <span class="info-label">Cargo:</span>
                     <span class="info-value">{{ modalDetalles.registro?.usuario_cargo }}</span>
                   </div>
-                  -->
                 </div>
               </div>
 
@@ -768,27 +765,31 @@ export default {
       
       try {
         const userId = parseInt(usuarioSeleccionado.value)
-        console.log('🔍 Cargando historial completo para usuario ID:', userId)
+        console.log('🔍 Cargando historial para usuario ID:', userId)
         console.log('🔍 Filtros aplicados:', filtros.value)
         
         const filtrosAPI = construirFiltrosAPI()
         console.log('🔍 Filtros API:', filtrosAPI)
         
-        // Usar el nuevo método de historial completo
-        const data = await historialService.obtenerHistorialCompleto(userId, filtrosAPI)
+        // USAR MÉTODO SIMPLE QUE PRESERVA DATOS DEL USUARIO
+        const data = await historialService.obtenerHistorial(userId, filtrosAPI)
         
         historial.value = data.historial || []
         resumen.value = {
-          estadisticas: data.estadisticas || {
-            total_registros: 0,
-            entradas: 0,
-            salidas: 0,
-            actividades: 0
+          estadisticas: {
+            total_registros: historial.value.length,
+            entradas: historial.value.filter(item => item.tipo === 'entrada').length,
+            salidas: historial.value.filter(item => item.tipo === 'salida').length,
+            actividades: historial.value.filter(item => item.tipo === 'actividad').length
           }
         }
         
-        console.log(`✅ ${historial.value.length} registros de historial completo cargados`)
-        console.log('📊 Estadísticas:', resumen.value.estadisticas)
+        console.log(`✅ ${historial.value.length} registros de historial cargados`)
+        console.log('📊 Estadísticas calculadas:', resumen.value.estadisticas)
+        console.log('👤 Datos de usuario en primer registro:', {
+          usuario_nombre: historial.value[0]?.usuario_nombre,
+          usuario_correo: historial.value[0]?.usuario_correo
+        })
         
         if (historial.value.length === 0) {
           console.log('⚠️ No se encontraron registros para este usuario con los filtros aplicados')
@@ -1055,6 +1056,14 @@ export default {
 
     // Métodos de modal
     const mostrarDetalles = (registro) => {
+      console.log('🔍 Mostrando detalles del registro:', registro)
+      console.log('👤 Datos de usuario en el registro:', {
+        usuario_nombre: registro?.usuario_nombre,
+        usuario_correo: registro?.usuario_correo,
+        usuario_curp: registro?.usuario_curp,
+        usuario_cargo: registro?.usuario_cargo
+      })
+      
       modalDetalles.value = {
         visible: true,
         registro: registro

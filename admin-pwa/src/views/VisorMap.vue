@@ -45,16 +45,7 @@
         <!-- Panel de control lateral para el mapa -->
         <div class="controles-panel">
           <div class="panel-header">
-            <h3>Controles del Mapa</h3>
-            <button @click="recargarMapa" class="btn-refresh" :class="{ loading }" :disabled="loading">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 2v6h-6"></path>
-                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-                <path d="M3 22v-6h6"></path>
-                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
-              </svg>
-              <span>{{ loading ? 'Actualizando...' : 'Actualizar datos' }}</span>
-            </button>
+            <h3 class="titulo-controles-centrado">Controles del Mapa</h3>
           </div>
           
           <div class="panel-section">
@@ -2475,6 +2466,39 @@ watch(filtroTipo, () => {
   font-size: 16px;
   font-weight: 600;
   color: #1f2937;
+}
+
+/* Título centrado con efecto de luz verde */
+.titulo-controles-centrado {
+  text-align: center !important;
+  color: #166534 !important; /* Verde fuerte */
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, 
+    #166534 0%, 
+    #166534 40%, 
+    #22c55e 50%, 
+    #166534 60%, 
+    #166534 100%);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: luz-verde-deslizante 6s ease-in-out infinite;
+}
+
+@keyframes luz-verde-deslizante {
+  0% {
+    background-position: -200% 0;
+  }
+  50% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .btn-refresh {

@@ -133,33 +133,46 @@
           
           <div class="panel-section">
             <h4>Leyenda</h4>
-            <div class="leyenda-grid">
-              <div class="leyenda-item">
-                <div class="color-marker entrada"></div>
-                <span>Entrada (hoy)</span>
-              </div>
-              <div class="leyenda-item">
-                <div class="color-marker salida"></div>
-                <span>Salida (hoy)</span>
-              </div>
-              
-              <!-- Subtítulo para Actividades -->
-              <div class="leyenda-subtitle">
-                <h5>Actividades</h5>
-              </div>
-              
-              <div class="leyenda-item">
-                <div class="color-marker campo-hoy"></div>
-                <span>Campo (hoy)</span>
-              </div>
-              <div class="leyenda-item">
-                <div class="color-marker gabinete-hoy"></div>
-                <span>Gabinete (hoy)</span>
-              </div>
-              
-              <div class="leyenda-item">
-                <div class="color-marker registro-antiguo"></div>
-                <span>Registro antiguo</span>
+            <div class="leyenda-container">
+              <div class="leyenda-grid">
+                
+                <!-- Subtítulo para Asistencias -->
+                <div class="leyenda-subtitle">
+                  <h5>Asistencias</h5>
+                </div>
+                
+                <div class="leyenda-item">
+                  <div class="color-marker entrada"></div>
+                  <span>Entrada (hoy)</span>
+                </div>
+                <div class="leyenda-item">
+                  <div class="color-marker salida"></div>
+                  <span>Salida (hoy)</span>
+                </div>
+                
+                <!-- Subtítulo para Actividades (reducido) -->
+                <div class="leyenda-subtitle">
+                  <h5>Actividades</h5>
+                </div>
+                
+                <div class="leyenda-item">
+                  <div class="color-marker campo-hoy"></div>
+                  <span>Campo (hoy)</span>
+                </div>
+                <div class="leyenda-item">
+                  <div class="color-marker gabinete-hoy"></div>
+                  <span>Gabinete (hoy)</span>
+                </div>
+                
+                <!-- Subtítulo para Otros -->
+                <div class="leyenda-subtitle">
+                  <h5>Otros</h5>
+                </div>
+                
+                <div class="leyenda-item">
+                  <div class="color-marker registro-antiguo"></div>
+                  <span>Registro antiguo</span>
+                </div>
               </div>
             </div>
           </div>
@@ -2553,10 +2566,33 @@ watch(filtroTipo, () => {
 }
 
 /* Leyenda del mapa */
+.leyenda-container {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.leyenda-container:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    0 3px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
 .leyenda-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
 .leyenda-item {
@@ -2564,6 +2600,7 @@ watch(filtroTipo, () => {
   align-items: center;
   gap: 6px;
   font-size: 10px;
+  padding: 1px 0;
 }
 
 .color-marker {
@@ -2599,18 +2636,32 @@ watch(filtroTipo, () => {
 /* Subtítulo en la leyenda */
 .leyenda-subtitle {
   grid-column: 1 / -1;
-  margin: 8px 0 4px 0;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 4px 0 4px 0;
+  padding: 6px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  background: linear-gradient(90deg, 
+    rgba(128, 128, 128, 0.15) 0%, 
+    rgba(128, 128, 128, 0.25) 50%, 
+    rgba(128, 128, 128, 0.15) 100%
+  );
+  border-radius: 4px;
+}
+
+.leyenda-subtitle:first-child {
+  margin-top: 0;
+  border-top: none;
 }
 
 .leyenda-subtitle h5 {
   margin: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #94A3B8;
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: #B0BEC5;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+  opacity: 0.9;
+  text-align: center;
 }
 
 /* Ayuda */

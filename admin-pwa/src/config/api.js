@@ -24,11 +24,14 @@ const API_CONFIGS = {
 const getEnvironment = () => {
   const hostname = window.location.hostname
   
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'local'
-  }
-  
+  // FORZAR PRODUCCION - Siempre usar API de producción
   return 'production'
+  
+  // Código original comentado:
+  // if (hostname === 'localhost' || hostname === '127.0.0.1') {
+  //   return 'local'
+  // }
+  // return 'production'
 }
 
 // Exportar configuración del entorno actual
@@ -36,7 +39,7 @@ const currentEnv = getEnvironment()
 export const API_CONFIG = API_CONFIGS[currentEnv]
 export const API_URL = API_CONFIG.baseURL
 
-console.log(`🌍 Entorno detectado: ${currentEnv}`)
+console.log(`🌍 Entorno FORZADO a: ${currentEnv}`)
 console.log(`🔗 API URL: ${API_URL}`)
 
 export default API_CONFIG

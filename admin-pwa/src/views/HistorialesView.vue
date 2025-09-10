@@ -489,17 +489,20 @@
                     <span class="info-value">{{ modalDetalles.registro?.usuario_nombre || 'Sin nombre' }}</span>
                   </div>
                   <div class="info-row">
-                    <span class="info-label">CURP:</span>
-                    <span class="info-value">{{ modalDetalles.registro?.usuario_curp || 'Sin CURP' }}</span>
-                  </div>
-                  <div class="info-row">
                     <span class="info-label">Correo:</span>
                     <span class="info-value">{{ modalDetalles.registro?.usuario_correo || 'Sin correo' }}</span>
+                  </div>
+                  <!-- Campos temporalmente comentados hasta actualizar backend de producción -->
+                  <!-- 
+                  <div class="info-row">
+                    <span class="info-label">CURP:</span>
+                    <span class="info-value">{{ modalDetalles.registro?.usuario_curp || 'Sin CURP' }}</span>
                   </div>
                   <div class="info-row" v-if="modalDetalles.registro?.usuario_cargo">
                     <span class="info-label">Cargo:</span>
                     <span class="info-value">{{ modalDetalles.registro?.usuario_cargo }}</span>
                   </div>
+                  -->
                 </div>
               </div>
 

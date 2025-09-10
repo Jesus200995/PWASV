@@ -444,7 +444,7 @@
 
     <!-- Modal de detalles moderno y compacto -->
     <div v-if="modalDetalles.visible" class="modal-overlay-modern" @click="cerrarModalDetalles">
-      <div class="modal-content-modern" @click.stop>
+      <div class="modal-content-modern-horizontal" @click.stop>
         <!-- Header del modal -->
         <div class="modal-header-modern">
           <div class="modal-title-section">
@@ -464,55 +464,41 @@
           </button>
         </div>
         
-        <!-- Body del modal -->
-        <div class="modal-body-modern">
-          <div v-if="modalDetalles.registro" class="details-grid-modern">
-            <!-- Imagen si existe -->
-            <div v-if="obtenerImagenUrl(modalDetalles.registro)" class="detail-image-section">
-              <div class="detail-image-container">
-                <img 
-                  :src="obtenerImagenUrl(modalDetalles.registro)" 
-                  :alt="'Imagen del registro'"
-                  class="detail-image"
-                  @error="onImageError"
-                  @load="onImageLoad"
-                />
-                <div class="image-overlay">
-                  <div class="image-info">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="9" cy="9" r="2"/>
-                      <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                    </svg>
-                    <span>Fotografía</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Información principal -->
+        <!-- Body del modal con dos columnas -->
+        <div class="modal-body-modern-horizontal">
+          <div v-if="modalDetalles.registro" class="modal-columns-container">
+            
+            <!-- Columna izquierda: Información del registro -->
+            <div class="modal-column-left">
+            
+            <!-- Información del Usuario -->
             <div class="detail-main-info">
-              <!-- Tipo y descripción -->
               <div class="detail-card-compact">
                 <div class="detail-header-compact">
                   <div class="detail-icon-small">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M9 12l2 2 4-4"/>
-                      <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
                     </svg>
                   </div>
-                  <span class="detail-label-compact">Información General</span>
+                  <span class="detail-label-compact">Información del Usuario</span>
                 </div>
                 <div class="detail-content-compact">
                   <div class="info-row">
-                    <span class="info-label">Tipo:</span>
-                    <span :class="['tipo-badge-modal', modalDetalles.registro?.tipo]">
-                      {{ formatearTipo(modalDetalles.registro?.tipo) }}
-                    </span>
+                    <span class="info-label">Nombre:</span>
+                    <span class="info-value">{{ modalDetalles.registro?.usuario_nombre || 'Sin nombre' }}</span>
                   </div>
                   <div class="info-row">
-                    <span class="info-label">Descripción:</span>
-                    <span class="info-value">{{ modalDetalles.registro?.descripcion || 'Sin descripción' }}</span>
+                    <span class="info-label">CURP:</span>
+                    <span class="info-value">{{ modalDetalles.registro?.usuario_curp || 'Sin CURP' }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Correo:</span>
+                    <span class="info-value">{{ modalDetalles.registro?.usuario_correo || 'Sin correo' }}</span>
+                  </div>
+                  <div class="info-row" v-if="modalDetalles.registro?.usuario_cargo">
+                    <span class="info-label">Cargo:</span>
+                    <span class="info-value">{{ modalDetalles.registro?.usuario_cargo }}</span>
                   </div>
                 </div>
               </div>
@@ -540,33 +526,61 @@
                 </div>
               </div>
 
-              <!-- Ubicación si existe -->
-              <div v-if="obtenerUbicacion(modalDetalles.registro)" class="detail-card-compact">
+              <!-- Tipo y descripción -->
+              <div class="detail-card-compact">
                 <div class="detail-header-compact">
                   <div class="detail-icon-small">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                      <circle cx="12" cy="10" r="3"/>
+                      <path d="M9 12l2 2 4-4"/>
+                      <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
                     </svg>
                   </div>
-                  <span class="detail-label-compact">Ubicación</span>
+                  <span class="detail-label-compact">Información General</span>
                 </div>
                 <div class="detail-content-compact">
-                  <div class="location-info">
-                    <div class="coordinate-row">
-                      <span class="coordinate-label">Lat:</span>
-                      <span class="coordinate-value">{{ obtenerUbicacion(modalDetalles.registro).latitud }}</span>
-                    </div>
-                    <div class="coordinate-row">
-                      <span class="coordinate-label">Lng:</span>
-                      <span class="coordinate-value">{{ obtenerUbicacion(modalDetalles.registro).longitud }}</span>
-                    </div>
+                  <div class="info-row">
+                    <span class="info-label">Tipo:</span>
+                    <span :class="['tipo-badge-modal', modalDetalles.registro?.tipo]">
+                      {{ formatearTipo(modalDetalles.registro?.tipo) }}
+                    </span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Descripción:</span>
+                    <span class="info-value">{{ modalDetalles.registro?.descripcion || 'Sin descripción' }}</span>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Origen -->
-              <div class="detail-card-compact">
+            <!-- Imagen si existe -->
+            <div v-if="obtenerImagenUrl(modalDetalles.registro)" class="detail-image-section">
+              <div class="detail-image-container">
+                <img 
+                  :src="obtenerImagenUrl(modalDetalles.registro)" 
+                  :alt="'Imagen del registro'"
+                  class="detail-image"
+                  @error="onImageError"
+                  @load="onImageLoad"
+                />
+                <div class="image-overlay">
+                  <div class="image-info">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="9" cy="9" r="2"/>
+                      <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                    </svg>
+                    <span>Fotografía</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            </div>
+
+            <!-- Columna derecha: Origen, Ubicación y Mapa -->
+            <div class="modal-column-right">
+              <!-- Origen de Datos -->
+              <div class="detail-card-compact origen-card">
                 <div class="detail-header-compact">
                   <div class="detail-icon-small">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -582,6 +596,57 @@
                   </span>
                 </div>
               </div>
+
+              <!-- Información de ubicación -->
+              <div class="detail-card-compact location-card">
+                <div class="detail-header-compact">
+                  <div class="detail-icon-small">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                  </div>
+                  <span class="detail-label-compact">Ubicación</span>
+                </div>
+                <div class="detail-content-compact">
+                  <div class="location-info">
+                    <div class="coordinate-row">
+                      <span class="coordinate-label">Latitud</span>
+                      <span class="coordinate-value">{{ obtenerUbicacion(modalDetalles.registro).latitud || 'N/A' }}</span>
+                    </div>
+                    <div class="coordinate-row">
+                      <span class="coordinate-label">Longitud</span>
+                      <span class="coordinate-value">{{ obtenerUbicacion(modalDetalles.registro).longitud || 'N/A' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mapa de Mapbox -->
+              <div class="detail-card-compact map-card">
+                <div class="detail-header-compact">
+                  <div class="detail-icon-small">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="3 6 9 1 15 6 21 1 21 18 15 23 9 18 3 23"/>
+                      <line x1="9" y1="1" x2="9" y2="18"/>
+                      <line x1="15" y1="6" x2="15" y2="23"/>
+                    </svg>
+                  </div>
+                  <span class="detail-label-compact">Mapa Interactivo</span>
+                </div>
+                <div class="detail-content-compact map-content">
+                  <div id="mapbox-container" class="mapbox-container"></div>
+                  <div v-if="!obtenerUbicacion(modalDetalles.registro).latitud" class="no-location-message">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                      <line x1="12" y1="7" x2="12" y2="13"/>
+                      <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <p>No hay coordenadas disponibles para este registro</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -591,7 +656,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import Sidebar from '../components/Sidebar_NEW.vue'
 import { useRouter } from 'vue-router'
 import usuariosService from '../services/usuariosService.js'
@@ -1066,6 +1131,150 @@ export default {
     const onImageLoad = (event) => {
       console.log('Imagen cargada exitosamente:', event.target.src)
     }
+
+    // Variables para el mapa
+    let mapboxInstance = null
+    let leafletInstance = null
+    const mapboxAccessToken = 'pk.eyJ1IjoidGVzdHVzZXIiLCJhIjoiY2xhYmNkZWZnMGFiYzNxbnV4eXpuaWRleiJ9.invalid'
+
+    // Inicializar mapa de Mapbox o Leaflet como fallback
+    const inicializarMapa = (latitud, longitud) => {
+      console.log('🗺️ Iniciando inicialización del mapa:', { latitud, longitud })
+      
+      // Destruir mapas existentes
+      if (mapboxInstance) {
+        mapboxInstance.remove()
+        mapboxInstance = null
+      }
+      if (leafletInstance) {
+        leafletInstance.remove()
+        leafletInstance = null
+      }
+
+      // Verificar que el contenedor existe
+      const container = document.getElementById('mapbox-container')
+      if (!container) {
+        console.error('❌ Contenedor del mapa no encontrado')
+        return
+      }
+
+      console.log('✅ Contenedor del mapa encontrado:', container)
+
+      // Limpiar contenedor
+      container.innerHTML = ''
+
+      // Usar Leaflet directamente (más confiable)
+      if (window.L) {
+        try {
+          console.log('🍃 Inicializando con Leaflet...')
+          
+          leafletInstance = window.L.map('mapbox-container', {
+            center: [latitud, longitud],
+            zoom: 16,
+            zoomControl: false,
+            attributionControl: false
+          })
+
+          // Añadir capa de OpenStreetMap
+          window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: ''
+          }).addTo(leafletInstance)
+
+          // Crear icono personalizado verde
+          const greenIcon = window.L.divIcon({
+            html: `<div style="
+              background-color: #4CAF50;
+              width: 20px;
+              height: 20px;
+              border-radius: 50% 50% 50% 0;
+              transform: rotate(-45deg);
+              border: 2px solid white;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            "></div>`,
+            className: 'custom-div-icon',
+            iconSize: [20, 20],
+            iconAnchor: [10, 20]
+          })
+
+          // Añadir marcador
+          window.L.marker([latitud, longitud], { icon: greenIcon })
+            .addTo(leafletInstance)
+            .bindPopup(`
+              <div style="text-align: center; padding: 4px; font-family: 'Inter', sans-serif;">
+                <strong style="color: #4CAF50; font-size: 12px;">📍 Ubicación</strong><br>
+                <small style="color: #666; font-size: 10px;">
+                  ${latitud.toFixed(6)}, ${longitud.toFixed(6)}
+                </small>
+              </div>
+            `)
+
+          console.log('✅ Mapa Leaflet inicializado correctamente')
+          
+          // Forzar redimensionamiento del mapa
+          setTimeout(() => {
+            leafletInstance.invalidateSize()
+          }, 100)
+          
+        } catch (error) {
+          console.error('❌ Error al inicializar Leaflet:', error)
+          mostrarErrorMapa(container)
+        }
+      } else {
+        console.error('❌ Leaflet no está disponible')
+        mostrarErrorMapa(container)
+      }
+    }
+
+    // Mostrar mensaje de error
+    const mostrarErrorMapa = (container) => {
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #e74c3c; text-align: center; padding: 20px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <p style="margin: 8px 0 0 0; font-size: 10px;">No se puede cargar el mapa</p>
+        </div>
+      `
+    }
+
+    // Destruir mapa
+    const destruirMapa = () => {
+      if (mapboxInstance) {
+        mapboxInstance.remove()
+        mapboxInstance = null
+      }
+      if (leafletInstance) {
+        leafletInstance.remove()
+        leafletInstance = null
+      }
+    }
+
+    // Watch para el modal de detalles
+    watch(() => modalDetalles.value.visible, (visible) => {
+      if (visible && modalDetalles.value.registro) {
+        // Usar nextTick para asegurar que el DOM está listo
+        nextTick(() => {
+          const ubicacion = obtenerUbicacion(modalDetalles.value.registro)
+          if (ubicacion && ubicacion.latitud && ubicacion.longitud) {
+            // Delay mayor para asegurar que el contenedor está completamente en el DOM
+            setTimeout(() => {
+              console.log('🗺️ Inicializando mapa con coordenadas:', ubicacion.latitud, ubicacion.longitud)
+              inicializarMapa(ubicacion.latitud, ubicacion.longitud)
+            }, 300)
+          } else {
+            console.log('⚠️ No hay coordenadas válidas para el mapa')
+          }
+        })
+      } else {
+        destruirMapa()
+      }
+    })
+
+    // Limpiar mapa al desmontar el componente
+    onUnmounted(() => {
+      destruirMapa()
+    })
 
     // Exportar a Excel
     const exportarExcel = async () => {
@@ -2544,6 +2753,22 @@ export default {
   position: relative;
 }
 
+/* Modal horizontal para dos columnas */
+.modal-content-modern-horizontal {
+  background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  border-radius: clamp(8px, 1.5vw, 12px);
+  max-width: clamp(420px, 90vw, 800px);
+  width: 100%;
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 
+    0 10px 40px rgba(76, 175, 80, 0.15),
+    0 4px 20px rgba(0, 0, 0, 0.1);
+  animation: slideInModal 0.3s ease-out;
+  position: relative;
+}
+
 @keyframes slideInModal {
   from {
     opacity: 0;
@@ -2658,6 +2883,35 @@ export default {
   overflow-y: auto;
 }
 
+/* Body del modal horizontal */
+.modal-body-modern-horizontal {
+  padding: clamp(12px, 2vw, 16px);
+  max-height: calc(85vh - 60px);
+  overflow-y: auto;
+}
+
+/* Contenedor de columnas */
+.modal-columns-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(16px, 3vw, 24px);
+  height: 100%;
+}
+
+/* Columna izquierda */
+.modal-column-left {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.8vw, 12px);
+}
+
+/* Columna derecha */
+.modal-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.8vw, 12px);
+}
+
 .details-grid-modern {
   display: flex;
   flex-direction: column;
@@ -2728,6 +2982,22 @@ export default {
   border-color: rgba(76, 175, 80, 0.25);
   background: rgba(255, 255, 255, 0.8);
   transform: translateY(-1px);
+}
+
+/* Tarjetas más compactas para ubicación y origen */
+.location-card,
+.origen-card {
+  min-height: auto;
+}
+
+.location-card .detail-header-compact,
+.origen-card .detail-header-compact {
+  padding: clamp(4px, 0.8vw, 6px) clamp(6px, 1.2vw, 8px);
+}
+
+.location-card .detail-content-compact,
+.origen-card .detail-content-compact {
+  padding: clamp(6px, 1.2vw, 8px);
 }
 
 .detail-header-compact {
@@ -2880,6 +3150,132 @@ export default {
   font-size: clamp(8px, 1.4vw, 9px);
   color: #374151;
   font-family: 'Courier New', monospace;
+}
+
+/* Estilos para el mapa */
+.map-card {
+  flex: 1;
+  min-height: clamp(320px, 35vh, 380px);
+}
+
+.map-content {
+  padding: 16px !important;
+  border-radius: clamp(4px, 0.8vw, 6px);
+  overflow: visible;
+  background: #f8f9fa;
+  min-height: clamp(320px, 35vh, 380px);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mapbox-container {
+  width: 280px;
+  height: 280px;
+  border-radius: 50% !important;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
+  border: 4px solid rgba(76, 175, 80, 0.4);
+  box-shadow: 
+    0 8px 24px rgba(76, 175, 80, 0.25),
+    inset 0 2px 8px rgba(76, 175, 80, 0.1);
+  position: relative;
+  margin: 16px auto;
+  flex-shrink: 0;
+}
+
+.mapbox-container canvas,
+.mapbox-container .mapboxgl-canvas,
+.mapbox-container .leaflet-container {
+  border-radius: 50% !important;
+}
+
+.mapbox-container .mapboxgl-control-container,
+.mapbox-container .leaflet-control-container {
+  display: none !important;
+}
+
+/* Estilos para Leaflet */
+.mapbox-container .leaflet-container {
+  background: transparent !important;
+}
+
+.mapbox-container .leaflet-tile-pane {
+  border-radius: 50% !important;
+}
+
+.mapbox-container .leaflet-map-pane {
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+.no-location-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+  text-align: center;
+  padding: clamp(20px, 4vw, 30px);
+}
+
+.no-location-message svg {
+  margin-bottom: clamp(8px, 1.5vw, 12px);
+  opacity: 0.6;
+}
+
+.no-location-message p {
+  margin: 0;
+  font-size: clamp(10px, 1.8vw, 12px);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* Responsive design para el modal horizontal */
+@media (max-width: 768px) {
+  .modal-content-modern-horizontal {
+    max-width: 95vw;
+    max-height: 90vh;
+  }
+  
+  .modal-columns-container {
+    grid-template-columns: 1fr;
+    gap: clamp(12px, 2.5vw, 16px);
+  }
+  
+  .mapbox-container {
+    width: 220px;
+    height: 220px;
+    border-radius: 50% !important;
+    margin: 12px auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content-modern-horizontal {
+    max-width: 98vw;
+  }
+  
+  .modal-body-modern-horizontal {
+    padding: clamp(8px, 1.5vw, 12px);
+  }
+  
+  .modal-columns-container {
+    gap: clamp(8px, 1.5vw, 12px);
+  }
+  
+  .mapbox-container {
+    width: 200px;
+    height: 200px;
+    border-radius: 50% !important;
+    margin: 10px auto;
+  }
+  
+  .map-card {
+    min-height: clamp(180px, 25vh, 220px);
+  }
 }
 
 /* Responsive design para el modal */

@@ -2703,7 +2703,7 @@ async def obtener_historial_usuario(
         # Construir consulta con filtros
         query = """
             SELECT h.id, h.usuario_id, h.tipo, h.descripcion, h.fecha, h.hora, h.detalles, h.creado_en,
-                   u.nombre_completo, u.correo
+                   u.nombre_completo, u.correo, u.curp, u.cargo
             FROM historial h
             JOIN usuarios u ON h.usuario_id = u.id
             WHERE h.usuario_id = %s
@@ -2740,7 +2740,9 @@ async def obtener_historial_usuario(
                 "detalles": row[6],
                 "creado_en": row[7].isoformat() if row[7] else None,
                 "usuario_nombre": row[8],
-                "usuario_correo": row[9]
+                "usuario_correo": row[9],
+                "usuario_curp": row[10],
+                "usuario_cargo": row[11]
             }
             historial.append(registro)
         
@@ -2766,7 +2768,7 @@ async def obtener_todos_historiales():
         
         cursor.execute("""
             SELECT h.id, h.usuario_id, h.tipo, h.descripcion, h.fecha, h.hora, h.detalles, h.creado_en,
-                   u.nombre_completo, u.correo
+                   u.nombre_completo, u.correo, u.curp, u.cargo
             FROM historial h
             JOIN usuarios u ON h.usuario_id = u.id
             ORDER BY h.fecha DESC, h.hora DESC 
@@ -2786,7 +2788,9 @@ async def obtener_todos_historiales():
                 "detalles": row[6],
                 "creado_en": row[7].isoformat() if row[7] else None,
                 "usuario_nombre": row[8],
-                "usuario_correo": row[9]
+                "usuario_correo": row[9],
+                "usuario_curp": row[10],
+                "usuario_cargo": row[11]
             }
             historial.append(registro)
         

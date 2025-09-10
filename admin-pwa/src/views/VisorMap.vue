@@ -89,6 +89,7 @@
                     <option value="salida">Solo Salidas</option>
                     <option value="campo-hoy">Solo Campo (hoy)</option>
                     <option value="gabinete-hoy">Solo Gabinete (hoy)</option>
+                    <option value="actividades-generales">Solo Actividades Total (Hoy)</option>
                     <option value="registro-antiguo">Solo Registros Antiguos</option>
                   </select>
                 </div>
@@ -153,6 +154,10 @@
                 <div class="leyenda-item">
                   <div class="color-marker gabinete-hoy"></div>
                   <span>Gabinete (hoy)</span>
+                </div>
+                <div class="leyenda-item">
+                  <div class="color-marker actividades-generales"></div>
+                  <span>Actividades total (Hoy)</span>
                 </div>
                 
                 <!-- Subtítulo para Otros -->
@@ -219,6 +224,9 @@
                   <polyline points="14 2 14 8 20 8"/>
                   <line x1="16" y1="13" x2="8" y2="13"/>
                 </svg>
+                <svg v-else-if="popupData.tipoClase === 'actividades-generales' || popupData.tipoActividad === 'actividades-generales'" class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
                 <svg v-else-if="popupData.tipoClase === 'registro-hoy'" class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
@@ -234,8 +242,10 @@
                   popupData.tipoActividad === 'salida' ? 'Salida' :
                   popupData.tipoActividad === 'oficina' ? 'Actividad de Oficina' :
                   popupData.tipoActividad === 'registro' ? 'Registro de Actividad' :
+                  popupData.tipoActividad === 'actividades-generales' ? 'Actividad General' :
                   popupData.tipoClase === 'campo' || popupData.tipoClase === 'campo-hoy' ? 'Actividad de Campo' :
                   popupData.tipoClase === 'gabinete' || popupData.tipoClase === 'gabinete-hoy' ? 'Actividad de Gabinete' :
+                  popupData.tipoClase === 'actividades-generales' ? 'Actividad General' :
                   popupData.tipoClase === 'entrada' ? 'Entrada' :
                   popupData.tipoClase === 'salida' ? 'Salida' :
                   popupData.tipoClase === 'registro-hoy' ? 'Registro de Hoy' :
@@ -1184,6 +1194,7 @@ const inicializarMapa = (datos) => {
             'salida', 'rgb(220, 20, 60)', // Crimson para salidas
             'campo-hoy', 'rgb(184, 134, 11)', // Darkgoldenrod para campo de hoy
             'gabinete-hoy', 'rgb(0, 0, 205)', // Mediumblue para gabinete de hoy
+            'actividades-generales', 'rgb(148, 0, 211)', // Darkviolet para actividades generales
             'campo-antiguo', 'rgb(128, 128, 128)', // Gris para campo antiguo
             'gabinete-antiguo', 'rgb(128, 128, 128)', // Gris para gabinete antiguo
             'registro-hoy', 'rgb(184, 134, 11)', // Darkgoldenrod para compatibilidad (campo por defecto)
@@ -1272,10 +1283,11 @@ const inicializarMapa = (datos) => {
             hour12: true
           }).toLowerCase(); // Convertir am/pm a minúsculas
           
-          const tipoActividad = props.tipo_actividad || 'registro';
+          const tipoActividad = props.tipo_actividad_original || props.tipo_actividad || 'registro';
           
           console.log('🔍 Propiedades del registro completo:', props);
-          console.log('� Tipo de actividad detectado:', tipoActividad);
+          console.log('🔍 Tipo de actividad detectado:', tipoActividad);
+          console.log('🎨 Tipo de actividad para mapa:', props.tipo_actividad);
           
           // Obtener la URL de imagen con logging detallado
           console.log('📝 props.tipo_actividad original:', props.tipo_actividad);
@@ -1291,7 +1303,7 @@ const inicializarMapa = (datos) => {
             fechaFormateada: fechaFormateada,
             horaFormateada: horaFormateada,
             tipoActividad: tipoActividad,
-            tipoClase: props.tipo_actividad,
+            tipoClase: props.tipo_actividad_original || props.tipo_actividad,
             coordenadasTexto: `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`,
             expandido: false,
             // Datos adicionales para la vista expandida
@@ -1449,7 +1461,15 @@ const actualizarPuntosMapa = (datos) => {
     const features = datos.map(punto => {
       // Usar la función determinarTipoActividad para clasificar según horario CDMX
       const infoActividad = determinarTipoActividad(punto);
-      const tipoActividad = infoActividad.tipo;
+      let tipoActividad = infoActividad.tipo;
+      
+      // Para el mapa: si el filtro está en "actividades-generales", cambiar campo y gabinete por "actividades-generales"
+      let tipoActividadMapa = tipoActividad;
+      if (filtroTipo.value === 'actividades-generales') {
+        if (tipoActividad === 'campo-hoy' || tipoActividad === 'gabinete-hoy') {
+          tipoActividadMapa = 'actividades-generales';
+        }
+      }
       
       // Verificar si la actividad es de hoy según el horario CDMX
       const esHoy = esUbicacionReciente(punto.fecha_hora);
@@ -1457,18 +1477,21 @@ const actualizarPuntosMapa = (datos) => {
       // Actualizar contadores para las estadísticas
       clusterInfo.total++;
       
-      // Actualizar contadores basados en el tipo de actividad
-      if (tipoActividad === 'entrada') {
+      // Actualizar contadores basados en el tipo de actividad del mapa
+      if (tipoActividadMapa === 'entrada') {
         clusterInfo.entradas++;
-      } else if (tipoActividad === 'salida') {
+      } else if (tipoActividadMapa === 'salida') {
         clusterInfo.salidas++;
-      } else if (tipoActividad === 'campo-hoy') {
+      } else if (tipoActividadMapa === 'campo-hoy') {
         clusterInfo.campoHoy++;
         clusterInfo.registrosHoy++;
-      } else if (tipoActividad === 'gabinete-hoy') {
+      } else if (tipoActividadMapa === 'gabinete-hoy') {
         clusterInfo.gabineteHoy++;
         clusterInfo.registrosHoy++;
-      } else if (tipoActividad === 'campo-antiguo' || tipoActividad === 'gabinete-antiguo' || tipoActividad === 'registro-antiguo') {
+      } else if (tipoActividadMapa === 'actividades-generales') {
+        // Para actividades generales, no incrementamos contadores específicos
+        clusterInfo.registrosHoy++;
+      } else if (tipoActividadMapa === 'campo-antiguo' || tipoActividadMapa === 'gabinete-antiguo' || tipoActividadMapa === 'registro-antiguo') {
         clusterInfo.registrosAntiguos++;
       }
       
@@ -1479,7 +1502,8 @@ const actualizarPuntosMapa = (datos) => {
           usuario_id: punto.usuario_id,
           nombre: punto.usuario?.nombre_completo || `Usuario ${punto.usuario_id}`,
           correo: punto.usuario?.correo || '',
-          tipo_actividad: tipoActividad,
+          tipo_actividad: tipoActividadMapa, // Para el color del mapa
+          tipo_actividad_original: tipoActividad, // Para el popup (mantener original)
           fecha_hora: punto.fecha_hora,
           descripcion: punto.descripcion || '',
           foto_url: punto.foto_url || null,
@@ -1887,6 +1911,9 @@ const aplicarFiltros = () => {
             return tipoActividad.tipo === 'campo-hoy'
           case 'gabinete-hoy':
             return tipoActividad.tipo === 'gabinete-hoy'
+          case 'actividades-generales':
+            // Para actividades generales, incluir campo y gabinete del día actual
+            return tipoActividad.tipo === 'campo-hoy' || tipoActividad.tipo === 'gabinete-hoy'
           case 'registro-hoy':
             return tipoActividad.tipo === 'registro-hoy' || tipoActividad.tipo === 'campo-hoy' || tipoActividad.tipo === 'gabinete-hoy'
           case 'registro-antiguo':
@@ -2822,6 +2849,10 @@ watch(filtroTipo, () => {
 
 .color-marker.gabinete-hoy {
   background-color: rgb(0, 0, 205); /* Mediumblue para gabinete */
+}
+
+.color-marker.actividades-generales {
+  background-color: rgb(148, 0, 211); /* darkviolet para actividades generales */
 }
 
 .color-marker.registro-hoy {

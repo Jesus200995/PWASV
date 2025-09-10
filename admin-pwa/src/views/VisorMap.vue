@@ -120,6 +120,10 @@
                 <span class="stat-label">Gabinete (hoy)</span>
                 <span class="stat-value gabinete">{{ estadisticasDiaActual.gabineteHoy }}</span>
               </div>
+              <div class="stat-item">
+                <span class="stat-label">Actividades total (Hoy)</span>
+                <span class="stat-value actividades-total">{{ estadisticasDiaActual.campoHoy + estadisticasDiaActual.gabineteHoy }}</span>
+              </div>
             </div>
           </div>
           
@@ -2781,6 +2785,11 @@ watch(filtroTipo, () => {
 
 .stat-value.gabinete {
   color: rgb(0, 0, 205); /* Mediumblue para gabinete */
+}
+
+.stat-value.actividades-total {
+  color: rgb(148, 0, 211); /* Darkviolet para actividades total */
+  font-weight: 700; /* Hacer más destacado */
 }
 
 .stat-value.hoy {

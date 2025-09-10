@@ -217,6 +217,17 @@
                   <polyline points="16 17 21 12 16 7"/>
                   <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
+                <svg v-else-if="popupData.tipoClase && (popupData.tipoClase.includes('campo') || popupData.tipoActividad === 'campo')" class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 18h18"/>
+                  <path d="M8 14v-4"/>
+                  <path d="M12 14v-6"/>
+                  <path d="M16 14v-8"/>
+                </svg>
+                <svg v-else-if="popupData.tipoClase && (popupData.tipoClase.includes('gabinete') || popupData.tipoActividad === 'gabinete')" class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                </svg>
                 <svg v-else-if="popupData.tipoClase === 'registro-hoy'" class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
@@ -225,7 +236,21 @@
                   <line x1="12" y1="8" x2="12" y2="12"/>
                   <line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
-                <strong>{{ popupData.tipoActividad }}</strong>
+                <strong>{{ 
+                  popupData.tipoActividad === 'campo' ? 'Actividad de Campo' :
+                  popupData.tipoActividad === 'gabinete' ? 'Actividad de Gabinete' :
+                  popupData.tipoActividad === 'entrada' ? 'Entrada' :
+                  popupData.tipoActividad === 'salida' ? 'Salida' :
+                  popupData.tipoActividad === 'oficina' ? 'Actividad de Oficina' :
+                  popupData.tipoActividad === 'registro' ? 'Registro de Actividad' :
+                  popupData.tipoClase === 'campo' || popupData.tipoClase === 'campo-hoy' ? 'Actividad de Campo' :
+                  popupData.tipoClase === 'gabinete' || popupData.tipoClase === 'gabinete-hoy' ? 'Actividad de Gabinete' :
+                  popupData.tipoClase === 'entrada' ? 'Entrada' :
+                  popupData.tipoClase === 'salida' ? 'Salida' :
+                  popupData.tipoClase === 'registro-hoy' ? 'Registro de Hoy' :
+                  popupData.tipoClase === 'registro-antiguo' || popupData.tipoClase === 'antiguo' ? 'Registro Anterior' :
+                  'Actividad'
+                }}</strong>
               </div>
               
               <button class="popup-close-btn" @click="cerrarPopup" title="Cerrar">
@@ -257,14 +282,23 @@
                   <div class="popup-info-column">
                     <!-- Detalles técnicos adicionales -->
                     <div class="popup-details-grid">
-                      <!-- ID del registro -->
-                      <div class="popup-detail-item">
+                      <!-- ID del registro y Tipo en la misma línea -->
+                      <div class="popup-detail-item popup-detail-row">
                         <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M9 12h6M9 16h6M9 8h6m-8 12h8a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <div class="popup-detail">
+                        <div class="popup-detail popup-detail-half">
                           <span class="popup-detail-label">ID Registro:</span>
                           <span class="popup-detail-value">{{ popupData.registroId || 'N/A' }}</span>
+                        </div>
+                        <svg class="popup-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <div class="popup-detail popup-detail-half">
+                          <span class="popup-detail-label">Tipo:</span>
+                          <span class="popup-detail-value tipo-actividad-value" :class="obtenerClaseTipoActividad(popupData.tipoActividad)">
+                            {{ formatearTipoActividad(popupData.tipoActividad) }}
+                          </span>
                         </div>
                       </div>
 
@@ -1247,13 +1281,13 @@ const inicializarMapa = (datos) => {
             hour12: true
           }).toLowerCase(); // Convertir am/pm a minúsculas
           
-          const tipoActividad = props.tipo_actividad === 'entrada' ? 'Entrada' : 
-                               props.tipo_actividad === 'salida' ? 'Salida' : 
-                               'Actividades';
+          const tipoActividad = props.tipo_actividad || 'registro';
           
           console.log('🔍 Propiedades del registro completo:', props);
+          console.log('� Tipo de actividad detectado:', tipoActividad);
           
           // Obtener la URL de imagen con logging detallado
+          console.log('📝 props.tipo_actividad original:', props.tipo_actividad);
           const imagenUrl = obtenerUrlImagen(props);
           console.log('🖼️ URL de imagen obtenida:', imagenUrl);
           
@@ -1589,6 +1623,146 @@ const obtenerUrlImagen = (props) => {
   
   console.log('❌ No se encontró imagen en:', Object.keys(props));
   return null;
+}
+
+// Función para formatear el tipo de actividad para mostrar en el popup
+const formatearTipoActividad = (tipoActividad) => {
+  if (!tipoActividad) return 'REGISTRO';
+  
+  // Limpiar sufijos como -hoy, -antiguo, etc.
+  let tipoLimpio = tipoActividad.toLowerCase();
+  
+  // Remover sufijos comunes
+  tipoLimpio = tipoLimpio.replace(/-hoy$/, '');
+  tipoLimpio = tipoLimpio.replace(/-antiguo$/, '');
+  tipoLimpio = tipoLimpio.replace(/^registro-/, ''); // Para casos como "registro-hoy"
+  
+  let resultado;
+  switch (tipoLimpio) {
+    case 'campo':
+      resultado = 'CAMPO';
+      break;
+    case 'gabinete':
+      resultado = 'GABINETE';
+      break;
+    case 'oficina':
+      resultado = 'OFICINA';
+      break;
+    case 'registro':
+      resultado = 'REGISTRO';
+      break;
+    case 'entrada':
+      resultado = 'ENTRADA';
+      break;
+    case 'salida':
+      resultado = 'SALIDA';
+      break;
+    case 'hoy':
+      resultado = 'REGISTRO';
+      break;
+    case 'antiguo':
+      resultado = 'REGISTRO';
+      break;
+    default:
+      resultado = tipoLimpio.toUpperCase();
+  }
+  
+  return resultado;
+}
+
+// Función para obtener la clase CSS correcta para el tipo de actividad
+const obtenerClaseTipoActividad = (tipoActividad) => {
+  if (!tipoActividad) return 'registro';
+  
+  // Limpiar sufijos como -hoy, -antiguo, etc.
+  let tipoLimpio = tipoActividad.toLowerCase();
+  tipoLimpio = tipoLimpio.replace(/-hoy$/, '');
+  tipoLimpio = tipoLimpio.replace(/-antiguo$/, '');
+  tipoLimpio = tipoLimpio.replace(/^registro-/, '');
+  
+  switch (tipoLimpio) {
+    case 'campo':
+      return 'campo';
+    case 'gabinete':
+      return 'gabinete';
+    case 'oficina':
+      return 'oficina';
+    case 'entrada':
+      return 'entrada';
+    case 'salida':
+      return 'salida';
+    case 'hoy':
+    case 'antiguo':
+    case 'registro':
+      return 'registro';
+    default:
+      return 'registro';
+  }
+}
+
+// Función para generar títulos amigables en los popups
+const generarTituloPopup = (tipoActividad, tipoClase) => {
+  console.log('📝 Generando título para:', tipoActividad, 'clase:', tipoClase);
+  
+  // Priorizar el tipo original (tipoActividad) sobre la clase técnica
+  if (tipoActividad) {
+    const tipoLower = tipoActividad.toLowerCase();
+    console.log('🔍 Procesando tipoActividad:', tipoLower);
+    
+    switch (tipoLower) {
+      case 'entrada':
+        console.log('✅ Devolviendo: Entrada');
+        return 'Entrada';
+      case 'salida':
+        console.log('✅ Devolviendo: Salida');
+        return 'Salida';
+      case 'campo':
+        console.log('✅ Devolviendo: Actividad de Campo');
+        return 'Actividad de Campo';
+      case 'gabinete':
+        console.log('✅ Devolviendo: Actividad de Gabinete');
+        return 'Actividad de Gabinete';
+      case 'oficina':
+        console.log('✅ Devolviendo: Actividad de Oficina');
+        return 'Actividad de Oficina';
+      case 'registro':
+        console.log('✅ Devolviendo: Registro de Actividad');
+        return 'Registro de Actividad';
+      default:
+        console.log('⚠️ Tipo no reconocido, usando capitalizado:', tipoActividad);
+        return tipoActividad.charAt(0).toUpperCase() + tipoActividad.slice(1);
+    }
+  }
+  
+  // Fallback a tipoClase si no hay tipoActividad
+  if (tipoClase) {
+    console.log('🔍 Procesando tipoClase:', tipoClase);
+    switch (tipoClase.toLowerCase()) {
+      case 'entrada':
+        return 'Entrada';
+      case 'salida':
+        return 'Salida';
+      case 'campo':
+      case 'campo-hoy':
+        console.log('✅ Devolviendo: Actividad de Campo (desde tipoClase)');
+        return 'Actividad de Campo';
+      case 'gabinete':
+      case 'gabinete-hoy':
+        console.log('✅ Devolviendo: Actividad de Gabinete (desde tipoClase)');
+        return 'Actividad de Gabinete';
+      case 'registro-hoy':
+        return 'Registro de Hoy';
+      case 'registro-antiguo':
+      case 'antiguo':
+        return 'Registro Anterior';
+      default:
+        console.log('⚠️ tipoClase no reconocido:', tipoClase);
+        return 'Actividad';
+    }
+  }
+  
+  console.log('❌ No hay tipo disponible, devolviendo: Actividad');
+  return 'Actividad';
 }
 
 // Función para manejar el clic en "Ver más detalles" en el popup
@@ -3388,6 +3562,24 @@ watch(filtroTipo, () => {
   padding: 4px 0;
 }
 
+/* Estilo para fila de elementos en línea */
+.popup-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  flex-wrap: nowrap;
+}
+
+/* Estilo para elemento de mitad de ancho */
+.popup-detail-half {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
 .popup-detail {
   display: flex;
   flex-direction: column;
@@ -3457,6 +3649,52 @@ watch(filtroTipo, () => {
   font-size: 11px;
   font-weight: 600;
   border: 1px solid #fed7aa;
+}
+
+/* Tipo de actividad con colores distintivos */
+.tipo-actividad-value {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tipo-actividad-value.entrada {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #4ade80;
+}
+
+.tipo-actividad-value.salida {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #dc2626;
+}
+
+.tipo-actividad-value.campo {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.tipo-actividad-value.gabinete {
+  background-color: #e0f2fe;
+  color: #0c4a6e;
+  border: 1px solid #00BFFF;
+}
+
+.tipo-actividad-value.oficina {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.tipo-actividad-value.registro {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
 }
 
 /* Modal para imagen completa */

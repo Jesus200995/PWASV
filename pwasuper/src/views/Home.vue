@@ -22,9 +22,10 @@
               :class="[
                 'section-nav-button flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300',
                 seccionActiva === 'asistencia' 
-                  ? 'active bg-green-500 text-white shadow-lg' 
+                  ? 'active text-white shadow-lg' 
                   : 'text-gray-600 hover:bg-white/30'
               ]"
+              :style="seccionActiva === 'asistencia' ? 'background-color: rgb(30, 144, 255);' : ''"
             >
               <div class="flex items-center justify-center space-x-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -40,11 +41,12 @@
               :class="[
                 'section-nav-button flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 relative',
                 seccionActiva === 'actividades' && entradaMarcada && !salidaMarcada
-                  ? 'active bg-blue-500 text-white shadow-lg' 
+                  ? 'active text-white shadow-lg' 
                   : (!entradaMarcada || salidaMarcada)
                     ? 'bg-gray-300 text-gray-500 cursor-pointer'
                     : 'text-gray-600 hover:bg-white/30'
               ]"
+              :style="seccionActiva === 'actividades' && entradaMarcada && !salidaMarcada ? 'background-color: rgb(147, 51, 234);' : ''"
             >
               <div class="flex items-center justify-center space-x-2">
                 <!-- Icono de candado cuando está bloqueado -->

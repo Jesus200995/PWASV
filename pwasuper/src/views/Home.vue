@@ -246,50 +246,34 @@
             </div>
           </div>
           
-          <!-- Contenedor principal más delgado -->
-          <div class="relative bg-gradient-to-br from-red-600/80 via-red-800/70 to-black/90 rounded-lg shadow-lg backdrop-blur-md border border-red-700/30 overflow-hidden py-1">
-            <!-- Efecto vidrio líquido superior -->
-            <div class="absolute inset-0 bg-gradient-to-br from-red-400/20 via-transparent to-red-900/10 pointer-events-none"></div>
+          <!-- Contenedor principal rediseñado -->
+          <div class="relative bg-gradient-to-br from-red-900 via-red-950 to-black backdrop-blur-sm rounded-xl shadow-xl border border-red-800/30 overflow-hidden mx-2">
+            <!-- Borde superior rojo elegante -->
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-red-400 to-red-500"></div>
             
-            <!-- Reflejo líquido principal (más delgado) -->
-            <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-red-300/25 to-transparent rounded-t-lg"></div>
-            
-            <!-- Ondas líquidas decorativas (más pequeñas) -->
-            <div class="absolute inset-0 opacity-10">
-              <div class="absolute top-2 right-4 w-8 h-8 border border-red-500/30 rounded-full animate-pulse"></div>
-              <div class="absolute bottom-2 left-4 w-4 h-4 border border-red-600/25 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
-              <div class="absolute top-1/2 right-2 w-2 h-2 border border-red-500/25 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
-            </div>
-            
-            <!-- Efecto shimmer líquido -->
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/15 to-transparent transform skew-x-6 translate-x-[-100%] animate-shimmer opacity-30"></div>
-            
-            <!-- Badge superior más delgado -->
-            <div class="absolute top-0 left-0 right-0 flex items-center justify-center px-3 py-0.5 bg-gradient-to-r from-red-800/80 to-black/70 backdrop-blur-sm border-b border-red-700/40 rounded-t-lg shadow-sm">
-              <!-- Texto más pequeño, rojo y negrita fuerte -->
-              <span class="text-[10px] font-black text-red-100 uppercase tracking-wide font-['Inter',sans-serif] drop-shadow-lg antialiased text-center">OBLIGATORIO</span>
-            </div>
-            
-            <!-- Contenido principal más compacto -->
-            <div class="relative z-20 flex flex-col items-center justify-center pt-4 pb-2 px-4">
-              <div class="text-center w-full">
-                <!-- Mensaje principal más pequeño -->
-                <div class="text-xs leading-snug text-red-100/95 font-['Inter',sans-serif]">
-                  <span class="font-bold text-white drop-shadow-md">Marcar entrada es necesario para usar actividades</span>
-                  <br>
-                  <span class="font-medium text-[10px]" style="color: rgb(220, 20, 60);">Al marcar salida se finaliza el acceso del día</span>
+            <!-- Contenido principal -->
+            <div class="relative p-4">
+              <!-- Icono y encabezado -->
+              <div class="flex items-center justify-center mb-3">
+                <div class="flex items-center space-x-2">
+                  <div class="w-7 h-7 rounded-full bg-red-500 flex items-center justify-center shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.718 9.168-4.309M6 15a2 2 0 002 2h1.832c4.1 0 7.625 1.718 9.168 4.309" />
+                    </svg>
+                  </div>
+                  <span class="text-xs font-semibold text-red-100 tracking-wide uppercase">Importante</span>
                 </div>
               </div>
-            </div>
-            
-            <!-- Borde suave líquido -->
-            <div class="absolute inset-0 rounded-lg border border-red-600/40 pointer-events-none shadow-inner"></div>
-            
-            <!-- Partículas flotantes (más pequeñas) -->
-            <div class="absolute inset-0 pointer-events-none">
-              <div class="absolute top-3 left-3 w-0.5 h-0.5 bg-red-400/50 rounded-full animate-float"></div>
-              <div class="absolute top-4 right-6 w-0.5 h-0.5 bg-red-300/50 rounded-full animate-float" style="animation-delay: 1.5s;"></div>
-              <div class="absolute bottom-3 right-4 w-0.5 h-0.5 bg-red-400/50 rounded-full animate-float" style="animation-delay: 0.8s;"></div>
+              
+              <!-- Mensaje principal -->
+              <div class="text-center space-y-2">
+                <h3 class="text-sm font-semibold text-white leading-tight">
+                  Marcar entrada es necesario para usar actividades
+                </h3>
+                <p class="text-xs text-red-200 font-medium">
+                  Al marcar salida se finaliza el acceso del día
+                </p>
+              </div>
             </div>
           </div>
         </div>

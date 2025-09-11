@@ -95,9 +95,9 @@
             'text-white shadow-lg hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
             'bg-gray-300 text-gray-500 cursor-not-allowed': entradaMarcada || verificandoAsistencia
           }"
-          :style="!entradaMarcada && !verificandoAsistencia ? 'background-color: #65AD00; box-shadow: 0 4px 12px rgba(101, 173, 0, 0.3);' : ''"
-          @mouseover="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = '#5A9B00')"
-          @mouseout="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = '#65AD00')"
+          :style="!entradaMarcada && !verificandoAsistencia ? 'background-color: rgb(30, 144, 255); box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);' : ''"
+          @mouseover="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(25, 130, 230)')"
+          @mouseout="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(30, 144, 255)')"
         >
           <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
             <div class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current"></div>
@@ -132,9 +132,12 @@
           :disabled="!entradaMarcada || salidaMarcada || verificandoAsistencia"
           class="relative overflow-hidden flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 transform"
           :class="{
-            'bg-red-500 text-white shadow-lg hover:bg-red-600 hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
+            'text-white shadow-lg hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
             'bg-gray-300 text-gray-500 cursor-not-allowed': !entradaMarcada || salidaMarcada || verificandoAsistencia
           }"
+          :style="entradaMarcada && !salidaMarcada && !verificandoAsistencia ? 'background-color: rgb(220, 20, 60); box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);' : ''"
+          @mouseover="entradaMarcada && !salidaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(200, 15, 55)')"
+          @mouseout="entradaMarcada && !salidaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(220, 20, 60)')"
         >
           <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
             <div class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current"></div>
@@ -219,7 +222,7 @@
                 <div class="text-xs leading-snug text-red-100/95 font-['Inter',sans-serif]">
                   <span class="font-bold text-white drop-shadow-md">Marcar entrada es necesario para usar actividades</span>
                   <br>
-                  <span class="font-medium text-red-200/90 text-[10px]">Al marcar salida se finaliza el acceso del día</span>
+                  <span class="font-medium text-[10px]" style="color: rgb(220, 20, 60);">Al marcar salida se finaliza el acceso del día</span>
                 </div>
               </div>
             </div>
@@ -451,7 +454,7 @@
       :show="showSalidaModal" 
       title="Registrar Salida"
       :message="salidaModalMessage"
-      type="confirm"
+      type="error"
       :showConfirm="true"
       confirmText="Registrar Salida"
       cancelText="Cancelar"
@@ -601,7 +604,7 @@
         <div class="mb-3">
           <label class="block text-xs font-medium text-gray-700 mb-2 flex items-center"
                  :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-emerald-600" :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-green-600" :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
             Tipo de Actividad <span class="text-red-500 text-sm">*</span>
@@ -617,21 +620,21 @@
                   'relative overflow-hidden rounded-xl p-3 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] border',
                   entradaMarcada && !salidaMarcada ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
                   tipoActividad === 'campo' ? 
-                    'bg-gradient-to-br from-emerald-400/15 via-green-300/10 to-teal-400/15 border-emerald-400/50 shadow-lg shadow-emerald-500/10' : 
-                    'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:border-emerald-300/40 hover:from-emerald-50/30 hover:via-green-25/20 hover:to-teal-50/15'
+                    'bg-gradient-to-br from-green-400/15 via-green-500/10 to-green-600/15 border-green-400/50 shadow-lg shadow-green-500/10' : 
+                    'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:border-green-300/40 hover:from-green-50/30 hover:via-green-25/20 hover:to-green-50/15'
                 ]"
                 style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
               >
                 <!-- Efecto de vidrio líquido sutil -->
                 <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-60 rounded-xl"></div>
-                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-emerald-300/15 to-transparent rounded-full blur-lg"></div>
+                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-green-300/15 to-transparent rounded-full blur-lg"></div>
                 
                 <div class="relative z-10 text-center">
                   <div class="flex justify-center mb-1.5">
                     <div :class="[
                       'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
                       tipoActividad === 'campo' ? 
-                        'bg-emerald-500 text-white shadow-md shadow-emerald-500/30' : 
+                        'bg-green-500 text-white shadow-md shadow-green-500/30' : 
                         'bg-gray-100 text-gray-500 border border-gray-200'
                     ]">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -641,17 +644,17 @@
                   </div>
                   <h3 :class="[
                     'font-medium text-xs mb-0.5 transition-colors duration-300',
-                    tipoActividad === 'campo' ? 'text-emerald-800' : 'text-gray-600'
+                    tipoActividad === 'campo' ? 'text-green-800' : 'text-gray-600'
                   ]">Campo</h3>
                   <p :class="[
                     'text-xs leading-tight transition-colors duration-300',
-                    tipoActividad === 'campo' ? 'text-emerald-600' : 'text-gray-400'
+                    tipoActividad === 'campo' ? 'text-green-600' : 'text-gray-400'
                   ]">Trabajo en terreno</p>
                 </div>
                 
                 <!-- Indicador de selección pequeño -->
                 <div v-if="tipoActividad === 'campo'" class="absolute top-1.5 right-1.5">
-                  <div class="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center shadow-sm">
+                  <div class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                     </svg>
@@ -666,21 +669,21 @@
                   'relative overflow-hidden rounded-xl p-3 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] border',
                   entradaMarcada && !salidaMarcada ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
                   tipoActividad === 'gabinete' ? 
-                    'bg-gradient-to-br from-blue-400/15 via-indigo-300/10 to-purple-400/15 border-blue-400/50 shadow-lg shadow-blue-500/10' : 
-                    'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:border-blue-300/40 hover:from-blue-50/30 hover:via-indigo-25/20 hover:to-purple-50/15'
+                    'bg-gradient-to-br from-orange-400/15 via-red-400/10 to-orange-500/15 border-orange-400/50 shadow-lg shadow-orange-500/10' : 
+                    'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:border-orange-300/40 hover:from-orange-50/30 hover:via-red-25/20 hover:to-orange-50/15'
                 ]"
                 style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
               >
                 <!-- Efecto de vidrio líquido sutil -->
                 <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-60 rounded-xl"></div>
-                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-blue-300/15 to-transparent rounded-full blur-lg"></div>
+                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-orange-300/15 to-transparent rounded-full blur-lg"></div>
                 
                 <div class="relative z-10 text-center">
                   <div class="flex justify-center mb-1.5">
                     <div :class="[
                       'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
                       tipoActividad === 'gabinete' ? 
-                        'bg-blue-500 text-white shadow-md shadow-blue-500/30' : 
+                        'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 
                         'bg-gray-100 text-gray-500 border border-gray-200'
                     ]">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -690,17 +693,17 @@
                   </div>
                   <h3 :class="[
                     'font-medium text-xs mb-0.5 transition-colors duration-300',
-                    tipoActividad === 'gabinete' ? 'text-blue-800' : 'text-gray-600'
+                    tipoActividad === 'gabinete' ? 'text-orange-800' : 'text-gray-600'
                   ]">Gabinete</h3>
                   <p :class="[
                     'text-xs leading-tight transition-colors duration-300',
-                    tipoActividad === 'gabinete' ? 'text-blue-600' : 'text-gray-400'
+                    tipoActividad === 'gabinete' ? 'text-orange-600' : 'text-gray-400'
                   ]">Trabajo de oficina</p>
                 </div>
                 
                 <!-- Indicador de selección pequeño -->
                 <div v-if="tipoActividad === 'gabinete'" class="absolute top-1.5 right-1.5">
-                  <div class="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
+                  <div class="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                     </svg>
@@ -869,8 +872,9 @@
                 {{ r.descripcion || 'Sin descripción' }}
               </p>
               <!-- Nuevo: mostrar tipo de actividad -->
-              <p v-if="r.tipo_actividad" class="text-xs text-blue-600 font-medium">
-                {{ r.tipo_actividad === 'campo' ? '🌾 Actividad de Campo' : '🏢 Actividad de Gabinete' }}
+              <p v-if="r.tipo_actividad" class="text-xs font-medium">
+                <span v-if="r.tipo_actividad === 'campo'" class="text-green-600">🌾 Actividad de Campo</span>
+                <span v-else class="text-orange-600">🏢 Actividad de Gabinete</span>
               </p>
               <p class="text-xs font-mono text-gray-600">
                 Lat: {{ r.latitud }}, Lon: {{ r.longitud }}
@@ -2937,7 +2941,7 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Estilos para títulos de entrada y salida con franja de fondo */
 .entrada-title {
-  color: #65AD00;
+  color: rgb(30, 144, 255);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   letter-spacing: -0.01em;
   font-weight: 700;
@@ -2946,19 +2950,19 @@ watch([entradaMarcada, salidaMarcada], () => {
   margin: -0.75rem -1.25rem 0.5rem -1.25rem;
   background: linear-gradient(
     135deg, 
-    rgba(101, 173, 0, 0.15) 0%,    /* Verde #65AD00 suave en bordes */
-    rgba(101, 173, 0, 0.10) 25%,   /* Verde #65AD00 muy suave */
-    rgba(101, 173, 0, 0.08) 50%,   /* Verde #65AD00 suave en el centro */
-    rgba(101, 173, 0, 0.10) 75%,   /* Verde #65AD00 muy suave */
-    rgba(101, 173, 0, 0.15) 100%   /* Verde #65AD00 suave en bordes */
+    rgba(30, 144, 255, 0.15) 0%,    /* Azul dodgerblue suave en bordes */
+    rgba(30, 144, 255, 0.10) 25%,   /* Azul dodgerblue muy suave */
+    rgba(30, 144, 255, 0.08) 50%,   /* Azul dodgerblue suave en el centro */
+    rgba(30, 144, 255, 0.10) 75%,   /* Azul dodgerblue muy suave */
+    rgba(30, 144, 255, 0.15) 100%   /* Azul dodgerblue suave en bordes */
   );
-  border-left: 4px solid rgba(101, 173, 0, 0.6);
+  border-left: 4px solid rgba(30, 144, 255, 0.6);
   border-radius: 0 8px 8px 0;
-  box-shadow: 0 2px 8px rgba(101, 173, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(30, 144, 255, 0.1);
 }
 
 .salida-title {
-  color: #991b1b;
+  color: rgb(220, 20, 60);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   letter-spacing: -0.01em;
   font-weight: 700;
@@ -2967,15 +2971,15 @@ watch([entradaMarcada, salidaMarcada], () => {
   margin: -0.75rem -1.25rem 0.5rem -1.25rem;
   background: linear-gradient(
     135deg, 
-    rgba(220, 38, 38, 0.15) 0%,    /* Rojo fuerte suave en bordes */
-    rgba(239, 68, 68, 0.10) 25%,   /* Rojo medio muy suave */
-    rgba(252, 165, 165, 0.08) 50%, /* Rojo suave en el centro */
-    rgba(239, 68, 68, 0.10) 75%,   /* Rojo medio muy suave */
-    rgba(220, 38, 38, 0.15) 100%   /* Rojo fuerte suave en bordes */
+    rgba(220, 20, 60, 0.15) 0%,    /* Crimson fuerte suave en bordes */
+    rgba(220, 20, 60, 0.10) 25%,   /* Crimson medio muy suave */
+    rgba(220, 20, 60, 0.08) 50%,   /* Crimson suave en el centro */
+    rgba(220, 20, 60, 0.10) 75%,   /* Crimson medio muy suave */
+    rgba(220, 20, 60, 0.15) 100%   /* Crimson fuerte suave en bordes */
   );
-  border-left: 4px solid rgba(220, 38, 38, 0.6);
+  border-left: 4px solid rgba(220, 20, 60, 0.6);
   border-radius: 0 8px 8px 0;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+  box-shadow: 0 2px 8px rgba(220, 20, 60, 0.1);
 }
 
 .modern-title {
@@ -3165,11 +3169,11 @@ watch([entradaMarcada, salidaMarcada], () => {
 /* Animación sutil para el botón de ubicación */
 @keyframes pulse-subtle {
   0%, 100% {
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
     transform: translateY(0);
   }
   50% {
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
     transform: translateY(-1px);
   }
 }
@@ -3252,15 +3256,15 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 .location-button-circular {
   background: linear-gradient(135deg, 
-    rgba(96, 165, 250, 0.9) 0%,      /* Azul cielo más suave */
-    rgba(59, 130, 246, 0.85) 40%,    /* Azul intermedio suave */
-    rgba(37, 99, 235, 0.9) 100%      /* Azul más profundo pero suave */
+    rgba(255, 215, 0, 0.9) 0%,      /* Gold más suave */
+    rgba(218, 165, 32, 0.85) 40%,   /* Goldenrod intermedio suave */
+    rgba(184, 134, 11, 0.9) 100%    /* Gold más profundo pero suave */
   );
   border: 2px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 
-    0 10px 35px 0 rgba(96, 165, 250, 0.35),
+    0 10px 35px 0 rgba(255, 215, 0, 0.35),
     0 0 0 1px rgba(255, 255, 255, 0.2),
     inset 0 2px 0 0 rgba(255, 255, 255, 0.3),
     inset 0 -2px 0 0 rgba(0, 0, 0, 0.1);
@@ -3275,14 +3279,14 @@ watch([entradaMarcada, salidaMarcada], () => {
 .location-button-circular:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.12);
   box-shadow: 
-    0 18px 55px 0 rgba(96, 165, 250, 0.5),
+    0 18px 55px 0 rgba(255, 215, 0, 0.5),
     0 0 0 2px rgba(255, 255, 255, 0.4),
     inset 0 3px 0 0 rgba(255, 255, 255, 0.4),
     inset 0 -2px 0 0 rgba(0, 0, 0, 0.1);
   background: linear-gradient(135deg, 
-    rgba(96, 165, 250, 1) 0%,
-    rgba(59, 130, 246, 0.95) 40%,
-    rgba(37, 99, 235, 1) 100%
+    rgba(255, 215, 0, 1) 0%,
+    rgba(218, 165, 32, 0.95) 40%,
+    rgba(184, 134, 11, 1) 100%
   );
   border-color: rgba(255, 255, 255, 0.5);
 }
@@ -3290,27 +3294,27 @@ watch([entradaMarcada, salidaMarcada], () => {
 .location-button-circular:active:not(:disabled) {
   transform: translateY(-1px) scale(1.06);
   box-shadow: 
-    0 6px 25px 0 rgba(96, 165, 250, 0.45),
+    0 6px 25px 0 rgba(255, 215, 0, 0.45),
     inset 0 2px 4px 0 rgba(0, 0, 0, 0.15);
 }
 
 /* Estado de éxito circular con efecto de vidrio premium */
 .location-button-success-circular {
   background: linear-gradient(135deg, 
-    rgba(110, 231, 183, 0.5) 0%,     /* Verde claro translúcido */
-    rgba(52, 211, 153, 0.6) 50%,    /* Verde esmeralda medio */
-    rgba(16, 185, 129, 0.8) 100%    /* Verde más oscuro */
+    rgba(173, 255, 47, 0.5) 0%,     /* Greenyellow translúcido */
+    rgba(154, 230, 42, 0.6) 50%,    /* Greenyellow medio */
+    rgba(124, 185, 34, 0.8) 100%    /* Greenyellow más oscuro */
   ) !important;
   backdrop-filter: blur(25px) !important;
   -webkit-backdrop-filter: blur(25px) !important;
-  border: 3px solid rgba(110, 231, 183, 0.8) !important;
+  border: 3px solid rgba(173, 255, 47, 0.8) !important;
   border-top: 3px solid rgba(255, 255, 255, 0.6) !important;
   border-left: 3px solid rgba(255, 255, 255, 0.6) !important;
   box-shadow: 
-    0 15px 50px 0 rgba(52, 211, 153, 0.4),
-    0 0 20px 3px rgba(110, 231, 183, 0.3),
+    0 15px 50px 0 rgba(173, 255, 47, 0.4),
+    0 0 20px 3px rgba(173, 255, 47, 0.3),
     inset 0 3px 0 0 rgba(255, 255, 255, 0.5),
-    inset 0 -2px 0 0 rgba(52, 211, 153, 0.3) !important;
+    inset 0 -2px 0 0 rgba(173, 255, 47, 0.3) !important;
   animation: glass-glow-circular 4s ease-in-out infinite;
   position: relative;
   overflow: hidden;
@@ -3320,51 +3324,51 @@ watch([entradaMarcada, salidaMarcada], () => {
 @keyframes glass-glow-circular {
   0% {
     background: linear-gradient(135deg, 
-      rgba(110, 231, 183, 0.5) 0%,
-      rgba(52, 211, 153, 0.6) 50%,
-      rgba(16, 185, 129, 0.8) 100%
+      rgba(173, 255, 47, 0.5) 0%,
+      rgba(154, 230, 42, 0.6) 50%,
+      rgba(124, 185, 34, 0.8) 100%
     );
     box-shadow: 
-      0 15px 50px 0 rgba(52, 211, 153, 0.4),
-      0 0 20px 3px rgba(110, 231, 183, 0.3),
+      0 15px 50px 0 rgba(173, 255, 47, 0.4),
+      0 0 20px 3px rgba(173, 255, 47, 0.3),
       inset 0 3px 0 0 rgba(255, 255, 255, 0.5);
   }
   50% {
     background: linear-gradient(135deg, 
-      rgba(110, 231, 183, 0.7) 0%,
-      rgba(52, 211, 153, 0.8) 50%,
-      rgba(16, 185, 129, 0.9) 100%
+      rgba(173, 255, 47, 0.7) 0%,
+      rgba(154, 230, 42, 0.8) 50%,
+      rgba(124, 185, 34, 0.9) 100%
     );
     box-shadow: 
-      0 18px 60px 0 rgba(52, 211, 153, 0.6),
-      0 0 30px 5px rgba(110, 231, 183, 0.4),
+      0 18px 60px 0 rgba(173, 255, 47, 0.6),
+      0 0 30px 5px rgba(173, 255, 47, 0.4),
       inset 0 3px 0 0 rgba(255, 255, 255, 0.6);
   }
   100% {
     background: linear-gradient(135deg, 
-      rgba(110, 231, 183, 0.5) 0%,
-      rgba(52, 211, 153, 0.6) 50%,
-      rgba(16, 185, 129, 0.8) 100%
+      rgba(173, 255, 47, 0.5) 0%,
+      rgba(154, 230, 42, 0.6) 50%,
+      rgba(124, 185, 34, 0.8) 100%
     );
     box-shadow: 
-      0 15px 50px 0 rgba(52, 211, 153, 0.4),
-      0 0 20px 3px rgba(110, 231, 183, 0.3),
+      0 15px 50px 0 rgba(173, 255, 47, 0.4),
+      0 0 20px 3px rgba(173, 255, 47, 0.3),
       inset 0 3px 0 0 rgba(255, 255, 255, 0.5);
   }
 }
 
 .location-button-success-circular:hover:not(:disabled) {
   background: linear-gradient(135deg, 
-    rgba(110, 231, 183, 0.8) 0%,
-    rgba(52, 211, 153, 0.9) 50%,
-    rgba(16, 185, 129, 1) 100%
+    rgba(173, 255, 47, 0.8) 0%,
+    rgba(154, 230, 42, 0.9) 50%,
+    rgba(124, 185, 34, 1) 100%
   ) !important;
-  border: 3px solid rgba(110, 231, 183, 1) !important;
+  border: 3px solid rgba(173, 255, 47, 1) !important;
   border-top: 3px solid rgba(255, 255, 255, 0.8) !important;
   border-left: 3px solid rgba(255, 255, 255, 0.8) !important;
   box-shadow: 
-    0 25px 70px 0 rgba(52, 211, 153, 0.7),
-    0 0 40px 8px rgba(110, 231, 183, 0.5),
+    0 25px 70px 0 rgba(173, 255, 47, 0.7),
+    0 0 40px 8px rgba(173, 255, 47, 0.5),
     inset 0 3px 0 0 rgba(255, 255, 255, 0.7) !important;
   transform: translateY(-5px) scale(1.18);
 }
@@ -3427,16 +3431,16 @@ watch([entradaMarcada, salidaMarcada], () => {
 .coordinates-display-circular {
   margin-top: 0.5rem;
   background: linear-gradient(135deg, 
-    rgba(110, 231, 183, 0.08) 0%,
-    rgba(52, 211, 153, 0.12) 100%
+    rgba(173, 255, 47, 0.08) 0%,
+    rgba(154, 230, 42, 0.12) 100%
   );
-  border: 1px solid rgba(110, 231, 183, 0.25);
+  border: 1px solid rgba(173, 255, 47, 0.25);
   border-radius: 12px;
   padding: 0.5rem;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 
-    0 3px 12px 0 rgba(52, 211, 153, 0.12),
+    0 3px 12px 0 rgba(173, 255, 47, 0.12),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
   animation: slide-down-circular 0.4s ease-out;
   max-width: 160px;
@@ -3457,13 +3461,13 @@ watch([entradaMarcada, salidaMarcada], () => {
   padding: 0.25rem;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 6px;
-  border: 1px solid rgba(110, 231, 183, 0.15);
+  border: 1px solid rgba(173, 255, 47, 0.15);
 }
 
 .coordinate-label-circular {
   font-size: 0.5rem;
   font-weight: 600;
-  color: rgba(52, 211, 153, 0.85);
+  color: rgba(173, 255, 47, 0.85);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 0.125rem;
@@ -3474,11 +3478,11 @@ watch([entradaMarcada, salidaMarcada], () => {
   font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 0.5rem;
   font-weight: 500;
-  color: rgba(16, 185, 129, 0.9);
+  color: rgba(124, 185, 34, 0.9);
   background: rgba(255, 255, 255, 0.7);
   padding: 0.125rem 0.25rem;
   border-radius: 4px;
-  border: 1px solid rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(173, 255, 47, 0.15);
   word-break: break-all;
   line-height: 1.1;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -3582,15 +3586,15 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 .location-button {
   background: linear-gradient(135deg, 
-    rgba(54, 231, 187, 0.9) 0%,    /* Color #36E7BB suave */
-    rgba(42, 210, 170, 1) 50%,     /* Turquesa medio */
-    rgba(30, 180, 150, 1) 100%     /* Turquesa oscuro en los bordes */
+    rgba(255, 215, 0, 0.9) 0%,    /* Gold suave */
+    rgba(218, 165, 32, 1) 50%,    /* Goldenrod medio */
+    rgba(184, 134, 11, 1) 100%    /* Gold oscuro en los bordes */
   );
-  border: 2px solid rgba(54, 231, 187, 0.8);
+  border: 2px solid rgba(255, 215, 0, 0.8);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   box-shadow: 
-    0 8px 32px 0 rgba(54, 231, 187, 0.4),
+    0 8px 32px 0 rgba(255, 215, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
     inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
@@ -3605,38 +3609,38 @@ watch([entradaMarcada, salidaMarcada], () => {
 .location-button:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.02);
   box-shadow: 
-    0 12px 40px 0 rgba(54, 231, 187, 0.5),
+    0 12px 40px 0 rgba(255, 215, 0, 0.5),
     0 0 0 2px rgba(255, 255, 255, 0.2),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
     inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
   background: linear-gradient(135deg, 
-    rgba(54, 231, 187, 1) 0%,
-    rgba(42, 210, 170, 1) 50%,
-    rgba(30, 180, 150, 1) 100%
+    rgba(255, 215, 0, 1) 0%,
+    rgba(218, 165, 32, 1) 50%,
+    rgba(184, 134, 11, 1) 100%
   );
-  border-color: rgba(54, 231, 187, 0.9);
+  border-color: rgba(255, 215, 0, 0.9);
 }
 
 .location-button:active:not(:disabled) {
   transform: translateY(-1px) scale(1.01);
   box-shadow: 
-    0 6px 20px 0 rgba(54, 231, 187, 0.4),
+    0 6px 20px 0 rgba(255, 215, 0, 0.4),
     inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* Estado de éxito con efecto de vidrio (glassmorphism) y color #3FDE99 */
+/* Estado de éxito con efecto de vidrio (glassmorphism) y color greenyellow */
 .location-button-success {
-  background: rgba(63, 222, 153, 0.4) !important; /* Color base #3FDE99 con transparencia */
+  background: rgba(173, 255, 47, 0.4) !important; /* Color base greenyellow con transparencia */
   backdrop-filter: blur(15px) !important;
   -webkit-backdrop-filter: blur(15px) !important;
-  border: 1px solid rgba(63, 222, 153, 0.7) !important;
+  border: 1px solid rgba(173, 255, 47, 0.7) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
   border-left: 1px solid rgba(255, 255, 255, 0.5) !important;
   box-shadow: 
-    0 8px 32px 0 rgba(63, 222, 153, 0.3),
+    0 8px 32px 0 rgba(173, 255, 47, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.2),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 0 rgba(63, 222, 153, 0.2);
+    inset 0 -1px 0 0 rgba(173, 255, 47, 0.2);
   color: rgba(0, 40, 20, 0.9) !important;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5) !important;
   animation: glass-shine 3s ease-in-out infinite;
@@ -3647,24 +3651,24 @@ watch([entradaMarcada, salidaMarcada], () => {
 /* Efecto de brillo para botones con efecto de vidrio */
 @keyframes glass-shine {
   0% {
-    background: rgba(63, 222, 153, 0.4);
+    background: rgba(173, 255, 47, 0.4);
   }
   50% {
-    background: rgba(63, 222, 153, 0.6);
+    background: rgba(173, 255, 47, 0.6);
   }
   100% {
-    background: rgba(63, 222, 153, 0.4);
+    background: rgba(173, 255, 47, 0.4);
   }
 }
 
 .location-button-success:hover:not(:disabled) {
-  background: rgba(63, 222, 153, 0.6) !important;
-  border: 1px solid rgba(63, 222, 153, 0.9) !important;
+  background: rgba(173, 255, 47, 0.6) !important;
+  border: 1px solid rgba(173, 255, 47, 0.9) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.7) !important;
   border-left: 1px solid rgba(255, 255, 255, 0.7) !important;
   box-shadow: 
-    0 12px 40px 0 rgba(63, 222, 153, 0.5),
-    0 0 10px 2px rgba(63, 222, 153, 0.3),
+    0 12px 40px 0 rgba(173, 255, 47, 0.5),
+    0 0 10px 2px rgba(173, 255, 47, 0.3),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
   transform: translateY(-3px) scale(1.03);
 }
@@ -3724,16 +3728,16 @@ watch([entradaMarcada, salidaMarcada], () => {
 .coordinates-display {
   margin-top: 0.5rem;
   background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.08) 0%,
-    rgba(37, 99, 235, 0.12) 100%
+    rgba(255, 215, 0, 0.08) 0%,
+    rgba(218, 165, 32, 0.12) 100%
   );
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(255, 215, 0, 0.2);
   border-radius: 8px;
   padding: 0.5rem;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 
-    0 2px 8px 0 rgba(59, 130, 246, 0.1),
+    0 2px 8px 0 rgba(255, 215, 0, 0.1),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
   animation: slide-down 0.3s ease-out;
 }
@@ -3754,7 +3758,7 @@ watch([entradaMarcada, salidaMarcada], () => {
 .coordinate-label {
   font-size: 0.5rem;
   font-weight: 600;
-  color: rgba(59, 130, 246, 0.8);
+  color: rgba(255, 215, 0, 0.8);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.125rem;
@@ -3765,11 +3769,11 @@ watch([entradaMarcada, salidaMarcada], () => {
   font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 0.6rem;
   font-weight: 600;
-  color: rgba(37, 99, 235, 0.9);
+  color: rgba(218, 165, 32, 0.9);
   background: rgba(255, 255, 255, 0.6);
   padding: 0.125rem 0.25rem;
   border-radius: 4px;
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.15);
   word-break: break-all;
   line-height: 1.1;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);

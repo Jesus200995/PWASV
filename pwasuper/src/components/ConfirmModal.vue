@@ -56,8 +56,9 @@
           </div>
           
           <div class="error-icon" v-else-if="type === 'error'">
-            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" 
+                 style="background-color: rgba(220, 20, 60, 0.1);">
+              <svg class="w-6 h-6" style="color: rgb(220, 20, 60);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
               </svg>
             </div>
@@ -357,9 +358,22 @@ defineEmits(['close', 'confirm']);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
+/* Estilo específico para tipo error */
+.modal-container:has(.error-icon) .btn-primary {
+  background: linear-gradient(135deg, rgb(220, 20, 60) 0%, rgb(180, 15, 50) 100%);
+  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+}
+
 .btn-primary:hover {
   background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Hover específico para tipo error */
+.modal-container:has(.error-icon) .btn-primary:hover {
+  background: linear-gradient(135deg, rgb(200, 15, 55) 0%, rgb(160, 10, 45) 100%);
+  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
   transform: translateY(-1px);
 }
 

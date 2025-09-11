@@ -951,22 +951,22 @@ const determinarTipoActividad = (actividad) => {
   
   // CASO 1: Si la actividad es de tipo entrada
   if (actividad.tipo_actividad === 'entrada') {
-    // Si la entrada es de hoy (CDMX): Verde lima
+    // Si la entrada es de hoy (CDMX): Mediumblue
     if (esActividadDeHoy) {
       return {
         tipo: 'entrada',
         clase: 'entrada',
         descripcion: 'Entrada de Hoy',
-        color: '#4ADE80' // Verde suave
+        color: 'rgb(0, 0, 205)' // Mediumblue
       };
     } 
-    // Si la entrada NO es de hoy (CDMX): Naranja (antigua)
+    // Si la entrada NO es de hoy (CDMX): Silver (antigua)
     else {
       return {
         tipo: 'registro-antiguo',
         clase: 'antiguo',
         descripcion: 'Entrada Anterior',
-        color: '#FF9800' // Naranja
+        color: 'rgb(192, 192, 192)' // Silver
       };
     }
   }
@@ -982,79 +982,79 @@ const determinarTipoActividad = (actividad) => {
         color: '#DC2626' // Rojo
       };
     }
-    // Si la salida NO es de hoy (CDMX): Naranja (antigua)
+    // Si la salida NO es de hoy (CDMX): Silver (antigua)
     else {
       return {
         tipo: 'registro-antiguo',
         clase: 'antiguo',
         descripcion: 'Salida Anterior',
-        color: '#FF9800' // Naranja
+        color: 'rgb(192, 192, 192)' // Silver
       };
     }
   }
   
   // CASO 3: Actividades de Campo
   else if (actividad.tipo_actividad === 'campo') {
-    // Si la actividad de campo es de hoy (CDMX): Verde fuerte
+    // Si la actividad de campo es de hoy (CDMX): Limegreen
     if (esActividadDeHoy) {
       return {
         tipo: 'campo-hoy',
         clase: 'campo-hoy',
         descripcion: 'Actividad de Campo Hoy',
-        color: '#15803D' // Verde fuerte
+        color: 'rgb(50, 205, 50)' // Limegreen
       };
     }
-    // Si la actividad de campo NO es de hoy (CDMX): Naranja (antigua)
+    // Si la actividad de campo NO es de hoy (CDMX): Silver (antigua)
     else {
       return {
         tipo: 'campo-antiguo',
         clase: 'antiguo',
         descripcion: 'Actividad de Campo Anterior',
-        color: '#FF9800' // Naranja
+        color: 'rgb(192, 192, 192)' // Silver
       };
     }
   }
   
   // CASO 4: Actividades de Gabinete
   else if (actividad.tipo_actividad === 'gabinete') {
-    // Si la actividad de gabinete es de hoy (CDMX): Azul
+    // Si la actividad de gabinete es de hoy (CDMX): Darkorange
     if (esActividadDeHoy) {
       return {
         tipo: 'gabinete-hoy',
         clase: 'gabinete-hoy',
         descripcion: 'Actividad de Gabinete Hoy',
-        color: '#00BFFF' // Deepskyblue
+        color: 'rgb(255, 140, 0)' // Darkorange
       };
     }
-    // Si la actividad de gabinete NO es de hoy (CDMX): Naranja (antigua)
+    // Si la actividad de gabinete NO es de hoy (CDMX): Silver (antigua)
     else {
       return {
         tipo: 'gabinete-antiguo',
         clase: 'antiguo',
         descripcion: 'Actividad de Gabinete Anterior',
-        color: '#FF9800' // Naranja
+        color: 'rgb(192, 192, 192)' // Silver
       };
     }
   }
   
   // CASO 5: Actividades sin tipo específico (por compatibilidad)
   else {
-    // Si el registro es de hoy (CDMX): Verde fuerte (asumir campo por defecto)
+    // Si el registro es de hoy (CDMX): Limegreen (asumir campo por defecto)
     if (esActividadDeHoy) {
       return {
         tipo: 'campo-hoy',
         clase: 'campo-hoy',
         descripcion: 'Actividad de Campo Hoy',
-        color: '#15803D' // Verde fuerte (campo por defecto)
+        color: 'rgb(50, 205, 50)' // Limegreen (campo por defecto)
       };
     }
-    // Si el registro NO es de hoy (CDMX): Naranja (antiguo)
+    // Si el registro NO es de hoy (CDMX): Silver (antiguo)
     else {
       return {
         tipo: 'campo-antiguo',
         clase: 'antiguo',
         descripcion: 'Actividad Anterior',
-        color: '#FF9800' // Naranja
+        color: 'rgb(192, 192, 192)' // Silver
       };
     }
   }
@@ -1194,15 +1194,15 @@ const inicializarMapa = (datos) => {
           'circle-color': [
             'match',
             ['get', 'tipo_actividad'],
-            'entrada', 'rgb(50, 205, 50)', // Limegreen para entradas
+            'entrada', 'rgb(0, 0, 205)', // Mediumblue para entradas
             'salida', 'rgb(220, 20, 60)', // Crimson para salidas
-            'campo-hoy', 'rgb(184, 134, 11)', // Darkgoldenrod para campo de hoy
-            'gabinete-hoy', 'rgb(30, 144, 255)', // Dodgerblue para gabinete de hoy
+            'campo-hoy', 'rgb(50, 205, 50)', // Limegreen para campo de hoy
+            'gabinete-hoy', 'rgb(255, 140, 0)', // Darkorange para gabinete de hoy
             'actividades-generales', 'rgb(148, 0, 211)', // Darkviolet para actividades generales
-            'campo-antiguo', 'rgb(128, 128, 128)', // Gris para campo antiguo
-            'gabinete-antiguo', 'rgb(128, 128, 128)', // Gris para gabinete antiguo
-            'registro-hoy', 'rgb(184, 134, 11)', // Darkgoldenrod para compatibilidad (campo por defecto)
-            'registro-antiguo', 'rgb(128, 128, 128)', // Gris para registros antiguos
+            'campo-antiguo', 'rgb(192, 192, 192)', // Silver para campo antiguo
+            'gabinete-antiguo', 'rgb(192, 192, 192)', // Silver para gabinete antiguo
+            'registro-hoy', 'rgb(34, 139, 34)', // Verde para compatibilidad (campo por defecto)
+            'registro-antiguo', 'rgb(192, 192, 192)', // Silver para registros antiguos
             '#A9A9A9' // Gris por defecto (no debería llegar aquí)
           ],
           // Tamaño un poco más grande pero manteniendo proporción según nivel de zoom
@@ -2772,7 +2772,7 @@ watch(filtroTipo, () => {
 }
 
 .stat-value.entrada {
-  color: #2ecc71;
+  color: rgb(0, 0, 205); /* Mediumblue para entradas */
 }
 
 .stat-value.salida {
@@ -2780,11 +2780,11 @@ watch(filtroTipo, () => {
 }
 
 .stat-value.campo {
-  color: rgb(184, 134, 11); /* Darkgoldenrod para campo */
+  color: rgb(50, 205, 50); /* Limegreen para campo */
 }
 
 .stat-value.gabinete {
-  color: rgb(30, 144, 255); /* Dodgerblue para gabinete */
+  color: rgb(255, 140, 0); /* Darkorange para gabinete */
 }
 
 .stat-value.actividades-total {
@@ -2845,7 +2845,7 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.entrada {
-  background-color: rgb(50, 205, 50); /* Limegreen para entrada */
+  background-color: rgb(0, 0, 205); /* Mediumblue para entrada */
 }
 
 .color-marker.salida {
@@ -2853,11 +2853,11 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.campo-hoy {
-  background-color: rgb(184, 134, 11); /* Darkgoldenrod para campo */
+  background-color: rgb(50, 205, 50); /* Limegreen para campo */
 }
 
 .color-marker.gabinete-hoy {
-  background-color: rgb(30, 144, 255); /* Dodgerblue para gabinete */
+  background-color: rgb(255, 140, 0); /* Darkorange para gabinete */
 }
 
 .color-marker.actividades-generales {
@@ -2869,7 +2869,7 @@ watch(filtroTipo, () => {
 }
 
 .color-marker.registro-antiguo {
-  background-color: rgb(128, 128, 128);
+  background-color: rgb(192, 192, 192); /* Silver para registros antiguos */
 }
 
 /* Subtítulo en la leyenda */
@@ -3030,8 +3030,8 @@ watch(filtroTipo, () => {
 
 /* Colores dinámicos según tipo de registro */
 .custom-popup.popup-entrada {
-  background-color: #f6fff6;
-  border: 1px solid rgba(50, 205, 50, 0.3);
+  background-color: #f0f0ff;
+  border: 1px solid rgba(0, 0, 205, 0.3);
 }
 
 .custom-popup.popup-salida {
@@ -3040,13 +3040,13 @@ watch(filtroTipo, () => {
 }
 
 .custom-popup.popup-campo-hoy {
-  background-color: #fefdf8;
-  border: 1px solid rgba(184, 134, 11, 0.3);
+  background-color: #f0fff0;
+  border: 1px solid rgba(50, 205, 50, 0.3);
 }
 
 .custom-popup.popup-gabinete-hoy {
-  background-color: #f0f8ff;
-  border: 1px solid rgba(30, 144, 255, 0.3);
+  background-color: #fff8dc;
+  border: 1px solid rgba(255, 140, 0, 0.3);
 }
 
 .custom-popup.popup-registro-hoy {
@@ -3058,8 +3058,8 @@ watch(filtroTipo, () => {
 .custom-popup.popup-antiguo,
 .custom-popup.popup-campo-antiguo,
 .custom-popup.popup-gabinete-antiguo {
-  background-color: #f8f9fa;
-  border: 1px solid rgba(128, 128, 128, 0.3);
+  background-color: #f8f8f8;
+  border: 1px solid rgba(192, 192, 192, 0.5);
 }
 
 /* Estilos para la flecha indicadora */
@@ -3086,9 +3086,9 @@ watch(filtroTipo, () => {
 
 /* Colores de la flecha según el tipo */
 .popup-entrada .popup-arrow::after {
-  background-color: #f6fff6;
-  border-right: 1px solid rgba(50, 205, 50, 0.3);
-  border-bottom: 1px solid rgba(50, 205, 50, 0.3);
+  background-color: #f0f0ff;
+  border-right: 1px solid rgba(0, 0, 205, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 205, 0.3);
 }
 
 .popup-salida .popup-arrow::after {
@@ -3098,15 +3098,15 @@ watch(filtroTipo, () => {
 }
 
 .popup-campo-hoy .popup-arrow::after {
-  background-color: #fefdf8;
-  border-right: 1px solid rgba(184, 134, 11, 0.3);
-  border-bottom: 1px solid rgba(184, 134, 11, 0.3);
+  background-color: #f0fff0;
+  border-right: 1px solid rgba(50, 205, 50, 0.3);
+  border-bottom: 1px solid rgba(50, 205, 50, 0.3);
 }
 
 .popup-gabinete-hoy .popup-arrow::after {
-  background-color: #f0f8ff;
-  border-right: 1px solid rgba(30, 144, 255, 0.3);
-  border-bottom: 1px solid rgba(30, 144, 255, 0.3);
+  background-color: #fff8dc;
+  border-right: 1px solid rgba(255, 140, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 140, 0, 0.3);
 }
 
 .popup-registro-hoy .popup-arrow::after {
@@ -3119,9 +3119,9 @@ watch(filtroTipo, () => {
 .popup-antiguo .popup-arrow::after,
 .popup-campo-antiguo .popup-arrow::after,
 .popup-gabinete-antiguo .popup-arrow::after {
-  background-color: #f8f9fa;
-  border-right: 1px solid rgba(128, 128, 128, 0.3);
-  border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+  background-color: #f8f8f8;
+  border-right: 1px solid rgba(192, 192, 192, 0.5);
+  border-bottom: 1px solid rgba(192, 192, 192, 0.5);
 }
 
 .popup-header {
@@ -3170,7 +3170,7 @@ watch(filtroTipo, () => {
 
 /* Estilos específicos para el botón X en cada tipo de popup */
 .popup-entrada .popup-close-btn:hover svg {
-  color: rgb(50, 205, 50);
+  color: rgb(0, 0, 205); /* Mediumblue */
 }
 
 .popup-salida .popup-close-btn:hover svg {
@@ -3178,11 +3178,11 @@ watch(filtroTipo, () => {
 }
 
 .popup-campo-hoy .popup-close-btn:hover svg {
-  color: rgb(184, 134, 11); /* Darkgoldenrod para campo */
+  color: rgb(50, 205, 50); /* Limegreen para campo */
 }
 
 .popup-gabinete-hoy .popup-close-btn:hover svg {
-  color: rgb(30, 144, 255); /* Dodgerblue para gabinete */
+  color: rgb(255, 140, 0); /* Darkorange para gabinete */
 }
 
 .popup-registro-hoy .popup-close-btn:hover svg {
@@ -3193,7 +3193,7 @@ watch(filtroTipo, () => {
 .popup-antiguo .popup-close-btn:hover svg,
 .popup-campo-antiguo .popup-close-btn:hover svg,
 .popup-gabinete-antiguo .popup-close-btn:hover svg {
-  color: rgb(128, 128, 128);
+  color: rgb(192, 192, 192); /* Silver */
 }
 
 .popup-icon {
@@ -3211,7 +3211,7 @@ watch(filtroTipo, () => {
 .popup-entrada .popup-icon,
 .popup-entrada .popup-icon-small,
 .popup-entrada strong {
-  color: rgb(50, 205, 50);
+  color: rgb(0, 0, 205); /* Mediumblue */
 }
 
 .popup-salida .popup-icon,
@@ -3223,13 +3223,13 @@ watch(filtroTipo, () => {
 .popup-campo-hoy .popup-icon,
 .popup-campo-hoy .popup-icon-small,
 .popup-campo-hoy strong {
-  color: rgb(184, 134, 11); /* Darkgoldenrod para campo */
+  color: rgb(50, 205, 50); /* Limegreen para campo */
 }
 
 .popup-gabinete-hoy .popup-icon,
 .popup-gabinete-hoy .popup-icon-small,
 .popup-gabinete-hoy strong {
-  color: rgb(30, 144, 255); /* Dodgerblue para gabinete */
+  color: rgb(255, 140, 0); /* Darkorange para gabinete */
 }
 
 .popup-registro-hoy .popup-icon,
@@ -3250,7 +3250,7 @@ watch(filtroTipo, () => {
 .popup-antiguo strong,
 .popup-campo-antiguo strong,
 .popup-gabinete-antiguo strong {
-  color: rgb(128, 128, 128);
+  color: rgb(192, 192, 192); /* Silver */
 }
 
 .popup-header strong {
@@ -3726,9 +3726,9 @@ watch(filtroTipo, () => {
 }
 
 .tipo-actividad-value.entrada {
-  background-color: #f6fff6;
-  color: rgb(50, 205, 50);
-  border: 1px solid rgba(50, 205, 50, 0.3);
+  background-color: #f0f0ff;
+  color: rgb(0, 0, 205); /* Mediumblue */
+  border: 1px solid rgba(0, 0, 205, 0.3);
 }
 
 .tipo-actividad-value.salida {
@@ -3738,15 +3738,15 @@ watch(filtroTipo, () => {
 }
 
 .tipo-actividad-value.campo {
-  background-color: #fefdf8;
-  color: rgb(184, 134, 11);
-  border: 1px solid rgba(184, 134, 11, 0.3);
+  background-color: #f0fff0;
+  color: rgb(50, 205, 50); /* Limegreen */
+  border: 1px solid rgba(50, 205, 50, 0.3);
 }
 
 .tipo-actividad-value.gabinete {
-  background-color: #f0f8ff;
-  color: rgb(30, 144, 255);
-  border: 1px solid rgba(30, 144, 255, 0.3);
+  background-color: #fff8dc;
+  color: rgb(255, 140, 0); /* Darkorange */
+  border: 1px solid rgba(255, 140, 0, 0.3);
 }
 
 .tipo-actividad-value.oficina {
@@ -3756,9 +3756,9 @@ watch(filtroTipo, () => {
 }
 
 .tipo-actividad-value.registro {
-  background-color: #f8f9fa;
-  color: rgb(128, 128, 128);
-  border: 1px solid rgba(128, 128, 128, 0.3);
+  background-color: #f8f8f8;
+  color: rgb(192, 192, 192); /* Silver */
+  border: 1px solid rgba(192, 192, 192, 0.5);
 }
 
 /* Modal para imagen completa */

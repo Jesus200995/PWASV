@@ -3311,39 +3311,37 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 .location-button-circular {
   background: linear-gradient(135deg, 
-    rgba(255, 215, 0, 0.9) 0%,      /* Gold más suave */
-    rgba(218, 165, 32, 0.85) 40%,   /* Goldenrod intermedio suave */
-    rgba(184, 134, 11, 0.9) 100%    /* Gold más profundo pero suave */
+    rgba(255, 200, 0, 1) 0%,         /* Gold más intenso */
+    rgba(238, 180, 34, 1) 40%,       /* Goldenrod más saturado */
+    rgba(204, 149, 11, 1) 100%       /* Gold profundo más intenso */
   );
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 
-    0 10px 35px 0 rgba(255, 215, 0, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 2px 0 0 rgba(255, 255, 255, 0.3),
-    inset 0 -2px 0 0 rgba(0, 0, 0, 0.1);
+    0 8px 25px 0 rgba(0, 0, 0, 0.2),
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 0 0 rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
   font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.01em;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .location-button-circular:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.12);
   box-shadow: 
-    0 18px 55px 0 rgba(255, 215, 0, 0.5),
-    0 0 0 2px rgba(255, 255, 255, 0.4),
-    inset 0 3px 0 0 rgba(255, 255, 255, 0.4),
-    inset 0 -2px 0 0 rgba(0, 0, 0, 0.1);
+    0 12px 35px 0 rgba(0, 0, 0, 0.3),
+    inset 0 3px 0 0 rgba(255, 255, 255, 0.7),
+    inset 0 -2px 0 0 rgba(0, 0, 0, 0.2);
   background: linear-gradient(135deg, 
-    rgba(255, 215, 0, 1) 0%,
-    rgba(218, 165, 32, 0.95) 40%,
-    rgba(184, 134, 11, 1) 100%
+    rgba(255, 180, 0, 1) 0%,
+    rgba(255, 165, 0, 1) 40%,
+    rgba(224, 140, 0, 1) 100%
   );
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.8);
 }
 
 .location-button-circular:active:not(:disabled) {
@@ -3356,20 +3354,20 @@ watch([entradaMarcada, salidaMarcada], () => {
 /* Estado de éxito circular con efecto de vidrio premium */
 .location-button-success-circular {
   background: linear-gradient(135deg, 
-    rgba(173, 255, 47, 0.5) 0%,     /* Greenyellow translúcido */
-    rgba(154, 230, 42, 0.6) 50%,    /* Greenyellow medio */
-    rgba(124, 185, 34, 0.8) 100%    /* Greenyellow más oscuro */
+    rgba(154, 255, 0, 1) 0%,        /* Verde más brillante */
+    rgba(124, 230, 0, 1) 50%,       /* Verde medio más intenso */
+    rgba(100, 200, 0, 1) 100%       /* Verde oscuro más saturado */
   ) !important;
   backdrop-filter: blur(25px) !important;
   -webkit-backdrop-filter: blur(25px) !important;
-  border: 3px solid rgba(173, 255, 47, 0.8) !important;
-  border-top: 3px solid rgba(255, 255, 255, 0.6) !important;
-  border-left: 3px solid rgba(255, 255, 255, 0.6) !important;
+  border: 4px solid rgba(154, 255, 0, 1) !important;
+  border-top: 4px solid rgba(255, 255, 255, 0.8) !important;
+  border-left: 4px solid rgba(255, 255, 255, 0.8) !important;
   box-shadow: 
-    0 15px 50px 0 rgba(173, 255, 47, 0.4),
-    0 0 20px 3px rgba(173, 255, 47, 0.3),
-    inset 0 3px 0 0 rgba(255, 255, 255, 0.5),
-    inset 0 -2px 0 0 rgba(173, 255, 47, 0.3) !important;
+    0 10px 30px 0 rgba(0, 0, 0, 0.25),
+    0 0 8px 1px rgba(154, 255, 0, 0.3),
+    inset 0 3px 0 0 rgba(255, 255, 255, 0.7),
+    inset 0 -2px 0 0 rgba(0, 0, 0, 0.2) !important;
   animation: glass-glow-circular 4s ease-in-out infinite;
   position: relative;
   overflow: hidden;
@@ -3379,44 +3377,44 @@ watch([entradaMarcada, salidaMarcada], () => {
 @keyframes glass-glow-circular {
   0% {
     background: linear-gradient(135deg, 
-      rgba(173, 255, 47, 0.5) 0%,
-      rgba(154, 230, 42, 0.6) 50%,
-      rgba(124, 185, 34, 0.8) 100%
+      rgba(154, 255, 0, 1) 0%,
+      rgba(124, 230, 0, 1) 50%,
+      rgba(100, 200, 0, 1) 100%
     );
     box-shadow: 
-      0 15px 50px 0 rgba(173, 255, 47, 0.4),
-      0 0 20px 3px rgba(173, 255, 47, 0.3),
-      inset 0 3px 0 0 rgba(255, 255, 255, 0.5);
+      0 10px 30px 0 rgba(0, 0, 0, 0.25),
+      0 0 8px 1px rgba(154, 255, 0, 0.3),
+      inset 0 3px 0 0 rgba(255, 255, 255, 0.7);
   }
   50% {
     background: linear-gradient(135deg, 
-      rgba(173, 255, 47, 0.7) 0%,
-      rgba(154, 230, 42, 0.8) 50%,
-      rgba(124, 185, 34, 0.9) 100%
+      rgba(127, 255, 0, 1) 0%,
+      rgba(105, 255, 0, 1) 50%,
+      rgba(85, 220, 0, 1) 100%
     );
     box-shadow: 
-      0 18px 60px 0 rgba(173, 255, 47, 0.6),
-      0 0 30px 5px rgba(173, 255, 47, 0.4),
-      inset 0 3px 0 0 rgba(255, 255, 255, 0.6);
+      0 12px 35px 0 rgba(0, 0, 0, 0.3),
+      0 0 12px 2px rgba(127, 255, 0, 0.4),
+      inset 0 3px 0 0 rgba(255, 255, 255, 0.8);
   }
   100% {
     background: linear-gradient(135deg, 
-      rgba(173, 255, 47, 0.5) 0%,
-      rgba(154, 230, 42, 0.6) 50%,
-      rgba(124, 185, 34, 0.8) 100%
+      rgba(154, 255, 0, 1) 0%,
+      rgba(124, 230, 0, 1) 50%,
+      rgba(100, 200, 0, 1) 100%
     );
     box-shadow: 
-      0 15px 50px 0 rgba(173, 255, 47, 0.4),
-      0 0 20px 3px rgba(173, 255, 47, 0.3),
-      inset 0 3px 0 0 rgba(255, 255, 255, 0.5);
+      0 10px 30px 0 rgba(0, 0, 0, 0.25),
+      0 0 8px 1px rgba(154, 255, 0, 0.3),
+      inset 0 3px 0 0 rgba(255, 255, 255, 0.7);
   }
 }
 
 .location-button-success-circular:hover:not(:disabled) {
   background: linear-gradient(135deg, 
-    rgba(173, 255, 47, 0.8) 0%,
-    rgba(154, 230, 42, 0.9) 50%,
-    rgba(124, 185, 34, 1) 100%
+    rgba(127, 255, 0, 1) 0%,
+    rgba(105, 255, 0, 1) 50%,
+    rgba(85, 220, 0, 1) 100%
   ) !important;
   border: 3px solid rgba(173, 255, 47, 1) !important;
   border-top: 3px solid rgba(255, 255, 255, 0.8) !important;
@@ -3641,39 +3639,37 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 .location-button {
   background: linear-gradient(135deg, 
-    rgba(255, 215, 0, 0.9) 0%,    /* Gold suave */
-    rgba(218, 165, 32, 1) 50%,    /* Goldenrod medio */
-    rgba(184, 134, 11, 1) 100%    /* Gold oscuro en los bordes */
+    rgba(255, 200, 0, 1) 0%,      /* Gold más intenso */
+    rgba(238, 180, 34, 1) 50%,    /* Goldenrod más fuerte */
+    rgba(204, 149, 11, 1) 100%    /* Gold oscuro más saturado */
   );
-  border: 2px solid rgba(255, 215, 0, 0.8);
+  border: 3px solid rgba(255, 215, 0, 1);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   box-shadow: 
-    0 8px 32px 0 rgba(255, 215, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+    0 6px 20px 0 rgba(0, 0, 0, 0.2),
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 0 0 rgba(0, 0, 0, 0.15);
   position: relative;
   overflow: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   font-weight: 600;
   letter-spacing: 0.025em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
 }
 
 .location-button:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.02);
   box-shadow: 
-    0 12px 40px 0 rgba(255, 215, 0, 0.5),
-    0 0 0 2px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+    0 10px 25px 0 rgba(0, 0, 0, 0.3),
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 0 0 rgba(0, 0, 0, 0.15);
   background: linear-gradient(135deg, 
-    rgba(255, 215, 0, 1) 0%,
-    rgba(218, 165, 32, 1) 50%,
-    rgba(184, 134, 11, 1) 100%
+    rgba(255, 180, 0, 1) 0%,
+    rgba(255, 165, 0, 1) 50%,
+    rgba(224, 140, 0, 1) 100%
   );
-  border-color: rgba(255, 215, 0, 0.9);
+  border-color: rgba(255, 215, 0, 1);
 }
 
 .location-button:active:not(:disabled) {
@@ -3685,19 +3681,19 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Estado de éxito con efecto de vidrio (glassmorphism) y color greenyellow */
 .location-button-success {
-  background: rgba(173, 255, 47, 0.4) !important; /* Color base greenyellow con transparencia */
+  background: rgba(154, 255, 0, 0.8) !important; /* Verde más intenso */
   backdrop-filter: blur(15px) !important;
   -webkit-backdrop-filter: blur(15px) !important;
-  border: 1px solid rgba(173, 255, 47, 0.7) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border: 3px solid rgba(154, 255, 0, 1) !important;
+  border-top: 3px solid rgba(255, 255, 255, 0.7) !important;
+  border-left: 3px solid rgba(255, 255, 255, 0.7) !important;
   box-shadow: 
-    0 8px 32px 0 rgba(173, 255, 47, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 0 rgba(173, 255, 47, 0.2);
+    0 8px 25px 0 rgba(0, 0, 0, 0.25),
+    0 0 6px 1px rgba(154, 255, 0, 0.25),
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 0 0 rgba(0, 0, 0, 0.15);
   color: rgba(0, 40, 20, 0.9) !important;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+  text-shadow: 0 2px 2px rgba(255, 255, 255, 0.7) !important;
   animation: glass-shine 3s ease-in-out infinite;
   position: relative;
   overflow: hidden;
@@ -3706,25 +3702,33 @@ watch([entradaMarcada, salidaMarcada], () => {
 /* Efecto de brillo para botones con efecto de vidrio */
 @keyframes glass-shine {
   0% {
-    background: rgba(173, 255, 47, 0.4);
+    background: rgba(154, 255, 0, 0.8);
+    box-shadow: 
+      0 8px 25px 0 rgba(0, 0, 0, 0.25),
+      0 0 6px 1px rgba(154, 255, 0, 0.25);
   }
   50% {
-    background: rgba(173, 255, 47, 0.6);
+    background: rgba(127, 255, 0, 1);
+    box-shadow: 
+      0 10px 30px 0 rgba(0, 0, 0, 0.3),
+      0 0 10px 2px rgba(127, 255, 0, 0.35);
   }
   100% {
-    background: rgba(173, 255, 47, 0.4);
+    background: rgba(154, 255, 0, 0.8);
+    box-shadow: 
+      0 8px 25px 0 rgba(0, 0, 0, 0.25),
+      0 0 6px 1px rgba(154, 255, 0, 0.25);
   }
 }
 
 .location-button-success:hover:not(:disabled) {
-  background: rgba(173, 255, 47, 0.6) !important;
-  border: 1px solid rgba(173, 255, 47, 0.9) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.7) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.7) !important;
+  background: rgba(127, 255, 0, 1) !important;
+  border: 3px solid rgba(127, 255, 0, 1) !important;
+  border-top: 3px solid rgba(255, 255, 255, 0.8) !important;
+  border-left: 3px solid rgba(255, 255, 255, 0.8) !important;
   box-shadow: 
-    0 12px 40px 0 rgba(173, 255, 47, 0.5),
-    0 0 10px 2px rgba(173, 255, 47, 0.3),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+    0 10px 30px 0 rgba(0, 0, 0, 0.3),
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.7);
   transform: translateY(-3px) scale(1.03);
 }
 

@@ -3341,112 +3341,34 @@ watch([entradaMarcada, salidaMarcada], () => {
     inset 0 2px 4px 0 rgba(0, 0, 0, 0.15);
 }
 
-/* Estado de éxito circular con efecto de vidrio premium */
+/* Estado de éxito circular - versión simple sin efectos excesivos */
 .location-button-success-circular {
   background: linear-gradient(135deg, 
-    rgba(154, 255, 0, 1) 0%,        /* Verde más brillante */
-    rgba(124, 230, 0, 1) 50%,       /* Verde medio más intenso */
-    rgba(100, 200, 0, 1) 100%       /* Verde oscuro más saturado */
+    rgba(154, 255, 0, 0.9) 0%,
+    rgba(124, 230, 0, 0.9) 50%,
+    rgba(100, 200, 0, 0.9) 100%
   ) !important;
-  backdrop-filter: blur(25px) !important;
-  -webkit-backdrop-filter: blur(25px) !important;
-  border: 4px solid rgba(154, 255, 0, 1) !important;
-  border-top: 4px solid rgba(255, 255, 255, 0.8) !important;
-  border-left: 4px solid rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(154, 255, 0, 0.8) !important;
   box-shadow: 
-    0 10px 30px 0 rgba(0, 0, 0, 0.25),
-    0 0 8px 1px rgba(154, 255, 0, 0.3),
-    inset 0 3px 0 0 rgba(255, 255, 255, 0.7),
-    inset 0 -2px 0 0 rgba(0, 0, 0, 0.2) !important;
-  animation: glass-glow-circular 4s ease-in-out infinite;
+    0 4px 12px 0 rgba(0, 0, 0, 0.15),
+    0 0 4px 1px rgba(154, 255, 0, 0.2) !important;
   position: relative;
   overflow: hidden;
 }
 
-/* Efecto de brillo suave para botones circulares con éxito */
-@keyframes glass-glow-circular {
-  0% {
-    background: linear-gradient(135deg, 
-      rgba(154, 255, 0, 1) 0%,
-      rgba(124, 230, 0, 1) 50%,
-      rgba(100, 200, 0, 1) 100%
-    );
-    box-shadow: 
-      0 10px 30px 0 rgba(0, 0, 0, 0.25),
-      0 0 8px 1px rgba(154, 255, 0, 0.3),
-      inset 0 3px 0 0 rgba(255, 255, 255, 0.7);
-  }
-  50% {
-    background: linear-gradient(135deg, 
-      rgba(127, 255, 0, 1) 0%,
-      rgba(105, 255, 0, 1) 50%,
-      rgba(85, 220, 0, 1) 100%
-    );
-    box-shadow: 
-      0 12px 35px 0 rgba(0, 0, 0, 0.3),
-      0 0 12px 2px rgba(127, 255, 0, 0.4),
-      inset 0 3px 0 0 rgba(255, 255, 255, 0.8);
-  }
-  100% {
-    background: linear-gradient(135deg, 
-      rgba(154, 255, 0, 1) 0%,
-      rgba(124, 230, 0, 1) 50%,
-      rgba(100, 200, 0, 1) 100%
-    );
-    box-shadow: 
-      0 10px 30px 0 rgba(0, 0, 0, 0.25),
-      0 0 8px 1px rgba(154, 255, 0, 0.3),
-      inset 0 3px 0 0 rgba(255, 255, 255, 0.7);
-  }
-}
-
 .location-button-success-circular:hover:not(:disabled) {
   background: linear-gradient(135deg, 
-    rgba(127, 255, 0, 1) 0%,
-    rgba(105, 255, 0, 1) 50%,
-    rgba(85, 220, 0, 1) 100%
+    rgba(140, 240, 0, 0.9) 0%,
+    rgba(115, 215, 0, 0.9) 50%,
+    rgba(95, 185, 0, 0.9) 100%
   ) !important;
-  border: 3px solid rgba(173, 255, 47, 1) !important;
-  border-top: 3px solid rgba(255, 255, 255, 0.8) !important;
-  border-left: 3px solid rgba(255, 255, 255, 0.8) !important;
+  border: 2px solid rgba(140, 240, 0, 0.8) !important;
   box-shadow: 
-    0 25px 70px 0 rgba(173, 255, 47, 0.7),
-    0 0 40px 8px rgba(173, 255, 47, 0.5),
-    inset 0 3px 0 0 rgba(255, 255, 255, 0.7) !important;
-  transform: translateY(-5px) scale(1.18);
-}
-
-/* Efecto de destello en los botones de éxito circulares */
-.location-button-success-circular::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(
-    from 0deg,
-    rgba(255, 255, 255, 0) 0deg,
-    rgba(255, 255, 255, 0.2) 90deg,
-    rgba(255, 255, 255, 0) 180deg,
-    rgba(255, 255, 255, 0.1) 270deg,
-    rgba(255, 255, 255, 0) 360deg
-  );
-  animation: circular-sweep 8s infinite linear;
-}
-
-@keyframes circular-sweep {
-  0% {
-    transform: rotate(0deg);
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    transform: rotate(360deg);
-    opacity: 0.7;
-  }
+    0 6px 16px 0 rgba(0, 0, 0, 0.2),
+    0 0 6px 1px rgba(140, 240, 0, 0.3) !important;
+  transform: translateY(-1px) scale(1.02);
 }
 
 /* Efecto de ondas para el botón normal circular */

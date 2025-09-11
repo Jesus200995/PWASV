@@ -314,7 +314,7 @@
           <!-- Info del usuario -->
           <div class="bg-primary/10 rounded-lg p-2 mb-6">
             <div class="flex items-center">
-              <div class="relative w-8 h-8 bg-gradient-to-br from-primary/90 via-primary/85 to-primary/90 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-2">
+              <div class="relative w-8 h-8 bg-gradient-to-br from-green-700 via-green-800 to-green-900 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-2">
                 <!-- Efecto vidrio en círculo de iniciales -->
                 <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
                 
@@ -549,7 +549,7 @@
       <!-- Info del usuario -->
       <div class="bg-primary/10 rounded-lg p-2 mb-6">
         <div class="flex items-center">
-          <div class="relative w-8 h-8 bg-gradient-to-br from-primary/90 via-primary/85 to-primary/90 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-2">
+          <div class="relative w-8 h-8 bg-gradient-to-br from-green-700 via-green-800 to-green-900 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-2">
             <!-- Efecto vidrio en círculo de iniciales -->
             <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
             

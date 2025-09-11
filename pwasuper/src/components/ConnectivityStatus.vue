@@ -41,7 +41,7 @@
           <div v-if="isSyncing && syncProgress" class="mb-4">
             <div class="bg-gray-200 rounded-full h-2">
               <div 
-                class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                class="bg-blue-700 h-2 rounded-full transition-all duration-300"
                 :style="{ width: `${(syncProgress.procesados / syncProgress.total) * 100}%` }"
               ></div>
             </div>
@@ -63,7 +63,7 @@
             <button
               v-if="isOnline && !isSyncing && pendientes.total > 0"
               @click="sincronizarManual"
-              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-700 rounded-md hover:bg-blue-800 transition-colors"
             >
               Sincronizar ahora
             </button>
@@ -131,7 +131,7 @@
     <!-- Notificación flotante simple para casos mínimos -->
     <div 
       v-if="props.show && !showBanner && !isOnline && !bannerDismissed" 
-      class="fixed bottom-4 right-4 z-50 bg-red-500 text-white p-3 rounded-lg shadow-lg flex items-center max-w-sm"
+      class="fixed bottom-4 right-4 z-50 bg-red-700 text-white p-3 rounded-lg shadow-lg flex items-center max-w-sm"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -192,23 +192,23 @@ const showBanner = computed(() => {
 // Métodos para obtener clases CSS
 const getBannerClasses = () => {
   if (!isOnline.value) {
-    return 'bg-red-500 text-white';
+    return 'bg-red-700 text-white';
   } else if (isSyncing.value) {
-    return 'bg-blue-500 text-white';
+    return 'bg-blue-700 text-white';
   } else if (pendientes.value.total > 0) {
-    return 'bg-yellow-500 text-white';
+    return 'bg-yellow-600 text-white';
   } else {
-    return 'bg-green-500 text-white';
+    return 'bg-green-700 text-white';
   }
 };
 
 const getModalIconClasses = () => {
   if (!isOnline.value) {
-    return 'bg-red-100 text-red-600';
+    return 'bg-red-100 text-red-700';
   } else if (isSyncing.value) {
-    return 'bg-blue-100 text-blue-600';
+    return 'bg-blue-100 text-blue-700';
   } else {
-    return 'bg-green-100 text-green-600';
+    return 'bg-green-100 text-green-700';
   }
 };
 

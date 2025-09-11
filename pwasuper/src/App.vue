@@ -229,7 +229,7 @@ function logout() {
       <div class="max-w-sm mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <div class="relative w-8 h-8 bg-gradient-to-br from-primary/90 via-primary/85 to-primary/90 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-3">
+            <div class="relative w-8 h-8 bg-gradient-to-br from-green-700 via-green-800 to-green-900 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-3">
               <!-- Efecto vidrio en círculo de iniciales -->
               <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
               
@@ -240,7 +240,7 @@ function logout() {
               <span class="text-white text-xs font-bold drop-shadow-lg filter brightness-110 relative z-10">{{ getUserInitials }}</span>
             </div>
             <div>
-              <h1 class="text-lg font-semibold text-green-950" style="letter-spacing: 0.5px;">Sembrando Vida</h1>
+              <h1 class="text-base font-bold text-green-800" style="letter-spacing: 0.3px; font-family: 'Century Gothic', 'Futura', 'Avenir', 'Proxima Nova', 'Montserrat', sans-serif;">Sembrando Vida</h1>
               <p class="text-xs text-gray-500">{{ userName }}</p>
             </div>
           </div>

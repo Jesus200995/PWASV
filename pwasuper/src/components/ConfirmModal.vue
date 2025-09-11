@@ -1,9 +1,11 @@
 <template>
   <transition name="modal">
     <div v-if="show" class="modal-overlay" @click="$emit('close')">
-      <div class="modal-container" :class="{ 'compact': type === 'info', 'compact-confirm': type === 'confirm' }" @click.stop>
-        <!-- Header más elegante -->
-        <div v-if="title" class="modal-header">
+      <div class="modal-container" :class="{ 'compact': type === 'info', 'compact-confirm': type === 'confirm' }" 
+           :data-modal-type="title && title.includes('Entrada') ? 'entrada' : title && title.includes('Salida') ? 'salida' : ''" 
+           @click.stop>
+        <!-- Header más elegante - Solo mostrar en tipos info, success, warning -->
+        <div v-if="title && type !== 'confirm' && type !== 'error'" class="modal-header">
           <div class="flex items-center">
             <div v-if="type === 'confirm'" class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
               <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,8 +21,8 @@
           </button>
         </div>
         
-        <!-- Botón de cierre para modales sin título -->
-        <div v-else class="absolute top-2 right-2 z-10">
+        <!-- Botón de cierre para modales de confirmación (confirm y error) -->
+        <div v-if="type === 'confirm' || type === 'error'" class="absolute top-2 right-2 z-10">
           <button @click="$emit('close')" class="modal-close group">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-colors group-hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -30,8 +32,8 @@
         
         <!-- Body más espacioso -->
         <div class="modal-body">
-          <!-- Iconos principales más grandes -->
-          <div class="confirm-icon" v-if="type === 'confirm'">
+          <!-- Iconos principales más grandes - Ocultos para confirm y error -->
+          <div class="confirm-icon" v-if="type === 'confirm' && false">
             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
               <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -55,7 +57,7 @@
             </div>
           </div>
           
-          <div class="error-icon" v-else-if="type === 'error'">
+          <div class="error-icon" v-else-if="type === 'error' && false">
             <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" 
                  style="background-color: rgba(220, 20, 60, 0.1);">
               <svg class="w-6 h-6" style="color: rgb(220, 20, 60);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -358,10 +360,16 @@ defineEmits(['close', 'confirm']);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-/* Estilo específico para tipo error */
-.modal-container:has(.error-icon) .btn-primary {
-  background: linear-gradient(135deg, rgb(220, 20, 60) 0%, rgb(180, 15, 50) 100%);
-  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+/* Estilo específico para modal de entrada */
+.modal-container[data-modal-type="entrada"] .btn-primary {
+  background: linear-gradient(135deg, rgb(30, 144, 255) 0%, rgb(25, 118, 210) 100%) !important;
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3) !important;
+}
+
+/* Estilo específico para modal de salida */
+.modal-container[data-modal-type="salida"] .btn-primary {
+  background: linear-gradient(135deg, rgb(220, 20, 60) 0%, rgb(180, 15, 50) 100%) !important;
+  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3) !important;
 }
 
 .btn-primary:hover {
@@ -370,10 +378,17 @@ defineEmits(['close', 'confirm']);
   transform: translateY(-1px);
 }
 
-/* Hover específico para tipo error */
-.modal-container:has(.error-icon) .btn-primary:hover {
-  background: linear-gradient(135deg, rgb(200, 15, 55) 0%, rgb(160, 10, 45) 100%);
-  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
+/* Hover específico para modal de entrada */
+.modal-container[data-modal-type="entrada"] .btn-primary:hover {
+  background: linear-gradient(135deg, rgb(25, 118, 210) 0%, rgb(21, 101, 192) 100%) !important;
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+/* Hover específico para modal de salida */
+.modal-container[data-modal-type="salida"] .btn-primary:hover {
+  background: linear-gradient(135deg, rgb(200, 15, 55) 0%, rgb(160, 10, 45) 100%) !important;
+  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4) !important;
   transform: translateY(-1px);
 }
 

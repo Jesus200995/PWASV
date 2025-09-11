@@ -1736,8 +1736,8 @@ function mostrarModalEntrada() {
   entradaModalMessage.value = `
     <div class="text-left">
       <div class="flex items-center mb-3">
-        <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-3" style="background-color: rgba(30, 144, 255, 0.1);">
+          <svg class="w-5 h-5" style="color: rgb(30, 144, 255);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
         </div>
@@ -1747,19 +1747,19 @@ function mostrarModalEntrada() {
         </div>
       </div>
       
-      <div class="bg-green-50 border-l-4 border-green-400 p-3 mb-3">
+      <div class="p-3 mb-3 rounded" style="background-color: rgba(30, 144, 255, 0.1); border-left: 4px solid rgba(30, 144, 255, 0.6);">
         <div class="flex items-center">
-          <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 mr-2" style="color: rgb(30, 144, 255);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <p class="text-green-700 font-medium text-sm">Al registrar tu entrada podrás registrar actividades</p>
+          <p class="font-medium text-sm" style="color: rgb(25, 118, 210);">Al registrar tu entrada podrás registrar actividades</p>
         </div>
-        <p class="text-green-600 text-xs mt-1 ml-6">Durante tu jornada podrás capturar todas tus actividades</p>
+        <p class="text-xs mt-1 ml-6" style="color: rgb(30, 144, 255);">Durante tu jornada podrás capturar todas tus actividades</p>
       </div>
 
       <div class="space-y-2 text-xs text-gray-600">
         <div class="flex items-start">
-          <svg class="w-3 h-3 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 mr-2 mt-0.5 flex-shrink-0" style="color: rgb(30, 144, 255);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
           </svg>
           <span>Se capturará ubicación y fotografía</span>
@@ -1788,8 +1788,8 @@ function mostrarModalSalida() {
   salidaModalMessage.value = `
     <div class="text-left">
       <div class="flex items-center mb-3">
-        <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
-          <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-3" style="background-color: rgba(220, 20, 60, 0.1);">
+          <svg class="w-5 h-5" style="color: rgb(220, 20, 60);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
         </div>
@@ -1799,19 +1799,19 @@ function mostrarModalSalida() {
         </div>
       </div>
       
-      <div class="bg-red-50 border-l-4 border-red-400 p-3 mb-3">
+      <div class="p-3 mb-3 rounded" style="background-color: rgba(220, 20, 60, 0.1); border-left: 4px solid rgba(220, 20, 60, 0.6);">
         <div class="flex items-center">
-          <svg class="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 mr-2" style="color: rgb(220, 20, 60);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 21l-5.197-5.197m0 0L12 12.803m0 0L5.196 17.996M12 12.803l5.198-5.197L21 3"/>
           </svg>
-          <p class="text-red-700 font-medium text-sm">No podrás registrar más actividades</p>
+          <p class="font-medium text-sm" style="color: rgb(185, 15, 50);">No podrás registrar más actividades</p>
         </div>
-        <p class="text-red-600 text-xs mt-1 ml-6">El registro se bloqueará hasta mañana</p>
+        <p class="text-xs mt-1 ml-6" style="color: rgb(220, 20, 60);">El registro se bloqueará hasta mañana</p>
       </div>
 
       <div class="space-y-3 text-sm text-gray-600">
         <div class="flex items-start">
-          <svg class="w-4 h-4 text-blue-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 mr-3 mt-0.5 flex-shrink-0" style="color: rgb(220, 20, 60);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
           </svg>
           <span>Se capturará tu ubicación actual y una fotografía</span>

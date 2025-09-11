@@ -665,21 +665,21 @@
                   'relative overflow-hidden rounded-xl p-3 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] border',
                   entradaMarcada && !salidaMarcada ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
                   tipoActividad === 'campo' ? 
-                    'bg-gradient-to-br from-green-400/15 via-green-500/10 to-green-600/15 border-green-400/50 shadow-lg shadow-green-500/10' : 
+                    'bg-gradient-to-br from-green-600/25 via-green-700/20 to-green-800/25 border-green-600/70 shadow-lg shadow-green-600/20' : 
                     'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:border-green-300/40 hover:from-green-50/30 hover:via-green-25/20 hover:to-green-50/15'
                 ]"
                 style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
               >
                 <!-- Efecto de vidrio líquido sutil -->
                 <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-60 rounded-xl"></div>
-                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-green-300/15 to-transparent rounded-full blur-lg"></div>
+                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-green-600/25 to-transparent rounded-full blur-lg"></div>
                 
                 <div class="relative z-10 text-center">
                   <div class="flex justify-center mb-1.5">
                     <div :class="[
                       'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
                       tipoActividad === 'campo' ? 
-                        'bg-green-500 text-white shadow-md shadow-green-500/30' : 
+                        'bg-green-700 text-white shadow-md shadow-green-700/40' : 
                         'bg-gray-100 text-gray-500 border border-gray-200'
                     ]">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -689,17 +689,17 @@
                   </div>
                   <h3 :class="[
                     'font-medium text-xs mb-0.5 transition-colors duration-300',
-                    tipoActividad === 'campo' ? 'text-green-800' : 'text-gray-600'
+                    tipoActividad === 'campo' ? 'text-green-900' : 'text-gray-600'
                   ]">Campo</h3>
                   <p :class="[
                     'text-xs leading-tight transition-colors duration-300',
-                    tipoActividad === 'campo' ? 'text-green-600' : 'text-gray-400'
+                    tipoActividad === 'campo' ? 'text-green-800' : 'text-gray-400'
                   ]">Trabajo en terreno</p>
                 </div>
                 
                 <!-- Indicador de selección pequeño -->
                 <div v-if="tipoActividad === 'campo'" class="absolute top-1.5 right-1.5">
-                  <div class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center shadow-sm">
+                  <div class="w-4 h-4 bg-green-700 rounded-full flex items-center justify-center shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                     </svg>
@@ -714,21 +714,21 @@
                   'relative overflow-hidden rounded-xl p-3 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] border',
                   entradaMarcada && !salidaMarcada ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
                   tipoActividad === 'gabinete' ? 
-                    'bg-gradient-to-br from-orange-400/15 via-red-400/10 to-orange-500/15 border-orange-400/50 shadow-lg shadow-orange-500/10' : 
+                    'bg-gradient-to-br from-orange-600/25 via-red-600/20 to-orange-700/25 border-orange-600/70 shadow-lg shadow-orange-600/20' : 
                     'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:border-orange-300/40 hover:from-orange-50/30 hover:via-red-25/20 hover:to-orange-50/15'
                 ]"
                 style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
               >
                 <!-- Efecto de vidrio líquido sutil -->
                 <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-60 rounded-xl"></div>
-                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-orange-300/15 to-transparent rounded-full blur-lg"></div>
+                <div class="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-orange-600/25 to-transparent rounded-full blur-lg"></div>
                 
                 <div class="relative z-10 text-center">
                   <div class="flex justify-center mb-1.5">
                     <div :class="[
                       'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
                       tipoActividad === 'gabinete' ? 
-                        'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 
+                        'bg-orange-700 text-white shadow-md shadow-orange-700/40' : 
                         'bg-gray-100 text-gray-500 border border-gray-200'
                     ]">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -738,17 +738,17 @@
                   </div>
                   <h3 :class="[
                     'font-medium text-xs mb-0.5 transition-colors duration-300',
-                    tipoActividad === 'gabinete' ? 'text-orange-800' : 'text-gray-600'
+                    tipoActividad === 'gabinete' ? 'text-orange-900' : 'text-gray-600'
                   ]">Gabinete</h3>
                   <p :class="[
                     'text-xs leading-tight transition-colors duration-300',
-                    tipoActividad === 'gabinete' ? 'text-orange-600' : 'text-gray-400'
+                    tipoActividad === 'gabinete' ? 'text-orange-800' : 'text-gray-400'
                   ]">Trabajo de oficina</p>
                 </div>
                 
                 <!-- Indicador de selección pequeño -->
                 <div v-if="tipoActividad === 'gabinete'" class="absolute top-1.5 right-1.5">
-                  <div class="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center shadow-sm">
+                  <div class="w-4 h-4 bg-orange-700 rounded-full flex items-center justify-center shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                     </svg>

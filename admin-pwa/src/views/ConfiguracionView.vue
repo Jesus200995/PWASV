@@ -180,7 +180,7 @@
                   <polyline points="7,10 12,15 17,10"/>
                   <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                {{ exporting ? 'Exportando...' : 'Exportar Datos' }}
+                {{ exporting ? 'Exportando JSON...' : 'Exportar Datos (JSON)' }}
               </button>
               
               <button @click="descargarBaseDatos" class="action-btn database-btn" :disabled="descargandoBD">
@@ -412,13 +412,19 @@ const exportarDatos = async () => {
   try {
     const token = localStorage.getItem('admin_token')
     
-    // Obtener todos los datos
+    mostrarMensaje('Iniciando', 'Obteniendo todos los registros de actividades...')
+    
+    // Obtener TODOS los registros sin límite y todos los usuarios
     const [usuariosRes, registrosRes] = await Promise.all([
       axios.get(`${apiConfig.url}/usuarios`, {
         headers: { 'Authorization': `Bearer ${token}` }
       }),
       axios.get(`${apiConfig.url}/registros`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${token}` },
+        params: { 
+          limit: 10000, // Límite alto para obtener todos los registros
+          page_size: 5000 // Tamaño de página grande
+        }
       })
     ])
     
@@ -426,28 +432,110 @@ const exportarDatos = async () => {
     const usuariosData = Array.isArray(usuariosRes.data) ? usuariosRes.data : (usuariosRes.data.usuarios || [])
     const registrosData = Array.isArray(registrosRes.data) ? registrosRes.data : (registrosRes.data.registros || [])
     
+    console.log('📊 Datos obtenidos:', {
+      usuarios: usuariosData.length,
+      registros: registrosData.length
+    })
+    
+    // Crear estructura JSON completa con información detallada
     const datos = {
-      usuarios: usuariosData,
-      registros: registrosData,
-      exportado_en: new Date().toISOString(),
-      total_usuarios: usuariosData.length,
-      total_registros: registrosData.length
+      metadatos: {
+        exportado_en: new Date().toISOString(),
+        fecha_exportacion: new Date().toLocaleString('es-ES'),
+        servidor: apiConfig.url,
+        tipo_exportacion: 'registros_actividades_completo',
+        version: '1.0'
+      },
+      resumen: {
+        total_usuarios: usuariosData.length,
+        total_registros: registrosData.length,
+        registros_campo: registrosData.filter(r => r.tipo_actividad === 'campo').length,
+        registros_gabinete: registrosData.filter(r => r.tipo_actividad === 'gabinete').length,
+        registros_sin_tipo: registrosData.filter(r => !r.tipo_actividad || r.tipo_actividad === null).length
+      },
+      usuarios: usuariosData.map(usuario => ({
+        id: usuario.id,
+        correo: usuario.correo,
+        nombre_completo: usuario.nombre_completo,
+        cargo: usuario.cargo,
+        supervisor: usuario.supervisor,
+        curp: usuario.curp,
+        telefono: usuario.telefono,
+        rol: usuario.rol || 'user'
+      })),
+      registros_actividades: registrosData.map(registro => ({
+        id: registro.id,
+        usuario_id: registro.usuario_id,
+        usuario_info: {
+          nombre: usuariosData.find(u => u.id === registro.usuario_id)?.nombre_completo || 'Usuario no encontrado',
+          correo: usuariosData.find(u => u.id === registro.usuario_id)?.correo || 'N/A'
+        },
+        ubicacion: {
+          latitud: registro.latitud,
+          longitud: registro.longitud
+        },
+        actividad: {
+          descripcion: registro.descripcion,
+          tipo: registro.tipo_actividad || 'campo',
+          fecha_hora: registro.fecha_hora,
+          foto_url: registro.foto_url
+        }
+      }))
     }
     
-    // Crear y descargar archivo JSON
-    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' })
+    // Crear y descargar archivo JSON con nombre descriptivo
+    const timestamp = new Date().toISOString().split('T')[0]
+    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json; charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `sembrando_vida_export_${new Date().toISOString().split('T')[0]}.json`
+    a.download = `registros_actividades_${timestamp}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
     
-    mostrarMensaje('Éxito', `Datos exportados correctamente.<br>Usuarios: ${datos.total_usuarios}<br>Registros: ${datos.total_registros}`)
+    // Calcular tamaño del archivo
+    const tamanhoKB = Math.round(blob.size / 1024)
+    
+    mostrarMensaje('✅ Exportación JSON Exitosa', 
+      `<div style="text-align: left;">
+        <h4 style="color: #2563eb; margin-bottom: 15px;">📄 Archivo JSON Generado</h4>
+        <p><strong>📁 Archivo:</strong> registros_actividades_${timestamp}.json</p>
+        <p><strong>📊 Tamaño:</strong> ${tamanhoKB} KB</p>
+        <hr style="margin: 15px 0;">
+        <h5 style="color: #1e40af;">📋 Datos Exportados:</h5>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          <li><strong>👥 Usuarios:</strong> ${datos.resumen.total_usuarios}</li>
+          <li><strong>📝 Total registros:</strong> ${datos.resumen.total_registros}</li>
+          <li><strong>🏞️ Actividades campo:</strong> ${datos.resumen.registros_campo}</li>
+          <li><strong>🏢 Actividades gabinete:</strong> ${datos.resumen.registros_gabinete}</li>
+          <li><strong>❓ Sin tipo:</strong> ${datos.resumen.registros_sin_tipo}</li>
+        </ul>
+        <hr style="margin: 15px 0;">
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">
+          El archivo JSON contiene todos los registros de actividades con información 
+          detallada de usuarios, ubicaciones y metadatos. Compatible con análisis de datos 
+          y herramientas de visualización.
+        </p>
+      </div>`
+    )
   } catch (err) {
-    mostrarMensaje('Error', 'Error al exportar los datos: ' + (err.response?.data?.detail || err.message))
+    let errorMsg = 'Error al exportar los datos: '
+    
+    if (err.response?.status === 401) {
+      errorMsg += 'No autorizado. Inicia sesión nuevamente.'
+    } else if (err.response?.status === 403) {
+      errorMsg += 'Acceso denegado. Permisos insuficientes.'
+    } else if (err.response?.status === 500) {
+      errorMsg += 'Error del servidor. Intenta más tarde.'
+    } else if (err.request) {
+      errorMsg += 'No se pudo conectar con el servidor. Verifica tu conexión.'
+    } else {
+      errorMsg += err.message || 'Error desconocido'
+    }
+    
+    mostrarMensaje('❌ Error', errorMsg)
   } finally {
     exporting.value = false
   }

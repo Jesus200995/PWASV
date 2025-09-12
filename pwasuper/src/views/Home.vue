@@ -3396,16 +3396,16 @@ watch([entradaMarcada, salidaMarcada], () => {
 .coordinates-display-circular {
   margin-top: 0.5rem;
   background: linear-gradient(135deg, 
-    rgba(173, 255, 47, 0.08) 0%,
-    rgba(154, 230, 42, 0.12) 100%
+    rgba(21, 128, 61, 0.25) 0%,
+    rgba(15, 118, 110, 0.35) 100%
   );
-  border: 1px solid rgba(173, 255, 47, 0.25);
+  border: 1px solid rgba(34, 197, 94, 0.6);
   border-radius: 12px;
   padding: 0.5rem;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 
-    0 3px 12px 0 rgba(173, 255, 47, 0.12),
+    0 3px 12px 0 rgba(34, 197, 94, 0.3),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
   animation: slide-down-circular 0.4s ease-out;
   max-width: 160px;
@@ -3432,22 +3432,23 @@ watch([entradaMarcada, salidaMarcada], () => {
 .coordinate-label-circular {
   font-size: 0.5rem;
   font-weight: 600;
-  color: rgba(173, 255, 47, 0.85);
+  color: white;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 0.125rem;
   font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .coordinate-value-circular {
   font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 0.5rem;
-  font-weight: 500;
-  color: rgba(124, 185, 34, 0.9);
+  font-weight: 600;
+  color: rgb(21, 128, 61);
   background: rgba(255, 255, 255, 0.7);
   padding: 0.125rem 0.25rem;
   border-radius: 4px;
-  border: 1px solid rgba(173, 255, 47, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.25);
   word-break: break-all;
   line-height: 1.1;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -3531,11 +3532,15 @@ watch([entradaMarcada, salidaMarcada], () => {
   
   .coordinate-label-circular {
     font-size: 0.4rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
   
   .coordinate-value-circular {
     font-size: 0.4rem;
     padding: 0.125rem 0.1875rem;
+    font-weight: 600;
+    color: rgb(21, 128, 61);
   }
   
   .coordinates-grid-circular {

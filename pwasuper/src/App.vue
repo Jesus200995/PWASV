@@ -240,7 +240,7 @@ function logout() {
               <span class="text-white text-xs font-bold drop-shadow-lg filter brightness-110 relative z-10">{{ getUserInitials }}</span>
             </div>
             <div>
-              <h1 class="text-base font-bold text-green-800" style="letter-spacing: 0.3px; font-family: 'Century Gothic', 'Futura', 'Avenir', 'Proxima Nova', 'Montserrat', sans-serif;">Sembrando Vida</h1>
+              <h1 class="text-base font-bold text-green-800 century-gothic-font" style="letter-spacing: 0.3px;">Sembrando Vida</h1>
               <p class="text-xs text-gray-500">{{ userName }}</p>
             </div>
           </div>

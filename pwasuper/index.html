@@ -29,9 +29,27 @@
     <!-- Offline Support -->
     <meta name="offline-support" content="true" />
     
+    <!-- Google Fonts para Century Gothic y alternativas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;600;700;800;900&family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <title>Sembrando Vida: CONTROL</title>
     
     <style>
+      /* Definición de fuente Century Gothic personalizada */
+      @font-face {
+        font-family: 'Century Gothic';
+        src: local('Century Gothic'), local('CenturyGothic'), local('Gothic A1');
+        font-display: swap;
+      }
+      
+      /* Clase personalizada para Century Gothic */
+      .century-gothic-font {
+        font-family: 'Century Gothic', 'Gothic A1', 'Nunito Sans', 'Futura', 'Avenir', 'Proxima Nova', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+        font-display: swap;
+      }
+      
       /* Fondo de vidrio para evitar color morado durante la carga */
       html, body {
         background: linear-gradient(to bottom right, #f0fdfa, #ecfdf5, #f0fdfa) !important;

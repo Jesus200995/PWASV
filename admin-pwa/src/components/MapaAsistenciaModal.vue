@@ -538,24 +538,24 @@ export default {
 }
 
 .marker-container.entrada .marker-icon {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  border: 2px solid rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, #1e90ff, #1976d2);
+  border: 2px solid rgba(30, 144, 255, 0.3);
 }
 
 .marker-container.entrada:hover .marker-icon {
-  background: linear-gradient(135deg, #45a049, #388e3c);
-  border-color: rgba(76, 175, 80, 0.5);
+  background: linear-gradient(135deg, #1976d2, #1565c0);
+  border-color: rgba(30, 144, 255, 0.5);
   transform: scale(1.1);
 }
 
 .marker-container.salida .marker-icon {
-  background: linear-gradient(135deg, #f44336, #d32f2f);
-  border: 2px solid rgba(244, 67, 54, 0.3);
+  background: linear-gradient(135deg, #dc143c, #b71c1c);
+  border: 2px solid rgba(220, 20, 60, 0.3);
 }
 
 .marker-container.salida:hover .marker-icon {
-  background: linear-gradient(135deg, #d32f2f, #c62828);
-  border-color: rgba(244, 67, 54, 0.5);
+  background: linear-gradient(135deg, #b71c1c, #c62828);
+  border-color: rgba(220, 20, 60, 0.5);
   transform: scale(1.1);
 }
 
@@ -577,12 +577,12 @@ export default {
 }
 
 .marker-container.entrada .marker-pulse {
-  background: rgba(76, 175, 80, 0.6);
+  background: rgba(30, 144, 255, 0.6);
   animation: pulse 2.5s ease-out infinite;
 }
 
 .marker-container.salida .marker-pulse {
-  background: rgba(244, 67, 54, 0.6);
+  background: rgba(220, 20, 60, 0.6);
   animation: pulse 2.5s ease-out infinite 0.3s;
 }
 
@@ -649,11 +649,11 @@ export default {
 }
 
 .popup-icon.entrada-icon {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: linear-gradient(135deg, #1e90ff, #1976d2);
 }
 
 .popup-icon.salida-icon {
-  background: linear-gradient(135deg, #f44336, #d32f2f);
+  background: linear-gradient(135deg, #dc143c, #b71c1c);
 }
 
 .popup-icon svg {

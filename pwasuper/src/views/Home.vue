@@ -242,7 +242,7 @@
               
               <!-- Mensaje principal -->
               <div class="text-center space-y-2">
-                <h3 class="text-sm font-semibold text-white leading-tight">
+                <h3 class="text-xs font-semibold text-white leading-tight">
                   Marcar entrada es necesario para usar actividades
                 </h3>
                 <p class="text-xs text-red-200 font-medium">

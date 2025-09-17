@@ -116,7 +116,7 @@
           
           <!-- Estado: Marcada - Completada -->
           <template v-else-if="entradaMarcada">
-            <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-2">
+            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
@@ -130,7 +130,7 @@
                 {{ datosEntrada.hora }}
               </span>
             </span>
-            <span class="text-xs text-green-600 font-medium mt-1">✓ Completada</span>
+            <span class="text-xs text-blue-600 font-medium mt-1">✓ Completada</span>
           </template>
         </button>
 
@@ -316,7 +316,9 @@
           <div class="mb-4">
             <div class="flex items-center justify-between mb-2">
               <h3 class="text-base font-semibold text-gray-800">1. Ubicación</h3>
-              <span v-if="latitud && longitud" class="text-green-600 text-xs">✓ Completado</span>
+              <span v-if="latitud && longitud" 
+                :class="tipoAsistencia === 'entrada' ? 'text-blue-600' : 'text-green-600'"
+                class="text-xs">✓ Completado</span>
             </div>
             
             <!-- Botón de ubicación circular con diseño moderno -->
@@ -375,7 +377,9 @@
           <div class="mb-4">
             <div class="flex items-center justify-between mb-2">
               <h3 class="text-base font-semibold text-gray-800">2. Foto</h3>
-              <span v-if="foto" class="text-green-600 text-xs">✓ Completado</span>
+              <span v-if="foto" 
+                :class="tipoAsistencia === 'entrada' ? 'text-blue-600' : 'text-green-600'"
+                class="text-xs">✓ Completado</span>
             </div>
             
             <div class="flex items-center justify-center w-full">
@@ -404,7 +408,9 @@
           <div class="mb-4">
             <div class="flex items-center justify-between mb-2">
               <h3 class="text-base font-semibold text-gray-800">3. Descripción/Notas</h3>
-              <span v-if="descripcion.trim()" class="text-green-600 text-xs">✓ Completado</span>
+              <span v-if="descripcion.trim()" 
+                :class="tipoAsistencia === 'entrada' ? 'text-blue-600' : 'text-green-600'"
+                class="text-xs">✓ Completado</span>
             </div>
             
             <textarea

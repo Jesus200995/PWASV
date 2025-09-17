@@ -236,16 +236,16 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.718 9.168-4.309M6 15a2 2 0 002 2h1.832c4.1 0 7.625 1.718 9.168 4.309" />
                     </svg>
                   </div>
-                  <span class="text-xs font-semibold text-red-100 tracking-wide uppercase">Importante</span>
+                  <span class="font-semibold text-red-100 tracking-wide uppercase" style="font-size: 0.6rem;">Importante</span>
                 </div>
               </div>
               
               <!-- Mensaje principal -->
-              <div class="text-center space-y-2">
-                <h3 class="text-xs font-semibold text-white leading-tight">
+              <div class="text-center space-y-1">
+                <h3 class="text-2xs font-semibold text-white leading-tight" style="font-size: 0.65rem;">
                   Marcar entrada es necesario para usar actividades
                 </h3>
-                <p class="text-xs text-red-200 font-medium">
+                <p class="text-2xs text-red-200 font-medium" style="font-size: 0.6rem;">
                   Al marcar salida se finaliza el acceso del día
                 </p>
               </div>

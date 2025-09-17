@@ -87,139 +87,114 @@
         </div>
 
         <!-- Botones de Asistencia (solo visibles cuando no está en modo asistencia) -->
-        <div v-if="!modoAsistencia" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+        <div v-if="!modoAsistencia" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
         <!-- Botón Marcar Entrada -->
         <button
           @click="mostrarModalEntrada"
           :disabled="entradaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden rounded-xl transition-all duration-300 transform"
+          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[140px] w-full flex flex-col items-center justify-center p-6"
           :class="{
-            'flex flex-col items-center justify-center p-3 text-white shadow-lg hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
-            'flex items-center p-4 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 cursor-not-allowed border-l-4 border-blue-400': entradaMarcada || verificandoAsistencia
+            'text-white shadow-lg hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
+            'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 cursor-not-allowed': entradaMarcada || verificandoAsistencia
           }"
           :style="!entradaMarcada && !verificandoAsistencia ? 'background-color: rgb(30, 144, 255); box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);' : ''"
           @mouseover="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(25, 130, 230)')"
           @mouseout="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(30, 144, 255)')"
         >
           <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current"></div>
+            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
           </div>
           
-          <!-- Layout cuando no está marcada (vertical) -->
+          <!-- Estado: No marcada - Activo -->
           <template v-if="!entradaMarcada && !verificandoAsistencia">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span class="font-semibold text-sm">Marcar Entrada</span>
+            <span class="font-semibold text-lg">Marcar Entrada</span>
+            <span class="text-sm opacity-90 mt-1">Registra tu llegada</span>
           </template>
           
-          <!-- Layout cuando está marcada (horizontal) -->
-          <template v-else>
-            <div class="flex items-center w-full">
-              <!-- Ícono grande a la izquierda -->
-              <div class="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </div>
-              
-              <!-- Información a la derecha -->
-              <div class="flex-1 text-left">
-                <div class="font-semibold text-base text-gray-600">Entrada Registrada</div>
-                <div class="text-sm text-gray-500 mt-1">
-                  <span v-if="asistenciaHoy && asistenciaHoy.entrada">
-                    {{ formatearHora(asistenciaHoy.entrada) }}
-                  </span>
-                  <span v-else-if="entradaMarcada && datosEntrada.hora">
-                    {{ datosEntrada.hora }}
-                  </span>
-                </div>
-                <div class="text-xs text-gray-500 mt-1">
-                  {{ new Date().toLocaleDateString('es-ES') }}
-                </div>
-                <div class="text-xs text-gray-500 mt-1 font-medium">✓ Completada</div>
-              </div>
+          <!-- Estado: Marcada - Completada -->
+          <template v-else-if="entradaMarcada">
+            <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
+            <span class="font-semibold text-lg text-gray-700">Entrada Registrada</span>
+            <span class="text-sm text-gray-500 mt-1">
+              <span v-if="asistenciaHoy && asistenciaHoy.entrada">
+                {{ formatearHora(asistenciaHoy.entrada) }}
+              </span>
+              <span v-else-if="datosEntrada.hora">
+                {{ datosEntrada.hora }}
+              </span>
+            </span>
+            <span class="text-xs text-green-600 font-medium mt-1">✓ Completada</span>
           </template>
-          
-          <!-- Mostrar resumen de entrada si está marcada (solo para modo vertical anterior) -->
-          <div v-if="datosEntrada.hora && !entradaMarcada" class="mt-1 text-center">
-            <p class="text-xs opacity-75">Entrada registrada:</p>
-            <p class="text-xs font-mono font-bold">{{ datosEntrada.hora }}</p>
-            <p class="text-xs opacity-75 mt-1">{{ datosEntrada.descripcion }}</p>
-          </div>
         </button>
 
         <!-- Botón Marcar Salida -->
         <button
           @click="mostrarModalSalida"
           :disabled="!entradaMarcada || salidaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden rounded-xl transition-all duration-300 transform"
+          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[140px] w-full flex flex-col items-center justify-center p-6"
           :class="{
-            'flex flex-col items-center justify-center p-3 text-white shadow-lg hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
-            'flex items-center p-4 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 cursor-not-allowed border-l-4': !entradaMarcada || salidaMarcada || verificandoAsistencia,
-            'border-red-400': salidaMarcada,
-            'border-gray-400': !entradaMarcada
+            'text-white shadow-lg hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
+            'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 cursor-not-allowed': !entradaMarcada || salidaMarcada || verificandoAsistencia
           }"
           :style="entradaMarcada && !salidaMarcada && !verificandoAsistencia ? 'background-color: rgb(220, 20, 60); box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);' : ''"
           @mouseover="entradaMarcada && !salidaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(200, 15, 55)')"
           @mouseout="entradaMarcada && !salidaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(220, 20, 60)')"
         >
           <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-current"></div>
+            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
           </div>
           
-          <!-- Layout cuando no está marcada y entrada está marcada (vertical) -->
+          <!-- Estado: Activo para marcar salida -->
           <template v-if="entradaMarcada && !salidaMarcada && !verificandoAsistencia">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span class="font-semibold text-sm">Marcar Salida</span>
+            <span class="font-semibold text-lg">Marcar Salida</span>
+            <span class="text-sm opacity-90 mt-1">Registra tu salida</span>
           </template>
           
-          <!-- Layout cuando está bloqueada o marcada (horizontal) -->
-          <template v-else>
-            <div class="flex items-center w-full">
-              <!-- Ícono grande a la izquierda -->
-              <div class="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path v-if="!entradaMarcada" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </div>
-              
-              <!-- Información a la derecha -->
-              <div class="flex-1 text-left">
-                <template v-if="salidaMarcada">
-                  <div class="font-semibold text-base text-gray-600">Salida Registrada</div>
-                  <div class="text-sm text-gray-500 mt-1">
-                    <span v-if="asistenciaHoy && asistenciaHoy.salida">
-                      {{ formatearHora(asistenciaHoy.salida) }}
-                    </span>
-                    <span v-else-if="salidaMarcada && datosSalida.hora">
-                      {{ datosSalida.hora }}
-                    </span>
-                  </div>
-                  <div class="text-xs text-gray-500 mt-1">
-                    {{ new Date().toLocaleDateString('es-ES') }}
-                  </div>
-                  <div class="text-xs text-gray-500 mt-1 font-medium">✓ Completada</div>
-                </template>
-                <template v-else-if="!entradaMarcada">
-                  <div class="font-semibold text-base text-gray-600">Marcar Salida</div>
-                  <div class="text-sm text-gray-500 mt-1">Primero marca tu entrada</div>
-                  <div class="text-xs text-amber-600 mt-1 font-medium">🔒 Bloqueado</div>
-                </template>
-              </div>
+          <!-- Estado: Bloqueado (sin entrada) -->
+          <template v-else-if="!entradaMarcada">
+            <div class="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <span class="font-semibold text-lg text-gray-600">Marcar Salida</span>
+            <span class="text-sm text-gray-500 mt-1">Primero marca tu entrada</span>
+            <div class="flex items-center mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-600 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span class="text-xs text-amber-600 font-medium">Bloqueado</span>
             </div>
           </template>
           
-          <!-- Mostrar resumen de salida si está marcada (solo para modo vertical anterior) -->
-          <div v-if="datosSalida.hora && !salidaMarcada" class="mt-1 text-center">
-            <p class="text-xs opacity-75">Salida registrada:</p>
-            <p class="text-xs font-mono font-bold">{{ datosSalida.hora }}</p>
-            <p class="text-xs opacity-75 mt-1">{{ datosSalida.descripcion }}</p>
-          </div>
+          <!-- Estado: Salida completada -->
+          <template v-else-if="salidaMarcada">
+            <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span class="font-semibold text-lg text-gray-700">Salida Registrada</span>
+            <span class="text-sm text-gray-500 mt-1">
+              <span v-if="asistenciaHoy && asistenciaHoy.salida">
+                {{ formatearHora(asistenciaHoy.salida) }}
+              </span>
+              <span v-else-if="datosSalida.hora">
+                {{ datosSalida.hora }}
+              </span>
+            </span>
+            <span class="text-xs text-red-600 font-medium mt-1">✓ Completada</span>
+          </template>
         </button>
       </div>
 
@@ -3944,5 +3919,41 @@ watch([entradaMarcada, salidaMarcada], () => {
 .fade-slide-leave-from {
   opacity: 1;
   transform: translateY(0) scale(1);
+}
+
+/* Estilos responsivos mejorados para botones de asistencia */
+@media (min-width: 768px) {
+  .grid.md\\:grid-cols-2 {
+    align-items: stretch;
+  }
+  
+  .grid.md\\:grid-cols-2 button {
+    min-height: 140px;
+  }
+}
+
+@media (max-width: 767px) {
+  .grid button {
+    min-height: 120px;
+  }
+}
+
+/* Asegurar que los botones tengan diseño consistente */
+.grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* Mejorar transiciones y hover effects */
+.grid button:not(:disabled):hover {
+  transform: scale(1.02);
+}
+
+.grid button:not(:disabled):active {
+  transform: scale(0.98);
 }
 </style>

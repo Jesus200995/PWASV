@@ -92,7 +92,7 @@
         <button
           @click="mostrarModalEntrada"
           :disabled="entradaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[140px] w-full flex flex-col items-center justify-center p-6"
+          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[100px] w-full flex flex-col items-center justify-center p-3"
           :class="{
             'text-white shadow-lg hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
             'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 cursor-not-allowed': entradaMarcada || verificandoAsistencia
@@ -107,22 +107,22 @@
           
           <!-- Estado: No marcada - Activo -->
           <template v-if="!entradaMarcada && !verificandoAsistencia">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span class="font-semibold text-lg">Marcar Entrada</span>
-            <span class="text-sm opacity-90 mt-1">Registra tu llegada</span>
+            <span class="font-semibold text-base">Marcar Entrada</span>
+            <span class="text-xs opacity-90 mt-0.5">Registra tu llegada</span>
           </template>
           
           <!-- Estado: Marcada - Completada -->
           <template v-else-if="entradaMarcada">
-            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span class="font-semibold text-lg text-gray-700">Entrada Registrada</span>
-            <span class="text-sm text-gray-500 mt-1">
+            <span class="font-semibold text-base text-gray-700">Entrada Registrada</span>
+            <span class="text-xs text-gray-500 mt-0.5">
               <span v-if="asistenciaHoy && asistenciaHoy.entrada">
                 {{ formatearHora(asistenciaHoy.entrada) }}
               </span>
@@ -130,7 +130,7 @@
                 {{ datosEntrada.hora }}
               </span>
             </span>
-            <span class="text-xs text-blue-600 font-medium mt-1">✓ Completada</span>
+            <span class="text-xs text-blue-600 font-medium mt-0.5">✓ Completada</span>
           </template>
         </button>
 
@@ -138,7 +138,7 @@
         <button
           @click="mostrarModalSalida"
           :disabled="!entradaMarcada || salidaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[140px] w-full flex flex-col items-center justify-center p-6"
+          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[100px] w-full flex flex-col items-center justify-center p-3"
           :class="{
             'text-white shadow-lg hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
             'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 cursor-not-allowed': !entradaMarcada || salidaMarcada || verificandoAsistencia
@@ -153,22 +153,22 @@
           
           <!-- Estado: Activo para marcar salida -->
           <template v-if="entradaMarcada && !salidaMarcada && !verificandoAsistencia">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span class="font-semibold text-lg">Marcar Salida</span>
-            <span class="text-sm opacity-90 mt-1">Registra tu salida</span>
+            <span class="font-semibold text-base">Marcar Salida</span>
+            <span class="text-xs opacity-90 mt-0.5">Registra tu salida</span>
           </template>
           
           <!-- Estado: Bloqueado (sin entrada) -->
           <template v-else-if="!entradaMarcada">
-            <div class="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <span class="font-semibold text-lg text-gray-600">Marcar Salida</span>
-            <span class="text-sm text-gray-500 mt-1">Primero marca tu entrada</span>
+            <span class="font-semibold text-base text-gray-600">Marcar Salida</span>
+            <span class="text-xs text-gray-500 mt-0.5">Primero marca tu entrada</span>
             <div class="flex items-center mt-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-600 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -179,13 +179,13 @@
           
           <!-- Estado: Salida completada -->
           <template v-else-if="salidaMarcada">
-            <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span class="font-semibold text-lg text-gray-700">Salida Registrada</span>
-            <span class="text-sm text-gray-500 mt-1">
+            <span class="font-semibold text-base text-gray-700">Salida Registrada</span>
+            <span class="text-xs text-gray-500 mt-0.5">
               <span v-if="asistenciaHoy && asistenciaHoy.salida">
                 {{ formatearHora(asistenciaHoy.salida) }}
               </span>
@@ -193,7 +193,7 @@
                 {{ datosSalida.hora }}
               </span>
             </span>
-            <span class="text-xs text-red-600 font-medium mt-1">✓ Completada</span>
+            <span class="text-xs text-red-600 font-medium mt-0.5">✓ Completada</span>
           </template>
         </button>
       </div>

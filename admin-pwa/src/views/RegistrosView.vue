@@ -1945,9 +1945,9 @@ const imprimirRegistros = () => {
             }
             
             .tipo-print.tipo-gabinete {
-                background: #e3f2fd;
-                color: #1565c0;
-                border: 1px solid #90caf9;
+                background: #fff3e0;
+                color: #ef6c00;
+                border: 1px solid #ff9800;
             }
             
             .print-footer {
@@ -2021,7 +2021,7 @@ const imprimirRegistros = () => {
                 }
                 
                 .tipo-print.tipo-gabinete {
-                    background: #e3f2fd !important;
+                    background: #fff3e0 !important;
                     -webkit-print-color-adjust: exact;
                     color-adjust: exact;
                 }
@@ -4148,12 +4148,12 @@ const logout = () => {
 .hora-display {
   font-size: 11px;
   font-weight: 700;
-  color: #ff8c00;
-  text-shadow: 0 1px 2px rgba(255, 140, 0, 0.2);
-  background: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(255, 165, 0, 0.05) 100%);
+  color: #7b1fa2;
+  text-shadow: 0 1px 2px rgba(123, 31, 162, 0.2);
+  background: linear-gradient(135deg, rgba(123, 31, 162, 0.1) 0%, rgba(142, 36, 170, 0.05) 100%);
   padding: 2px 6px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 140, 0, 0.2);
+  border: 1px solid rgba(123, 31, 162, 0.2);
   white-space: nowrap;
   letter-spacing: 0.3px;
 }
@@ -4184,13 +4184,13 @@ const logout = () => {
 .tipo-campo {
   background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
   color: #2e7d32;
-  border: 1px solid #a5d6a7;
+  border: 1px solid #4CAF50;
 }
 
 .tipo-gabinete {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  color: #1565c0;
-  border: 1px solid #90caf9;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  color: #ef6c00;
+  border: 1px solid #ff9800;
 }
 
 .tipo-badge:hover {
@@ -4455,9 +4455,9 @@ const logout = () => {
 }
 
 .tipo-badge-modal.tipo-gabinete {
-  background: linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%);
-  color: #2e7d32;
-  border: 1px solid #66BB6A;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  color: #ef6c00;
+  border: 1px solid #ff9800;
 }
 
 .photo-container {

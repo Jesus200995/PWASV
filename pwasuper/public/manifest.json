@@ -2,6 +2,7 @@
   "name": "Sembrando Vida: CONTROL",
   "short_name": "Sembrando Vida",
   "description": "Sistema de registro de asistencia y actividades con funcionalidad offline",
+  "version": "1.0.1",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

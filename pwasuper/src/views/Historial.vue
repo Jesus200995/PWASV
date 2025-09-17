@@ -17,28 +17,17 @@
           <div 
             class="absolute top-1 bottom-1 rounded-full transition-all duration-700 ease-in-out"
             :style="{
-              left: tabActiva === 'registros' ? '4px' : '50%',
+              left: tabActiva === 'asistencias' ? '4px' : '50%',
               width: 'calc(50% - 8px)',
-              background: tabActiva === 'registros' 
-                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8, #1e40af)' 
-                : 'linear-gradient(135deg, #10b981, #059669, #047857)',
-              boxShadow: tabActiva === 'registros'
-                ? '0 8px 25px rgba(59, 130, 246, 0.4), 0 4px 15px rgba(29, 78, 216, 0.3), 0 0 20px rgba(59, 130, 246, 0.2)'
-                : '0 8px 25px rgba(16, 185, 129, 0.4), 0 4px 15px rgba(5, 150, 105, 0.3), 0 0 20px rgba(16, 185, 129, 0.2)'
+              background: tabActiva === 'asistencias' 
+                ? 'linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8)' 
+                : 'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
+              boxShadow: tabActiva === 'asistencias'
+                ? '0 8px 25px rgba(59, 130, 246, 0.4), 0 4px 15px rgba(37, 99, 235, 0.3), 0 0 20px rgba(59, 130, 246, 0.2)'
+                : '0 8px 25px rgba(139, 92, 246, 0.4), 0 4px 15px rgba(124, 58, 237, 0.3), 0 0 20px rgba(139, 92, 246, 0.2)'
             }"
           ></div>
           
-          <button 
-            @click="cambiarTab('registros')" 
-            :class="[
-              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-700 ease-in-out relative overflow-hidden z-10',
-              tabActiva === 'registros' 
-                ? 'text-white' 
-                : 'text-gray-600 hover:text-gray-800'
-            ]"
-          >
-            <span class="relative z-20 font-bold tracking-wide">Actividades</span>
-          </button>
           <button 
             @click="cambiarTab('asistencias')" 
             :class="[
@@ -50,6 +39,17 @@
           >
             <span class="relative z-20 font-bold tracking-wide">Asistencias</span>
           </button>
+          <button 
+            @click="cambiarTab('registros')" 
+            :class="[
+              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-700 ease-in-out relative overflow-hidden z-10',
+              tabActiva === 'registros' 
+                ? 'text-white' 
+                : 'text-gray-600 hover:text-gray-800'
+            ]"
+          >
+            <span class="relative z-20 font-bold tracking-wide">Actividades</span>
+          </button>
         </div>
       </div>
 
@@ -58,7 +58,7 @@
         <!-- Título centralizado para Actividades -->
         <div class="text-center mb-1">
           <h2 class="text-sm font-bold text-gray-800 mb-1">Historial de actividades</h2>
-          <div class="w-20 h-0.5 bg-gradient-to-r from-green-400 to-green-600 mx-auto mb-1"></div>
+          <div class="w-20 h-0.5 bg-gradient-to-r from-purple-400 to-purple-600 mx-auto mb-1"></div>
           <p v-if="userInfo" class="text-xs text-gray-600">
             Registros de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
           </p>
@@ -79,7 +79,7 @@
         <!-- Título centralizado para Asistencias -->
         <div class="text-center mb-1">
           <h2 class="text-sm font-bold text-gray-800 mb-1">Historial de asistencias</h2>
-          <div class="w-20 h-0.5 bg-gradient-to-r from-green-400 to-green-600 mx-auto mb-1"></div>
+          <div class="w-20 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-1"></div>
           <p v-if="userInfo" class="text-xs text-gray-600">
             Asistencias de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
           </p>
@@ -372,7 +372,7 @@ const registroSeleccionado = ref(null);
 const detailMap = ref(null);
 const isOnline = ref(true);
 const userInfo = ref(null);
-const tabActiva = ref('registros');
+const tabActiva = ref('asistencias');
 const imagenModalVisible = ref(false);
 const imagenSeleccionada = ref('');
 
@@ -394,9 +394,10 @@ onMounted(async () => {
     return;
   }
   
-  cargarRegistros();
-  // Cargar asistencias también al inicio
+  // Ahora que Asistencias es la tab por defecto, cargarla primero
   cargarAsistencias();
+  // También cargar registros para que estén disponibles
+  cargarRegistros();
 });
 
 async function cargarRegistros() {
@@ -710,10 +711,14 @@ function verAsistenciaEnMapa(asistencia, tipo) {
 }
 
 // Cargar asistencias cuando se cambia a esa pestaña
+// Cargar datos cuando se cambia de pestaña
 function cambiarTab(tab) {
   tabActiva.value = tab;
   if (tab === 'asistencias' && asistencias.value.length === 0) {
     cargarAsistencias();
+  }
+  if (tab === 'registros' && registros.value.length === 0) {
+    cargarRegistros();
   }
 }
 

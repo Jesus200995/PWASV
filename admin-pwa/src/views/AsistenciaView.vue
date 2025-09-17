@@ -3529,7 +3529,7 @@ export default {
   max-width: 0; /* Forzar que respete el width */
   font-family: Arial, sans-serif; /* Fuente Arial */
   font-size: clamp(8px, 1.4vw, 9px); /* Mismo tamaño que user-name */
-  color: #1565C0; /* Azul fuerte */
+  color: #5d4037; /* Color café oscuro */
   font-weight: 700; /* Negritas (bold) */
   font-style: italic; /* Cursiva/de lado */
 }
@@ -3620,12 +3620,13 @@ export default {
 }
 
 .date-badge {
-  background: rgba(76, 175, 80, 0.1);
-  color: #4CAF50;
+  background: rgba(96, 96, 96, 0.1);
+  color: #424242;
   padding: clamp(2px, 0.4vw, 3px) clamp(4px, 0.8vw, 6px); /* Padding más pequeño */
   border-radius: clamp(6px, 1.2vw, 8px); /* Border radius más pequeño */
   font-weight: 500;
   font-size: clamp(7px, 1.2vw, 8px); /* Tamaño más pequeño */
+  font-style: italic;
   white-space: nowrap;
   display: inline-block;
   max-width: 100%;
@@ -3648,13 +3649,13 @@ export default {
 }
 
 .time-badge.entrada {
-  background: rgba(33, 150, 243, 0.1);
-  color: #2196F3;
+  background: rgba(30, 144, 255, 0.1);
+  color: #1e90ff;
 }
 
 .time-badge.salida {
-  background: rgba(255, 152, 0, 0.1);
-  color: #FF9800;
+  background: rgba(220, 20, 60, 0.1);
+  color: #dc143c;
 }
 
 /* Estilos específicos para columnas de hora */
@@ -3790,23 +3791,23 @@ export default {
 }
 
 .map-btn.entrada-map {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: linear-gradient(135deg, #1e90ff, #1976d2);
 }
 
 .map-btn.entrada-map:hover {
-  background: linear-gradient(135deg, #45a049, #388e3c);
+  background: linear-gradient(135deg, #1976d2, #1565c0);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
 }
 
 .map-btn.salida-map {
-  background: linear-gradient(135deg, #f44336, #d32f2f);
+  background: linear-gradient(135deg, #dc143c, #b71c1c);
 }
 
 .map-btn.salida-map:hover {
-  background: linear-gradient(135deg, #d32f2f, #c62828);
+  background: linear-gradient(135deg, #b71c1c, #c62828);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
 }
 
 .map-btn:active {
@@ -4140,7 +4141,7 @@ export default {
   .asistencias-table td:nth-child(2) { /* Correo */
     font-family: Arial, sans-serif; /* Fuente Arial */
     font-size: clamp(7px, 1.3vw, 8px); /* Tamaño consistente */
-    color: #1565C0; /* Azul fuerte */
+    color: #5d4037; /* Color café oscuro */
     font-weight: 700; /* Negritas (bold) */
     font-style: italic; /* Cursiva/de lado */
   }
@@ -4280,7 +4281,7 @@ export default {
     font-size: clamp(7px, 1.2vw, 8px); /* Mismo tamaño que user-name en móvil */
     line-height: 1.1;
     font-family: Arial, sans-serif; /* Fuente Arial */
-    color: #1565C0; /* Azul fuerte */
+    color: #5d4037; /* Color café oscuro */
     font-weight: 700; /* Negritas (bold) */
     font-style: italic; /* Cursiva/de lado */
   }

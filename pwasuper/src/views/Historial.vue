@@ -184,8 +184,8 @@
               <!-- Diseño dividido: Entrada y Salida en dos columnas -->
               <div class="grid grid-cols-2 gap-2">
                 <!-- Columna Entrada -->
-                <div class="bg-green-50 rounded-lg p-2 border-2 border-green-200 shadow-sm">
-                  <h4 class="text-xs font-semibold text-green-800 mb-1 flex items-center justify-center text-center">
+                <div class="entrada-bg-light rounded-lg p-2 border-2 shadow-sm">
+                  <h4 class="text-xs font-semibold entrada-text-dark mb-1 flex items-center justify-center text-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
@@ -194,7 +194,7 @@
                   
                   <div v-if="asistencia.hora_entrada" class="space-y-2">
                     <div class="text-center">
-                      <p class="text-xs font-bold text-green-700">{{ formatHora(asistencia.hora_entrada) }}</p>
+                      <p class="text-xs font-bold entrada-text">{{ formatHora(asistencia.hora_entrada) }}</p>
                     </div>
                     
                     <div v-if="asistencia.foto_entrada_url" class="flex justify-center">
@@ -209,7 +209,7 @@
                     </div>
                     
                     <div class="text-center">
-                      <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" class="text-green-600 hover:text-green-800 text-xs font-medium underline">
+                      <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" class="entrada-text hover:entrada-text-dark text-xs font-medium underline">
                         📍 Ver mapa
                       </button>
                     </div>
@@ -226,12 +226,12 @@
                 <div :class="[
                   'rounded-lg p-2 border-2 shadow-sm',
                   asistencia.hora_salida 
-                    ? 'bg-red-50 border-red-200' 
+                    ? 'salida-bg-light' 
                     : 'bg-gray-50 border-gray-200'
                 ]">
                   <h4 :class="[
                     'text-xs font-semibold mb-1 flex items-center justify-center text-center',
-                    asistencia.hora_salida ? 'text-red-800' : 'text-gray-500'
+                    asistencia.hora_salida ? 'salida-text-dark' : 'text-gray-500'
                   ]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -241,7 +241,7 @@
                   
                   <div v-if="asistencia.hora_salida" class="space-y-2">
                     <div class="text-center">
-                      <p class="text-xs font-bold text-red-700">{{ formatHora(asistencia.hora_salida) }}</p>
+                      <p class="text-xs font-bold salida-text">{{ formatHora(asistencia.hora_salida) }}</p>
                     </div>
                     
                     <div v-if="asistencia.foto_salida_url" class="flex justify-center">
@@ -256,7 +256,7 @@
                     </div>
                     
                     <div class="text-center">
-                      <button @click="verAsistenciaEnMapa(asistencia, 'salida')" class="text-red-600 hover:text-red-800 text-xs font-medium underline">
+                      <button @click="verAsistenciaEnMapa(asistencia, 'salida')" class="salida-text hover:salida-text-dark text-xs font-medium underline">
                         📍 Ver mapa
                       </button>
                     </div>
@@ -1247,5 +1247,44 @@ function verImagen(url) {
     padding: 8px 48px;
     font-size: 0.8rem;
   }
+}
+
+/* Colores personalizados para entrada y salida que coincidan con Home.vue */
+.entrada-colors {
+  background-color: rgb(30, 144, 255) !important;
+  border-color: rgb(25, 130, 230) !important;
+  color: white !important;
+}
+
+.entrada-bg-light {
+  background-color: rgba(30, 144, 255, 0.1) !important;
+  border-color: rgba(30, 144, 255, 0.3) !important;
+}
+
+.entrada-text {
+  color: rgb(30, 144, 255) !important;
+}
+
+.entrada-text-dark {
+  color: rgb(25, 130, 230) !important;
+}
+
+.salida-colors {
+  background-color: rgb(220, 20, 60) !important;
+  border-color: rgb(200, 15, 55) !important;
+  color: white !important;
+}
+
+.salida-bg-light {
+  background-color: rgba(220, 20, 60, 0.1) !important;
+  border-color: rgba(220, 20, 60, 0.3) !important;
+}
+
+.salida-text {
+  color: rgb(220, 20, 60) !important;
+}
+
+.salida-text-dark {
+  color: rgb(200, 15, 55) !important;
 }
 </style>

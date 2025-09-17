@@ -108,57 +108,154 @@
         <div class="mb-2 text-xs text-gray-600">
           Total de registros: <span class="font-semibold text-primary">{{ registros.length }}</span>
         </div>
-        <div class="space-y-2">
-          <div v-for="(registro, index) in registros" :key="index" class="glass-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
-            <div class="p-2">
-              <div class="flex gap-2">
-                <div class="w-12 h-12 flex-shrink-0 bg-gray-100 rounded overflow-hidden relative" :class="{'cursor-pointer': registro.foto_url}" @click="registro.foto_url && verImagen(registro.foto_url)">
-                  <img v-if="registro.foto_url" :src="registro.foto_url" class="w-full h-full object-cover" alt="Foto" />
-                  <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="space-y-3">
+          <div v-for="(registro, index) in registros" :key="index" 
+               :class="[
+                 'relative overflow-hidden rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl',
+                 'backdrop-filter backdrop-blur-xl border shadow-lg',
+                 registro.tipo_actividad === 'campo' 
+                   ? 'bg-gradient-to-br from-green-50/80 via-emerald-25/40 to-green-100/60 border-green-200/60 hover:shadow-green-200/50' 
+                   : registro.tipo_actividad === 'gabinete'
+                   ? 'bg-gradient-to-br from-orange-50/80 via-amber-25/40 to-orange-100/60 border-orange-200/60 hover:shadow-orange-200/50'
+                   : 'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:shadow-gray-200/50'
+               ]"
+               style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+            
+            <!-- Efectos decorativos de vidrio líquido -->
+            <div class="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-60 rounded-2xl pointer-events-none"></div>
+            <div v-if="registro.tipo_actividad === 'campo'" class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-green-400/20 to-transparent rounded-full blur-xl"></div>
+            <div v-else-if="registro.tipo_actividad === 'gabinete'" class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-orange-400/20 to-transparent rounded-full blur-xl"></div>
+            
+            <!-- Borde superior colorido -->
+            <div :class="[
+              'absolute top-0 left-0 right-0 h-1 rounded-t-2xl',
+              registro.tipo_actividad === 'campo' 
+                ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-green-600' 
+                : registro.tipo_actividad === 'gabinete'
+                ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600'
+                : 'bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600'
+            ]"></div>
+            
+            <div class="relative z-10 p-4">
+              <div class="flex gap-3">
+                <!-- Imagen con diseño mejorado -->
+                <div class="w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden relative shadow-lg" 
+                     :class="{'cursor-pointer': registro.foto_url}" 
+                     @click="registro.foto_url && verImagen(registro.foto_url)">
+                  <img v-if="registro.foto_url" 
+                       :src="registro.foto_url" 
+                       class="w-full h-full object-cover transition-transform duration-300 hover:scale-110" 
+                       alt="Foto" />
+                  <div v-else :class="[
+                         'w-full h-full flex items-center justify-center',
+                         registro.tipo_actividad === 'campo' 
+                           ? 'bg-green-100 text-green-500' 
+                           : registro.tipo_actividad === 'gabinete'
+                           ? 'bg-orange-100 text-orange-500'
+                           : 'bg-gray-100 text-gray-400'
+                       ]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <div v-if="registro.foto_url" class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div v-if="registro.foto_url" class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity rounded-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white opacity-0 hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
                 </div>
                 
-                <div class="flex-1 min-w-0">
+                <div class="flex-1 min-w-0 space-y-2">
+                  <!-- Header con fecha y botón de mapa -->
                   <div class="flex justify-between items-start">
-                    <div class="flex flex-col">
-                      <p class="text-xs text-gray-500 font-medium">{{ formatFechaCompleta(registro.fecha_hora) }}</p>
-                      <p class="text-xs text-green-600 font-bold">{{ formatHoraCDMX(registro.fecha_hora) }}</p>
+                    <div class="flex flex-col space-y-1">
+                      <p class="text-xs font-semibold text-gray-700">{{ formatFechaCompleta(registro.fecha_hora) }}</p>
+                      <p :class="[
+                           'text-sm font-bold',
+                           registro.tipo_actividad === 'campo' 
+                             ? 'text-green-700' 
+                             : registro.tipo_actividad === 'gabinete'
+                             ? 'text-orange-700'
+                             : 'text-gray-700'
+                         ]">{{ formatHoraCDMX(registro.fecha_hora) }}</p>
                     </div>
-                    <button @click="verEnMapa(registro)" class="text-primary hover:text-primary-dark text-xs flex items-center ml-1 whitespace-nowrap">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    <button @click="verEnMapa(registro)" 
+                            :class="[
+                              'text-xs flex items-center px-3 py-1.5 rounded-full font-medium transition-all duration-300 hover:scale-105 shadow-sm',
+                              registro.tipo_actividad === 'campo' 
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-200' 
+                                : registro.tipo_actividad === 'gabinete'
+                                ? 'bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-200'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                            ]">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      Ver mapa
+                      Mapa
                     </button>
                   </div>
                   
-                  <p class="text-xs text-gray-800 mt-0.5 line-clamp-2">{{ registro.descripcion || "Sin descripción" }}</p>
+                  <!-- Descripción -->
+                  <p class="text-sm text-gray-800 leading-relaxed line-clamp-2">{{ registro.descripcion || "Sin descripción" }}</p>
                   
-                  <!-- Nuevo: mostrar tipo de actividad -->
-                  <div v-if="registro.tipo_actividad" class="mt-1">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" 
-                          :class="registro.tipo_actividad === 'campo' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-blue-100 text-blue-800'">
-                      {{ registro.tipo_actividad === 'campo' ? '🌾 Campo' : '🏢 Gabinete' }}
-                    </span>
-                  </div>
-                  
-                  <div class="mt-0.5 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <div class="text-xs text-gray-600 truncate">
-                      {{ registro.latitud }}, {{ registro.longitud }}
+                  <!-- Tipo de actividad con diseño mejorado -->
+                  <div v-if="registro.tipo_actividad" class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <!-- Icono circular mejorado -->
+                      <div :class="[
+                        'w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110',
+                        registro.tipo_actividad === 'campo' 
+                          ? 'bg-gradient-to-br from-green-600 to-green-700 shadow-green-600/40' 
+                          : 'bg-gradient-to-br from-orange-600 to-orange-700 shadow-orange-600/40'
+                      ]">
+                        <!-- Efecto de brillo interno -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-full"></div>
+                        
+                        <!-- Icono para Campo -->
+                        <svg v-if="registro.tipo_actividad === 'campo'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                        <!-- Icono para Gabinete -->
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      
+                      <!-- Información del tipo de actividad -->
+                      <div class="flex flex-col">
+                        <span :class="[
+                          'text-sm font-bold',
+                          registro.tipo_actividad === 'campo' 
+                            ? 'text-green-800' 
+                            : 'text-orange-800'
+                        ]">
+                          {{ registro.tipo_actividad === 'campo' ? 'Campo' : 'Gabinete' }}
+                        </span>
+                        <span :class="[
+                          'text-xs',
+                          registro.tipo_actividad === 'campo' 
+                            ? 'text-green-600' 
+                            : 'text-orange-600'
+                        ]">
+                          {{ registro.tipo_actividad === 'campo' ? 'Trabajo en terreno' : 'Trabajo de oficina' }}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <!-- Coordenadas mejoradas -->
+                    <div :class="[
+                      'text-right bg-white/60 backdrop-blur-sm rounded-lg px-2 py-1 border',
+                      registro.tipo_actividad === 'campo' 
+                        ? 'border-green-200/60' 
+                        : 'border-orange-200/60'
+                    ]">
+                      <div class="text-xs text-gray-600 font-mono">
+                        {{ registro.latitud.toFixed(4) }}
+                      </div>
+                      <div class="text-xs text-gray-600 font-mono">
+                        {{ registro.longitud.toFixed(4) }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1247,6 +1344,89 @@ function verImagen(url) {
     padding: 8px 48px;
     font-size: 0.8rem;
   }
+}
+
+/* Estilos adicionales para el historial moderno */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Animaciones suaves para las tarjetas del historial */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.space-y-3 > * {
+  animation: slideInUp 0.4s ease-out;
+}
+
+.space-y-3 > *:nth-child(1) { animation-delay: 0s; }
+.space-y-3 > *:nth-child(2) { animation-delay: 0.1s; }
+.space-y-3 > *:nth-child(3) { animation-delay: 0.2s; }
+.space-y-3 > *:nth-child(4) { animation-delay: 0.3s; }
+.space-y-3 > *:nth-child(5) { animation-delay: 0.4s; }
+
+/* Efectos de hover mejorados para los iconos */
+.hover\:scale-110:hover {
+  transform: scale(1.1);
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+/* Estilos específicos para fondos con transparencia */
+.bg-gradient-to-br {
+  position: relative;
+}
+
+/* Mejoras específicas para móviles en el historial */
+@media (max-width: 640px) {
+  .space-y-3 > * {
+    margin-bottom: 1rem;
+  }
+  
+  .space-y-3 > div {
+    padding: 1rem;
+  }
+  
+  .w-16.h-16 {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  
+  .w-10.h-10 {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+/* Efectos de profundidad y sombras dinámicas */
+.hover\:shadow-xl:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.hover\:shadow-green-200\/50:hover {
+  box-shadow: 0 20px 25px -5px rgba(34, 197, 94, 0.15), 0 10px 10px -5px rgba(34, 197, 94, 0.1);
+}
+
+.hover\:shadow-orange-200\/50:hover {
+  box-shadow: 0 20px 25px -5px rgba(251, 146, 60, 0.15), 0 10px 10px -5px rgba(251, 146, 60, 0.1);
+}
+
+.hover\:shadow-gray-200\/50:hover {
+  box-shadow: 0 20px 25px -5px rgba(156, 163, 175, 0.15), 0 10px 10px -5px rgba(156, 163, 175, 0.1);
 }
 
 /* Colores personalizados para entrada y salida que coincidan con Home.vue */

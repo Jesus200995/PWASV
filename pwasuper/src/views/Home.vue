@@ -433,8 +433,12 @@
             <button
               @click="confirmarAsistencia"
               :disabled="!puedeEnviarAsistencia || enviandoAsistencia"
-              class="glass-button flex-1 relative text-xs py-2"
-              :class="{'opacity-50 cursor-not-allowed': !puedeEnviarAsistencia || enviandoAsistencia}"
+              class="flex-1 relative text-xs py-2"
+              :class="[
+                'glass-button',
+                tipoAsistencia === 'entrada' ? 'glass-button-entrada' : 'glass-button-salida',
+                {'opacity-50 cursor-not-allowed': !puedeEnviarAsistencia || enviandoAsistencia}
+              ]"
             >
               <div v-if="enviandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
                 <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
@@ -809,7 +813,7 @@
         <button
           type="submit"
           :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || enviando || !entradaMarcada || salidaMarcada"
-          :class="['glass-button w-full', (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || enviando || !entradaMarcada || salidaMarcada) ? 'opacity-50 cursor-not-allowed' : '']"
+          :class="['glass-button-registro w-full', (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || enviando || !entradaMarcada || salidaMarcada) ? 'opacity-50 cursor-not-allowed' : '']"
         >
           <span v-if="enviando" class="flex items-center justify-center">
             <svg
@@ -2942,6 +2946,192 @@ watch([entradaMarcada, salidaMarcada], () => {
     0 8px 32px 0 rgba(31, 38, 135, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Estilos específicos para botones de entrada (azul) */
+.glass-button-entrada {
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(30, 144, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(30, 144, 255, 0.8) 0%, 
+    rgba(25, 118, 210, 0.8) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px 0 rgba(30, 144, 255, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glass-button-entrada:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px 0 rgba(30, 144, 255, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(30, 144, 255, 0.9) 0%, 
+    rgba(25, 118, 210, 0.9) 100%);
+}
+
+.glass-button-entrada:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 
+    0 4px 15px 0 rgba(30, 144, 255, 0.3),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button-entrada::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.glass-button-entrada:hover::before {
+  left: 100%;
+}
+
+/* Estilos específicos para botones de salida (rojo) */
+.glass-button-salida {
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(220, 20, 60, 0.8) 0%, 
+    rgba(183, 28, 28, 0.8) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px 0 rgba(220, 20, 60, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glass-button-salida:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px 0 rgba(220, 20, 60, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(220, 20, 60, 0.9) 0%, 
+    rgba(183, 28, 28, 0.9) 100%);
+}
+
+.glass-button-salida:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 
+    0 4px 15px 0 rgba(220, 20, 60, 0.3),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button-salida::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.glass-button-salida:hover::before {
+  left: 100%;
+}
+
+/* Estilos específicos para botones de registro (morado) */
+.glass-button-registro {
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(128, 0, 128, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(128, 0, 128, 0.8) 0%, 
+    rgba(102, 16, 242, 0.8) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px 0 rgba(128, 0, 128, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glass-button-registro:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px 0 rgba(128, 0, 128, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(128, 0, 128, 0.9) 0%, 
+    rgba(102, 16, 242, 0.9) 100%);
+}
+
+.glass-button-registro:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 
+    0 4px 15px 0 rgba(128, 0, 128, 0.3),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button-registro::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.glass-button-registro:hover::before {
+  left: 100%;
 }
 
 .glass-link {

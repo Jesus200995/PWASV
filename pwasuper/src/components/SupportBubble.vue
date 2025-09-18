@@ -13,9 +13,9 @@
 
     <div
       v-if="!isHidden && !props.hideOnSupportPage"
-      class="fixed bottom-6 right-6 z-50 select-none"
+      class="fixed z-50 select-none support-bubble-container"
       :class="{ 'translate-y-0': isVisible, 'translate-y-20': !isVisible }"
-      style="transition: transform 0.3s ease-in-out;"
+      :style="bubblePositionStyle"
     >
       <!-- Contenedor principal de la burbuja -->
       <div class="relative">
@@ -23,7 +23,8 @@
         <transition name="scale-fade">
           <div
             v-if="isExpanded"
-            class="absolute bottom-16 right-0 rounded-2xl shadow-2xl border p-4 w-80 max-w-[calc(100vw-3rem)] backdrop-blur-sm"
+            class="absolute bottom-16 rounded-2xl shadow-2xl border p-4 w-80 max-w-[calc(100vw-3rem)] backdrop-blur-sm"
+            :class="panelPositionClass"
             style="background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,1) 100%); backdrop-filter: blur(15px); border: 2px solid rgba(148, 30, 67, 0.2); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.9);"
             @click.stop
           >
@@ -130,8 +131,11 @@
         <!-- Botón principal de la burbuja -->
         <button
           @click="toggleExpanded"
-          class="relative w-14 h-14 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center group"
+          @mousedown="startDrag"
+          @touchstart="startDrag"
+          class="relative w-14 h-14 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center group touch-none"
           style="background: linear-gradient(135deg, #941E43 0%, #7D1A3A 100%); box-shadow: 0 10px 25px rgba(148, 30, 67, 0.4);"
+          :class="{ 'cursor-grabbing': isDragging, 'cursor-grab': !isDragging }"
         >
           
               <!-- Icono principal -->
@@ -171,7 +175,8 @@
         <button
           v-if="!isExpanded"
           @click="hideTemporarily"
-          class="absolute -top-2 -left-2 w-6 h-6 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors flex items-center justify-center text-xs shadow-lg"
+          class="absolute w-6 h-6 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors flex items-center justify-center text-xs shadow-lg"
+          :class="isOnRight ? '-top-2 -left-2' : '-top-2 -right-2'"
           title="Ocultar temporalmente"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -185,7 +190,11 @@
     <transition name="slide-up">
       <div
         v-if="isHidden && !props.hideOnSupportPage"
-        class="fixed bottom-6 right-6 z-50"
+        class="fixed z-50"
+        :style="{
+          [isOnRight ? 'right' : 'left']: '0.5rem',
+          [customY !== null ? 'top' : 'bottom']: customY !== null ? `${customY}px` : '0.5rem'
+        }"
       >
         <button
           @click="showAgain"
@@ -222,6 +231,11 @@ const props = defineProps({
 const isExpanded = ref(false)
 const isVisible = ref(false)
 const isHidden = ref(false)
+const isDragging = ref(false)
+const isOnRight = ref(true) // Por defecto a la derecha
+const customY = ref(null) // Posición Y personalizada
+const position = ref({ x: 0, y: 0 })
+const dragStart = ref({ x: 0, y: 0 })
 
 // Determinar si estamos en horario de atención
 const isHorarioAbierto = computed(() => {
@@ -236,8 +250,58 @@ const isHorarioAbierto = computed(() => {
   return esDiaLaboral && estaEnHorario
 })
 
+// Calcular posición y clase del panel según lado
+const panelPositionClass = computed(() => {
+  return isOnRight.value ? 'right-0' : 'left-0'
+})
+
+const bubblePositionStyle = computed(() => {
+  if (isDragging.value) {
+    // Durante el arrastre, usar posición absoluta para movimiento libre
+    return {
+      position: 'fixed',
+      left: `${position.value.x}px`,
+      top: `${position.value.y}px`,
+      right: 'auto',
+      bottom: 'auto',
+      transition: 'none',
+      zIndex: '60' // Asegurar que esté por encima de todo durante el arrastre
+    }
+  }
+  
+  // Cuando no se arrastra, usar posición personalizada o por defecto
+  const baseStyle = {
+    transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)' // Transición suave y elegante
+  }
+  
+  // Si hay una posición Y personalizada, usarla; si no, usar bottom por defecto
+  if (customY.value !== null) {
+    baseStyle.top = `${customY.value}px`
+    baseStyle.bottom = 'auto'
+  } else {
+    baseStyle.bottom = '0.5rem' // Reducido de 1.5rem a 0.5rem
+    baseStyle.top = 'auto'
+  }
+  
+  if (isOnRight.value) {
+    return {
+      ...baseStyle,
+      right: '0.5rem', // Reducido de 1.5rem a 0.5rem para estar más cerca
+      left: 'auto'
+    }
+  } else {
+    return {
+      ...baseStyle,
+      left: '0.5rem', // Reducido de 1.5rem a 0.5rem para estar más cerca
+      right: 'auto'
+    }
+  }
+})
+
 const toggleExpanded = () => {
-  isExpanded.value = !isExpanded.value
+  if (!isDragging.value) {
+    isExpanded.value = !isExpanded.value
+  }
 }
 
 const hideTemporarily = () => {
@@ -265,14 +329,119 @@ const handleContactClick = (type) => {
   }, 500)
 }
 
+// Funciones de arrastre
+const startDrag = (event) => {
+  isDragging.value = true
+  const clientX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX
+  const clientY = event.type.includes('touch') ? event.touches[0].clientY : event.clientY
+  
+  // Obtener posición actual del elemento
+  const rect = event.target.closest('.support-bubble-container').getBoundingClientRect()
+  
+  dragStart.value = {
+    x: clientX - rect.left,
+    y: clientY - rect.top
+  }
+  
+  // Establecer posición inicial basada en la posición actual del elemento
+  position.value = {
+    x: rect.left,
+    y: rect.top
+  }
+  
+  document.addEventListener('mousemove', onDrag)
+  document.addEventListener('mouseup', endDrag)
+  document.addEventListener('touchmove', onDrag, { passive: false })
+  document.addEventListener('touchend', endDrag)
+}
+
+const onDrag = (event) => {
+  if (!isDragging.value) return
+  
+  event.preventDefault()
+  const clientX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX
+  const clientY = event.type.includes('touch') ? event.touches[0].clientY : event.clientY
+  
+  // Calcular nueva posición absoluta
+  position.value = {
+    x: clientX - dragStart.value.x,
+    y: clientY - dragStart.value.y
+  }
+}
+
+const endDrag = (event) => {
+  if (!isDragging.value) return
+  
+  const clientX = event.type.includes('touch') ? 
+    (event.changedTouches ? event.changedTouches[0].clientX : event.clientX) : 
+    event.clientX
+  const clientY = event.type.includes('touch') ? 
+    (event.changedTouches ? event.changedTouches[0].clientY : event.clientY) : 
+    event.clientY
+  
+  // Determinar en qué lado debería quedar basado en la posición final
+  const screenWidth = window.innerWidth
+  const finalX = position.value.x
+  const shouldBeOnRight = finalX > screenWidth / 2
+  
+  // Calcular la posición Y final y mantenerla dentro de límites seguros
+  const safeMargin = 8 // Reducido de 24px a 8px para estar más cerca de las esquinas
+  const screenHeight = window.innerHeight
+  const bubbleSize = 56 // 14 * 4 = 56px (w-14 h-14)
+  
+  let finalY = position.value.y
+  // Asegurar que esté dentro de los límites seguros de la pantalla
+  finalY = Math.max(safeMargin, Math.min(screenHeight - bubbleSize - safeMargin, finalY))
+  
+  // Actualizar estado - la burbuja se pegará al lado correspondiente
+  isOnRight.value = shouldBeOnRight
+  
+  // Guardar la posición Y personalizada
+  customY.value = finalY
+  
+  // Resetear posición de arrastre - la burbuja volverá a su posición fija
+  position.value = { x: 0, y: 0 }
+  isDragging.value = false
+  
+  // Guardar preferencia en localStorage
+  localStorage.setItem('supportBubblePosition', JSON.stringify({
+    isOnRight: isOnRight.value,
+    customY: finalY
+  }))
+  
+  // Limpiar eventos
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', endDrag)
+  document.removeEventListener('touchmove', onDrag)
+  document.removeEventListener('touchend', endDrag)
+}
+
 // Cerrar panel al hacer clic fuera
 const handleClickOutside = (event) => {
-  if (isExpanded.value && !event.target.closest('.fixed.bottom-6.right-6')) {
+  if (isExpanded.value && !event.target.closest('.fixed.bottom-6.right-6') && !event.target.closest('.support-bubble-container')) {
     isExpanded.value = false
   }
 }
 
+// Cargar posición guardada
+const loadSavedPosition = () => {
+  try {
+    const saved = localStorage.getItem('supportBubblePosition')
+    if (saved) {
+      const { isOnRight: savedIsOnRight, customY: savedCustomY } = JSON.parse(saved)
+      isOnRight.value = savedIsOnRight
+      if (savedCustomY !== undefined) {
+        customY.value = savedCustomY
+      }
+    }
+  } catch (error) {
+    console.log('No se pudo cargar la posición guardada')
+  }
+}
+
 onMounted(() => {
+  loadSavedPosition()
+  
   if (props.autoShow) {
     setTimeout(() => {
       isVisible.value = true
@@ -284,6 +453,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', endDrag)
+  document.removeEventListener('touchmove', onDrag)
+  document.removeEventListener('touchend', endDrag)
 })
 </script>
 

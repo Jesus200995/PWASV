@@ -31,7 +31,7 @@
             <!-- Header del panel -->
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center shadow-md" style="background: linear-gradient(135deg, #DA4464 0%, #C33E5A 100%);">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center shadow-md" style="background: linear-gradient(135deg, #65DB2E 0%, #4CAF50 100%);">
                   <font-awesome-icon 
                     icon="headset"
                     class="h-4 w-4 text-white"
@@ -134,7 +134,7 @@
           @mousedown="startDrag"
           @touchstart="startDrag"
           class="relative w-14 h-14 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center group touch-none"
-          style="background: linear-gradient(135deg, #DA4464 0%, #C33E5A 100%); box-shadow: 0 10px 25px rgba(218, 68, 100, 0.4);"
+          style="background: linear-gradient(135deg, #65DB2E 0%, #4CAF50 100%); box-shadow: 0 10px 25px rgba(101, 219, 46, 0.4);"
           :class="{ 'cursor-grabbing': isDragging, 'cursor-grab': !isDragging }"
         >
           
@@ -165,7 +165,7 @@
           <div 
             v-if="showNotificationBadge && !isExpanded"
             class="absolute -top-1 -right-1 w-4 h-4 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md animate-bounce"
-            style="background-color: #DA4464;"
+            style="background-color: #65DB2E;"
           >
             !
           </div>
@@ -268,7 +268,7 @@ const panelStyles = computed(() => {
   const baseStyles = {
     background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,1) 100%)',
     backdropFilter: 'blur(15px)',
-    border: '2px solid rgba(218, 68, 100, 0.2)',
+    border: '2px solid rgba(101, 219, 46, 0.2)',
     boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
     maxHeight: '80vh',
     overflowY: 'auto'

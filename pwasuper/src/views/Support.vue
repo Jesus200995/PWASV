@@ -1,10 +1,10 @@
 <template>
-  <div class="fixed inset-0 overflow-hidden" style="background: linear-gradient(135deg, rgba(218, 68, 100, 0.05) 0%, rgba(235, 80, 115, 0.08) 50%, rgba(218, 68, 100, 0.05) 100%);">
+  <div class="fixed inset-0 overflow-hidden" style="background: linear-gradient(135deg, rgba(101, 219, 46, 0.05) 0%, rgba(76, 175, 80, 0.08) 50%, rgba(101, 219, 46, 0.05) 100%);">
     <!-- Elementos decorativos para mejorar el efecto de vidrio -->
     <div class="absolute inset-0">
-      <div class="absolute top-1/4 left-1/4 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="background-color: rgba(218, 68, 100, 0.3);"></div>
-      <div class="absolute top-3/4 right-1/4 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s; background-color: rgba(235, 80, 115, 0.3);"></div>
-      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s; background-color: rgba(195, 62, 90, 0.3);"></div>
+      <div class="absolute top-1/4 left-1/4 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="background-color: rgba(101, 219, 46, 0.3);"></div>
+      <div class="absolute top-3/4 right-1/4 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s; background-color: rgba(76, 175, 80, 0.3);"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s; background-color: rgba(56, 142, 60, 0.3);"></div>
     </div>
     
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
@@ -13,7 +13,7 @@
       <!-- Header de Soporte -->
       <div class="glass-card text-center">
         <div class="flex items-center justify-center mb-3">
-          <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-xl" style="background: linear-gradient(135deg, #DA4464 0%, #C33E5A 100%);">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-xl" style="background: linear-gradient(135deg, #65DB2E 0%, #4CAF50 100%);">
             <font-awesome-icon 
               icon="headset"
               class="h-6 w-6 text-white"
@@ -68,7 +68,7 @@
       <!-- Opciones de contacto -->
       <div class="glass-card">
         <h2 class="text-base font-semibold text-gray-800 mb-3 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: #DA4464;">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: #65DB2E;">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
           </svg>
           Opciones de Contacto
@@ -151,10 +151,10 @@
       </div>
 
       <!-- Mensaje motivacional -->
-      <div class="glass-card text-center border" style="background: linear-gradient(to right, rgba(218, 68, 100, 0.05), rgba(195, 62, 90, 0.08)); border-color: rgba(218, 68, 100, 0.2);">
+      <div class="glass-card text-center border" style="background: linear-gradient(to right, rgba(101, 219, 46, 0.05), rgba(76, 175, 80, 0.08)); border-color: rgba(101, 219, 46, 0.2);">
         <div class="flex items-center justify-center mb-2">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background-color: rgba(218, 68, 100, 0.1);">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: #DA4464;">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background-color: rgba(101, 219, 46, 0.1);">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: #65DB2E;">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </div>
@@ -213,7 +213,7 @@ const handleContactClick = (type) => {
 .red-line {
   width: 60px;
   height: 3px;
-  background: linear-gradient(90deg, #DA4464, #C33E5A);
+  background: linear-gradient(90deg, #65DB2E, #4CAF50);
   border-radius: 2px;
 }
 

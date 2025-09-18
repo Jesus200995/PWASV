@@ -1,14 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-red-50 via-rose-50 to-red-100 flex flex-col relative overflow-hidden">
+  <div class="fixed inset-0 bg-gradient-to-br from-red-50 via-rose-50 to-red-100 overflow-hidden">
     <!-- Elementos decorativos para mejorar el efecto de vidrio -->
     <div class="absolute inset-0">
       <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
       <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-rose-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
-
+    
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
-      <div class="page-container w-full max-w-lg mx-auto relative z-10 px-4 py-2 space-y-4">
+      <div class="page-container relative z-10 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 min-h-full max-w-full">
+        <div class="w-full max-w-lg mx-auto space-y-4">
       <!-- Header de Soporte -->
       <div class="glass-card text-center">
         <div class="flex items-center justify-center mb-3">
@@ -186,6 +187,7 @@
           No dudes en contactarnos. Nuestro equipo de soporte está comprometido a brindarte la mejor experiencia posible.
         </p>
       </div>
+        </div>
       </div>
     </div>
   </div>

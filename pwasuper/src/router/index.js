@@ -7,6 +7,7 @@ import Home from '../views/Home.vue'
 import Historial from '../views/Historial.vue'
 import Profile from '../views/Profile.vue'
 import Notificaciones from '../views/Notificaciones.vue'
+import Support from '../views/Support.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -15,7 +16,8 @@ const routes = [
   { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword },
   { path: '/historial', name: 'Historial', component: Historial },
   { path: '/profile', name: 'Profile', component: Profile },
-  { path: '/notificaciones', name: 'Notificaciones', component: Notificaciones }
+  { path: '/notificaciones', name: 'Notificaciones', component: Notificaciones },
+  { path: '/support', name: 'Support', component: Support }
 ]
 
 const router = createRouter({
@@ -33,7 +35,7 @@ router.beforeEach((to, from, next) => {
     next({ name: 'Home' })
   }
   // Si intenta acceder a rutas protegidas sin estar logueado, redirigir a login
-  else if ((to.name === 'Home' || to.name === 'Historial' || to.name === 'Profile' || to.name === 'Notificaciones') && !isLoggedIn) {
+  else if ((to.name === 'Home' || to.name === 'Historial' || to.name === 'Profile' || to.name === 'Notificaciones' || to.name === 'Support') && !isLoggedIn) {
     next({ name: 'Login' })
   }
   // En cualquier otro caso, permitir la navegación

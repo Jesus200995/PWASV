@@ -3,6 +3,7 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConnectivityStatus from './components/ConnectivityStatus.vue';
 import UpdateNotification from './components/UpdateNotification.vue';
+import SupportBubble from './components/SupportBubble.vue';
 import { useNotifications } from './composables/useNotifications.js';
 
 const router = useRouter();
@@ -336,6 +337,20 @@ function logout() {
               <span class="font-medium">Mi Perfil</span>
             </router-link>
             
+            <router-link 
+              to="/support" 
+              @click="closeMobileMenu"
+              class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              :class="{ 'bg-red-50 text-red-600 border border-red-200': route.name === 'Support' }"
+            >
+              <font-awesome-icon 
+                icon="headset"
+                class="h-5 w-5 mr-3"
+                :class="route.name === 'Support' ? 'text-red-600' : ''"
+              />
+              <span class="font-medium">Soporte</span>
+            </router-link>
+            
             <div class="border-t border-gray-200 pt-2 mt-2">
               <button 
                 @click="logout" 
@@ -370,6 +385,9 @@ function logout() {
 
     <!-- Modal de actualización de la aplicación (obligatorio) -->
     <UpdateNotification />
+
+    <!-- Burbuja de soporte (solo visible cuando el usuario está logueado y no está en la vista de soporte) -->
+    <SupportBubble v-if="isLoggedIn" :hideOnSupportPage="route.name === 'Support'" />
   </div>
 </template>
 

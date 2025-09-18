@@ -8,47 +8,25 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
-      workbox: {
-        skipWaiting: true,
-        clientsClaim: true,
-        cleanupOutdatedCaches: true,
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\..*\//i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
-              }
-            }
-          }
-        ]
-      },
       manifest: {
-        name: 'Sembrando Vida: CONTROL',
-        short_name: 'Sembrando Vida',
-        description: 'Sistema de registro de asistencia y actividades con funcionalidad offline',
-        version: '1.0.1',
-        theme_color: '#10b981',
-        background_color: '#f0fdfa',
+        name: 'Sembrando Datos',
+        short_name: 'Sembrando Datos',
+        description: 'Aplicación para registro de ubicaciones y reforestación',
+        theme_color: '#4CAF50',
+        background_color: '#FFFFFF',
         display: 'standalone',
-        orientation: 'portrait-primary',
         scope: '/',
         start_url: '/',
         icons: [
           {
             src: '/pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any maskable'
+            type: 'image/png'
           },
           {
             src: '/pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
+            type: 'image/png'
           }
         ]
       }

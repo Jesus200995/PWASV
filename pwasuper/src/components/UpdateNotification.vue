@@ -81,11 +81,6 @@ onMounted(() => {
             }
           });
         });
-        
-        // Verificar actualizaciones cada 30 segundos
-        setInterval(() => {
-          reg.update();
-        }, 30000);
       });
     
     // Escuchar eventos de controllerchange (cuando el SW se actualiza)

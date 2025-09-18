@@ -5,7 +5,7 @@
 
 // Incrementar la versión del cache cuando hay cambios importantes
 // Esto forzará a que se muestre la notificación de actualización
-const CACHE_NAME = 'pwa-super-v1.0.1-iconos-actualizados';
+const CACHE_NAME = 'pwa-super-v1.0.1';
 const OFFLINE_URL = '/offline.html';
 
 // Archivos a cachear para funcionamiento offline
@@ -29,7 +29,7 @@ self.addEventListener('install', (event) => {
       })
       .then(() => {
         console.log('✅ Service Worker instalado correctamente');
-        // Forzar activación inmediata para actualizar automáticamente
+        // Forzar activación inmediata
         return self.skipWaiting();
       })
   );

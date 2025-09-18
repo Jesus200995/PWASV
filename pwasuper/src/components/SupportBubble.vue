@@ -9,18 +9,28 @@
     >
       <!-- Contenedor principal de la burbuja -->
       <div class="relative">
+        <!-- Overlay semitransparente cuando está expandido -->
+        <transition name="fade">
+          <div
+            v-if="isExpanded"
+            class="fixed inset-0 bg-black/20 backdrop-blur-sm"
+            style="z-index: -1;"
+            @click="toggleExpanded"
+          ></div>
+        </transition>
+
         <!-- Panel expandido de soporte -->
         <transition name="scale-fade">
           <div
             v-if="isExpanded"
-            class="absolute bottom-16 right-0 bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 w-80 max-w-[calc(100vw-3rem)] backdrop-blur-sm"
-            style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.98) 100%); backdrop-filter: blur(10px);"
+            class="absolute bottom-16 right-0 rounded-2xl shadow-2xl border p-4 w-80 max-w-[calc(100vw-3rem)] backdrop-blur-sm"
+            style="background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,1) 100%); backdrop-filter: blur(15px); border: 2px solid rgba(148, 30, 67, 0.2); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.9);"
             @click.stop
           >
             <!-- Header del panel -->
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-md">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center shadow-md" style="background: linear-gradient(135deg, #941E43 0%, #7D1A3A 100%);">
                   <font-awesome-icon 
                     icon="headset"
                     class="h-4 w-4 text-white"
@@ -120,12 +130,12 @@
         <!-- Botón principal de la burbuja -->
         <button
           @click="toggleExpanded"
-          class="relative w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center group"
-          style="box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);"
+          class="relative w-14 h-14 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center group"
+          style="background: linear-gradient(135deg, #941E43 0%, #7D1A3A 100%); box-shadow: 0 10px 25px rgba(148, 30, 67, 0.4);"
           :class="{ 'rotate-45': isExpanded }"
         >
           <!-- Efecto de ondas al hacer hover -->
-          <div class="absolute inset-0 rounded-full bg-red-400 opacity-75 group-hover:animate-ping"></div>
+          <div class="absolute inset-0 rounded-full opacity-75 group-hover:animate-ping" style="background-color: #B8225F;"></div>
           
               <!-- Icono principal -->
               <div class="relative z-10">
@@ -153,7 +163,8 @@
           <!-- Badge de notificación (opcional) -->
           <div 
             v-if="showNotificationBadge && !isExpanded"
-            class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md animate-bounce"
+            class="absolute -top-1 -right-1 w-4 h-4 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md animate-bounce"
+            style="background-color: #941E43;"
           >
             !
           </div>
@@ -315,6 +326,16 @@ onUnmounted(() => {
   transform: translateY(100%);
 }
 
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 /* Animación de hover mejorada */
 .group:hover .group-hover\:animate-ping {
   animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
@@ -329,7 +350,7 @@ onUnmounted(() => {
 
 /* Sombra personalizada */
 .shadow-3xl {
-  box-shadow: 0 20px 40px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 20px 40px rgba(148, 30, 67, 0.6);
 }
 
 /* Responsive adjustments */

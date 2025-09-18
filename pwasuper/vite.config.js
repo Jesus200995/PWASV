@@ -9,11 +9,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Sembrando Datos',
-        short_name: 'Sembrando Datos',
-        description: 'Aplicación para registro de ubicaciones y reforestación',
-        theme_color: '#4CAF50',
-        background_color: '#FFFFFF',
+        name: 'Sembrando Vida: CONTROL',
+        short_name: 'Sembrando Vida',
+        description: 'Sistema de registro de asistencia y actividades con funcionalidad offline',
+        theme_color: '#10b981',
+        background_color: '#f0fdfa',
         display: 'standalone',
         scope: '/',
         start_url: '/',

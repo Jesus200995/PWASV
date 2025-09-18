@@ -1,6 +1,16 @@
 <template>
   <teleport to="body">
     <!-- Burbuja de soporte flotante -->
+    <!-- Overlay semitransparente cuando está expandido -->
+    <transition name="fade">
+      <div
+        v-if="isExpanded && !isHidden && !props.hideOnSupportPage"
+        class="fixed inset-0 bg-black/20 backdrop-blur-sm"
+        style="z-index: 45;"
+        @click="toggleExpanded"
+      ></div>
+    </transition>
+
     <div
       v-if="!isHidden && !props.hideOnSupportPage"
       class="fixed bottom-6 right-6 z-50 select-none"
@@ -9,16 +19,6 @@
     >
       <!-- Contenedor principal de la burbuja -->
       <div class="relative">
-        <!-- Overlay semitransparente cuando está expandido -->
-        <transition name="fade">
-          <div
-            v-if="isExpanded"
-            class="fixed inset-0 bg-black/20 backdrop-blur-sm"
-            style="z-index: -1;"
-            @click="toggleExpanded"
-          ></div>
-        </transition>
-
         <!-- Panel expandido de soporte -->
         <transition name="scale-fade">
           <div
@@ -132,10 +132,7 @@
           @click="toggleExpanded"
           class="relative w-14 h-14 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center group"
           style="background: linear-gradient(135deg, #941E43 0%, #7D1A3A 100%); box-shadow: 0 10px 25px rgba(148, 30, 67, 0.4);"
-          :class="{ 'rotate-45': isExpanded }"
         >
-          <!-- Efecto de ondas al hacer hover -->
-          <div class="absolute inset-0 rounded-full opacity-75 group-hover:animate-ping" style="background-color: #B8225F;"></div>
           
               <!-- Icono principal -->
               <div class="relative z-10">

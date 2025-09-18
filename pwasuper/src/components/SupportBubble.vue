@@ -42,24 +42,24 @@
             </div>
 
             <!-- Horario de atención -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 mb-4 border border-blue-100">
+            <div class="rounded-xl p-3 mb-4 border" style="background: linear-gradient(to right, rgba(0, 128, 128, 0.1), rgba(0, 128, 128, 0.15)); border-color: rgba(0, 128, 128, 0.3);">
               <div class="flex items-center space-x-2 mb-2">
-                <div class="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: rgb(0, 128, 128);">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <span class="font-medium text-blue-900 text-sm">Horario de Atención</span>
+                <span class="font-medium text-sm" style="color: rgb(0, 100, 100);">Horario de Atención</span>
               </div>
-              <div class="text-xs text-blue-800 space-y-1">
+              <div class="text-xs space-y-1" style="color: rgb(0, 100, 100);">
                 <div class="flex items-center space-x-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" style="color: rgb(0, 128, 128);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <span>Lunes a Viernes</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" style="color: rgb(0, 128, 128);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>10:00 - 18:00 horas</span>
@@ -105,7 +105,7 @@
               <a
                 href="tel:5646611850"
                 @click="handleContactClick('phone')"
-                class="flex items-center space-x-3 p-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                class="flex items-center space-x-3 p-3 bg-gradient-to-r from-blue-800 to-blue-900 text-white rounded-xl hover:from-blue-900 hover:to-blue-950 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
               >
                 <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

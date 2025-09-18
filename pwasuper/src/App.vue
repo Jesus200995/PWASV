@@ -341,12 +341,11 @@ function logout() {
               to="/support" 
               @click="closeMobileMenu"
               class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-              :class="{ 'bg-red-50 text-red-600 border border-red-200': route.name === 'Support' }"
+              :class="{ 'bg-primary/10 text-primary': route.name === 'Support' }"
             >
               <font-awesome-icon 
                 icon="headset"
                 class="h-5 w-5 mr-3"
-                :class="route.name === 'Support' ? 'text-red-600' : ''"
               />
               <span class="font-medium">Soporte</span>
             </router-link>

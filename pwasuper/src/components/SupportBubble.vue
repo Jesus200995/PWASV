@@ -12,7 +12,7 @@
     </transition>
 
     <div
-      v-if="!isHidden && !props.hideOnSupportPage"
+      v-if="!isHidden && !props.hideOnSupportPage && !isCompletelyHidden"
       class="fixed z-50 select-none support-bubble-container"
       :class="{ 'translate-y-0': isVisible, 'translate-y-20': !isVisible }"
       :style="bubblePositionStyle"
@@ -23,15 +23,15 @@
         <transition name="scale-fade">
           <div
             v-if="isExpanded"
-            class="absolute bottom-16 rounded-2xl shadow-2xl border p-4 w-80 max-w-[calc(100vw-3rem)] backdrop-blur-sm"
-            :class="panelPositionClass"
-            style="background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,1) 100%); backdrop-filter: blur(15px); border: 2px solid rgba(148, 30, 67, 0.2); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.9);"
+            class="rounded-2xl shadow-2xl border p-4 w-80 max-w-[calc(100vw-2rem)] backdrop-blur-sm"
+            :class="panelPosition === 'center' ? 'fixed' : `absolute ${panelPositionClass}`"
+            :style="panelStyles"
             @click.stop
           >
             <!-- Header del panel -->
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center shadow-md" style="background: linear-gradient(135deg, #941E43 0%, #7D1A3A 100%);">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center shadow-md" style="background: linear-gradient(135deg, #DA4464 0%, #C33E5A 100%);">
                   <font-awesome-icon 
                     icon="headset"
                     class="h-4 w-4 text-white"
@@ -134,7 +134,7 @@
           @mousedown="startDrag"
           @touchstart="startDrag"
           class="relative w-14 h-14 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center group touch-none"
-          style="background: linear-gradient(135deg, #941E43 0%, #7D1A3A 100%); box-shadow: 0 10px 25px rgba(148, 30, 67, 0.4);"
+          style="background: linear-gradient(135deg, #DA4464 0%, #C33E5A 100%); box-shadow: 0 10px 25px rgba(218, 68, 100, 0.4);"
           :class="{ 'cursor-grabbing': isDragging, 'cursor-grab': !isDragging }"
         >
           
@@ -165,7 +165,7 @@
           <div 
             v-if="showNotificationBadge && !isExpanded"
             class="absolute -top-1 -right-1 w-4 h-4 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md animate-bounce"
-            style="background-color: #941E43;"
+            style="background-color: #DA4464;"
           >
             !
           </div>
@@ -174,10 +174,10 @@
         <!-- Botón para ocultar temporalmente -->
         <button
           v-if="!isExpanded"
-          @click="hideTemporarily"
+          @click="hideCompletely"
           class="absolute w-6 h-6 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors flex items-center justify-center text-xs shadow-lg"
           :class="isOnRight ? '-top-2 -left-2' : '-top-2 -right-2'"
-          title="Ocultar temporalmente"
+          title="Ocultar burbuja de soporte"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -231,11 +231,13 @@ const props = defineProps({
 const isExpanded = ref(false)
 const isVisible = ref(false)
 const isHidden = ref(false)
+const isCompletelyHidden = ref(false) // Nueva variable para ocultar completamente
 const isDragging = ref(false)
 const isOnRight = ref(true) // Por defecto a la derecha
 const customY = ref(null) // Posición Y personalizada
 const position = ref({ x: 0, y: 0 })
 const dragStart = ref({ x: 0, y: 0 })
+const panelPosition = ref('bottom') // 'bottom' o 'top'
 
 // Determinar si estamos en horario de atención
 const isHorarioAbierto = computed(() => {
@@ -250,10 +252,64 @@ const isHorarioAbierto = computed(() => {
   return esDiaLaboral && estaEnHorario
 })
 
-// Calcular posición y clase del panel según lado
+// Calcular posición y clase del panel según lado y espacio
 const panelPositionClass = computed(() => {
-  return isOnRight.value ? 'right-0' : 'left-0'
+  if (panelPosition.value === 'center') {
+    return '' // Sin clases de posicionamiento, usaremos estilos inline
+  }
+  
+  const horizontal = isOnRight.value ? 'right-0' : 'left-0'
+  const vertical = panelPosition.value === 'bottom' ? 'top-16' : 'bottom-16'
+  
+  return `${horizontal} ${vertical}`
 })
+
+const panelStyles = computed(() => {
+  const baseStyles = {
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,1) 100%)',
+    backdropFilter: 'blur(15px)',
+    border: '2px solid rgba(218, 68, 100, 0.2)',
+    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+    maxHeight: '80vh',
+    overflowY: 'auto'
+  }
+  
+  if (panelPosition.value === 'center') {
+    return {
+      ...baseStyles,
+      position: 'fixed',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      [isOnRight.value ? 'right' : 'left']: '1rem',
+      zIndex: '60'
+    }
+  }
+  
+  return baseStyles
+})
+
+// Función para detectar posición óptima del panel
+const calculatePanelPosition = () => {
+  const screenHeight = window.innerHeight
+  const panelHeight = 500
+  const safeMargin = 20
+  
+  // Obtener posición Y de la burbuja
+  let bubbleY = customY.value !== null ? customY.value : screenHeight - 64
+  
+  // Calcular espacio disponible
+  const spaceBelow = screenHeight - bubbleY - 56 - safeMargin
+  const spaceAbove = bubbleY - safeMargin
+  
+  // Decidir posición
+  if (spaceBelow >= 400) {
+    panelPosition.value = 'bottom'
+  } else if (spaceAbove >= 400) {
+    panelPosition.value = 'top'
+  } else {
+    panelPosition.value = 'center'
+  }
+}
 
 const bubblePositionStyle = computed(() => {
   if (isDragging.value) {
@@ -300,7 +356,17 @@ const bubblePositionStyle = computed(() => {
 
 const toggleExpanded = () => {
   if (!isDragging.value) {
-    isExpanded.value = !isExpanded.value
+    if (isExpanded.value) {
+      // Si está expandido y se hace clic en X, ocultar completamente
+      hideCompletely()
+    } else {
+      // Si no está expandido, expandir normalmente
+      isExpanded.value = true
+      // Calcular posición óptima cuando se abre
+      setTimeout(() => {
+        calculatePanelPosition()
+      }, 10) // Pequeño delay para asegurar que el DOM esté actualizado
+    }
   }
 }
 
@@ -310,6 +376,15 @@ const hideTemporarily = () => {
   setTimeout(() => {
     isHidden.value = true
   }, 300)
+}
+
+const hideCompletely = () => {
+  isExpanded.value = false
+  isVisible.value = false
+  isCompletelyHidden.value = true
+  
+  // Guardar el estado de ocultado completo para esta sesión
+  sessionStorage.setItem('supportBubbleCompletelyHidden', 'true')
 }
 
 const showAgain = () => {
@@ -403,6 +478,13 @@ const endDrag = (event) => {
   position.value = { x: 0, y: 0 }
   isDragging.value = false
   
+  // Recalcular posición del panel si está abierto
+  if (isExpanded.value) {
+    setTimeout(() => {
+      calculatePanelPosition()
+    }, 100) // Delay para que la animación termine
+  }
+  
   // Guardar preferencia en localStorage
   localStorage.setItem('supportBubblePosition', JSON.stringify({
     isOnRight: isOnRight.value,
@@ -423,7 +505,16 @@ const handleClickOutside = (event) => {
   }
 }
 
-// Cargar posición guardada
+// Manejar cambio de tamaño de ventana
+const handleResize = () => {
+  if (isExpanded.value) {
+    setTimeout(() => {
+      calculatePanelPosition()
+    }, 100)
+  }
+}
+
+// Cargar posición guardada y estado de visibilidad
 const loadSavedPosition = () => {
   try {
     const saved = localStorage.getItem('supportBubblePosition')
@@ -434,6 +525,12 @@ const loadSavedPosition = () => {
         customY.value = savedCustomY
       }
     }
+    
+    // Verificar si la burbuja fue ocultada completamente en esta sesión
+    const completelyHidden = sessionStorage.getItem('supportBubbleCompletelyHidden')
+    if (completelyHidden === 'true') {
+      isCompletelyHidden.value = true
+    }
   } catch (error) {
     console.log('No se pudo cargar la posición guardada')
   }
@@ -442,17 +539,22 @@ const loadSavedPosition = () => {
 onMounted(() => {
   loadSavedPosition()
   
-  if (props.autoShow) {
+  // Solo mostrar si no está completamente oculta y autoShow está activado
+  if (props.autoShow && !isCompletelyHidden.value) {
     setTimeout(() => {
       isVisible.value = true
     }, 1000) // Mostrar después de 1 segundo
   }
   
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('resize', handleResize)
+  window.addEventListener('orientationchange', handleResize)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('resize', handleResize)
+  window.removeEventListener('orientationchange', handleResize)
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', endDrag)
   document.removeEventListener('touchmove', onDrag)
@@ -520,7 +622,7 @@ onUnmounted(() => {
 
 /* Sombra personalizada */
 .shadow-3xl {
-  box-shadow: 0 20px 40px rgba(148, 30, 67, 0.6);
+  box-shadow: 0 20px 40px rgba(218, 68, 100, 0.6);
 }
 
 /* Responsive adjustments */

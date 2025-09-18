@@ -99,29 +99,6 @@
               </svg>
             </div>
           </a>
-
-          <!-- Llamada telefónica -->
-          <a
-            href="tel:5646611850"
-            @click="handleContactClick('phone')"
-            class="flex items-center space-x-3 p-3 bg-gradient-to-r from-blue-800 to-blue-900 text-white rounded-xl hover:from-blue-900 hover:to-blue-950 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
-          >
-            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-            </div>
-            <div class="flex-1">
-              <div class="font-semibold text-base">Llamar Ahora</div>
-              <div class="text-xs opacity-90">564-661-1850</div>
-              <div class="text-xs opacity-80 mt-0.5">Para problemas urgentes o complejos</div>
-            </div>
-            <div class="w-5 h-5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-            </div>
-          </a>
         </div>
       </div>
 

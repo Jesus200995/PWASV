@@ -108,10 +108,10 @@
       </div>
     </transition>
 
-    <!-- Burbuja principal (posición fija superior derecha) -->
+    <!-- Burbuja principal (posición fija superior izquierda, cerca del panel de registro) -->
     <div
       v-if="!props.hideOnLoginPage"
-      class="fixed z-50 top-4 right-4"
+      class="fixed z-50 top-6 left-4"
     >
       <!-- Botón principal de la burbuja -->
       <button
@@ -183,11 +183,11 @@ const baseStyles = {
   overflow: 'hidden'
 }
 
-// Posición del panel (siempre en la esquina superior derecha)
+// Posición del panel (ahora en la esquina superior izquierda)
 const panelStyle = computed(() => {
   return {
     top: '4.5rem',
-    right: '1rem',
+    left: '1rem',
     ...baseStyles
   }
 })
@@ -215,7 +215,7 @@ const handleContactClick = () => {
 /* Animaciones específicas para login */
 .panel-scale-enter-active, .panel-scale-leave-active {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: top right;
+  transform-origin: top left;
 }
 
 .panel-scale-enter-from, .panel-scale-leave-to {

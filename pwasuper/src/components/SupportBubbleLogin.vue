@@ -44,9 +44,14 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <span class="font-semibold text-xs" style="color: #1e3a8a;">
-                {{ isHorarioAbierto ? 'Disponible Ahora' : 'Fuera de Horario' }}
-              </span>
+              <div>
+                <span class="font-semibold text-xs" :class="isHorarioAbierto ? 'text-green-700' : 'text-red-700'">
+                  {{ isHorarioAbierto ? 'Disponible Ahora' : 'Fuera de Horario' }}
+                </span>
+                <p class="text-xs text-gray-600 mt-0.5">
+                  {{ isHorarioAbierto ? 'Te respondemos inmediatamente' : 'Responderemos en horario laboral' }}
+                </p>
+              </div>
             </div>
             
             <div class="bg-white bg-opacity-60 p-2 space-y-1" style="border-radius: 0.75rem;">
@@ -61,6 +66,16 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="font-medium text-xs" style="color: #1e3a8a;">10:00 AM - 6:00 PM</span>
+              </div>
+            </div>
+            
+            <!-- Indicador visual de estado -->
+            <div class="mt-2 flex items-center justify-center">
+              <div class="flex items-center space-x-1">
+                <div class="w-2 h-2 rounded-full" :class="isHorarioAbierto ? 'bg-green-400 animate-pulse' : 'bg-red-400'"></div>
+                <span class="text-xs font-medium" :class="isHorarioAbierto ? 'text-green-700' : 'text-red-700'">
+                  {{ isHorarioAbierto ? 'En línea' : 'Fuera de línea' }}
+                </span>
               </div>
             </div>
           </div>
@@ -108,10 +123,10 @@
       </div>
     </transition>
 
-    <!-- Burbuja principal (posición fija superior izquierda, cerca del panel de registro) -->
+    <!-- Burbuja principal (posición fija superior derecha) -->
     <div
       v-if="!props.hideOnLoginPage"
-      class="fixed z-50 top-6 left-4"
+      class="fixed z-50 top-4 right-4"
     >
       <!-- Botón principal de la burbuja -->
       <button
@@ -183,11 +198,11 @@ const baseStyles = {
   overflow: 'hidden'
 }
 
-// Posición del panel (ahora en la esquina superior izquierda)
+// Posición del panel (siempre en la esquina superior derecha)
 const panelStyle = computed(() => {
   return {
     top: '4.5rem',
-    left: '1rem',
+    right: '1rem',
     ...baseStyles
   }
 })
@@ -215,7 +230,7 @@ const handleContactClick = () => {
 /* Animaciones específicas para login */
 .panel-scale-enter-active, .panel-scale-leave-active {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: top left;
+  transform-origin: top right;
 }
 
 .panel-scale-enter-from, .panel-scale-leave-to {

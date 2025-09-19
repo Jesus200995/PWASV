@@ -127,6 +127,9 @@
         </div>
       </div>
     </div>
+    
+    <!-- Componente de soporte específico para login -->
+    <SupportBubbleLogin />
   </div>
 </template>
 
@@ -135,6 +138,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URL, getBestApiUrl, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+import SupportBubbleLogin from '../components/SupportBubbleLogin.vue';
 
 const router = useRouter();
 const email = ref('');

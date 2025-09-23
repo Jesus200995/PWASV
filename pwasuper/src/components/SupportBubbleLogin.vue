@@ -123,7 +123,7 @@
       </div>
     </transition>
 
-    <!-- Burbuja principal (posición fija superior derecha) -->
+    <!-- Burbuja principal (posición fija lado derecho) -->
     <div
       v-if="!props.hideOnLoginPage"
       class="fixed z-50 top-4 right-4"

@@ -1,7 +1,13 @@
 <template>
   <teleport to="body">
-    <!-- Burbuja de soporte flotante -->
     <!-- Overlay semitransparente cuando está expandido -->
+    <div
+      v-if="isExpanded && !isHidden && !props.hideOnSupportPage && !isCompletelyHidden"
+      class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+      @click="closePanel"
+    ></div>
+    
+    <!-- Burbuja de soporte flotante -->
     <div
       v-if="!isHidden && !props.hideOnSupportPage && !isCompletelyHidden"
       class="fixed z-50 select-none support-bubble-container"

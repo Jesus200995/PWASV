@@ -2,32 +2,21 @@
   <teleport to="body">
     <!-- Burbuja de soporte flotante -->
     <!-- Overlay semitransparente cuando está expandido -->
-    <transition name="fade">
-      <div
-        v-if="isExpanded && !isHidden && !props.hideOnSupportPage"
-        class="fixed inset-0 bg-black/20 backdrop-blur-sm"
-        style="z-index: 45;"
-        @click="toggleExpanded"
-      ></div>
-    </transition>
-
     <div
       v-if="!isHidden && !props.hideOnSupportPage && !isCompletelyHidden"
       class="fixed z-50 select-none support-bubble-container"
-      :class="{ 'translate-y-0': isVisible, 'translate-y-20': !isVisible }"
       :style="bubblePositionStyle"
     >
       <!-- Contenedor principal de la burbuja -->
       <div class="relative">
         <!-- Panel expandido de soporte -->
-        <transition name="scale-fade">
-          <div
-            v-if="isExpanded"
-            class="rounded-2xl shadow-2xl border p-4 w-80 max-w-[calc(100vw-2rem)] backdrop-blur-sm"
-            :class="panelPosition === 'center' ? 'fixed' : `absolute ${panelPositionClass}`"
-            :style="panelStyles"
-            @click.stop
-          >
+        <div
+          v-if="isExpanded"
+          class="rounded-2xl shadow-2xl border p-4 w-80 max-w-[calc(100vw-2rem)] backdrop-blur-sm"
+          :class="panelPosition === 'center' ? 'fixed' : `absolute ${panelPositionClass}`"
+          :style="panelStyles"
+          @click.stop
+        >
             <!-- Header del panel -->
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center space-x-3">
@@ -118,7 +107,6 @@
               </div>
             </div>
           </div>
-        </transition>
 
         <!-- Botón principal de la burbuja -->
         <button
@@ -319,7 +307,7 @@ const bubblePositionStyle = computed(() => {
   
   // Cuando no se arrastra, usar posición personalizada o por defecto
   const baseStyle = {
-    transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)' // Transición suave y elegante
+    // Sin transición para evitar animación de entrada
   }
   
   // Si hay una posición Y personalizada, usarla; si no, usar bottom por defecto

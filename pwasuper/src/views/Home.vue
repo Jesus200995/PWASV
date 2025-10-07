@@ -396,6 +396,7 @@
                 <input
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   @change="onFileChange"
                   class="hidden"
                   ref="fileInput"
@@ -785,6 +786,7 @@
               <input
                 type="file"
                 accept="image/*"
+                capture="environment"
                 @change="onFileChangeRegistro"
                 :disabled="!entradaMarcada || salidaMarcada"
                 class="hidden"

@@ -165,6 +165,7 @@
             <input
               type="file"
               accept="image/*"
+              capture="environment"
               @change="onFileChange"
               class="hidden"
               ref="fileInput"
@@ -323,6 +324,7 @@
               <input
                 type="file"
                 accept="image/*"
+                capture="environment"
                 @change="onFileChangeRegistro"
                 class="hidden"
                 ref="fileInputRegistro"
@@ -548,6 +550,7 @@
               <input
                 type="file"
                 accept="image/*"
+                capture="environment"
                 @change="onFileChange"
                 class="hidden"
                 ref="fileInput"

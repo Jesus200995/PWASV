@@ -382,27 +382,64 @@
                 class="text-xs">✓ Completado</span>
             </div>
             
-            <div class="flex items-center justify-center w-full">
-              <label class="flex flex-col w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100">
-                <div v-if="!foto" class="flex flex-col items-center justify-center pt-5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <p class="pt-1 text-xs text-gray-400">Selecciona una foto</p>
-                </div>
-                <div v-else class="flex items-center justify-center h-full">
-                  <img :src="foto" class="h-full object-contain" />
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  @change="onFileChange"
-                  class="hidden"
-                  ref="fileInput"
-                />
-              </label>
+            <!-- Vista previa de la foto -->
+            <div v-if="foto" class="mb-3">
+              <div class="w-full h-32 bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                <img :src="foto" class="w-full h-full object-cover" />
+              </div>
+              <button
+                @click="eliminarFoto"
+                class="mt-2 text-xs text-red-600 hover:text-red-800 flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eliminar foto
+              </button>
             </div>
+            
+            <!-- Botones para capturar foto -->
+            <div v-if="!foto" class="space-y-2">
+              <!-- Botón para tomar foto con cámara -->
+              <button
+                @click="tomarFotoConCamara"
+                class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="font-medium">Tomar Foto</span>
+              </button>
+              
+              <!-- Botón para seleccionar de galería -->
+              <button
+                @click="seleccionarDeGaleria"
+                class="w-full flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:bg-gray-800 transition-colors duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="font-medium">Seleccionar de Galería</span>
+              </button>
+            </div>
+            
+            <!-- Inputs ocultos para los diferentes tipos de captura -->
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              @change="onFileChange"
+              class="hidden"
+              ref="fileInputCamera"
+            />
+            <input
+              type="file"
+              accept="image/*"
+              @change="onFileChange"
+              class="hidden"
+              ref="fileInputGallery"
+            />
           </div>
 
           <!-- Paso 3: Descripción -->
@@ -754,46 +791,81 @@
         <div class="mb-3">
           <label class="block text-sm font-medium text-gray-700 mb-2" 
                  :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">Foto</label>
-          <div class="flex items-center justify-center w-full">
-            <label class="flex flex-col w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 active:bg-gray-100"
-                   :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': !entradaMarcada || salidaMarcada }">
-              <div v-if="!fotoRegistro" class="flex flex-col items-center justify-center pt-7">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-8 h-8 text-gray-400"
-                  :class="{ 'text-gray-300': !entradaMarcada || salidaMarcada }"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <p class="pt-1 text-sm text-gray-400" 
-                   :class="{ 'text-gray-300': !entradaMarcada || salidaMarcada }">
-                  <span v-if="entradaMarcada && !salidaMarcada">Selecciona una foto</span>
-                  <span v-else-if="!entradaMarcada">Marca entrada primero</span>
-                  <span v-else>Función bloqueada</span>
-                </p>
-              </div>
-              <div v-else class="flex items-center justify-center h-full">
-                <img :src="fotoRegistro" class="h-full object-contain" />
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                @change="onFileChangeRegistro"
-                :disabled="!entradaMarcada || salidaMarcada"
-                class="hidden"
-                ref="fileInputRegistro"
-              />
-            </label>
+          
+          <!-- Vista previa de la foto -->
+          <div v-if="fotoRegistro" class="mb-3">
+            <div class="w-full h-32 bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+              <img :src="fotoRegistro" class="w-full h-full object-cover" />
+            </div>
+            <button
+              @click="eliminarFotoRegistro"
+              :disabled="!entradaMarcada || salidaMarcada"
+              class="mt-2 text-xs text-red-600 hover:text-red-800 flex items-center"
+              :class="{ 'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Eliminar foto
+            </button>
           </div>
+          
+          <!-- Botones para capturar foto -->
+          <div v-if="!fotoRegistro" class="space-y-2">
+            <!-- Botón para tomar foto con cámara -->
+            <button
+              @click="tomarFotoConCamaraRegistro"
+              :disabled="!entradaMarcada || salidaMarcada"
+              class="w-full flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors duration-200"
+              :class="{ 'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span class="font-medium">
+                <span v-if="entradaMarcada && !salidaMarcada">Tomar Foto</span>
+                <span v-else-if="!entradaMarcada">Marca entrada primero</span>
+                <span v-else>Función bloqueada</span>
+              </span>
+            </button>
+            
+            <!-- Botón para seleccionar de galería -->
+            <button
+              @click="seleccionarDeGaleriaRegistro"
+              :disabled="!entradaMarcada || salidaMarcada"
+              class="w-full flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:bg-gray-800 transition-colors duration-200"
+              :class="{ 'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="font-medium">
+                <span v-if="entradaMarcada && !salidaMarcada">Seleccionar de Galería</span>
+                <span v-else-if="!entradaMarcada">Marca entrada primero</span>
+                <span v-else>Función bloqueada</span>
+              </span>
+            </button>
+          </div>
+          
+          <!-- Inputs ocultos para los diferentes tipos de captura -->
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            @change="onFileChangeRegistro"
+            :disabled="!entradaMarcada || salidaMarcada"
+            class="hidden"
+            ref="fileInputCameraRegistro"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            @change="onFileChangeRegistro"
+            :disabled="!entradaMarcada || salidaMarcada"
+            class="hidden"
+            ref="fileInputGalleryRegistro"
+          />
         </div>
 
         <!-- Descripción -->
@@ -985,6 +1057,11 @@ const tipoActividad = ref(""); // Nuevo: campo para tipo de actividad
 // Referencias generales
 const fileInput = ref(null);
 const fileInputRegistro = ref(null);
+// Nuevas referencias para los diferentes tipos de captura
+const fileInputCamera = ref(null);
+const fileInputGallery = ref(null);
+const fileInputCameraRegistro = ref(null);
+const fileInputGalleryRegistro = ref(null);
 const historial = ref([]);
 const enviando = ref(false);
 const error = ref(null);
@@ -1105,8 +1182,15 @@ function limpiarDatosAsistencia() {
   archivoFoto.value = null;
   descripcion.value = "";
   
+  // Limpiar todos los inputs de archivo
   if (fileInput.value) {
     fileInput.value.value = "";
+  }
+  if (fileInputCamera.value) {
+    fileInputCamera.value.value = "";
+  }
+  if (fileInputGallery.value) {
+    fileInputGallery.value.value = "";
   }
 }
 
@@ -1592,6 +1676,70 @@ async function onFileChangeRegistro(e) {
   }
 }
 
+// Nuevas funciones para manejo de fotos con opciones separadas
+
+// Funciones para asistencia (entrada/salida)
+function tomarFotoConCamara() {
+  // Usar input específico para cámara
+  if (fileInputCamera.value) {
+    fileInputCamera.value.click();
+  }
+}
+
+function seleccionarDeGaleria() {
+  // Usar input específico para galería
+  if (fileInputGallery.value) {
+    fileInputGallery.value.click();
+  }
+}
+
+function eliminarFoto() {
+  foto.value = null;
+  archivoFoto.value = null;
+  
+  // Limpiar ambos inputs
+  if (fileInputCamera.value) {
+    fileInputCamera.value.value = "";
+  }
+  if (fileInputGallery.value) {
+    fileInputGallery.value.value = "";
+  }
+}
+
+// Funciones para registro de actividades
+function tomarFotoConCamaraRegistro() {
+  if (!entradaMarcada.value || salidaMarcada.value) return;
+  
+  // Usar input específico para cámara en registros
+  if (fileInputCameraRegistro.value) {
+    fileInputCameraRegistro.value.click();
+  }
+}
+
+function seleccionarDeGaleriaRegistro() {
+  if (!entradaMarcada.value || salidaMarcada.value) return;
+  
+  // Usar input específico para galería en registros
+  if (fileInputGalleryRegistro.value) {
+    fileInputGalleryRegistro.value.click();
+  }
+}
+
+function eliminarFotoRegistro() {
+  if (!entradaMarcada.value || salidaMarcada.value) return;
+  
+  fotoRegistro.value = null;
+  archivoFotoRegistro.value = null;
+  
+  // Limpiar ambos inputs de registro
+  if (fileInputCameraRegistro.value) {
+    fileInputCameraRegistro.value.value = "";
+  }
+  if (fileInputGalleryRegistro.value) {
+    fileInputGalleryRegistro.value.value = "";
+  }
+}
+
 async function enviarRegistro() {
   // Verificar estado de asistencia
   if (!entradaMarcada.value) {
@@ -1674,8 +1822,15 @@ async function enviarRegistro() {
       latitudRegistro.value = null;
       longitudRegistro.value = null;
 
+      // Limpiar todos los inputs de archivo de registro
       if (fileInputRegistro.value) {
         fileInputRegistro.value.value = "";
+      }
+      if (fileInputCameraRegistro.value) {
+        fileInputCameraRegistro.value.value = "";
+      }
+      if (fileInputGalleryRegistro.value) {
+        fileInputGalleryRegistro.value.value = "";
       }
 
       // Mostrar modal de éxito offline
@@ -1736,8 +1891,15 @@ async function enviarRegistro() {
     latitudRegistro.value = null;
     longitudRegistro.value = null;
 
+    // Limpiar todos los inputs de archivo de registro
     if (fileInputRegistro.value) {
       fileInputRegistro.value.value = "";
+    }
+    if (fileInputCameraRegistro.value) {
+      fileInputCameraRegistro.value.value = "";
+    }
+    if (fileInputGalleryRegistro.value) {
+      fileInputGalleryRegistro.value.value = "";
     }
 
     // Mostrar modal de éxito
@@ -2724,8 +2886,15 @@ watch([entradaMarcada, salidaMarcada], () => {
     latitudRegistro.value = null;
     longitudRegistro.value = null;
     
+    // Limpiar todos los inputs de archivo de registro
     if (fileInputRegistro.value) {
       fileInputRegistro.value.value = "";
+    }
+    if (fileInputCameraRegistro.value) {
+      fileInputCameraRegistro.value.value = "";
+    }
+    if (fileInputGalleryRegistro.value) {
+      fileInputGalleryRegistro.value.value = "";
     }
   }
 });

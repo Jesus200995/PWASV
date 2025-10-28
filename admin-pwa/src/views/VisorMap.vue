@@ -90,7 +90,6 @@
                     <option value="campo-hoy">Solo Campo (hoy)</option>
                     <option value="gabinete-hoy">Solo Gabinete (hoy)</option>
                     <option value="actividades-generales">Solo Actividades Total (Hoy)</option>
-                    <option value="registro-antiguo">Solo Registros Antiguos</option>
                   </select>
                 </div>
               </div>
@@ -164,14 +163,18 @@
                   <span>Actividades total (Hoy)</span>
                 </div>
                 
-                <!-- Subtítulo para Otros -->
+                <!-- Subtítulo para Actividades -->
                 <div class="leyenda-subtitle">
-                  <h5>Otros</h5>
+                  <h5>Actividades</h5>
                 </div>
                 
                 <div class="leyenda-item">
-                  <div class="color-marker registro-antiguo"></div>
-                  <span>Registro antiguo</span>
+                  <div class="color-marker campo"></div>
+                  <span>Campo (hoy)</span>
+                </div>
+                <div class="leyenda-item">
+                  <div class="color-marker gabinete"></div>
+                  <span>Gabinete (hoy)</span>
                 </div>
               </div>
             </div>
@@ -560,8 +563,7 @@ const clusterInfo = reactive({
   salidas: 0,
   campoHoy: 0,
   gabineteHoy: 0,
-  registrosHoy: 0,
-  registrosAntiguos: 0
+  registrosHoy: 0
 })
 
 // Estado para las estadísticas del día actual en horario CDMX
@@ -855,9 +857,12 @@ const cargarTotalUsuarios = async () => {
 const obtenerUltimasActividadesPorUsuario = (registros, asistencias) => {
   const mapaUsuarios = new Map()
   
-  // Procesar registros normales
+  // Procesar registros normales - SOLO DEL DÍA ACTUAL
   registros.forEach(registro => {
     if (!registro.latitud || !registro.longitud) return
+    
+    // Verificar que sea del día actual
+    if (!esUbicacionReciente(registro.fecha_hora)) return
     
     const usuarioId = registro.usuario_id
     const fechaHora = new Date(registro.fecha_hora)
@@ -877,61 +882,67 @@ const obtenerUltimasActividadesPorUsuario = (registros, asistencias) => {
     }
   })
   
-  // Procesar asistencias (entrada y salida)
+  // Procesar asistencias (entrada y salida) - SOLO DEL DÍA ACTUAL
   asistencias.forEach(asistencia => {
     const usuarioId = asistencia.usuario_id
     
     // Procesar entrada si existe
     if (asistencia.hora_entrada && asistencia.latitud_entrada && asistencia.longitud_entrada) {
-      const fechaEntrada = new Date(asistencia.hora_entrada)
-      
-      const actividadEntrada = {
-        id: `entrada_${asistencia.id}`,
-        usuario_id: usuarioId,
-        usuario: {
-          nombre_completo: asistencia.nombre_usuario,
-          correo: asistencia.correo_usuario,
-          cargo: asistencia.cargo_usuario
-        },
-        tipo_actividad: 'entrada',
-        fecha_actividad: fechaEntrada,
-        fecha_hora: asistencia.hora_entrada,
-        latitud: parseFloat(asistencia.latitud_entrada),
-        longitud: parseFloat(asistencia.longitud_entrada),
-        foto_url: asistencia.foto_entrada_url,
-        descripcion: asistencia.descripcion_entrada || 'Entrada registrada'
-      }
-      
-      if (!mapaUsuarios.has(usuarioId) || 
-          fechaEntrada > mapaUsuarios.get(usuarioId).fecha_actividad) {
-        mapaUsuarios.set(usuarioId, actividadEntrada)
+      // Solo si es del día actual
+      if (esUbicacionReciente(asistencia.hora_entrada)) {
+        const fechaEntrada = new Date(asistencia.hora_entrada)
+        
+        const actividadEntrada = {
+          id: `entrada_${asistencia.id}`,
+          usuario_id: usuarioId,
+          usuario: {
+            nombre_completo: asistencia.nombre_usuario,
+            correo: asistencia.correo_usuario,
+            cargo: asistencia.cargo_usuario
+          },
+          tipo_actividad: 'entrada',
+          fecha_actividad: fechaEntrada,
+          fecha_hora: asistencia.hora_entrada,
+          latitud: parseFloat(asistencia.latitud_entrada),
+          longitud: parseFloat(asistencia.longitud_entrada),
+          foto_url: asistencia.foto_entrada_url,
+          descripcion: asistencia.descripcion_entrada || 'Entrada registrada'
+        }
+        
+        if (!mapaUsuarios.has(usuarioId) || 
+            fechaEntrada > mapaUsuarios.get(usuarioId).fecha_actividad) {
+          mapaUsuarios.set(usuarioId, actividadEntrada)
+        }
       }
     }
     
     // Procesar salida si existe
     if (asistencia.hora_salida && asistencia.latitud_salida && asistencia.longitud_salida) {
-      const fechaSalida = new Date(asistencia.hora_salida)
-      
-      const actividadSalida = {
-        id: `salida_${asistencia.id}`,
-        usuario_id: usuarioId,
-        usuario: {
-          nombre_completo: asistencia.nombre_usuario,
-          correo: asistencia.correo_usuario,
-          cargo: asistencia.cargo_usuario
-        },
-        tipo_actividad: 'salida',
-        fecha_actividad: fechaSalida,
-        fecha_hora: asistencia.hora_salida,
-        latitud: parseFloat(asistencia.latitud_salida),
-        longitud: parseFloat(asistencia.longitud_salida),
-        foto_url: asistencia.foto_salida_url,
-        descripcion: asistencia.descripcion_salida || 'Salida registrada'
-      }
-      
-      if (!mapaUsuarios.has(usuarioId) || 
-          fechaSalida > mapaUsuarios.get(usuarioId).fecha_actividad) {
-        mapaUsuarios.set(usuarioId, actividadSalida)
+      // Solo si es del día actual
+      if (esUbicacionReciente(asistencia.hora_salida)) {
+        const fechaSalida = new Date(asistencia.hora_salida)
+        
+        const actividadSalida = {
+          id: `salida_${asistencia.id}`,
+          usuario_id: usuarioId,
+          usuario: {
+            nombre_completo: asistencia.nombre_usuario,
+            correo: asistencia.correo_usuario,
+            cargo: asistencia.cargo_usuario
+          },
+          tipo_actividad: 'salida',
+          fecha_actividad: fechaSalida,
+          fecha_hora: asistencia.hora_salida,
+          latitud: parseFloat(asistencia.latitud_salida),
+          longitud: parseFloat(asistencia.longitud_salida),
+          foto_url: asistencia.foto_salida_url,
+          descripcion: asistencia.descripcion_salida || 'Salida registrada'
+        }
+        
+        if (!mapaUsuarios.has(usuarioId) || 
+            fechaSalida > mapaUsuarios.get(usuarioId).fecha_actividad) {
+          mapaUsuarios.set(usuarioId, actividadSalida)
+        }
       }
     }
   })
@@ -960,14 +971,9 @@ const determinarTipoActividad = (actividad) => {
         color: 'rgb(0, 0, 205)' // Mediumblue
       };
     } 
-    // Si la entrada NO es de hoy (CDMX): Silver (antigua)
+    // Filtrar registros antiguos (no mostrar)
     else {
-      return {
-        tipo: 'registro-antiguo',
-        clase: 'antiguo',
-        descripcion: 'Entrada Anterior',
-        color: 'rgb(192, 192, 192)' // Silver
-      };
+      return null;
     }
   }
   
@@ -982,14 +988,9 @@ const determinarTipoActividad = (actividad) => {
         color: '#DC2626' // Rojo
       };
     }
-    // Si la salida NO es de hoy (CDMX): Silver (antigua)
+    // Filtrar registros antiguos (no mostrar)
     else {
-      return {
-        tipo: 'registro-antiguo',
-        clase: 'antiguo',
-        descripcion: 'Salida Anterior',
-        color: 'rgb(192, 192, 192)' // Silver
-      };
+      return null;
     }
   }
   
@@ -1004,14 +1005,9 @@ const determinarTipoActividad = (actividad) => {
         color: 'rgb(50, 205, 50)' // Limegreen
       };
     }
-    // Si la actividad de campo NO es de hoy (CDMX): Silver (antigua)
+    // Filtrar registros antiguos (no mostrar)
     else {
-      return {
-        tipo: 'campo-antiguo',
-        clase: 'antiguo',
-        descripcion: 'Actividad de Campo Anterior',
-        color: 'rgb(192, 192, 192)' // Silver
-      };
+      return null;
     }
   }
   
@@ -1026,14 +1022,9 @@ const determinarTipoActividad = (actividad) => {
         color: 'rgb(255, 140, 0)' // Darkorange
       };
     }
-    // Si la actividad de gabinete NO es de hoy (CDMX): Silver (antigua)
+    // Filtrar registros antiguos (no mostrar)
     else {
-      return {
-        tipo: 'gabinete-antiguo',
-        clase: 'antiguo',
-        descripcion: 'Actividad de Gabinete Anterior',
-        color: 'rgb(192, 192, 192)' // Silver
-      };
+      return null;
     }
   }
   
@@ -1048,14 +1039,9 @@ const determinarTipoActividad = (actividad) => {
         color: 'rgb(50, 205, 50)' // Limegreen (campo por defecto)
       };
     }
-    // Si el registro NO es de hoy (CDMX): Silver (antiguo)
+    // Filtrar registros antiguos (no mostrar)
     else {
-      return {
-        tipo: 'campo-antiguo',
-        clase: 'antiguo',
-        descripcion: 'Actividad Anterior',
-        color: 'rgb(192, 192, 192)' // Silver
-      };
+      return null;
     }
   }
 }
@@ -1199,10 +1185,7 @@ const inicializarMapa = (datos) => {
             'campo-hoy', 'rgb(50, 205, 50)', // Limegreen para campo de hoy
             'gabinete-hoy', 'rgb(255, 140, 0)', // Darkorange para gabinete de hoy
             'actividades-generales', 'rgb(148, 0, 211)', // Darkviolet para actividades generales
-            'campo-antiguo', 'rgb(192, 192, 192)', // Silver para campo antiguo
-            'gabinete-antiguo', 'rgb(192, 192, 192)', // Silver para gabinete antiguo
             'registro-hoy', 'rgb(34, 139, 34)', // Verde para compatibilidad (campo por defecto)
-            'registro-antiguo', 'rgb(192, 192, 192)', // Silver para registros antiguos
             '#A9A9A9' // Gris por defecto (no debería llegar aquí)
           ],
           // Tamaño un poco más grande pero manteniendo proporción según nivel de zoom
@@ -1459,12 +1442,17 @@ const actualizarPuntosMapa = (datos) => {
     clusterInfo.campoHoy = 0;
     clusterInfo.gabineteHoy = 0;
     clusterInfo.registrosHoy = 0;
-    clusterInfo.registrosAntiguos = 0;
     
     // Convertir datos a formato GeoJSON
     const features = datos.map(punto => {
       // Usar la función determinarTipoActividad para clasificar según horario CDMX
       const infoActividad = determinarTipoActividad(punto);
+      
+      // Si la actividad devuelve null (registro antiguo), ignorar y pasar al siguiente
+      if (!infoActividad) {
+        return null;
+      }
+      
       let tipoActividad = infoActividad.tipo;
       
       // Para el mapa: si el filtro está en "actividades-generales", cambiar campo y gabinete por "actividades-generales"
@@ -1495,8 +1483,6 @@ const actualizarPuntosMapa = (datos) => {
       } else if (tipoActividadMapa === 'actividades-generales') {
         // Para actividades generales, no incrementamos contadores específicos
         clusterInfo.registrosHoy++;
-      } else if (tipoActividadMapa === 'campo-antiguo' || tipoActividadMapa === 'gabinete-antiguo' || tipoActividadMapa === 'registro-antiguo') {
-        clusterInfo.registrosAntiguos++;
       }
       
       return {
@@ -1519,7 +1505,7 @@ const actualizarPuntosMapa = (datos) => {
           coordinates: [punto.longitud, punto.latitud]
         }
       };
-    });
+    }).filter(feature => feature !== null); // Filtrar registros antiguos (null)
     
     // Actualizar solo la fuente de datos para puntos (sin clústeres)
     puntosSource.setData({
@@ -1534,7 +1520,9 @@ const actualizarPuntosMapa = (datos) => {
       // Crear límites para contener todos los puntos
       const bounds = new mapboxgl.LngLatBounds();
       features.forEach(feature => {
-        bounds.extend(feature.geometry.coordinates);
+        if (feature && feature.geometry) {
+          bounds.extend(feature.geometry.coordinates);
+        }
       });
       
       // Ajustar vista a los límites calculados
@@ -1771,9 +1759,6 @@ const generarTituloPopup = (tipoActividad, tipoClase) => {
         return 'Actividad de Gabinete';
       case 'registro-hoy':
         return 'Registro de Hoy';
-      case 'registro-antiguo':
-      case 'antiguo':
-        return 'Registro Anterior';
       default:
         console.log('⚠️ tipoClase no reconocido:', tipoClase);
         return 'Actividad';
@@ -1906,6 +1891,11 @@ const aplicarFiltros = () => {
       actividadesFinales = actividadesFiltradas.filter(actividad => {
         const tipoActividad = determinarTipoActividad(actividad)
         
+        // Si determinarTipoActividad retorna null, filtrar esa actividad
+        if (!tipoActividad) {
+          return false
+        }
+        
         switch (filtroTipo.value) {
           case 'entrada':
             return tipoActividad.tipo === 'entrada'
@@ -1920,8 +1910,6 @@ const aplicarFiltros = () => {
             return tipoActividad.tipo === 'campo-hoy' || tipoActividad.tipo === 'gabinete-hoy'
           case 'registro-hoy':
             return tipoActividad.tipo === 'registro-hoy' || tipoActividad.tipo === 'campo-hoy' || tipoActividad.tipo === 'gabinete-hoy'
-          case 'registro-antiguo':
-            return tipoActividad.tipo === 'registro-antiguo' || tipoActividad.tipo === 'campo-antiguo' || tipoActividad.tipo === 'gabinete-antiguo'
           default:
             return true
         }
@@ -2868,10 +2856,6 @@ watch(filtroTipo, () => {
   background-color: #00BFFF; /* Para compatibilidad */
 }
 
-.color-marker.registro-antiguo {
-  background-color: rgb(192, 192, 192); /* Silver para registros antiguos */
-}
-
 /* Subtítulo en la leyenda */
 .leyenda-subtitle {
   grid-column: 1 / -1;
@@ -3054,12 +3038,14 @@ watch(filtroTipo, () => {
   border: 1px solid rgba(22, 163, 74, 0.3);
 }
 
-.custom-popup.popup-registro-antiguo, 
-.custom-popup.popup-antiguo,
-.custom-popup.popup-campo-antiguo,
-.custom-popup.popup-gabinete-antiguo {
-  background-color: #f8f8f8;
-  border: 1px solid rgba(192, 192, 192, 0.5);
+.custom-popup.popup-entrada, 
+.custom-popup.popup-salida,
+.custom-popup.popup-campo-hoy,
+.custom-popup.popup-gabinete-hoy {
+  background-color: rgba(255, 255, 255, 0.98);
+  border: 2px solid rgba(100, 100, 100, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* Estilos para la flecha indicadora */
@@ -3113,15 +3099,6 @@ watch(filtroTipo, () => {
   background-color: #f0fdf4;
   border-right: 1px solid rgba(22, 163, 74, 0.3);
   border-bottom: 1px solid rgba(22, 163, 74, 0.3);
-}
-
-.popup-registro-antiguo .popup-arrow::after,
-.popup-antiguo .popup-arrow::after,
-.popup-campo-antiguo .popup-arrow::after,
-.popup-gabinete-antiguo .popup-arrow::after {
-  background-color: #f8f8f8;
-  border-right: 1px solid rgba(192, 192, 192, 0.5);
-  border-bottom: 1px solid rgba(192, 192, 192, 0.5);
 }
 
 .popup-header {
@@ -3189,13 +3166,6 @@ watch(filtroTipo, () => {
   color: #15803D; /* Verde fuerte por defecto */
 }
 
-.popup-registro-antiguo .popup-close-btn:hover svg,
-.popup-antiguo .popup-close-btn:hover svg,
-.popup-campo-antiguo .popup-close-btn:hover svg,
-.popup-gabinete-antiguo .popup-close-btn:hover svg {
-  color: rgb(192, 192, 192); /* Silver */
-}
-
 .popup-icon {
   width: 18px;
   height: 18px;
@@ -3236,21 +3206,6 @@ watch(filtroTipo, () => {
 .popup-registro-hoy .popup-icon-small,
 .popup-registro-hoy strong {
   color: #15803D; /* Verde fuerte por defecto */
-}
-
-.popup-registro-antiguo .popup-icon,
-.popup-registro-antiguo .popup-icon-small,
-.popup-antiguo .popup-icon,
-.popup-antiguo .popup-icon-small,
-.popup-campo-antiguo .popup-icon,
-.popup-campo-antiguo .popup-icon-small,
-.popup-gabinete-antiguo .popup-icon,
-.popup-gabinete-antiguo .popup-icon-small,
-.popup-registro-antiguo strong,
-.popup-antiguo strong,
-.popup-campo-antiguo strong,
-.popup-gabinete-antiguo strong {
-  color: rgb(192, 192, 192); /* Silver */
 }
 
 .popup-header strong {

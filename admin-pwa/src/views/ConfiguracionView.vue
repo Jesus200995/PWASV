@@ -221,6 +221,16 @@
                 </svg>
                 Ver Logs
               </button>
+              
+              <button @click="descargarUsuarios" class="action-btn users-btn" :disabled="descargandoUsuarios">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                {{ descargandoUsuarios ? 'Descargando...' : 'Exportar Usuarios' }}
+              </button>
             </div>
           </div>
 
@@ -325,6 +335,7 @@ const confirmMessage = ref('')
 const eliminandoRegistros = ref(false)
 const eliminandoAsistencias = ref(false)
 const descargandoBD = ref(false)
+const descargandoUsuarios = ref(false)
 
 const apiConfig = reactive({
   url: 'https://apipwa.sembrandodatos.com',
@@ -951,6 +962,190 @@ const eliminarTodasAsistencias = async () => {
   }
 }
 
+const descargarUsuarios = async () => {
+  descargandoUsuarios.value = true
+  
+  try {
+    const token = localStorage.getItem('admin_token')
+    
+    mostrarMensaje('Iniciando', '📥 Obteniendo todos los usuarios de la base de datos...')
+    
+    // Obtener TODOS los usuarios con información completa incluyendo contraseñas
+    const response = await axios.get(`${apiConfig.url}/usuarios/exportacion-completa`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: apiConfig.timeout * 1000
+    })
+    
+    // Manejar diferentes formatos de respuesta
+    const usuariosData = Array.isArray(response.data) ? response.data : (response.data.usuarios || [])
+    
+    console.log('📊 Datos de usuarios obtenidos:', {
+      total: usuariosData.length,
+      campos: usuariosData.length > 0 ? Object.keys(usuariosData[0]) : []
+    })
+    
+    if (usuariosData.length === 0) {
+      mostrarMensaje('⚠️ Sin Datos', 'No hay usuarios en la base de datos para exportar.')
+      return
+    }
+    
+    // Generar archivo SQL solo con la tabla de usuarios
+    let sqlContent = ''
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+    
+    // Header del archivo SQL
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- EXPORTACIÓN DE USUARIOS - Base de Datos\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- Fecha de exportación: ${new Date().toLocaleString('es-ES')}\n`
+    sqlContent += `-- Servidor: ${apiConfig.url}\n`
+    sqlContent += `-- Total usuarios: ${usuariosData.length}\n`
+    sqlContent += `-- ===============================================\n\n`
+    
+    // Estructura de la tabla usuarios
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- ESTRUCTURA DE LA TABLA: usuarios\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `DROP TABLE IF EXISTS usuarios CASCADE;\n\n`
+    
+    sqlContent += `CREATE TABLE usuarios (\n`
+    sqlContent += `    id SERIAL PRIMARY KEY,\n`
+    sqlContent += `    correo VARCHAR(255) UNIQUE NOT NULL,\n`
+    sqlContent += `    nombre_completo VARCHAR(255) NOT NULL,\n`
+    sqlContent += `    cargo VARCHAR(255),\n`
+    sqlContent += `    supervisor VARCHAR(255),\n`
+    sqlContent += `    contrasena VARCHAR(255) NOT NULL,\n`
+    sqlContent += `    curp VARCHAR(18) UNIQUE,\n`
+    sqlContent += `    telefono VARCHAR(20),\n`
+    sqlContent += `    rol VARCHAR(50) DEFAULT 'user',\n`
+    sqlContent += `    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n`
+    sqlContent += `    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n`
+    sqlContent += `);\n\n`
+    
+    // Datos de usuarios
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- DATOS DE USUARIOS (${usuariosData.length} registros)\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `INSERT INTO usuarios (id, correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono, rol) VALUES\n`
+    
+    const usuariosInserts = usuariosData.map((usuario, index) => {
+      const id = usuario.id || index + 1
+      const correo = (usuario.correo || '').replace(/'/g, "''")
+      const nombre = (usuario.nombre_completo || '').replace(/'/g, "''")
+      const cargo = (usuario.cargo || '').replace(/'/g, "''")
+      const supervisor = (usuario.supervisor || '').replace(/'/g, "''")
+      const contrasena = (usuario.contrasena || '').replace(/'/g, "''")
+      const curp = (usuario.curp || '').replace(/'/g, "''")
+      const telefono = (usuario.telefono || '').replace(/'/g, "''")
+      const rol = (usuario.rol || 'user').replace(/'/g, "''")
+      
+      return `(${id}, '${correo}', '${nombre}', '${cargo}', '${supervisor}', '${contrasena}', '${curp}', '${telefono}', '${rol}')`
+    })
+    
+    sqlContent += usuariosInserts.join(',\n') + ';\n\n'
+    
+    // Índices
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- ÍNDICES\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `CREATE INDEX IF NOT EXISTS idx_usuarios_correo ON usuarios(correo);\n`
+    sqlContent += `CREATE INDEX IF NOT EXISTS idx_usuarios_curp ON usuarios(curp);\n`
+    sqlContent += `CREATE INDEX IF NOT EXISTS idx_usuarios_rol ON usuarios(rol);\n\n`
+    
+    // Estadísticas
+    const usuariosConCurp = usuariosData.filter(u => u.curp && u.curp.trim() !== '').length
+    const usuariosConTelefono = usuariosData.filter(u => u.telefono && u.telefono.trim() !== '').length
+    const usuariosConSupervisor = usuariosData.filter(u => u.supervisor && u.supervisor.trim() !== '').length
+    const usuariosPorRol = {}
+    usuariosData.forEach(u => {
+      const rol = u.rol || 'user'
+      usuariosPorRol[rol] = (usuariosPorRol[rol] || 0) + 1
+    })
+    
+    // Footer
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- RESUMEN DE EXPORTACIÓN\n`
+    sqlContent += `-- ===============================================\n`
+    sqlContent += `-- Total usuarios: ${usuariosData.length}\n`
+    sqlContent += `-- Usuarios con CURP: ${usuariosConCurp}\n`
+    sqlContent += `-- Usuarios con teléfono: ${usuariosConTelefono}\n`
+    sqlContent += `-- Usuarios con supervisor: ${usuariosConSupervisor}\n`
+    sqlContent += `-- Distribución por rol:\n`
+    Object.entries(usuariosPorRol).forEach(([rol, cantidad]) => {
+      sqlContent += `--   ${rol}: ${cantidad}\n`
+    })
+    sqlContent += `-- Fecha: ${new Date().toLocaleString('es-ES')}\n`
+    sqlContent += `-- ===============================================\n`
+    
+    // Crear y descargar archivo SQL
+    const blob = new Blob([sqlContent], { type: 'application/sql; charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `USUARIOS_${timestamp}.sql`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    
+    // Calcular tamaño del archivo
+    const tamanhoKB = Math.round(blob.size / 1024)
+    
+    mostrarMensaje('✅ Exportación de Usuarios Exitosa', 
+      `<div style="text-align: left;">
+        <h4 style="color: #0ea5e9; margin-bottom: 15px;">👥 Base de Usuarios Exportada</h4>
+        <p><strong>📁 Archivo:</strong> USUARIOS_${timestamp}.sql</p>
+        <p><strong>📊 Tamaño:</strong> ${tamanhoKB} KB</p>
+        <hr style="margin: 15px 0;">
+        <h5 style="color: #0284c7;">📋 Estadísticas:</h5>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          <li><strong>👤 Total usuarios:</strong> ${usuariosData.length}</li>
+          <li><strong>🆔 Con CURP:</strong> ${usuariosConCurp}</li>
+          <li><strong>📞 Con teléfono:</strong> ${usuariosConTelefono}</li>
+          <li><strong>👔 Con supervisor:</strong> ${usuariosConSupervisor}</li>
+        </ul>
+        <hr style="margin: 15px 0;">
+        <h5 style="color: #0284c7;">📊 Por Rol:</h5>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          ${Object.entries(usuariosPorRol).map(([rol, cantidad]) => 
+            `<li><strong>${rol}:</strong> ${cantidad}</li>`
+          ).join('')}
+        </ul>
+        <hr style="margin: 15px 0;">
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">
+          ✅ El archivo SQL contiene la estructura completa de la tabla usuarios 
+          con todos los datos incluyendo contraseñas. Puede restaurarse en 
+          cualquier servidor PostgreSQL.
+        </p>
+      </div>`
+    )
+  } catch (err) {
+    let errorMsg = '❌ Error al exportar usuarios: '
+    
+    if (err.response?.status === 401) {
+      errorMsg += 'No autorizado. Inicia sesión nuevamente.'
+    } else if (err.response?.status === 403) {
+      errorMsg += 'Acceso denegado. Permisos insuficientes.'
+    } else if (err.response?.status === 404) {
+      errorMsg += 'Endpoint no disponible. Verifica el servidor.'
+    } else if (err.response?.status === 500) {
+      errorMsg += 'Error del servidor. Intenta más tarde.'
+    } else if (err.request) {
+      errorMsg += 'No se pudo conectar con el servidor. Verifica tu conexión.'
+    } else {
+      errorMsg += err.message || 'Error desconocido'
+    }
+    
+    console.error('Error completo:', err)
+    mostrarMensaje('❌ Error', errorMsg)
+  } finally {
+    descargandoUsuarios.value = false
+  }
+}
+
 const logout = () => {
   // No usar confirm(), el modal se maneja en el Sidebar
   localStorage.removeItem('admin_token')
@@ -1419,6 +1614,12 @@ const logout = () => {
   background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.users-btn {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
 }
 
 .action-btn:hover:not(:disabled) {

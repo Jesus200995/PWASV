@@ -340,7 +340,7 @@ class UsuariosService {
   }
 }
 
-  exportarBaseUsuarios = async () => {
+  async exportarBaseUsuarios() {
     try {
       console.log('📥 Exportando base de datos completa de usuarios...');
       const response = await fetch(`${API_URL}/usuarios/exportacion-completa`, {

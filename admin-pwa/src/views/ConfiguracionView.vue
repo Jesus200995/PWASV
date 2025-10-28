@@ -221,18 +221,6 @@
                 </svg>
                 Ver Logs
               </button>
-
-              <button @click="exportarBaseUsuarios" class="action-btn users-btn" :disabled="exportandoUsuarios">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                  <line x1="12" y1="21" x2="12" y2="12"/>
-                  <polyline points="15 14 12 12 9 14"/>
-                </svg>
-                {{ exportandoUsuarios ? 'Exportando...' : 'Exportar Base de Usuarios' }}
-              </button>
             </div>
           </div>
 
@@ -317,15 +305,11 @@ import axios from 'axios'
 import Sidebar from '../components/Sidebar_NEW.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import asistenciasService from '../services/asistenciasService.js'
-import usuariosService from '../services/usuariosService.js'
 
 const router = useRouter()
 
 // Estado de conexión
 const isOnline = ref(navigator.onLine)
-
-// Estado para exportación de usuarios
-const exportandoUsuarios = ref(false)
 
 const adminUser = ref(localStorage.getItem('admin_user') || 'Admin')
 const checking = ref(false)
@@ -882,52 +866,6 @@ const mostrarLogs = () => {
   mostrarMensaje('Logs del Sistema', `<pre>${logs.join('\n')}</pre>`)
 }
 
-const exportarBaseUsuarios = async () => {
-  if (exportandoUsuarios.value) return;
-  
-  exportandoUsuarios.value = true;
-  try {
-    mostrarMensaje('Exportando', 'Obteniendo base de datos de usuarios...');
-    
-    const resultado = await usuariosService.exportarBaseUsuarios();
-    
-    mostrarMensaje('✅ Base de Datos de Usuarios Exportada', 
-      `<div style="text-align: left;">
-        <h4 style="color: #2563eb; margin-bottom: 15px;">📄 Archivo JSON Generado</h4>
-        <p><strong>📁 Archivo:</strong> base_usuarios_${resultado.timestamp}.json</p>
-        <hr style="margin: 15px 0;">
-        <h5 style="color: #1e40af;">📋 Datos Exportados:</h5>
-        <ul style="margin: 10px 0; padding-left: 20px;">
-          <li><strong>👥 Total usuarios:</strong> ${resultado.total_usuarios}</li>
-        </ul>
-        <hr style="margin: 15px 0;">
-        <p style="font-size: 12px; color: #666; margin-top: 15px;">
-          El archivo JSON contiene la información completa de todos los usuarios registrados 
-          en el sistema, incluyendo nombres, correos, cargos y demás datos relevantes.
-        </p>
-      </div>`
-    );
-  } catch (error) {
-    let errorMsg = 'Error al exportar la base de datos de usuarios: ';
-    
-    if (error.response?.status === 401) {
-      errorMsg += 'No autorizado. Inicia sesión nuevamente.';
-    } else if (error.response?.status === 403) {
-      errorMsg += 'Acceso denegado. Permisos insuficientes.';
-    } else if (error.response?.status === 500) {
-      errorMsg += 'Error del servidor. Intenta más tarde.';
-    } else if (error.request) {
-      errorMsg += 'No se pudo conectar con el servidor. Verifica tu conexión.';
-    } else {
-      errorMsg += error.message || 'Error desconocido';
-    }
-    
-    mostrarMensaje('❌ Error', errorMsg);
-  } finally {
-    exportandoUsuarios.value = false;
-  }
-}
-
 const mostrarMensaje = (titulo, contenido) => {
   modalTitle.value = titulo
   modalContent.value = contenido
@@ -1481,12 +1419,6 @@ const logout = () => {
   background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
-}
-
-.users-btn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
 .action-btn:hover:not(:disabled) {

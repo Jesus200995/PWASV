@@ -314,23 +314,36 @@
           </div>
           
           <div v-else class="table-container">
+            <!-- Información de carga optimizada -->
+            <div class="load-info">
+              <div class="load-status">
+                <span class="load-icon">⚡</span>
+                <span class="load-text">
+                  Mostrando {{ asistencias.length.toLocaleString('es') }} asistencias cargadas
+                  <template v-if="totalAsistenciasServidor > asistencias.length">
+                    de {{ totalAsistenciasServidor.toLocaleString('es') }} totales
+                  </template>
+                </span>
+              </div>
+            </div>
+
             <table class="asistencias-table">
               <thead>
                 <tr>
-                  <th>Usuario</th>
-                  <th>Correo</th>
-                  <th>Fecha</th>
-                  <th>Entrada</th>
-                  <th>Salida</th>
-                  <th>Ubicación Entrada</th>
-                  <th>Ubicación Salida</th>
-                  <th>Fotos</th>
-                  <th>Observaciones</th>
+                  <th class="col-usuario">Usuario</th>
+                  <th class="col-correo">Correo</th>
+                  <th class="col-fecha">Fecha</th>
+                  <th class="col-entrada">Entrada</th>
+                  <th class="col-salida">Salida</th>
+                  <th class="col-ubicacion-entrada">Ubicación Entrada</th>
+                  <th class="col-ubicacion-salida">Ubicación Salida</th>
+                  <th class="col-fotos">Fotos</th>
+                  <th class="col-observaciones">Observaciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="asistencia in asistenciasPaginadas" :key="asistencia.id">
-                  <td>
+                  <td class="col-usuario">
                     <div class="user-info">
                       <div class="user-avatar">
                         {{ obtenerIniciales(asistencia.nombre_usuario) }}
@@ -341,25 +354,25 @@
                       </div>
                     </div>
                   </td>
-                  <td>{{ asistencia.correo_usuario }}</td>
-                  <td>
+                  <td class="col-correo">{{ asistencia.correo_usuario }}</td>
+                  <td class="col-fecha">
                     <span class="date-badge">
                       {{ formatearFecha(asistencia.fecha) }}
                     </span>
                   </td>
-                  <td>
+                  <td class="col-entrada">
                     <span class="time-badge entrada" v-if="asistencia.hora_entrada">
                       {{ formatearHora(asistencia.hora_entrada) }}
                     </span>
                     <span v-else class="no-data">Sin registro</span>
                   </td>
-                  <td>
+                  <td class="col-salida">
                     <span class="time-badge salida" v-if="asistencia.hora_salida">
                       {{ formatearHora(asistencia.hora_salida) }}
                     </span>
                     <span v-else class="no-data">Pendiente</span>
                   </td>
-                  <td>
+                  <td class="col-ubicacion-entrada">
                     <div v-if="asistencia.latitud_entrada && asistencia.longitud_entrada" class="location-cell">
                       <div class="location-info">
                         <span class="location-badge compact"
@@ -380,7 +393,7 @@
                     </div>
                     <span v-else class="no-data">N/A</span>
                   </td>
-                  <td>
+                  <td class="col-ubicacion-salida">
                     <div v-if="asistencia.latitud_salida && asistencia.longitud_salida" class="location-cell">
                       <div class="location-info">
                         <span class="location-badge compact"
@@ -401,7 +414,7 @@
                     </div>
                     <span v-else class="no-data">N/A</span>
                   </td>
-                  <td>
+                  <td class="col-fotos">
                     <div class="photos-cell">
                       <div class="photo-item" v-if="asistencia.foto_entrada_url">
                         <img 
@@ -428,7 +441,7 @@
                       <span v-if="!asistencia.foto_entrada_url && !asistencia.foto_salida_url" class="no-data">Sin fotos</span>
                     </div>
                   </td>
-                  <td>
+                  <td class="col-observaciones">
                     <div class="observations-cell">
                       <div v-if="asistencia.descripcion_entrada" class="observation-item">
                         <strong>Entrada:</strong> {{ asistencia.descripcion_entrada }}
@@ -454,7 +467,7 @@
                   <label for="itemsPorPagina" class="pagination-label">Asistencias por página:</label>
                   <select 
                     id="itemsPorPagina" 
-                    v-model="asistenciasPorPagina" 
+                    v-model.number="asistenciasPorPagina" 
                     @change="cambiarAsistenciasPorPagina"
                     class="pagination-select"
                   >
@@ -644,6 +657,7 @@ export default {
       paginaActual: 1,
       asistenciasPorPagina: 50,
       paginaSalto: '',
+      totalAsistenciasServidor: 0,
       // Estado UI
       loading: false,
       error: null,
@@ -4694,6 +4708,129 @@ export default {
     overflow-x: hidden !important;
   }
 }
+
+/* === ESTILOS PARA INFORMACIÓN DE CARGA OPTIMIZADA === */
+.load-info {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  animation: slideDown 0.4s ease-out;
+}
+
+.load-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #2e7d32;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.load-icon {
+  font-size: 1.3rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.load-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.load-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.load-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+.loading-more {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #2e7d32;
+  font-size: 0.9rem;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* === ESTILOS MEJORADOS PARA COLUMNAS DE TABLA === */
+.col-usuario,
+.col-correo,
+.col-fecha,
+.col-entrada,
+.col-salida,
+.col-ubicacion-entrada,
+.col-ubicacion-salida,
+.col-fotos,
+.col-observaciones {
+  padding: 1rem;
+  vertical-align: top;
+}
+
+.col-usuario { width: 18%; }
+.col-correo { width: 15%; }
+.col-fecha { width: 10%; }
+.col-entrada { width: 10%; }
+.col-salida { width: 10%; }
+.col-ubicacion-entrada { width: 12%; }
+.col-ubicacion-salida { width: 12%; }
+.col-fotos { width: 10%; }
+.col-observaciones { width: 13%; }
+
+/* === ANIMACIONES === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 </style>
 
 <style>

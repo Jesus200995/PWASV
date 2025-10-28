@@ -15,14 +15,19 @@ class AsistenciasService {
       try {
         console.log(`🔍 Intento ${intento}/${maxReintentos} - Solicitando asistencias desde:`, `${API_URL}/asistencias`);
         
+        const controller = new AbortController();
+        // Timeout de 60 segundos por intento (aumentado de 10s)
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        
         const response = await fetch(`${API_URL}/asistencias`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
-          // Timeout de 10 segundos por intento
-          signal: AbortSignal.timeout(10000)
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -86,12 +91,19 @@ class AsistenciasService {
     try {
       console.log('🔍 Solicitando usuarios desde:', `${API_URL}/usuarios`);
       
+      const controller = new AbortController();
+      // Timeout de 30 segundos
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
       const response = await fetch(`${API_URL}/usuarios`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -287,14 +299,19 @@ class AsistenciasService {
     try {
       console.log('🗑️ ELIMINACIÓN MASIVA: Eliminando todas las asistencias...');
       
+      const controller = new AbortController();
+      // Timeout de 60 segundos para operaciones masivas
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      
       const response = await fetch(`${API_URL}/admin/asistencias/all`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        // Timeout de 30 segundos para operaciones masivas
-        signal: AbortSignal.timeout(30000)
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -306,7 +323,7 @@ class AsistenciasService {
       
       return data;
     } catch (error) {
-      if (error.name === 'TimeoutError') {
+      if (error.name === 'AbortError') {
         console.error('❌ Timeout al eliminar asistencias - La operación está tomando demasiado tiempo');
         throw new Error('La eliminación está tomando demasiado tiempo. Intenta de nuevo en unos momentos.');
       }
@@ -323,14 +340,19 @@ class AsistenciasService {
     try {
       console.log('🗑️ ELIMINACIÓN MASIVA: Eliminando todos los registros...');
       
+      const controller = new AbortController();
+      // Timeout de 60 segundos para operaciones masivas
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      
       const response = await fetch(`${API_URL}/admin/registros/all`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        // Timeout de 30 segundos para operaciones masivas
-        signal: AbortSignal.timeout(30000)
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -342,7 +364,7 @@ class AsistenciasService {
       
       return data;
     } catch (error) {
-      if (error.name === 'TimeoutError') {
+      if (error.name === 'AbortError') {
         console.error('❌ Timeout al eliminar registros');
         throw new Error('La eliminación está tomando demasiado tiempo. Intenta de nuevo en unos momentos.');
       }
@@ -359,14 +381,19 @@ class AsistenciasService {
     try {
       console.log('🗑️ ELIMINACIÓN MASIVA: Eliminando todos los usuarios...');
       
+      const controller = new AbortController();
+      // Timeout de 60 segundos para operaciones masivas
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      
       const response = await fetch(`${API_URL}/admin/usuarios/all`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        // Timeout de 30 segundos para operaciones masivas
-        signal: AbortSignal.timeout(30000)
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -378,7 +405,7 @@ class AsistenciasService {
       
       return data;
     } catch (error) {
-      if (error.name === 'TimeoutError') {
+      if (error.name === 'AbortError') {
         console.error('❌ Timeout al eliminar usuarios');
         throw new Error('La eliminación está tomando demasiado tiempo. Intenta de nuevo en unos momentos.');
       }

@@ -2116,7 +2116,8 @@ async def debug_tiempo_actual():
 @app.get("/asistencias")
 async def obtener_historial_asistencias(usuario_id: int = None, limit: int = None):
     try:
-        if not conn:
+        # Verificar y reconectar si es necesario
+        if not verificar_conexion_db():
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
         print(f"🔍 Obteniendo historial de asistencias para usuario: {usuario_id}, límite: {limit if limit else 'Sin límite'}")

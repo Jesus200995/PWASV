@@ -340,6 +340,48 @@ class UsuariosService {
   }
 }
 
+  async exportarBaseUsuarios() {
+    try {
+      console.log('📥 Exportando base de datos completa de usuarios...');
+      const response = await fetch(`${API_URL}/usuarios/exportacion-completa`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        console.error(`❌ Error HTTP: ${response.status} - ${response.statusText}`);
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Base de datos de usuarios obtenida:', data);
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json; charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `base_usuarios_${timestamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      return {
+        status: 'success',
+        message: 'Base de datos de usuarios exportada exitosamente',
+        timestamp,
+        total_usuarios: data.usuarios?.length || 0
+      };
+      
+    } catch (error) {
+      console.error('❌ Error al exportar base de datos de usuarios:', error);
+      throw error;
+    }
+  }
+
 // Exportar una instancia única del servicio (singleton)
 export const usuariosService = new UsuariosService();
 export default usuariosService;

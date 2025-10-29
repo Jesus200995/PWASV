@@ -311,6 +311,7 @@
       :show="showConfirmModal"
       :title="confirmTitle"
       :message="confirmMessage"
+      :type="confirmType"
       @confirm="handleConfirm"
       @cancel="handleCancel"
     />
@@ -350,6 +351,7 @@ const showConfirmModal = ref(false)
 const confirmAction = ref(null)
 const confirmTitle = ref('')
 const confirmMessage = ref('')
+const confirmType = ref('warning')
 
 // Variables para las acciones de eliminación masiva
 const eliminandoRegistros = ref(false)
@@ -1173,19 +1175,26 @@ const descargarUsuarios = async () => {
 
 // NUEVAS FUNCIONES PARA ELIMINAR IMÁGENES
 const confirmarEliminarImagenes = () => {
-  showConfirmation(
-    '⚠️ ELIMINAR TODAS LAS IMÁGENES',
-    '¿Estás completamente seguro de que quieres eliminar TODAS las imágenes del sistema?<br><br><strong>Esta acción NO SE PUEDE DESHACER</strong> y eliminará:<br>• Todas las fotos de registros de actividades<br>• Todas las fotos de entrada/salida de asistencias<br>• Todos los archivos de imágenes almacenados<br><br>Esta operación es irreversible.',
-    async () => {
-      // Segunda confirmación más estricta
-      const confirmacion = prompt('Para confirmar, escribe exactamente: ELIMINAR IMÁGENES')
-      if (confirmacion === 'ELIMINAR IMÁGENES') {
-        await eliminarTodasLasImagenes()
-      } else {
-        mostrarMensaje('Cancelado', 'Eliminación de imágenes cancelada.')
-      }
+  confirmType.value = 'danger'
+  confirmTitle.value = '⚠️ ELIMINAR TODAS LAS IMÁGENES'
+  confirmMessage.value = `¿Estás completamente seguro de que quieres eliminar TODAS las imágenes del sistema?
+
+Esta acción NO SE PUEDE DESHACER y eliminará:
+• Todas las fotos de registros de actividades
+• Todas las fotos de entrada/salida de asistencias
+• Todos los archivos de imágenes almacenados
+
+Esta operación es irreversible.`
+  confirmAction.value = async () => {
+    // Segunda confirmación más estricta
+    const confirmacion = prompt('Para confirmar, escribe exactamente: ELIMINAR IMÁGENES')
+    if (confirmacion === 'ELIMINAR IMÁGENES') {
+      await eliminarTodasLasImagenes()
+    } else {
+      mostrarMensaje('Cancelado', 'Eliminación de imágenes cancelada.')
     }
-  )
+  }
+  showConfirmModal.value = true
 }
 
 const eliminarTodasLasImagenes = async () => {
@@ -1193,19 +1202,24 @@ const eliminarTodasLasImagenes = async () => {
   showProgressModal.value = true
   
   try {
+    console.log('🚀 Iniciando eliminación de imágenes...')
+    
     // Iniciar el progreso visual
     const detenerProgreso = await progressModalRef.value.iniciarProgreso()
     
     // Llamar al servicio para eliminar todas las imágenes
+    console.log('📞 Llamando al servicio...')
     const resultado = await imagenesService.eliminarTodasLasImagenes()
+    
+    console.log('📊 Resultado recibido:', resultado)
     
     // Actualizar el modal con las estadísticas reales
     progressModalRef.value.actualizar({
-      fotos_bd_limpiadas: resultado.estadisticas.fotos_bd_limpiadas,
-      archivos_eliminados: resultado.estadisticas.archivos_eliminados,
-      archivos_no_encontrados: resultado.estadisticas.archivos_no_encontrados,
-      total_eliminado: resultado.estadisticas.total_eliminado,
-      errores_encontrados: resultado.estadisticas.errores_encontrados
+      fotos_bd_limpiadas: resultado.estadisticas?.fotos_bd_limpiadas || 0,
+      archivos_eliminados: resultado.estadisticas?.archivos_eliminados || 0,
+      archivos_no_encontrados: resultado.estadisticas?.archivos_no_encontrados || 0,
+      total_eliminado: resultado.estadisticas?.total_eliminado || 0,
+      errores_encontrados: resultado.estadisticas?.errores_encontrados || 0
     })
     
     // Marcar como completado
@@ -1216,21 +1230,36 @@ const eliminarTodasLasImagenes = async () => {
     
   } catch (error) {
     console.error('❌ Error al eliminar imágenes:', error)
+    console.error('   Error type:', error.constructor.name)
+    console.error('   Error message:', error.message)
+    
     eliminandoImagenes.value = false
     showProgressModal.value = false
     
-    let errorMsg = 'Error al eliminar las imágenes: '
+    let errorMsg = error.message || 'Error desconocido al eliminar las imágenes'
     
+    // Si el mensaje de error ya es descriptivo, usarlo directamente
+    if (errorMsg.includes('No hay token') || 
+        errorMsg.includes('Sesión expirada') || 
+        errorMsg.includes('No tienes permisos') ||
+        errorMsg.includes('Error en el servidor') ||
+        errorMsg.includes('Error de conexión') ||
+        errorMsg.includes('endpoint')) {
+      mostrarMensaje('❌ Error', errorMsg)
+      return
+    }
+    
+    // Casos adicionales
     if (error.response?.status === 401) {
-      errorMsg += 'No autorizado. Inicia sesión nuevamente.'
+      errorMsg = 'No autorizado. Inicia sesión nuevamente.'
     } else if (error.response?.status === 403) {
-      errorMsg += 'Acceso denegado. Permisos insuficientes.'
+      errorMsg = 'Acceso denegado. Permisos insuficientes.'
     } else if (error.response?.status === 500) {
-      errorMsg += 'Error del servidor. Intenta más tarde.'
+      errorMsg = 'Error del servidor. Intenta más tarde.'
+    } else if (error.response?.status === 404) {
+      errorMsg = 'El endpoint no existe. Verifica que el servidor está actualizado.'
     } else if (error.request) {
-      errorMsg += 'No se pudo conectar con el servidor. Verifica tu conexión.'
-    } else {
-      errorMsg += error.message || 'Error desconocido'
+      errorMsg = 'No se pudo conectar con el servidor. Verifica tu conexión y que el servidor está funcionando.'
     }
     
     mostrarMensaje('❌ Error', errorMsg)

@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+import io
+import sys
+# Configurar UTF-8 para Windows
+if sys.platform == 'win32':
+    io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -55,17 +63,17 @@ def conectar_base_datos():
             user=DB_USER, 
             password=DB_PASS,
             # Configuraciones para mejor manejo de conexiones
-            connect_timeout=10,
+            connect_timeout=30,
             keepalives=1,
             keepalives_idle=30,
-            keepalives_interval=5,
-            keepalives_count=5
+            keepalives_interval=10,
+            keepalives_count=10
         )
         cursor = conn.cursor()
-        print("✅ Conexión a la base de datos exitosa")
+        print("[DB] Conexion exitosa")
         return True
     except Exception as e:
-        print(f"❌ Error conectando a la base de datos: {e}")
+        print(f"[DB ERROR] Conexion fallida: {str(e)}")
         conn = None
         cursor = None
         return False
@@ -150,6 +158,7 @@ def ejecutar_consulta_segura(query, params=None, fetch_type='all'):
 
 # Establecer conexión inicial
 try:
+    print("[STARTUP] Intentando conectar a BD...")
     conectar_base_datos()
     
     # Crear tabla admin_users si no existe
@@ -175,10 +184,13 @@ try:
             ("admin", default_password, "admin"),
             fetch_type='none'
         )
-        print("✅ Usuario administrador por defecto creado: admin/admin123")
+        print("[DB] Usuario administrador por defecto creado: admin/admin123")
+    
+    print("[DB] Inicializacion completada exitosamente")
     
 except Exception as e:
-    print(f"❌ Error en inicialización de base de datos: {e}")
+    print(f"[ERROR] Inicializacion: {str(e)}")
+    print("[INFO] El servidor iniciara pero algunas funciones podrian no estar disponibles")
     conn = None
     cursor = None
 

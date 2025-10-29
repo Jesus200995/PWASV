@@ -4890,6 +4890,174 @@ async def verificar_salud_api():
 
 # ==================== FIN ENDPOINTS DE GESTIÓN DE ROLES Y PERMISOS ====================
 
+# ==================== ENDPOINT PARA ELIMINAR TODAS LAS IMÁGENES ====================
+
+@app.delete("/imagenes/eliminar-todas")
+async def eliminar_todas_imagenes():
+    """
+    Endpoint para eliminar TODAS las imágenes (fotos) almacenadas en la base de datos.
+    Elimina:
+    - Todas las fotos de registros de actividades
+    - Todas las fotos de entrada/salida de asistencias
+    - Los archivos físicos del directorio de fotos
+    """
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print("🗑️ INICIANDO ELIMINACIÓN DE TODAS LAS IMÁGENES...")
+        
+        # Contadores
+        fotos_bd_eliminadas = 0
+        fotos_archivo_eliminadas = 0
+        fotos_no_encontradas = 0
+        errores = 0
+        
+        # 1. Obtener todas las fotos de registros
+        try:
+            cursor.execute("SELECT DISTINCT foto_url FROM registros WHERE foto_url IS NOT NULL")
+            fotos_registros = cursor.fetchall()
+            print(f"📸 Se encontraron {len(fotos_registros)} fotos en registros")
+            
+            for foto_row in fotos_registros:
+                foto_path = foto_row[0]
+                if foto_path:
+                    if os.path.exists(foto_path):
+                        try:
+                            os.remove(foto_path)
+                            fotos_archivo_eliminadas += 1
+                            print(f"   ✅ Eliminado: {foto_path}")
+                        except Exception as e:
+                            errores += 1
+                            print(f"   ❌ Error eliminando {foto_path}: {e}")
+                    else:
+                        fotos_no_encontradas += 1
+                        print(f"   ⚠️ Archivo no encontrado: {foto_path}")
+        except Exception as e:
+            print(f"⚠️ Error al obtener fotos de registros: {e}")
+            errores += 1
+        
+        # 2. Obtener todas las fotos de asistencias (entrada y salida)
+        try:
+            cursor.execute("""
+                SELECT DISTINCT foto_entrada_url, foto_salida_url 
+                FROM asistencias 
+                WHERE foto_entrada_url IS NOT NULL OR foto_salida_url IS NOT NULL
+            """)
+            fotos_asistencias = cursor.fetchall()
+            print(f"📸 Se encontraron {len(fotos_asistencias)} registros de asistencia con fotos")
+            
+            for foto_row in fotos_asistencias:
+                # Foto de entrada
+                if foto_row[0]:
+                    foto_path = foto_row[0]
+                    if os.path.exists(foto_path):
+                        try:
+                            os.remove(foto_path)
+                            fotos_archivo_eliminadas += 1
+                            print(f"   ✅ Eliminado: {foto_path}")
+                        except Exception as e:
+                            errores += 1
+                            print(f"   ❌ Error eliminando {foto_path}: {e}")
+                    else:
+                        fotos_no_encontradas += 1
+                        print(f"   ⚠️ Archivo no encontrado: {foto_path}")
+                
+                # Foto de salida
+                if foto_row[1]:
+                    foto_path = foto_row[1]
+                    if os.path.exists(foto_path):
+                        try:
+                            os.remove(foto_path)
+                            fotos_archivo_eliminadas += 1
+                            print(f"   ✅ Eliminado: {foto_path}")
+                        except Exception as e:
+                            errores += 1
+                            print(f"   ❌ Error eliminando {foto_path}: {e}")
+                    else:
+                        fotos_no_encontradas += 1
+                        print(f"   ⚠️ Archivo no encontrado: {foto_path}")
+        except Exception as e:
+            print(f"⚠️ Error al obtener fotos de asistencias: {e}")
+            errores += 1
+        
+        # 3. Limpiar referencias en la base de datos
+        try:
+            # Actualizar registros estableciendo foto_url en NULL
+            cursor.execute("UPDATE registros SET foto_url = NULL WHERE foto_url IS NOT NULL")
+            registros_limpiados = cursor.rowcount
+            print(f"🗑️ {registros_limpiados} registros limpios en la BD")
+            
+            # Actualizar asistencias estableciendo fotos en NULL
+            cursor.execute("UPDATE asistencias SET foto_entrada_url = NULL WHERE foto_entrada_url IS NOT NULL")
+            entrada_limpiadas = cursor.rowcount
+            
+            cursor.execute("UPDATE asistencias SET foto_salida_url = NULL WHERE foto_salida_url IS NOT NULL")
+            salida_limpiadas = cursor.rowcount
+            
+            print(f"🗑️ {entrada_limpiadas} fotos de entrada limpias en la BD")
+            print(f"🗑️ {salida_limpiadas} fotos de salida limpias en la BD")
+            
+            fotos_bd_eliminadas = registros_limpiados + entrada_limpiadas + salida_limpiadas
+            
+            conn.commit()
+            print("✅ Cambios confirmados en la base de datos")
+            
+        except Exception as e:
+            conn.rollback()
+            print(f"❌ Error limpiando la base de datos: {e}")
+            errores += 1
+        
+        # 4. Limpiar archivos huérfanos en el directorio de fotos
+        try:
+            if os.path.exists(FOTOS_DIR):
+                archivos_directorio = os.listdir(FOTOS_DIR)
+                print(f"📁 Se encontraron {len(archivos_directorio)} archivos en el directorio de fotos")
+                
+                for archivo in archivos_directorio:
+                    ruta_archivo = os.path.join(FOTOS_DIR, archivo)
+                    if os.path.isfile(ruta_archivo):
+                        try:
+                            os.remove(ruta_archivo)
+                            fotos_archivo_eliminadas += 1
+                            print(f"   ✅ Eliminado archivo huérfano: {archivo}")
+                        except Exception as e:
+                            errores += 1
+                            print(f"   ❌ Error eliminando archivo {archivo}: {e}")
+        except Exception as e:
+            print(f"⚠️ Error limpiando directorio de fotos: {e}")
+            errores += 1
+        
+        # Preparar resumen
+        resumen = {
+            "status": "success",
+            "message": "Eliminación de imágenes completada",
+            "estadisticas": {
+                "fotos_bd_limpiadas": fotos_bd_eliminadas,
+                "archivos_eliminados": fotos_archivo_eliminadas,
+                "archivos_no_encontrados": fotos_no_encontradas,
+                "total_eliminado": fotos_archivo_eliminadas + fotos_no_encontradas,
+                "errores_encontrados": errores
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        print("\n✅ ELIMINACIÓN COMPLETADA:")
+        print(f"   📸 Fotos en BD limpiadas: {fotos_bd_eliminadas}")
+        print(f"   🗑️ Archivos eliminados: {fotos_archivo_eliminadas}")
+        print(f"   ⚠️ Archivos no encontrados: {fotos_no_encontradas}")
+        print(f"   ❌ Errores: {errores}")
+        
+        return resumen
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error general en eliminación de imágenes: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar imágenes: {str(e)}")
+
+# ==================== FIN ENDPOINT ELIMINAR IMÁGENES ====================
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

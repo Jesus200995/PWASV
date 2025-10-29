@@ -231,6 +231,15 @@
                 </svg>
                 {{ descargandoUsuarios ? 'Descargando...' : 'Exportar Usuarios' }}
               </button>
+
+              <button @click="confirmarEliminarImagenes" class="action-btn images-btn" :disabled="eliminandoImagenes">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"></path>
+                  <polyline points="17 6 17 16"></polyline>
+                  <line x1="13" y1="10" x2="7" y2="10"></line>
+                </svg>
+                {{ eliminandoImagenes ? 'Eliminando...' : 'Eliminar Imágenes' }}
+              </button>
             </div>
           </div>
 
@@ -305,6 +314,15 @@
       @confirm="handleConfirm"
       @cancel="handleCancel"
     />
+
+    <!-- Modal de progreso para eliminación de imágenes -->
+    <ProgressModal
+      ref="progressModalRef"
+      :show="showProgressModal"
+      titulo="Eliminar todas las imágenes"
+      @cerrar="cerrarProgressModal"
+      @completado="onProgressCompletado"
+    />
   </div>
 </template>
 
@@ -314,7 +332,9 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar_NEW.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
+import ProgressModal from '../components/ProgressModal.vue'
 import asistenciasService from '../services/asistenciasService.js'
+import imagenesService from '../services/imagenesService.js'
 
 const router = useRouter()
 
@@ -336,6 +356,11 @@ const eliminandoRegistros = ref(false)
 const eliminandoAsistencias = ref(false)
 const descargandoBD = ref(false)
 const descargandoUsuarios = ref(false)
+const eliminandoImagenes = ref(false)
+
+// Variables para el modal de progreso
+const showProgressModal = ref(false)
+const progressModalRef = ref(null)
 
 const apiConfig = reactive({
   url: 'https://apipwa.sembrandodatos.com',
@@ -1146,6 +1171,88 @@ const descargarUsuarios = async () => {
   }
 }
 
+// NUEVAS FUNCIONES PARA ELIMINAR IMÁGENES
+const confirmarEliminarImagenes = () => {
+  showConfirmation(
+    '⚠️ ELIMINAR TODAS LAS IMÁGENES',
+    '¿Estás completamente seguro de que quieres eliminar TODAS las imágenes del sistema?<br><br><strong>Esta acción NO SE PUEDE DESHACER</strong> y eliminará:<br>• Todas las fotos de registros de actividades<br>• Todas las fotos de entrada/salida de asistencias<br>• Todos los archivos de imágenes almacenados<br><br>Esta operación es irreversible.',
+    async () => {
+      // Segunda confirmación más estricta
+      const confirmacion = prompt('Para confirmar, escribe exactamente: ELIMINAR IMÁGENES')
+      if (confirmacion === 'ELIMINAR IMÁGENES') {
+        await eliminarTodasLasImagenes()
+      } else {
+        mostrarMensaje('Cancelado', 'Eliminación de imágenes cancelada.')
+      }
+    }
+  )
+}
+
+const eliminarTodasLasImagenes = async () => {
+  eliminandoImagenes.value = true
+  showProgressModal.value = true
+  
+  try {
+    // Iniciar el progreso visual
+    const detenerProgreso = await progressModalRef.value.iniciarProgreso()
+    
+    // Llamar al servicio para eliminar todas las imágenes
+    const resultado = await imagenesService.eliminarTodasLasImagenes()
+    
+    // Actualizar el modal con las estadísticas reales
+    progressModalRef.value.actualizar({
+      fotos_bd_limpiadas: resultado.estadisticas.fotos_bd_limpiadas,
+      archivos_eliminados: resultado.estadisticas.archivos_eliminados,
+      archivos_no_encontrados: resultado.estadisticas.archivos_no_encontrados,
+      total_eliminado: resultado.estadisticas.total_eliminado,
+      errores_encontrados: resultado.estadisticas.errores_encontrados
+    })
+    
+    // Marcar como completado
+    detenerProgreso()
+    progressModalRef.value.completar()
+    
+    console.log('✅ Eliminación de imágenes completada:', resultado)
+    
+  } catch (error) {
+    console.error('❌ Error al eliminar imágenes:', error)
+    eliminandoImagenes.value = false
+    showProgressModal.value = false
+    
+    let errorMsg = 'Error al eliminar las imágenes: '
+    
+    if (error.response?.status === 401) {
+      errorMsg += 'No autorizado. Inicia sesión nuevamente.'
+    } else if (error.response?.status === 403) {
+      errorMsg += 'Acceso denegado. Permisos insuficientes.'
+    } else if (error.response?.status === 500) {
+      errorMsg += 'Error del servidor. Intenta más tarde.'
+    } else if (error.request) {
+      errorMsg += 'No se pudo conectar con el servidor. Verifica tu conexión.'
+    } else {
+      errorMsg += error.message || 'Error desconocido'
+    }
+    
+    mostrarMensaje('❌ Error', errorMsg)
+  }
+}
+
+const cerrarProgressModal = () => {
+  showProgressModal.value = false
+  eliminandoImagenes.value = false
+}
+
+const onProgressCompletado = () => {
+  // El modal se cierra después de unos segundos automáticamente
+  setTimeout(() => {
+    cerrarProgressModal()
+    mostrarMensaje(
+      '✅ Eliminación exitosa',
+      'Todas las imágenes han sido eliminadas correctamente del sistema.'
+    )
+  }, 2000)
+}
+
 const logout = () => {
   // No usar confirm(), el modal se maneja en el Sidebar
   localStorage.removeItem('admin_token')
@@ -1620,6 +1727,12 @@ const logout = () => {
   background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
+}
+
+.images-btn {
+  background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(236, 72, 153, 0.2);
 }
 
 .action-btn:hover:not(:disabled) {

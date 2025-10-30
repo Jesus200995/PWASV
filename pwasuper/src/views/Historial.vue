@@ -308,12 +308,24 @@
           Total de asistencias: <span class="font-semibold text-primary">{{ asistencias.length }}</span>
         </div>
         <div class="space-y-2">
-          <div v-for="(asistencia, index) in asistencias" :key="index" class="glass-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
-            <div class="p-2">
-              <!-- Información de la fecha -->
-              <div class="flex justify-between items-center mb-2">
-                <h3 class="text-sm font-medium text-gray-800">{{ formatFecha(asistencia.fecha) }}</h3>
+          <!-- Agrupar asistencias por fecha -->
+          <div v-for="grupo in agruparAsistenciasPorFecha(asistencias)" :key="grupo.fecha">
+            <!-- Separador de fecha -->
+            <div class="flex items-center gap-2 my-3 px-2">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+              <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-full border border-indigo-200/50 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="text-xs font-semibold text-indigo-700 capitalize">{{ grupo.fecha }}</span>
               </div>
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+            </div>
+
+            <!-- Asistencias del día -->
+            <div class="space-y-2">
+              <div v-for="(asistencia, index) in grupo.asistencias" :key="`${grupo.fecha}-${index}`" class="glass-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
+            <div class="p-2">
 
               <!-- Diseño dividido: Entrada y Salida en dos columnas -->
               <div class="grid grid-cols-2 gap-2">
@@ -431,6 +443,8 @@
               </div>
 
               <!-- Estado incompleto eliminado - ahora se maneja en el recuadro de salida -->
+            </div>
+          </div>
             </div>
           </div>
         </div>
@@ -842,6 +856,27 @@ function agruparRegistrosPorFecha(registrosLista) {
       registros: regs.sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora))
     }))
     .sort((a, b) => new Date(b.registros[0].fecha_hora) - new Date(a.registros[0].fecha_hora));
+}
+
+// Función para agrupar asistencias por fecha
+function agruparAsistenciasPorFecha(asistenciasLista) {
+  const grupos = {};
+  
+  asistenciasLista.forEach(asistencia => {
+    const fechaCDMX = obtenerFechaCDMX(asistencia.fecha);
+    if (!grupos[fechaCDMX]) {
+      grupos[fechaCDMX] = [];
+    }
+    grupos[fechaCDMX].push(asistencia);
+  });
+  
+  // Convertir a array de objetos con fecha y asistencias, ordenados por fecha descendente
+  return Object.entries(grupos)
+    .map(([fecha, asists]) => ({
+      fecha,
+      asistencias: asists.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+    }))
+    .sort((a, b) => new Date(b.asistencias[0].fecha) - new Date(a.asistencias[0].fecha));
 }
 
 function verEnMapa(registro) {

@@ -12,59 +12,90 @@
     <!-- Tabs para alternar entre registros normales y asistencias -->
     <div class="glass-card mb-2">
       <div class="flex justify-center border-b border-white/20 mb-2 pb-3">
-        <div class="flex bg-gradient-to-r from-white/10 via-white/15 to-white/10 backdrop-blur-xl rounded-full p-1 gap-1 shadow-2xl border border-white/30 relative overflow-hidden">
-          <!-- Indicador de fondo animado -->
+        <div class="flex bg-gradient-to-r from-white/10 via-white/15 to-white/10 backdrop-blur-3xl rounded-full p-1.5 gap-1 shadow-2xl border border-white/30 relative overflow-hidden">
+          <!-- Brillo de fondo superior -->
+          <div class="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full"></div>
+          
+          <!-- Indicador de fondo animado fluido HD -->
           <div 
-            class="absolute top-1 bottom-1 rounded-full transition-all duration-700 ease-in-out"
+            class="absolute top-1.5 bottom-1.5 rounded-full transition-all duration-500 ease-out"
             :style="{
-              left: tabActiva === 'asistencias' ? '4px' : '50%',
-              width: 'calc(50% - 8px)',
+              left: tabActiva === 'asistencias' ? '6px' : '50%',
+              width: 'calc(50% - 12px)',
               background: tabActiva === 'asistencias' 
-                ? 'linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8)' 
-                : 'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
+                ? 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(37, 99, 235) 50%, rgb(29, 78, 216) 100%)' 
+                : 'linear-gradient(135deg, rgb(139, 92, 246) 0%, rgb(124, 58, 237) 50%, rgb(109, 40, 217) 100%)',
               boxShadow: tabActiva === 'asistencias'
-                ? '0 8px 25px rgba(59, 130, 246, 0.4), 0 4px 15px rgba(37, 99, 235, 0.3), 0 0 20px rgba(59, 130, 246, 0.2)'
-                : '0 8px 25px rgba(139, 92, 246, 0.4), 0 4px 15px rgba(124, 58, 237, 0.3), 0 0 20px rgba(139, 92, 246, 0.2)'
+                ? 'rgba(59, 130, 246, 0.6) 0px 12px 40px, rgba(37, 99, 235, 0.4) 0px 6px 25px, rgba(59, 130, 246, 0.25) 0px 0px 30px, inset 0px 1px 2px rgba(255, 255, 255, 0.3)'
+                : 'rgba(139, 92, 246, 0.6) 0px 12px 40px, rgba(124, 58, 237, 0.4) 0px 6px 25px, rgba(139, 92, 246, 0.25) 0px 0px 30px, inset 0px 1px 2px rgba(255, 255, 255, 0.3)'
+            }"
+          ></div>
+          
+          <!-- Efecto de brillo interior -->
+          <div 
+            class="absolute top-1.5 bottom-1.5 rounded-full pointer-events-none transition-all duration-500 ease-out"
+            :style="{
+              left: tabActiva === 'asistencias' ? '6px' : '50%',
+              width: 'calc(50% - 12px)',
+              background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%)',
             }"
           ></div>
           
           <button 
             @click="cambiarTab('asistencias')" 
             :class="[
-              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-700 ease-in-out relative overflow-hidden z-10',
+              'tab-button-liquid px-12 py-2.5 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden z-10 flex items-center justify-center hover:scale-105 active:scale-95',
               tabActiva === 'asistencias' 
-                ? 'text-white' 
+                ? 'text-white drop-shadow-lg' 
                 : 'text-gray-600 hover:text-gray-800'
             ]"
           >
-            <span class="relative z-20 font-bold tracking-wide">Asistencias</span>
+            <span class="relative z-20 font-bold tracking-wider">Asistencias</span>
+            <!-- Ripple de fondo interior -->
+            <span v-if="tabActiva === 'asistencias'" class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-transparent blur-lg z-0"></span>
           </button>
           <button 
             @click="cambiarTab('registros')" 
             :class="[
-              'tab-button-liquid px-12 py-2 font-semibold text-xs rounded-full transition-all duration-700 ease-in-out relative overflow-hidden z-10',
+              'tab-button-liquid px-12 py-2.5 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden z-10 flex items-center justify-center hover:scale-105 active:scale-95',
               tabActiva === 'registros' 
-                ? 'text-white' 
+                ? 'text-white drop-shadow-lg' 
                 : 'text-gray-600 hover:text-gray-800'
             ]"
           >
-            <span class="relative z-20 font-bold tracking-wide">Actividades</span>
+            <span class="relative z-20 font-bold tracking-wider">Actividades</span>
+            <!-- Ripple de fondo interior -->
+            <span v-if="tabActiva === 'registros'" class="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400/20 to-transparent blur-lg z-0"></span>
           </button>
         </div>
       </div>
 
       <!-- Tab de Registros Normales -->
       <div v-show="tabActiva === 'registros'">
-        <!-- Título centralizado para Actividades -->
-        <div class="text-center mb-1">
-          <h2 class="text-sm font-bold text-gray-800 mb-1">Historial de actividades</h2>
-          <div class="w-20 h-0.5 bg-gradient-to-r from-purple-400 to-purple-600 mx-auto mb-1"></div>
-          <p v-if="userInfo" class="text-xs text-gray-600">
-            Registros de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
-          </p>
+        <!-- Título centralizado para Actividades - Diseño Mejorado -->
+        <div class="text-center mb-2 px-2">
+          <div class="inline-block">
+            <div class="flex items-center justify-center gap-2 mb-2">
+              <div class="h-1 w-8 bg-gradient-to-r from-purple-400 via-purple-500 to-transparent rounded-full"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <div class="h-1 w-8 bg-gradient-to-l from-purple-400 via-purple-500 to-transparent rounded-full"></div>
+            </div>
+            <h2 class="text-lg font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent mb-1 tracking-wide">
+              Historial de Actividades
+            </h2>
+            <div class="flex items-center justify-center gap-1">
+              <div class="h-px w-6 bg-gradient-to-r from-transparent to-purple-300"></div>
+              <p v-if="userInfo" class="text-xs text-gray-600 font-medium">
+                {{ userInfo.nombre_completo }}
+              </p>
+              <div class="h-px w-6 bg-gradient-to-l from-transparent to-purple-300"></div>
+            </div>
+          </div>
         </div>
         
-        <div class="flex justify-end items-center mb-1">
+        <div class="flex justify-end items-center mb-2">
           <button @click="cargarRegistros" class="glass-button-refresh text-xs px-2 py-1 flex items-center gap-1">
             <svg :class="['h-2.5 w-2.5 transition-transform duration-500', cargando ? 'animate-spin' : '']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -76,16 +107,30 @@
 
       <!-- Tab de Asistencias -->
       <div v-show="tabActiva === 'asistencias'">
-        <!-- Título centralizado para Asistencias -->
-        <div class="text-center mb-1">
-          <h2 class="text-sm font-bold text-gray-800 mb-1">Historial de asistencias</h2>
-          <div class="w-20 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-1"></div>
-          <p v-if="userInfo" class="text-xs text-gray-600">
-            Asistencias de: <span class="font-medium text-primary">{{ userInfo.nombre_completo }}</span>
-          </p>
+        <!-- Título centralizado para Asistencias - Diseño Mejorado -->
+        <div class="text-center mb-2 px-2">
+          <div class="inline-block">
+            <div class="flex items-center justify-center gap-2 mb-2">
+              <div class="h-1 w-8 bg-gradient-to-r from-blue-400 via-blue-500 to-transparent rounded-full"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+              </svg>
+              <div class="h-1 w-8 bg-gradient-to-l from-blue-400 via-blue-500 to-transparent rounded-full"></div>
+            </div>
+            <h2 class="text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent mb-1 tracking-wide">
+              Historial de Asistencias
+            </h2>
+            <div class="flex items-center justify-center gap-1">
+              <div class="h-px w-6 bg-gradient-to-r from-transparent to-blue-300"></div>
+              <p v-if="userInfo" class="text-xs text-gray-600 font-medium">
+                {{ userInfo.nombre_completo }}
+              </p>
+              <div class="h-px w-6 bg-gradient-to-l from-transparent to-blue-300"></div>
+            </div>
+          </div>
         </div>
         
-        <div class="flex justify-end items-center mb-1">
+        <div class="flex justify-end items-center mb-2">
           <button @click="cargarAsistencias" class="glass-button-refresh text-xs px-2 py-1 flex items-center gap-1">
             <svg :class="['h-2.5 w-2.5 transition-transform duration-500', cargandoAsistencias ? 'animate-spin' : '']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1295,26 +1340,38 @@ function verImagen(url) {
   position: relative;
   cursor: pointer;
   font-weight: 600;
-  letter-spacing: 0.025em;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
   min-width: 160px;
   text-align: center;
   background: transparent;
   border: none;
   outline: none;
+  will-change: transform, color;
+  -webkit-font-smoothing: antialiased;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
-.tab-button-liquid:not(.tab-active-liquid):hover {
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  transform: translateY(-1px);
+.tab-button-liquid:hover {
+  backdrop-filter: blur(35px);
+  -webkit-backdrop-filter: blur(35px);
+  transform: translateY(-2px);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tab-button-liquid:active {
+  transform: translateY(1px);
+  transition: all 0.1s ease;
 }
 
 /* Animación suave para el contenedor de pestañas */
 .glass-card .flex.bg-gradient-to-r {
   position: relative;
   overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Animación de pulso suave para elementos activos */

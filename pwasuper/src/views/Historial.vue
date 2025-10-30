@@ -577,7 +577,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import L from 'leaflet';
@@ -621,6 +621,16 @@ onMounted(async () => {
   cargarAsistencias();
   // También cargar registros para que estén disponibles
   cargarRegistros();
+});
+
+// Watch para limpiar el mapa cuando se cierra el modal
+watch(mapaVisible, (nuevoValor) => {
+  if (!nuevoValor && detailMap.value) {
+    // Limpiar el mapa cuando se cierra
+    detailMap.value.remove();
+    detailMap.value = null;
+    console.log('🗺️ Mapa limpiado');
+  }
 });
 
 async function cargarRegistros() {
@@ -935,48 +945,63 @@ function agruparAsistenciasPorFecha(asistenciasLista) {
 }
 
 function verEnMapa(registro) {
+  // Validar que tenga coordenadas válidas
+  if (!registro.latitud || !registro.longitud) {
+    console.error('❌ Ubicación sin coordenadas válidas:', registro);
+    alert('Esta ubicación no tiene coordenadas disponibles');
+    return;
+  }
+
   registroSeleccionado.value = registro;
   mapaVisible.value = true;
   
+  // Destruir el mapa anterior si existe
+  if (detailMap.value) {
+    detailMap.value.remove();
+    detailMap.value = null;
+  }
+  
   // Esperar a que el DOM se actualice
   setTimeout(() => {
-    if (!detailMap.value) {
-      detailMap.value = L.map('detailMap').setView([registro.latitud, registro.longitud], 15);
+    try {
+      // Inicializar mapa nuevo
+      detailMap.value = L.map('detailMap').setView([registro.latitud, registro.longitud], 16);
+      
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
       }).addTo(detailMap.value);
-    } else {
-      detailMap.value.setView([registro.latitud, registro.longitud], 15);
-    }
-    
-    // Limpiar marcadores anteriores
-    detailMap.value.eachLayer(layer => {
-      if (layer instanceof L.Marker) {
-        detailMap.value.removeLayer(layer);
-      }
-    });
+      
       // Añadir marcador con icono personalizado
-    const customIcon = L.divIcon({
-      html: `
-        <div class="custom-marker-wrapper">
-          <div class="custom-marker"></div>
-          <div class="marker-pulse"></div>
-        </div>
-      `,
-      className: 'custom-marker-icon',
-      iconSize: [30, 30],
-      iconAnchor: [15, 15]
-    });
-    
-    const marker = L.marker([registro.latitud, registro.longitud], { icon: customIcon }).addTo(detailMap.value);
-    if (registro.descripcion) {
-      marker.bindPopup(registro.descripcion).openPopup();
+      const customIcon = L.divIcon({
+        html: `
+          <div class="custom-marker-wrapper">
+            <div class="custom-marker"></div>
+            <div class="marker-pulse"></div>
+          </div>
+        `,
+        className: 'custom-marker-icon',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+      });
+      
+      const marker = L.marker([registro.latitud, registro.longitud], { icon: customIcon }).addTo(detailMap.value);
+      
+      if (registro.descripcion) {
+        marker.bindPopup(registro.descripcion).openPopup();
+      }
+      
+      // Forzar que el mapa se redibuje
+      setTimeout(() => {
+        if (detailMap.value) {
+          detailMap.value.invalidateSize();
+        }
+      }, 100);
+      
+      console.log('✅ Mapa cargado correctamente en:', registro.latitud, registro.longitud);
+    } catch (error) {
+      console.error('❌ Error al cargar el mapa:', error);
     }
-    
-    // Forzar que el mapa se redibuje
-    setTimeout(() => {
-      detailMap.value.invalidateSize();
-    }, 100);
   }, 100);
 }
 
@@ -986,6 +1011,13 @@ function verAsistenciaEnMapa(asistencia, tipo) {
   const longitud = tipo === 'entrada' ? asistencia.longitud_entrada : asistencia.longitud_salida;
   const descripcion = tipo === 'entrada' ? asistencia.descripcion_entrada : asistencia.descripcion_salida;
   
+  // Validar que tenga coordenadas válidas
+  if (!latitud || !longitud) {
+    console.error(`❌ Sin coordenadas de ${tipo}:`, { latitud, longitud, asistencia });
+    alert(`No hay coordenadas de ${tipo} disponibles para esta asistencia`);
+    return;
+  }
+  
   // Crear un objeto similar a registro para reutilizar la función existente
   const registroParaMapa = {
     latitud: latitud,
@@ -993,6 +1025,7 @@ function verAsistenciaEnMapa(asistencia, tipo) {
     descripcion: descripcion || `${tipo.charAt(0).toUpperCase() + tipo.slice(1)} - ${formatFecha(asistencia.fecha)}`
   };
   
+  console.log(`📍 Abriendo mapa de ${tipo}:`, registroParaMapa);
   verEnMapa(registroParaMapa);
 }
 

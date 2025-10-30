@@ -272,7 +272,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      Mapa
+                      Ubicación
                     </button>
                   </div>
                   
@@ -409,9 +409,14 @@
                       </div>
                     </div>
                     
-                    <div class="text-center">
-                      <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" class="entrada-text hover:entrada-text-dark text-xs font-medium underline">
-                        📍 Ver mapa
+                    <div class="flex justify-center">
+                      <button @click="verAsistenciaEnMapa(asistencia, 'entrada')" 
+                              class="text-xs flex items-center px-2 py-1 rounded-lg font-medium transition-all duration-300 hover:scale-105 shadow-sm bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="text-xs">Ubicación</span>
                       </button>
                     </div>
                     
@@ -466,9 +471,14 @@
                       </div>
                     </div>
                     
-                    <div class="text-center">
-                      <button @click="verAsistenciaEnMapa(asistencia, 'salida')" class="salida-text hover:salida-text-dark text-xs font-medium underline">
-                        📍 Ver mapa
+                    <div class="flex justify-center">
+                      <button @click="verAsistenciaEnMapa(asistencia, 'salida')" 
+                              class="text-xs flex items-center px-2 py-1 rounded-lg font-medium transition-all duration-300 hover:scale-105 shadow-sm bg-red-100 text-red-700 hover:bg-red-200 border border-red-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="text-xs">Ubicación</span>
                       </button>
                     </div>
                     

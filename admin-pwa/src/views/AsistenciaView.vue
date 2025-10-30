@@ -324,6 +324,23 @@
                     de {{ totalAsistenciasServidor.toLocaleString('es') }} totales
                   </template>
                 </span>
+                <button 
+                  v-if="totalAsistenciasServidor > asistencias.length && !cargandoMas" 
+                  @click="cargarMasAsistencias"
+                  class="load-more-btn"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14m-7-7l7 7 7-7"/>
+                  </svg>
+                  Cargar más
+                </button>
+                <span v-if="cargandoMas" class="loading-more">
+                  <svg class="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <path d="M9 12l2 2 4-4"/>
+                  </svg>
+                  Cargando...
+                </span>
               </div>
             </div>
 
@@ -628,6 +645,7 @@ import Sidebar from '../components/Sidebar_NEW.vue'
 import MapaAsistenciaModal from '../components/MapaAsistenciaModal.vue'
 import AsistenciasService from '../services/asistenciasService.js'
 import EstadisticasService from '../services/estadisticasService.js'
+import { API_URL } from '../config/api.js'
 import * as XLSX from 'xlsx'
 
 export default {
@@ -653,11 +671,12 @@ export default {
       filtroSalida: false,
       filtroSinSalida: false,
       mostrarFiltrosAvanzados: false,
-      // Variables para paginación
+      // Variables para paginación y carga optimizada
       paginaActual: 1,
       asistenciasPorPagina: 50,
       paginaSalto: '',
       totalAsistenciasServidor: 0,
+      cargandoMas: false,
       // Estado UI
       loading: false,
       error: null,
@@ -851,29 +870,30 @@ export default {
       this.error = null
       
       try {
-        console.log('📊 Solicitando TODAS las asistencias sin límite...')
+        console.log('📊 Solicitando asistencias con carga optimizada (200 registros iniciales)...')
         console.time('Carga de asistencias')
         
-        // Cargar asistencias y estadísticas en paralelo
-        const [asistencias] = await Promise.all([
-          AsistenciasService.obtenerAsistenciasConUsuarios(),
-          this.cargarEstadisticas()
-        ])
+        // Primero cargar estadísticas para conocer el total real
+        await this.cargarEstadisticas()
         
-        console.log(`🔢 Recibidas ${asistencias.length} asistencias totales del servidor`)
+        // Luego cargar las primeras 200 asistencias
+        const asistencias = await AsistenciasService.obtenerAsistenciasConUsuarios(200)
+        
+        console.log(`🔢 Recibidos ${asistencias.length} asistencias iniciales del servidor`)
+        console.log(`📊 Total en servidor: ${this.totalAsistenciasServidor.toLocaleString('es')} asistencias`)
         
         this.asistencias = asistencias
         this.filtrarAsistencias()
         
         console.timeEnd('Carga de asistencias')
         
-        // Estadísticas rápidas
+        // Estadísticas rápidas de los datos cargados
         const conEntrada = this.asistencias.filter(a => a.hora_entrada).length
         const conSalida = this.asistencias.filter(a => a.hora_salida).length
         const completas = this.asistencias.filter(a => a.hora_entrada && a.hora_salida).length
         const totalUsuariosUnicos = new Set(this.asistencias.map(a => a.usuario_id)).size
         
-        console.log(`📈 Estadísticas de asistencias: ${this.asistencias.length.toLocaleString('es')} registros | ${totalUsuariosUnicos} usuarios únicos | ${conEntrada} con entrada (${(conEntrada/this.asistencias.length*100).toFixed(1)}%) | ${conSalida} con salida (${(conSalida/this.asistencias.length*100).toFixed(1)}%) | ${completas} completas (${(completas/this.asistencias.length*100).toFixed(1)}%)`)
+        console.log(`📈 Estadísticas de asistencias cargadas: ${this.asistencias.length.toLocaleString('es')} de ${this.totalAsistenciasServidor.toLocaleString('es')} | ${totalUsuariosUnicos} usuarios únicos | ${conEntrada} con entrada (${(conEntrada/this.asistencias.length*100).toFixed(1)}%) | ${conSalida} con salida (${(conSalida/this.asistencias.length*100).toFixed(1)}%) | ${completas} completas (${(completas/this.asistencias.length*100).toFixed(1)}%)`)
         
         console.log('✅ Asistencias cargadas exitosamente:', this.asistencias.length)
       } catch (error) {
@@ -884,32 +904,117 @@ export default {
       }
     },
 
+    // Nueva función para cargar más asistencias
+    async cargarMasAsistencias() {
+      if (this.cargandoMas || this.asistencias.length >= this.totalAsistenciasServidor) return
+      
+      try {
+        this.cargandoMas = true
+        console.log('⏬ Cargando más asistencias...')
+        
+        const offset = this.asistencias.length
+        const asistenciasAdicionales = await AsistenciasService.obtenerAsistenciasConUsuarios(200, offset)
+        
+        if (asistenciasAdicionales.length > 0) {
+          console.log(`✅ Cargadas ${asistenciasAdicionales.length} asistencias adicionales`)
+          this.asistencias = [...this.asistencias, ...asistenciasAdicionales]
+          this.filtrarAsistencias()
+        } else {
+          console.log('ℹ️ No hay más asistencias para cargar')
+          this.totalAsistenciasServidor = this.asistencias.length
+        }
+        
+      } catch (error) {
+        console.error('❌ Error al cargar más asistencias:', error)
+      } finally {
+        this.cargandoMas = false
+      }
+    },
+
     async cargarEstadisticas() {
       try {
         console.log('🔍 Cargando estadísticas desde el servidor...')
         
-        // Usar el servicio de estadísticas con fallback
-        const estadisticas = await EstadisticasService.obtenerEstadisticasConFallback(
-          [], // registros (no los usamos aquí)
-          [], // usuarios (no los usamos aquí) 
-          this.asistencias // asistencias para fallback
-        )
+        // Obtener estadísticas directamente del servidor
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000) // Timeout de 10 segundos
         
-        // Actualizar estadísticas del servidor
-        this.estadisticasServidor = {
-          totalAsistencias: estadisticas.totalAsistencias || 0,
-          totalAsistenciasHoy: estadisticas.asistenciasHoy || 0,
-          usuariosPresentes: estadisticas.usuariosPresentes || 0,
-          totalRegistros: estadisticas.totalRegistros || 0,
-          totalUsuarios: estadisticas.totalUsuarios || 0,
-          registrosHoy: estadisticas.registrosHoy || 0
+        const response = await fetch(`${API_URL}/estadisticas`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`)
         }
         
-        console.log('✅ Estadísticas cargadas:', this.estadisticasServidor)
+        const data = await response.json()
+        const stats = data.estadisticas
+        
+        if (stats) {
+          // Actualizar estadísticas del servidor con el total real
+          this.estadisticasServidor = {
+            totalAsistencias: stats.total_asistencias || 0,
+            totalAsistenciasHoy: stats.asistencias_hoy || 0,
+            usuariosPresentes: stats.usuarios_presentes_hoy || 0,
+            totalRegistros: stats.total_registros || 0,
+            totalUsuarios: stats.total_usuarios || 0,
+            registrosHoy: stats.registros_hoy || 0
+          }
+          
+          // Guardar el total del servidor para saber cuántas asistencias hay en total
+          this.totalAsistenciasServidor = stats.total_asistencias || 0
+          
+          console.log(`✅ Estadísticas cargadas del servidor - Total asistencias: ${this.totalAsistenciasServidor}`)
+          
+          return this.estadisticasServidor
+        }
         
       } catch (error) {
-        console.warn('⚠️ Error al cargar estadísticas, usando cálculo local:', error)
-        // En caso de error, resetear estadísticas para que use cálculo local
+        console.warn('⚠️ Error al cargar estadísticas del servidor, usando cálculo local:', error)
+        // Fallback a cálculo local
+        this.calcularEstadisticasLocales()
+      }
+    },
+
+    calcularEstadisticasLocales() {
+      try {
+        // Total de asistencias (asistencias locales cargadas)
+        const totalLocal = this.asistencias.length
+        
+        // Asistencias de hoy
+        const hoy = new Date().toISOString().split('T')[0]
+        const asistenciasHoy = this.asistencias.filter(a => a.fecha === hoy).length
+        
+        // Usuarios presentes hoy
+        const usuariosHoy = new Set()
+        this.asistencias.forEach(a => {
+          if (a.fecha === hoy && a.hora_entrada) {
+            usuariosHoy.add(a.usuario_id)
+          }
+        })
+        
+        this.estadisticasServidor = {
+          totalAsistencias: totalLocal,
+          totalAsistenciasHoy: asistenciasHoy,
+          usuariosPresentes: usuariosHoy.size,
+          totalRegistros: 0,
+          totalUsuarios: 0,
+          registrosHoy: 0
+        }
+        
+        // Si calculamos localmente, asumimos que puede haber más en el servidor
+        this.totalAsistenciasServidor = totalLocal >= 200 ? totalLocal + 1 : totalLocal
+        
+        console.log(`📊 Estadísticas locales calculadas - ${totalLocal} asistencias, ${asistenciasHoy} hoy, ${usuariosHoy.size} presentes`)
+        
+      } catch (error) {
+        console.error('Error al calcular estadísticas locales:', error)
         this.estadisticasServidor = {
           totalAsistencias: 0,
           totalAsistenciasHoy: 0,
@@ -918,6 +1023,7 @@ export default {
           totalUsuarios: 0,
           registrosHoy: 0
         }
+        this.totalAsistenciasServidor = 0
       }
     },
 

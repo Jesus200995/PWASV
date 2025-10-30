@@ -2114,13 +2114,13 @@ async def debug_tiempo_actual():
         return {"error": str(e)}
 
 @app.get("/asistencias")
-async def obtener_historial_asistencias(usuario_id: int = None, limit: int = None):
+async def obtener_historial_asistencias(usuario_id: int = None, limit: int = None, offset: int = 0):
     try:
         # Verificar y reconectar si es necesario
         if not verificar_conexion_db():
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        print(f"🔍 Obteniendo historial de asistencias para usuario: {usuario_id}, límite: {limit if limit else 'Sin límite'}")
+        print(f"🔍 Obteniendo historial de asistencias - Usuario: {usuario_id}, Límite: {limit if limit else 'Sin límite'}, Offset: {offset}")
         
         if usuario_id:
             if limit:
@@ -2131,8 +2131,8 @@ async def obtener_historial_asistencias(usuario_id: int = None, limit: int = Non
                        FROM asistencias 
                        WHERE usuario_id = %s 
                        ORDER BY fecha DESC, hora_entrada DESC 
-                       LIMIT %s""",
-                    (usuario_id, limit)
+                       LIMIT %s OFFSET %s""",
+                    (usuario_id, limit, offset)
                 )
             else:
                 cursor.execute(
@@ -2141,8 +2141,9 @@ async def obtener_historial_asistencias(usuario_id: int = None, limit: int = Non
                               foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
                        FROM asistencias 
                        WHERE usuario_id = %s 
-                       ORDER BY fecha DESC, hora_entrada DESC""",
-                    (usuario_id,)
+                       ORDER BY fecha DESC, hora_entrada DESC 
+                       OFFSET %s""",
+                    (usuario_id, offset)
                 )
         else:
             if limit:
@@ -2152,8 +2153,8 @@ async def obtener_historial_asistencias(usuario_id: int = None, limit: int = Non
                               foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
                        FROM asistencias 
                        ORDER BY fecha DESC, hora_entrada DESC 
-                       LIMIT %s""",
-                    (limit,)
+                       LIMIT %s OFFSET %s""",
+                    (limit, offset)
                 )
             else:
                 cursor.execute(
@@ -2161,11 +2162,13 @@ async def obtener_historial_asistencias(usuario_id: int = None, limit: int = Non
                               latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
                               foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
                        FROM asistencias 
-                       ORDER BY fecha DESC, hora_entrada DESC"""
+                       ORDER BY fecha DESC, hora_entrada DESC 
+                       OFFSET %s""",
+                    (offset,)
                 )
         
         resultados = cursor.fetchall()
-        print(f"📊 Encontradas {len(resultados)} asistencias totales sin límite")
+        print(f"📊 Encontradas {len(resultados)} asistencias (limit: {limit}, offset: {offset})")
         
         # Convertir tuplas a diccionarios manualmente
         asistencias = []

@@ -5,21 +5,37 @@ import { API_URL } from '../config/api.js';
 class AsistenciasService {
   /**
    * Obtiene el historial completo de asistencias de todos los usuarios
+   * @param {number} limite - Número máximo de registros a obtener (por defecto sin límite)
+   * @param {number} offset - Número de registros a saltar (por defecto 0)
    * @returns {Promise<Array>} Lista de asistencias con información de usuarios
    */
-  async obtenerAsistencias() {
+  async obtenerAsistencias(limite = null, offset = 0) {
     let ultimoError = null;
     const maxReintentos = 3;
     
     for (let intento = 1; intento <= maxReintentos; intento++) {
       try {
-        console.log(`🔍 Intento ${intento}/${maxReintentos} - Solicitando asistencias desde:`, `${API_URL}/asistencias`);
+        // Construir URL con parámetros opcionales
+        let url = `${API_URL}/asistencias?`;
+        const params = new URLSearchParams();
+        
+        if (limite !== null) {
+          params.append('limit', limite);
+        }
+        
+        if (offset > 0) {
+          params.append('offset', offset);
+        }
+        
+        url += params.toString();
+        
+        console.log(`🔍 Intento ${intento}/${maxReintentos} - Solicitando asistencias desde:`, url);
         
         const controller = new AbortController();
-        // Timeout de 60 segundos por intento (aumentado de 10s)
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        // Timeout de 30 segundos para cargas optimizadas
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
         
-        const response = await fetch(`${API_URL}/asistencias`, {
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -34,7 +50,7 @@ class AsistenciasService {
         }
 
         const data = await response.json();
-        console.log('✅ Asistencias obtenidas exitosamente:', data);
+        console.log(`✅ Asistencias obtenidas exitosamente: ${data.asistencias?.length || 0} registros`);
         
         return data.asistencias || [];
       } catch (error) {
@@ -121,12 +137,14 @@ class AsistenciasService {
 
   /**
    * Combina asistencias con información de usuarios
+   * @param {number} limite - Número máximo de registros a obtener (por defecto sin límite)
+   * @param {number} offset - Número de registros a saltar (por defecto 0)
    * @returns {Promise<Array>} Lista de asistencias enriquecidas con datos de usuario
    */
-  async obtenerAsistenciasConUsuarios() {
+  async obtenerAsistenciasConUsuarios(limite = null, offset = 0) {
     try {
       const [asistencias, usuarios] = await Promise.all([
-        this.obtenerAsistencias(),
+        this.obtenerAsistencias(limite, offset),
         this.obtenerUsuarios()
       ]);
 
@@ -159,7 +177,7 @@ class AsistenciasService {
         };
       });
 
-      console.log('✅ Asistencias enriquecidas procesadas:', asistenciasEnriquecidas.length);
+      console.log(`✅ Asistencias enriquecidas procesadas: ${asistenciasEnriquecidas.length} registros`);
       return asistenciasEnriquecidas;
     } catch (error) {
       console.error('❌ Error al obtener asistencias con usuarios:', error);

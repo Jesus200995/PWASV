@@ -833,14 +833,20 @@ def obtener_estadisticas():
         cursor.execute("SELECT COUNT(*) FROM asistencias")
         total_asistencias = cursor.fetchone()[0]
         
-        # Obtener asistencias de hoy
-        cursor.execute("SELECT COUNT(*) FROM asistencias WHERE fecha = CURRENT_DATE")
+        # Obtener asistencias de hoy (usando zona horaria de Ciudad de México)
+        cursor.execute("""
+            SELECT COUNT(*) FROM asistencias 
+            WHERE fecha = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
+        """)
         asistencias_hoy = cursor.fetchone()[0]
         
-        # Obtener usuarios presentes hoy (que han marcado entrada)
+        # Obtener usuarios presentes AHORA (con entrada pero SIN salida) - tiempo real CDMX
+        # Solo cuenta usuarios que marcaron entrada hoy pero aún NO han marcado salida
         cursor.execute("""
             SELECT COUNT(DISTINCT usuario_id) FROM asistencias 
-            WHERE fecha = CURRENT_DATE AND hora_entrada IS NOT NULL
+            WHERE fecha = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
+            AND hora_entrada IS NOT NULL
+            AND hora_salida IS NULL
         """)
         usuarios_presentes = cursor.fetchone()[0]
         
@@ -853,7 +859,14 @@ def obtener_estadisticas():
             "usuarios_presentes": usuarios_presentes
         }
         
-        print(f"✅ Estadísticas obtenidas: {estadisticas}")
+        print(f"✅ Estadísticas obtenidas (tiempo real CDMX):")
+        print(f"   - Total asistencias: {total_asistencias:,}")
+        print(f"   - Asistencias hoy: {asistencias_hoy}")
+        print(f"   - Usuarios PRESENTES ahora (con entrada, sin salida): {usuarios_presentes}")
+        print(f"   - Total registros: {total_registros:,}")
+        print(f"   - Registros hoy: {registros_hoy}")
+        print(f"   - Total usuarios: {total_usuarios}")
+        
         return {"estadisticas": estadisticas}
         
     except psycopg2.Error as e:

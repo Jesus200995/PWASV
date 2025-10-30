@@ -701,34 +701,44 @@ export default {
   },
   computed: {
     totalAsistencias() {
-      // Usar estadísticas del servidor si están disponibles, sino calcular localmente
-      return this.estadisticasServidor.totalAsistencias > 0 
-        ? this.estadisticasServidor.totalAsistencias 
-        : this.asistencias.length
+      // SIEMPRE usar estadísticas del servidor (valor real en tiempo real)
+      if (this.estadisticasServidor.totalAsistencias !== undefined && 
+          this.estadisticasServidor.totalAsistencias !== null) {
+        return this.estadisticasServidor.totalAsistencias
+      }
+      
+      // Fallback: usar datos locales solo si no hay conexión
+      return this.asistencias.length
     },
     totalAsistenciasHoy() {
-      // Usar estadísticas del servidor si están disponibles, sino calcular localmente
-      if (this.estadisticasServidor.totalAsistenciasHoy > 0) {
+      // SIEMPRE usar estadísticas del servidor (valor real en tiempo real CDMX)
+      if (this.estadisticasServidor.totalAsistenciasHoy !== undefined && 
+          this.estadisticasServidor.totalAsistenciasHoy !== null) {
         return this.estadisticasServidor.totalAsistenciasHoy
       }
       
+      // Fallback: calcular desde datos locales solo si no hay conexión
       const hoy = new Date().toISOString().split('T')[0]
       return this.asistencias.filter(a => a.fecha === hoy).length
     },
     usuariosPresentes() {
-      // Usar estadísticas del servidor si están disponibles, sino calcular localmente
-      if (this.estadisticasServidor.usuariosPresentes > 0) {
+      // SIEMPRE usar estadísticas del servidor (valor real en tiempo real)
+      // Solo calcular localmente si las estadísticas del servidor no se han cargado aún
+      if (this.estadisticasServidor.usuariosPresentes !== undefined && 
+          this.estadisticasServidor.usuariosPresentes !== null) {
         return this.estadisticasServidor.usuariosPresentes
       }
       
+      // Fallback: calcular desde datos locales solo si no hay conexión al servidor
+      // Usuarios PRESENTES = con entrada HOY pero SIN salida todavía
       const hoy = new Date().toISOString().split('T')[0]
-      const usuariosHoy = new Set()
+      const usuariosPresentes = new Set()
       this.asistencias.forEach(a => {
-        if (a.fecha === hoy && a.hora_entrada) {
-          usuariosHoy.add(a.usuario_id)
+        if (a.fecha === hoy && a.hora_entrada && !a.hora_salida) {
+          usuariosPresentes.add(a.usuario_id)
         }
       })
-      return usuariosHoy.size
+      return usuariosPresentes.size
     },
     departamentos() {
       // Obtiene lista única de departamentos
@@ -961,7 +971,7 @@ export default {
           this.estadisticasServidor = {
             totalAsistencias: stats.total_asistencias || 0,
             totalAsistenciasHoy: stats.asistencias_hoy || 0,
-            usuariosPresentes: stats.usuarios_presentes_hoy || 0,
+            usuariosPresentes: stats.usuarios_presentes || 0, // ✅ Corregido: usa el nombre correcto del backend
             totalRegistros: stats.total_registros || 0,
             totalUsuarios: stats.total_usuarios || 0,
             registrosHoy: stats.registros_hoy || 0
@@ -970,7 +980,10 @@ export default {
           // Guardar el total del servidor para saber cuántas asistencias hay en total
           this.totalAsistenciasServidor = stats.total_asistencias || 0
           
-          console.log(`✅ Estadísticas cargadas del servidor - Total asistencias: ${this.totalAsistenciasServidor}`)
+          console.log(`✅ Estadísticas cargadas del servidor (tiempo real CDMX):`)
+          console.log(`   - Total asistencias: ${this.totalAsistenciasServidor.toLocaleString('es')}`)
+          console.log(`   - Asistencias hoy: ${stats.asistencias_hoy || 0}`)
+          console.log(`   - Usuarios PRESENTES ahora (con entrada, sin salida): ${stats.usuarios_presentes || 0}`)
           
           return this.estadisticasServidor
         }
@@ -991,18 +1004,18 @@ export default {
         const hoy = new Date().toISOString().split('T')[0]
         const asistenciasHoy = this.asistencias.filter(a => a.fecha === hoy).length
         
-        // Usuarios presentes hoy
-        const usuariosHoy = new Set()
+        // Usuarios PRESENTES ahora (con entrada pero SIN salida)
+        const usuariosPresentes = new Set()
         this.asistencias.forEach(a => {
-          if (a.fecha === hoy && a.hora_entrada) {
-            usuariosHoy.add(a.usuario_id)
+          if (a.fecha === hoy && a.hora_entrada && !a.hora_salida) {
+            usuariosPresentes.add(a.usuario_id)
           }
         })
         
         this.estadisticasServidor = {
           totalAsistencias: totalLocal,
           totalAsistenciasHoy: asistenciasHoy,
-          usuariosPresentes: usuariosHoy.size,
+          usuariosPresentes: usuariosPresentes.size,
           totalRegistros: 0,
           totalUsuarios: 0,
           registrosHoy: 0
@@ -1011,7 +1024,7 @@ export default {
         // Si calculamos localmente, asumimos que puede haber más en el servidor
         this.totalAsistenciasServidor = totalLocal >= 200 ? totalLocal + 1 : totalLocal
         
-        console.log(`📊 Estadísticas locales calculadas - ${totalLocal} asistencias, ${asistenciasHoy} hoy, ${usuariosHoy.size} presentes`)
+        console.log(`📊 Estadísticas locales calculadas - ${totalLocal} asistencias, ${asistenciasHoy} hoy, ${usuariosPresentes.size} PRESENTES (con entrada, sin salida)`)
         
       } catch (error) {
         console.error('Error al calcular estadísticas locales:', error)

@@ -108,8 +108,24 @@
         <div class="mb-2 text-xs text-gray-600">
           Total de registros: <span class="font-semibold text-primary">{{ registros.length }}</span>
         </div>
-        <div class="space-y-1.5">
-          <div v-for="(registro, index) in registros" :key="index" 
+        <div class="space-y-2">
+          <!-- Agrupar registros por fecha -->
+          <div v-for="grupo in agruparRegistrosPorFecha(registros)" :key="grupo.fecha">
+            <!-- Separador de fecha -->
+            <div class="flex items-center gap-2 my-3 px-2">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+              <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-200/50 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="text-xs font-semibold text-blue-700 capitalize">{{ grupo.fecha }}</span>
+              </div>
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+            </div>
+            
+            <!-- Registros del día -->
+            <div class="space-y-1.5 pl-1">
+              <div v-for="(registro, index) in grupo.registros" :key="`${grupo.fecha}-${index}`" 
                :class="[
                  'relative overflow-hidden rounded-xl transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg',
                  'backdrop-filter backdrop-blur-xl border shadow-sm',
@@ -146,17 +162,36 @@
                        :src="registro.foto_url" 
                        class="w-full h-full object-cover transition-transform duration-300 hover:scale-110" 
                        alt="Foto" />
-                  <div v-else :class="[
-                         'w-full h-full flex items-center justify-center',
-                         registro.tipo_actividad === 'campo' 
-                           ? 'bg-green-100 text-green-500' 
-                           : registro.tipo_actividad === 'gabinete'
-                           ? 'bg-orange-100 text-orange-500'
-                           : 'bg-gray-100 text-gray-400'
-                       ]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                  <div v-else class="flex justify-center">
+                    <div :class="[
+                      'w-12 h-12 rounded flex items-center justify-center relative group shadow-md border',
+                      registro.tipo_actividad === 'campo' 
+                        ? 'bg-gradient-to-br from-green-100 to-green-50 border-green-200/50' 
+                        : registro.tipo_actividad === 'gabinete'
+                        ? 'bg-gradient-to-br from-orange-100 to-orange-50 border-orange-200/50'
+                        : 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200/50'
+                    ]">
+                      <div :class="[
+                        'flex flex-col items-center justify-center',
+                        registro.tipo_actividad === 'campo' 
+                          ? 'text-green-600' 
+                          : registro.tipo_actividad === 'gabinete'
+                          ? 'text-orange-600'
+                          : 'text-gray-500'
+                      ]">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+                        </svg>
+                      </div>
+                      <div :class="[
+                        'absolute top-0 right-0 w-2 h-2 rounded-full',
+                        registro.tipo_actividad === 'campo' 
+                          ? 'bg-green-500' 
+                          : registro.tipo_actividad === 'gabinete'
+                          ? 'bg-orange-500'
+                          : 'bg-gray-500'
+                      ]"></div>
+                    </div>
                   </div>
                   <div v-if="registro.foto_url" class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white opacity-0 hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -261,6 +296,8 @@
                 </div>
               </div>
             </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -302,6 +339,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
                         </div>
+                      </div>
+                    </div>
+                    <div v-else class="flex justify-center">
+                      <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center relative group shadow-sm border border-blue-200/50">
+                        <div class="text-blue-600 flex flex-col items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+                          </svg>
+                        </div>
+                        <div class="absolute top-0 right-0 w-2 h-2 rounded-full bg-blue-500 shadow-md"></div>
                       </div>
                     </div>
                     
@@ -349,6 +396,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
                         </div>
+                      </div>
+                    </div>
+                    <div v-else class="flex justify-center">
+                      <div class="w-8 h-8 rounded bg-gradient-to-br from-red-100 to-red-50 flex items-center justify-center relative group shadow-sm border border-red-200/50">
+                        <div class="text-red-600 flex flex-col items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+                          </svg>
+                        </div>
+                        <div class="absolute top-0 right-0 w-2 h-2 rounded-full bg-red-500 shadow-md"></div>
                       </div>
                     </div>
                     
@@ -743,6 +800,48 @@ function formatHoraCDMX(fechaStr) {
     console.error('Error al formatear hora CDMX:', e, fechaStr);
     return fechaStr;
   }
+}
+
+// Función para obtener solo la fecha en formato CDMX (sin hora)
+function obtenerFechaCDMX(fechaStr) {
+  try {
+    if (!fechaStr) return '';
+    const fecha = new Date(fechaStr);
+    if (isNaN(fecha.getTime())) {
+      return '';
+    }
+    // Retornar fecha en formato: "Lun, 30 de Octubre"
+    return fecha.toLocaleDateString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      weekday: 'short',
+      day: '2-digit',
+      month: 'long'
+    });
+  } catch (e) {
+    console.error('Error al formatear fecha CDMX:', e);
+    return '';
+  }
+}
+
+// Función para agrupar registros por fecha (CDMX)
+function agruparRegistrosPorFecha(registrosLista) {
+  const grupos = {};
+  
+  registrosLista.forEach(registro => {
+    const fechaCDMX = obtenerFechaCDMX(registro.fecha_hora);
+    if (!grupos[fechaCDMX]) {
+      grupos[fechaCDMX] = [];
+    }
+    grupos[fechaCDMX].push(registro);
+  });
+  
+  // Convertir a array de objetos con fecha y registros, ordenados por fecha descendente
+  return Object.entries(grupos)
+    .map(([fecha, regs]) => ({
+      fecha,
+      registros: regs.sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora))
+    }))
+    .sort((a, b) => new Date(b.registros[0].fecha_hora) - new Date(a.registros[0].fecha_hora));
 }
 
 function verEnMapa(registro) {
@@ -1474,5 +1573,62 @@ function verImagen(url) {
 
 .salida-text-dark {
   color: rgb(200, 15, 55) !important;
+}
+
+/* Estilos para iconos de "GUARDADO" cuando no hay imagen */
+.guardado-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.guardado-icon-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.guardado-icon-container:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: scale(1.05);
+}
+
+/* Animación de pulsación para el distintivo de seguridad */
+@keyframes pulseCheck {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+.guardado-icon-container .absolute.top-0.right-0 {
+  animation: pulseCheck 2.5s ease-in-out infinite;
+}
+
+/* Animación suave de aparición para los iconos */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.guardado-icon-container {
+  animation: fadeInScale 0.4s ease-out;
 }
 </style>

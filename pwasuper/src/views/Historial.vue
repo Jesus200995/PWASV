@@ -540,25 +540,32 @@
   </div>
 </div>
     
-    <!-- Diálogo de mapa -->
-    <div v-if="mapaVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
-      <div class="glass-modal rounded-lg shadow-xl w-full max-w-sm max-h-[85vh] flex flex-col">
-        <div class="p-2 border-b border-gray-200 flex justify-between items-center">
-          <h3 class="text-xs font-medium">Ubicación</h3>
-          <button @click="mapaVisible = false" class="glass-close-button text-gray-500 hover:text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div class="flex-1 min-h-0">
-          <div id="detailMap" class="h-full w-full"></div>
-        </div>
-        <div class="p-2 border-t border-gray-200">
-          <button @click="mapaVisible = false" class="glass-button w-full text-xs py-1">Cerrar</button>
+    <!-- Diálogo de mapa mejorado con fondo transparente -->
+    <teleport to="body" v-if="mapaVisible">
+      <div class="fixed inset-0 backdrop-blur-md flex items-center justify-center z-[9999] p-2 sm:p-4 animate-fadeInSmooth">
+        <!-- Contenedor del modal -->
+        <div class="glass-map-modal-green w-full max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 animate-scaleInSmooth relative">
+          
+          <!-- Contenedor del mapa con header integrado -->
+          <div class="flex-1 min-h-0 bg-gradient-to-br from-green-600 to-emerald-700 relative overflow-hidden">
+            <!-- Efecto de brillo superior -->
+            <div class="absolute inset-0 bg-gradient-to-br from-green-400/10 to-emerald-600/5 pointer-events-none z-0"></div>
+            
+            <!-- Mapa -->
+            <div id="detailMap" class="h-full w-full relative z-10"></div>
+            
+            <!-- Botón cerrar circular - Posición flotante en esquina -->
+            <button 
+              @click="mapaVisible = false" 
+              class="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-300 hover:scale-110 active:scale-95 shadow-lg hover:shadow-red-500/50 z-20 group">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 group-hover:rotate-90 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </teleport>
     
     <!-- Modal para visualizar imagen -->
     <div v-if="imagenModalVisible" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-2">
@@ -1765,5 +1772,98 @@ function verImagen(url) {
 
 .guardado-icon-container {
   animation: fadeInScale 0.4s ease-out;
+}
+
+/* ============ Estilos del Modal de Mapa Mejorado ============ */
+
+/* Modal de mapa verde fuerte con efecto glassmorphism */
+.glass-map-modal-green {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 2px solid rgba(16, 185, 129, 0.5);
+  box-shadow: 
+    0 25px 70px 0 rgba(16, 185, 129, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Animación de entrada suave y fluida para el modal */
+@keyframes fadeInSmooth {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(12px);
+  }
+}
+
+@keyframes scaleInSmooth {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-fadeInSmooth {
+  animation: fadeInSmooth 0.5s ease-out;
+}
+
+.animate-scaleInSmooth {
+  animation: scaleInSmooth 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Responsividad mejorada para el modal de mapa verde */
+@media (max-width: 640px) {
+  .glass-map-modal-green {
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100vh - 4rem);
+  }
+  
+  .glass-map-modal-green #detailMap {
+    min-height: 320px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .glass-map-modal-green {
+    max-width: 500px;
+    max-height: calc(100vh - 3rem);
+  }
+}
+
+@media (min-width: 1025px) {
+  .glass-map-modal-green {
+    max-width: 600px;
+    max-height: calc(100vh - 2rem);
+  }
+}
+
+/* Mejoras para la visibilidad del mapa */
+#detailMap {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.9), rgba(16, 185, 129, 0.9)) !important;
+}
+
+/* Overlay transparente difuminado */
+.fixed.inset-0.backdrop-blur-md {
+  background-color: transparent !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* Animación del botón cerrar con rotación */
+@keyframes buttonPulseGreen {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
 }
 </style>

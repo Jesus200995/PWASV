@@ -513,6 +513,7 @@ class SyncService {
     try {
       console.log(`📤 Enviando asistencia ${asistencia.tipo} offline:`, asistencia.id);
       console.log('🕐 Timestamp original:', asistencia.timestamp);
+      console.log('📌 Timestamp CDMX:', asistencia.timestamp_cdmx);
       
       // Obtener timestamp de sincronización (momento actual)
       const syncTimestamp = new Date().toISOString();
@@ -525,8 +526,10 @@ class SyncService {
       formData.append('longitud', asistencia.longitud);
       formData.append('descripcion', asistencia.descripcion || '');
       
-      // Usar el timestamp original (hora de creación offline) no el de sincronización
-      formData.append('timestamp_offline', asistencia.timestamp);
+      // ✅ IMPORTANTE: Usar el timestamp CDMX si está disponible (más confiable)
+      // Si no, usar el timestamp general
+      const timestampAEnviar = asistencia.timestamp_cdmx || asistencia.timestamp;
+      formData.append('timestamp_offline', timestampAEnviar);
       
       // Añadir campos adicionales para que el backend identifique correctamente los datos offline
       formData.append('es_asistencia_offline', 'true');
@@ -535,7 +538,7 @@ class SyncService {
       formData.append('id_offline', asistencia.id.toString());
       formData.append('fecha_offline', asistencia.fecha || new Date().toISOString().split('T')[0]);
       
-      console.log(`📤 Enviando timestamp_offline para ${asistencia.tipo}:`, asistencia.timestamp);
+      console.log(`📤 Enviando timestamp_offline para ${asistencia.tipo}:`, timestampAEnviar);
       console.log(`📤 Enviando sync_timestamp:`, syncTimestamp);
       
       // Convertir foto base64 de vuelta a archivo si existe

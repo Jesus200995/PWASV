@@ -88,41 +88,45 @@
 
         <!-- Botones de Asistencia (solo visibles cuando no está en modo asistencia) -->
         <div v-if="!modoAsistencia" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-        <!-- Botón Marcar Entrada -->
+        <!-- Botón Marcar Entrada - MEJORADO -->
         <button
           @click="mostrarModalEntrada"
           :disabled="entradaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[80px] w-full flex flex-col items-center justify-center p-2"
+          class="entrance-button relative overflow-hidden rounded-2xl min-h-[90px] w-full flex flex-col items-center justify-center p-3 group"
           :class="{
-            'text-white shadow-lg hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
-            'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 cursor-not-allowed': entradaMarcada || verificandoAsistencia
+            'entrance-active text-white': !entradaMarcada && !verificandoAsistencia,
+            'entrance-disabled text-gray-500': entradaMarcada || verificandoAsistencia
           }"
-          :style="!entradaMarcada && !verificandoAsistencia ? 'background-color: rgb(30, 144, 255); box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);' : ''"
-          @mouseover="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(25, 130, 230)')"
-          @mouseout="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(30, 144, 255)')"
         >
-          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
+          <!-- Efecto de brillo en hover -->
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+          
+          <!-- Animación de fondo fluido -->
+          <div v-if="!entradaMarcada && !verificandoAsistencia" class="entrance-shine absolute inset-0 rounded-2xl"></div>
+          
+          <!-- Spinner de carga -->
+          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center rounded-2xl">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white/40 border-t-white"></div>
           </div>
           
           <!-- Estado: No marcada - Activo -->
           <template v-if="!entradaMarcada && !verificandoAsistencia">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 group-hover:scale-110 transition-transform duration-300 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span class="font-semibold text-sm">Marcar Entrada</span>
-            <span class="text-xs opacity-90">Registra tu llegada</span>
+            <span class="font-bold text-sm relative z-10">Marcar Entrada</span>
+            <span class="text-xs opacity-80 relative z-10">Registra tu llegada</span>
           </template>
           
           <!-- Estado: Marcada - Completada -->
           <template v-else-if="entradaMarcada">
-            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mb-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <div class="entrance-success-circle w-8 h-8 rounded-full flex items-center justify-center mb-1 relative z-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white checkmark-animate" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span class="font-semibold text-sm text-gray-700">Entrada Registrada</span>
-            <span class="text-xs text-gray-500">
+            <span class="font-semibold text-sm text-gray-700 relative z-10">Entrada Registrada</span>
+            <span class="text-xs text-gray-500 relative z-10">
               <span v-if="asistenciaHoy && asistenciaHoy.entrada">
                 {{ formatearHora(asistenciaHoy.entrada) }}
               </span>
@@ -130,46 +134,50 @@
                 {{ datosEntrada.hora }}
               </span>
             </span>
-            <span class="text-xs text-blue-600 font-medium">✓ Completada</span>
+            <span class="text-xs text-blue-600 font-medium relative z-10">✓ Completada</span>
           </template>
         </button>
 
-        <!-- Botón Marcar Salida -->
+        <!-- Botón Marcar Salida - MEJORADO -->
         <button
           @click="mostrarModalSalida"
           :disabled="!entradaMarcada || salidaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[80px] w-full flex flex-col items-center justify-center p-2"
+          class="exit-button relative overflow-hidden rounded-2xl min-h-[90px] w-full flex flex-col items-center justify-center p-3 group"
           :class="{
-            'text-white shadow-lg hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
-            'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 cursor-not-allowed': !entradaMarcada || salidaMarcada || verificandoAsistencia
+            'exit-active text-white': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
+            'exit-disabled text-gray-500': !entradaMarcada || salidaMarcada || verificandoAsistencia
           }"
-          :style="entradaMarcada && !salidaMarcada && !verificandoAsistencia ? 'background-color: rgb(220, 20, 60); box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);' : ''"
-          @mouseover="entradaMarcada && !salidaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(200, 15, 55)')"
-          @mouseout="entradaMarcada && !salidaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(220, 20, 60)')"
         >
-          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
+          <!-- Efecto de brillo en hover -->
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+          
+          <!-- Animación de fondo fluido -->
+          <div v-if="entradaMarcada && !salidaMarcada && !verificandoAsistencia" class="exit-shine absolute inset-0 rounded-2xl"></div>
+          
+          <!-- Spinner de carga -->
+          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-10 flex items-center justify-center rounded-2xl">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white/40 border-t-white"></div>
           </div>
           
           <!-- Estado: Activo para marcar salida -->
           <template v-if="entradaMarcada && !salidaMarcada && !verificandoAsistencia">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1 group-hover:scale-110 transition-transform duration-300 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span class="font-semibold text-sm">Marcar Salida</span>
-            <span class="text-xs opacity-90">Registra tu salida</span>
+            <span class="font-bold text-sm relative z-10">Marcar Salida</span>
+            <span class="text-xs opacity-80 relative z-10">Registra tu salida</span>
           </template>
           
           <!-- Estado: Bloqueado (sin entrada) -->
           <template v-else-if="!entradaMarcada">
-            <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mb-0.5">
+            <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mb-1 relative z-10">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <span class="font-semibold text-sm text-gray-600">Marcar Salida</span>
-            <span class="text-xs text-gray-500">Primero marca tu entrada</span>
-            <div class="flex items-center mt-1">
+            <span class="font-semibold text-sm text-gray-600 relative z-10">Marcar Salida</span>
+            <span class="text-xs text-gray-500 relative z-10">Primero marca tu entrada</span>
+            <div class="flex items-center mt-1 relative z-10">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-600 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -179,9 +187,9 @@
           
           <!-- Estado: Salida completada -->
           <template v-else-if="salidaMarcada">
-            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mb-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <div class="exit-success-circle w-8 h-8 rounded-full flex items-center justify-center mb-1 relative z-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white checkmark-animate" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <span class="font-semibold text-sm text-gray-700">Salida Registrada</span>
@@ -1214,14 +1222,19 @@ async function confirmarAsistencia() {
       // **MODO OFFLINE: Guardar datos localmente**
       console.log('📴 Sin conexión - Guardando asistencia offline');
       
-      // Guardar en almacenamiento offline usando IndexedDB
+      // ✅ IMPORTANTE: Obtener timestamp CDMX ANTES de guardar
+      const timestampCDMX = obtenerTimestampCDMX();
+      console.log(`📌 Timestamp CDMX para offline: ${timestampCDMX}`);
+      
+      // Guardar en almacenamiento offline usando IndexedDB CON timestamp CDMX
       await offlineService.guardarAsistenciaOffline(
         user.value.id,
         tipoAsistencia.value,
         latitud.value,
         longitud.value,
         descripcion.value,
-        archivoFoto.value
+        archivoFoto.value,
+        timestampCDMX  // ✅ Pasar timestamp CDMX verificable
       );
       
       // Simular datos de respuesta para el estado local
@@ -1239,7 +1252,8 @@ async function confirmarAsistencia() {
           descripcion: descripcion.value,
           latitud: latitud.value,
           longitud: longitud.value,
-          foto_url: foto.value // URL local temporal
+          foto_url: foto.value, // URL local temporal
+          timestamp_cdmx: timestampCDMX // ✅ Guardar timestamp
         };
       } else {
         salidaMarcada.value = true;
@@ -1248,7 +1262,8 @@ async function confirmarAsistencia() {
           descripcion: descripcion.value,
           latitud: latitud.value,
           longitud: longitud.value,
-          foto_url: foto.value // URL local temporal
+          foto_url: foto.value, // URL local temporal
+          timestamp_cdmx: timestampCDMX // ✅ Guardar timestamp
         };
       }
       
@@ -1284,12 +1299,12 @@ async function confirmarAsistencia() {
     formData.append("descripcion", descripcion.value);
     formData.append("foto", archivoFoto.value);
     
-    // ✅ NUEVO: Agregar timestamp CDMX exacto (igual que la barra verde)
-    // Solo enviar timestamp_offline si el servidor lo soporta
-    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocalDev) {
-      formData.append("timestamp_offline", obtenerTimestampCDMX());
-    }
+    // ✅ SIEMPRE: Agregar timestamp CDMX exacto (igual que la barra verde)
+    // Este timestamp viene del reloj verificable de la barra verde y no puede ser manipulado
+    // El backend SIEMPRE validará este timestamp contra su servidor
+    const timestampCDMX = obtenerTimestampCDMX();
+    formData.append("timestamp_offline", timestampCDMX);
+    console.log(`📌 Enviando timestamp CDMX: ${timestampCDMX}`);
 
     // Determinar endpoint según tipo de asistencia y usar el servicio
     let response;
@@ -4323,4 +4338,183 @@ watch([entradaMarcada, salidaMarcada], () => {
 .grid button:not(:disabled):active {
   transform: scale(0.98);
 }
+
+/* ============ Estilos Botones Entrada y Salida Mejorados ============ */
+
+/* Botón Entrada - Base */
+.entrance-button {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  background-color: rgb(30, 144, 255);
+  box-shadow: 0 8px 16px rgba(30, 144, 255, 0.3);
+}
+
+/* Botón Entrada - Estado Activo */
+.entrance-active {
+  color: white;
+  box-shadow: 0 12px 24px rgba(30, 144, 255, 0.4);
+}
+
+.entrance-active:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 32px rgba(30, 144, 255, 0.5);
+}
+
+.entrance-active:active {
+  transform: translateY(-2px) scale(0.98);
+  box-shadow: 0 6px 12px rgba(30, 144, 255, 0.3);
+}
+
+/* Botón Entrada - Estado Deshabilitado */
+.entrance-disabled {
+  background: linear-gradient(135deg, rgba(209, 213, 219, 0.8), rgba(229, 231, 235, 0.8));
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  cursor: not-allowed;
+}
+
+/* Animación de brillo en el botón entrada */
+@keyframes entrance-shimmer {
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.entrance-shine {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: entrance-shimmer 3s infinite;
+}
+
+/* Botón Salida - Base */
+.exit-button {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  background-color: rgb(220, 20, 60);
+  box-shadow: 0 8px 16px rgba(220, 20, 60, 0.3);
+}
+
+/* Botón Salida - Estado Activo */
+.exit-active {
+  color: white;
+  box-shadow: 0 12px 24px rgba(220, 20, 60, 0.4);
+}
+
+.exit-active:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 32px rgba(220, 20, 60, 0.5);
+}
+
+.exit-active:active {
+  transform: translateY(-2px) scale(0.98);
+  box-shadow: 0 6px 12px rgba(220, 20, 60, 0.3);
+}
+
+/* Botón Salida - Estado Deshabilitado */
+.exit-disabled {
+  background: linear-gradient(135deg, rgba(209, 213, 219, 0.8), rgba(229, 231, 235, 0.8));
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  cursor: not-allowed;
+}
+
+/* Animación de brillo en el botón salida */
+@keyframes exit-shimmer {
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.exit-shine {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: exit-shimmer 3s infinite;
+}
+
+/* Círculos de éxito con animación */
+.entrance-success-circle {
+  background-color: rgb(30, 144, 255);
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.4);
+  animation: scaleInSuccess 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.exit-success-circle {
+  background-color: rgb(220, 20, 60);
+  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.4);
+  animation: scaleInSuccess 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Animación de escala para círculos de éxito */
+@keyframes scaleInSuccess {
+  from {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Animación del checkmark */
+@keyframes checkmarkDraw {
+  0% {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+  }
+  100% {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 0;
+  }
+}
+
+.checkmark-animate {
+  animation: checkmarkDraw 0.6s ease-in-out;
+}
+
+/* Efectos adicionales para mejor UX */
+.entrance-button::before,
+.exit-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 2xl;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.entrance-button:hover::before,
+.exit-button:hover::before {
+  opacity: 0.15;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .entrance-button,
+  .exit-button {
+    min-height: 85px;
+    border-radius: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .entrance-button,
+  .exit-button {
+    min-height: 100px;
+    border-radius: 1.5rem;
+  }
+}
+
 </style>

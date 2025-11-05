@@ -1773,10 +1773,6 @@ def obtener_fecha_hora_cdmx(timestamp_offline=None):
     """
     Función de utilidad para manejar correctamente las fechas y horas en zona CDMX.
     
-    ANTI-FRAUDE: Si se proporciona un timestamp del cliente, se valida que no esté
-    demasiado alejado del servidor. Esto previene que usuarios cambien su reloj
-    del sistema para hacer trampa.
-    
     Args:
         timestamp_offline (str): Timestamp ISO string opcional desde el cliente
         
@@ -1824,25 +1820,6 @@ def obtener_fecha_hora_cdmx(timestamp_offline=None):
             print(f"   🇲🇽 CDMX convertido: {hora_cdmx}")
             print(f"   📆 Fecha LOCAL CDMX: {fecha_cdmx}")
             print(f"   📊 Día de la semana: {fecha_cdmx.strftime('%A')}")
-            
-            # ✅ ANTI-FRAUDE: Validar que el timestamp cliente no sea muy diferente al servidor
-            ahora_servidor = datetime.now(CDMX_TZ)
-            diferencia_segundos = abs((ahora_servidor - hora_cdmx).total_seconds())
-            
-            # Si la diferencia es mayor a 5 minutos (300 segundos), registrar alerta
-            if diferencia_segundos > 300:
-                print(f"⚠️ ALERTA DE SINCRONIZACIÓN: Timestamp cliente diferencia {diferencia_segundos}s del servidor")
-                print(f"   ⏰ Hora cliente: {hora_cdmx}")
-                print(f"   ⏰ Hora servidor: {ahora_servidor}")
-                print(f"   ⚠️ El usuario posiblemente modificó su reloj del sistema")
-                
-                # Si la diferencia es mayor a 1 hora, RECHAZAR
-                if diferencia_segundos > 3600:
-                    print(f"❌ RECHAZO: Diferencia de timestamp > 1 hora ({diferencia_segundos}s)")
-                    print(f"   🚫 Posible fraude: Usuario intentó cambiar su reloj")
-                    raise Exception(f"Timestamp rechazado: Diferencia de {diferencia_segundos}s con el servidor. Sincroniza tu reloj.")
-            else:
-                print(f"✅ Validación anti-fraude OK: Diferencia de {diferencia_segundos}s (< 5 min)")
             
             timestamp_for_filename = hora_cdmx.strftime('%Y%m%d%H%M%S')
             
@@ -5096,64 +5073,6 @@ async def eliminar_todas_imagenes():
         raise HTTPException(status_code=500, detail=f"Error al eliminar imágenes: {str(e)}")
 
 # ==================== FIN ENDPOINT ELIMINAR IMÁGENES ====================
-
-# ==================== ENDPOINT VALIDACIÓN DE SINCRONIZACIÓN ====================
-
-@app.get("/validar/sincronizacion-reloj")
-async def validar_sincronizacion_reloj():
-    """
-    Endpoint público que devuelve la hora actual del servidor en CDMX.
-    
-    Propósito: Permitir que el cliente valide que su reloj está sincronizado
-    con el servidor. Esto previene fraudes donde usuarios cambien su reloj
-    del sistema para registrar asistencias en horarios incorrectos.
-    
-    Response:
-    {
-        "servidor_timestamp_cdmx": "2025-11-04T14:30:45.123-06:00",
-        "servidor_timestamp_utc": "2025-11-04T20:30:45.123+00:00",
-        "servidor_hora_legible": "14:30:45",
-        "servidor_fecha": "04/11/2025",
-        "zona_horaria": "America/Mexico_City (CDMX)",
-        "sincronizado": true/false,
-        "diferencia_segundos": 5
-    }
-    """
-    try:
-        # Obtener hora actual en CDMX
-        ahora_cdmx = datetime.now(CDMX_TZ)
-        ahora_utc = datetime.now(pytz.UTC)
-        
-        # Formatear horas legibles
-        hora_legible = ahora_cdmx.strftime('%H:%M:%S')
-        fecha_legible = ahora_cdmx.strftime('%d/%m/%Y')
-        
-        # Formatear timestamps ISO
-        timestamp_cdmx = ahora_cdmx.isoformat()
-        timestamp_utc = ahora_utc.isoformat()
-        
-        respuesta = {
-            "status": "ok",
-            "servidor_timestamp_cdmx": timestamp_cdmx,
-            "servidor_timestamp_utc": timestamp_utc,
-            "servidor_hora_legible": hora_legible,
-            "servidor_fecha": fecha_legible,
-            "zona_horaria": "America/Mexico_City (CDMX)",
-            "timestamp_generado": datetime.now().isoformat(),
-            "proposito": "Validar sincronización de reloj del cliente"
-        }
-        
-        print(f"✅ Sincronización del reloj validada:")
-        print(f"   🇲🇽 CDMX: {timestamp_cdmx}")
-        print(f"   🌍 UTC: {timestamp_utc}")
-        
-        return respuesta
-        
-    except Exception as e:
-        print(f"❌ Error en validación de sincronización: {e}")
-        raise HTTPException(status_code=500, detail=f"Error validando sincronización: {str(e)}")
-
-# ==================== FIN ENDPOINT VALIDACIÓN ====================
 
 if __name__ == "__main__":
     import uvicorn

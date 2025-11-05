@@ -264,15 +264,12 @@ class OfflineService {
   /**
    * Guarda una asistencia (entrada/salida) offline
    */
-  async guardarAsistenciaOffline(usuarioId, tipo, latitud, longitud, descripcion, archivo, timestampCDMX = null) {
+  async guardarAsistenciaOffline(usuarioId, tipo, latitud, longitud, descripcion, archivo) {
     try {
       await this.initDB();
       
       // Convertir archivo a base64 si existe
       const fotoBase64 = archivo ? await this.fileToBase64(archivo) : null;
-      
-      // ✅ Usar timestamp CDMX si se proporciona, sino generar uno
-      const timestamp = timestampCDMX || new Date().toISOString();
       
       const asistencia = {
         usuario_id: usuarioId,
@@ -283,8 +280,7 @@ class OfflineService {
         foto_base64: fotoBase64,
         foto_filename: archivo ? archivo.name : null,
         foto_type: archivo ? archivo.type : null,
-        timestamp: timestamp, // ✅ AHORA: Timestamp CDMX verificable
-        timestamp_cdmx: timestampCDMX, // ✅ Guardar también el timestamp CDMX explícitamente
+        timestamp: new Date().toISOString(), // Hora de creación offline
         sync_timestamp: null, // Se completará cuando se sincronice
         fecha: new Date().toISOString().split('T')[0] // YYYY-MM-DD
       };
@@ -297,7 +293,6 @@ class OfflineService {
         
         request.onsuccess = () => {
           console.log(`✅ Asistencia ${tipo} guardada offline con ID:`, request.result);
-          console.log(`   📌 Timestamp CDMX: ${timestampCDMX}`);
           resolve(request.result);
         };
         

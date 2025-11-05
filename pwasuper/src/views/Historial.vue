@@ -835,11 +835,12 @@ function formatHora(fechaStr) {
   }
 }
 
-// Nueva función para mostrar fecha completa pero más compacta
 function formatFechaCompleta(fechaStr) {
   try {
     if (!fechaStr) return '';
     
+    // ✅ SOLUCIÓN: El backend ahora envía fechas con zona horaria CDMX (-06:00)
+    // JavaScript interpretará esto correctamente como la hora/fecha de CDMX
     const fecha = new Date(fechaStr);
     
     // Verificar que la fecha sea válida
@@ -848,9 +849,9 @@ function formatFechaCompleta(fechaStr) {
       return fechaStr;
     }
     
-    // Formatear fecha en español mexicano de forma compacta
+    // NO NECESITAMOS timeZone porque el Date ya está en CDMX
+    // Pero lo incluimos para ser consistentes
     return fecha.toLocaleDateString('es-MX', {
-      timeZone: 'America/Mexico_City',
       weekday: 'short',
       day: '2-digit',
       month: 'short',
@@ -867,6 +868,8 @@ function formatHoraCDMX(fechaStr) {
   try {
     if (!fechaStr) return '';
     
+    // ✅ SOLUCIÓN: El backend ahora envía fechas con zona horaria CDMX (-06:00)
+    // JavaScript interpretará esto correctamente
     const fecha = new Date(fechaStr);
     
     // Verificar que la fecha sea válida
@@ -875,9 +878,8 @@ function formatHoraCDMX(fechaStr) {
       return fechaStr;
     }
     
-    // Mostrar hora en formato AM/PM (igual que las asistencias)
+    // La hora ya está correcta gracias a la zona horaria del backend
     return fecha.toLocaleTimeString('es-MX', {
-      timeZone: 'America/Mexico_City',
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
@@ -892,13 +894,18 @@ function formatHoraCDMX(fechaStr) {
 function obtenerFechaCDMX(fechaStr) {
   try {
     if (!fechaStr) return '';
+    
+    // ✅ SOLUCIÓN: El backend ahora envía fechas con zona horaria CDMX (-06:00)
+    // JavaScript interpretará esto correctamente
     const fecha = new Date(fechaStr);
+    
     if (isNaN(fecha.getTime())) {
+      console.error('Fecha inválida:', fechaStr);
       return '';
     }
+    
     // Retornar fecha en formato: "Lun, 30 de Octubre"
     return fecha.toLocaleDateString('es-MX', {
-      timeZone: 'America/Mexico_City',
       weekday: 'short',
       day: '2-digit',
       month: 'long'

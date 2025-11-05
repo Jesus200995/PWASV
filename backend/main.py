@@ -670,6 +670,14 @@ def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, 
         registros = []
         for i, row in enumerate(resultados):
             try:
+                # ✅ SOLUCIÓN: Agregar zona horaria CDMX al ISO format para que JavaScript lo interprete correctamente
+                fecha_iso = None
+                if row[6]:
+                    # row[6] es un datetime sin zona horaria (CDMX)
+                    # Agregamos explícitamente la zona horaria CDMX (-06:00)
+                    fecha_iso = row[6].isoformat() + "-06:00"
+                    print(f"📅 Fecha con zona CDMX: {fecha_iso}")
+                
                 registro = {
                     "id": row[0],
                     "usuario_id": row[1],
@@ -677,7 +685,7 @@ def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, 
                     "longitud": float(row[3]) if row[3] is not None else None,
                     "descripcion": row[4] if row[4] is not None else "",
                     "foto_url": row[5] if row[5] is not None else None,
-                    "fecha_hora": row[6].isoformat() if row[6] else None,
+                    "fecha_hora": fecha_iso,
                     "tipo_actividad": row[7] if len(row) > 7 and row[7] is not None else "campo"
                 }
                 registros.append(registro)
@@ -2186,12 +2194,14 @@ async def obtener_historial_asistencias(usuario_id: int = None, limit: int = Non
         # Convertir tuplas a diccionarios manualmente
         asistencias = []
         for row in resultados:
+            # ✅ SOLUCIÓN: Agregar zona horaria CDMX (-06:00) a los ISO format
+            # para que JavaScript los interprete correctamente sin desplazamientos
             asistencia = {
                 "id": row[0],
                 "usuario_id": row[1],
-                "fecha": row[2].isoformat() if row[2] else None,
-                "hora_entrada": row[3].isoformat() if row[3] else None,
-                "hora_salida": row[4].isoformat() if row[4] else None,
+                "fecha": (row[2].isoformat() + "-06:00") if row[2] else None,
+                "hora_entrada": (row[3].isoformat() + "-06:00") if row[3] else None,
+                "hora_salida": (row[4].isoformat() + "-06:00") if row[4] else None,
                 "latitud_entrada": float(row[5]) if row[5] else None,
                 "longitud_entrada": float(row[6]) if row[6] else None,
                 "latitud_salida": float(row[7]) if row[7] else None,

@@ -1284,12 +1284,9 @@ async function confirmarAsistencia() {
     formData.append("descripcion", descripcion.value);
     formData.append("foto", archivoFoto.value);
     
-    // ✅ NUEVO: Agregar timestamp CDMX exacto (igual que la barra verde)
-    // Solo enviar timestamp_offline si el servidor lo soporta
-    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocalDev) {
-      formData.append("timestamp_offline", obtenerTimestampCDMX());
-    }
+    // ✅ SOLUCIÓN: Agregar SIEMPRE timestamp CDMX exacto (igual que el reloj de la barra verde)
+    // El servidor SIEMPRE lo debe recibir y usarlo para garantizar fecha/hora correcta
+    formData.append("timestamp_offline", obtenerTimestampCDMX());
 
     // Determinar endpoint según tipo de asistencia y usar el servicio
     let response;
@@ -1852,14 +1849,9 @@ async function enviarRegistro() {
     formData.append("tipo_actividad", tipoActividad.value); // Nuevo: agregar tipo de actividad
     formData.append("foto", archivoFotoRegistro.value);
     formData.append("tipo", "actividad"); // Especificar explícitamente que es un registro de actividad
-    // ✅ SOLUCIÓN: Agregar timestamp CDMX exacto (igual que en la barra verde)
-    // Solo enviar timestamp_offline si el servidor lo soporta
-    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocalDev) {
-      formData.append("timestamp_offline", obtenerTimestampCDMX());
-    }
-
-    // Enviar datos al backend
+      // ✅ SOLUCIÓN: Agregar SIEMPRE timestamp CDMX exacto (igual que el reloj de la barra verde)
+      // El servidor SIEMPRE lo debe recibir y usarlo para garantizar fecha/hora correcta
+      formData.append("timestamp_offline", obtenerTimestampCDMX());    // Enviar datos al backend
     const response = await axios.post(`${API_URL}/registro`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",

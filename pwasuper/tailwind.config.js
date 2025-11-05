@@ -21,6 +21,11 @@ export default {
         error: '#F44336',
         success: '#8BC34A',
         dark: '#212121',
+        'apple-green': {
+          DEFAULT: '#6CC651',
+          dark: '#5DB33C',
+          light: '#8FD968',
+        },
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router';
 import ConnectivityStatus from './components/ConnectivityStatus.vue';
 import UpdateNotification from './components/UpdateNotification.vue';
 import SupportBubble from './components/SupportBubble.vue';
+import WelcomeModalNew from './components/WelcomeModalNew.vue';
 import { useNotifications } from './composables/useNotifications.js';
 
 const router = useRouter();
@@ -203,24 +204,12 @@ function logout() {
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Mensaje de bienvenida -->
-    <transition name="slide-down">
-      <div v-if="showWelcome" class="fixed top-0 inset-x-0 z-50 bg-primary-dark text-white p-3 shadow-lg">
-        <div class="max-w-sm mx-auto flex items-center justify-between">
-          <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="font-medium text-sm">¡Bienvenido, {{ userName }}!</span>
-          </div>
-          <button @click="showWelcome = false" class="text-white hover:text-gray-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </transition>
+    <!-- Nuevo modal de bienvenida mejorado -->
+    <WelcomeModalNew 
+      :show="showWelcome"
+      :userName="userName"
+      @close="showWelcome = false"
+    />
 
     <!-- Indicador de estado de conexión -->
     <ConnectivityStatus :show="route.name === 'Home' && !showMobileMenu" />
@@ -401,18 +390,6 @@ function logout() {
   opacity: 0;
 }
 
-/* Animación para el mensaje de bienvenida */
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-down-enter-from,
-.slide-down-leave-to {
-  transform: translateY(-100%);
-  opacity: 0;
-}
-
 /* Efecto vidrio líquido para el título */
 h1 {
   position: relative;
@@ -448,5 +425,28 @@ h1::before {
   100% {
     transform: translateX(100%) translateY(100%) rotate(45deg);
   }
+}
+
+/* Colores personalizados para verde manzana */
+:root {
+  --apple-green: #6CC651;
+  --apple-green-dark: #5DB33C;
+  --apple-green-light: #8FD968;
+}
+
+.bg-apple-green {
+  background-color: #6CC651;
+}
+
+.bg-apple-green-dark {
+  background-color: #5DB33C;
+}
+
+.text-apple-green {
+  color: #6CC651;
+}
+
+.text-apple-green-dark {
+  color: #5DB33C;
 }
 </style>

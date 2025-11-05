@@ -355,16 +355,18 @@
         <div class="space-y-2">
           <!-- Agrupar asistencias por fecha -->
           <div v-for="grupo in agruparAsistenciasPorFecha(asistencias)" :key="grupo.fecha">
-            <!-- Separador de fecha -->
-            <div class="flex items-center gap-2 my-3 px-2">
-              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-              <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-full border border-indigo-200/50 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <!-- Separador de fecha mejorado -->
+            <div class="flex items-center gap-2 my-4 px-2">
+              <div class="flex-1 h-0.5 bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
+              <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full border-2 border-blue-300/80 shadow-md hover:shadow-lg transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span class="text-xs font-semibold text-indigo-700 capitalize">{{ grupo.fecha }}</span>
+                <span class="text-sm font-bold text-blue-800 capitalize">
+                  {{ grupo.fecha || 'Fecha no disponible' }}
+                </span>
               </div>
-              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+              <div class="flex-1 h-0.5 bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
             </div>
 
             <!-- Asistencias del día -->
@@ -893,25 +895,35 @@ function formatHoraCDMX(fechaStr) {
 // Función para obtener solo la fecha en formato CDMX (sin hora)
 function obtenerFechaCDMX(fechaStr) {
   try {
-    if (!fechaStr) return '';
+    if (!fechaStr) {
+      console.warn('⚠️ obtenerFechaCDMX: fechaStr vacía o null');
+      return '';
+    }
+    
+    console.log(`🔍 obtenerFechaCDMX: procesando "${fechaStr}"`);
     
     // ✅ SOLUCIÓN: El backend ahora envía fechas con zona horaria CDMX (-06:00)
     // JavaScript interpretará esto correctamente
     const fecha = new Date(fechaStr);
     
     if (isNaN(fecha.getTime())) {
-      console.error('Fecha inválida:', fechaStr);
+      console.error('❌ Fecha inválida:', fechaStr);
       return '';
     }
     
-    // Retornar fecha en formato: "Lun, 30 de Octubre"
-    return fecha.toLocaleDateString('es-MX', {
+    // Retornar fecha en formato: "Lun, 30 de Octubre de 2025"
+    // Incluye el año tal como está en la base de datos
+    const resultado = fecha.toLocaleDateString('es-MX', {
       weekday: 'short',
       day: '2-digit',
-      month: 'long'
+      month: 'long',
+      year: 'numeric'
     });
+    
+    console.log(`✅ obtenerFechaCDMX: "${fechaStr}" -> "${resultado}"`);
+    return resultado;
   } catch (e) {
-    console.error('Error al formatear fecha CDMX:', e);
+    console.error('❌ Error al formatear fecha CDMX:', e, 'Input:', fechaStr);
     return '';
   }
 }
@@ -937,25 +949,94 @@ function agruparRegistrosPorFecha(registrosLista) {
     .sort((a, b) => new Date(b.registros[0].fecha_hora) - new Date(a.registros[0].fecha_hora));
 }
 
+// Función alternativa para extraer solo la fecha sin hora (fallback)
+function extraerFechaSimple(fechaStr) {
+  try {
+    if (!fechaStr) return '';
+    
+    // Si es una fecha en formato ISO como "2025-11-05T11:24:00-06:00"
+    // Extraer solo la parte de la fecha "2025-11-05"
+    const partes = fechaStr.split('T');
+    const fechaSola = partes[0];
+    
+    if (!fechaSola) return '';
+    
+    // Convertir "2025-11-05" a "mié, 05 de noviembre de 2025"
+    // Primero crear un date desde la fecha en formato ISO local
+    const [año, mes, dia] = fechaSola.split('-');
+    const fecha = new Date(año, parseInt(mes) - 1, dia);
+    
+    if (isNaN(fecha.getTime())) {
+      console.error('❌ extraerFechaSimple: fecha inválida:', fechaStr);
+      return fechaSola; // Retornar al menos la fecha en formato simple
+    }
+    
+    // Formatear con el mismo patrón que obtenerFechaCDMX
+    const resultado = fecha.toLocaleDateString('es-MX', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+    
+    console.log(`✅ extraerFechaSimple: "${fechaStr}" -> "${resultado}"`);
+    return resultado;
+  } catch (e) {
+    console.error('❌ Error en extraerFechaSimple:', e);
+    return '';
+  }
+}
+
 // Función para agrupar asistencias por fecha
 function agruparAsistenciasPorFecha(asistenciasLista) {
+  console.log(`🔍 agruparAsistenciasPorFecha: iniciando con ${asistenciasLista.length} asistencias`);
+  
   const grupos = {};
   
-  asistenciasLista.forEach(asistencia => {
-    const fechaCDMX = obtenerFechaCDMX(asistencia.fecha);
+  asistenciasLista.forEach((asistencia, idx) => {
+    // DEBUG: Verificar estructura de asistencia
+    if (!asistencia.fecha) {
+      console.warn(`⚠️ Asistencia ${idx} sin fecha:`, asistencia);
+      return;
+    }
+    
+    console.log(`  [${idx}] Fecha raw: ${asistencia.fecha}`);
+    
+    // Intentar obtener fecha, si falla usar alternativa
+    let fechaCDMX = obtenerFechaCDMX(asistencia.fecha);
+    
+    if (!fechaCDMX) {
+      console.warn(`⚠️ obtenerFechaCDMX retornó vacío para: ${asistencia.fecha}, usando alternativa...`);
+      fechaCDMX = extraerFechaSimple(asistencia.fecha);
+    }
+    
+    console.log(`  ➜ Fecha formateada: "${fechaCDMX}"`);
+    
+    if (!fechaCDMX) {
+      console.error(`❌ No se pudo obtener fecha para asistencia ${idx}:`, asistencia);
+      return;
+    }
+    
     if (!grupos[fechaCDMX]) {
       grupos[fechaCDMX] = [];
+      console.log(`  ✨ Nuevo grupo creado: "${fechaCDMX}"`);
     }
     grupos[fechaCDMX].push(asistencia);
   });
   
+  console.log(`📊 Total de grupos creados: ${Object.keys(grupos).length}`);
+  console.log(`📊 Grupos:`, Object.keys(grupos));
+  
   // Convertir a array de objetos con fecha y asistencias, ordenados por fecha descendente
-  return Object.entries(grupos)
+  const resultado = Object.entries(grupos)
     .map(([fecha, asists]) => ({
       fecha,
       asistencias: asists.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
     }))
     .sort((a, b) => new Date(b.asistencias[0].fecha) - new Date(a.asistencias[0].fecha));
+  
+  console.log(`✅ Agrupamiento completado:`, resultado);
+  return resultado;
 }
 
 function verEnMapa(registro) {

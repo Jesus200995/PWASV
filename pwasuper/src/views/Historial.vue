@@ -357,16 +357,16 @@
           <div v-for="grupo in agruparAsistenciasPorFecha(asistencias)" :key="grupo.fecha">
             <!-- Separador de fecha mejorado -->
             <div class="flex items-center gap-2 my-3 px-2">
-              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-              <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-200/50 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+              <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-full border border-blue-600/70 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span class="text-xs font-semibold text-blue-700 capitalize">
+                <span class="text-xs font-semibold text-blue-900 capitalize">
                   {{ grupo.fecha || 'Fecha no disponible' }}
                 </span>
               </div>
-              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
             </div>
 
             <!-- Asistencias del día -->

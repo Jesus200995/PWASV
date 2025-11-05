@@ -158,14 +158,14 @@
           <div v-for="grupo in agruparRegistrosPorFecha(registros)" :key="grupo.fecha">
             <!-- Separador de fecha -->
             <div class="flex items-center gap-2 my-3 px-2">
-              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-              <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-200/50 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
+              <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-100 to-violet-100 rounded-full border border-purple-400/60 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span class="text-xs font-semibold text-blue-700 capitalize">{{ grupo.fecha }}</span>
+                <span class="text-xs font-semibold text-purple-800 capitalize">{{ grupo.fecha }}</span>
               </div>
-              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
             </div>
             
             <!-- Registros del día -->
@@ -356,17 +356,17 @@
           <!-- Agrupar asistencias por fecha -->
           <div v-for="grupo in agruparAsistenciasPorFecha(asistencias)" :key="grupo.fecha">
             <!-- Separador de fecha mejorado -->
-            <div class="flex items-center gap-2 my-4 px-2">
-              <div class="flex-1 h-0.5 bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
-              <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full border-2 border-blue-300/80 shadow-md hover:shadow-lg transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <div class="flex items-center gap-2 my-3 px-2">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+              <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-200/50 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span class="text-sm font-bold text-blue-800 capitalize">
+                <span class="text-xs font-semibold text-blue-700 capitalize">
                   {{ grupo.fecha || 'Fecha no disponible' }}
                 </span>
               </div>
-              <div class="flex-1 h-0.5 bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
             </div>
 
             <!-- Asistencias del día -->

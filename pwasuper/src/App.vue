@@ -5,6 +5,7 @@ import ConnectivityStatus from './components/ConnectivityStatus.vue';
 import UpdateNotification from './components/UpdateNotification.vue';
 import SupportBubble from './components/SupportBubble.vue';
 import WelcomeModalNew from './components/WelcomeModalNew.vue';
+import PoinsettiaFlower from './components/PoinsettiaFlower.vue';
 import { useNotifications } from './composables/useNotifications.js';
 
 const router = useRouter();
@@ -219,16 +220,8 @@ function logout() {
       <div class="max-w-sm mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <div class="relative w-8 h-8 bg-gradient-to-br from-green-700 via-green-800 to-green-900 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-3">
-              <!-- Efecto vidrio en círculo de iniciales -->
-              <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
-              
-              <!-- Reflejo superior del círculo -->
-              <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-full"></div>
-              
-              <!-- Iniciales con efecto mejorado -->
-              <span class="text-white text-xs font-bold drop-shadow-lg filter brightness-110 relative z-10">{{ getUserInitials }}</span>
-            </div>
+            <!-- Flor de Noche Buena girando en lugar del círculo de iniciales -->
+            <PoinsettiaFlower />
             <div>
               <h1 class="text-base font-bold text-green-800 mb-0">Sembrando Vida</h1>
               <p class="text-xs text-gray-500 -mt-0.5">{{ userName }}</p>

@@ -192,6 +192,16 @@
                 {{ descargandoBD ? 'Descargando...' : 'Descargar BD' }}
               </button>
               
+              <button @click="descargarBDRapida" class="action-btn bd-rapida-btn" :disabled="descargandoBDRapida">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14,2 14,8 20,8"></polyline>
+                  <path d="M12 18v-6"></path>
+                  <path d="M9 15h6"></path>
+                </svg>
+                {{ descargandoBDRapida ? 'Descargando BD...' : '⚡ BD Completa Rápida' }}
+              </button>
+              
               <button @click="limpiarCache" class="action-btn cache-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 6h18"/>
@@ -324,6 +334,12 @@
       @cerrar="cerrarProgressModal"
       @completado="onProgressCompletado"
     />
+
+    <!-- Modal de progreso para descarga de BD -->
+    <DescargaProgressModal
+      ref="descargaProgressRef"
+      :show="showDescargaProgress"
+    />
   </div>
 </template>
 
@@ -334,8 +350,10 @@ import axios from 'axios'
 import Sidebar from '../components/Sidebar_NEW.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ProgressModal from '../components/ProgressModal.vue'
+import DescargaProgressModal from '../components/DescargaProgressModal.vue'
 import asistenciasService from '../services/asistenciasService.js'
 import imagenesService from '../services/imagenesService.js'
+import baseDatosService from '../services/baseDatosService.js'
 
 const router = useRouter()
 
@@ -345,6 +363,10 @@ const isOnline = ref(navigator.onLine)
 const adminUser = ref(localStorage.getItem('admin_user') || 'Admin')
 const checking = ref(false)
 const exporting = ref(false)
+
+// Variables para el modal de descarga de BD
+const descargaProgressRef = ref(null)
+const showDescargaProgress = ref(false)
 
 // Variables para el modal de confirmación
 const showConfirmModal = ref(false)
@@ -359,6 +381,7 @@ const eliminandoAsistencias = ref(false)
 const descargandoBD = ref(false)
 const descargandoUsuarios = ref(false)
 const eliminandoImagenes = ref(false)
+const descargandoBDRapida = ref(false)
 
 // Variables para el modal de progreso
 const showProgressModal = ref(false)
@@ -836,6 +859,84 @@ const descargarBaseDatos = async () => {
     mostrarMensaje('❌ Error', errorMsg)
   } finally {
     descargandoBD.value = false
+  }
+}
+
+// ⚡ NUEVA FUNCIÓN: Descarga rápida de BD completa con progreso en tiempo real
+const descargarBDRapida = async () => {
+  descargandoBDRapida.value = true
+  showDescargaProgress.value = true
+  
+  try {
+    console.log('⚡ Iniciando descarga RÁPIDA de BD completa con progreso...')
+    
+    // Definir callback para actualizar el progreso
+    const onProgress = (datos) => {
+      if (descargaProgressRef.value) {
+        console.log('📊 Actualizando progreso:', datos)
+        descargaProgressRef.value.actualizar({
+          bytesDescargados: datos.bytesDescargados,
+          tamanoTotal: datos.tamanoTotal,
+          velocidad: datos.velocidad,
+          mensaje: `Descargando: ${((datos.bytesDescargados / (1024 * 1024)).toFixed(2))} MB descargados...`
+        })
+      }
+    }
+    
+    // Llamar al servicio de BD con callback de progreso
+    const resultado = await baseDatosService.descargarBDCompleta(onProgress)
+    
+    console.log('✅ Descarga completada:', resultado)
+    
+    // Marcar como completado
+    if (descargaProgressRef.value) {
+      descargaProgressRef.value.completar()
+    }
+    
+    // Esperar un poco y cerrar el modal
+    setTimeout(() => {
+      showDescargaProgress.value = false
+      descargandoBDRapida.value = false
+      
+      // Mostrar mensaje de éxito
+      mostrarMensaje('✅ Descarga Exitosa', 
+        `<div style="text-align: left;">
+          <h4 style="color: #ec4899; margin-bottom: 15px;">⚡ Base de Datos Descargada</h4>
+          <p><strong>📁 Archivo:</strong> ${resultado.archivo}</p>
+          <p><strong>📊 Tamaño:</strong> ${resultado.tamanhoMB} MB</p>
+          <hr style="margin: 15px 0;">
+          <p style="font-size: 12px; color: #666; margin-top: 15px;">
+            ✅ La base de datos completa ha sido descargada exitosamente en formato SQL.
+            Incluye todas las tablas, usuarios, registros y asistencias.
+          </p>
+        </div>`
+      )
+    }, 1500)
+    
+  } catch (err) {
+    console.error('❌ Error en descarga rápida de BD:', err)
+    
+    showDescargaProgress.value = false
+    descargandoBDRapida.value = false
+    
+    let errorMsg = err.message || 'Error desconocido'
+    
+    // Personalizar mensajes de error
+    if (errorMsg.includes('No autorizado')) {
+      errorMsg = '❌ No autorizado. Por favor inicia sesión nuevamente.'
+    } else if (errorMsg.includes('Acceso denegado')) {
+      errorMsg = '❌ Acceso denegado. No tienes permisos para descargar la BD.'
+    } else if (errorMsg.includes('Endpoint no disponible')) {
+      errorMsg = '❌ Endpoint no disponible. Verifica que el servidor está actualizado.'
+    } else if (errorMsg.includes('Error del servidor')) {
+      errorMsg = '❌ Error del servidor. Por favor intenta más tarde.'
+    } else if (errorMsg.includes('No se pudo conectar')) {
+      errorMsg = '❌ No se pudo conectar con el servidor. Verifica la conexión.'
+    }
+    
+    mostrarMensaje('❌ Error', errorMsg)
+  } finally {
+    descargandoBDRapida.value = false
   }
 }
 
@@ -1732,6 +1833,37 @@ const logout = () => {
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
+}
+
+.bd-rapida-btn {
+  background: linear-gradient(135deg, #ec4899 0%, #f472b6 50%, #fb7185 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.bd-rapida-btn::before {
+  content: '⚡';
+  position: absolute;
+  left: 8px;
+  font-size: 14px;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.bd-rapida-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.6);
 }
 
 .cache-btn {

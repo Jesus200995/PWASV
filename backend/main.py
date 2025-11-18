@@ -5084,6 +5084,244 @@ async def eliminar_todas_imagenes():
 
 # ==================== FIN ENDPOINT ELIMINAR IMÁGENES ====================
 
+# ==================== NUEVO ENDPOINT: DESCARGAR BD COMPLETA RÁPIDA ====================
+
+@app.get("/descargar-bd-completa", response_class=StreamingResponse)
+async def descargar_bd_completa():
+    """
+    Endpoint optimizado para descargar TODA la base de datos en formato SQL de forma MUY RÁPIDA
+    Usa streaming para manejo eficiente de memoria
+    """
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print("🚀 [BD COMPLETA] Iniciando descarga rápida de base de datos completa...")
+        timestamp = datetime.now().isoformat().replace(':', '-')
+        nombre_archivo = f"BASE_DATOS_COMPLETA_{timestamp}.sql"
+        
+        async def generar_sql():
+            """Generador de SQL para streaming eficiente"""
+            
+            try:
+                # Header
+                yield f"""-- ===============================================
+-- EXPORTACIÓN COMPLETA BASE DE DATOS app_registros
+-- ===============================================
+-- Generado: {datetime.now().isoformat()}
+-- Servidor: app_registros (PostgreSQL)
+-- ===============================================
+
+"""
+                
+                # 1. TABLA USUARIOS - Crear e insertar datos de forma rápida
+                print("📝 Procesando tabla usuarios...")
+                yield """-- ======== TABLA: USUARIOS ========
+DROP TABLE IF EXISTS usuarios CASCADE;
+
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    correo VARCHAR(255) UNIQUE NOT NULL,
+    nombre_completo VARCHAR(255) NOT NULL,
+    cargo VARCHAR(255),
+    supervisor VARCHAR(255),
+    contrasena VARCHAR(255) NOT NULL,
+    curp VARCHAR(18) UNIQUE,
+    telefono VARCHAR(20),
+    rol VARCHAR(50) DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+"""
+                
+                # Obtener usuarios de forma rápida
+                cursor.execute("""
+                    SELECT id, correo, nombre_completo, cargo, supervisor, 
+                           contrasena, curp, telefono, rol
+                    FROM usuarios 
+                    ORDER BY id ASC
+                """)
+                
+                usuarios_data = cursor.fetchall()
+                print(f"📊 Obtenidos {len(usuarios_data)} usuarios")
+                
+                if usuarios_data:
+                    yield "INSERT INTO usuarios (id, correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono, rol) VALUES\n"
+                    
+                    for idx, row in enumerate(usuarios_data):
+                        id_u, correo, nombre, cargo, supervisor, contrasena, curp, telefono, rol = row
+                        
+                        # Escapar comillas simples
+                        correo = (correo or '').replace("'", "''")
+                        nombre = (nombre or '').replace("'", "''")
+                        cargo = (cargo or '').replace("'", "''")
+                        supervisor = (supervisor or '').replace("'", "''")
+                        contrasena = (contrasena or '').replace("'", "''")
+                        curp = (curp or '').replace("'", "''")
+                        telefono = (telefono or '').replace("'", "''")
+                        rol = (rol or 'user').replace("'", "''")
+                        
+                        coma = "," if idx < len(usuarios_data) - 1 else ";"
+                        yield f"({id_u}, '{correo}', '{nombre}', '{cargo}', '{supervisor}', '{contrasena}', '{curp}', '{telefono}', '{rol}'){coma}\n"
+                
+                yield "\n"
+                
+                # 2. TABLA REGISTROS - Insertar datos de forma rápida
+                print("📋 Procesando tabla registros...")
+                yield """-- ======== TABLA: REGISTROS ========
+DROP TABLE IF EXISTS registros CASCADE;
+
+CREATE TABLE registros (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuarios(id),
+    latitud DECIMAL(10, 8),
+    longitud DECIMAL(11, 8),
+    descripcion TEXT,
+    foto_url VARCHAR(500),
+    fecha_hora TIMESTAMP NOT NULL,
+    tipo_actividad VARCHAR(50) DEFAULT 'campo',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+"""
+                
+                # Obtener registros de forma rápida
+                cursor.execute("""
+                    SELECT id, usuario_id, latitud, longitud, descripcion, 
+                           foto_url, fecha_hora, tipo_actividad
+                    FROM registros 
+                    ORDER BY id ASC
+                """)
+                
+                registros_data = cursor.fetchall()
+                print(f"📊 Obtenidos {len(registros_data)} registros")
+                
+                if registros_data:
+                    yield "INSERT INTO registros (id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad) VALUES\n"
+                    
+                    for idx, row in enumerate(registros_data):
+                        id_r, usuario_id, lat, lon, desc, foto, fecha, tipo = row
+                        
+                        # Escapar comillas simples
+                        desc = (desc or '').replace("'", "''")
+                        foto = (foto or '').replace("'", "''")
+                        tipo = (tipo or 'campo').replace("'", "''")
+                        
+                        lat_str = str(lat) if lat is not None else "NULL"
+                        lon_str = str(lon) if lon is not None else "NULL"
+                        fecha_str = str(fecha) if fecha else "NOW()"
+                        
+                        coma = "," if idx < len(registros_data) - 1 else ";"
+                        yield f"({id_r}, {usuario_id}, {lat_str}, {lon_str}, '{desc}', '{foto}', '{fecha_str}', '{tipo}'){coma}\n"
+                
+                yield "\n"
+                
+                # 3. TABLA ASISTENCIAS - Insertar datos de forma rápida
+                print("🕐 Procesando tabla asistencias...")
+                yield """-- ======== TABLA: ASISTENCIAS ========
+DROP TABLE IF EXISTS asistencias CASCADE;
+
+CREATE TABLE asistencias (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuarios(id),
+    fecha DATE NOT NULL,
+    hora_entrada TIMESTAMP,
+    hora_salida TIMESTAMP,
+    latitud_entrada DECIMAL(10, 8),
+    longitud_entrada DECIMAL(11, 8),
+    latitud_salida DECIMAL(10, 8),
+    longitud_salida DECIMAL(11, 8),
+    foto_entrada_url VARCHAR(500),
+    foto_salida_url VARCHAR(500),
+    descripcion_entrada TEXT,
+    descripcion_salida TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+"""
+                
+                # Obtener asistencias de forma rápida
+                cursor.execute("""
+                    SELECT id, usuario_id, fecha, hora_entrada, hora_salida,
+                           latitud_entrada, longitud_entrada, latitud_salida, 
+                           longitud_salida, foto_entrada_url, foto_salida_url,
+                           descripcion_entrada, descripcion_salida
+                    FROM asistencias 
+                    ORDER BY id ASC
+                """)
+                
+                asistencias_data = cursor.fetchall()
+                print(f"📊 Obtenidas {len(asistencias_data)} asistencias")
+                
+                if asistencias_data:
+                    yield "INSERT INTO asistencias (id, usuario_id, fecha, hora_entrada, hora_salida, latitud_entrada, longitud_entrada, latitud_salida, longitud_salida, foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida) VALUES\n"
+                    
+                    for idx, row in enumerate(asistencias_data):
+                        id_a, usuario_id, fecha, hora_ent, hora_sal, lat_ent, lon_ent, lat_sal, lon_sal, foto_ent, foto_sal, desc_ent, desc_sal = row
+                        
+                        # Escapar comillas simples
+                        foto_ent = (foto_ent or '').replace("'", "''")
+                        foto_sal = (foto_sal or '').replace("'", "''")
+                        desc_ent = (desc_ent or '').replace("'", "''")
+                        desc_sal = (desc_sal or '').replace("'", "''")
+                        
+                        fecha_str = str(fecha) if fecha else "CURRENT_DATE"
+                        hora_ent_str = f"'{str(hora_ent)}'" if hora_ent else "NULL"
+                        hora_sal_str = f"'{str(hora_sal)}'" if hora_sal else "NULL"
+                        lat_ent_str = str(lat_ent) if lat_ent is not None else "NULL"
+                        lon_ent_str = str(lon_ent) if lon_ent is not None else "NULL"
+                        lat_sal_str = str(lat_sal) if lat_sal is not None else "NULL"
+                        lon_sal_str = str(lon_sal) if lon_sal is not None else "NULL"
+                        
+                        coma = "," if idx < len(asistencias_data) - 1 else ";"
+                        yield f"({id_a}, {usuario_id}, '{fecha_str}', {hora_ent_str}, {hora_sal_str}, {lat_ent_str}, {lon_ent_str}, {lat_sal_str}, {lon_sal_str}, '{foto_ent}', '{foto_sal}', '{desc_ent}', '{desc_sal}'){coma}\n"
+                
+                yield "\n"
+                
+                # 4. Crear índices para optimización
+                print("🔍 Agregando índices...")
+                yield """-- ======== ÍNDICES PARA OPTIMIZACIÓN ========
+CREATE INDEX IF NOT EXISTS idx_usuarios_correo ON usuarios(correo);
+CREATE INDEX IF NOT EXISTS idx_usuarios_curp ON usuarios(curp);
+CREATE INDEX IF NOT EXISTS idx_registros_usuario ON registros(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_registros_fecha ON registros(fecha_hora);
+CREATE INDEX IF NOT EXISTS idx_asistencias_usuario ON asistencias(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_asistencias_fecha ON asistencias(fecha);
+
+-- ======== FIN DE EXPORTACIÓN ========
+-- Total registros exportados: usuarios={}, registros={}, asistencias={}
+-- Fecha: {}
+-- ===============================================
+""".format(len(usuarios_data), len(registros_data), len(asistencias_data), 
+           datetime.now().isoformat())
+                
+                print("✅ Descarga de BD completa generada exitosamente")
+                
+            except Exception as e:
+                print(f"❌ Error generando SQL: {e}")
+                yield f"-- ERROR: {str(e)}\n"
+        
+        # Headers para descarga
+        headers = {
+            "Content-Disposition": f"attachment; filename={nombre_archivo}",
+            "Content-Type": "application/sql; charset=utf-8"
+        }
+        
+        print(f"📥 Iniciando descarga del archivo: {nombre_archivo}")
+        return StreamingResponse(
+            content=generar_sql(),
+            media_type="application/sql; charset=utf-8",
+            headers=headers
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en descarga de BD completa: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al descargar base de datos: {str(e)}")
+
+# ==================== FIN DESCARGA BD COMPLETA ====================
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

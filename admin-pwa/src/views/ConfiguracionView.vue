@@ -351,8 +351,8 @@
       :show="showDescargaProgress"
     />
 
-    <!-- Modal de progreso para descarga de CSV -->
-    <DescargaProgressModal
+    <!-- Modal de progreso NARANJA para descarga de CSV -->
+    <DescargaCSVProgressModal
       ref="descargaCSVProgressRef"
       :show="showDescargaCSVProgress"
     />
@@ -367,6 +367,7 @@ import Sidebar from '../components/Sidebar_NEW.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ProgressModal from '../components/ProgressModal.vue'
 import DescargaProgressModal from '../components/DescargaProgressModal.vue'
+import DescargaCSVProgressModal from '../components/DescargaCSVProgressModal.vue'
 import asistenciasService from '../services/asistenciasService.js'
 import imagenesService from '../services/imagenesService.js'
 import baseDatosService from '../services/baseDatosService.js'

@@ -175,6 +175,163 @@ class BaseDatosService {
     return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + tamanios[i]
   }
 
+  async descargarRegistrosCSV(onProgress = null) {
+    // Descarga todos los registros de actividades en formato CSV
+    // Utiliza streaming para manejo eficiente de memoria.
+    // onProgress es una función callback que recibe { bytesDescargados, tamanoTotal, velocidad }
+    
+    try {
+      console.log('🚀 Iniciando descarga de registros CSV...');
+      
+      const token = localStorage.getItem('admin_token');
+      
+      if (!token) {
+        throw new Error('No hay token de autenticación. Por favor inicia sesión.');
+      }
+      
+      console.log(`📡 Conectando a: ${API_URL}/exportar-registros-csv`);
+      
+      const response = await fetch(`${API_URL}/exportar-registros-csv`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'text/csv'
+        }
+      });
+      
+      if (!response.ok) {
+        console.error(`❌ Error HTTP: ${response.status} - ${response.statusText}`);
+        
+        if (response.status === 401) {
+          throw new Error('No autorizado. Sesión expirada. Por favor inicia sesión nuevamente.');
+        } else if (response.status === 403) {
+          throw new Error('Acceso denegado. No tienes permisos para descargar registros.');
+        } else if (response.status === 404) {
+          throw new Error('Endpoint no disponible. Verifica que el servidor está actualizado.');
+        } else if (response.status === 500) {
+          throw new Error('Error del servidor. Por favor intenta más tarde.');
+        } else {
+          throw new Error(`Error del servidor: ${response.status}`);
+        }
+      }
+      
+      console.log('✅ Conexión establecida');
+      
+      // Obtener tamaño total del contenido
+      const contentLength = response.headers.get('content-length');
+      const tamanoTotal = parseInt(contentLength, 10) || 0;
+      
+      console.log(`📊 Tamaño total: ${this.formatearBytes(tamanoTotal)}`);
+      
+      // Leer el stream de respuesta
+      const reader = response.body.getReader();
+      const chunks = [];
+      let bytesDescargados = 0;
+      let ultimaActualizacion = Date.now();
+      let ultimosBytesReportados = 0;
+      
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+          
+          chunks.push(value);
+          bytesDescargados += value.length;
+          
+          // Calcular velocidad y notificar cada 200ms
+          const ahora = Date.now();
+          const deltaTiempo = (ahora - ultimaActualizacion) / 1000; // en segundos
+          
+          if (deltaTiempo >= 0.2) {
+            const deltaBytes = bytesDescargados - ultimosBytesReportados;
+            const velocidad = deltaBytes / deltaTiempo; // bytes por segundo
+            
+            // Notificar progreso
+            if (onProgress) {
+              onProgress({
+                bytesDescargados,
+                tamanoTotal,
+                velocidad,
+                porcentaje: tamanoTotal > 0 ? Math.round((bytesDescargados / tamanoTotal) * 100) : 0
+              });
+            }
+            
+            console.log(`📥 Descargados: ${this.formatearBytes(bytesDescargados)} / ${this.formatearBytes(tamanoTotal)} (${this.formatearBytes(velocidad)}/s)`);
+            
+            ultimaActualizacion = ahora;
+            ultimosBytesReportados = bytesDescargados;
+          }
+        }
+      } catch (streamError) {
+        console.error('❌ Error leyendo stream:', streamError);
+        throw new Error('Error al descargar el archivo: ' + streamError.message);
+      }
+      
+      console.log(`✅ Contenido descargado - Tamaño final: ${this.formatearBytes(bytesDescargados)}`);
+      
+      // Combinar chunks en un único blob
+      const blob = new Blob(chunks, { type: 'text/csv; charset=utf-8' });
+      console.log(`✅ Blob creado - Tamaño: ${this.formatearBytes(blob.size)}`);
+      
+      // Obtener nombre del archivo del header Content-Disposition
+      const contentDisposition = response.headers.get('content-disposition');
+      let nombreArchivo = 'REGISTROS_ACTIVIDADES.csv';
+      
+      if (contentDisposition && contentDisposition.includes('filename=')) {
+        nombreArchivo = contentDisposition.split('filename=')[1].replace(/"/g, '');
+      }
+      
+      console.log(`📁 Nombre del archivo: ${nombreArchivo}`);
+      
+      // Crear URL del blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Crear elemento anchor para descarga
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      document.body.appendChild(a);
+      
+      // Iniciar descarga
+      console.log('⬇️ Iniciando descarga del archivo...');
+      a.click();
+      
+      // Limpiar
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+      console.log('✅ Descarga completada exitosamente');
+      
+      // Notificación final
+      if (onProgress) {
+        onProgress({
+          bytesDescargados,
+          tamanoTotal,
+          velocidad: 0,
+          porcentaje: 100,
+          completado: true
+        });
+      }
+      
+      return {
+        status: 'success',
+        message: '✅ Registros descargados exitosamente',
+        archivo: nombreArchivo,
+        tamanho: blob.size,
+        tamanhoMB: (blob.size / 1024 / 1024).toFixed(2)
+      };
+      
+    } catch (error) {
+      console.error('❌ Error al descargar registros CSV:', error.message);
+      
+      // Lanzar error con mensaje descriptivo
+      throw new Error(error.message || 'Error desconocido al descargar registros');
+    }
+  }
+
   async obtenerInfoBD() {
     // Obtiene información sobre el tamaño y cantidad de datos en la BD
     try {

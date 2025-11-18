@@ -201,6 +201,16 @@
                 </svg>
                 {{ descargandoBDRapida ? 'Descargando BD...' : '⚡ BD Completa Rápida' }}
               </button>
+
+              <button @click="descargarRegistrosCSV" class="action-btn registros-csv-btn" :disabled="descargandoRegistrosCSV">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14,2 14,8 20,8"></polyline>
+                  <line x1="12" y1="13" x2="12" y2="19"></line>
+                  <line x1="9" y1="16" x2="15" y2="16"></line>
+                </svg>
+                {{ descargandoRegistrosCSV ? 'Exportando CSV...' : '📊 Registros CSV' }}
+              </button>
               
               <button @click="limpiarCache" class="action-btn cache-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -340,6 +350,12 @@
       ref="descargaProgressRef"
       :show="showDescargaProgress"
     />
+
+    <!-- Modal de progreso para descarga de CSV -->
+    <DescargaProgressModal
+      ref="descargaCSVProgressRef"
+      :show="showDescargaCSVProgress"
+    />
   </div>
 </template>
 
@@ -368,6 +384,10 @@ const exporting = ref(false)
 const descargaProgressRef = ref(null)
 const showDescargaProgress = ref(false)
 
+// Variables para el modal de descarga de CSV
+const descargaCSVProgressRef = ref(null)
+const showDescargaCSVProgress = ref(false)
+
 // Variables para el modal de confirmación
 const showConfirmModal = ref(false)
 const confirmAction = ref(null)
@@ -382,6 +402,7 @@ const descargandoBD = ref(false)
 const descargandoUsuarios = ref(false)
 const eliminandoImagenes = ref(false)
 const descargandoBDRapida = ref(false)
+const descargandoRegistrosCSV = ref(false)
 
 // Variables para el modal de progreso
 const showProgressModal = ref(false)
@@ -937,6 +958,85 @@ const descargarBDRapida = async () => {
     mostrarMensaje('❌ Error', errorMsg)
   } finally {
     descargandoBDRapida.value = false
+  }
+}
+
+// 📊 NUEVA FUNCIÓN: Descarga de registros CSV con progreso en tiempo real
+const descargarRegistrosCSV = async () => {
+  descargandoRegistrosCSV.value = true
+  showDescargaCSVProgress.value = true
+  
+  try {
+    console.log('📊 Iniciando descarga de registros en CSV con progreso...')
+    
+    // Definir callback para actualizar el progreso
+    const onProgress = (datos) => {
+      if (descargaCSVProgressRef.value) {
+        console.log('📊 Actualizando progreso CSV:', datos)
+        descargaCSVProgressRef.value.actualizar({
+          bytesDescargados: datos.bytesDescargados,
+          tamanoTotal: datos.tamanoTotal,
+          velocidad: datos.velocidad,
+          mensaje: `Exportando: ${((datos.bytesDescargados / (1024 * 1024)).toFixed(2))} MB exportados...`
+        })
+      }
+    }
+    
+    // Llamar al servicio de CSV con callback de progreso
+    const resultado = await baseDatosService.descargarRegistrosCSV(onProgress)
+    
+    console.log('✅ Exportación completada:', resultado)
+    
+    // Marcar como completado
+    if (descargaCSVProgressRef.value) {
+      descargaCSVProgressRef.value.completar()
+    }
+    
+    // Esperar un bit y cerrar el modal
+    setTimeout(() => {
+      showDescargaCSVProgress.value = false
+      descargandoRegistrosCSV.value = false
+      
+      // Mostrar mensaje de éxito
+      mostrarMensaje('✅ Exportación Exitosa', 
+        `<div style="text-align: left;">
+          <h4 style="color: #f97316; margin-bottom: 15px;">📊 Registros Exportados</h4>
+          <p><strong>📁 Archivo:</strong> ${resultado.archivo}</p>
+          <p><strong>📊 Tamaño:</strong> ${resultado.tamanhoMB} MB</p>
+          <p><strong>📝 Registros:</strong> ${resultado.registros} registros exportados</p>
+          <hr style="margin: 15px 0;">
+          <p style="font-size: 12px; color: #666; margin-top: 15px;">
+            ✅ Todos los registros de actividades han sido exportados exitosamente en formato CSV.
+            Puedes abrir el archivo en Excel o cualquier editor de hojas de cálculo.
+          </p>
+        </div>`
+      )
+    }, 1500)
+    
+  } catch (err) {
+    console.error('❌ Error en descarga de CSV:', err)
+    
+    showDescargaCSVProgress.value = false
+    descargandoRegistrosCSV.value = false
+    
+    let errorMsg = err.message || 'Error desconocido'
+    
+    // Personalizar mensajes de error
+    if (errorMsg.includes('No autorizado')) {
+      errorMsg = '❌ No autorizado. Por favor inicia sesión nuevamente.'
+    } else if (errorMsg.includes('Acceso denegado')) {
+      errorMsg = '❌ Acceso denegado. No tienes permisos para descargar los registros.'
+    } else if (errorMsg.includes('Endpoint no disponible')) {
+      errorMsg = '❌ Endpoint no disponible. Verifica que el servidor está actualizado.'
+    } else if (errorMsg.includes('Error del servidor')) {
+      errorMsg = '❌ Error del servidor. Por favor intenta más tarde.'
+    } else if (errorMsg.includes('No se pudo conectar')) {
+      errorMsg = '❌ No se pudo conectar con el servidor. Verifica la conexión.'
+    }
+    
+    mostrarMensaje('❌ Error', errorMsg)
+  } finally {
+    descargandoRegistrosCSV.value = false
   }
 }
 
@@ -1864,6 +1964,39 @@ const logout = () => {
 .bd-rapida-btn:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(236, 72, 153, 0.6);
+}
+
+.registros-csv-btn {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fbbf24 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.registros-csv-btn::before {
+  content: '📊';
+  position: absolute;
+  left: 8px;
+  font-size: 14px;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 0.8;
+  }
+}
+
+.registros-csv-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.6);
 }
 
 .cache-btn {

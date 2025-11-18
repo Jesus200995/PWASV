@@ -5322,6 +5322,111 @@ CREATE INDEX IF NOT EXISTS idx_asistencias_fecha ON asistencias(fecha);
 
 # ==================== FIN DESCARGA BD COMPLETA ====================
 
+# ==================== NUEVO ENDPOINT: EXPORTAR REGISTROS A CSV ====================
+
+@app.get("/exportar-registros-csv", response_class=StreamingResponse)
+async def exportar_registros_csv():
+    """
+    Endpoint optimizado para exportar TODOS los registros de actividades en formato CSV
+    Usa streaming para manejo eficiente de memoria
+    """
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print("📊 [REGISTROS CSV] Iniciando exportación de registros a CSV...")
+        timestamp = datetime.now().isoformat().replace(':', '-')
+        nombre_archivo = f"REGISTROS_ACTIVIDADES_{timestamp}.csv"
+        
+        async def generar_csv():
+            """Generador de CSV para streaming eficiente"""
+            
+            try:
+                # Header CSV
+                header = "ID,Usuario_ID,Nombre_Usuario,Correo_Usuario,Cargo,Latitud,Longitud,Descripcion,Tipo_Actividad,Fecha_Hora,Foto_URL\n"
+                yield header
+                
+                print("📝 Procesando registros...")
+                
+                # Obtener registros con información de usuarios de forma rápida
+                cursor.execute("""
+                    SELECT 
+                        r.id, 
+                        r.usuario_id, 
+                        u.nombre_completo, 
+                        u.correo, 
+                        u.cargo,
+                        r.latitud, 
+                        r.longitud, 
+                        r.descripcion, 
+                        r.tipo_actividad,
+                        r.fecha_hora,
+                        r.foto_url
+                    FROM registros r
+                    LEFT JOIN usuarios u ON r.usuario_id = u.id
+                    ORDER BY r.id ASC
+                """)
+                
+                # Procesar resultados en chunks
+                chunk_size = 500
+                registros_procesados = 0
+                
+                while True:
+                    registros = cursor.fetchmany(chunk_size)
+                    if not registros:
+                        break
+                    
+                    for registro in registros:
+                        id_r, usuario_id, nombre, correo, cargo, lat, lon, desc, tipo, fecha, foto = registro
+                        
+                        # Escapar comillas y saltos de línea en campos de texto
+                        nombre = (nombre or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
+                        correo = (correo or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
+                        cargo = (cargo or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
+                        desc = (desc or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
+                        tipo = (tipo or 'campo').replace('"', '""')
+                        foto = (foto or '').replace('"', '""')
+                        
+                        # Formatear fecha
+                        fecha_str = str(fecha) if fecha else ''
+                        
+                        # Construir línea CSV
+                        linea = f'{id_r},{usuario_id},"{nombre}","{correo}","{cargo}",{lat},{lon},"{desc}","{tipo}","{fecha_str}","{foto}"\n'
+                        
+                        yield linea
+                        registros_procesados += 1
+                        
+                        # Log cada 1000 registros
+                        if registros_procesados % 1000 == 0:
+                            print(f"📊 {registros_procesados} registros procesados...")
+                
+                print(f"✅ {registros_procesados} registros exportados a CSV")
+                
+            except Exception as e:
+                print(f"❌ Error generando CSV: {e}")
+                yield f"# ERROR: {str(e)}\n"
+        
+        # Headers para descarga
+        headers = {
+            "Content-Disposition": f"attachment; filename={nombre_archivo}",
+            "Content-Type": "text/csv; charset=utf-8"
+        }
+        
+        print(f"📥 Iniciando descarga del archivo: {nombre_archivo}")
+        return StreamingResponse(
+            content=generar_csv(),
+            media_type="text/csv; charset=utf-8",
+            headers=headers
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en exportación CSV: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al exportar registros: {str(e)}")
+
+# ==================== FIN EXPORTAR REGISTROS A CSV ====================
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

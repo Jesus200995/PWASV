@@ -240,18 +240,18 @@
       
       <transition name="fade">
         <div v-if="showEditModal" class="fixed inset-0 flex items-center justify-center p-3 pointer-events-none" style="z-index: 50;">
-          <div class="bg-white rounded-2xl max-w-xs w-full mx-3 max-h-[85vh] overflow-y-auto edit-modal pointer-events-auto" @click.stop>
-          <div class="sticky top-0 bg-white rounded-t-2xl border-b border-green-100 p-3">
+          <div class="rounded-2xl max-w-xs w-full mx-3 max-h-[85vh] overflow-y-auto edit-modal pointer-events-auto border-2 border-green-400" style="background: linear-gradient(135deg, rgba(240, 253, 244, 0.95) 0%, rgba(220, 252, 231, 0.95) 100%); backdrop-filter: blur(10px);">
+          <div class="sticky top-0 rounded-t-2xl border-b-2 border-green-400 p-3" style="background: linear-gradient(135deg, rgba(240, 253, 244, 0.98) 0%, rgba(220, 252, 231, 0.98) 100%); backdrop-filter: blur(10px);">
             <div class="flex justify-between items-center">
-              <h3 class="text-sm font-bold text-gray-800 flex items-center">
+              <h3 class="text-sm font-bold text-green-700 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
                 Editar Información
               </h3>
-              <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <button @click="closeEditModal" class="w-7 h-7 rounded-full flex items-center justify-center transition-colors" style="background-color: rgba(134, 239, 172, 0.3); border: 1px solid rgba(52, 211, 153, 0.5);">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
@@ -272,6 +272,7 @@
                   class="edit-input-small w-full"
                   :class="{ 'border-red-500': editErrors.nombre_completo }"
                   placeholder="Ingresa tu nombre completo"
+                  @input="editForm.nombre_completo = editForm.nombre_completo.toUpperCase()"
                   required
                 />
                 <p v-if="editErrors.nombre_completo" class="text-red-500 text-xs mt-1">{{ editErrors.nombre_completo }}</p>
@@ -298,6 +299,7 @@
                   class="edit-input-small w-full"
                   :class="{ 'border-red-500': editErrors.cargo }"
                   placeholder="Ingresa tu cargo"
+                  @input="editForm.cargo = editForm.cargo.toUpperCase()"
                   required
                 />
                 <p v-if="editErrors.cargo" class="text-red-500 text-xs mt-1">{{ editErrors.cargo }}</p>
@@ -310,6 +312,7 @@
                   type="text"
                   class="edit-input-small w-full"
                   placeholder="Ingresa el nombre de tu supervisor"
+                  @input="editForm.supervisor = editForm.supervisor.toUpperCase()"
                 />
               </div>
 
@@ -322,6 +325,7 @@
                   :class="{ 'border-red-500': editErrors.curp }"
                   placeholder="Ingresa tu CURP"
                   maxlength="18"
+                  @input="editForm.curp = editForm.curp.toUpperCase()"
                 />
                 <p v-if="editErrors.curp" class="text-red-500 text-xs mt-1">{{ editErrors.curp }}</p>
               </div>
@@ -801,11 +805,41 @@ const updateUserInfo = async () => {
     }
     
     // Validar CURP si se proporciona
-    if (editForm.value.curp && editForm.value.curp.length > 0) {
-      if (editForm.value.curp.length !== 18) {
+    if (editForm.value.curp && editForm.value.curp.trim().length > 0) {
+      const curpTrimmed = editForm.value.curp.trim().toUpperCase()
+      
+      // Validar formato: 18 caracteres alfanuméricos
+      if (curpTrimmed.length !== 18) {
         editErrors.value.curp = 'El CURP debe tener exactamente 18 caracteres'
         return
       }
+      
+      // Validar que solo contenga letras y números
+      if (!/^[A-Z0-9]{18}$/.test(curpTrimmed)) {
+        editErrors.value.curp = 'El CURP debe contener solo letras y números'
+        return
+      }
+      
+      editForm.value.curp = curpTrimmed
+    }
+    
+    // Validar teléfono si se proporciona
+    if (editForm.value.telefonoDigitos && editForm.value.telefonoDigitos.trim().length > 0) {
+      const telTrimmed = editForm.value.telefonoDigitos.trim()
+      
+      // Validar que solo contenga números
+      if (!/^\d+$/.test(telTrimmed)) {
+        editErrors.value.telefonoDigitos = 'El teléfono solo debe contener números'
+        return
+      }
+      
+      // Validar que tenga entre 7 y 15 dígitos (estándar internacional)
+      if (telTrimmed.length < 7 || telTrimmed.length > 15) {
+        editErrors.value.telefonoDigitos = 'El teléfono debe tener entre 7 y 15 dígitos'
+        return
+      }
+      
+      editForm.value.telefonoDigitos = telTrimmed
     }
     
     isUpdatingUser.value = true

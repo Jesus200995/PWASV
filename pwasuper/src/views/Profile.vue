@@ -228,9 +228,19 @@
     </transition>
 
     <!-- Modal de edición de información personal -->
-    <transition name="fade">
-      <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3" style="z-index: 9999;">
-        <div class="bg-white rounded-2xl max-w-xs w-full mx-3 max-h-[85vh] overflow-y-auto edit-modal">
+    <teleport to="body">
+      <transition name="fade">
+        <!-- Overlay con difuminación -->
+        <div 
+          v-if="showEditModal" 
+          class="fixed inset-0 bg-black/30 backdrop-blur-md z-40"
+          @click="closeEditModal"
+        ></div>
+      </transition>
+      
+      <transition name="fade">
+        <div v-if="showEditModal" class="fixed inset-0 flex items-center justify-center p-3 pointer-events-none" style="z-index: 50;">
+          <div class="bg-white rounded-2xl max-w-xs w-full mx-3 max-h-[85vh] overflow-y-auto edit-modal pointer-events-auto" @click.stop>
           <div class="sticky top-0 bg-white rounded-t-2xl border-b border-green-100 p-3">
             <div class="flex justify-between items-center">
               <h3 class="text-sm font-bold text-gray-800 flex items-center">
@@ -408,7 +418,8 @@
           </div>
         </div>
       </div>
-    </transition>
+      </transition>
+    </teleport>
 
     <!-- Modal de éxito para edición -->
     <transition name="fade">

@@ -555,9 +555,9 @@
       </div>
 
       <div class="text-center mb-3">
-        <h2 class="text-sm font-bold text-gray-800 mb-1 title-case"
+        <h2 class="text-sm font-bold text-gray-800 mb-1 purple-title"
             :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }">
-          REGISTRA TUS ACTIVIDADES
+          Registra Tus Actividades
         </h2>
         <!-- Línea tipo marcatextos -->
         <div class="green-line mx-auto mb-1" :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"></div>
@@ -3339,6 +3339,25 @@ watch([entradaMarcada, salidaMarcada], () => {
   border-right: 2px solid rgba(255, 0, 40, 1);
   border-radius: 0 6px 6px 0;
   box-shadow: 0 3px 12px rgba(255, 0, 40, 0.25);
+}
+
+.purple-title {
+  background: linear-gradient(
+    90deg, 
+    #6b21a8 0%, 
+    #7c3aed 25%, 
+    #c4b5fd 50%, 
+    #7c3aed 75%, 
+    #6b21a8 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-wave 3s ease-in-out infinite;
+  font-family: 'Poppins', 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  letter-spacing: -0.015em;
+  font-weight: 700;
 }
 
 .modern-title {

@@ -153,60 +153,194 @@
       <!-- Cambio de contraseña -->
       <div class="glass-card">
         <h2 class="text-sm font-semibold text-gray-800 mb-2 modern-title flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"></path>
           </svg>
-          Cambiar Contraseña
+          Más Ajustes
         </h2>
-        <div class="green-line mb-2"></div>
-        <form @submit.prevent="changePassword" class="space-y-3">
-        <!-- Mensaje de error general -->
-        <div v-if="errors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 rounded-lg" role="alert">
-          <p class="text-xs">{{ errors.general }}</p>
-        </div>
-        
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Nueva contraseña</label>
-          <input
-            v-model="passwordForm.newPassword"
-            type="password"
-            class="glass-input w-full"
-            :class="{ 'border-red-500': errors.newPassword }"
-            placeholder="Ingresa tu nueva contraseña"
-            required
-          />
-          <p v-if="errors.newPassword" class="text-red-500 text-xs mt-1">{{ errors.newPassword }}</p>
-        </div>
-        
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Confirmar nueva contraseña</label>
-          <input
-            v-model="passwordForm.confirmPassword"
-            type="password"
-            class="glass-input w-full"
-            :class="{ 'border-red-500': errors.confirmPassword }"
-            placeholder="Confirma tu nueva contraseña"
-            required
-          />
-          <p v-if="errors.confirmPassword" class="text-red-500 text-xs mt-1">{{ errors.confirmPassword }}</p>
-        </div>
-        
-        <button
-          type="submit"
-          :disabled="isChangingPassword"
-          class="glass-button w-full"
-          :class="{ 'opacity-50 cursor-not-allowed': isChangingPassword }"
+        <div class="green-line mb-3"></div>
+        <button 
+          @click="openPasswordChangeModal"
+          class="w-full relative overflow-hidden rounded-lg py-2.5 px-4 font-medium text-green-700 transition-all duration-300 hover:scale-105 active:scale-95"
+          style="background: linear-gradient(135deg, rgba(220, 252, 231, 0.8) 0%, rgba(187, 247, 208, 0.6) 100%); border: 2px solid #16a34a;"
         >
-          <svg v-if="isChangingPassword" class="animate-spin h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          {{ isChangingPassword ? 'Cambiando...' : 'Cambiar Contraseña' }}
+          <span class="absolute inset-0 rounded-lg" style="border: 2px solid #16a34a; animation: neon-glow 3s ease-in-out infinite;"></span>
+          <span class="relative flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            Cambiar Contraseña
+          </span>
         </button>
-      </form>
-    </div>
+      </div>
 
-    <!-- Modal de confirmación -->
+    <!-- Modal de cambio de contraseña -->
+    <teleport to="body">
+      <transition name="fade">
+        <!-- Overlay con difuminación -->
+        <div 
+          v-if="showPasswordChangeModal" 
+          class="fixed inset-0 bg-black/30 backdrop-blur-md z-40"
+          @click="closePasswordChangeModal"
+        ></div>
+      </transition>
+      
+      <transition name="fade">
+        <div v-if="showPasswordChangeModal" class="fixed inset-0 flex items-center justify-center p-3 pointer-events-none" style="z-index: 50;">
+          <div class="rounded-2xl max-w-xs w-full mx-3 max-h-[85vh] overflow-y-auto edit-modal pointer-events-auto border-2 border-green-400" style="background: linear-gradient(135deg, rgba(240, 253, 244, 0.95) 0%, rgba(220, 252, 231, 0.95) 100%); backdrop-filter: blur(10px);">
+            <div class="sticky top-0 rounded-t-2xl border-b-2 border-green-400 p-3" style="background: linear-gradient(135deg, rgba(240, 253, 244, 0.98) 0%, rgba(220, 252, 231, 0.98) 100%); backdrop-filter: blur(10px);">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold text-green-700 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Cambiar Contraseña
+                </h3>
+                <button @click="closePasswordChangeModal" class="w-7 h-7 rounded-full flex items-center justify-center transition-colors" style="background-color: rgba(134, 239, 172, 0.3); border: 1px solid rgba(52, 211, 153, 0.5);">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="p-3">
+              <!-- Paso 1: Verificación de contraseña actual -->
+              <div v-if="passwordChangeStep === 1">
+                <p class="text-xs text-gray-600 mb-3">Primero, verifica tu contraseña actual para continuar.</p>
+                <form @submit.prevent="verifyCurrentPassword" class="space-y-3">
+                  <div v-if="passwordErrors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 rounded-lg" role="alert">
+                    <p class="text-xs">{{ passwordErrors.general }}</p>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Contraseña Actual</label>
+                    <div class="relative">
+                      <input
+                        v-model="passwordChangeForm.currentPassword"
+                        :type="showCurrentPassword ? 'text' : 'password'"
+                        class="glass-input w-full pr-10"
+                        placeholder="Ingresa tu contraseña actual"
+                        required
+                      />
+                      <button
+                        type="button"
+                        @click="showCurrentPassword = !showCurrentPassword"
+                        class="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                      >
+                        <svg v-if="!showCurrentPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-2.391m5.005-2.905A9.005 9.005 0 0112 5c4.478 0 8.268 2.943 9.543 7a9.974 9.974 0 01-1.564 2.391m0 0A9.005 9.005 0 0112 19" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    :disabled="isVerifyingPassword"
+                    class="glass-button w-full"
+                    :class="{ 'opacity-50 cursor-not-allowed': isVerifyingPassword }"
+                  >
+                    {{ isVerifyingPassword ? 'Verificando...' : 'Verificar' }}
+                  </button>
+                </form>
+              </div>
+
+              <!-- Paso 2: Cambio de contraseña -->
+              <div v-if="passwordChangeStep === 2">
+                <p class="text-xs text-gray-600 mb-3">Ahora ingresa tu nueva contraseña dos veces.</p>
+                <form @submit.prevent="changePasswordNow" class="space-y-3">
+                  <div v-if="passwordErrors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 rounded-lg" role="alert">
+                    <p class="text-xs">{{ passwordErrors.general }}</p>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nueva Contraseña</label>
+                    <div class="relative">
+                      <input
+                        v-model="passwordChangeForm.newPassword"
+                        :type="showNewPassword ? 'text' : 'password'"
+                        class="glass-input w-full pr-10"
+                        :class="{ 'border-red-500': passwordErrors.newPassword }"
+                        placeholder="Ingresa tu nueva contraseña"
+                        required
+                      />
+                      <button
+                        type="button"
+                        @click="showNewPassword = !showNewPassword"
+                        class="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                      >
+                        <svg v-if="!showNewPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-2.391m5.005-2.905A9.005 9.005 0 0112 5c4.478 0 8.268 2.943 9.543 7a9.974 9.974 0 01-1.564 2.391m0 0A9.005 9.005 0 0112 19" />
+                        </svg>
+                      </button>
+                    </div>
+                    <p v-if="passwordErrors.newPassword" class="text-red-500 text-xs mt-1">{{ passwordErrors.newPassword }}</p>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+                    <div class="relative">
+                      <input
+                        v-model="passwordChangeForm.confirmPassword"
+                        :type="showConfirmPassword ? 'text' : 'password'"
+                        class="glass-input w-full pr-10"
+                        :class="{ 'border-red-500': passwordErrors.confirmPassword }"
+                        placeholder="Confirma tu nueva contraseña"
+                        required
+                      />
+                      <button
+                        type="button"
+                        @click="showConfirmPassword = !showConfirmPassword"
+                        class="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                      >
+                        <svg v-if="!showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-2.391m5.005-2.905A9.005 9.005 0 0112 5c4.478 0 8.268 2.943 9.543 7a9.974 9.974 0 01-1.564 2.391m0 0A9.005 9.005 0 0112 19" />
+                        </svg>
+                      </button>
+                    </div>
+                    <p v-if="passwordErrors.confirmPassword" class="text-red-500 text-xs mt-1">{{ passwordErrors.confirmPassword }}</p>
+                  </div>
+
+                  <div class="flex gap-2">
+                    <button
+                      type="button"
+                      @click="passwordChangeStep = 1"
+                      class="glass-button-secondary w-full"
+                    >
+                      Atrás
+                    </button>
+                    <button
+                      type="submit"
+                      :disabled="isChangingPassword"
+                      class="glass-button w-full"
+                      :class="{ 'opacity-50 cursor-not-allowed': isChangingPassword }"
+                    >
+                      {{ isChangingPassword ? 'Guardando...' : 'Guardar Cambios' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </teleport>
+
+    <!-- Modal antiguo: Modal de confirmación -->
     <transition name="fade">
       <div v-if="showSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3" style="z-index: 60;">
         <div class="glass-card max-w-xs w-full mx-3">
@@ -461,6 +595,20 @@ const errors = ref({})
 const isChangingPassword = ref(false)
 const showSuccessModal = ref(false)
 
+// Variables para cambio de contraseña en modal
+const showPasswordChangeModal = ref(false)
+const passwordChangeStep = ref(1)
+const passwordChangeForm = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+const passwordErrors = ref({})
+const isVerifyingPassword = ref(false)
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
+
 // Variables reactivas para edición de información personal
 const showEditModal = ref(false)
 const showEditSuccessModal = ref(false)
@@ -712,6 +860,158 @@ const changePassword = async () => {
     } else {
       // Algo ocurrió al configurar la solicitud
       errors.value.general = 'Error al cambiar la contraseña: ' + error.message
+    }
+  } finally {
+    isChangingPassword.value = false
+  }
+}
+
+// ==================== FUNCIONES PARA MODAL DE CAMBIO DE CONTRASEÑA ====================
+
+const openPasswordChangeModal = () => {
+  showPasswordChangeModal.value = true
+  passwordChangeStep.value = 1
+  passwordChangeForm.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  }
+  passwordErrors.value = {}
+  showCurrentPassword.value = false
+  showNewPassword.value = false
+  showConfirmPassword.value = false
+}
+
+const closePasswordChangeModal = () => {
+  showPasswordChangeModal.value = false
+  passwordChangeStep.value = 1
+  passwordChangeForm.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  }
+  passwordErrors.value = {}
+}
+
+const verifyCurrentPassword = async () => {
+  passwordErrors.value = {}
+  
+  if (!passwordChangeForm.value.currentPassword.trim()) {
+    passwordErrors.value.general = 'Ingresa tu contraseña actual'
+    return
+  }
+  
+  isVerifyingPassword.value = true
+  
+  try {
+    // Verificar conexión a internet
+    const online = await checkInternetConnection()
+    if (!online) {
+      passwordErrors.value.general = getOfflineMessage()
+      return
+    }
+    
+    // Verificar contraseña actual (endpoint simple para verificación)
+    const response = await axios.post(`${API_URL}/verificar_contrasena`, {
+      usuario_id: user.value.id,
+      contrasena: passwordChangeForm.value.currentPassword
+    }, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    if (response.status === 200 && response.data.success) {
+      // Contraseña verificada, pasar al paso 2
+      passwordChangeStep.value = 2
+    } else {
+      passwordErrors.value.general = 'Contraseña incorrecta'
+    }
+    
+  } catch (error) {
+    console.error('Error verificando contraseña:', error)
+    
+    if (error.response?.status === 401) {
+      passwordErrors.value.general = 'Contraseña incorrecta'
+    } else if (error.response?.status === 404) {
+      passwordErrors.value.general = 'Usuario no encontrado'
+    } else if (error.code === 'ERR_NETWORK' || !error.response) {
+      passwordErrors.value.general = 'No se pudo conectar con el servidor'
+    } else {
+      passwordErrors.value.general = 'Error al verificar la contraseña'
+    }
+  } finally {
+    isVerifyingPassword.value = false
+  }
+}
+
+const changePasswordNow = async () => {
+  passwordErrors.value = {}
+  
+  // Validaciones
+  if (!passwordChangeForm.value.newPassword.trim()) {
+    passwordErrors.value.newPassword = 'Ingresa una nueva contraseña'
+    return
+  }
+  
+  if (passwordChangeForm.value.newPassword.length < 6) {
+    passwordErrors.value.newPassword = 'La contraseña debe tener al menos 6 caracteres'
+    return
+  }
+  
+  if (!passwordChangeForm.value.confirmPassword.trim()) {
+    passwordErrors.value.confirmPassword = 'Confirma tu nueva contraseña'
+    return
+  }
+  
+  if (passwordChangeForm.value.newPassword !== passwordChangeForm.value.confirmPassword) {
+    passwordErrors.value.confirmPassword = 'Las contraseñas no coinciden'
+    return
+  }
+  
+  isChangingPassword.value = true
+  
+  try {
+    // Verificar conexión a internet
+    const online = await checkInternetConnection()
+    if (!online) {
+      passwordErrors.value.general = getOfflineMessage()
+      return
+    }
+    
+    // Cambiar contraseña
+    const response = await axios.post(`${API_URL}/cambiar_contrasena`, {
+      usuario_id: user.value.id,
+      nueva_contrasena: passwordChangeForm.value.newPassword
+    }, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    if (response.status === 200 && response.data.success) {
+      // Éxito
+      closePasswordChangeModal()
+      showSuccessModal.value = true
+      
+      // Limpiar formulario antiguo
+      passwordForm.value = {
+        newPassword: '',
+        confirmPassword: ''
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error)
+    
+    if (error.response?.status === 400) {
+      passwordErrors.value.general = error.response.data?.detail || 'Error al cambiar la contraseña'
+    } else if (error.code === 'ERR_NETWORK' || !error.response) {
+      passwordErrors.value.general = 'No se pudo conectar con el servidor'
+    } else {
+      passwordErrors.value.general = 'Error al cambiar la contraseña'
     }
   } finally {
     isChangingPassword.value = false
@@ -1083,6 +1383,46 @@ const validatePhoneEdit = () => {
   box-shadow: 
     0 4px 15px 0 rgba(76, 175, 80, 0.3),
     inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button-secondary {
+  padding: 0.625rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(156, 163, 175, 0.5);
+  background: linear-gradient(135deg, 
+    rgba(229, 231, 235, 0.8) 0%, 
+    rgba(209, 213, 219, 0.8) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 3px 15px 0 rgba(156, 163, 175, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-button-secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px 0 rgba(156, 163, 175, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(243, 244, 246, 0.9) 0%, 
+    rgba(229, 231, 235, 0.9) 100%);
+}
+
+.glass-button-secondary:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 
+    0 4px 15px 0 rgba(156, 163, 175, 0.2),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
 .glass-button::before {
@@ -1778,6 +2118,25 @@ const validatePhoneEdit = () => {
 
 .info-item-enhanced:hover .value-info {
   transform: translateX(2px);
+}
+
+/* Animación de borde neon giratorio */
+@keyframes neon-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(22, 163, 74, 0.5), inset 0 0 5px rgba(22, 163, 74, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(22, 163, 74, 0.9), inset 0 0 15px rgba(22, 163, 74, 0.4), 0 0 30px rgba(22, 163, 74, 0.6);
+  }
+}
+
+@keyframes spin-border {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Fallback para navegadores que no soportan background-clip */

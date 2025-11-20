@@ -522,6 +522,48 @@ async def login(usuario: UserLogin):
         "cargo": user[3]
     }
 
+# ==================== ENDPOINT PARA VERIFICAR CONTRASEÑA ====================
+
+@app.post("/verificar_contrasena")
+async def verificar_contrasena(datos: dict):
+    """Verifica si la contraseña actual es correcta"""
+    try:
+        usuario_id = datos.get('usuario_id')
+        contrasena = datos.get('contrasena')
+        
+        if not usuario_id or not contrasena:
+            raise HTTPException(status_code=400, detail="usuario_id y contrasena son obligatorios")
+        
+        # Verificar que el usuario existe y obtener su contraseña
+        cursor.execute("SELECT id, contrasena FROM usuarios WHERE id = %s", (usuario_id,))
+        usuario = cursor.fetchone()
+        
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Comparar contraseña (sin encriptación, verificar si está encriptada primero)
+        contrasena_almacenada = usuario[1]
+        
+        # Intentar comparar directamente primero (por si no está encriptada)
+        if contrasena == contrasena_almacenada:
+            return {"success": True, "message": "Contraseña verificada"}
+        
+        # Si no coincide, intentar con bcrypt (por si está encriptada)
+        try:
+            if bcrypt.checkpw(contrasena.encode('utf-8'), contrasena_almacenada.encode('utf-8')):
+                return {"success": True, "message": "Contraseña verificada"}
+        except Exception:
+            pass
+        
+        # Contraseña incorrecta
+        raise HTTPException(status_code=401, detail="Contraseña incorrecta")
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error al verificar contraseña: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al verificar contraseña: {str(e)}")
+
 @app.post("/cambiar_contrasena")
 async def cambiar_contrasena(datos: PasswordChange):
     try:

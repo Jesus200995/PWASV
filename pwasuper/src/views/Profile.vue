@@ -24,11 +24,13 @@
 
       <!-- Información del usuario -->
       <div class="glass-card mb-2">
-        <div class="flex justify-between items-center mb-2">
+        <div class="flex justify-between items-center mb-3">
           <h2 class="text-sm font-semibold text-gray-800 modern-title flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 mr-2 text-white flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </span>
             Información Personal
           </h2>
           <button @click="openEditModal" class="glass-edit-button">
@@ -37,42 +39,113 @@
             </svg>
           </button>
         </div>
-        <div class="green-line mb-2"></div>
+        <div class="green-line mb-3"></div>
         
-        <div class="space-y-2">
-          <div class="glass-info-row flex justify-between items-center py-1">
-            <span class="text-xs font-medium text-gray-600">Nombre completo:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.nombre_completo || 'No disponible' }}</span>
+        <div class="space-y-2.5">
+          <!-- Nombre Completo -->
+          <div class="info-item-enhanced">
+            <div class="flex items-center gap-2">
+              <span class="icon-badge icon-user">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                </svg>
+              </span>
+              <div class="flex-1">
+                <p class="label-info">Nombre completo</p>
+                <p class="value-info value-name">{{ user.nombre_completo || 'No disponible' }}</p>
+              </div>
+            </div>
           </div>
           
-          <div class="glass-info-row flex justify-between items-center py-1">
-            <span class="text-xs font-medium text-gray-600">Email:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.correo || user.email || 'No disponible' }}</span>
+          <!-- Email -->
+          <div class="info-item-enhanced">
+            <div class="flex items-center gap-2">
+              <span class="icon-badge icon-email">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+              </span>
+              <div class="flex-1">
+                <p class="label-info">Correo electrónico</p>
+                <p class="value-info value-email">{{ user.correo || user.email || 'No disponible' }}</p>
+              </div>
+            </div>
           </div>
           
-          <div class="glass-info-row flex justify-between items-center py-1">
-            <span class="text-xs font-medium text-gray-600">Cargo:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ user.cargo || 'No disponible' }}</span>
+          <!-- Cargo -->
+          <div class="info-item-enhanced">
+            <div class="flex items-center gap-2">
+              <span class="icon-badge icon-position">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </span>
+              <div class="flex-1">
+                <p class="label-info">Puesto</p>
+                <p class="value-info value-position">{{ user.cargo || 'No disponible' }}</p>
+              </div>
+            </div>
           </div>
           
-          <div class="glass-info-row flex justify-between items-center py-1">
-            <span class="text-xs font-medium text-gray-600">Supervisor:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ (user.supervisor && user.supervisor.trim()) || 'No asignado' }}</span>
+          <!-- Supervisor -->
+          <div class="info-item-enhanced">
+            <div class="flex items-center gap-2">
+              <span class="icon-badge icon-supervisor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8-8c1.66 0 3-1.34 3-3S9.66 0 8 0 5 1.34 5 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.89 1.97 1.5 1.97 2.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                </svg>
+              </span>
+              <div class="flex-1">
+                <p class="label-info">Supervisor</p>
+                <p class="value-info value-supervisor">{{ (user.supervisor && user.supervisor.trim()) || 'No asignado' }}</p>
+              </div>
+            </div>
           </div>
           
-          <div class="glass-info-row flex justify-between items-center py-1">
-            <span class="text-xs font-medium text-gray-600">CURP:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ (user.curp && user.curp.trim()) || 'No registrado' }}</span>
+          <!-- CURP -->
+          <div class="info-item-enhanced">
+            <div class="flex items-center gap-2">
+              <span class="icon-badge icon-curp">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 18H5v-2h9v2zm5-4H5V4h14v12z"/>
+                  <path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
+                </svg>
+              </span>
+              <div class="flex-1">
+                <p class="label-info">CURP</p>
+                <p class="value-info value-curp font-mono">{{ (user.curp && user.curp.trim()) || 'No registrado' }}</p>
+              </div>
+            </div>
           </div>
           
-          <div class="glass-info-row flex justify-between items-center py-1">
-            <span class="text-xs font-medium text-gray-600">Teléfono:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ (user.telefono && user.telefono.trim()) || 'No registrado' }}</span>
+          <!-- Teléfono -->
+          <div class="info-item-enhanced">
+            <div class="flex items-center gap-2">
+              <span class="icon-badge icon-phone">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.95 21c-1.05 0-2.08-.4-2.95-1.15C15.38 18.85 13.47 17 11.56 15.08 9.64 13.16 7.75 11.25 5.15 8.95 4.4 8.08 4 6.95 4 5.9c0-.95.4-1.95 1.15-2.95 1.2-1.55 2.35-1.95 3.2-1.95.55 0 1.15.15 1.55.55l2.35 2.35c.4.4.6.95.6 1.55 0 .55-.2 1.05-.55 1.5l-1 1c-.15.15-.25.35-.25.55v.1c.3.65.75 1.4 1.35 2.15.6.75 1.35 1.4 2.15 1.85.15.1.35.15.55.15h.1l1 -1c.45-.35.95-.55 1.5-.55.6 0 1.15.2 1.55.6l2.35 2.35c.4.4.55 1 .55 1.55 0 .85-.4 2-1.95 3.2C22.1 20.6 21.1 21 20.05 21z"/>
+                </svg>
+              </span>
+              <div class="flex-1">
+                <p class="label-info">Teléfono</p>
+                <p class="value-info value-phone">{{ (user.telefono && user.telefono.trim()) || 'No registrado' }}</p>
+              </div>
+            </div>
           </div>
           
-          <div v-if="user.fecha_registro" class="glass-info-row flex justify-between items-center py-1">
-            <span class="text-xs font-medium text-gray-600">Fecha de registro:</span>
-            <span class="text-xs text-gray-800 font-semibold">{{ formatDate(user.fecha_registro) }}</span>
+          <!-- Fecha de registro -->
+          <div v-if="user.fecha_registro" class="info-item-enhanced">
+            <div class="flex items-center gap-2">
+              <span class="icon-badge icon-date">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                </svg>
+              </span>
+              <div class="flex-1">
+                <p class="label-info">Fecha de registro</p>
+                <p class="value-info value-date">{{ formatDate(user.fecha_registro) }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1464,5 +1537,225 @@ const validatePhoneEdit = () => {
 
 .glass-edit-button:active {
   transform: scale(0.95);
+}
+
+/* Estilos mejorados para la información del usuario */
+.info-item-enhanced {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.info-item-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.info-item-enhanced:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(76, 175, 80, 0.2);
+  box-shadow: 
+    0 4px 15px rgba(76, 175, 80, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.info-item-enhanced:hover::before {
+  opacity: 1;
+}
+
+/* Estilos para iconos de insignia */
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: currentColor;
+}
+
+.icon-user {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(147, 197, 253, 0.2));
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #3b82f6;
+}
+
+.icon-email {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(196, 181, 253, 0.2));
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #8b5cf6;
+}
+
+.icon-position {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(187, 247, 208, 0.2));
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.icon-supervisor {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(244, 194, 213, 0.2));
+  border-color: rgba(236, 72, 153, 0.4);
+  color: #ec4899;
+}
+
+.icon-curp {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(254, 215, 170, 0.2));
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #f97316;
+}
+
+.icon-phone {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(186, 230, 253, 0.2));
+  border-color: rgba(14, 165, 233, 0.4);
+  color: #0ea5e9;
+}
+
+.icon-date {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(233, 213, 255, 0.2));
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #a855f7;
+}
+
+.info-item-enhanced:hover .icon-badge {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para labels e información */
+.label-info {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  margin: 0;
+  transition: color 0.3s ease;
+  line-height: 1;
+}
+
+.info-item-enhanced:hover .label-info {
+  color: #6b7280;
+}
+
+/* Estilos para valores de información - diferenciados por tipo */
+.value-info {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0.125rem 0 0 0;
+  transition: all 0.3s ease;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+.value-name {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.value-email {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}
+
+.value-position {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.value-supervisor {
+  background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}
+
+.value-curp {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.value-phone {
+  background: linear-gradient(135deg, #0369a1 0%, #0c4a6e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}
+
+.value-date {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}
+
+.info-item-enhanced:hover .value-info {
+  transform: translateX(2px);
+}
+
+/* Fallback para navegadores que no soportan background-clip */
+@supports not (-webkit-background-clip: text) {
+  .value-name {
+    color: #1f2937;
+  }
+  
+  .value-email {
+    color: #7c3aed;
+  }
+  
+  .value-position {
+    color: #059669;
+  }
+  
+  .value-supervisor {
+    color: #db2777;
+  }
+  
+  .value-curp {
+    color: #ea580c;
+  }
+  
+  .value-phone {
+    color: #0369a1;
+  }
+  
+  .value-date {
+    color: #8b5cf6;
+  }
 }
 </style>

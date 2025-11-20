@@ -3302,7 +3302,7 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Estilos para títulos de entrada y salida con franja de fondo */
 .entrada-title {
-  color: rgb(0, 100, 255);
+  color: white;
   font-family: 'Poppins', 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: -0.01em;
   font-weight: 700;
@@ -3311,18 +3311,18 @@ watch([entradaMarcada, salidaMarcada], () => {
   margin: -0.5rem -1rem 0.25rem -1rem;
   background: linear-gradient(
     90deg, 
-    rgba(0, 100, 255, 0.4) 0%,
-    rgba(0, 100, 255, 0.6) 50%,
-    rgba(0, 100, 255, 0.4) 100%
+    rgba(15, 55, 140, 0.9) 0%,
+    rgba(15, 55, 140, 1) 50%,
+    rgba(15, 55, 140, 0.9) 100%
   );
-  border-left: 2px solid rgba(0, 100, 255, 1);
-  border-right: 2px solid rgba(0, 100, 255, 1);
+  border-left: 3px solid rgba(10, 40, 120, 1);
+  border-right: 3px solid rgba(10, 40, 120, 1);
   border-radius: 0 6px 6px 0;
-  box-shadow: 0 3px 12px rgba(0, 100, 255, 0.25);
+  box-shadow: 0 4px 16px rgba(15, 55, 140, 0.5);
 }
 
 .salida-title {
-  color: rgb(255, 0, 40);
+  color: white;
   font-family: 'Poppins', 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: -0.01em;
   font-weight: 700;
@@ -3331,14 +3331,14 @@ watch([entradaMarcada, salidaMarcada], () => {
   margin: -0.5rem -1rem 0.25rem -1rem;
   background: linear-gradient(
     90deg, 
-    rgba(255, 0, 40, 0.4) 0%,
-    rgba(255, 0, 40, 0.6) 50%,
-    rgba(255, 0, 40, 0.4) 100%
+    rgba(155, 25, 45, 0.9) 0%,
+    rgba(155, 25, 45, 1) 50%,
+    rgba(155, 25, 45, 0.9) 100%
   );
-  border-left: 2px solid rgba(255, 0, 40, 1);
-  border-right: 2px solid rgba(255, 0, 40, 1);
+  border-left: 3px solid rgba(120, 15, 35, 1);
+  border-right: 3px solid rgba(120, 15, 35, 1);
   border-radius: 0 6px 6px 0;
-  box-shadow: 0 3px 12px rgba(255, 0, 40, 0.25);
+  box-shadow: 0 4px 16px rgba(155, 25, 45, 0.5);
 }
 
 .purple-title {

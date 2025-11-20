@@ -285,28 +285,21 @@
         <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
         <div v-if="modoAsistencia" class="mt-6 border-t border-gray-200 pt-6">
           <div class="text-center mb-4">
-            <h2 class="text-lg font-bold text-gray-800 mb-2"
+            <h2 class="text-sm font-bold text-gray-800 mb-2 title-case"
                 :class="tipoAsistencia === 'entrada' ? 'entrada-title' : 'salida-title'">
               {{ tipoAsistencia === 'entrada' ? 'ENTRADA' : 'SALIDA' }}
             </h2>
-            <p class="text-xs text-gray-500">Completa todos los datos requeridos</p>
           </div>
           
           <!-- Info del usuario -->
           <div class="bg-primary/10 rounded-lg p-2 mb-6">
             <div class="flex items-center">
-              <div class="relative w-8 h-8 bg-gradient-to-br from-green-700 via-green-800 to-green-900 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-2">
-                <!-- Efecto vidrio en círculo de iniciales -->
-                <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
-                
-                <!-- Reflejo superior del círculo -->
-                <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-full"></div>
-                
-                <!-- Iniciales con efecto mejorado -->
-                <span class="text-white text-xs font-bold drop-shadow-lg filter brightness-110 relative z-10">{{ getUserInitials }}</span>
+              <div class="relative w-8 h-8 rounded-full border-2 border-green-600 flex items-center justify-center mr-2">
+                <!-- Iniciales -->
+                <span class="text-green-600 text-xs font-semibold">{{ getUserInitials }}</span>
               </div>
               <div>
-                <p class="font-medium text-primary text-sm">{{ user.nombre_completo }}</p>
+                <p class="font-medium text-primary text-xs">{{ user.nombre_completo }}</p>
                 <p class="text-xs text-gray-500">{{ user.cargo }}</p>
               </div>
             </div>
@@ -562,34 +555,23 @@
       </div>
 
       <div class="text-center mb-3">
-        <h2 class="text-lg font-bold text-gray-800 mb-1 modern-title"
+        <h2 class="text-sm font-bold text-gray-800 mb-1 title-case"
             :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }">
-          Registra tus actividades
+          REGISTRA TUS ACTIVIDADES
         </h2>
         <!-- Línea tipo marcatextos -->
         <div class="green-line mx-auto mb-1" :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"></div>
-        <p class="text-xs text-gray-500" :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }">
-          <span v-if="entradaMarcada && !salidaMarcada">Captura tu ubicación actual para el registro</span>
-          <span v-else-if="!entradaMarcada">Marca tu entrada primero</span>
-          <span v-else>Registro de actividades finalizado</span>
-        </p>
       </div>
       
       <!-- Info del usuario -->
       <div class="bg-primary/10 rounded-lg p-2 mb-6">
         <div class="flex items-center">
-          <div class="relative w-8 h-8 bg-gradient-to-br from-green-700 via-green-800 to-green-900 rounded-full shadow-xl backdrop-blur-xl border border-white/25 overflow-hidden flex items-center justify-center mr-2">
-            <!-- Efecto vidrio en círculo de iniciales -->
-            <div class="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none rounded-full"></div>
-            
-            <!-- Reflejo superior del círculo -->
-            <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-full"></div>
-            
-            <!-- Iniciales con efecto mejorado -->
-            <span class="text-white text-xs font-bold drop-shadow-lg filter brightness-110 relative z-10">{{ getUserInitials }}</span>
+          <div class="relative w-8 h-8 rounded-full border-2 border-green-600 flex items-center justify-center mr-2">
+            <!-- Iniciales -->
+            <span class="text-green-600 text-xs font-semibold">{{ getUserInitials }}</span>
           </div>
           <div>
-            <p class="font-medium text-primary text-sm">{{ user.nombre_completo }}</p>
+            <p class="font-medium text-primary text-xs">{{ user.nombre_completo }}</p>
             <p class="text-xs text-gray-500">{{ user.cargo }}</p>
           </div>
         </div>
@@ -3320,45 +3302,43 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Estilos para títulos de entrada y salida con franja de fondo */
 .entrada-title {
-  color: rgb(30, 144, 255);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: rgb(0, 100, 255);
+  font-family: 'Poppins', 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: -0.01em;
   font-weight: 700;
   position: relative;
-  padding: 0.75rem 1.5rem;
-  margin: -0.75rem -1.25rem 0.5rem -1.25rem;
+  padding: 0.5rem 1rem;
+  margin: -0.5rem -1rem 0.25rem -1rem;
   background: linear-gradient(
-    135deg, 
-    rgba(30, 144, 255, 0.15) 0%,    /* Azul dodgerblue suave en bordes */
-    rgba(30, 144, 255, 0.10) 25%,   /* Azul dodgerblue muy suave */
-    rgba(30, 144, 255, 0.08) 50%,   /* Azul dodgerblue suave en el centro */
-    rgba(30, 144, 255, 0.10) 75%,   /* Azul dodgerblue muy suave */
-    rgba(30, 144, 255, 0.15) 100%   /* Azul dodgerblue suave en bordes */
+    90deg, 
+    rgba(0, 100, 255, 0.4) 0%,
+    rgba(0, 100, 255, 0.6) 50%,
+    rgba(0, 100, 255, 0.4) 100%
   );
-  border-left: 4px solid rgba(30, 144, 255, 0.6);
-  border-radius: 0 8px 8px 0;
-  box-shadow: 0 2px 8px rgba(30, 144, 255, 0.1);
+  border-left: 2px solid rgba(0, 100, 255, 1);
+  border-right: 2px solid rgba(0, 100, 255, 1);
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 3px 12px rgba(0, 100, 255, 0.25);
 }
 
 .salida-title {
-  color: rgb(220, 20, 60);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: rgb(255, 0, 40);
+  font-family: 'Poppins', 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: -0.01em;
   font-weight: 700;
   position: relative;
-  padding: 0.75rem 1.5rem;
-  margin: -0.75rem -1.25rem 0.5rem -1.25rem;
+  padding: 0.5rem 1rem;
+  margin: -0.5rem -1rem 0.25rem -1rem;
   background: linear-gradient(
-    135deg, 
-    rgba(220, 20, 60, 0.15) 0%,    /* Crimson fuerte suave en bordes */
-    rgba(220, 20, 60, 0.10) 25%,   /* Crimson medio muy suave */
-    rgba(220, 20, 60, 0.08) 50%,   /* Crimson suave en el centro */
-    rgba(220, 20, 60, 0.10) 75%,   /* Crimson medio muy suave */
-    rgba(220, 20, 60, 0.15) 100%   /* Crimson fuerte suave en bordes */
+    90deg, 
+    rgba(255, 0, 40, 0.4) 0%,
+    rgba(255, 0, 40, 0.6) 50%,
+    rgba(255, 0, 40, 0.4) 100%
   );
-  border-left: 4px solid rgba(220, 20, 60, 0.6);
-  border-radius: 0 8px 8px 0;
-  box-shadow: 0 2px 8px rgba(220, 20, 60, 0.1);
+  border-left: 2px solid rgba(255, 0, 40, 1);
+  border-right: 2px solid rgba(255, 0, 40, 1);
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 3px 12px rgba(255, 0, 40, 0.25);
 }
 
 .modern-title {
@@ -3383,9 +3363,9 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 .green-line {
   width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, #16a34a, #22c55e, #16a34a);
-  border-radius: 1px;
+  height: 1px;
+  background: linear-gradient(90deg, #15803d, #16a34a, #15803d);
+  border-radius: 0.5px;
   animation: line-glow 2s ease-in-out infinite alternate;
 }
 

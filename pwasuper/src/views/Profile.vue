@@ -1125,19 +1125,7 @@ const validatePhoneEdit = () => {
 }
 
 .modern-title {
-  background: linear-gradient(
-    90deg, 
-    #166534 0%, 
-    #15803d 25%, 
-    #86efac 50%, 
-    #15803d 75%, 
-    #166534 100%
-  );
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradient-wave 3s ease-in-out infinite;
+  color: #16a34a;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   letter-spacing: -0.015em;
   font-weight: 500;

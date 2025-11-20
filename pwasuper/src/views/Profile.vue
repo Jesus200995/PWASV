@@ -41,7 +41,7 @@
         </div>
         <div class="green-line mb-3"></div>
         
-        <div class="space-y-2.5">
+        <div class="space-y-1.5">
           <!-- Nombre Completo -->
           <div class="info-item-enhanced">
             <div class="flex items-center gap-2">
@@ -51,7 +51,7 @@
                 </svg>
               </span>
               <div class="flex-1">
-                <p class="label-info">Nombre completo</p>
+                <p class="label-info">Nombre Completo</p>
                 <p class="value-info value-name">{{ user.nombre_completo || 'No disponible' }}</p>
               </div>
             </div>
@@ -66,7 +66,7 @@
                 </svg>
               </span>
               <div class="flex-1">
-                <p class="label-info">Correo electrónico</p>
+                <p class="label-info">Correo Electrónico</p>
                 <p class="value-info value-email">{{ user.correo || user.email || 'No disponible' }}</p>
               </div>
             </div>
@@ -1597,7 +1597,7 @@ const validatePhoneEdit = () => {
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
-  padding: 0.75rem;
+  padding: 0.5rem 0.625rem;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
@@ -1694,9 +1694,9 @@ const validatePhoneEdit = () => {
 /* Estilos para labels e información */
 .label-info {
   font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
   color: #9ca3af;
   margin: 0;
   transition: color 0.3s ease;
@@ -1709,13 +1709,13 @@ const validatePhoneEdit = () => {
 
 /* Estilos para valores de información - diferenciados por tipo */
 .value-info {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #1f2937;
-  margin: 0.125rem 0 0 0;
+  margin: 0.25rem 0 0 0;
   transition: all 0.3s ease;
   word-break: break-word;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .value-name {
@@ -1723,7 +1723,8 @@ const validatePhoneEdit = () => {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-weight: 700;
+  font-weight: 500;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .value-email {

@@ -12,10 +12,8 @@
       <!-- Header del perfil -->
       <div class="glass-card mb-2">
         <div class="text-center mb-3">
-          <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-2 glass-avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+          <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2 glass-avatar-outline border-2 border-green-500">
+            <span class="text-2xl font-bold text-green-600">{{ getUserInitials() }}</span>
           </div>
           <h1 class="text-base font-bold text-gray-800 modern-title">{{ user.nombre_completo }}</h1>
           <div class="green-line mx-auto mb-2"></div>
@@ -419,6 +417,19 @@ const filteredCountries = computed(() => {
     pais.codigo.includes(searchTerm)
   )
 })
+
+// Función para obtener las iniciales del usuario
+const getUserInitials = () => {
+  if (!user.value.nombre_completo) return 'U'
+  
+  const nombres = user.value.nombre_completo.trim().split(' ')
+  const iniciales = nombres
+    .map(nombre => nombre.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('')
+  
+  return iniciales || 'U'
+}
 
 onMounted(() => {
   const storedUser = localStorage.getItem('user')
@@ -965,6 +976,51 @@ const validatePhoneEdit = () => {
   box-shadow: 
     0 8px 32px 0 rgba(76, 175, 80, 0.3),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-avatar-outline {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 
+    0 8px 32px 0 rgba(76, 175, 80, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-avatar-outline::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: rotate(0deg) translate(-100%, -100%);
+  }
+  100% {
+    transform: rotate(360deg) translate(-100%, -100%);
+  }
+}
+
+.glass-avatar-outline:hover {
+  border-color: rgba(76, 175, 80, 0.6);
+  box-shadow: 
+    0 8px 32px 0 rgba(76, 175, 80, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(76, 175, 80, 0.3);
 }
 
 .glass-success-icon {

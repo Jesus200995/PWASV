@@ -59,45 +59,61 @@ self.addEventListener('activate', (event) => {
 
 // Evento de fetch (intercepta todas las solicitudes de red)
 self.addEventListener('fetch', (event) => {
-  // Solo manejar solicitudes GET
-  if (event.request.method !== 'GET') return;
+  // Ignorar solicitudes del chrome-extension y data:
+  if (event.request.url.startsWith('chrome-extension://') || 
+      event.request.url.startsWith('data:')) {
+    return;
+  }
   
-  // Ignorar solicitudes del chrome-extension
-  if (event.request.url.startsWith('chrome-extension://')) return;
-  
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Si está en cache, devolverlo
-        if (response) {
-          return response;
-        }
-        
-        // Si no está en cache, intentar descargarlo
-        return fetch(event.request).then((response) => {
-          // Verificar que la respuesta sea válida
-          if (!response || response.status !== 200 || response.type !== 'basic') {
+  // Para peticiones GET, usar estrategia de cache-first
+  if (event.request.method === 'GET') {
+    event.respondWith(
+      caches.match(event.request)
+        .then((response) => {
+          // Si está en cache, devolverlo
+          if (response) {
             return response;
           }
           
-          // Clonar la respuesta (solo se puede usar una vez)
-          const responseToCache = response.clone();
-          
-          // Agregar al cache
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          
-          return response;
-        }).catch(() => {
-          // Si falla la descarga, mostrar página offline para navegación
-          if (event.request.mode === 'navigate') {
-            return caches.match(OFFLINE_URL);
-          }
-        });
+          // Si no está en cache, intentar descargarlo
+          return fetch(event.request).then((response) => {
+            // Verificar que la respuesta sea válida
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            // Clonar la respuesta (solo se puede usar una vez)
+            const responseToCache = response.clone();
+            
+            // Agregar al cache
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            
+            return response;
+          }).catch(() => {
+            // Si falla la descarga, mostrar página offline para navegación
+            if (event.request.mode === 'navigate') {
+              return caches.match(OFFLINE_URL);
+            }
+          });
+        })
+    );
+  } else {
+    // Para otras peticiones (POST, PATCH, DELETE, PUT, etc.), permitir que pasen directamente
+    // sin intervención del SW. Esto permite que los endpoints de API funcionen correctamente
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // Si falla la conexión, mostrar página offline para navegación
+        if (event.request.mode === 'navigate') {
+          return caches.match(OFFLINE_URL);
+        }
+        // Para otros tipos de petición, rechazar
+        return Promise.reject(new Error('No hay conexión de red'));
       })
-  );
+    );
+  }
 });
 
 // Evento de sincronización en segundo plano

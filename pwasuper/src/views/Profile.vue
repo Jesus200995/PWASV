@@ -848,6 +848,7 @@ const updateUserInfo = async () => {
     const online = await checkInternetConnection()
     if (!online) {
       editErrors.value.general = getOfflineMessage()
+      isUpdatingUser.value = false
       return
     }
     
@@ -857,76 +858,93 @@ const updateUserInfo = async () => {
     const telefonoCompleto = editForm.value.telefonoDigitos ? 
       `${editForm.value.codigoPais}${editForm.value.telefonoDigitos.trim()}` : null
     
-    const response = await axios.patch(`${API_URL}/usuarios/${storedUser.id}/info`, {
-      nombre_completo: editForm.value.nombre_completo.trim(),
-      correo: editForm.value.correo.trim(),
-      cargo: editForm.value.cargo.trim(),
-      supervisor: editForm.value.supervisor?.trim() || null,
-      curp: editForm.value.curp?.trim() || null,
-      telefono: telefonoCompleto
-    }, {
-      timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json'
+    try {
+      console.log('📡 Enviando solicitud PATCH a:', `${API_URL}/usuarios/${storedUser.id}/info`)
+      
+      const response = await axios.patch(
+        `${API_URL}/usuarios/${storedUser.id}/info`,
+        {
+          nombre_completo: editForm.value.nombre_completo.trim(),
+          correo: editForm.value.correo.trim(),
+          cargo: editForm.value.cargo.trim(),
+          supervisor: editForm.value.supervisor?.trim() || null,
+          curp: editForm.value.curp?.trim() || null,
+          telefono: telefonoCompleto
+        },
+        {
+          timeout: 15000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      
+      console.log('✅ Respuesta del servidor:', response.data)
+      
+      if (response.status === 200 && response.data.success) {
+        // Actualizar los datos del usuario en el estado local
+        user.value = {
+          ...user.value,
+          nombre_completo: editForm.value.nombre_completo,
+          correo: editForm.value.correo,
+          cargo: editForm.value.cargo,
+          supervisor: editForm.value.supervisor,
+          curp: editForm.value.curp,
+          telefono: telefonoCompleto
+        }
+        
+        // Actualizar localStorage
+        const updatedUser = { 
+          ...storedUser, 
+          nombre_completo: editForm.value.nombre_completo,
+          correo: editForm.value.correo,
+          cargo: editForm.value.cargo,
+          supervisor: editForm.value.supervisor,
+          curp: editForm.value.curp,
+          telefono: telefonoCompleto
+        }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+        
+        // Cerrar modal de edición
+        closeEditModal()
+        
+        // Mostrar modal de éxito
+        showEditSuccessModal.value = true
+        
+        // Recargar datos del usuario para asegurar sincronización
+        setTimeout(() => {
+          loadUserData()
+        }, 1000)
       }
-    })
-    
-    console.log('Respuesta del servidor:', response.data)
-    
-    if (response.status === 200 && response.data.success) {
-      // Construir teléfono completo para guardar
-      const telefonoCompleto = editForm.value.telefonoDigitos ? 
-        `${editForm.value.codigoPais}${editForm.value.telefonoDigitos.trim()}` : null
+    } catch (error) {
+      console.error('❌ Error completo:', error)
+      console.error('Estado:', error.response?.status)
+      console.error('Datos de error:', error.response?.data)
+      console.error('Código de error:', error.code)
       
-      // Actualizar los datos del usuario en el estado local
-      user.value = {
-        ...user.value,
-        nombre_completo: editForm.value.nombre_completo,
-        correo: editForm.value.correo,
-        cargo: editForm.value.cargo,
-        supervisor: editForm.value.supervisor,
-        curp: editForm.value.curp,
-        telefono: telefonoCompleto
+      if (error.response?.status === 400) {
+        // Error de validación
+        const detail = error.response.data?.detail || 'Error de validación'
+        editErrors.value.general = detail
+      } else if (error.response?.status === 404) {
+        editErrors.value.general = 'Usuario no encontrado en el servidor'
+      } else if (error.response?.status === 500) {
+        editErrors.value.general = 'Error interno del servidor. Por favor intenta más tarde'
+      } else if (error.code === 'ECONNABORTED') {
+        editErrors.value.general = 'La solicitud tardó demasiado tiempo. Verifica tu conexión'
+      } else if (error.code === 'ERR_NETWORK' || !error.response) {
+        editErrors.value.general = 'No se pudo conectar con el servidor. Verifica tu conexión a internet'
+      } else {
+        editErrors.value.general = error.response?.data?.message || 
+                                  error.response?.data?.detail ||
+                                  'Error desconocido al actualizar la información'
       }
-      
-      // Actualizar localStorage
-      const updatedUser = { 
-        ...storedUser, 
-        nombre_completo: editForm.value.nombre_completo,
-        correo: editForm.value.correo,
-        cargo: editForm.value.cargo,
-        supervisor: editForm.value.supervisor,
-        curp: editForm.value.curp,
-        telefono: telefonoCompleto
-      }
-      localStorage.setItem('user', JSON.stringify(updatedUser))
-      
-      // Cerrar modal de edición
-      closeEditModal()
-      
-      // Mostrar modal de éxito
-      showEditSuccessModal.value = true
-      
-      // Recargar datos del usuario para asegurar sincronización
-      setTimeout(() => {
-        loadUserData()
-      }, 1000)
+    } finally {
+      isUpdatingUser.value = false
     }
-    
   } catch (error) {
-    console.error('Error al actualizar información:', error)
-    
-    if (error.response) {
-      const errorMsg = error.response.data?.detail || 
-                      error.response.data?.message || 
-                      'Error al actualizar la información'
-      editErrors.value.general = errorMsg
-    } else if (error.request) {
-      editErrors.value.general = 'No se pudo conectar con el servidor. Verifica tu conexión.'
-    } else {
-      editErrors.value.general = 'Error al actualizar la información: ' + error.message
-    }
-  } finally {
+    console.error('❌ Error general en actualización de usuario:', error)
+    editErrors.value.general = 'Error inesperado al actualizar la información'
     isUpdatingUser.value = false
   }
 }

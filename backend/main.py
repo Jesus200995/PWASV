@@ -24,7 +24,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3003", "http://127.0.0.1:3003", "*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -484,6 +484,23 @@ async def crear_usuario(usuario: UserCreate):
         conn.rollback()
         print(f"❌ Error completo: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error al crear usuario: {str(e)}")
+
+# ==================== ENDPOINTS DE HEALTH CHECK ====================
+
+@app.get("/health")
+async def health_check():
+    """Endpoint para verificar la salud del servidor"""
+    try:
+        if not verificar_conexion_db():
+            return {"status": "warning", "message": "Servidor en línea pero sin conexión a base de datos"}
+        return {"status": "ok", "message": "Servidor en línea y conectado a base de datos"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.options("/{path:path}")
+async def preflight(path: str):
+    """Manejar solicitudes CORS preflight"""
+    return {"message": "OK"}
 
 @app.post("/login")
 async def login(usuario: UserLogin):

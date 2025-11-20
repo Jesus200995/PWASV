@@ -566,7 +566,7 @@ async def verificar_contrasena(datos: dict):
 
 @app.post("/cambiar_contrasena")
 async def cambiar_contrasena(datos: PasswordChange):
-    try:
+    try {
         # Verificar que el usuario existe
         cursor.execute("SELECT id FROM usuarios WHERE id = %s", (datos.usuario_id,))
         usuario = cursor.fetchone()
@@ -578,13 +578,13 @@ async def cambiar_contrasena(datos: PasswordChange):
         if not datos.nueva_contrasena or len(datos.nueva_contrasena.strip()) < 6:
             raise HTTPException(status_code=400, detail="La nueva contraseña debe tener al menos 6 caracteres")
         
-        # Hash de la nueva contraseña
-        hashed_password = bcrypt.hashpw(datos.nueva_contrasena.encode('utf-8'), bcrypt.gensalt())
+        # Guardar la contraseña sin encriptación (tal cual)
+        nueva_contrasena = datos.nueva_contrasena.strip()
         
         # Actualizar la contraseña en la base de datos
         cursor.execute(
             "UPDATE usuarios SET contrasena = %s WHERE id = %s",
-            (hashed_password.decode('utf-8'), datos.usuario_id)
+            (nueva_contrasena, datos.usuario_id)
         )
         
         conn.commit()

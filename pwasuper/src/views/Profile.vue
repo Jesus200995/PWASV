@@ -25,9 +25,9 @@
       <!-- Información del usuario -->
       <div class="glass-card mb-2">
         <div class="flex justify-between items-center mb-3">
-          <h2 class="text-sm font-semibold text-gray-800 modern-title flex items-center">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 mr-2 text-white flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+          <h2 class="text-base font-bold text-gray-800 modern-title flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-4.5 h-4.5 rounded-full border-2 border-green-500 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
               </svg>
             </span>

@@ -10,15 +10,18 @@
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-3" style="z-index: 1;">
       <div class="page-container w-full max-w-sm mx-auto relative z-10 p-3 sm:p-4 lg:p-5">
       <!-- Header del perfil -->
-      <div class="glass-card mb-2">
+      <div class="glass-card mb-2 relative overflow-hidden">
+        <!-- Efecto de esquina doblada verde -->
+        <div class="absolute top-0 left-0 w-12 h-12 bg-gradient-to-br from-green-700 to-green-600 transform -translate-x-1 -translate-y-1" style="clip-path: polygon(0 0, 100% 0, 0 100%);"></div>
+        <div class="absolute top-0 left-0 w-12 h-12 bg-gradient-to-br from-green-500 to-green-400 transform -translate-x-0.5 -translate-y-0.5" style="clip-path: polygon(0 0, 100% 0, 0 100%);"></div>
+        
         <div class="text-center mb-3">
           <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2 glass-avatar-outline border-2 border-green-500">
             <span class="text-2xl font-bold text-green-600">{{ getUserInitials() }}</span>
           </div>
           <h1 class="text-base font-bold text-gray-800 modern-title">{{ user.nombre_completo }}</h1>
           <div class="green-line mx-auto mb-2"></div>
-          <p class="text-xs text-gray-600">{{ user.cargo }}</p>
-          <p class="text-xs text-gray-500 mt-1">{{ user.correo || user.email }}</p>
+          <p class="text-xs font-semibold text-white bg-green-600 py-0.5 px-2.5 rounded-full border-2 border-green-700 inline-block">{{ user.cargo }}</p>
         </div>
       </div>
 

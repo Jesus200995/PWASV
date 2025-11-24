@@ -133,21 +133,26 @@
           
           <!-- Estado: Marcada - Completada -->
           <template v-else-if="entradaMarcada">
-            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex flex-col items-center pb-8">
+              <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span class="font-bold text-base text-gray-700">Entrada Registrada</span>
+              <span class="text-sm text-gray-500 mt-1">
+                <span v-if="asistenciaHoy && asistenciaHoy.entrada">
+                  {{ formatearHora(asistenciaHoy.entrada) }}
+                </span>
+                <span v-else-if="datosEntrada.hora">
+                  {{ datosEntrada.hora }}
+                </span>
+              </span>
             </div>
-            <span class="font-bold text-base text-gray-700">Entrada Registrada</span>
-            <span class="text-sm text-gray-500 mt-1">
-              <span v-if="asistenciaHoy && asistenciaHoy.entrada">
-                {{ formatearHora(asistenciaHoy.entrada) }}
-              </span>
-              <span v-else-if="datosEntrada.hora">
-                {{ datosEntrada.hora }}
-              </span>
-            </span>
-            <span class="text-sm text-blue-600 font-semibold mt-2">✓ Completada</span>
+            <!-- Barra de Completado -->
+            <div class="absolute bottom-0 left-0 right-0 py-1.5 rounded-b-2xl" style="background-color: #d4a000;">
+              <span class="text-xs text-white font-bold tracking-wider">COMPLETADO</span>
+            </div>
           </template>
         </button>
 
@@ -216,21 +221,26 @@
           
           <!-- Estado: Salida completada -->
           <template v-else-if="salidaMarcada">
-            <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-              </svg>
+            <div class="flex flex-col items-center pb-8">
+              <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span class="font-bold text-base text-gray-700">Salida Registrada</span>
+              <span class="text-sm text-gray-500 mt-1">
+                <span v-if="asistenciaHoy && asistenciaHoy.salida">
+                  {{ formatearHora(asistenciaHoy.salida) }}
+                </span>
+                <span v-else-if="datosSalida.hora">
+                  {{ datosSalida.hora }}
+                </span>
+              </span>
             </div>
-            <span class="font-bold text-base text-gray-700">Salida Registrada</span>
-            <span class="text-sm text-gray-500 mt-1">
-              <span v-if="asistenciaHoy && asistenciaHoy.salida">
-                {{ formatearHora(asistenciaHoy.salida) }}
-              </span>
-              <span v-else-if="datosSalida.hora">
-                {{ datosSalida.hora }}
-              </span>
-            </span>
-            <span class="text-sm text-red-600 font-semibold mt-2">✓ Completada</span>
+            <!-- Barra de Completado -->
+            <div class="absolute bottom-0 left-0 right-0 py-1.5 rounded-b-2xl" style="background-color: #d4a000;">
+              <span class="text-xs text-white font-bold tracking-wider">COMPLETADO</span>
+            </div>
           </template>
         </button>
       </div>

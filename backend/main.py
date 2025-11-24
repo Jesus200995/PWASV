@@ -5451,26 +5451,28 @@ async def exportar_registros_csv():
     """
     Endpoint optimizado para exportar TODOS los registros de actividades en formato CSV
     Usa streaming para manejo eficiente de memoria
+    Incluye: Modalidad (campo/gabinete), Tipo de Actividad y Tipo de Actividad Otro
     """
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        print("📊 [REGISTROS CSV] Iniciando exportación de registros a CSV...")
+        print("📊 [ACTIVIDADES CSV] Iniciando exportación de actividades a CSV...")
         timestamp = datetime.now().isoformat().replace(':', '-')
-        nombre_archivo = f"REGISTROS_ACTIVIDADES_{timestamp}.csv"
+        nombre_archivo = f"ACTIVIDADES_{timestamp}.csv"
         
         async def generar_csv():
             """Generador de CSV para streaming eficiente"""
             
             try:
-                # Header CSV
-                header = "ID,Usuario_ID,Nombre_Usuario,Correo_Usuario,Cargo,Latitud,Longitud,Descripcion,Tipo_Actividad,Fecha_Hora,Foto_URL\n"
+                # Header CSV - Incluye Tipo_Actividad (modalidad) y Categoria_Actividad (tipo de actividad)
+                header = "ID,Usuario_ID,Nombre_Usuario,Correo_Usuario,Cargo,Latitud,Longitud,Descripcion,Modalidad,Tipo_Actividad,Tipo_Actividad_Otro,Fecha_Hora,Foto_URL\n"
                 yield header
                 
                 print("📝 Procesando registros...")
                 
                 # Obtener registros con información de usuarios de forma rápida
+                # Incluye categoria_actividad (tipo de actividad) y categoria_actividad_otro
                 cursor.execute("""
                     SELECT 
                         r.id, 
@@ -5482,6 +5484,8 @@ async def exportar_registros_csv():
                         r.longitud, 
                         r.descripcion, 
                         r.tipo_actividad,
+                        r.categoria_actividad,
+                        r.categoria_actividad_otro,
                         r.fecha_hora,
                         r.foto_url
                     FROM registros r
@@ -5499,21 +5503,25 @@ async def exportar_registros_csv():
                         break
                     
                     for registro in registros:
-                        id_r, usuario_id, nombre, correo, cargo, lat, lon, desc, tipo, fecha, foto = registro
+                        # Ahora incluye categoria_actividad y categoria_actividad_otro
+                        id_r, usuario_id, nombre, correo, cargo, lat, lon, desc, modalidad, tipo_actividad, tipo_actividad_otro, fecha, foto = registro
                         
                         # Escapar comillas y saltos de línea en campos de texto
                         nombre = (nombre or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
                         correo = (correo or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
                         cargo = (cargo or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
                         desc = (desc or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
-                        tipo = (tipo or 'campo').replace('"', '""')
+                        modalidad = (modalidad or 'campo').replace('"', '""')
+                        tipo_actividad = (tipo_actividad or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
+                        tipo_actividad_otro = (tipo_actividad_otro or '').replace('"', '""').replace('\n', ' ').replace('\r', '')
                         foto = (foto or '').replace('"', '""')
                         
                         # Formatear fecha
                         fecha_str = str(fecha) if fecha else ''
                         
-                        # Construir línea CSV
-                        linea = f'{id_r},{usuario_id},"{nombre}","{correo}","{cargo}",{lat},{lon},"{desc}","{tipo}","{fecha_str}","{foto}"\n'
+                        # Construir línea CSV con nuevos campos
+                        # Columnas: ID,Usuario_ID,Nombre_Usuario,Correo_Usuario,Cargo,Latitud,Longitud,Descripcion,Modalidad,Tipo_Actividad,Tipo_Actividad_Otro,Fecha_Hora,Foto_URL
+                        linea = f'{id_r},{usuario_id},"{nombre}","{correo}","{cargo}",{lat},{lon},"{desc}","{modalidad}","{tipo_actividad}","{tipo_actividad_otro}","{fecha_str}","{foto}"\n'
                         
                         yield linea
                         registros_procesados += 1

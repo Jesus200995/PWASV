@@ -177,11 +177,12 @@ class BaseDatosService {
 
   async descargarRegistrosCSV(onProgress = null) {
     // Descarga todos los registros de actividades en formato CSV
+    // Incluye: Modalidad (campo/gabinete), Tipo de Actividad y Tipo de Actividad Otro
     // Utiliza streaming para manejo eficiente de memoria.
     // onProgress es una función callback que recibe { bytesDescargados, tamanoTotal, velocidad }
     
     try {
-      console.log('🚀 Iniciando descarga de registros CSV...');
+      console.log('🚀 Iniciando descarga de actividades CSV...');
       
       const token = localStorage.getItem('admin_token');
       
@@ -276,7 +277,7 @@ class BaseDatosService {
       
       // Obtener nombre del archivo del header Content-Disposition
       const contentDisposition = response.headers.get('content-disposition');
-      let nombreArchivo = 'REGISTROS_ACTIVIDADES.csv';
+      let nombreArchivo = 'ACTIVIDADES.csv';
       
       if (contentDisposition && contentDisposition.includes('filename=')) {
         nombreArchivo = contentDisposition.split('filename=')[1].replace(/"/g, '');
@@ -303,7 +304,7 @@ class BaseDatosService {
         window.URL.revokeObjectURL(url);
       }, 100);
       
-      console.log('✅ Descarga completada exitosamente');
+      console.log('✅ Descarga de actividades completada exitosamente');
       
       // Notificación final
       if (onProgress) {
@@ -318,17 +319,17 @@ class BaseDatosService {
       
       return {
         status: 'success',
-        message: '✅ Registros descargados exitosamente',
+        message: '✅ Actividades descargadas exitosamente',
         archivo: nombreArchivo,
         tamanho: blob.size,
         tamanhoMB: (blob.size / 1024 / 1024).toFixed(2)
       };
       
     } catch (error) {
-      console.error('❌ Error al descargar registros CSV:', error.message);
+      console.error('❌ Error al descargar actividades CSV:', error.message);
       
       // Lanzar error con mensaje descriptivo
-      throw new Error(error.message || 'Error desconocido al descargar registros');
+      throw new Error(error.message || 'Error desconocido al descargar actividades');
     }
   }
 

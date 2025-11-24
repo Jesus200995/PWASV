@@ -209,7 +209,7 @@
                   <line x1="12" y1="13" x2="12" y2="19"></line>
                   <line x1="9" y1="16" x2="15" y2="16"></line>
                 </svg>
-                {{ descargandoRegistrosCSV ? 'Exportando CSV...' : '📊 Registros CSV' }}
+                {{ descargandoRegistrosCSV ? 'Exportando CSV...' : '📊 Actividades CSV' }}
               </button>
               
               <button @click="limpiarCache" class="action-btn cache-btn">
@@ -1001,13 +1001,23 @@ const descargarRegistrosCSV = async () => {
       // Mostrar mensaje de éxito
       mostrarMensaje('✅ Exportación Exitosa', 
         `<div style="text-align: left;">
-          <h4 style="color: #f97316; margin-bottom: 15px;">📊 Registros Exportados</h4>
+          <h4 style="color: #f97316; margin-bottom: 15px;">📊 Actividades Exportadas</h4>
           <p><strong>📁 Archivo:</strong> ${resultado.archivo}</p>
           <p><strong>📊 Tamaño:</strong> ${resultado.tamanhoMB} MB</p>
-          <p><strong>📝 Registros:</strong> ${resultado.registros} registros exportados</p>
+          <hr style="margin: 15px 0;">
+          <h5 style="color: #ea580c;">📋 Columnas incluidas:</h5>
+          <ul style="margin: 10px 0; padding-left: 20px; font-size: 12px;">
+            <li>ID, Usuario, Nombre, Correo, Cargo</li>
+            <li>Ubicación (Latitud, Longitud)</li>
+            <li>Descripción de la actividad</li>
+            <li><strong>Modalidad</strong> (Campo/Gabinete)</li>
+            <li><strong>Tipo de Actividad</strong> (categoría)</li>
+            <li><strong>Tipo de Actividad Otro</strong> (especificación)</li>
+            <li>Fecha/Hora, Foto URL</li>
+          </ul>
           <hr style="margin: 15px 0;">
           <p style="font-size: 12px; color: #666; margin-top: 15px;">
-            ✅ Todos los registros de actividades han sido exportados exitosamente en formato CSV.
+            ✅ Todas las actividades han sido exportadas exitosamente en formato CSV.
             Puedes abrir el archivo en Excel o cualquier editor de hojas de cálculo.
           </p>
         </div>`

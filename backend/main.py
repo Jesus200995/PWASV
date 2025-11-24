@@ -727,22 +727,22 @@ def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, 
         # Construir consulta según parámetros con paginación optimizada
         if usuario_id:
             if limit:
-                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
                           FROM registros WHERE usuario_id = %s 
                           ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
                 params = (usuario_id, min(limit, page_size), offset)
             else:
-                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
                           FROM registros WHERE usuario_id = %s 
                           ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
                 params = (usuario_id, page_size, offset)
         else:
             if limit:
-                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
                           FROM registros ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
                 params = (min(limit, page_size), offset)
             else:
-                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
                           FROM registros ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
                 params = (page_size, offset)
         
@@ -798,7 +798,9 @@ def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, 
                     "descripcion": row[4] if row[4] is not None else "",
                     "foto_url": row[5] if row[5] is not None else None,
                     "fecha_hora": fecha_iso,
-                    "tipo_actividad": row[7] if len(row) > 7 and row[7] is not None else "campo"
+                    "tipo_actividad": row[7] if len(row) > 7 and row[7] is not None else "campo",
+                    "categoria_actividad": row[8] if len(row) > 8 and row[8] is not None else None,
+                    "categoria_actividad_otro": row[9] if len(row) > 9 and row[9] is not None else None
                 }
                 registros.append(registro)
             except Exception as row_error:
@@ -844,7 +846,7 @@ def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int 
         
         # Construir consulta optimizada con índices
         base_query = """
-            SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad 
+            SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
             FROM registros 
         """
         
@@ -899,7 +901,9 @@ def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int 
                     "descripcion": row[4] if row[4] is not None else "",
                     "foto_url": row[5] if row[5] is not None else None,
                     "fecha_hora": row[6].isoformat() if row[6] else None,
-                    "tipo_actividad": row[7] if len(row) > 7 and row[7] is not None else "campo"
+                    "tipo_actividad": row[7] if len(row) > 7 and row[7] is not None else "campo",
+                    "categoria_actividad": row[8] if len(row) > 8 and row[8] is not None else None,
+                    "categoria_actividad_otro": row[9] if len(row) > 9 and row[9] is not None else None
                 }
                 registros.append(registro)
             except Exception as row_error:

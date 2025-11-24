@@ -16,7 +16,7 @@
           <p class="text-xs text-gray-500 mb-3">Selecciona el tipo de registro que deseas realizar</p>
           
           <!-- Botones de navegación entre secciones -->
-          <div class="flex gap-2 section-nav-container p-1 rounded-full">
+          <div class="flex gap-2 section-nav-container p-1 rounded-full items-center">
             <button
               @click="seccionActiva = 'asistencia'"
               :class="[
@@ -39,27 +39,28 @@
               @click="(!entradaMarcada || salidaMarcada) ? mostrarModalActividadesBloqueadas() : (seccionActiva = 'actividades')"
               :disabled="false"
               :class="[
-                'section-nav-button flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 relative',
+                'section-nav-button flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300',
                 seccionActiva === 'actividades' && entradaMarcada && !salidaMarcada
                   ? 'active text-white shadow-lg' 
                   : (!entradaMarcada || salidaMarcada)
-                    ? 'bg-gray-300 text-gray-500 cursor-pointer'
+                    ? 'bg-gray-200 text-gray-500 cursor-pointer'
                     : 'text-gray-600 hover:bg-white/30'
               ]"
               :style="seccionActiva === 'actividades' && entradaMarcada && !salidaMarcada ? 'background-color: rgb(147, 51, 234);' : ''"
             >
               <div class="flex items-center justify-center space-x-2">
-                <!-- Icono de candado cuando está bloqueado -->
-                <svg v-if="!entradaMarcada || salidaMarcada" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <!-- Icono normal de actividades cuando está habilitado -->
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- Icono de actividades siempre visible -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 <span>Actividades</span>
               </div>
             </button>
+          </div>
+          
+          <!-- Etiqueta BLOQUEADO centrada debajo de los botones -->
+          <div v-if="!entradaMarcada || salidaMarcada" class="flex justify-end mt-0.5 mr-1">
+            <span class="bg-gray-600 text-white text-[7px] font-semibold tracking-wider px-2 rounded-b-lg" style="padding-top: 1px; padding-bottom: 2px;">BLOQUEADO</span>
           </div>
         </div>
       </div>

@@ -399,7 +399,13 @@ class SyncService {
       formData.append('latitud', registro.latitud);
       formData.append('longitud', registro.longitud);
       formData.append('descripcion', registro.descripcion || '');
-      formData.append('tipo_actividad', registro.tipo_actividad || 'campo'); // Nuevo: agregar tipo de actividad
+      formData.append('tipo_actividad', registro.tipo_actividad || 'campo');
+      
+      // NUEVO: Agregar campos de categoría de actividad
+      formData.append('categoria_actividad', registro.categoria_actividad || '');
+      if (registro.categoria_actividad === 'Otro' && registro.categoria_actividad_otro) {
+        formData.append('categoria_actividad_otro', registro.categoria_actividad_otro);
+      }
       
       // MEJORA: Asegurar que se envía como tipo actividad explícitamente
       formData.append('tipo', 'actividad');
@@ -416,6 +422,7 @@ class SyncService {
       console.log('📤 Enviando timestamp_offline:', registro.timestamp);
       console.log('📤 Enviando sync_timestamp:', syncTimestamp);
       console.log('📤 Enviando tipo de registro: actividad');
+      console.log('📤 Enviando categoria_actividad:', registro.categoria_actividad);
       
       // Convertir foto base64 de vuelta a archivo si existe
       let archivoAdjunto = false;

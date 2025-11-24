@@ -174,11 +174,15 @@ class OfflineService {
    * @param {string} descripcion - Descripción del registro
    * @param {File} archivo - Archivo de imagen adjunto
    * @param {string} tipoActividad - Tipo de actividad ('campo' o 'gabinete')
+   * @param {string} timestampCDMX - Timestamp en formato ISO con zona horaria CDMX
+   * @param {string} categoriaActividad - Categoría de la actividad (nuevo campo obligatorio)
+   * @param {string} categoriaActividadOtro - Especificación si la categoría es "Otro" (nuevo campo opcional)
    * @returns {Promise<number>} - ID del registro guardado en IndexedDB
    */
-  async guardarRegistroOffline(usuarioId, latitud, longitud, descripcion, archivo, tipoActividad = 'campo', timestampCDMX = null) {
+  async guardarRegistroOffline(usuarioId, latitud, longitud, descripcion, archivo, tipoActividad = 'campo', timestampCDMX = null, categoriaActividad = '', categoriaActividadOtro = null) {
     try {
       console.log('🔄 Guardando registro offline para usuario ID:', usuarioId);
+      console.log('📋 Categoría de actividad:', categoriaActividad, categoriaActividadOtro ? `(Otro: ${categoriaActividadOtro})` : '');
       await this.initDB();
       
       // Convertir archivo a base64 si existe
@@ -209,7 +213,9 @@ class OfflineService {
         latitud,
         longitud,
         descripcion,
-        tipo_actividad: tipoActividad, // Nuevo: agregar tipo de actividad
+        tipo_actividad: tipoActividad, // tipo de actividad (campo/gabinete)
+        categoria_actividad: categoriaActividad, // NUEVO: categoría de actividad
+        categoria_actividad_otro: categoriaActividadOtro, // NUEVO: especificación si es "Otro"
         foto_base64: fotoBase64,
         foto_filename: archivo ? archivo.name : null,
         foto_type: archivo ? archivo.type : null,

@@ -769,6 +769,74 @@
           </div>
         </div>
 
+        <!-- NUEVO: Selector de Categoría de Actividad -->
+        <div class="mb-3">
+          <label class="block text-xs font-medium text-gray-700 mb-2 flex items-center"
+                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-purple-600" :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            Selecciona el tipo de actividad <span class="text-red-500 text-sm ml-1">*</span>
+          </label>
+          
+          <div class="relative">
+            <select
+              v-model="categoriaActividad"
+              :disabled="!entradaMarcada || salidaMarcada"
+              class="glass-input w-full text-sm appearance-none pr-10"
+              :class="{ 
+                'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada,
+                'border-red-400': !categoriaActividad && tipoActividad && entradaMarcada && !salidaMarcada
+              }"
+            >
+              <option value="" disabled>-- Selecciona una categoría --</option>
+              <option v-for="categoria in categoriasActividad" :key="categoria" :value="categoria">
+                {{ categoria }}
+              </option>
+            </select>
+            <!-- Icono de flecha para el select -->
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+          
+          <!-- Mensaje de error si no se ha seleccionado categoría -->
+          <div v-if="!categoriaActividad && tipoActividad && entradaMarcada && !salidaMarcada" class="mt-1.5">
+            <p class="text-xs text-red-500 font-medium animate-pulse">Por favor selecciona una categoría de actividad</p>
+          </div>
+        </div>
+
+        <!-- NUEVO: Campo para especificar "Otro" si se selecciona esa opción -->
+        <div v-if="categoriaActividad === 'Otro'" class="mb-3">
+          <label class="block text-xs font-medium text-gray-700 mb-2 flex items-center"
+                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Especifica cuál <span class="text-red-500 text-sm ml-1">*</span>
+          </label>
+          
+          <input
+            type="text"
+            v-model="categoriaActividadOtro"
+            :disabled="!entradaMarcada || salidaMarcada"
+            class="glass-input w-full text-sm"
+            :class="{ 
+              'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada,
+              'border-red-400': categoriaActividad === 'Otro' && !categoriaActividadOtro.trim() && entradaMarcada && !salidaMarcada
+            }"
+            placeholder="Escribe el tipo de actividad..."
+            maxlength="200"
+          />
+          
+          <!-- Mensaje de error si no se ha especificado el otro tipo -->
+          <div v-if="categoriaActividad === 'Otro' && !categoriaActividadOtro.trim() && entradaMarcada && !salidaMarcada" class="mt-1.5">
+            <p class="text-xs text-red-500 font-medium animate-pulse">Por favor especifica el tipo de actividad</p>
+          </div>
+        </div>
+
         <!-- Input de archivo para imagen -->
         <div class="mb-3">
           <label class="block text-sm font-medium text-gray-700 mb-2" 
@@ -868,8 +936,8 @@
         <!-- Botón enviar -->
         <button
           type="submit"
-          :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || enviando || !entradaMarcada || salidaMarcada"
-          :class="['glass-button-registro w-full', (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || enviando || !entradaMarcada || salidaMarcada) ? 'opacity-50 cursor-not-allowed' : '']"
+          :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || enviando || !entradaMarcada || salidaMarcada"
+          :class="['glass-button-registro w-full', (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || enviando || !entradaMarcada || salidaMarcada) ? 'opacity-50 cursor-not-allowed' : '']"
         >
           <span v-if="enviando" class="flex items-center justify-center">
             <svg
@@ -1035,6 +1103,24 @@ const fotoRegistro = ref(null);
 const archivoFotoRegistro = ref(null);
 const descripcionRegistro = ref("");
 const tipoActividad = ref(""); // Nuevo: campo para tipo de actividad
+
+// Nuevos campos para categoría de actividad
+const categoriaActividad = ref(""); // Selector de categoría obligatorio
+const categoriaActividadOtro = ref(""); // Campo de texto si se selecciona "Otro"
+
+// Lista de opciones de categoría de actividad
+const categoriasActividad = [
+  "Acompañamiento técnico",
+  "Productivas directas",
+  "Ahorro y trámites financieros",
+  "Capacitación / talleres / cursos",
+  "Difusión y comunicación",
+  "Eventos comunitarios / ferias / tianguis",
+  "Reuniones y asambleas",
+  "Trabajo administrativo y captura",
+  "Viveros y biofábricas",
+  "Otro"
+];
 
 // Referencias generales
 const fileInput = ref(null);
@@ -1738,6 +1824,20 @@ async function enviarRegistro() {
     return;
   }
 
+  // Validar categoría de actividad
+  if (!categoriaActividad.value) {
+    error.value = "❌ Debes seleccionar una categoría de actividad.";
+    setTimeout(() => error.value = null, 5000);
+    return;
+  }
+
+  // Validar campo "Otro" si está seleccionado
+  if (categoriaActividad.value === 'Otro' && !categoriaActividadOtro.value.trim()) {
+    error.value = "❌ Debes especificar el tipo de actividad cuando seleccionas 'Otro'.";
+    setTimeout(() => error.value = null, 5000);
+    return;
+  }
+
   enviando.value = true;
   error.value = null;
 
@@ -1757,8 +1857,10 @@ async function enviarRegistro() {
         longitudRegistro.value,
         descripcionRegistro.value,
         archivoFotoRegistro.value,
-        tipoActividad.value, // Nuevo: incluir tipo de actividad
-        timestampCDMX // Nuevo: usar timestamp CDMX exacto
+        tipoActividad.value, // tipo de actividad (campo/gabinete)
+        timestampCDMX, // timestamp CDMX exacto
+        categoriaActividad.value, // NUEVO: categoría de actividad
+        categoriaActividad.value === 'Otro' ? categoriaActividadOtro.value.trim() : null // NUEVO: especificación si es "Otro"
       );
       
       console.log(`✅ Registro offline guardado con ID: ${registroID}`);
@@ -1785,7 +1887,9 @@ async function enviarRegistro() {
         latitud: latitudRegistro.value,
         longitud: longitudRegistro.value,
         descripcion: descripcionRegistro.value,
-        tipo_actividad: tipoActividad.value, // Nuevo: agregar tipo de actividad
+        tipo_actividad: tipoActividad.value,
+        categoria_actividad: categoriaActividad.value, // NUEVO
+        categoria_actividad_otro: categoriaActividad.value === 'Otro' ? categoriaActividadOtro.value.trim() : null, // NUEVO
         foto: fotoRegistro.value,
         offline: true, // Marcador para indicar que está pendiente
         backend: null,
@@ -1795,7 +1899,9 @@ async function enviarRegistro() {
 
       // Limpiar campos
       descripcionRegistro.value = "";
-      tipoActividad.value = ""; // Nuevo: limpiar tipo de actividad
+      tipoActividad.value = "";
+      categoriaActividad.value = ""; // NUEVO: limpiar categoría
+      categoriaActividadOtro.value = ""; // NUEVO: limpiar especificación
       fotoRegistro.value = null;
       archivoFotoRegistro.value = null;
       latitudRegistro.value = null;
@@ -1828,12 +1934,19 @@ async function enviarRegistro() {
     formData.append("latitud", latitudRegistro.value);
     formData.append("longitud", longitudRegistro.value);
     formData.append("descripcion", descripcionRegistro.value);
-    formData.append("tipo_actividad", tipoActividad.value); // Nuevo: agregar tipo de actividad
+    formData.append("tipo_actividad", tipoActividad.value);
+    formData.append("categoria_actividad", categoriaActividad.value); // NUEVO: categoría de actividad
+    // NUEVO: solo enviar categoria_actividad_otro si la categoría es "Otro"
+    if (categoriaActividad.value === 'Otro') {
+      formData.append("categoria_actividad_otro", categoriaActividadOtro.value.trim());
+    }
     formData.append("foto", archivoFotoRegistro.value);
     formData.append("tipo", "actividad"); // Especificar explícitamente que es un registro de actividad
-      // ✅ SOLUCIÓN: Agregar SIEMPRE timestamp CDMX exacto (igual que el reloj de la barra verde)
-      // El servidor SIEMPRE lo debe recibir y usarlo para garantizar fecha/hora correcta
-      formData.append("timestamp_offline", obtenerTimestampCDMX());    // Enviar datos al backend
+    // ✅ SOLUCIÓN: Agregar SIEMPRE timestamp CDMX exacto (igual que el reloj de la barra verde)
+    // El servidor SIEMPRE lo debe recibir y usarlo para garantizar fecha/hora correcta
+    formData.append("timestamp_offline", obtenerTimestampCDMX());
+    
+    // Enviar datos al backend
     const response = await axios.post(`${API_URL}/registro`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -1850,7 +1963,9 @@ async function enviarRegistro() {
       latitud: latitudRegistro.value,
       longitud: longitudRegistro.value,
       descripcion: descripcionRegistro.value,
-      tipo_actividad: tipoActividad.value, // Nuevo: agregar tipo de actividad
+      tipo_actividad: tipoActividad.value,
+      categoria_actividad: categoriaActividad.value, // NUEVO
+      categoria_actividad_otro: categoriaActividad.value === 'Otro' ? categoriaActividadOtro.value.trim() : null, // NUEVO
       foto: fotoRegistro.value,
       offline: false, // Enviado exitosamente
       backend: response.data,
@@ -1859,7 +1974,9 @@ async function enviarRegistro() {
 
     // Limpiar campos
     descripcionRegistro.value = "";
-    tipoActividad.value = ""; // Nuevo: limpiar tipo de actividad
+    tipoActividad.value = "";
+    categoriaActividad.value = ""; // NUEVO: limpiar categoría
+    categoriaActividadOtro.value = ""; // NUEVO: limpiar especificación
     fotoRegistro.value = null;
     archivoFotoRegistro.value = null;
     latitudRegistro.value = null;
@@ -2855,6 +2972,9 @@ watch([entradaMarcada, salidaMarcada], () => {
   if (!entradaMarcada.value || salidaMarcada.value) {
     console.log('🚫 Actividades bloqueadas, limpiando campos de registro');
     descripcionRegistro.value = "";
+    tipoActividad.value = "";
+    categoriaActividad.value = ""; // NUEVO: limpiar categoría
+    categoriaActividadOtro.value = ""; // NUEVO: limpiar especificación
     fotoRegistro.value = null;
     archivoFotoRegistro.value = null;
     latitudRegistro.value = null;

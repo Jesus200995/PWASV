@@ -177,6 +177,33 @@ try:
         )
         print("✅ Usuario administrador por defecto creado: admin/admin123")
     
+    # ===== MIGRACIÓN: Agregar columnas categoria_actividad a tabla registros =====
+    try:
+        # Verificar si la columna categoria_actividad existe
+        ejecutar_consulta_segura("""
+            DO $$ 
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'registros' AND column_name = 'categoria_actividad'
+                ) THEN
+                    ALTER TABLE registros ADD COLUMN categoria_actividad VARCHAR(100);
+                    RAISE NOTICE 'Columna categoria_actividad agregada a registros';
+                END IF;
+                
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'registros' AND column_name = 'categoria_actividad_otro'
+                ) THEN
+                    ALTER TABLE registros ADD COLUMN categoria_actividad_otro VARCHAR(255);
+                    RAISE NOTICE 'Columna categoria_actividad_otro agregada a registros';
+                END IF;
+            END $$;
+        """, fetch_type='none')
+        print("✅ Verificación de columnas categoria_actividad completada")
+    except Exception as migration_error:
+        print(f"⚠️ Advertencia en migración de categoria_actividad: {migration_error}")
+    
 except Exception as e:
     print(f"❌ Error en inicialización de base de datos: {e}")
     conn = None
@@ -605,6 +632,8 @@ async def registrar(
     longitud: float = Form(...),
     descripcion: str = Form(""),
     tipo_actividad: str = Form(...),  # Nuevo campo obligatorio: 'campo' o 'gabinete'
+    categoria_actividad: str = Form(...),  # Nuevo campo obligatorio: categoría de la actividad
+    categoria_actividad_otro: str = Form(None),  # Campo opcional: especificación cuando se selecciona "Otro"
     foto: UploadFile = File(...),
     timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
 ):
@@ -614,12 +643,36 @@ async def registrar(
     print(f"   longitud: {longitud}")
     print(f"   descripcion: {descripcion}")
     print(f"   tipo_actividad: {tipo_actividad}")
+    print(f"   categoria_actividad: {categoria_actividad}")
+    print(f"   categoria_actividad_otro: {categoria_actividad_otro}")
     print(f"   foto: {foto.filename}")
     print(f"   timestamp_offline: {timestamp_offline}")
     
     # Validar tipo de actividad
     if tipo_actividad not in ['campo', 'gabinete']:
         raise HTTPException(status_code=400, detail="tipo_actividad debe ser 'campo' o 'gabinete'")
+    
+    # Validar categoría de actividad
+    categorias_validas = [
+        'Acompañamiento técnico',
+        'Productivas directas',
+        'Ahorro y trámites financieros',
+        'Capacitación / talleres / cursos',
+        'Difusión y comunicación',
+        'Eventos comunitarios / ferias / tianguis',
+        'Reuniones y asambleas',
+        'Trabajo administrativo y captura',
+        'Viveros y biofábricas',
+        'Otro'
+    ]
+    if categoria_actividad not in categorias_validas:
+        raise HTTPException(status_code=400, detail=f"categoria_actividad debe ser una de las opciones válidas: {', '.join(categorias_validas)}")
+    
+    # Si la categoría es "Otro", se requiere especificación
+    if categoria_actividad == 'Otro' and not categoria_actividad_otro:
+        raise HTTPException(status_code=400, detail="Cuando categoria_actividad es 'Otro', se requiere especificar en categoria_actividad_otro")
+    
+    print(f"✅ Categoría de actividad válida: {categoria_actividad}" + (f" (Otro: {categoria_actividad_otro})" if categoria_actividad == 'Otro' else ""))
     
     print(f"✅ Tipo de actividad válido: {tipo_actividad}")
     
@@ -649,13 +702,13 @@ async def registrar(
 
     # Guardar registro en la base usando consulta segura
     ejecutar_consulta_segura(
-        "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-        (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora, tipo_actividad),
+        "INSERT INTO registros (usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        (usuario_id, latitud, longitud, descripcion, ruta_archivo, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro),
         fetch_type='none'
     )
-    print(f"✅ Registro guardado en BD con fecha_hora: {fecha_hora} y tipo_actividad: {tipo_actividad}")
+    print(f"✅ Registro guardado en BD con fecha_hora: {fecha_hora}, tipo_actividad: {tipo_actividad}, categoria_actividad: {categoria_actividad}")
 
-    return {"status": "ok", "foto_url": ruta_archivo, "tipo_actividad": tipo_actividad}
+    return {"status": "ok", "foto_url": ruta_archivo, "tipo_actividad": tipo_actividad, "categoria_actividad": categoria_actividad}
 
 # ENDPOINT CORREGIDO - Esta es la parte importante que debe actualizarse
 @app.get("/registros")
@@ -5239,6 +5292,8 @@ CREATE TABLE registros (
     foto_url VARCHAR(500),
     fecha_hora TIMESTAMP NOT NULL,
     tipo_actividad VARCHAR(50) DEFAULT 'campo',
+    categoria_actividad VARCHAR(100),
+    categoria_actividad_otro VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -5247,7 +5302,7 @@ CREATE TABLE registros (
                 # Obtener registros de forma rápida
                 cursor.execute("""
                     SELECT id, usuario_id, latitud, longitud, descripcion, 
-                           foto_url, fecha_hora, tipo_actividad
+                           foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro
                     FROM registros 
                     ORDER BY id ASC
                 """)
@@ -5256,22 +5311,26 @@ CREATE TABLE registros (
                 print(f"📊 Obtenidos {len(registros_data)} registros")
                 
                 if registros_data:
-                    yield "INSERT INTO registros (id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad) VALUES\n"
+                    yield "INSERT INTO registros (id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro) VALUES\n"
                     
                     for idx, row in enumerate(registros_data):
-                        id_r, usuario_id, lat, lon, desc, foto, fecha, tipo = row
+                        id_r, usuario_id, lat, lon, desc, foto, fecha, tipo, cat_act, cat_act_otro = row
                         
                         # Escapar comillas simples
                         desc = (desc or '').replace("'", "''")
                         foto = (foto or '').replace("'", "''")
                         tipo = (tipo or 'campo').replace("'", "''")
+                        cat_act = (cat_act or '').replace("'", "''")
+                        cat_act_otro = (cat_act_otro or '').replace("'", "''")
                         
                         lat_str = str(lat) if lat is not None else "NULL"
                         lon_str = str(lon) if lon is not None else "NULL"
                         fecha_str = str(fecha) if fecha else "NOW()"
+                        cat_act_str = f"'{cat_act}'" if cat_act else "NULL"
+                        cat_act_otro_str = f"'{cat_act_otro}'" if cat_act_otro else "NULL"
                         
                         coma = "," if idx < len(registros_data) - 1 else ";"
-                        yield f"({id_r}, {usuario_id}, {lat_str}, {lon_str}, '{desc}', '{foto}', '{fecha_str}', '{tipo}'){coma}\n"
+                        yield f"({id_r}, {usuario_id}, {lat_str}, {lon_str}, '{desc}', '{foto}', '{fecha_str}', '{tipo}', {cat_act_str}, {cat_act_otro_str}){coma}\n"
                 
                 yield "\n"
                 

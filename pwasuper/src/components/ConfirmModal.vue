@@ -1,9 +1,10 @@
 <template>
-  <transition name="modal">
-    <div v-if="show" class="modal-overlay" @click="$emit('close')">
-      <div class="modal-container" :class="{ 'compact': type === 'info', 'compact-confirm': type === 'confirm' }" 
-           :data-modal-type="title && title.includes('Entrada') ? 'entrada' : title && title.includes('Salida') ? 'salida' : ''" 
-           @click.stop>
+  <teleport to="body">
+    <transition name="modal">
+      <div v-if="show" class="modal-overlay" @click="$emit('close')">
+        <div class="modal-container" :class="{ 'compact': type === 'info', 'compact-confirm': type === 'confirm' }" 
+             :data-modal-type="title && title.includes('Entrada') ? 'entrada' : title && title.includes('Salida') ? 'salida' : ''" 
+             @click.stop>
         <!-- Header más elegante - Solo mostrar en tipos info, success, warning -->
         <div v-if="title && type !== 'confirm' && type !== 'error'" class="modal-header">
           <div class="flex items-center">
@@ -86,6 +87,7 @@
       </div>
     </div>
   </transition>
+  </teleport>
 </template>
 
 <script setup>

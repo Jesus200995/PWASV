@@ -220,10 +220,10 @@ function logout() {
       <div class="max-w-sm mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <!-- Flor de Noche Buena girando en lugar del círculo de iniciales -->
+            <!-- Icono de plantita con contorno neón -->
             <PoinsettiaFlower />
             <div>
-              <h1 class="text-base font-bold text-green-800 mb-0">Sembrando Vida</h1>
+              <h1 class="header-title text-base mb-0">Sembrando Vida</h1>
               <p class="text-xs text-gray-500 -mt-0.5">{{ userName }}</p>
             </div>
           </div>
@@ -383,40 +383,33 @@ function logout() {
   opacity: 0;
 }
 
-/* Efecto vidrio líquido para el título */
-h1 {
-  position: relative;
-  overflow: hidden;
-  color: #052e16;
-}
-
-h1::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+/* Título del header con tipografía elegante y animación de brillo */
+.header-title {
+  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: #16a34a;
   background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.4) 50%,
-    transparent 70%
+    90deg,
+    #16a34a 0%,
+    #16a34a 40%,
+    #4ade80 50%,
+    #16a34a 60%,
+    #16a34a 100%
   );
-  transform: rotate(45deg);
-  animation: liquidGlass 3s infinite;
-  pointer-events: none;
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShine 2.5s ease-in-out infinite;
 }
 
-@keyframes liquidGlass {
+@keyframes textShine {
   0% {
-    transform: translateX(-100%) translateY(-100%) rotate(45deg);
-  }
-  50% {
-    transform: translateX(0%) translateY(0%) rotate(45deg);
+    background-position: 100% 50%;
   }
   100% {
-    transform: translateX(100%) translateY(100%) rotate(45deg);
+    background-position: -100% 50%;
   }
 }
 

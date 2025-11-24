@@ -697,14 +697,14 @@
           </div>
         </div>
 
-        <!-- Tipo de Actividad - Diseño Vidrio Líquido Compacto -->
+        <!-- Modalidad - Campo o Gabinete -->
         <div class="mb-3">
           <label class="block text-xs font-medium text-gray-700 mb-2 flex items-center"
                  :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-green-600" :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-            Tipo de Actividad <span class="text-red-500 text-sm">*</span>
+            Modalidad <span class="text-red-500 text-sm">*</span>
           </label>
           
           <!-- Contenedor de opciones con estilo vidrio líquido compacto -->
@@ -811,32 +811,35 @@
             
             <!-- Mensaje de error si no está seleccionado -->
             <div v-if="!tipoActividad && (entradaMarcada && !salidaMarcada)" class="mt-1.5 text-center">
-              <p class="text-xs text-red-500 font-medium animate-pulse">Por favor selecciona el tipo de actividad</p>
+              <p class="text-xs text-red-500 font-medium animate-pulse">Por favor selecciona la modalidad</p>
             </div>
           </div>
         </div>
 
-        <!-- NUEVO: Selector de Categoría de Actividad -->
+        <!-- Selector de Categoría de Actividad -->
         <div class="mb-3">
-          <label class="block text-xs font-medium text-gray-700 mb-2 flex items-center"
-                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-purple-600" :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <label class="block text-xs font-medium mb-2 flex items-center"
+                 :class="{ 
+                   'text-gray-400': !entradaMarcada || salidaMarcada || !tipoActividad,
+                   'text-gray-700': entradaMarcada && !salidaMarcada && tipoActividad
+                 }">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5" :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada || !tipoActividad, 'text-purple-600': entradaMarcada && !salidaMarcada && tipoActividad }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
-            Selecciona el tipo de actividad <span class="text-red-500 text-sm ml-1">*</span>
+            Tipo de Actividad <span class="text-red-500 text-sm ml-1">*</span>
           </label>
           
           <div class="relative">
             <select
               v-model="categoriaActividad"
-              :disabled="!entradaMarcada || salidaMarcada"
+              :disabled="!entradaMarcada || salidaMarcada || !tipoActividad"
               class="glass-input w-full text-sm appearance-none pr-10"
               :class="{ 
-                'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada,
+                'opacity-50 cursor-not-allowed bg-gray-100': !entradaMarcada || salidaMarcada || !tipoActividad,
                 'border-red-400': !categoriaActividad && tipoActividad && entradaMarcada && !salidaMarcada
               }"
             >
-              <option value="" disabled>-- Selecciona una categoría --</option>
+              <option value="" disabled>{{ !tipoActividad ? '-- Primero selecciona la modalidad --' : '-- Selecciona el tipo de actividad --' }}</option>
               <option v-for="categoria in categoriasActividad" :key="categoria" :value="categoria">
                 {{ categoria }}
               </option>
@@ -849,9 +852,9 @@
             </div>
           </div>
           
-          <!-- Mensaje de error si no se ha seleccionado categoría -->
+          <!-- Mensaje de error si no se ha seleccionado tipo de actividad -->
           <div v-if="!categoriaActividad && tipoActividad && entradaMarcada && !salidaMarcada" class="mt-1.5">
-            <p class="text-xs text-red-500 font-medium animate-pulse">Por favor selecciona una categoría de actividad</p>
+            <p class="text-xs text-red-500 font-medium animate-pulse">Por favor selecciona el tipo de actividad</p>
           </div>
         </div>
 

@@ -87,42 +87,58 @@
         </div>
 
         <!-- Botones de Asistencia (solo visibles cuando no está en modo asistencia) -->
-        <div v-if="!modoAsistencia" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+        <div v-if="!modoAsistencia" class="flex gap-3 mb-2">
         <!-- Botón Marcar Entrada -->
         <button
           @click="mostrarModalEntrada"
           :disabled="entradaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[80px] w-full flex flex-col items-center justify-center p-2"
+          class="relative overflow-hidden rounded-2xl transition-all duration-300 transform min-h-[200px] flex-1 flex flex-col items-center justify-center p-4"
           :class="{
-            'text-white shadow-lg hover:scale-105 active:scale-95': !entradaMarcada && !verificandoAsistencia,
-            'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 cursor-not-allowed': entradaMarcada || verificandoAsistencia
+            'text-white shadow-xl hover:scale-[1.02] active:scale-[0.98]': !entradaMarcada && !verificandoAsistencia,
+            'bg-gradient-to-b from-gray-50 to-gray-100 text-gray-500 cursor-not-allowed border border-gray-200': entradaMarcada || verificandoAsistencia
           }"
-          :style="!entradaMarcada && !verificandoAsistencia ? 'background-color: rgb(30, 144, 255); box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);' : ''"
-          @mouseover="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(25, 130, 230)')"
-          @mouseout="!entradaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(30, 144, 255)')"
+          :style="!entradaMarcada && !verificandoAsistencia ? 'background: linear-gradient(135deg, rgb(30, 144, 255) 0%, rgb(0, 119, 230) 100%); box-shadow: 0 10px 30px rgba(30, 144, 255, 0.5);' : ''"
         >
-          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
+          <!-- Efecto de burbujas de vidrio flotantes -->
+          <div v-if="!entradaMarcada && !verificandoAsistencia" class="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+            <!-- Burbuja 1 -->
+            <div class="absolute w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm animate-bubble-1" style="left: 10%; bottom: -20%;"></div>
+            <!-- Burbuja 2 -->
+            <div class="absolute w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm animate-bubble-2" style="left: 60%; bottom: -15%;"></div>
+            <!-- Burbuja 3 -->
+            <div class="absolute w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm animate-bubble-3" style="left: 35%; bottom: -10%;"></div>
+            <!-- Burbuja 4 -->
+            <div class="absolute w-16 h-16 rounded-full bg-white/12 backdrop-blur-sm animate-bubble-4" style="left: 80%; bottom: -18%;"></div>
+            <!-- Brillo superior suave -->
+            <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/20 to-transparent"></div>
+          </div>
+          
+          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded-2xl z-10">
+            <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-current"></div>
           </div>
           
           <!-- Estado: No marcada - Activo -->
           <template v-if="!entradaMarcada && !verificandoAsistencia">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span class="font-semibold text-sm">Marcar Entrada</span>
-            <span class="text-xs opacity-90">Registra tu llegada</span>
+            <div class="relative z-10 flex flex-col items-center">
+              <div class="w-16 h-16 rounded-full bg-white/25 flex items-center justify-center mb-4 backdrop-blur-sm shadow-lg border border-white/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <span class="font-bold text-lg tracking-wide">Marcar Entrada</span>
+              <span class="text-sm opacity-90 mt-1">Registra tu llegada</span>
+            </div>
           </template>
           
           <!-- Estado: Marcada - Completada -->
           <template v-else-if="entradaMarcada">
-            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mb-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span class="font-semibold text-sm text-gray-700">Entrada Registrada</span>
-            <span class="text-xs text-gray-500">
+            <span class="font-bold text-base text-gray-700">Entrada Registrada</span>
+            <span class="text-sm text-gray-500 mt-1">
               <span v-if="asistenciaHoy && asistenciaHoy.entrada">
                 {{ formatearHora(asistenciaHoy.entrada) }}
               </span>
@@ -130,62 +146,82 @@
                 {{ datosEntrada.hora }}
               </span>
             </span>
-            <span class="text-xs text-blue-600 font-medium">✓ Completada</span>
+            <span class="text-sm text-blue-600 font-semibold mt-2">✓ Completada</span>
           </template>
         </button>
+
+        <!-- Separador vertical decorativo -->
+        <div class="w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent self-stretch my-4"></div>
 
         <!-- Botón Marcar Salida -->
         <button
           @click="mostrarModalSalida"
           :disabled="!entradaMarcada || salidaMarcada || verificandoAsistencia"
-          class="relative overflow-hidden rounded-xl transition-all duration-300 transform min-h-[80px] w-full flex flex-col items-center justify-center p-2"
+          class="relative overflow-hidden rounded-2xl transition-all duration-300 transform min-h-[200px] flex-1 flex flex-col items-center justify-center p-4"
           :class="{
-            'text-white shadow-lg hover:scale-105 active:scale-95': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
-            'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 cursor-not-allowed': !entradaMarcada || salidaMarcada || verificandoAsistencia
+            'text-white shadow-xl hover:scale-[1.02] active:scale-[0.98]': entradaMarcada && !salidaMarcada && !verificandoAsistencia,
+            'bg-gradient-to-b from-gray-50 to-gray-100 text-gray-500 cursor-not-allowed border border-gray-200': !entradaMarcada || salidaMarcada || verificandoAsistencia
           }"
-          :style="entradaMarcada && !salidaMarcada && !verificandoAsistencia ? 'background-color: rgb(220, 20, 60); box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);' : ''"
-          @mouseover="entradaMarcada && !salidaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(200, 15, 55)')"
-          @mouseout="entradaMarcada && !salidaMarcada && !verificandoAsistencia && ($event.target.style.backgroundColor = 'rgb(220, 20, 60)')"
+          :style="entradaMarcada && !salidaMarcada && !verificandoAsistencia ? 'background: linear-gradient(135deg, rgb(220, 20, 60) 0%, rgb(180, 15, 50) 100%); box-shadow: 0 10px 30px rgba(220, 20, 60, 0.5);' : ''"
         >
-          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
+          <!-- Efecto de burbujas de vidrio flotantes -->
+          <div v-if="entradaMarcada && !salidaMarcada && !verificandoAsistencia" class="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+            <!-- Burbuja 1 -->
+            <div class="absolute w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm animate-bubble-1" style="left: 10%; bottom: -20%;"></div>
+            <!-- Burbuja 2 -->
+            <div class="absolute w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm animate-bubble-2" style="left: 60%; bottom: -15%;"></div>
+            <!-- Burbuja 3 -->
+            <div class="absolute w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm animate-bubble-3" style="left: 35%; bottom: -10%;"></div>
+            <!-- Burbuja 4 -->
+            <div class="absolute w-16 h-16 rounded-full bg-white/12 backdrop-blur-sm animate-bubble-4" style="left: 80%; bottom: -18%;"></div>
+            <!-- Brillo superior suave -->
+            <div class="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/20 to-transparent"></div>
+          </div>
+          
+          <div v-if="verificandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded-2xl z-10">
+            <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-current"></div>
           </div>
           
           <!-- Estado: Activo para marcar salida -->
           <template v-if="entradaMarcada && !salidaMarcada && !verificandoAsistencia">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span class="font-semibold text-sm">Marcar Salida</span>
-            <span class="text-xs opacity-90">Registra tu salida</span>
+            <div class="relative z-10 flex flex-col items-center">
+              <div class="w-16 h-16 rounded-full bg-white/25 flex items-center justify-center mb-4 backdrop-blur-sm shadow-lg border border-white/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <span class="font-bold text-lg tracking-wide">Marcar Salida</span>
+              <span class="text-sm opacity-90 mt-1">Registra tu salida</span>
+            </div>
           </template>
           
           <!-- Estado: Bloqueado (sin entrada) -->
           <template v-else-if="!entradaMarcada">
-            <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mb-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+            <!-- Contenido centrado con padding inferior para la barra -->
+            <div class="flex flex-col items-center pb-10">
+              <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center mb-3 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <span class="font-bold text-base text-gray-600">Marcar Salida</span>
+              <span class="text-sm text-gray-500 mt-1">Primero marca tu entrada</span>
             </div>
-            <span class="font-semibold text-sm text-gray-600">Marcar Salida</span>
-            <span class="text-xs text-gray-500">Primero marca tu entrada</span>
-            <div class="flex items-center mt-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-600 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              <span class="text-xs text-amber-600 font-medium">Bloqueado</span>
+            <!-- Barra de Bloqueado de lado a lado -->
+            <div class="absolute bottom-0 left-0 right-0 bg-gray-500 py-2 rounded-b-2xl">
+              <span class="text-sm text-white font-bold tracking-wider">BLOQUEADO</span>
             </div>
           </template>
           
           <!-- Estado: Salida completada -->
           <template v-else-if="salidaMarcada">
-            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mb-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span class="font-semibold text-sm text-gray-700">Salida Registrada</span>
-            <span class="text-xs text-gray-500">
+            <span class="font-bold text-base text-gray-700">Salida Registrada</span>
+            <span class="text-sm text-gray-500 mt-1">
               <span v-if="asistenciaHoy && asistenciaHoy.salida">
                 {{ formatearHora(asistenciaHoy.salida) }}
               </span>
@@ -193,7 +229,7 @@
                 {{ datosSalida.hora }}
               </span>
             </span>
-            <span class="text-xs text-red-600 font-medium">✓ Completada</span>
+            <span class="text-sm text-red-600 font-semibold mt-2">✓ Completada</span>
           </template>
         </button>
       </div>
@@ -2995,6 +3031,94 @@ watch([entradaMarcada, salidaMarcada], () => {
 </script>
 
 <style scoped>
+/* Animaciones de burbujas de vidrio flotantes */
+@keyframes bubble-float-1 {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-250px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes bubble-float-2 {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.5;
+  }
+  85% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-280px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes bubble-float-3 {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.4;
+  }
+  80% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-220px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes bubble-float-4 {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.55;
+  }
+  88% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateY(-260px) scale(0.95);
+    opacity: 0;
+  }
+}
+
+.animate-bubble-1 {
+  animation: bubble-float-1 8s ease-in-out infinite;
+}
+
+.animate-bubble-2 {
+  animation: bubble-float-2 10s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-bubble-3 {
+  animation: bubble-float-3 7s ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+.animate-bubble-4 {
+  animation: bubble-float-4 9s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s;

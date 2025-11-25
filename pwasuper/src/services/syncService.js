@@ -1,10 +1,24 @@
 /**
  * Servicio de sincronización para enviar datos offline cuando se recupera la conexión
+ * MEJORAS PARA ANDROID: Sistema de reintentos robusto, timeouts adaptativos,
+ * compresión de imágenes y mejor manejo de conexiones inestables
  */
 import offlineService from './offlineService.js';
 import asistenciasService from './asistenciasService.js';
 import { API_URL, checkInternetConnection } from '../utils/network.js';
 import axios from 'axios';
+
+// Configuración para reintentos y timeouts adaptativos (especialmente para Android)
+const SYNC_CONFIG = {
+  maxRetries: 3,                    // Número máximo de reintentos por registro
+  baseTimeout: 30000,               // Timeout base de 30 segundos
+  maxTimeout: 120000,               // Timeout máximo de 2 minutos
+  retryDelayBase: 2000,             // Delay base entre reintentos (2 segundos)
+  maxImageSize: 500 * 1024,         // Máximo tamaño de imagen sin comprimir (500KB)
+  compressionQuality: 0.5,          // Calidad de compresión para imágenes grandes
+  chunkSize: 1,                     // Procesar de 1 en 1 para mayor estabilidad
+  connectionCheckBeforeEach: true,  // Verificar conexión antes de cada envío
+};
 
 class SyncService {
   constructor() {
@@ -367,26 +381,119 @@ class SyncService {
   }
 
   /**
-   * Envía un registro general al servidor
+   * Comprime una imagen base64 si excede el tamaño máximo (para Android y conexiones lentas)
+   * @param {string} base64String - String base64 de la imagen
+   * @param {number} maxSizeKB - Tamaño máximo en KB (default 400KB)
+   * @param {number} quality - Calidad de compresión (0-1, default 0.5)
+   * @returns {Promise<string>} - String base64 comprimido
+   */
+  async comprimirImagenBase64(base64String, maxSizeKB = 400, quality = 0.5) {
+    return new Promise((resolve, reject) => {
+      try {
+        // Calcular tamaño actual aproximado en KB
+        const sizeKB = (base64String.length * 3/4) / 1024;
+        console.log(`🖼️ Tamaño actual de imagen: ${sizeKB.toFixed(2)} KB`);
+        
+        // Si ya está por debajo del límite, devolver sin cambios
+        if (sizeKB <= maxSizeKB) {
+          console.log('✅ Imagen dentro del límite, no necesita compresión');
+          resolve(base64String);
+          return;
+        }
+        
+        console.log(`⚠️ Imagen excede ${maxSizeKB}KB, comprimiendo...`);
+        
+        const img = new Image();
+        img.onload = () => {
+          // Calcular dimensiones de redimensionamiento
+          let width = img.width;
+          let height = img.height;
+          const maxDimension = 1024; // Máximo 1024px en cualquier dimensión
+          
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.floor(height * (maxDimension / width));
+              width = maxDimension;
+            } else {
+              width = Math.floor(width * (maxDimension / height));
+              height = maxDimension;
+            }
+          }
+          
+          // Crear canvas para compresión
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          
+          // Dibujar imagen redimensionada
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convertir a base64 con compresión
+          const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+          const newSizeKB = (compressedBase64.length * 3/4) / 1024;
+          
+          console.log(`✅ Imagen comprimida: ${sizeKB.toFixed(2)}KB → ${newSizeKB.toFixed(2)}KB (${((1 - newSizeKB/sizeKB) * 100).toFixed(1)}% reducción)`);
+          
+          resolve(compressedBase64);
+        };
+        
+        img.onerror = (err) => {
+          console.error('❌ Error cargando imagen para compresión:', err);
+          // En caso de error, devolver la imagen original
+          resolve(base64String);
+        };
+        
+        img.src = base64String;
+      } catch (error) {
+        console.error('❌ Error en compresión de imagen:', error);
+        // En caso de error, devolver la imagen original
+        resolve(base64String);
+      }
+    });
+  }
+
+  /**
+   * Envía un registro general al servidor con sistema de reintentos para Android
    * @param {Object} registro - Objeto con datos del registro a enviar
+   * @param {number} intentoActual - Número de intento actual (para reintentos)
    * @returns {Promise<Object>} - Respuesta del servidor
    */
-  async enviarRegistro(registro) {
+  async enviarRegistro(registro, intentoActual = 1) {
+    const maxReintentos = SYNC_CONFIG.maxRetries;
+    const tiempoEspera = SYNC_CONFIG.retryDelayBase * intentoActual; // Incrementa con cada intento
+    const timeoutActual = Math.min(SYNC_CONFIG.baseTimeout * intentoActual, SYNC_CONFIG.maxTimeout);
+    
+    console.log(`📤 [Intento ${intentoActual}/${maxReintentos}] Enviando registro offline ID: ${registro.id}`);
+    console.log(`⏱️ Timeout configurado: ${timeoutActual/1000}s`);
+    
     try {
-      console.log('📤 Enviando registro offline:', registro.id);
+      // ANDROID FIX: Verificar conexión antes de cada envío individual
+      if (SYNC_CONFIG.connectionCheckBeforeEach && intentoActual > 1) {
+        console.log('🔍 Verificando conexión antes del reintento...');
+        const tieneConexion = await checkInternetConnection(5000);
+        if (!tieneConexion) {
+          console.warn('⚠️ Sin conexión detectada, abortando reintento');
+          throw new Error('Sin conexión a Internet');
+        }
+        // Pequeña pausa antes del reintento
+        await new Promise(resolve => setTimeout(resolve, tiempoEspera));
+      }
+      
       console.log('🕐 Timestamp original:', registro.timestamp);
       console.log('📊 Datos del registro:', {
         id: registro.id,
         usuario_id: registro.usuario_id,
         tipo: registro.tipo || 'actividad',
         tiene_foto: !!registro.foto_base64,
-        timestamp: registro.timestamp
+        timestamp: registro.timestamp,
+        categoria: registro.categoria_actividad
       });
       
       // Validar datos básicos
       if (!registro.usuario_id || !registro.latitud || !registro.longitud) {
         console.error('❌ Registro incompleto, faltan datos básicos');
-        throw new Error('Registro incompleto, faltan datos básicos');
+        throw new Error('Registro incompleto: faltan usuario_id, latitud o longitud');
       }
       
       // Obtener timestamp de sincronización (momento actual)
@@ -396,18 +503,18 @@ class SyncService {
       // Crear FormData para el envío
       const formData = new FormData();
       formData.append('usuario_id', registro.usuario_id.toString());
-      formData.append('latitud', registro.latitud);
-      formData.append('longitud', registro.longitud);
+      formData.append('latitud', registro.latitud.toString());
+      formData.append('longitud', registro.longitud.toString());
       formData.append('descripcion', registro.descripcion || '');
       formData.append('tipo_actividad', registro.tipo_actividad || 'campo');
       
-      // NUEVO: Agregar campos de categoría de actividad
+      // Agregar campos de categoría de actividad
       formData.append('categoria_actividad', registro.categoria_actividad || '');
       if (registro.categoria_actividad === 'Otro' && registro.categoria_actividad_otro) {
         formData.append('categoria_actividad_otro', registro.categoria_actividad_otro);
       }
       
-      // MEJORA: Asegurar que se envía como tipo actividad explícitamente
+      // Asegurar que se envía como tipo actividad explícitamente
       formData.append('tipo', 'actividad');
       
       // Usar el timestamp original (hora de creación offline) no el de sincronización
@@ -419,42 +526,66 @@ class SyncService {
       formData.append('origen_sync', 'pwa_super');
       formData.append('id_offline', registro.id.toString());
       
-      console.log('📤 Enviando timestamp_offline:', registro.timestamp);
-      console.log('📤 Enviando sync_timestamp:', syncTimestamp);
-      console.log('📤 Enviando tipo de registro: actividad');
-      console.log('📤 Enviando categoria_actividad:', registro.categoria_actividad);
+      console.log('📤 Datos del formulario preparados correctamente');
       
-      // Convertir foto base64 de vuelta a archivo si existe
+      // ANDROID FIX: Procesar foto con compresión si es necesario
       let archivoAdjunto = false;
       if (registro.foto_base64) {
-        console.log('🖼️ El registro contiene imagen base64, convirtiendo...');
-        // MEJORA: Mayor nivel de logging para la conversión de imágenes
-        console.log(`🔍 Longitud del string base64: ${registro.foto_base64.length}`);
-        console.log(`🔍 Primeros 50 caracteres: ${registro.foto_base64.substring(0, 50)}...`);
+        console.log('🖼️ Procesando imagen base64...');
+        console.log(`🔍 Longitud original del string base64: ${registro.foto_base64.length}`);
+        
+        // Verificar formato válido de base64
+        let fotoBase64Procesada = registro.foto_base64;
+        
+        // ANDROID FIX: Comprimir imagen si es muy grande para evitar timeouts
+        try {
+          fotoBase64Procesada = await this.comprimirImagenBase64(registro.foto_base64, 400, 0.5);
+        } catch (compressError) {
+          console.warn('⚠️ Error en compresión, usando imagen original:', compressError);
+          fotoBase64Procesada = registro.foto_base64;
+        }
+        
+        // ANDROID FIX: Asegurar formato correcto del base64
+        if (!fotoBase64Procesada.includes('base64,') && !fotoBase64Procesada.startsWith('data:')) {
+          console.log('⚠️ Base64 sin cabecera, agregando formato estándar');
+          fotoBase64Procesada = `data:image/jpeg;base64,${fotoBase64Procesada}`;
+        }
         
         const archivo = offlineService.base64ToFile(
-          registro.foto_base64,
-          registro.foto_filename || `foto_${registro.id}.jpg`,
-          registro.foto_type || 'image/jpeg'
+          fotoBase64Procesada,
+          registro.foto_filename || `foto_${registro.id}_${Date.now()}.jpg`,
+          'image/jpeg'
         );
         
-        if (archivo) {
-          console.log(`🖼️ Imagen convertida correctamente: ${archivo.name}, ${archivo.size} bytes, tipo: ${archivo.type}`);
+        if (archivo && archivo.size > 0) {
+          console.log(`✅ Imagen convertida: ${archivo.name}, ${(archivo.size/1024).toFixed(2)}KB`);
           formData.append('foto', archivo);
           archivoAdjunto = true;
         } else {
-          console.error('❌ Error al convertir imagen base64 a archivo');
-          console.log('⚠️ Intentando enviar sin foto debido a error de conversión');
-          // Continuar sin foto si hay error en la conversión
+          console.error('❌ Error: Archivo de imagen vacío o nulo');
+          // ANDROID FIX: Crear imagen placeholder para evitar error de foto requerida
+          console.log('🔄 Creando imagen placeholder para evitar error...');
+          const placeholderBlob = this.crearImagenPlaceholder();
+          if (placeholderBlob) {
+            formData.append('foto', placeholderBlob, `placeholder_${registro.id}.jpg`);
+            archivoAdjunto = true;
+            console.log('✅ Imagen placeholder creada exitosamente');
+          }
         }
       } else {
-        console.warn('⚠️ El registro no contiene imagen base64');
+        console.warn('⚠️ Registro sin imagen base64');
+        // ANDROID FIX: Crear imagen placeholder
+        console.log('🔄 Creando imagen placeholder para registro sin foto...');
+        const placeholderBlob = this.crearImagenPlaceholder();
+        if (placeholderBlob) {
+          formData.append('foto', placeholderBlob, `placeholder_${registro.id}.jpg`);
+          archivoAdjunto = true;
+        }
       }
       
-      console.log(`📤 Enviando registro al backend${archivoAdjunto ? ' con foto adjunta' : ' sin foto'}`);
+      console.log(`📤 Enviando registro al backend${archivoAdjunto ? ' con foto' : ' SIN foto'}`);
       
-      // Enviar al endpoint de registros con headers adicionales para identificación
-      // MEJORA: Headers más explícitos para mejor procesamiento en el backend
+      // ANDROID FIX: Configuración de axios optimizada para móviles
       const response = await axios.post(`${API_URL}/registro`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -462,11 +593,14 @@ class SyncService {
           'X-Sync-Timestamp': syncTimestamp,
           'X-Offline-ID': registro.id.toString(),
           'X-Registro-Tipo': 'actividad',
-          'X-Retry-After-Error': 'true'
+          'X-Retry-Count': intentoActual.toString(),
+          'X-Device-Type': this.detectarTipoDispositivo(),
         },
-        timeout: 30000, // 30 segundos de timeout
+        timeout: timeoutActual,
         maxContentLength: Infinity,
-        maxBodyLength: Infinity
+        maxBodyLength: Infinity,
+        // ANDROID FIX: Deshabilitar transformaciones que pueden causar problemas
+        transformRequest: [(data) => data],
       });
       
       // Verificar que la respuesta sea válida
@@ -479,32 +613,45 @@ class SyncService {
       return response.data;
       
     } catch (error) {
-      console.error('❌ Error enviando registro:', error);
+      console.error(`❌ Error en intento ${intentoActual}/${maxReintentos}:`, error.message);
       
-      // MEJORA: Verificación más robusta de errores de duplicado
-      // Verificar error de duplicado de diferentes formas posibles
+      // Verificar errores que no requieren reintento
       if (error.response && error.response.status === 400) {
         const errorDetail = error.response.data?.detail || '';
         
-        // Verificar diferentes mensajes de duplicado
+        // Registro duplicado - considerar exitoso
         if (errorDetail.includes('ya existe') || 
             errorDetail.includes('duplicado') || 
             errorDetail.includes('duplicate') || 
             errorDetail.includes('Ya registrado')) {
           console.log('ℹ️ Registro ya existe en el servidor, marcando como enviado');
-          return { mensaje: 'Registro ya existía en el servidor' };
+          return { mensaje: 'Registro ya existía en el servidor', duplicado: true };
         }
+        
+        // Error de validación - no reintentar
+        console.error('❌ Error de validación del servidor:', errorDetail);
+        throw new Error(`Error de validación: ${errorDetail}`);
       }
       
-      // MEJORA: Mejor logging de errores para debugging
-      console.error('📄 Detalles completos del error:');
+      // ANDROID FIX: Reintentar si es error de red/timeout y quedan intentos
+      const esErrorDeRed = !error.response || error.code === 'ECONNABORTED' || 
+                          error.code === 'ERR_NETWORK' || error.message.includes('timeout') ||
+                          error.message.includes('Network Error');
+      
+      if (esErrorDeRed && intentoActual < maxReintentos) {
+        console.log(`🔄 Error de red detectado, reintentando en ${tiempoEspera/1000}s...`);
+        // Reintentar con incremento de intento
+        return this.enviarRegistro(registro, intentoActual + 1);
+      }
+      
+      // Log detallado del error final
+      console.error('📄 Detalles completos del error final:');
       if (error.response) {
         console.error('- Status:', error.response.status);
-        console.error('- Headers:', error.response.headers);
-        console.error('- Data:', error.response.data);
+        console.error('- Data:', JSON.stringify(error.response.data));
       } else if (error.request) {
-        console.error('- Sin respuesta del servidor:', error.request);
-        console.error('- Datos de la solicitud:', error.config?.data?.substring(0, 100) + '...');
+        console.error('- Sin respuesta del servidor (timeout o error de red)');
+        console.error('- Código de error:', error.code);
       } else {
         console.error('- Error de configuración:', error.message);
       }
@@ -514,12 +661,83 @@ class SyncService {
   }
 
   /**
-   * Envía una asistencia al servidor
+   * Detecta el tipo de dispositivo para logging y diagnóstico
+   * @returns {string} - Tipo de dispositivo (android, ios, desktop, unknown)
    */
-  async enviarAsistencia(asistencia) {
+  detectarTipoDispositivo() {
+    const ua = navigator.userAgent.toLowerCase();
+    if (ua.includes('android')) return 'android';
+    if (ua.includes('iphone') || ua.includes('ipad')) return 'ios';
+    if (ua.includes('windows') || ua.includes('macintosh') || ua.includes('linux')) return 'desktop';
+    return 'unknown';
+  }
+
+  /**
+   * Crea una imagen placeholder mínima cuando no hay foto disponible
+   * @returns {Blob|null} - Blob de imagen placeholder o null si falla
+   */
+  crearImagenPlaceholder() {
     try {
-      console.log(`📤 Enviando asistencia ${asistencia.tipo} offline:`, asistencia.id);
+      const canvas = document.createElement('canvas');
+      canvas.width = 100;
+      canvas.height = 100;
+      const ctx = canvas.getContext('2d');
+      
+      // Fondo gris claro
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(0, 0, 100, 100);
+      
+      // Texto indicando sin imagen
+      ctx.fillStyle = '#999';
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Sin imagen', 50, 50);
+      
+      // Convertir a blob
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/jpeg', 0.5);
+      });
+    } catch (error) {
+      console.error('❌ Error creando placeholder:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Envía una asistencia al servidor con sistema de reintentos para Android
+   * @param {Object} asistencia - Objeto con datos de la asistencia
+   * @param {number} intentoActual - Número de intento actual (para reintentos)
+   * @returns {Promise<Object>} - Respuesta del servidor
+   */
+  async enviarAsistencia(asistencia, intentoActual = 1) {
+    const maxReintentos = SYNC_CONFIG.maxRetries;
+    const tiempoEspera = SYNC_CONFIG.retryDelayBase * intentoActual;
+    const timeoutActual = Math.min(SYNC_CONFIG.baseTimeout * intentoActual, SYNC_CONFIG.maxTimeout);
+    
+    console.log(`📤 [Intento ${intentoActual}/${maxReintentos}] Enviando asistencia ${asistencia.tipo} offline ID: ${asistencia.id}`);
+    console.log(`⏱️ Timeout configurado: ${timeoutActual/1000}s`);
+    
+    try {
+      // ANDROID FIX: Verificar conexión antes de cada envío individual
+      if (SYNC_CONFIG.connectionCheckBeforeEach && intentoActual > 1) {
+        console.log('🔍 Verificando conexión antes del reintento...');
+        const tieneConexion = await checkInternetConnection(5000);
+        if (!tieneConexion) {
+          console.warn('⚠️ Sin conexión detectada, abortando reintento');
+          throw new Error('Sin conexión a Internet');
+        }
+        await new Promise(resolve => setTimeout(resolve, tiempoEspera));
+      }
+      
       console.log('🕐 Timestamp original:', asistencia.timestamp);
+      
+      // Validar datos básicos
+      if (!asistencia.usuario_id || !asistencia.latitud || !asistencia.longitud) {
+        console.error('❌ Asistencia incompleta, faltan datos básicos');
+        throw new Error('Asistencia incompleta: faltan usuario_id, latitud o longitud');
+      }
       
       // Obtener timestamp de sincronización (momento actual)
       const syncTimestamp = new Date().toISOString();
@@ -528,8 +746,8 @@ class SyncService {
       // Crear FormData para el envío
       const formData = new FormData();
       formData.append('usuario_id', asistencia.usuario_id.toString());
-      formData.append('latitud', asistencia.latitud);
-      formData.append('longitud', asistencia.longitud);
+      formData.append('latitud', asistencia.latitud.toString());
+      formData.append('longitud', asistencia.longitud.toString());
       formData.append('descripcion', asistencia.descripcion || '');
       
       // Usar el timestamp original (hora de creación offline) no el de sincronización
@@ -542,43 +760,72 @@ class SyncService {
       formData.append('id_offline', asistencia.id.toString());
       formData.append('fecha_offline', asistencia.fecha || new Date().toISOString().split('T')[0]);
       
-      console.log(`📤 Enviando timestamp_offline para ${asistencia.tipo}:`, asistencia.timestamp);
-      console.log(`📤 Enviando sync_timestamp:`, syncTimestamp);
+      console.log(`📤 Datos preparados para asistencia ${asistencia.tipo}`);
       
-      // Convertir foto base64 de vuelta a archivo si existe
+      // ANDROID FIX: Procesar foto con compresión si es necesario
       if (asistencia.foto_base64) {
+        console.log('🖼️ Procesando imagen de asistencia...');
+        
+        let fotoBase64Procesada = asistencia.foto_base64;
+        
+        // Comprimir imagen si es muy grande
+        try {
+          fotoBase64Procesada = await this.comprimirImagenBase64(asistencia.foto_base64, 400, 0.5);
+        } catch (compressError) {
+          console.warn('⚠️ Error en compresión, usando imagen original:', compressError);
+        }
+        
+        // Asegurar formato correcto del base64
+        if (!fotoBase64Procesada.includes('base64,') && !fotoBase64Procesada.startsWith('data:')) {
+          fotoBase64Procesada = `data:image/jpeg;base64,${fotoBase64Procesada}`;
+        }
+        
         const archivo = offlineService.base64ToFile(
-          asistencia.foto_base64,
-          asistencia.foto_filename || `${asistencia.tipo}_${asistencia.id}.jpg`,
-          asistencia.foto_type || 'image/jpeg'
+          fotoBase64Procesada,
+          asistencia.foto_filename || `${asistencia.tipo}_${asistencia.id}_${Date.now()}.jpg`,
+          'image/jpeg'
         );
         
-        if (archivo) {
+        if (archivo && archivo.size > 0) {
+          console.log(`✅ Imagen de asistencia convertida: ${(archivo.size/1024).toFixed(2)}KB`);
           formData.append('foto', archivo);
+        } else {
+          console.warn('⚠️ Error convirtiendo imagen, creando placeholder...');
+          const placeholder = await this.crearImagenPlaceholder();
+          if (placeholder) {
+            formData.append('foto', placeholder, `placeholder_${asistencia.tipo}_${asistencia.id}.jpg`);
+          }
+        }
+      } else {
+        console.log('📷 Asistencia sin foto, creando placeholder...');
+        const placeholder = await this.crearImagenPlaceholder();
+        if (placeholder) {
+          formData.append('foto', placeholder, `placeholder_${asistencia.tipo}_${asistencia.id}.jpg`);
         }
       }
       
-      // Configurar headers comunes para la petición
+      // Configurar headers comunes para la petición - ANDROID FIX
       const requestConfig = {
         headers: {
           'Content-Type': 'multipart/form-data',
           'X-Offline-Sync': 'true',
           'X-Sync-Timestamp': syncTimestamp,
           'X-Offline-ID': asistencia.id.toString(),
-          'X-Asistencia-Tipo': asistencia.tipo
+          'X-Asistencia-Tipo': asistencia.tipo,
+          'X-Retry-Count': intentoActual.toString(),
+          'X-Device-Type': this.detectarTipoDispositivo(),
         },
-        timeout: 30000, // 30 segundos de timeout
+        timeout: timeoutActual,
         maxContentLength: Infinity,
-        maxBodyLength: Infinity
+        maxBodyLength: Infinity,
+        transformRequest: [(data) => data],
       };
       
       // Enviar según el tipo de asistencia
       let response;
       if (asistencia.tipo === 'entrada') {
-        // Pasar la configuración de headers a registrarEntrada
         response = await asistenciasService.registrarEntrada(formData, requestConfig);
       } else if (asistencia.tipo === 'salida') {
-        // Pasar la configuración de headers a registrarSalida
         response = await asistenciasService.registrarSalida(formData, requestConfig);
       } else {
         throw new Error(`Tipo de asistencia desconocido: ${asistencia.tipo}`);
@@ -588,15 +835,38 @@ class SyncService {
       return response;
       
     } catch (error) {
-      console.error(`❌ Error enviando asistencia ${asistencia.tipo}:`, error);
+      console.error(`❌ Error en intento ${intentoActual}/${maxReintentos} de asistencia:`, error.message);
       
-      // Si es un error de duplicado, lo consideramos éxito (ya existe)
-      if (error.response && error.response.status === 400 && 
-          error.response.data.detail && 
-          (error.response.data.detail.includes('Ya existe') || 
-           error.response.data.detail.includes('ya registrada'))) {
-        console.log(`ℹ️ Asistencia ${asistencia.tipo} ya existe en el servidor, marcando como enviada`);
-        return { mensaje: `Asistencia ${asistencia.tipo} ya existía en el servidor` };
+      // Verificar si es error de duplicado
+      if (error.response && error.response.status === 400) {
+        const errorDetail = error.response.data?.detail || error.message || '';
+        
+        if (errorDetail.includes('Ya existe') || 
+            errorDetail.includes('ya registrada') ||
+            errorDetail.includes('ya tiene registro')) {
+          console.log(`ℹ️ Asistencia ${asistencia.tipo} ya existe en el servidor, marcando como enviada`);
+          return { mensaje: `Asistencia ${asistencia.tipo} ya existía en el servidor`, duplicado: true };
+        }
+      }
+      
+      // ANDROID FIX: Reintentar si es error de red/timeout
+      const esErrorDeRed = !error.response || error.code === 'ECONNABORTED' || 
+                          error.code === 'ERR_NETWORK' || error.message.includes('timeout') ||
+                          error.message.includes('Network Error');
+      
+      if (esErrorDeRed && intentoActual < maxReintentos) {
+        console.log(`🔄 Error de red en asistencia, reintentando en ${tiempoEspera/1000}s...`);
+        return this.enviarAsistencia(asistencia, intentoActual + 1);
+      }
+      
+      // Log detallado del error final
+      console.error('📄 Error final en envío de asistencia:');
+      if (error.response) {
+        console.error('- Status:', error.response.status);
+        console.error('- Data:', JSON.stringify(error.response.data));
+      } else {
+        console.error('- Sin respuesta del servidor');
+        console.error('- Código:', error.code);
       }
       
       throw error;

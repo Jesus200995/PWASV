@@ -309,7 +309,7 @@
           </button>
           
           <!-- Modal principal -->
-          <div class="news-modal bg-white rounded-2xl w-full max-w-md sm:max-w-2xl lg:max-w-4xl h-[90vh] sm:h-[88vh] max-h-[700px] overflow-hidden shadow-2xl transform transition-all duration-500 scale-100 flex flex-col animate-modal-open">
+          <div class="news-modal bg-white rounded-2xl w-full max-w-md sm:max-w-2xl lg:max-w-4xl h-[99vh] sm:h-[88vh] max-h-[99vh] sm:max-h-[700px] overflow-hidden shadow-2xl transform transition-all duration-500 scale-100 flex flex-col animate-modal-open">
         
         <!-- Header Profesional tipo Notificación Moderna -->
         <div class="notification-modal-header relative overflow-hidden flex-shrink-0">
@@ -317,35 +317,35 @@
           <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700"></div>
           <!-- Patrón decorativo sutil (más pequeño) -->
           <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-0 right-0 w-16 h-16 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div class="absolute bottom-0 left-0 w-12 h-12 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+            <div class="absolute top-0 right-0 w-10 h-10 sm:w-16 sm:h-16 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-8 h-8 sm:w-12 sm:h-12 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
           </div>
           
-          <div class="relative z-10 px-3 py-2 sm:px-4 sm:py-2.5">
+          <div class="relative z-10 px-3 py-1.5 sm:px-4 sm:py-2.5">
             <!-- Barra superior con etiqueta -->
-            <div class="flex items-center justify-start mb-1.5">
+            <div class="flex items-center justify-start mb-1">
               <div class="flex items-center gap-1.5">
                 <!-- Icono de notificación -->
-                <div class="w-6 h-6 bg-white/20 backdrop-blur-sm rounded-md flex items-center justify-center">
-                  <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-5 h-5 sm:w-6 sm:h-6 bg-white/20 backdrop-blur-sm rounded-md flex items-center justify-center">
+                  <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                   </svg>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-[9px] font-semibold text-white/80 uppercase tracking-wider">Notificación</span>
-                  <span class="text-[9px] text-white/60">•</span>
-                  <span class="text-[9px] text-white/60">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</span>
+                  <span class="text-[8px] sm:text-[9px] font-semibold text-white/80 uppercase tracking-wider">Notificación</span>
+                  <span class="text-[8px] sm:text-[9px] text-white/60">•</span>
+                  <span class="text-[8px] sm:text-[9px] text-white/60">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Título Principal y Badge en la misma línea -->
-            <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start justify-between gap-2 sm:gap-3">
               <div class="flex-1 min-w-0">
-                <h1 class="text-base sm:text-lg lg:text-xl font-medium text-white leading-tight whitespace-normal break-words">
+                <h1 class="text-sm sm:text-lg lg:text-xl font-medium text-white leading-tight whitespace-normal break-words">
                   {{ notificacionSeleccionada.titulo }}
                 </h1>
-                <p v-if="notificacionSeleccionada.subtitulo" class="text-xs sm:text-sm text-white/75 font-normal mt-1 italic whitespace-normal break-words">
+                <p v-if="notificacionSeleccionada.subtitulo" class="text-[11px] sm:text-sm text-white/75 font-normal mt-0.5 sm:mt-1 italic whitespace-normal break-words">
                   {{ notificacionSeleccionada.subtitulo }}
                 </p>
               </div>

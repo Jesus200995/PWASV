@@ -313,8 +313,8 @@
         
         <!-- Header Profesional tipo Notificación Moderna -->
         <div class="notification-modal-header relative overflow-hidden flex-shrink-0">
-          <!-- Fondo degradado elegante -->
-          <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700"></div>
+          <!-- Fondo degradado elegante guinda con verde -->
+          <div class="absolute inset-0 bg-gradient-to-r from-rose-800 via-pink-900 to-emerald-700"></div>
           <!-- Patrón decorativo sutil (más pequeño) -->
           <div class="absolute inset-0 opacity-10">
             <div class="absolute top-0 right-0 w-10 h-10 sm:w-16 sm:h-16 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
@@ -373,7 +373,7 @@
           <!-- Sección de Descripción/Mensaje -->
           <div class="notification-description-section mb-6">
             <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-xl p-4 shadow-sm">
-              <div class="notification-description-text text-sm text-gray-700 leading-relaxed" v-html="formatearDescripcion(notificacionSeleccionada.descripcion)"></div>
+              <div class="notification-description-text text-sm text-gray-700 leading-snug" v-html="formatearDescripcion(notificacionSeleccionada.descripcion)"></div>
             </div>
           </div>
 

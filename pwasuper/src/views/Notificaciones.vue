@@ -293,82 +293,92 @@
          @click="cerrarDetalleNotificacion">
       <div class="news-modal bg-white rounded-2xl w-full max-w-md sm:max-w-2xl lg:max-w-4xl h-[90vh] sm:h-[88vh] max-h-[700px] overflow-hidden shadow-2xl transform transition-all duration-300 scale-100 flex flex-col" @click.stop>
         
-        <!-- Header Profesional tipo Periódico -->
-        <div class="news-header relative overflow-hidden flex-shrink-0">
-          <!-- Patrón de fondo sutil -->
-          <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 opacity-95"></div>
-          <div class="absolute inset-0 bg-newspaper-pattern opacity-5"></div>
+        <!-- Header Profesional tipo Notificación Moderna -->
+        <div class="notification-modal-header relative overflow-hidden flex-shrink-0">
+          <!-- Fondo degradado elegante -->
+          <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700"></div>
+          <!-- Patrón decorativo sutil (más pequeño) -->
+          <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-12 h-12 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+          </div>
           
-          <div class="relative z-10 p-1 sm:p-2">
-            <!-- Barra superior con logo y fecha - mucho más compacta -->
-            <div class="flex items-center justify-between mb-1 pb-1 border-b border-gray-600">
-              <div class="flex items-center space-x-1">
-                <div class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+          <div class="relative z-10 px-3 py-2 sm:px-4 sm:py-2.5">
+            <!-- Barra superior con etiqueta y botón cerrar -->
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <!-- Icono de notificación -->
+                <div class="w-6 h-6 bg-white/20 backdrop-blur-sm rounded-md flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                   </svg>
                 </div>
-                <div>
-                  <div style="font-size: 0.65rem;" class="text-green-400 font-semibold tracking-wider uppercase">Notificación</div>
-                  <div style="font-size: 0.65rem;" class="text-gray-300">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[9px] font-semibold text-white/80 uppercase tracking-wider">Notificación</span>
+                  <span class="text-[9px] text-white/60">•</span>
+                  <span class="text-[9px] text-white/60">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</span>
                 </div>
               </div>
               
               <button 
                 @click="cerrarDetalleNotificacion"
-                class="close-button w-7 h-7 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-all duration-200 group"
+                class="w-6 h-6 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-200 group"
               >
-                <svg class="w-3.5 h-3.5 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
             </div>
 
-            <!-- Título Principal - más compacto -->
-            <div class="mb-1">
-              <h1 class="news-title text-sm sm:text-base lg:text-lg font-bold text-white leading-tight mb-1">
-                {{ notificacionSeleccionada.titulo }}
-              </h1>
-              <p v-if="notificacionSeleccionada.subtitulo" style="font-size: 0.7rem;" class="news-subtitle text-gray-300 font-medium">
-                {{ notificacionSeleccionada.subtitulo }}
-              </p>
-            </div>
-
-            <!-- Estado de lectura -->
-            <div class="flex items-center space-x-1">
-              <div class="flex items-center space-x-1">
-                <div :class="[
-                  'w-1.5 h-1.5 rounded-full',
+            <!-- Título Principal y Badge en la misma línea -->
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex-1 min-w-0">
+                <h1 class="text-sm sm:text-base font-bold text-white leading-snug truncate">
+                  {{ notificacionSeleccionada.titulo }}
+                </h1>
+                <p v-if="notificacionSeleccionada.subtitulo" class="text-[11px] text-white/70 font-medium mt-0.5 italic truncate">
+                  {{ notificacionSeleccionada.subtitulo }}
+                </p>
+              </div>
+              
+              <!-- Badge de estado -->
+              <div :class="[
+                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold flex-shrink-0',
+                notificacionSeleccionada.leida 
+                  ? 'bg-green-400/20 text-green-100' 
+                  : 'bg-red-400/20 text-red-100'
+              ]">
+                <span :class="[
+                  'w-1 h-1 rounded-full',
                   notificacionSeleccionada.leida ? 'bg-green-400' : 'bg-red-400 animate-pulse'
-                ]"></div>
-                <span style="font-size: 0.65rem;" class="text-gray-400">
-                  {{ notificacionSeleccionada.leida ? 'Leída' : 'Nueva' }}
-                </span>
+                ]"></span>
+                <span>{{ notificacionSeleccionada.leida ? 'Leída' : 'Nueva' }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Contenido del Artículo -->
-        <div class="news-content flex-1 p-2 sm:p-3 overflow-y-auto min-h-0">
+        <div class="notification-modal-content flex-1 p-4 sm:p-5 overflow-y-auto min-h-0">
           
-          <!-- Lead/Entradilla siempre completa -->
-          <div class="news-lead mb-4">
-            <div style="font-size: 0.75rem;" class="text-gray-800 leading-relaxed font-medium border-l-3 border-green-500 pl-3 bg-gray-50 py-2 rounded-r-md">
-              <p class="mb-1">
-                {{ notificacionSeleccionada.descripcion }}
-              </p>
+          <!-- Sección de Descripción/Mensaje -->
+          <div class="notification-description-section mb-6">
+            <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-xl p-4 shadow-sm">
+              <div class="notification-description-text text-sm text-gray-700 leading-relaxed" v-html="formatearDescripcion(notificacionSeleccionada.descripcion)"></div>
             </div>
           </div>
 
-          <!-- Imagen destacada -->
-          <div v-if="notificacionSeleccionada.tiene_archivo && esImagen(notificacionSeleccionada.archivo_tipo)" class="news-featured-image mb-6">
-            <div class="relative overflow-hidden bg-transparent">
+          <!-- Sección de Imagen -->
+          <div v-if="notificacionSeleccionada.tiene_archivo && esImagen(notificacionSeleccionada.archivo_tipo)" class="notification-image-section mb-6">
+            <div class="relative overflow-hidden bg-white rounded-xl border border-gray-200 shadow-md">
               <!-- Placeholder de carga -->
               <div class="flex items-center justify-center min-h-48 bg-gray-50 image-placeholder">
                 <div class="text-gray-400 text-center">
-                  <div class="text-2xl mb-2">🖼️</div>
+                  <div class="w-12 h-12 mx-auto mb-2 bg-gray-200 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-gray-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
                   <div class="text-sm font-medium">Cargando imagen...</div>
                 </div>
               </div>
@@ -376,23 +386,26 @@
               <img 
                 :src="obtenerUrlArchivo(notificacionSeleccionada.id)" 
                 :alt="notificacionSeleccionada.archivo_nombre"
-                class="w-full h-auto object-contain cursor-pointer hover:scale-105 transition-transform duration-300 relative z-10 bg-white"
+                class="w-full h-auto object-contain cursor-pointer hover:scale-[1.02] transition-transform duration-300 relative z-10 bg-white"
                 @click="abrirArchivo(notificacionSeleccionada.id)"
                 @error="onImageError"
                 @load="onImageLoad"
                 loading="eager"
                 decoding="async"
               />
-              <!-- Overlay con información -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                <p class="text-white text-xs">{{ notificacionSeleccionada.archivo_nombre }}</p>
+              <!-- Overlay con información del archivo -->
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent p-4">
+                <div class="flex items-center justify-between">
+                  <p class="text-white text-sm font-medium truncate max-w-[70%]">{{ notificacionSeleccionada.archivo_nombre }}</p>
+                  <span class="text-white/70 text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">Toca para ampliar</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Video embebido - tamaño reducido -->
-          <div v-else-if="notificacionSeleccionada.tiene_archivo && esVideo(notificacionSeleccionada.archivo_tipo)" class="news-video mb-6" style="max-width: 85%; margin: 0 auto;">
-            <div class="relative overflow-hidden bg-gray-100 shadow-lg">
+          <!-- Sección de Video -->
+          <div v-else-if="notificacionSeleccionada.tiene_archivo && esVideo(notificacionSeleccionada.archivo_tipo)" class="notification-video-section mb-6">
+            <div class="relative overflow-hidden bg-gray-900 rounded-xl shadow-lg border border-gray-800">
               <video 
                 :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
                 class="w-full h-auto object-cover"
@@ -400,12 +413,16 @@
                 preload="metadata"
                 poster=""
               >
-                <div class="flex items-center justify-center min-h-48 bg-gray-200">
-                  <div class="text-gray-600 text-center">
+                <div class="flex items-center justify-center min-h-48 bg-gray-800">
+                  <div class="text-gray-400 text-center">
                     <div class="text-sm">Tu navegador no soporta video</div>
                   </div>
                 </div>
               </video>
+              <!-- Nombre del archivo -->
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 pointer-events-none">
+                <p class="text-white/80 text-xs font-medium truncate">{{ notificacionSeleccionada.archivo_nombre }}</p>
+              </div>
             </div>
           </div>
 
@@ -557,42 +574,46 @@
             </div>
           </div>
 
-          <!-- Enlace relacionado - Diseño empresarial moderno -->
-          <div v-if="notificacionSeleccionada.enlace_url" class="enterprise-link-section mb-3">
-            <h4 class="link-section-title">Enlace</h4>
-            <div class="enterprise-link-card">
-              <!-- Header con icono y acción -->
-              <div class="link-header">
-                <div class="link-icon-container">
-                  <svg class="link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                  </svg>
+          <!-- Sección de Enlace -->
+          <div v-if="notificacionSeleccionada.enlace_url" class="notification-link-section mb-6">
+            <a 
+              :href="notificacionSeleccionada.enlace_url" 
+              target="_blank"
+              rel="noopener noreferrer"
+              class="notification-link-card group block"
+            >
+              <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 hover:border-blue-400 hover:shadow-md transition-all duration-300">
+                <div class="flex items-center gap-3">
+                  <!-- Icono de enlace -->
+                  <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                  </div>
+                  <!-- Contenido -->
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Abrir enlace</div>
+                    <div class="text-xs text-gray-500 truncate mt-0.5">{{ formatearEnlaceLegible(notificacionSeleccionada.enlace_url) }}</div>
+                  </div>
+                  <!-- Flecha -->
+                  <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                  </div>
                 </div>
-                <div class="link-content">
-                  <div class="link-url-display">{{ formatearEnlaceLegible(notificacionSeleccionada.enlace_url) }}</div>
-                </div>
-                <a 
-                  :href="notificacionSeleccionada.enlace_url" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="enterprise-action-btn"
-                  :title="notificacionSeleccionada.enlace_url"
-                >
-                  <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </a>
               </div>
-            </div>
+            </a>
           </div>
         </div>
         
-        <!-- Footer del artículo - solo fecha -->
-        <div class="news-footer flex-shrink-0 border-t border-gray-200 p-1 sm:p-2 bg-gray-50">
-          <div class="text-center">
-            <div style="font-size: 0.6rem;" class="text-gray-600">
-              Recibido: {{ formatearFechaCompleta(notificacionSeleccionada.fecha_creacion) }}
-            </div>
+        <!-- Footer del modal mejorado -->
+        <div class="notification-modal-footer flex-shrink-0 border-t border-gray-200 px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100">
+          <div class="flex items-center justify-center gap-1.5 text-[10px] text-gray-400">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Recibido: {{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</span>
           </div>
         </div>
       </div>
@@ -1644,6 +1665,39 @@ const formatearFecha = (fechaISO) => {
 
 const formatearFechaCompleta = (fechaISO) => {
   return notificacionesService.formatearFechaCompleta(fechaISO)
+}
+
+// Función para formatear la descripción respetando saltos de línea y formato
+const formatearDescripcion = (texto) => {
+  if (!texto) return ''
+  
+  // Escapar HTML para seguridad
+  const escaparHtml = (str) => {
+    const div = document.createElement('div')
+    div.textContent = str
+    return div.innerHTML
+  }
+  
+  let textoFormateado = escaparHtml(texto)
+  
+  // Convertir saltos de línea a <br>
+  textoFormateado = textoFormateado.replace(/\n\n/g, '</p><p class="mt-3">')
+  textoFormateado = textoFormateado.replace(/\n/g, '<br>')
+  
+  // Detectar URLs y convertirlas en enlaces
+  const urlRegex = /(https?:\/\/[^\s<]+)/g
+  textoFormateado = textoFormateado.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline break-all">$1</a>')
+  
+  // Detectar texto entre asteriscos como negrita
+  textoFormateado = textoFormateado.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+  textoFormateado = textoFormateado.replace(/\*(.+?)\*/g, '<em class="italic">$1</em>')
+  
+  // Envolver en párrafo si no está ya
+  if (!textoFormateado.startsWith('<p')) {
+    textoFormateado = `<p class="mb-0">${textoFormateado}</p>`
+  }
+  
+  return textoFormateado
 }
 
 const esReciente = (fechaISO) => {
@@ -3914,5 +3968,257 @@ video::-webkit-media-controls {
   font-weight: 500;
   text-transform: uppercase;
   z-index: 10;
+}
+
+/* =================================
+   ESTILOS PARA MODAL PROFESIONAL DE NOTIFICACIONES
+   ================================= */
+
+/* Header del modal de notificación */
+.notification-modal-header {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Contenido del modal */
+.notification-modal-content {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: #ffffff;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
+}
+
+.notification-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notification-modal-content::-webkit-scrollbar-thumb {
+  background-color: rgba(16, 185, 129, 0.3);
+  border-radius: 3px;
+}
+
+.notification-modal-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(16, 185, 129, 0.5);
+}
+
+/* Sección de descripción */
+.notification-description-section {
+  position: relative;
+}
+
+.notification-description-text {
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: #374151;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.notification-description-text p {
+  margin-bottom: 0;
+}
+
+.notification-description-text p + p {
+  margin-top: 0.75rem;
+}
+
+.notification-description-text a {
+  color: #2563eb;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.notification-description-text a:hover {
+  color: #1d4ed8;
+}
+
+/* Sección de imagen */
+.notification-image-section {
+  position: relative;
+}
+
+.notification-image-section img {
+  max-height: 60vh;
+  width: 100%;
+  object-fit: contain;
+  background: #f9fafb;
+}
+
+/* Sección de video */
+.notification-video-section video {
+  max-height: 60vh;
+  width: 100%;
+  object-fit: contain;
+}
+
+/* Sección de enlace */
+.notification-link-card {
+  text-decoration: none;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.notification-link-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Footer del modal */
+.notification-modal-footer {
+  position: relative;
+}
+
+.notification-modal-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #10b981, transparent);
+}
+
+/* Responsividad para el modal de notificaciones */
+@media (max-width: 640px) {
+  .notification-modal-header {
+    padding: 1rem !important;
+  }
+  
+  .notification-modal-header h1 {
+    font-size: 1.125rem !important;
+  }
+  
+  .notification-modal-content {
+    padding: 1rem !important;
+  }
+  
+  .notification-description-text {
+    font-size: 0.875rem;
+    line-height: 1.625;
+  }
+  
+  .notification-image-section img {
+    max-height: 50vh;
+  }
+  
+  .notification-video-section video {
+    max-height: 50vh;
+  }
+  
+  .notification-modal-footer {
+    padding: 0.75rem 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-modal-header {
+    padding: 0.875rem !important;
+  }
+  
+  .notification-modal-header h1 {
+    font-size: 1rem !important;
+  }
+  
+  .notification-modal-header .text-xs {
+    font-size: 0.65rem !important;
+  }
+  
+  .notification-modal-content {
+    padding: 0.875rem !important;
+  }
+  
+  .notification-description-text {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+  
+  .notification-image-section img {
+    max-height: 40vh;
+  }
+  
+  .notification-video-section video {
+    max-height: 40vh;
+  }
+  
+  .notification-link-section .rounded-xl {
+    padding: 0.75rem !important;
+  }
+  
+  .notification-modal-footer {
+    padding: 0.625rem 0.875rem !important;
+  }
+  
+  .notification-modal-footer button {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .notification-modal-header {
+    padding: 0.75rem !important;
+  }
+  
+  .notification-modal-header h1 {
+    font-size: 0.9375rem !important;
+  }
+  
+  .notification-modal-content {
+    padding: 0.75rem !important;
+  }
+  
+  .notification-description-text {
+    font-size: 0.75rem;
+  }
+  
+  .notification-image-section img,
+  .notification-video-section video {
+    max-height: 35vh;
+  }
+}
+
+/* Animaciones para elementos del modal */
+.notification-description-section,
+.notification-image-section,
+.notification-video-section,
+.notification-link-section {
+  animation: fadeInUp 0.4s ease-out;
+  animation-fill-mode: backwards;
+}
+
+.notification-image-section {
+  animation-delay: 0.1s;
+}
+
+.notification-video-section {
+  animation-delay: 0.1s;
+}
+
+.notification-link-section {
+  animation-delay: 0.2s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .notification-description-section,
+  .notification-image-section,
+  .notification-video-section,
+  .notification-link-section {
+    animation: none;
+  }
 }
 </style>

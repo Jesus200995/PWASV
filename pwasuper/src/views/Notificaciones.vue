@@ -304,8 +304,8 @@
           </div>
           
           <div class="relative z-10 px-3 py-2 sm:px-4 sm:py-2.5">
-            <!-- Barra superior con etiqueta y botón cerrar -->
-            <div class="flex items-center justify-between mb-1.5">
+            <!-- Barra superior con etiqueta -->
+            <div class="flex items-center justify-start mb-1.5">
               <div class="flex items-center gap-1.5">
                 <!-- Icono de notificación -->
                 <div class="w-6 h-6 bg-white/20 backdrop-blur-sm rounded-md flex items-center justify-center">
@@ -319,15 +319,6 @@
                   <span class="text-[9px] text-white/60">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</span>
                 </div>
               </div>
-              
-              <button 
-                @click="cerrarDetalleNotificacion"
-                class="w-6 h-6 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-200 group"
-              >
-                <svg class="w-3 h-3 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </button>
             </div>
 
             <!-- Título Principal y Badge en la misma línea -->

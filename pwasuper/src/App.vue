@@ -367,8 +367,8 @@ function logout() {
     <!-- Modal de actualización de la aplicación (obligatorio) -->
     <UpdateNotification />
 
-    <!-- Burbuja de soporte (solo visible cuando el usuario está logueado y no está en la vista de soporte) -->
-    <SupportBubble v-if="isLoggedIn" :hideOnSupportPage="route.name === 'Support'" />
+    <!-- Burbuja de soporte (solo visible cuando el usuario está logueado y no está en la vista de soporte o notificaciones) -->
+    <SupportBubble v-if="isLoggedIn" :hideOnSupportPage="route.name === 'Support' || route.name === 'Notificaciones'" />
   </div>
 </template>
 

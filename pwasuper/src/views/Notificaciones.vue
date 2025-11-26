@@ -287,11 +287,29 @@
       </div>
     </div>
 
-    <!-- Modal de detalle de notificación - Diseño Profesional Tipo Noticia -->
-    <div v-if="notificacionSeleccionada" 
-         class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 transition-all duration-300"
-         @click="cerrarDetalleNotificacion">
-      <div class="news-modal bg-white rounded-2xl w-full max-w-md sm:max-w-2xl lg:max-w-4xl h-[90vh] sm:h-[88vh] max-h-[700px] overflow-hidden shadow-2xl transform transition-all duration-300 scale-100 flex flex-col" @click.stop>
+    <!-- Modal de detalle de notificación - Teleportado al body para difuminación correcta -->
+    <teleport to="body">
+      <div v-if="notificacionSeleccionada" 
+           class="fixed inset-0 bg-emerald-900/30 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-40 transition-all duration-500 animate-fade-in-blur"
+           @click="cerrarDetalleNotificacion">
+        
+        <!-- Contenedor del modal con botón de cerrar -->
+        <div class="relative" @click.stop>
+          
+          <!-- Botón de cerrar (-) flotante en esquina superior derecha -->
+          <button 
+            @click="cerrarDetalleNotificacion"
+            class="absolute -top-1 right-1 sm:-top-2 sm:right-0 w-8 h-8 sm:w-9 sm:h-9 bg-emerald-600/90 hover:bg-emerald-700 backdrop-blur-sm text-white rounded-full flex items-center justify-center shadow-xl z-50 transition-all duration-200 transform hover:scale-110 active:scale-95 border border-white/20"
+            style="box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);"
+            title="Cerrar notificación"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4" />
+            </svg>
+          </button>
+          
+          <!-- Modal principal -->
+          <div class="news-modal bg-white rounded-2xl w-full max-w-md sm:max-w-2xl lg:max-w-4xl h-[90vh] sm:h-[88vh] max-h-[700px] overflow-hidden shadow-2xl transform transition-all duration-500 scale-100 flex flex-col animate-modal-open">
         
         <!-- Header Profesional tipo Notificación Moderna -->
         <div class="notification-modal-header relative overflow-hidden flex-shrink-0">
@@ -322,12 +340,12 @@
             </div>
 
             <!-- Título Principal y Badge en la misma línea -->
-            <div class="flex items-start justify-between gap-2">
+            <div class="flex items-start justify-between gap-3">
               <div class="flex-1 min-w-0">
-                <h1 class="text-sm sm:text-base font-bold text-white leading-snug truncate">
+                <h1 class="text-base sm:text-lg lg:text-xl font-medium text-white leading-tight whitespace-normal break-words">
                   {{ notificacionSeleccionada.titulo }}
                 </h1>
-                <p v-if="notificacionSeleccionada.subtitulo" class="text-[11px] text-white/70 font-medium mt-0.5 italic truncate">
+                <p v-if="notificacionSeleccionada.subtitulo" class="text-xs sm:text-sm text-white/75 font-normal mt-1 italic whitespace-normal break-words">
                   {{ notificacionSeleccionada.subtitulo }}
                 </p>
               </div>
@@ -607,8 +625,10 @@
             <span>Recibido: {{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</span>
           </div>
         </div>
+        </div>
+        </div>
       </div>
-    </div>
+    </teleport>
     </div>
   </div>
 </template>
@@ -4211,5 +4231,36 @@ video::-webkit-media-controls {
   .notification-link-section {
     animation: none;
   }
+}
+
+/* Animaciones de apertura del modal con desenfoque */
+@keyframes fadeInBlur {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(10px);
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-fade-in-blur {
+  animation: fadeInBlur 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-modal-open {
+  animation: modalSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 </style>

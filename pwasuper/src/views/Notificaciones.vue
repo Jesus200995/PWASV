@@ -107,14 +107,14 @@
                 'enterprise-notification-card group cursor-pointer transition-all duration-300 ease-out',
                 notificacion.leida 
                   ? 'notification-read border-l-green-500' 
-                  : 'notification-unread border-l-red-500'
+                  : 'notification-unread border-l-rose-700'
               ]"
               @click="abrirDetalleNotificacion(notificacion)"
               >
                 <!-- Indicador lateral -->
                 <div :class="[
                   'absolute left-0 top-0 h-full w-1 transition-all duration-300',
-                  notificacion.leida ? 'bg-green-500' : 'bg-red-500'
+                  notificacion.leida ? 'bg-green-500' : 'bg-gradient-to-b from-white/70 via-rose-500 to-white/70'
                 ]"></div>
                 
                 <div class="flex items-start gap-2.5 px-3 py-4">
@@ -124,7 +124,7 @@
                     'w-8 h-8 rounded-lg flex items-center justify-center shadow-sm border transition-all duration-300 group-hover:scale-105',
                     notificacion.leida 
                       ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200 text-green-600' 
-                      : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200 text-red-600'
+                      : 'bg-gradient-to-br from-white/80 to-rose-400 border-white/40 text-rose-800 shadow-lg'
                   ]">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -139,13 +139,13 @@
                     <div class="flex-1 min-w-0 pr-3">
                       <h3 :class="[
                         'text-sm font-semibold leading-tight mb-1 transition-colors duration-200 line-clamp-1',
-                        notificacion.leida ? 'text-gray-700 group-hover:text-gray-900' : 'text-gray-900 group-hover:text-black'
+                        notificacion.leida ? 'text-gray-700 group-hover:text-gray-900' : 'text-white font-bold'
                       ]">
                         {{ notificacion.titulo }}
                       </h3>
                       <p v-if="notificacion.subtitulo" :class="[
                         'notification-subtitle text-xs font-medium transition-colors duration-200 line-clamp-1',
-                        notificacion.leida ? 'text-gray-500' : 'text-gray-600'
+                        notificacion.leida ? 'text-gray-500' : 'text-white/90'
                       ]">
                         {{ notificacion.subtitulo }}
                       </p>
@@ -153,7 +153,7 @@
                     <div class="flex flex-col items-end flex-shrink-0">
                       <span :class="[
                         'notification-date text-xs font-medium transition-colors duration-200',
-                        notificacion.leida ? 'text-gray-400' : 'text-gray-500'
+                        notificacion.leida ? 'text-gray-400' : 'text-white/85'
                       ]">
                         {{ formatearFecha(notificacion.fecha_creacion) }}
                       </span>
@@ -161,7 +161,7 @@
                         'text-xs px-2 py-0.5 rounded-full mt-1 font-medium transition-all duration-200',
                         notificacion.leida 
                           ? 'bg-green-100 text-green-700 border border-green-200' 
-                          : 'bg-red-100 text-red-700 border border-red-200'
+                          : 'bg-gradient-to-r from-white/80 to-rose-400 text-rose-900 border border-white/50 shadow-md font-bold'
                       ]">
                         {{ notificacion.leida ? 'Leída' : 'Nueva' }}
                       </div>
@@ -172,7 +172,7 @@
                   <div v-if="notificacion.descripcion && notificacion.descripcion.trim()" class="mb-3">
                     <p :class="[
                       'text-xs leading-relaxed transition-colors duration-200 line-clamp-2',
-                      notificacion.leida ? 'text-gray-600' : 'text-gray-700'
+                      notificacion.leida ? 'text-gray-600' : 'text-white/95'
                     ]">
                       {{ notificacion.descripcion }}
                     </p>
@@ -2021,103 +2021,114 @@ onBeforeUnmount(() => {
 }
 
 .enterprise-notification-card.notification-unread {
-  background: #fef2f2; /* Fondo estático sin animación */
-  border-left-width: 3px;
-  border-left-color: #ef4444;
+  background: linear-gradient(-45deg, #9f1239, #be123c, #881337, #a21547, #9f1239);
+  background-size: 400% 400%;
+  animation: gradient-flow 4s ease infinite;
+  border-left-width: 4px;
+  border-left-color: rgba(255, 255, 255, 0.7);
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 1px 3px 0 rgba(239, 68, 68, 0.1),
-    0 1px 2px 0 rgba(239, 68, 68, 0.06);
-  will-change: auto; /* Solo el humo se anima */
+    0 4px 15px 0 rgba(159, 18, 57, 0.4),
+    0 2px 6px 0 rgba(159, 18, 57, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  will-change: background-position;
 }
 
-/* Efecto de luz girando alrededor del contorno */
+/* Animación de flujo del gradiente */
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Efecto de brillo sutil moviéndose */
 .enterprise-notification-card.notification-unread::before {
   content: '';
   position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 45deg,
-    rgba(239, 68, 68, 0.6) 90deg,
-    rgba(220, 38, 38, 0.8) 120deg,
-    rgba(185, 28, 28, 1) 135deg,
-    rgba(220, 38, 38, 0.8) 150deg,
-    rgba(239, 68, 68, 0.6) 180deg,
-    transparent 225deg,
-    transparent 360deg
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.1),
+    transparent
   );
-  border-radius: inherit;
-  animation: rotating-border-glow 3s linear infinite;
-  z-index: 0;
+  animation: shimmer-sweep 3s ease-in-out infinite;
+  z-index: 1;
   pointer-events: none;
-  filter: blur(1px);
-  opacity: 0.9;
 }
 
-/* Segunda capa de humo - ahora ajustada para z-index */
+@keyframes shimmer-sweep {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
+}
+
+/* Overlay de brillo suave */
 .enterprise-notification-card.notification-unread::after {
   content: '';
   position: absolute;
-  top: -10%;
-  left: -30%;
-  width: 160%;
-  height: 120%;
-  background: 
-    radial-gradient(ellipse 30px 60px at 25% 55%, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.015) 55%, transparent 90%),
-    radial-gradient(ellipse 20px 25px at 65% 20%, rgba(239, 68, 68, 0.04) 0%, rgba(239, 68, 68, 0.01) 65%, transparent 95%),
-    radial-gradient(ellipse 45px 35px at 80% 80%, rgba(239, 68, 68, 0.06) 0%, rgba(239, 68, 68, 0.025) 50%, transparent 85%),
-    radial-gradient(ellipse 15px 45px at 10% 85%, rgba(239, 68, 68, 0.03) 0%, rgba(239, 68, 68, 0.008) 70%, transparent 92%);
-  animation: smoke-drift-2 2s linear infinite;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 50%
+  );
   z-index: 1;
   pointer-events: none;
-  opacity: 0.7;
-  filter: blur(1.2px);
-  will-change: transform, opacity, filter;
-}
-
-/* Crear un nuevo pseudo-elemento para la primera capa de humo */
-.enterprise-notification-card.notification-unread {
-  background: #fef2f2;
-  border-left-width: 3px;
-  border-left-color: #ef4444;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 
-    0 1px 3px 0 rgba(239, 68, 68, 0.1),
-    0 1px 2px 0 rgba(239, 68, 68, 0.06);
-  will-change: auto;
-}
-
-.enterprise-notification-card.notification-unread .smoke-layer-1 {
-  content: '';
-  position: absolute;
-  top: -20%;
-  left: -50%;
-  width: 200%;
-  height: 140%;
-  background: 
-    radial-gradient(ellipse 40px 20px at 15% 25%, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.04) 40%, transparent 75%),
-    radial-gradient(ellipse 35px 50px at 45% 70%, rgba(239, 68, 68, 0.06) 0%, rgba(239, 68, 68, 0.02) 50%, transparent 85%),
-    radial-gradient(ellipse 50px 30px at 75% 40%, rgba(239, 68, 68, 0.07) 0%, rgba(239, 68, 68, 0.03) 45%, transparent 80%),
-    radial-gradient(ellipse 25px 40px at 85% 15%, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 60%, transparent 90%);
-  animation: smoke-drift-1 2.5s linear infinite;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.9;
-  filter: blur(0.8px);
-  will-change: transform, opacity, filter;
 }
 
 /* Asegurar que el contenido esté por encima de todo */
 .enterprise-notification-card.notification-unread > * {
   position: relative;
   z-index: 2;
+}
+
+/* Textos blancos para notificaciones no leídas */
+.enterprise-notification-card.notification-unread h3,
+.enterprise-notification-card.notification-unread .notification-subtitle,
+.enterprise-notification-card.notification-unread .notification-date,
+.enterprise-notification-card.notification-unread p {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.enterprise-notification-card.notification-unread h3 {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.enterprise-notification-card.notification-unread .notification-subtitle {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.enterprise-notification-card.notification-unread .notification-date {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Icono con fondo blanco/rojo para contraste */
+.enterprise-notification-card.notification-unread .flex-shrink-0 > div {
+  background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, #fb7185 100%) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: #881337 !important;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
 }
 
 .enterprise-notification-card.notification-read {
@@ -2127,22 +2138,20 @@ onBeforeUnmount(() => {
 }
 
 .enterprise-notification-card.notification-unread:hover {
-  background: #fecaca; /* Fondo estático más intenso en hover */
-  animation-play-state: running; /* No hay animación que pausar en el fondo */
-  border-left-color: #b91c1c;
+  background: linear-gradient(-45deg, #881337, #9f1239, #7f1d1d, #9f1239, #881337);
+  background-size: 400% 400%;
+  animation: gradient-flow 2s ease infinite;
+  border-left-color: rgba(255, 255, 255, 0.9);
   box-shadow: 
-    0 3px 6px 0 rgba(239, 68, 68, 0.2),
-    0 2px 4px 0 rgba(239, 68, 68, 0.12),
-    0 0 0 1px rgba(239, 68, 68, 0.08);
-  transform: translateY(-1px);
+    0 8px 25px 0 rgba(159, 18, 57, 0.5),
+    0 4px 10px 0 rgba(159, 18, 57, 0.3),
+    0 0 0 2px rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px) scale(1.01);
 }
 
-/* Pausar también las animaciones de humo al hacer hover */
-.enterprise-notification-card.notification-unread:hover::before,
-.enterprise-notification-card.notification-unread:hover::after {
-  animation-play-state: paused;
-  opacity: 0.1; /* Casi invisible en hover para mejor legibilidad */
-  filter: blur(2px); /* Más desvanecido en hover */
+/* Acelerar animación de brillo en hover */
+.enterprise-notification-card.notification-unread:hover::before {
+  animation: shimmer-sweep 1.5s ease-in-out infinite;
 }
 
 .enterprise-notification-card.notification-read:hover {

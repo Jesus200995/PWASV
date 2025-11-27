@@ -2194,37 +2194,66 @@ function confirmarSalidaModal() {
 function mostrarModalActividadesBloqueadas() {
   if (!entradaMarcada.value) {
     actividadesBloqueadasModalMessage.value = `
-      <div class="text-center">
-        <div class="flex items-center justify-center mb-3">
-          <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mr-2">
-            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="text-center px-2">
+        <!-- Icono principal con animación -->
+        <div class="flex justify-center mb-4">
+          <div class="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl flex items-center justify-center shadow-xl transform rotate-3">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
             </svg>
           </div>
-          <h3 class="text-sm font-semibold text-gray-900">Acceso Bloqueado</h3>
         </div>
         
-        <div class="bg-amber-50 border border-amber-200 rounded-lg p-2 mb-2">
-          <p class="text-amber-800 text-xs font-medium">Inicia tu jornada laboral primero</p>
-          <p class="text-amber-600 text-xs mt-1">Marca tu entrada en "Asistencia"</p>
+        <!-- Título -->
+        <h3 class="text-lg font-bold text-slate-800 mb-2">Acceso Restringido</h3>
+        
+        <!-- Mensaje principal -->
+        <div class="bg-gradient-to-r from-slate-100 to-gray-100 border-l-4 border-slate-600 rounded-r-xl p-4 mb-4 shadow-sm">
+          <p class="text-slate-700 text-sm font-semibold mb-1">Registra tu inicio de jornada</p>
+          <p class="text-slate-500 text-xs">Presiona "Registro de Inicio" en la sección de Asistencia para habilitar el registro de actividades</p>
+        </div>
+        
+        <!-- Pasos -->
+        <div class="flex items-center justify-center space-x-2 text-xs text-slate-500">
+          <span class="flex items-center bg-slate-200 px-3 py-1.5 rounded-full">
+            <span class="w-5 h-5 bg-slate-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-2">1</span>
+            Inicio
+          </span>
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+          <span class="flex items-center bg-slate-100 px-3 py-1.5 rounded-full text-slate-400">
+            <span class="w-5 h-5 bg-slate-300 text-slate-500 rounded-full flex items-center justify-center text-xs font-bold mr-2">2</span>
+            Actividades
+          </span>
         </div>
       </div>
     `;
   } else if (salidaMarcada.value) {
     actividadesBloqueadasModalMessage.value = `
-      <div class="text-center">
-        <div class="flex items-center justify-center mb-3">
-          <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-2">
-            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="text-center px-2">
+        <!-- Icono principal -->
+        <div class="flex justify-center mb-4">
+          <div class="w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-800 rounded-2xl flex items-center justify-center shadow-xl transform -rotate-3">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
             </svg>
           </div>
-          <h3 class="text-sm font-semibold text-gray-900">Salida Registrada</h3>
         </div>
         
-        <div class="bg-red-50 border border-red-200 rounded-lg p-2 mb-2">
-          <p class="text-red-800 text-xs font-medium">Salida de jornada ya marcada</p>
-          <p class="text-red-600 text-xs mt-1">Se restaurará el siguiente día</p>
+        <!-- Título -->
+        <h3 class="text-lg font-bold text-gray-800 mb-2">Jornada Finalizada</h3>
+        
+        <!-- Mensaje principal -->
+        <div class="bg-gradient-to-r from-gray-100 to-slate-100 border-l-4 border-gray-500 rounded-r-xl p-4 mb-4 shadow-sm">
+          <p class="text-gray-700 text-sm font-semibold mb-1">Término de jornada registrado</p>
+          <p class="text-gray-500 text-xs">El acceso a actividades se restablecerá automáticamente mañana con un nuevo registro de inicio</p>
+        </div>
+        
+        <!-- Estado -->
+        <div class="inline-flex items-center bg-gray-200 px-4 py-2 rounded-full">
+          <div class="w-2 h-2 bg-gray-500 rounded-full mr-2 animate-pulse"></div>
+          <span class="text-xs font-medium text-gray-600">Esperando próximo día laboral</span>
         </div>
       </div>
     `;

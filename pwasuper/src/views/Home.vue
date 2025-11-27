@@ -83,7 +83,7 @@
           <h2 class="text-lg font-bold text-gray-800 mb-1 modern-title">Control de Jornada</h2>
           <div class="green-line mx-auto mb-1"></div>
           <p class="text-xs text-gray-500">
-            {{ modoAsistencia ? 'Completa los datos para ' + (tipoAsistencia === 'entrada' ? 'registrar inicio' : 'registrar término') : 'Registra tu hora de inicio y término' }}
+            {{ modoAsistencia ? 'Completa los datos para ' + (tipoAsistencia === 'entrada' ? 'registro de inicio' : 'registro de término') : 'Registra tu inicio y término de jornada' }}
           </p>
         </div>
 
@@ -126,7 +126,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
               </div>
-              <span class="font-bold text-lg tracking-wide">Hora de Registro</span>
+              <span class="font-bold text-lg tracking-wide">Registro de Inicio</span>
               <span class="text-sm opacity-90 mt-1">Inicia tu jornada</span>
             </div>
           </template>
@@ -196,7 +196,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
               </div>
-              <span class="font-bold text-lg tracking-wide">Hora de Término</span>
+              <span class="font-bold text-lg tracking-wide">Registro de Término</span>
               <span class="text-sm opacity-90 mt-1">Finaliza tu jornada</span>
             </div>
           </template>
@@ -210,7 +210,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <span class="font-bold text-base text-gray-600">Hora de Término</span>
+              <span class="font-bold text-base text-gray-600">Registro de Término</span>
               <span class="text-sm text-gray-500 mt-1">Primero registra tu inicio</span>
             </div>
             <!-- Barra de Bloqueado de lado a lado -->
@@ -290,10 +290,10 @@
               <!-- Mensaje principal -->
               <div class="text-center space-y-1">
                 <h3 class="text-2xs font-semibold text-white leading-tight" style="font-size: 0.65rem;">
-                  Registrar hora de inicio es necesario para usar actividades
+                  Registro de inicio es necesario para usar actividades
                 </h3>
                 <p class="text-2xs text-red-200 font-medium" style="font-size: 0.6rem;">
-                  Al registrar hora de término se finaliza el acceso del día
+                  Al registrar término se finaliza el acceso del día
                 </p>
               </div>
             </div>
@@ -334,7 +334,7 @@
           <div class="text-center mb-4">
             <h2 class="text-sm font-bold text-gray-800 mb-2 title-case"
                 :class="tipoAsistencia === 'entrada' ? 'entrada-title' : 'salida-title'">
-              {{ tipoAsistencia === 'entrada' ? 'HORA DE REGISTRO' : 'HORA DE TÉRMINO' }}
+              {{ tipoAsistencia === 'entrada' ? 'REGISTRO DE INICIO' : 'REGISTRO DE TÉRMINO' }}
             </h2>
           </div>
           
@@ -547,7 +547,7 @@
     <!-- Modal de confirmación para entrada -->
     <ConfirmModal 
       :show="showEntradaModal" 
-      title="Registrar Hora de Inicio"
+      title="Registro de Inicio"
       :message="entradaModalMessage"
       type="confirm"
       :showConfirm="true"
@@ -560,7 +560,7 @@
     <!-- Modal de confirmación para salida -->
     <ConfirmModal 
       :show="showSalidaModal" 
-      title="Registrar Hora de Término"
+      title="Registro de Término"
       :message="salidaModalMessage"
       type="error"
       :showConfirm="true"
@@ -1371,8 +1371,8 @@ async function confirmarAsistencia() {
       }
       
       // Mostrar mensaje informativo offline
-      mensajeAsistencia.value = `${tipoAsistencia.value === 'entrada' ? 'Hora de inicio' : 'Hora de término'} guardada offline. Se enviará automáticamente cuando tengas conexión.`;
-      modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Inicio' : 'Término'} guardado! Se sincronizará cuando recuperes la conexión.`;
+      mensajeAsistencia.value = `${tipoAsistencia.value === 'entrada' ? 'Registro de inicio' : 'Registro de término'} guardado offline. Se enviará automáticamente cuando tengas conexión.`;
+      modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Inicio' : 'Término'} registrado! Se sincronizará cuando recuperes la conexión.`;
       showModal.value = true;
       
       // Salir del modo asistencia
@@ -1445,7 +1445,7 @@ async function confirmarAsistencia() {
 
     // Mostrar mensaje de éxito
     mensajeAsistencia.value = response.mensaje;
-    modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Hora de inicio' : 'Hora de término'} registrada exitosamente!`;
+    modalMessage.value = `¡${tipoAsistencia.value === 'entrada' ? 'Inicio' : 'Término'} registrado exitosamente!`;
     showModal.value = true;
     
     // Salir del modo asistencia
@@ -2077,7 +2077,7 @@ function mostrarModalEntrada() {
           </svg>
         </div>
         <div>
-          <h3 class="text-base font-semibold text-gray-900">Hora de Registro</h3>
+          <h3 class="text-base font-semibold text-gray-900">Registro de Inicio</h3>
           <p class="text-xs text-gray-600">Inicia tu jornada laboral</p>
         </div>
       </div>
@@ -2087,7 +2087,7 @@ function mostrarModalEntrada() {
           <svg class="w-4 h-4 mr-2" style="color: rgb(30, 144, 255);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <p class="font-medium text-sm" style="color: rgb(25, 118, 210);">Al registrar tu inicio podrás capturar actividades</p>
+          <p class="font-medium text-sm" style="color: rgb(25, 118, 210);">Al registrar inicio podrás capturar actividades</p>
         </div>
         <p class="text-xs mt-1 ml-6" style="color: rgb(30, 144, 255);">Durante tu jornada podrás documentar todas tus tareas</p>
       </div>
@@ -2129,7 +2129,7 @@ function mostrarModalSalida() {
           </svg>
         </div>
         <div>
-          <h3 class="text-base font-semibold text-gray-900">Hora de Término</h3>
+          <h3 class="text-base font-semibold text-gray-900">Registro de Término</h3>
           <p class="text-xs text-gray-600">Finaliza tu jornada laboral</p>
         </div>
       </div>

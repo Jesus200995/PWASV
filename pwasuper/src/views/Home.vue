@@ -121,25 +121,25 @@
           <!-- Estado: No marcada - Activo -->
           <template v-if="!entradaMarcada && !verificandoAsistencia">
             <div class="relative z-10 flex flex-col items-center">
-              <div class="w-16 h-16 rounded-full bg-white/25 flex items-center justify-center mb-4 backdrop-blur-sm shadow-lg border border-white/30">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/25 flex items-center justify-center mb-3 backdrop-blur-sm shadow-lg border border-white/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-9 sm:w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
               </div>
-              <span class="font-bold text-lg tracking-wide">Registro de Inicio</span>
-              <span class="text-sm opacity-90 mt-1">Inicia tu jornada</span>
+              <span class="font-bold text-base sm:text-lg tracking-wide leading-tight text-center">Registro de Inicio</span>
+              <span class="text-xs sm:text-sm opacity-90 mt-0.5">Inicia tu jornada</span>
             </div>
           </template>
           
           <!-- Estado: Marcada - Completada -->
           <template v-else-if="entradaMarcada">
             <div class="flex flex-col items-center pb-8">
-              <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 bg-blue-500 rounded-full flex items-center justify-center mb-3 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span class="font-bold text-base text-gray-700">Inicio Registrado</span>
+              <span class="font-bold text-sm sm:text-base text-gray-700 leading-tight text-center">Inicio Registrado</span>
               <span class="text-sm text-gray-500 mt-1">
                 <span v-if="asistenciaHoy && asistenciaHoy.entrada">
                   {{ formatearHora(asistenciaHoy.entrada) }}
@@ -191,13 +191,13 @@
           <!-- Estado: Activo para marcar salida -->
           <template v-if="entradaMarcada && !salidaMarcada && !verificandoAsistencia">
             <div class="relative z-10 flex flex-col items-center">
-              <div class="w-16 h-16 rounded-full bg-white/25 flex items-center justify-center mb-4 backdrop-blur-sm shadow-lg border border-white/30">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/25 flex items-center justify-center mb-3 backdrop-blur-sm shadow-lg border border-white/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-9 sm:w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
               </div>
-              <span class="font-bold text-lg tracking-wide">Registro de Término</span>
-              <span class="text-sm opacity-90 mt-1">Finaliza tu jornada</span>
+              <span class="font-bold text-base sm:text-lg tracking-wide leading-tight text-center">Registro de Término</span>
+              <span class="text-xs sm:text-sm opacity-90 mt-0.5">Finaliza tu jornada</span>
             </div>
           </template>
           
@@ -205,13 +205,13 @@
           <template v-else-if="!entradaMarcada">
             <!-- Contenido centrado con padding inferior para la barra -->
             <div class="flex flex-col items-center pb-10">
-              <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center mb-3 shadow-inner">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gray-300 rounded-full flex items-center justify-center mb-2 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <span class="font-bold text-base text-gray-600">Registro de Término</span>
-              <span class="text-sm text-gray-500 mt-1">Primero registra tu inicio</span>
+              <span class="font-bold text-sm sm:text-base text-gray-600 leading-tight text-center">Registro de Término</span>
+              <span class="text-xs sm:text-sm text-gray-500 mt-0.5">Primero registra tu inicio</span>
             </div>
             <!-- Barra de Bloqueado de lado a lado -->
             <div class="absolute bottom-0 left-0 right-0 bg-gray-500 py-2 rounded-b-2xl">
@@ -222,13 +222,13 @@
           <!-- Estado: Salida completada -->
           <template v-else-if="salidaMarcada">
             <div class="flex flex-col items-center pb-8">
-              <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 bg-red-500 rounded-full flex items-center justify-center mb-3 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span class="font-bold text-base text-gray-700">Término Registrado</span>
-              <span class="text-sm text-gray-500 mt-1">
+              <span class="font-bold text-sm sm:text-base text-gray-700 leading-tight text-center">Término Registrado</span>
+              <span class="text-xs sm:text-sm text-gray-500 mt-0.5">
                 <span v-if="asistenciaHoy && asistenciaHoy.salida">
                   {{ formatearHora(asistenciaHoy.salida) }}
                 </span>

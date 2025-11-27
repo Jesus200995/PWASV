@@ -393,16 +393,17 @@
               <div v-for="(asistencia, index) in grupo.asistencias" :key="`${grupo.fecha}-${index}`" class="glass-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all">
             <div class="p-2">
 
-              <!-- Diseño dividido: Entrada y Salida en dos columnas -->
+              <!-- Diseño dividido: Inicio y Término en dos columnas -->
               <div class="grid grid-cols-2 gap-2">
-                <!-- Columna Entrada -->
+                <!-- Columna Inicio -->
                 <div class="entrada-bg-light rounded-lg p-2 border-2 shadow-sm">
-                  <h4 class="text-xs font-semibold entrada-text-dark mb-1 flex items-center justify-center text-center">
+                  <h4 class="text-xs font-bold entrada-text-dark mb-1 flex items-center justify-center text-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                    ENTRADA
+                    Inicio
                   </h4>
+                  <div class="w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent mb-2"></div>
                   
                   <div v-if="asistencia.hora_entrada" class="space-y-2">
                     <div class="text-center">
@@ -411,7 +412,7 @@
                     
                     <div v-if="asistencia.foto_entrada_url" class="flex justify-center">
                       <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_entrada_url}`)">
-                        <img :src="`${API_URL}/${asistencia.foto_entrada_url}`" class="w-full h-full object-cover" alt="Foto entrada" />
+                        <img :src="`${API_URL}/${asistencia.foto_entrada_url}`" class="w-full h-full object-cover" alt="Foto inicio" />
                         <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -449,7 +450,7 @@
                   </div>
                 </div>
 
-                <!-- Columna Salida -->
+                <!-- Columna Término -->
                 <div :class="[
                   'rounded-lg p-2 border-2 shadow-sm',
                   asistencia.hora_salida 
@@ -457,14 +458,20 @@
                     : 'bg-gray-50 border-gray-200'
                 ]">
                   <h4 :class="[
-                    'text-xs font-semibold mb-1 flex items-center justify-center text-center',
+                    'text-xs font-bold mb-1 flex items-center justify-center text-center',
                     asistencia.hora_salida ? 'salida-text-dark' : 'text-gray-500'
                   ]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    SALIDA
+                    Término
                   </h4>
+                  <div :class="[
+                    'w-full h-0.5 mb-2',
+                    asistencia.hora_salida 
+                      ? 'bg-gradient-to-r from-transparent via-red-400 to-transparent' 
+                      : 'bg-gradient-to-r from-transparent via-gray-300 to-transparent'
+                  ]"></div>
                   
                   <div v-if="asistencia.hora_salida" class="space-y-2">
                     <div class="text-center">
@@ -473,7 +480,7 @@
                     
                     <div v-if="asistencia.foto_salida_url" class="flex justify-center">
                       <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_salida_url}`)">
-                        <img :src="`${API_URL}/${asistencia.foto_salida_url}`" class="w-full h-full object-cover" alt="Foto salida" />
+                        <img :src="`${API_URL}/${asistencia.foto_salida_url}`" class="w-full h-full object-cover" alt="Foto término" />
                         <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -513,7 +520,7 @@
                       </svg>
                     </div>
                     <p class="text-xs text-gray-500 font-medium">En curso</p>
-                    <p class="text-xs text-gray-400 mt-1">Sin registro de salida</p>
+                    <p class="text-xs text-gray-400 mt-1">Sin registro de término</p>
                   </div>
                 </div>
               </div>

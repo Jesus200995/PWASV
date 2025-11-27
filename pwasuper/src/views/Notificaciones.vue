@@ -106,7 +106,7 @@
 
               <!-- Card de notificación -->
               <div :class="[
-                'enterprise-notification-card group cursor-pointer transition-all duration-300 ease-out',
+                'enterprise-notification-card group cursor-pointer transition-all duration-300 ease-out rounded-2xl',
                 notificacion.leida 
                   ? 'notification-read border-l-green-500' 
                   : 'notification-unread border-l-rose-700'
@@ -1979,12 +1979,17 @@ onBeforeUnmount(() => {
 .enterprise-notification-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  border-radius: 1rem !important;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', sans-serif;
+}
+
+.enterprise-notification-card.notification-read,
+.enterprise-notification-card.notification-unread {
+  border-radius: 1rem !important;
 }
 
 /* Tipografía profesional para elementos de notificaciones */

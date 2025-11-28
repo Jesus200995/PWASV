@@ -216,7 +216,7 @@ function logout() {
     <ConnectivityStatus :show="route.name === 'Home' && !showMobileMenu" />
 
     <!-- Header móvil con menú hamburguesa -->
-    <header v-if="isLoggedIn" class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+    <header v-if="isLoggedIn" class="shadow-sm sticky top-0 z-40" style="background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 40%, #f0fdf4 75%, #ffffff 100%); border-bottom: 1px solid rgba(167, 243, 208, 0.3);">
       <div class="max-w-sm mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center">

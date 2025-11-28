@@ -136,7 +136,7 @@
       </a>
       
       <!-- Resumen Ejecutivo -->
-      <a href="https://dashboard.sembrandodatos.com/public/dashboard/a3a689e6-e359-4a29-a87f-6b5afb589163?fecha=2025-09-05" target="_blank" class="quick-link resumen-ejecutivo">
+      <a href="https://dashboard.sembrandodatos.com/public/dashboard/7b96d8b2-a786-4593-9765-3585c9212949" target="_blank" class="quick-link resumen-ejecutivo">
         <div class="link-icon-container">
           <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>

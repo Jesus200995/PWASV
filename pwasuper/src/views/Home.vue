@@ -31,7 +31,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>Asistencia</span>
+                <span>Registro</span>
               </div>
             </button>
             
@@ -2210,7 +2210,7 @@ function mostrarModalActividadesBloqueadas() {
         <!-- Mensaje principal -->
         <div class="bg-gradient-to-r from-slate-100 to-gray-100 border-l-4 border-slate-600 rounded-r-xl p-4 mb-4 shadow-sm">
           <p class="text-slate-700 text-sm font-semibold mb-1">Registra tu inicio de jornada</p>
-          <p class="text-slate-500 text-xs">Presiona "Registro de Inicio" en la sección de Asistencia para habilitar el registro de actividades</p>
+          <p class="text-slate-500 text-xs">Presiona "Registro de Inicio" en la sección de Registro para habilitar el registro de actividades</p>
         </div>
         
         <!-- Pasos -->
@@ -2253,7 +2253,7 @@ function mostrarModalActividadesBloqueadas() {
         <!-- Estado -->
         <div class="inline-flex items-center bg-gray-200 px-4 py-2 rounded-full">
           <div class="w-2 h-2 bg-gray-500 rounded-full mr-2 animate-pulse"></div>
-          <span class="text-xs font-medium text-gray-600">Esperando próximo día laboral</span>
+          <span class="text-xs font-medium text-gray-600">Esperando próximo día</span>
         </div>
       </div>
     `;

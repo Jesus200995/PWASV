@@ -50,7 +50,7 @@
                 : 'text-gray-600 hover:text-gray-800'
             ]"
           >
-            <span class="relative z-20 font-bold tracking-wider">Asistencias</span>
+            <span class="relative z-20 font-bold tracking-wider">Registros</span>
             <!-- Ripple de fondo interior -->
             <span v-if="tabActiva === 'asistencias'" class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-transparent blur-lg z-0"></span>
           </button>
@@ -118,7 +118,7 @@
               <div class="h-1 w-8 bg-gradient-to-l from-blue-400 via-blue-500 to-transparent rounded-full"></div>
             </div>
             <h2 class="text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent mb-1 tracking-wide">
-              Historial de Asistencias
+              Historial de Registros
             </h2>
             <div class="flex items-center justify-center gap-1">
               <div class="h-px w-6 bg-gradient-to-r from-transparent to-blue-300"></div>

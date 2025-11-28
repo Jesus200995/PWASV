@@ -631,8 +631,8 @@ async def registrar(
     latitud: float = Form(...),
     longitud: float = Form(...),
     descripcion: str = Form(""),
-    tipo_actividad: str = Form(...),  # Nuevo campo obligatorio: 'campo' o 'gabinete'
-    categoria_actividad: str = Form(...),  # Nuevo campo obligatorio: categoría de la actividad
+    tipo_actividad: str = Form("campo"),  # Campo con valor por defecto para compatibilidad con registros offline antiguos
+    categoria_actividad: str = Form(""),  # Campo con valor vacío por defecto para compatibilidad
     categoria_actividad_otro: str = Form(None),  # Campo opcional: especificación cuando se selecciona "Otro"
     foto: UploadFile = File(...),
     timestamp_offline: str = Form(None)  # Nuevo campo opcional para registro offline
@@ -648,9 +648,10 @@ async def registrar(
     print(f"   foto: {foto.filename}")
     print(f"   timestamp_offline: {timestamp_offline}")
     
-    # Validar tipo de actividad
-    if tipo_actividad not in ['campo', 'gabinete']:
-        raise HTTPException(status_code=400, detail="tipo_actividad debe ser 'campo' o 'gabinete'")
+    # Validar y corregir tipo de actividad con valor por defecto
+    if not tipo_actividad or tipo_actividad not in ['campo', 'gabinete']:
+        print(f"⚠️ tipo_actividad inválido o vacío ('{tipo_actividad}'), usando valor por defecto 'campo'")
+        tipo_actividad = 'campo'
     
     # Validar categoría de actividad
     categorias_validas = [
@@ -665,8 +666,16 @@ async def registrar(
         'Viveros y biofábricas',
         'Otro'
     ]
-    if categoria_actividad not in categorias_validas:
-        raise HTTPException(status_code=400, detail=f"categoria_actividad debe ser una de las opciones válidas: {', '.join(categorias_validas)}")
+    
+    # MEJORA: Asignar valor por defecto si categoria_actividad está vacía o es inválida
+    if not categoria_actividad or categoria_actividad not in categorias_validas:
+        # Inferir categoría basada en tipo de actividad
+        if tipo_actividad == 'gabinete':
+            categoria_actividad_default = 'Trabajo administrativo y captura'
+        else:
+            categoria_actividad_default = 'Acompañamiento técnico'
+        print(f"⚠️ categoria_actividad inválida o vacía ('{categoria_actividad}'), usando valor por defecto '{categoria_actividad_default}'")
+        categoria_actividad = categoria_actividad_default
     
     # Si la categoría es "Otro", se requiere especificación
     if categoria_actividad == 'Otro' and not categoria_actividad_otro:

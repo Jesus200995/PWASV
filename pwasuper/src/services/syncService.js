@@ -89,7 +89,7 @@ class SyncService {
     this.verificarConexionInicial();
     
     // Establecer verificación periódica de conexión y sincronización
-    // Cada 5 minutos verificamos si hay conexión y pendientes para sincronizar
+    // Cada 2 minutos verificamos si hay conexión y pendientes para sincronizar (más frecuente para mejor UX)
     setInterval(async () => {
       if (this.isOnline && !this.isSyncing) {
         try {
@@ -102,7 +102,7 @@ class SyncService {
           console.error('❌ Error en verificación periódica:', error);
         }
       }
-    }, 5 * 60 * 1000); // 5 minutos
+    }, 2 * 60 * 1000); // 2 minutos (más frecuente para sincronizar más rápido)
   }
 
   /**
@@ -496,6 +496,31 @@ class SyncService {
         throw new Error('Registro incompleto: faltan usuario_id, latitud o longitud');
       }
       
+      // MEJORA: Validar y asignar valores por defecto para campos obligatorios del backend
+      const tipoActividad = registro.tipo_actividad || 'campo';
+      let categoriaActividad = registro.categoria_actividad;
+      
+      // Si categoria_actividad está vacío o no es válido, usar valor por defecto
+      const categoriasValidas = [
+        'Acompañamiento técnico',
+        'Productivas directas',
+        'Ahorro y trámites financieros',
+        'Capacitación / talleres / cursos',
+        'Difusión y comunicación',
+        'Eventos comunitarios / ferias / tianguis',
+        'Reuniones y asambleas',
+        'Trabajo administrativo y captura',
+        'Viveros y biofábricas',
+        'Otro'
+      ];
+      
+      if (!categoriaActividad || !categoriasValidas.includes(categoriaActividad)) {
+        console.warn(`⚠️ Categoría de actividad vacía o inválida: '${categoriaActividad}', usando valor por defecto`);
+        // Intentar inferir del tipo de actividad o usar valor genérico
+        categoriaActividad = tipoActividad === 'gabinete' ? 'Trabajo administrativo y captura' : 'Acompañamiento técnico';
+        console.log(`📝 Categoría asignada automáticamente: ${categoriaActividad}`);
+      }
+      
       // Obtener timestamp de sincronización (momento actual)
       const syncTimestamp = new Date().toISOString();
       await offlineService.actualizarTimestampSincronizacion(registro.id, 'registro');
@@ -506,11 +531,11 @@ class SyncService {
       formData.append('latitud', registro.latitud.toString());
       formData.append('longitud', registro.longitud.toString());
       formData.append('descripcion', registro.descripcion || '');
-      formData.append('tipo_actividad', registro.tipo_actividad || 'campo');
+      formData.append('tipo_actividad', tipoActividad);
       
-      // Agregar campos de categoría de actividad
-      formData.append('categoria_actividad', registro.categoria_actividad || '');
-      if (registro.categoria_actividad === 'Otro' && registro.categoria_actividad_otro) {
+      // Agregar campos de categoría de actividad (ahora siempre tiene valor válido)
+      formData.append('categoria_actividad', categoriaActividad);
+      if (categoriaActividad === 'Otro' && registro.categoria_actividad_otro) {
         formData.append('categoria_actividad_otro', registro.categoria_actividad_otro);
       }
       
@@ -626,6 +651,26 @@ class SyncService {
             errorDetail.includes('Ya registrado')) {
           console.log('ℹ️ Registro ya existe en el servidor, marcando como enviado');
           return { mensaje: 'Registro ya existía en el servidor', duplicado: true };
+        }
+        
+        // MEJORA: Manejar errores de campos obligatorios como categoria_actividad o tipo_actividad
+        if (errorDetail.includes('categoria_actividad') || 
+            errorDetail.includes('tipo_actividad') ||
+            errorDetail.includes('field required')) {
+          console.error('❌ Error de campo obligatorio:', errorDetail);
+          console.log('🔄 Intentando corregir y reenviar con valores por defecto...');
+          
+          // Si es primer intento, intentar con valores por defecto
+          if (intentoActual === 1) {
+            // Modificar el registro con valores por defecto y reintentar
+            const registroCorregido = {
+              ...registro,
+              tipo_actividad: registro.tipo_actividad || 'campo',
+              categoria_actividad: registro.categoria_actividad || 'Acompañamiento técnico'
+            };
+            console.log('📝 Registro corregido:', registroCorregido);
+            return this.enviarRegistro(registroCorregido, intentoActual + 1);
+          }
         }
         
         // Error de validación - no reintentar

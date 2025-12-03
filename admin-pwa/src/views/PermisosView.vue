@@ -508,24 +508,43 @@
                   </div>
                 </label>
 
-                <!-- Usuarios -->
-                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.usuarios }">
-                  <input type="checkbox" v-model="formularioUsuario.permisos.usuarios" />
-                  <div class="permiso-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                      <circle cx="9" cy="7" r="4"/>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                  </div>
-                  <span class="permiso-card-name">Usuarios</span>
-                  <div class="permiso-toggle">
-                    <div class="toggle-track">
-                      <div class="toggle-thumb"></div>
+                <!-- Usuarios (con sub-permiso integrado) -->
+                <div class="permiso-card-wrapper" :class="{ 'expanded': formularioUsuario.permisos.usuarios }">
+                  <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.usuarios }">
+                    <input type="checkbox" v-model="formularioUsuario.permisos.usuarios" @change="onUsuariosChange" />
+                    <div class="permiso-card-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                      </svg>
                     </div>
+                    <span class="permiso-card-name">Usuarios</span>
+                    <div class="permiso-toggle">
+                      <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                      </div>
+                    </div>
+                  </label>
+                  
+                  <!-- Sub-permiso: Acciones de Usuarios (dentro del mismo recuadro) -->
+                  <div v-if="formularioUsuario.permisos.usuarios" class="sub-permiso-container">
+                    <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.usuarios_acciones }">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.usuarios_acciones" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                      <span class="sub-permiso-text">Permitir editar/eliminar</span>
+                      <div class="sub-toggle">
+                        <div class="sub-toggle-track">
+                          <div class="sub-toggle-thumb"></div>
+                        </div>
+                      </div>
+                    </label>
                   </div>
-                </label>
+                </div>
 
                 <!-- Historiales -->
                 <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.historiales }">
@@ -773,6 +792,7 @@ export default {
           asistencia: false,
           registros: false,
           usuarios: false,
+          usuarios_acciones: false,
           historiales: false,
           notificaciones: false,
           permisos: false,
@@ -786,6 +806,7 @@ export default {
         asistencia: false,
         registros: false,
         usuarios: false,
+        usuarios_acciones: false,
         historiales: false,
         notificaciones: false,
         permisos: false,
@@ -827,6 +848,14 @@ export default {
       window.addEventListener('offline', () => {
         this.isOnline = false
       })
+    },
+
+    // Handler cuando se cambia el permiso de usuarios
+    onUsuariosChange() {
+      // Si se desactiva usuarios, también desactivar usuarios_acciones
+      if (!this.formularioUsuario.permisos.usuarios) {
+        this.formularioUsuario.permisos.usuarios_acciones = false
+      }
     },
 
     // ==================== GESTIÓN DE USUARIOS ADMIN ====================
@@ -1712,6 +1741,7 @@ export default {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
+  max-height: calc(100vh - 180px);
 }
 
 /* === FORM SECTIONS === */
@@ -2105,6 +2135,117 @@ export default {
 
 .permiso-card.active .toggle-thumb {
   left: 20px;
+}
+
+/* === WRAPPER PARA PERMISOS CON SUB-PERMISOS === */
+.permiso-card-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.permiso-card-wrapper .permiso-card {
+  flex: none;
+}
+
+.permiso-card-wrapper.expanded .permiso-card {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+
+/* === SUB-PERMISOS INTEGRADOS === */
+.sub-permiso-container {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #4CAF50;
+  border-top: 1px dashed #86efac;
+  border-radius: 0 0 10px 10px;
+  padding: 10px 14px;
+  margin-top: -2px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sub-permiso-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+}
+
+.sub-permiso-item:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.sub-permiso-item input[type="checkbox"] {
+  display: none;
+}
+
+.sub-permiso-item svg {
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.sub-permiso-item.active svg {
+  color: #22c55e;
+}
+
+.sub-permiso-text {
+  flex: 1;
+  font-size: 12px;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.sub-permiso-item.active .sub-permiso-text {
+  color: #166534;
+}
+
+/* Mini toggle para sub-permisos */
+.sub-toggle {
+  margin-left: auto;
+}
+
+.sub-toggle-track {
+  width: 32px;
+  height: 16px;
+  background: #d1d5db;
+  border-radius: 8px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.sub-permiso-item.active .sub-toggle-track {
+  background: #22c55e;
+}
+
+.sub-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  transition: left 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.sub-permiso-item.active .sub-toggle-thumb {
+  left: 18px;
 }
 
 /* === QUICK ACTIONS === */
@@ -2762,6 +2903,34 @@ export default {
   .permiso-card.active .toggle-thumb {
     left: 18px;
   }
+  
+  /* Sub-permiso responsive */
+  .sub-permiso-container {
+    padding: 8px 10px;
+  }
+  
+  .sub-permiso-item {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+  
+  .sub-permiso-text {
+    font-size: 11px;
+  }
+  
+  .sub-toggle-track {
+    width: 28px;
+    height: 14px;
+  }
+  
+  .sub-toggle-thumb {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .sub-permiso-item.active .sub-toggle-thumb {
+    left: 16px;
+  }
 }
 
 /* Tablet landscape */
@@ -2772,7 +2941,87 @@ export default {
   }
   
   .modal-content {
-    max-height: 95vh;
+    max-height: 90vh;
+  }
+  
+  .modal-body {
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+  }
+  
+  .permisos-grid-modern {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile landscape */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-overlay {
+    padding: 4px;
+    align-items: flex-start;
+  }
+  
+  .modal-content {
+    max-height: 98vh;
+    border-radius: 8px;
+  }
+  
+  .modal-header {
+    padding: 10px 14px;
+  }
+  
+  .modal-header-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .modal-body {
+    max-height: calc(98vh - 120px);
+    overflow-y: auto;
+    padding: 10px;
+  }
+  
+  .form-section {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .section-header {
+    margin-bottom: 8px;
+  }
+  
+  .radio-group-modern {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .permisos-grid-modern {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  
+  .permiso-card {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  
+  .permiso-card-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .permiso-card-name {
+    font-size: 11px;
+  }
+  
+  .modal-footer {
+    padding: 10px 14px;
+    flex-direction: row;
+  }
+  
+  .btn-modal {
+    padding: 8px 16px;
+    font-size: 13px;
   }
 }
 

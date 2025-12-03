@@ -181,7 +181,7 @@
                   <th class="col-supervisor">Supervisor</th>
                   <th class="col-fecha">Fecha de Registro</th>
                   <th class="col-estado">Estado</th>
-                  <th class="col-acciones">Acciones</th>
+                  <th v-if="puedeVerAcciones" class="col-acciones">Acciones</th>
                 </tr>
               </thead>
               <tbody>                <tr v-for="usuario in usuariosPaginados" :key="usuario.id">
@@ -198,7 +198,7 @@
                       Activo
                     </span>
                   </td>
-                  <td class="col-acciones">
+                  <td v-if="puedeVerAcciones" class="col-acciones">
                     <div class="actions-container">
                       <div class="action-container">
                         <button @click="verDetalles(usuario)" class="btn-ver" title="Ver detalles del usuario">
@@ -767,8 +767,20 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
+import authService from '../services/authService.js'
 
 const router = useRouter()
+
+// Permiso para ver acciones (editar/eliminar)
+const puedeVerAcciones = computed(() => {
+  // Admin siempre puede ver acciones
+  if (authService.isAdmin()) {
+    return true
+  }
+  // Verificar permiso específico
+  const user = authService.getCurrentUser()
+  return user?.permisos?.usuarios_acciones === true
+})
 
 // Estado de conexión
 const isOnline = ref(navigator.onLine)

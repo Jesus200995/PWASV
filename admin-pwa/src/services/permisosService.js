@@ -85,6 +85,12 @@ const permisosService = {
         rol: datosUsuario.rol || 'user'
       }
       
+      // Incluir permisos si se especificaron
+      if (datosUsuario.permisos) {
+        usuarioData.permisos = datosUsuario.permisos
+        console.log('📋 Permisos a guardar:', datosUsuario.permisos)
+      }
+      
       const response = await api.post('/admin/usuarios', usuarioData)
       
       console.log('✅ Usuario administrativo creado exitosamente:', response.data)
@@ -112,6 +118,12 @@ const permisosService = {
       // Si hay nueva contraseña, incluirla
       if (datosUsuario.password && datosUsuario.password.trim()) {
         usuarioData.password = datosUsuario.password
+      }
+      
+      // Incluir permisos si se especificaron
+      if (datosUsuario.permisos) {
+        usuarioData.permisos = datosUsuario.permisos
+        console.log('📋 Permisos a actualizar:', datosUsuario.permisos)
       }
       
       const response = await api.put(`/admin/usuarios/${userId}`, usuarioData)

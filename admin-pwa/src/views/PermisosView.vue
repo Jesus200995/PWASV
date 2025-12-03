@@ -247,18 +247,6 @@
                 <small class="form-help permisos-help">Seleccione los módulos a los que el usuario tendrá acceso</small>
                 
                 <div class="permisos-grid">
-                  <!-- Dashboard -->
-                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.dashboard }">
-                    <label class="permiso-checkbox">
-                      <input type="checkbox" v-model="formularioUsuario.permisos.dashboard" />
-                      <span class="checkmark"></span>
-                      <div class="permiso-info">
-                        <span class="permiso-icon">📊</span>
-                        <span class="permiso-nombre">Dashboard</span>
-                      </div>
-                    </label>
-                  </div>
-
                   <!-- Visor Map -->
                   <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.visor }">
                     <label class="permiso-checkbox">
@@ -266,7 +254,7 @@
                       <span class="checkmark"></span>
                       <div class="permiso-info">
                         <span class="permiso-icon">🗺️</span>
-                        <span class="permiso-nombre">Visor Map</span>
+                        <span class="permiso-nombre">Visor de Seguimiento</span>
                       </div>
                     </label>
                   </div>
@@ -467,9 +455,8 @@ export default {
         password: '',
         rol: 'user',
         permisos: {
-          dashboard: true,
-          visor: true,
-          asistencia: true,
+          visor: false,
+          asistencia: false,
           registros: false,
           usuarios: false,
           historiales: false,
@@ -479,11 +466,10 @@ export default {
         }
       },
       
-      // Permisos por defecto para nuevos usuarios
+      // Permisos por defecto para nuevos usuarios (todos en false)
       permisosDefault: {
-        dashboard: true,
-        visor: true,
-        asistencia: true,
+        visor: false,
+        asistencia: false,
         registros: false,
         usuarios: false,
         historiales: false,

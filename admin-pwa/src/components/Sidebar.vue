@@ -412,17 +412,16 @@ const showLogoutModal = ref(false)
 const currentUser = ref(null)
 const unreadNotifications = ref(0)
 
-// Permisos por defecto
+// Permisos por defecto (todos en false, el usuario solo ve lo que se le asignó)
 const permisosDefault = {
-  dashboard: true,
-  visor: true,
-  asistencia: true,
-  registros: true,
-  usuarios: true,
-  historiales: true,
-  notificaciones: true,
-  permisos: true,
-  configuracion: true
+  visor: false,
+  asistencia: false,
+  registros: false,
+  usuarios: false,
+  historiales: false,
+  notificaciones: false,
+  permisos: false,
+  configuracion: false
 }
 
 // Computed properties

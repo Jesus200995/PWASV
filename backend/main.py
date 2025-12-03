@@ -4637,7 +4637,6 @@ async def buscar_usuarios(correo: Optional[str] = None, nombre: Optional[str] = 
 
 # Permisos por defecto para cada rol
 PERMISOS_ADMIN_DEFAULT = {
-    "dashboard": True,
     "visor": True,
     "asistencia": True,
     "registros": True,
@@ -4649,13 +4648,12 @@ PERMISOS_ADMIN_DEFAULT = {
 }
 
 PERMISOS_USER_DEFAULT = {
-    "dashboard": True,
-    "visor": True,
-    "asistencia": True,
-    "registros": True,
+    "visor": False,
+    "asistencia": False,
+    "registros": False,
     "usuarios": False,
-    "historiales": True,
-    "notificaciones": True,
+    "historiales": False,
+    "notificaciones": False,
     "permisos": False,
     "configuracion": False
 }

@@ -701,16 +701,15 @@ const handleKeydown = (event) => {
   letter-spacing: 0.5px;
   margin: 0;
   text-transform: uppercase;
-  background: linear-gradient(45deg, #F1F8E9 10%, #E8F5E8 30%, #DCEDC8 50%, #FFF9C4 70%, #FFEB3B 90%);
+  background: linear-gradient(135deg, #e8ffd4 0%, #d4ff9a 15%, #c6f76c 30%, #fff8b8 50%, #ffe566 70%, #ffdd44 85%, #ffd700 100%);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   color: transparent;
   background-clip: text;
-  animation: gradientText 3s ease infinite;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+  animation: gradientTextBright 4s ease infinite;
 }
 
-@keyframes gradientText {
+@keyframes gradientTextBright {
   0%, 100% {
     background-position: 0% 50%;
   }

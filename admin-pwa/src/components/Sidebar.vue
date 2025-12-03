@@ -729,41 +729,55 @@ const handleKeydown = (event) => {
 }
 
 .text-underline {
-  width: 80%;
+  width: 85%;
   height: 3px;
   background: linear-gradient(90deg, 
     transparent 0%,
-    #1B5E20 25%,
-    #2E7D32 50%,
-    #1B5E20 75%,
+    #10b981 15%,
+    #22c55e 35%,
+    #4ade80 50%,
+    #22c55e 65%,
+    #10b981 85%,
     transparent 100%);
   margin: 8px auto 0 auto;
   border-radius: 2px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(27, 94, 32, 0.3);
+  box-shadow: 
+    0 0 8px rgba(16, 185, 129, 0.6),
+    0 0 15px rgba(34, 197, 94, 0.4),
+    0 0 25px rgba(74, 222, 128, 0.2);
+}
+
+/* Luz que recorre de lado a lado */
+.text-underline::before {
+  content: "";
+  position: absolute;
+  width: 35%;
+  height: 150%;
+  top: -25%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(134, 239, 172, 0.3) 10%,
+    rgba(187, 247, 208, 0.6) 30%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(187, 247, 208, 0.6) 70%,
+    rgba(134, 239, 172, 0.3) 90%,
+    transparent 100%);
+  left: -35%;
+  animation: shineSideToSide 3s infinite ease-in-out;
+  border-radius: 2px;
+  filter: blur(0.5px);
+  box-shadow: 0 0 10px rgba(134, 239, 172, 0.9);
 }
 
 .text-underline::after {
-  content: "";
-  position: absolute;
-  width: 40%;
-  height: 100%;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.3) 20%,
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(255, 255, 255, 0.3) 80%,
-    transparent 100%);
-  left: -50%;
-  top: 0;
-  animation: underlineShine 2.5s infinite ease-in-out;
-  border-radius: 2px;
+  display: none;
 }
 
-@keyframes underlineShine {
+@keyframes shineSideToSide {
   0% {
-    left: -50%;
+    left: -35%;
     opacity: 0;
   }
   10% {
@@ -773,7 +787,7 @@ const handleKeydown = (event) => {
     opacity: 1;
   }
   100% {
-    left: 110%;
+    left: 100%;
     opacity: 0;
   }
 }

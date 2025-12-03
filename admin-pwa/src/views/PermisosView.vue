@@ -235,6 +235,147 @@
                 </div>
               </div>
 
+              <!-- Permisos de acceso (solo visible cuando el rol es 'user') -->
+              <div v-if="formularioUsuario.rol === 'user'" class="form-group permisos-section">
+                <label class="permisos-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4"/>
+                    <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.5 0 2.92.37 4.17 1.02"/>
+                  </svg>
+                  Permisos de Acceso a Módulos
+                </label>
+                <small class="form-help permisos-help">Seleccione los módulos a los que el usuario tendrá acceso</small>
+                
+                <div class="permisos-grid">
+                  <!-- Dashboard -->
+                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.dashboard }">
+                    <label class="permiso-checkbox">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.dashboard" />
+                      <span class="checkmark"></span>
+                      <div class="permiso-info">
+                        <span class="permiso-icon">📊</span>
+                        <span class="permiso-nombre">Dashboard</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Visor Map -->
+                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.visor }">
+                    <label class="permiso-checkbox">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.visor" />
+                      <span class="checkmark"></span>
+                      <div class="permiso-info">
+                        <span class="permiso-icon">🗺️</span>
+                        <span class="permiso-nombre">Visor Map</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Asistencia -->
+                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.asistencia }">
+                    <label class="permiso-checkbox">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.asistencia" />
+                      <span class="checkmark"></span>
+                      <div class="permiso-info">
+                        <span class="permiso-icon">✅</span>
+                        <span class="permiso-nombre">Asistencia</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Registros -->
+                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.registros }">
+                    <label class="permiso-checkbox">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.registros" />
+                      <span class="checkmark"></span>
+                      <div class="permiso-info">
+                        <span class="permiso-icon">📋</span>
+                        <span class="permiso-nombre">Registros</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Usuarios -->
+                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.usuarios }">
+                    <label class="permiso-checkbox">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.usuarios" />
+                      <span class="checkmark"></span>
+                      <div class="permiso-info">
+                        <span class="permiso-icon">👥</span>
+                        <span class="permiso-nombre">Usuarios</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Historiales -->
+                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.historiales }">
+                    <label class="permiso-checkbox">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.historiales" />
+                      <span class="checkmark"></span>
+                      <div class="permiso-info">
+                        <span class="permiso-icon">📜</span>
+                        <span class="permiso-nombre">Historiales</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Notificaciones -->
+                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.notificaciones }">
+                    <label class="permiso-checkbox">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.notificaciones" />
+                      <span class="checkmark"></span>
+                      <div class="permiso-info">
+                        <span class="permiso-icon">🔔</span>
+                        <span class="permiso-nombre">Notificaciones</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Permisos -->
+                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.permisos }">
+                    <label class="permiso-checkbox">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.permisos" />
+                      <span class="checkmark"></span>
+                      <div class="permiso-info">
+                        <span class="permiso-icon">🔐</span>
+                        <span class="permiso-nombre">Permisos</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Configuración -->
+                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.configuracion }">
+                    <label class="permiso-checkbox">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.configuracion" />
+                      <span class="checkmark"></span>
+                      <div class="permiso-info">
+                        <span class="permiso-icon">⚙️</span>
+                        <span class="permiso-nombre">Configuración</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Botones rápidos de selección -->
+                <div class="permisos-actions">
+                  <button type="button" class="btn-permisos-action" @click="seleccionarTodos">
+                    ✓ Seleccionar todos
+                  </button>
+                  <button type="button" class="btn-permisos-action btn-deseleccionar" @click="deseleccionarTodos">
+                    ✕ Deseleccionar todos
+                  </button>
+                </div>
+              </div>
+
+              <!-- Info para admin (todos los permisos) -->
+              <div v-if="formularioUsuario.rol === 'admin'" class="admin-permisos-info">
+                <div class="admin-info-icon">👑</div>
+                <div class="admin-info-text">
+                  <strong>Acceso Completo</strong>
+                  <p>Los administradores tienen acceso a todos los módulos del sistema automáticamente.</p>
+                </div>
+              </div>
+
               <!-- Botones -->
               <div class="modal-actions">
                 <button type="button" class="btn-secondary" @click="cerrarModales">
@@ -324,7 +465,31 @@ export default {
       formularioUsuario: {
         username: '',
         password: '',
-        rol: 'user'
+        rol: 'user',
+        permisos: {
+          dashboard: true,
+          visor: true,
+          asistencia: true,
+          registros: false,
+          usuarios: false,
+          historiales: false,
+          notificaciones: false,
+          permisos: false,
+          configuracion: false
+        }
+      },
+      
+      // Permisos por defecto para nuevos usuarios
+      permisosDefault: {
+        dashboard: true,
+        visor: true,
+        asistencia: true,
+        registros: false,
+        usuarios: false,
+        historiales: false,
+        notificaciones: false,
+        permisos: false,
+        configuracion: false
       },
       
       // Modal eliminar
@@ -393,10 +558,15 @@ export default {
     editarUsuario(usuario) {
       this.modoEdicion = true
       this.usuarioEditando = usuario
+      
+      // Cargar permisos del usuario o usar defaults
+      const permisosUsuario = usuario.permisos ? { ...usuario.permisos } : { ...this.permisosDefault }
+      
       this.formularioUsuario = {
         username: usuario.username,
         password: '', // No mostramos la contraseña actual
-        rol: usuario.rol
+        rol: usuario.rol,
+        permisos: permisosUsuario
       }
       this.mostrarModalEditar = true
     },
@@ -431,7 +601,8 @@ export default {
           // Actualizar usuario existente
           const datosActualizacion = {
             username: this.formularioUsuario.username,
-            rol: this.formularioUsuario.rol
+            rol: this.formularioUsuario.rol,
+            permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null
           }
           
           // Solo incluir password si se proporcionó
@@ -443,7 +614,11 @@ export default {
           this.mostrarToast('Usuario administrativo actualizado exitosamente', 'success')
         } else {
           // Crear nuevo usuario
-          await permisosService.crearUsuario(this.formularioUsuario)
+          const datosCreacion = {
+            ...this.formularioUsuario,
+            permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null
+          }
+          await permisosService.crearUsuario(datosCreacion)
           this.mostrarToast('Usuario administrativo creado exitosamente', 'success')
         }
         
@@ -471,8 +646,22 @@ export default {
       this.formularioUsuario = {
         username: '',
         password: '',
-        rol: 'user'
+        rol: 'user',
+        permisos: { ...this.permisosDefault }
       }
+    },
+
+    // Métodos para seleccionar/deseleccionar permisos
+    seleccionarTodos() {
+      Object.keys(this.formularioUsuario.permisos).forEach(key => {
+        this.formularioUsuario.permisos[key] = true
+      })
+    },
+
+    deseleccionarTodos() {
+      Object.keys(this.formularioUsuario.permisos).forEach(key => {
+        this.formularioUsuario.permisos[key] = false
+      })
     },
 
     // ==================== ELIMINAR USUARIO ADMIN ====================
@@ -1423,6 +1612,203 @@ export default {
   .main-content {
     margin-left: 180px;
     width: calc(100vw - 180px);
+  }
+}
+
+/* === PERMISOS CHECKBOXES === */
+.permisos-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed rgba(76, 175, 80, 0.3);
+}
+
+.permisos-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #2E7D32;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.permisos-label svg {
+  color: #4CAF50;
+}
+
+.permisos-help {
+  margin-bottom: 16px !important;
+  color: #666;
+}
+
+.permisos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.permiso-item {
+  background: #f8faf8;
+  border: 2px solid rgba(76, 175, 80, 0.15);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.permiso-item:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  background: #f0f7f0;
+}
+
+.permiso-item.activo {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
+}
+
+.permiso-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  cursor: pointer;
+  position: relative;
+}
+
+.permiso-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  height: 20px;
+  width: 20px;
+  min-width: 20px;
+  background-color: #fff;
+  border: 2px solid rgba(76, 175, 80, 0.4);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.permiso-checkbox:hover .checkmark {
+  border-color: #4CAF50;
+}
+
+.permiso-checkbox input:checked ~ .checkmark {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+}
+
+.permiso-checkbox input:checked ~ .checkmark::after {
+  content: "✓";
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.permiso-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.permiso-icon {
+  font-size: 16px;
+}
+
+.permiso-nombre {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.permisos-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-permisos-action {
+  padding: 6px 12px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  background: white;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #4CAF50;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.btn-permisos-action:hover {
+  background: rgba(76, 175, 80, 0.1);
+  border-color: #4CAF50;
+}
+
+.btn-permisos-action.btn-deseleccionar {
+  color: #666;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn-permisos-action.btn-deseleccionar:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: #999;
+}
+
+/* Admin permisos info */
+.admin-permisos-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.admin-info-icon {
+  font-size: 28px;
+}
+
+.admin-info-text {
+  flex: 1;
+}
+
+.admin-info-text strong {
+  display: block;
+  color: #f57c00;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.admin-info-text p {
+  margin: 0;
+  color: #666;
+  font-size: 13px;
+}
+
+/* Responsive permisos grid */
+@media (max-width: 768px) {
+  .permisos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .permisos-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .permisos-actions {
+    flex-direction: column;
   }
 }
 </style>

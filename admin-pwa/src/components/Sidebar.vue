@@ -155,7 +155,7 @@
     <nav class="sidebar-nav">
       <ul>
         <!-- Visor de seguimiento -->
-        <li class="nav-item" :class="{ active: $route.name === 'VisorMap' }">
+        <li class="nav-item" :class="{ active: $route.name === 'VisorMap' }" v-if="tienePermiso('visor')">
           <router-link to="/visor-map" class="nav-link">
             <div class="nav-icon-container">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -175,7 +175,7 @@
         </li>
 
         <!-- Asistencia -->
-        <li class="nav-item" :class="{ active: $route.name === 'Asistencia' }">
+        <li class="nav-item" :class="{ active: $route.name === 'Asistencia' }" v-if="tienePermiso('asistencia')">
           <router-link to="/asistencia" class="nav-link">
             <div class="nav-icon-container">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -189,7 +189,7 @@
         </li>
 
         <!-- Registro de Actividades -->
-        <li class="nav-item" :class="{ active: $route.name === 'Registros' }">
+        <li class="nav-item" :class="{ active: $route.name === 'Registros' }" v-if="tienePermiso('registros')">
           <router-link to="/registros" class="nav-link">
             <div class="nav-icon-container">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -205,8 +205,8 @@
           <div class="nav-indicator"></div>
         </li>
 
-        <!-- Usuarios (solo para admin) -->
-        <li class="nav-item" :class="{ active: $route.name === 'Usuarios' }" v-if="isAdmin">
+        <!-- Usuarios -->
+        <li class="nav-item" :class="{ active: $route.name === 'Usuarios' }" v-if="tienePermiso('usuarios')">
           <router-link to="/usuarios" class="nav-link">
             <div class="nav-icon-container">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -222,7 +222,7 @@
         </li>
 
         <!-- Historiales -->
-        <li class="nav-item" :class="{ active: $route.name === 'Historiales' }">
+        <li class="nav-item" :class="{ active: $route.name === 'Historiales' }" v-if="tienePermiso('historiales')">
           <router-link to="/historiales" class="nav-link">
             <div class="nav-icon-container">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -236,7 +236,7 @@
         </li>
 
         <!-- Notificaciones -->
-        <li class="nav-item" :class="{ active: $route.name === 'Notificaciones' }">
+        <li class="nav-item" :class="{ active: $route.name === 'Notificaciones' }" v-if="tienePermiso('notificaciones')">
           <router-link to="/notificaciones" class="nav-link">
             <div class="nav-icon-container">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -250,8 +250,8 @@
           <div class="nav-indicator"></div>
         </li>
 
-        <!-- Permisos de Usuarios (solo para admin) -->
-        <li class="nav-item" :class="{ active: $route.name === 'Permisos' }" v-if="isAdmin">
+        <!-- Permisos de Usuarios -->
+        <li class="nav-item" :class="{ active: $route.name === 'Permisos' }" v-if="tienePermiso('permisos')">
           <router-link to="/permisos" class="nav-link">
             <div class="nav-icon-container">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -264,8 +264,8 @@
           <div class="nav-indicator"></div>
         </li>
 
-        <!-- Configuración (solo para admin) -->
-        <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }" v-if="isAdmin">
+        <!-- Configuración -->
+        <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }" v-if="tienePermiso('configuracion')">
           <router-link to="/configuracion" class="nav-link">
             <div class="nav-icon-container">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -412,6 +412,19 @@ const showLogoutModal = ref(false)
 const currentUser = ref(null)
 const unreadNotifications = ref(0)
 
+// Permisos por defecto
+const permisosDefault = {
+  dashboard: true,
+  visor: true,
+  asistencia: true,
+  registros: true,
+  usuarios: true,
+  historiales: true,
+  notificaciones: true,
+  permisos: true,
+  configuracion: true
+}
+
 // Computed properties
 const isAdmin = computed(() => {
   return authService.isAdmin()
@@ -428,6 +441,23 @@ const roleDisplayName = computed(() => {
   const role = authService.getUserRole()
   return role === 'admin' ? 'Administrador' : 'Usuario'
 })
+
+// Función para verificar permisos
+const tienePermiso = (permiso) => {
+  // Si es admin, tiene todos los permisos por defecto
+  if (isAdmin.value) {
+    return true
+  }
+  
+  // Verificar permisos del usuario
+  const user = currentUser.value
+  if (user && user.permisos) {
+    return user.permisos[permiso] === true
+  }
+  
+  // Si no hay permisos definidos, usar defaults
+  return permisosDefault[permiso] || false
+}
 
 // Métodos
 const toggleSidebar = () => {

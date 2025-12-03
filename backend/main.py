@@ -177,6 +177,24 @@ try:
         )
         print("✅ Usuario administrador por defecto creado: admin/admin123")
     
+    # ===== MIGRACIÓN: Agregar columna permisos a tabla admin_users =====
+    try:
+        ejecutar_consulta_segura("""
+            DO $$ 
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'admin_users' AND column_name = 'permisos'
+                ) THEN
+                    ALTER TABLE admin_users ADD COLUMN permisos TEXT DEFAULT NULL;
+                    RAISE NOTICE 'Columna permisos agregada a admin_users';
+                END IF;
+            END $$;
+        """, fetch_type='none')
+        print("✅ Migración de columna permisos verificada")
+    except Exception as e:
+        print(f"⚠️ Error en migración de permisos: {e}")
+    
     # ===== MIGRACIÓN: Agregar columnas categoria_actividad a tabla registros =====
     try:
         # Verificar si la columna categoria_actividad existe
@@ -1802,8 +1820,8 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         
         print(f"🔐 Intento de login para usuario: {username}")
         
-        # Buscar usuario administrador en la base de datos
-        cursor.execute("SELECT id, password, rol FROM admin_users WHERE username = %s", (username,))
+        # Buscar usuario administrador en la base de datos incluyendo permisos
+        cursor.execute("SELECT id, password, rol, permisos FROM admin_users WHERE username = %s", (username,))
         row = cursor.fetchone()
         
         if not row or not pwd_context.verify(password, row[1]):
@@ -1812,6 +1830,16 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         
         user_id = row[0]
         user_rol = row[2] or 'admin'  # rol por defecto admin
+        
+        # Parsear permisos
+        permisos_str = row[3]
+        if permisos_str:
+            try:
+                permisos = json.loads(permisos_str)
+            except:
+                permisos = PERMISOS_ADMIN_DEFAULT if user_rol == 'admin' else PERMISOS_USER_DEFAULT
+        else:
+            permisos = PERMISOS_ADMIN_DEFAULT if user_rol == 'admin' else PERMISOS_USER_DEFAULT
         
         # Generar token JWT con información del usuario
         token_data = {
@@ -1831,7 +1859,8 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
                 "id": user_id,
                 "username": username,
                 "rol": user_rol,
-                "tipo": "admin_user"
+                "tipo": "admin_user",
+                "permisos": permisos
             }
         }
         
@@ -4606,15 +4635,42 @@ async def buscar_usuarios(correo: Optional[str] = None, nombre: Optional[str] = 
 
 # ==================== MODELOS PARA ADMINISTRADORES ====================
 
+# Permisos por defecto para cada rol
+PERMISOS_ADMIN_DEFAULT = {
+    "dashboard": True,
+    "visor": True,
+    "asistencia": True,
+    "registros": True,
+    "usuarios": True,
+    "historiales": True,
+    "notificaciones": True,
+    "permisos": True,
+    "configuracion": True
+}
+
+PERMISOS_USER_DEFAULT = {
+    "dashboard": True,
+    "visor": True,
+    "asistencia": True,
+    "registros": True,
+    "usuarios": False,
+    "historiales": True,
+    "notificaciones": True,
+    "permisos": False,
+    "configuracion": False
+}
+
 class AdminUserCreate(BaseModel):
     username: str
     password: str
     rol: str = 'user'  # admin o user
+    permisos: Optional[dict] = None  # Permisos personalizados
 
 class AdminUserUpdate(BaseModel):
     username: Optional[str] = None
     password: Optional[str] = None
     rol: Optional[str] = None
+    permisos: Optional[dict] = None  # Permisos personalizados
 
 # ==================== ENDPOINTS PARA GESTIÓN DE USUARIOS ADMINISTRATIVOS ====================
 
@@ -4628,9 +4684,9 @@ async def obtener_usuarios_admin():
         if not conn or not cursor:
             raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
         
-        # Obtener todos los usuarios administrativos
+        # Obtener todos los usuarios administrativos incluyendo permisos
         cursor.execute("""
-            SELECT id, username, rol
+            SELECT id, username, rol, permisos
             FROM admin_users 
             ORDER BY id ASC
         """)
@@ -4639,10 +4695,21 @@ async def obtener_usuarios_admin():
         usuarios = []
         
         for row in rows:
+            # Parsear permisos JSON o usar defaults
+            permisos_str = row[3]
+            if permisos_str:
+                try:
+                    permisos = json.loads(permisos_str)
+                except:
+                    permisos = PERMISOS_ADMIN_DEFAULT if row[2] == 'admin' else PERMISOS_USER_DEFAULT
+            else:
+                permisos = PERMISOS_ADMIN_DEFAULT if row[2] == 'admin' else PERMISOS_USER_DEFAULT
+            
             usuario = {
                 "id": row[0],
                 "username": row[1],
-                "rol": row[2]
+                "rol": row[2],
+                "permisos": permisos
             }
             usuarios.append(usuario)
         
@@ -4675,12 +4742,19 @@ async def crear_usuario_admin(usuario: AdminUserCreate):
         # Hashear la contraseña
         hashed_password = pwd_context.hash(usuario.password)
         
-        # Insertar nuevo usuario
+        # Determinar permisos (usar los enviados o los por defecto según rol)
+        if usuario.permisos:
+            permisos_json = json.dumps(usuario.permisos)
+        else:
+            permisos_default = PERMISOS_ADMIN_DEFAULT if usuario.rol == 'admin' else PERMISOS_USER_DEFAULT
+            permisos_json = json.dumps(permisos_default)
+        
+        # Insertar nuevo usuario con permisos
         cursor.execute("""
-            INSERT INTO admin_users (username, password, rol) 
-            VALUES (%s, %s, %s) 
+            INSERT INTO admin_users (username, password, rol, permisos) 
+            VALUES (%s, %s, %s, %s) 
             RETURNING id
-        """, (usuario.username, hashed_password, usuario.rol))
+        """, (usuario.username, hashed_password, usuario.rol, permisos_json))
         
         nuevo_id = cursor.fetchone()[0]
         conn.commit()
@@ -4690,7 +4764,8 @@ async def crear_usuario_admin(usuario: AdminUserCreate):
             "message": "Usuario administrativo creado exitosamente",
             "id": nuevo_id,
             "username": usuario.username,
-            "rol": usuario.rol
+            "rol": usuario.rol,
+            "permisos": json.loads(permisos_json)
         }
         
     except HTTPException:
@@ -4707,7 +4782,7 @@ async def obtener_usuario_admin(user_id: int):
         print(f"🔄 Obteniendo usuario administrativo ID: {user_id}")
         
         cursor.execute("""
-            SELECT id, username, rol
+            SELECT id, username, rol, permisos
             FROM admin_users 
             WHERE id = %s
         """, (user_id,))
@@ -4716,10 +4791,21 @@ async def obtener_usuario_admin(user_id: int):
         if not row:
             raise HTTPException(status_code=404, detail="Usuario administrativo no encontrado")
         
+        # Parsear permisos
+        permisos_str = row[3]
+        if permisos_str:
+            try:
+                permisos = json.loads(permisos_str)
+            except:
+                permisos = PERMISOS_ADMIN_DEFAULT if row[2] == 'admin' else PERMISOS_USER_DEFAULT
+        else:
+            permisos = PERMISOS_ADMIN_DEFAULT if row[2] == 'admin' else PERMISOS_USER_DEFAULT
+        
         usuario = {
             "id": row[0],
             "username": row[1],
-            "rol": row[2]
+            "rol": row[2],
+            "permisos": permisos
         }
         
         print(f"✅ Usuario administrativo obtenido: {usuario['username']}")
@@ -4766,6 +4852,11 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
             campos_actualizar.append("rol = %s")
             valores.append(usuario.rol)
         
+        if usuario.permisos is not None:
+            permisos_json = json.dumps(usuario.permisos)
+            campos_actualizar.append("permisos = %s")
+            valores.append(permisos_json)
+        
         if not campos_actualizar:
             raise HTTPException(status_code=400, detail="No hay campos para actualizar")
         
@@ -4776,13 +4867,24 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
         conn.commit()
         
         # Obtener usuario actualizado
-        cursor.execute("SELECT id, username, rol FROM admin_users WHERE id = %s", (user_id,))
+        cursor.execute("SELECT id, username, rol, permisos FROM admin_users WHERE id = %s", (user_id,))
         row = cursor.fetchone()
+        
+        # Parsear permisos
+        permisos_str = row[3]
+        if permisos_str:
+            try:
+                permisos = json.loads(permisos_str)
+            except:
+                permisos = PERMISOS_ADMIN_DEFAULT if row[2] == 'admin' else PERMISOS_USER_DEFAULT
+        else:
+            permisos = PERMISOS_ADMIN_DEFAULT if row[2] == 'admin' else PERMISOS_USER_DEFAULT
         
         usuario_actualizado = {
             "id": row[0],
             "username": row[1],
-            "rol": row[2]
+            "rol": row[2],
+            "permisos": permisos
         }
         
         print(f"✅ Usuario administrativo actualizado: {usuario_actualizado['username']}")

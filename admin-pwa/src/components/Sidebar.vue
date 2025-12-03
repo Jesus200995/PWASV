@@ -262,7 +262,7 @@
           <div class="nav-indicator"></div>
         </li>
 
-        <!-- Permisos de Usuarios -->
+        <!-- Permisos Administrativos -->
         <li class="nav-item" :class="{ active: $route.name === 'Permisos' }" v-if="tienePermiso('permisos')">
           <router-link to="/permisos" class="nav-link">
             <div class="nav-icon-container">
@@ -271,7 +271,7 @@
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
             </div>
-            <span class="nav-text">Permisos de Usuarios</span>
+            <span class="nav-text">Permisos Administrativos</span>
           </router-link>
           <div class="nav-indicator"></div>
         </li>

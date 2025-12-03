@@ -13,8 +13,8 @@
               </svg>
             </div>
             <div class="header-text">
-              <h1 class="header-title">Gestión de Permisos</h1>
-              <p class="header-subtitle">Administra usuarios administrativos y sus permisos de acceso</p>
+              <h1 class="header-title">Permisos Administrativos</h1>
+              <p class="header-subtitle">Gestiona los usuarios y permisos del panel de administración</p>
             </div>
           </div>
           <div class="header-actions">

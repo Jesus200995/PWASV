@@ -31,50 +31,51 @@ const routes = [
     path: '/usuarios',
     name: 'Usuarios',
     component: UsuariosView,
-    meta: { requiresAuth: true, requiresAdmin: true }
+    meta: { requiresAuth: true, requiredPermission: 'usuarios' }
   },
   {
     path: '/historiales',
     name: 'Historiales',
     component: HistorialesView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiredPermission: 'historiales' }
   },
   {
     path: '/asistencia',
     name: 'Asistencia',
     component: AsistenciaView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiredPermission: 'asistencia' }
   },
   {
     path: '/registros',
     name: 'Registros',
     component: RegistrosView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiredPermission: 'registros' }
   },
   {
     path: '/configuracion',
     name: 'Configuracion',
     component: ConfiguracionView,
-    meta: { requiresAuth: true, requiresAdmin: true }
+    meta: { requiresAuth: true, requiredPermission: 'configuracion' }
   },
   {
     path: '/notificaciones',
     name: 'Notificaciones',
     component: NotificacionesView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiredPermission: 'notificaciones' }
   },
   {
     path: '/permisos',
     name: 'Permisos',
     component: PermisosView,
-    meta: { requiresAuth: true, requiresAdmin: true }
+    meta: { requiresAuth: true, requiredPermission: 'permisos' }
   },
   {
     path: '/visor-map',
     name: 'VisorMap',
     component: VisorMapView,
     meta: {
-      requiresAuth: true
+      requiresAuth: true,
+      requiredPermission: 'visor'
     }
   }
 ]
@@ -103,21 +104,29 @@ router.beforeEach(async (to, from, next) => {
     return
   }
   
-  // Verificar permisos de admin si la ruta lo requiere
-  if (to.meta.requiresAdmin && isAuthenticated) {
-    const userRole = authService.getUserRole()
+  // Verificar permisos específicos si la ruta lo requiere
+  if (to.meta.requiredPermission && isAuthenticated) {
+    const hasPermission = authService.hasPermission(to.meta.requiredPermission)
     
-    if (userRole !== 'admin') {
-      console.log('🚫 Acceso denegado - Se requiere rol de administrador')
-      console.log('👤 Rol del usuario:', userRole)
+    if (!hasPermission) {
+      console.log(`🚫 Acceso denegado - No tiene permiso para: ${to.meta.requiredPermission}`)
+      console.log('👤 Rol del usuario:', authService.getUserRole())
+      console.log('📋 Permisos del usuario:', authService.getCurrentUser()?.permisos)
       
-      // Redirigir a una ruta accesible
-      if (from.path !== '/' && from.path !== '/login') {
+      // Buscar una ruta accesible para el usuario
+      const rutaAccesible = encontrarRutaAccesible()
+      
+      if (from.path !== '/' && from.path !== '/login' && from.path !== to.path) {
         // Si viene de una ruta válida, volver a ella
         next(from.path)
+      } else if (rutaAccesible) {
+        // Si tiene acceso a alguna ruta, ir ahí
+        next(rutaAccesible)
       } else {
-        // Si no, ir al visor de mapa
-        next('/visor-map')
+        // Si no tiene acceso a nada, cerrar sesión
+        console.log('⚠️ Usuario sin permisos, cerrando sesión')
+        authService.logout()
+        next('/login')
       }
       return
     }
@@ -126,5 +135,28 @@ router.beforeEach(async (to, from, next) => {
   console.log('✅ Navegación permitida a:', to.path)
   next()
 })
+
+// Función auxiliar para encontrar una ruta accesible
+function encontrarRutaAccesible() {
+  const rutasPorPrioridad = ['visor', 'asistencia', 'registros', 'historiales', 'notificaciones', 'usuarios', 'permisos', 'configuracion']
+  const rutasMap = {
+    'visor': '/visor-map',
+    'asistencia': '/asistencia',
+    'registros': '/registros',
+    'historiales': '/historiales',
+    'notificaciones': '/notificaciones',
+    'usuarios': '/usuarios',
+    'permisos': '/permisos',
+    'configuracion': '/configuracion'
+  }
+  
+  for (const permiso of rutasPorPrioridad) {
+    if (authService.hasPermission(permiso)) {
+      return rutasMap[permiso]
+    }
+  }
+  
+  return null
+}
 
 export default router

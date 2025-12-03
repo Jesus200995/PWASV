@@ -167,6 +167,10 @@ class AuthService {
    * Obtener el rol del usuario actual
    */
   getUserRole() {
+    // Asegurar que tenemos los datos del usuario
+    if (!this.user) {
+      this.user = this.getUserFromStorage()
+    }
     return this.user?.rol || 'user'
   }
 
@@ -199,6 +203,32 @@ class AuthService {
     }
     
     return true // Por defecto permitir acceso
+  }
+
+  /**
+   * Verificar si el usuario tiene un permiso específico
+   * @param {string} permiso - Nombre del permiso (visor, asistencia, registros, usuarios, etc.)
+   * @returns {boolean}
+   */
+  hasPermission(permiso) {
+    // Asegurar que tenemos los datos del usuario
+    if (!this.user) {
+      this.user = this.getUserFromStorage()
+    }
+    
+    // Si es admin, tiene todos los permisos
+    if (this.isAdmin()) {
+      return true
+    }
+    
+    // Verificar permisos del usuario
+    if (this.user && this.user.permisos) {
+      console.log(`🔐 Verificando permiso "${permiso}":`, this.user.permisos[permiso])
+      return this.user.permisos[permiso] === true
+    }
+    
+    console.log(`⚠️ Usuario sin permisos definidos, denegando acceso a: ${permiso}`)
+    return false
   }
 
   /**

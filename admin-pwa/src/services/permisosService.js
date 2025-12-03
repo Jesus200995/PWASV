@@ -126,6 +126,12 @@ const permisosService = {
         console.log('📋 Permisos a actualizar:', datosUsuario.permisos)
       }
       
+      // Incluir estado activo/inactivo
+      if (datosUsuario.activo !== undefined) {
+        usuarioData.activo = datosUsuario.activo
+        console.log('📋 Estado activo a actualizar:', datosUsuario.activo)
+      }
+      
       const response = await api.put(`/admin/usuarios/${userId}`, usuarioData)
       
       console.log('✅ Usuario administrativo actualizado exitosamente:', response.data)

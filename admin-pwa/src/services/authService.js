@@ -335,12 +335,13 @@ class AuthService {
     // Verificar si hubo cambios en rol o permisos
     if (sessionData.rol !== undefined || sessionData.permisos !== undefined) {
       const currentUser = this.user
-      let hasChanges = false
+      let hasRolChange = false
+      let hasPermisosChange = false
       
       // Verificar cambio de rol
       if (sessionData.rol && sessionData.rol !== currentUser.rol) {
         console.log(`🔄 Rol actualizado: ${currentUser.rol} → ${sessionData.rol}`)
-        hasChanges = true
+        hasRolChange = true
       }
       
       // Verificar cambio de permisos
@@ -350,12 +351,12 @@ class AuthService {
         
         if (currentPermisos !== newPermisos) {
           console.log('🔄 Permisos actualizados')
-          hasChanges = true
+          hasPermisosChange = true
         }
       }
       
       // Si hubo cambios, actualizar datos locales y notificar
-      if (hasChanges) {
+      if (hasRolChange || hasPermisosChange) {
         this.user = {
           ...this.user,
           rol: sessionData.rol || this.user.rol,
@@ -365,6 +366,26 @@ class AuthService {
         
         localStorage.setItem('admin_user_data', JSON.stringify(this.user))
         
+        // Si cambió el ROL, forzar refresh inmediato de la página
+        if (hasRolChange) {
+          console.log('⚠️ Cambio de rol detectado - Recargando página inmediatamente...')
+          
+          // Mostrar mensaje breve antes del refresh
+          window.dispatchEvent(new CustomEvent('force-refresh', {
+            detail: {
+              message: `Tu rol ha sido cambiado a "${sessionData.rol}". La página se recargará para aplicar los cambios.`,
+              reason: 'role-changed'
+            }
+          }))
+          
+          // Refresh inmediato después de un pequeño delay para mostrar el mensaje
+          setTimeout(() => {
+            window.location.reload()
+          }, 1500)
+          return
+        }
+        
+        // Si solo cambiaron permisos (no rol), solo notificar sin refresh
         // Notificar a la aplicación del cambio
         if (this.onUserUpdated) {
           this.onUserUpdated(this.user)

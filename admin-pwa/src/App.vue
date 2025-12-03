@@ -68,6 +68,22 @@ const handleRedirectToLogin = () => {
   router.push('/login')
 }
 
+// Handler para forzar refresh cuando cambia el rol
+const handleForceRefresh = (event) => {
+  const { reason, message } = event.detail || {}
+  
+  if (reason === 'role-changed') {
+    sessionModalConfig.value = {
+      title: 'Rol Actualizado',
+      message: message || 'Tu rol ha sido modificado. La página se recargará.',
+      iconType: 'refresh'
+    }
+    showSessionModal.value = true
+    
+    // El refresh se hace automáticamente desde authService después de 1.5s
+  }
+}
+
 // Iniciar verificación de sesión en tiempo real si el usuario ya está logueado
 onMounted(() => {
   if (authService.isAuthenticated()) {
@@ -77,12 +93,16 @@ onMounted(() => {
   
   // Escuchar evento de forzar logout
   window.addEventListener('force-logout', handleForceLogout)
+  
+  // Escuchar evento de forzar refresh (cambio de rol)
+  window.addEventListener('force-refresh', handleForceRefresh)
 })
 
 // Detener verificación al desmontar
 onUnmounted(() => {
   authService.stopSessionCheck()
   window.removeEventListener('force-logout', handleForceLogout)
+  window.removeEventListener('force-refresh', handleForceRefresh)
 })
 </script>
 

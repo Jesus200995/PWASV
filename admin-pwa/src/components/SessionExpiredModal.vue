@@ -23,6 +23,14 @@
                 <line x1="14" y1="11" x2="14" y2="17"/>
               </svg>
               
+              <!-- Icono de refresh (cambio de rol) -->
+              <svg v-else-if="iconType === 'refresh'" class="modal-icon spin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                <path d="M21 21v-5h-5"/>
+              </svg>
+              
               <!-- Icono de sesión expirada (default) -->
               <svg v-else class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
@@ -237,6 +245,33 @@ onUnmounted(() => {
 
 .modal-icon-container.expired .icon-pulse {
   background: rgba(245, 124, 0, 0.2);
+}
+
+.modal-icon-container.refresh {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  box-shadow: 0 4px 20px rgba(33, 150, 243, 0.4);
+}
+
+.modal-icon-container.refresh .modal-icon {
+  color: white;
+}
+
+.modal-icon-container.refresh .icon-pulse {
+  background: rgba(33, 150, 243, 0.2);
+}
+
+/* Animación de giro para el icono de refresh */
+.spin-icon {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {

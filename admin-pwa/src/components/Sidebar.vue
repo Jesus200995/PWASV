@@ -1073,32 +1073,44 @@ const handleKeydown = (event) => {
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px;
-  background: transparent;
-  border-radius: 6px;
-  border: none;
-  box-shadow: none;
+  gap: 6px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1.5px solid #39FF14;
+  box-shadow: 
+    0 0 6px rgba(57, 255, 20, 0.4),
+    0 0 12px rgba(57, 255, 20, 0.2),
+    inset 0 0 8px rgba(57, 255, 20, 0.1);
+  transition: all 0.3s ease;
+}
+
+.user-info:hover {
+  border-color: #7FFF00;
+  box-shadow: 
+    0 0 10px rgba(57, 255, 20, 0.6),
+    0 0 18px rgba(57, 255, 20, 0.3),
+    inset 0 0 12px rgba(57, 255, 20, 0.15);
 }
 
 .user-avatar {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: transparent;
+  background: linear-gradient(135deg, rgba(57, 255, 20, 0.3), rgba(57, 255, 20, 0.1));
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: none;
-  box-shadow: none;
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  box-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
 }
 
 .user-icon {
-  width: 15px;
-  height: 15px;
-  color: rgba(255, 255, 255, 0.8);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  width: 12px;
+  height: 12px;
+  color: #39FF14;
+  filter: drop-shadow(0 0 2px rgba(57, 255, 20, 0.5));
 }
 
 .user-details {
@@ -1109,21 +1121,25 @@ const handleKeydown = (event) => {
 .user-name {
   margin: 0;
   font-size: 11px;
-  font-weight: 400;
-  color: #FFFFFF;
+  font-weight: 700;
+  color: #39FF14;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 
+    0 0 4px rgba(57, 255, 20, 0.5),
+    0 0 8px rgba(57, 255, 20, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.3px;
 }
 
 .user-role {
-  margin: 0;
+  margin: 1px 0 0 0;
   font-size: 9px;
-  color: rgba(255, 255, 255, 0.7);
-  opacity: 0.9;
-  font-weight: 400;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 1;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .logout-button {
@@ -1131,9 +1147,9 @@ const handleKeydown = (event) => {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 12px;
+  padding: 6px 8px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
+  border-radius: 8px;
   background: linear-gradient(135deg, 
     rgba(255, 87, 34, 0.9) 0%,
     rgba(244, 67, 54, 0.9) 100%);
@@ -1146,8 +1162,7 @@ const handleKeydown = (event) => {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
   letter-spacing: 0.3px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  width: 85%;
-  align-self: center;
+  width: 100%;
 }
 
 .logout-button:hover {

@@ -378,10 +378,10 @@ class AuthService {
             }
           }))
           
-          // Refresh inmediato después de un pequeño delay para mostrar el mensaje
+          // Refresh casi inmediato (500ms solo para mostrar brevemente el mensaje)
           setTimeout(() => {
             window.location.reload()
-          }, 1500)
+          }, 500)
           return
         }
         

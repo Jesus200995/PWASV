@@ -108,6 +108,18 @@
         <div class="logo-text">
           <h1 class="brand-name">SEMBRANDO VIDA</h1>
           <p class="brand-tagline">App de Seguimiento</p>
+          
+          <!-- Información del usuario -->
+          <div class="user-info" style="margin-top: 12px;">
+            <div class="user-avatar">
+              <span class="user-initials">{{ userInitials }}</span>
+            </div>
+            <div class="user-details">
+              <p class="user-name">{{ userDisplayName }}</p>
+              <p class="user-role">{{ roleDisplayName }}</p>
+            </div>
+          </div>
+          
           <div class="text-underline"></div>
         </div>
       </div>
@@ -280,20 +292,8 @@
       </ul>
     </nav>
 
-    <!-- Información del usuario y cerrar sesión -->
+    <!-- Cerrar sesión -->
     <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">
-          <svg class="user-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-        </div>
-        <div class="user-details">
-          <p class="user-name">{{ userDisplayName }}</p>
-          <p class="user-role">{{ roleDisplayName }}</p>
-        </div>
-      </div>
       <button @click="showLogoutModal = true" class="logout-button">
         <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -434,6 +434,11 @@ const userDisplayName = computed(() => {
     return currentUser.value.nombre || currentUser.value.username || 'Usuario'
   }
   return 'Usuario'
+})
+
+const userInitials = computed(() => {
+  const name = userDisplayName.value
+  return name ? name.charAt(0).toUpperCase() : 'U'
 })
 
 const roleDisplayName = computed(() => {
@@ -1121,18 +1126,21 @@ const handleKeydown = (event) => {
 }
 
 .user-info {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  border-radius: 20px;
   border: 1.5px solid #39FF14;
   box-shadow: 
     0 0 6px rgba(57, 255, 20, 0.4),
     0 0 12px rgba(57, 255, 20, 0.2),
     inset 0 0 8px rgba(57, 255, 20, 0.1);
   transition: all 0.3s ease;
+  width: auto;
+  max-width: 100%;
 }
 
 .user-info:hover {
@@ -1144,28 +1152,36 @@ const handleKeydown = (event) => {
 }
 
 .user-avatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(57, 255, 20, 0.3), rgba(57, 255, 20, 0.1));
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid rgba(57, 255, 20, 0.5);
-  box-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+  border: 1.5px solid rgba(57, 255, 20, 0.6);
 }
 
-.user-icon {
-  width: 12px;
-  height: 12px;
+.user-initials {
+  font-size: 11px;
+  font-weight: 600;
   color: #39FF14;
-  filter: drop-shadow(0 0 2px rgba(57, 255, 20, 0.5));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  line-height: 1;
 }
 
 .user-details {
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .user-name {
@@ -1181,15 +1197,17 @@ const handleKeydown = (event) => {
     0 0 8px rgba(57, 255, 20, 0.3),
     0 1px 2px rgba(0, 0, 0, 0.5);
   letter-spacing: 0.3px;
+  line-height: 1.2;
 }
 
 .user-role {
-  margin: 1px 0 0 0;
+  margin: 2px 0 0 0;
   font-size: 9px;
   color: rgba(255, 255, 255, 0.85);
   opacity: 1;
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
 }
 
 .logout-button {
@@ -2081,13 +2099,12 @@ const handleKeydown = (event) => {
   }
   
   .user-avatar {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
   
-  .user-icon {
-    width: 12px;
-    height: 12px;
+  .user-initials {
+    font-size: 9px;
   }
   
   .user-name {
@@ -2210,13 +2227,12 @@ const handleKeydown = (event) => {
   }
   
   .user-avatar {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
   }
   
-  .user-icon {
-    width: 8px;
-    height: 8px;
+  .user-initials {
+    font-size: 7px;
   }
   
   .user-name {
@@ -2351,13 +2367,12 @@ const handleKeydown = (event) => {
   }
   
   .user-avatar {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
   
-  .user-icon {
-    width: 10px;
-    height: 10px;
+  .user-initials {
+    font-size: 8px;
   }
   
   .user-name {

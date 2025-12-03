@@ -1413,16 +1413,17 @@ export default {
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: transparent;
+  border: 1.5px solid #4CAF50;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #4CAF50;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   flex-shrink: 0;
 }
 

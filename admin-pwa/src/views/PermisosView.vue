@@ -757,6 +757,7 @@
 <script>
 import Sidebar from '../components/Sidebar.vue'
 import permisosService from '../services/permisosService.js'
+import authService from '../services/authService.js'
 
 export default {
   name: 'PermisosView',
@@ -953,6 +954,23 @@ export default {
           
           await permisosService.actualizarUsuario(this.usuarioEditando.id, datosActualizacion)
           this.mostrarToast('Usuario administrativo actualizado exitosamente', 'success')
+          
+          // Si se editó el usuario actual, actualizar permisos inmediatamente
+          const currentUser = authService.getCurrentUser()
+          if (currentUser && currentUser.username === this.formularioUsuario.username) {
+            const newUserData = {
+              ...currentUser,
+              rol: datosActualizacion.rol,
+              permisos: datosActualizacion.permisos || currentUser.permisos
+            }
+            // Actualizar localStorage
+            localStorage.setItem('admin_user_data', JSON.stringify(newUserData))
+            // Disparar evento para actualizar todas las vistas
+            window.dispatchEvent(new CustomEvent('user-session-updated', { 
+              detail: newUserData 
+            }))
+            console.log('🔄 Permisos del usuario actual actualizados inmediatamente')
+          }
         } else {
           // Crear nuevo usuario (siempre activo)
           const datosCreacion = {

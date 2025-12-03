@@ -762,7 +762,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
@@ -771,16 +771,27 @@ import authService from '../services/authService.js'
 
 const router = useRouter()
 
-// Permiso para ver acciones (editar/eliminar)
+// Variable reactiva para permisos del usuario actual (se actualiza en tiempo real)
+const userPermisos = ref(authService.getCurrentUser()?.permisos || {})
+const userRol = ref(authService.getCurrentUser()?.rol || '')
+
+// Permiso para ver acciones (editar/eliminar) - REACTIVO
 const puedeVerAcciones = computed(() => {
   // Admin siempre puede ver acciones
-  if (authService.isAdmin()) {
+  if (userRol.value === 'admin' || authService.isAdmin()) {
     return true
   }
-  // Verificar permiso específico
-  const user = authService.getCurrentUser()
-  return user?.permisos?.usuarios_acciones === true
+  // Verificar permiso específico usando la variable reactiva
+  return userPermisos.value?.usuarios_acciones === true
 })
+
+// Función para actualizar permisos cuando el evento es disparado
+const actualizarPermisosUsuario = (event) => {
+  const userData = event.detail
+  console.log('🔄 UsuariosView: Permisos actualizados en tiempo real', userData.permisos)
+  userPermisos.value = userData.permisos || {}
+  userRol.value = userData.rol || ''
+}
 
 // Estado de conexión
 const isOnline = ref(navigator.onLine)
@@ -844,6 +855,14 @@ onMounted(() => {
   window.addEventListener('offline', () => {
     isOnline.value = false
   })
+  
+  // Escuchar actualizaciones de permisos en tiempo real
+  window.addEventListener('user-session-updated', actualizarPermisosUsuario)
+})
+
+// Limpiar listeners al desmontar
+onUnmounted(() => {
+  window.removeEventListener('user-session-updated', actualizarPermisosUsuario)
 })
 
 const cargarUsuarios = async () => {

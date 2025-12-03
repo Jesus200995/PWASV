@@ -180,7 +180,7 @@
                   <th class="col-cargo">Cargo</th>
                   <th class="col-supervisor">Supervisor</th>
                   <th class="col-fecha">Fecha de Registro</th>
-                  <th class="col-estado">Estado</th>
+                  <th class="col-curp">CURP</th>
                   <th v-if="puedeVerAcciones" class="col-acciones">Acciones</th>
                 </tr>
               </thead>
@@ -193,10 +193,8 @@
                   <td>{{ usuario.cargo }}</td>
                   <td>{{ usuario.supervisor }}</td>
                   <td>{{ formatFecha(usuario.created_at || new Date()) }}</td>
-                  <td>
-                    <span class="status-badge active">
-                      Activo
-                    </span>
+                  <td class="col-curp">
+                    <span class="curp-text">{{ (usuario.curp || 'N/A').toUpperCase() }}</span>
                   </td>
                   <td v-if="puedeVerAcciones" class="col-acciones">
                     <div class="actions-container">
@@ -970,9 +968,8 @@ const imprimirUsuarios = () => {
       .col-nombre { width: 200px; }
       .col-cargo { width: 150px; }
       .col-supervisor { width: 180px; }
-      .col-curp { width: 120px; font-family: monospace; font-size: 8px; }
+      .col-curp { width: 140px; text-align: center; }
       .col-telefono { width: 120px; font-family: monospace; font-size: 8px; }
-      .col-estado { width: 120px; text-align: center; }
       
       .estado-activo { 
         color: #28a745 !important; 
@@ -1087,14 +1084,10 @@ const imprimirUsuarios = () => {
             <th class="col-supervisor">Supervisor</th>
             <th class="col-curp">CURP</th>
             <th class="col-telefono">Teléfono</th>
-            <th class="col-estado">Estado</th>
           </tr>
         </thead>
         <tbody>
           ${usuariosFiltrados.value.map(usuario => {
-            const estado = obtenerEstadoUsuario(usuario)
-            const claseEstado = estado === 'Activo' ? 'estado-activo' : 'estado-inactivo'
-            
             return `
             <tr>
               <td class="col-id">${usuario.id}</td>
@@ -1102,9 +1095,8 @@ const imprimirUsuarios = () => {
               <td class="col-nombre">${usuario.nombre_completo || 'Sin nombre'}</td>
               <td class="col-cargo">${usuario.cargo || 'Sin cargo'}</td>
               <td class="col-supervisor">${usuario.supervisor || 'Sin supervisor'}</td>
-              <td class="col-curp">${usuario.curp || 'Sin CURP'}</td>
+              <td class="col-curp">${(usuario.curp || 'Sin CURP').toUpperCase()}</td>
               <td class="col-telefono">${usuario.telefono || 'Sin teléfono'}</td>
-              <td class="col-estado"><span class="${claseEstado}">${estado}</span></td>
             </tr>
             `
           }).join('')}
@@ -1141,7 +1133,7 @@ const imprimirUsuarios = () => {
 }
 
 const exportarExcel = () => {
-  // Headers completos con todos los campos (sin contraseña ni fecha)
+  // Headers completos con todos los campos (sin contraseña, fecha ni estado)
   const headers = [
     'ID Usuario',
     'Correo Electrónico', 
@@ -1149,8 +1141,7 @@ const exportarExcel = () => {
     'Cargo', 
     'Supervisor', 
     'CURP',
-    'Teléfono',
-    'Estado'
+    'Teléfono'
   ]
   
   const obtenerEstadoUsuario = (usuario) => {
@@ -1182,9 +1173,8 @@ const exportarExcel = () => {
     usuario.nombre_completo || 'Sin nombre',
     usuario.cargo || 'Sin cargo',
     usuario.supervisor || 'Sin supervisor',
-    usuario.curp || 'Sin CURP',
-    usuario.telefono || 'Sin teléfono',
-    obtenerEstadoUsuario(usuario)
+    (usuario.curp || 'Sin CURP').toUpperCase(),
+    usuario.telefono || 'Sin teléfono'
   ])
   
   // Crear contenido CSV con información adicional
@@ -1205,8 +1195,7 @@ const exportarExcel = () => {
   
   // Agregar información adicional al final
   csvContent += `\n"Notas:"\n`
-  csvContent += `"- Estado 'Activo': Usuario tiene correo, nombre, cargo y CURP completados"\n`
-  csvContent += `"- Estado 'Incompleto': Faltan datos en campos importantes"\n`
+  csvContent += `"- CURP mostrada en mayúsculas para mejor legibilidad"\n`
   csvContent += `"- Información de contraseñas y fechas excluida por seguridad"\n`
   
   // Agregar BOM para caracteres especiales en Excel
@@ -1238,7 +1227,8 @@ const filtrarUsuarios = () => {
       usuario.correo.toLowerCase().includes(termino) ||
       (usuario.nombre_completo && usuario.nombre_completo.toLowerCase().includes(termino)) ||
       (usuario.cargo && usuario.cargo.toLowerCase().includes(termino)) ||
-      (usuario.supervisor && usuario.supervisor.toLowerCase().includes(termino))
+      (usuario.supervisor && usuario.supervisor.toLowerCase().includes(termino)) ||
+      (usuario.curp && usuario.curp.toLowerCase().includes(termino))
     )
   }
   resetearPaginacion()
@@ -2298,7 +2288,7 @@ const logout = () => {
 .usuarios-table th.col-cargo { width: 150px; }
 .usuarios-table th.col-supervisor { width: 180px; }
 .usuarios-table th.col-fecha { width: 140px; }
-.usuarios-table th.col-estado { width: 120px; }
+.usuarios-table th.col-curp { width: 140px; }
 .usuarios-table th.col-acciones { 
   width: 200px !important; 
   min-width: 200px !important;
@@ -2328,8 +2318,27 @@ const logout = () => {
 .usuarios-table td:nth-child(4) { min-width: 120px; } /* Cargo */
 .usuarios-table td:nth-child(5) { min-width: 120px; } /* Supervisor */
 .usuarios-table td:nth-child(6) { min-width: 110px; } /* Fecha */
-.usuarios-table td:nth-child(7) { min-width: 90px; }  /* Estado */
+.usuarios-table td:nth-child(7) { min-width: 140px; } /* CURP */
 .usuarios-table td:nth-child(8) { min-width: 140px; } /* Acciones */
+
+/* Estilos para columna CURP */
+.col-curp {
+  width: 140px;
+  text-align: center;
+}
+
+.curp-text {
+  display: inline-block;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(8px, 1.3vw, 10px);
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: rgba(100, 100, 100, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
 
 /* Estilos específicos para columnas */
 .col-id {

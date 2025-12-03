@@ -641,7 +641,7 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar_NEW.vue'
+import Sidebar from '../components/Sidebar.vue'
 import MapaAsistenciaModal from '../components/MapaAsistenciaModal.vue'
 import AsistenciasService from '../services/asistenciasService.js'
 import EstadisticasService from '../services/estadisticasService.js'

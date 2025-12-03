@@ -647,7 +647,7 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar_NEW.vue'
+import Sidebar from '../components/Sidebar.vue'
 import notificacionesService from '../services/notificacionesService.js'
 import usuariosService from '../services/usuariosService.js'
 

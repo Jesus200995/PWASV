@@ -196,18 +196,14 @@ class AuthService {
 
   /**
    * Refrescar información del usuario
+   * Nota: No llama al backend porque el endpoint /auth/me no devuelve el usuario correcto
+   * Los datos del usuario se obtienen durante el login y se guardan en localStorage
    */
   async refreshUserInfo() {
-    if (this.user?.username) {
-      try {
-        const userData = await this.fetchUserInfo(this.user.username)
-        this.user = userData
-        localStorage.setItem('admin_user_data', JSON.stringify(userData))
-        return userData
-      } catch (error) {
-        console.error('Error refreshing user info:', error)
-        return this.user
-      }
+    // Simplemente devolver los datos ya guardados del usuario
+    // El backend ya envía user_info en la respuesta del login
+    if (!this.user) {
+      this.user = this.getUserFromStorage()
     }
     return this.user
   }

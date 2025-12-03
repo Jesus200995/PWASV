@@ -680,7 +680,7 @@
 
 <script>
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
-import Sidebar from '../components/Sidebar_NEW.vue'
+import Sidebar from '../components/Sidebar.vue'
 import { useRouter } from 'vue-router'
 import usuariosService from '../services/usuariosService.js'
 import historialService from '../services/historialService.js'

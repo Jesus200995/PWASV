@@ -1,6 +1,6 @@
 <template>
   <div class="permisos-container">
-    <Sidebar_NEW @logout="logout" />
+    <Sidebar @logout="logout" />
     
     <main class="main-content">
       <header class="page-header">

@@ -1,421 +1,399 @@
 <template>
-  <div class="sidebar">
-    <!-- Efecto liquid glass background -->
+  <div :class="['sidebar', { 'collapsed': isCollapsed }]">
+    <!-- Botón de toggle para el sidebar en móviles -->
+    <button class="sidebar-toggle" @click="toggleSidebar">
+      <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Cabecera del sidebar con logo animado -->
     <div class="sidebar-header">
-      <div class="header-content">
-        <!-- Animación de flor elegante flotante -->
-        <div class="flower-animation">
-          <svg class="flower-icon" viewBox="0 0 120 120" fill="none">
-            <!-- Pétalos principales mejorados con animación verde -->
-            <g class="petals-main">
-              <!-- Pétalos exteriores grandes -->
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(0 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="0 60 60;10 60 60;0 60 60" dur="4s" repeatCount="indefinite"/>
-              </path>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(36 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="36 60 60;46 60 60;36 60 60" dur="4.2s" repeatCount="indefinite"/>
-              </path>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(72 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="72 60 60;82 60 60;72 60 60" dur="3.8s" repeatCount="indefinite"/>
-              </path>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(108 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="108 60 60;118 60 60;108 60 60" dur="4.1s" repeatCount="indefinite"/>
-              </path>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(144 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="144 60 60;154 60 60;144 60 60" dur="3.9s" repeatCount="indefinite"/>
-              </path>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(180 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="180 60 60;190 60 60;180 60 60" dur="4.3s" repeatCount="indefinite"/>
-              </path>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(216 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="216 60 60;226 60 60;216 60 60" dur="3.7s" repeatCount="indefinite"/>
-              </path>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(252 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="252 60 60;262 60 60;252 60 60" dur="4.4s" repeatCount="indefinite"/>
-              </path>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-1)" opacity="0.9" transform="rotate(288 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="288 60 60;298 60 60;288 60 60" dur="3.6s" repeatCount="indefinite"/>
-              </path>
-              <path d="M60 25 C50 30, 45 45, 60 55 C75 45, 70 30, 60 25 Z" fill="url(#petal-gradient-2)" opacity="0.85" transform="rotate(324 60 60)">
-                <animateTransform attributeName="transform" type="rotate" values="324 60 60;334 60 60;324 60 60" dur="4.5s" repeatCount="indefinite"/>
-              </path>
-            </g>
-            
-            <!-- Pétalos internos más pequeños con pulsación -->
-            <g class="petals-inner">
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(18 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.5s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(54 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.8s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(90 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.3s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(126 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.7s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(162 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.4s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(198 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.9s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(234 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.2s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(270 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.6s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(306 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.1s" repeatCount="indefinite"/>
-              </ellipse>
-              <ellipse cx="60" cy="40" rx="4" ry="12" fill="url(#inner-gradient)" opacity="0.8" transform="rotate(342 60 60)">
-                <animate attributeName="opacity" values="0.8;0.5;0.8" dur="3.0s" repeatCount="indefinite"/>
-              </ellipse>
-            </g>
-            
-            <!-- Centro con múltiples capas verdes -->
-            <circle cx="60" cy="60" r="10" fill="url(#center-gradient)" opacity="0.95">
-              <animate attributeName="r" values="10;12;10" dur="3s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="60" cy="60" r="7" fill="url(#center-gradient-2)" opacity="0.9">
-              <animate attributeName="r" values="7;9;7" dur="2.8s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="60" cy="60" r="4" fill="#66BB6A" opacity="0.8">
-              <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="60" cy="60" r="2" fill="#A5D6A7" opacity="0.9">
-              <animate attributeName="r" values="2;3;2" dur="2.2s" repeatCount="indefinite"/>
-            </circle>
-            
-            <!-- Brillos dinámicos en el centro con efecto verde -->
-            <circle cx="57" cy="57" r="1.5" fill="#E8F5E8" opacity="0.9">
-              <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.8s" repeatCount="indefinite"/>
-              <animate attributeName="r" values="1.5;2.5;1.5" dur="1.8s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="63" cy="62" r="1" fill="#F1F8E9" opacity="0.7">
-              <animate attributeName="opacity" values="0.7;0.2;0.7" dur="2.3s" repeatCount="indefinite"/>
-              <animate attributeName="r" values="1;1.8;1" dur="2.3s" repeatCount="indefinite"/>
-            </circle>
-            
-            <!-- Definiciones de degradados verdes mejorados -->
+      <div class="logo-container">
+        <!-- Flor SVG girando como en LoginView -->
+        <div class="logo-animation">
+          <svg class="logo-flower-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <linearGradient id="petal-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#C8E6C9;stop-opacity:0.95" />
-                <stop offset="30%" style="stop-color:#A5D6A7;stop-opacity:0.9" />
-                <stop offset="70%" style="stop-color:#81C784;stop-opacity:0.8" />
-                <stop offset="100%" style="stop-color:#66BB6A;stop-opacity:0.7" />
+              <linearGradient id="petalGradientSidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#dcfce7;stop-opacity:1" />
+                <stop offset="30%" style="stop-color:#bbf7d0;stop-opacity:1" />
+                <stop offset="60%" style="stop-color:#86efac;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#4ade80;stop-opacity:1" />
               </linearGradient>
-              <linearGradient id="petal-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#E8F5E8;stop-opacity:0.9" />
-                <stop offset="30%" style="stop-color:#C8E6C9;stop-opacity:0.85" />
-                <stop offset="70%" style="stop-color:#A5D6A7;stop-opacity:0.75" />
-                <stop offset="100%" style="stop-color:#81C784;stop-opacity:0.65" />
+              <linearGradient id="centerGradientSidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#16a34a;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#15803d;stop-opacity:1" />
               </linearGradient>
-              <linearGradient id="inner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#F1F8E9;stop-opacity:0.9" />
-                <stop offset="50%" style="stop-color:#E8F5E8;stop-opacity:0.7" />
-                <stop offset="100%" style="stop-color:#C8E6C9;stop-opacity:0.5" />
-              </linearGradient>
-              <radialGradient id="center-gradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" style="stop-color:#A5D6A7;stop-opacity:1" />
-                <stop offset="50%" style="stop-color:#81C784;stop-opacity:0.95" />
-                <stop offset="100%" style="stop-color:#66BB6A;stop-opacity:0.8" />
-              </radialGradient>
-              <radialGradient id="center-gradient-2" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" style="stop-color:#C8E6C9;stop-opacity:0.9" />
-                <stop offset="100%" style="stop-color:#81C784;stop-opacity:0.7" />
-              </radialGradient>
+              <filter id="petalGlowSidebar" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                <feMerge> 
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="centerShadowSidebar" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#15803d" flood-opacity="0.4"/>
+              </filter>
             </defs>
+            
+            <!-- Grupo de la flor que girará como una unidad -->
+            <g class="flower-rotating-sidebar">
+              <!-- Pétalos de la flor (8 pétalos) -->
+              <!-- Pétalo superior -->
+              <ellipse cx="50" cy="25" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"/>
+              
+              <!-- Pétalo superior derecho -->
+              <ellipse cx="65" cy="35" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(45 65 35)"/>
+              
+              <!-- Pétalo derecho -->
+              <ellipse cx="75" cy="50" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(90 75 50)"/>
+              
+              <!-- Pétalo inferior derecho -->
+              <ellipse cx="65" cy="65" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(135 65 65)"/>
+              
+              <!-- Pétalo inferior -->
+              <ellipse cx="50" cy="75" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(180 50 75)"/>
+              
+              <!-- Pétalo inferior izquierdo -->
+              <ellipse cx="35" cy="65" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(225 35 65)"/>
+              
+              <!-- Pétalo izquierdo -->
+              <ellipse cx="25" cy="50" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(270 25 50)"/>
+              
+              <!-- Pétalo superior izquierdo -->
+              <ellipse cx="35" cy="35" rx="8" ry="15" 
+                       fill="url(#petalGradientSidebar)" filter="url(#petalGlowSidebar)"
+                       transform="rotate(315 35 35)"/>
+              
+              <!-- Centro de la flor -->
+              <circle cx="50" cy="50" r="12" 
+                      fill="url(#centerGradientSidebar)" filter="url(#centerShadowSidebar)"/>
+              
+              <!-- Detalles del centro -->
+              <circle cx="50" cy="50" r="8" 
+                      fill="#22c55e" opacity="0.8"/>
+              <circle cx="47" cy="47" r="3" 
+                      fill="#86efac" opacity="0.6"/>
+              
+              <!-- Pequeños detalles en los pétalos -->
+              <circle cx="50" cy="30" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="62" cy="38" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="70" cy="50" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="62" cy="62" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="50" cy="70" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="38" cy="62" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="30" cy="50" r="1.5" fill="#22c55e" opacity="0.7"/>
+              <circle cx="38" cy="38" r="1.5" fill="#22c55e" opacity="0.7"/>
+            </g>
           </svg>
         </div>
+        
+        <!-- Texto del logo con efecto de brillo -->
         <div class="logo-text">
-          <h1 class="brand-title">SEMBRANDO VIDA</h1>
-          <p class="brand-subtitle">App de Seguimiento</p>
+          <h1 class="brand-name">SEMBRANDO VIDA</h1>
+          <p class="brand-tagline">App de Seguimiento</p>
+          <div class="text-underline"></div>
         </div>
       </div>
     </div>
-      <!-- Botón para ir al geoportal -->
-    <div class="geoportal-section">
-      <a href="https://geoportal.sembrandodatos.com/" target="_blank" class="geoportal-btn">
-        <div class="geoportal-icon-wrapper">
-          <svg class="geoportal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- Enlaces rápidos: Geoportal y App Móvil -->
+    <div class="quick-links">
+      <a href="https://geoportal.sembrandodatos.com/" target="_blank" class="quick-link geoportal">
+        <div class="link-icon-container">
+          <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
             <path d="M2 12h20"/>
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-            <path d="M8 12c0-2.5 1.8-4.5 4-4.5s4 2 4 4.5-1.8 4.5-4 4.5-4-2-4-4.5"/>
           </svg>
         </div>
-        <span class="geoportal-text">Geoportal</span>
-        <div class="geoportal-glow"></div>
+        <span>Geoportal</span>
       </a>
-      
-      <!-- Botón para ir a la App Móvil -->
-      <a href="https://app.sembrandodatos.com/login" target="_blank" class="mobile-app-btn">
-        <div class="mobile-app-icon-wrapper">
-          <svg class="mobile-app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <a href="https://app.sembrandodatos.com/login" target="_blank" class="quick-link app-movil">
+        <div class="link-icon-container">
+          <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
             <line x1="12" y1="18" x2="12.01" y2="18"/>
           </svg>
         </div>
-        <span class="mobile-app-text">App Móvil</span>
-        <div class="mobile-app-glow"></div>
+        <span>App Móvil</span>
+      </a>
+      
+      <!-- Resumen Ejecutivo -->
+      <a href="https://dashboard.sembrandodatos.com/public/dashboard/7b96d8b2-a786-4593-9765-3585c9212949" target="_blank" class="quick-link resumen-ejecutivo">
+        <div class="link-icon-container">
+          <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <path d="M9 9h6v6H9z"/>
+            <path d="M9 3v6"/>
+            <path d="M21 9h-6"/>
+            <path d="M9 15v6"/>
+            <path d="M15 15h6"/>
+          </svg>
+        </div>
+        <span>Resumen Ejecutivo</span>
       </a>
     </div>
-      
-      <nav class="sidebar-nav">
+
+    <!-- Navegación principal -->
+    <nav class="sidebar-nav">
       <ul>
-        <!-- Dashboard - OCULTO TEMPORALMENTE (NO ELIMINAR - Solo documentado para futura referencia)
-        <li class="nav-item" :class="{ active: $route.name === 'Dashboard' }">
-          <router-link to="/dashboard" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="9"/>
-                <rect x="14" y="3" width="7" height="5"/>
-                <rect x="14" y="12" width="7" height="9"/>
-                <rect x="3" y="16" width="7" height="5"/>
-              </svg>
-            </div>
-            <span class="nav-text">Dashboard</span>
-            <div class="nav-glow"></div>
-          </router-link>
-        </li>
-        -->
-        
-        <!-- Mapa Optimizado -->
+        <!-- Visor de seguimiento -->
         <li class="nav-item" :class="{ active: $route.name === 'VisorMap' }">
           <router-link to="/visor-map" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Ícono profesional de seguimiento GPS -->
-                <circle cx="12" cy="12" r="8"/>
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M12 1v6"/>
-                <path d="M12 17v6"/>
-                <path d="M1 12h6"/>
-                <path d="M17 12h6"/>
-                <!-- Indicadores direccionales modernos -->
-                <path d="M16.24 7.76l-2.12 2.12"/>
-                <path d="M9.88 14.12l-2.12 2.12"/>
-                <path d="M16.24 16.24l-2.12-2.12"/>
-                <path d="M9.88 9.88l-2.12-2.12"/>
-                <!-- Pulso de seguimiento -->
-                <circle cx="12" cy="12" r="6" opacity="0.2" stroke-dasharray="2,2"/>
-                <circle cx="12" cy="12" r="1.5" fill="currentColor" opacity="0.8"/>
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 3h3a7 7 0 0 0 3 18h-3A17 17 0 0 1 8 3z"/>
+                <path d="M16 12h3"/>
+                <path d="M16 18h2"/>
+                <path d="M16 6h2"/>
+                <path d="M3 12h3"/>
+                <path d="M6 6h2"/>
+                <path d="M6 18h2"/>
               </svg>
             </div>
-            <span class="nav-text">Visor de seguimiento</span>
-            <div class="nav-glow"></div>
+            <span class="nav-text">Visor de Seguimiento</span>
           </router-link>
+          <div class="nav-indicator"></div>
         </li>
-        
+
+        <!-- Asistencia -->
         <li class="nav-item" :class="{ active: $route.name === 'Asistencia' }">
           <router-link to="/asistencia" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Ícono profesional de check corporativo -->
-                <path d="M9 11l3 3L22 4"/>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                <!-- Marco profesional -->
-                <rect x="3" y="3" width="18" height="18" rx="3" opacity="0.1" fill="currentColor"/>
-                <!-- Elementos decorativos empresariales -->
-                <circle cx="7" cy="7" r="0.5" opacity="0.6"/>
-                <circle cx="17" cy="7" r="0.5" opacity="0.6"/>
-                <path d="M7 16h10" opacity="0.3" stroke-width="1.5"/>
-                <path d="M7 19h6" opacity="0.2" stroke-width="1"/>
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
             </div>
             <span class="nav-text">Asistencia</span>
-            <div class="nav-glow"></div>
           </router-link>
+          <div class="nav-indicator"></div>
         </li>
-        
+
+        <!-- Registro de Actividades -->
         <li class="nav-item" :class="{ active: $route.name === 'Registros' }">
           <router-link to="/registros" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Ícono profesional de documentos empresariales -->
-                <rect x="4" y="2" width="16" height="20" rx="3" ry="3" opacity="0.1" fill="currentColor"/>
-                <path d="M14 2v6h6"/>
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-                <!-- Líneas de contenido profesionales -->
-                <line x1="8" y1="13" x2="16" y2="13" stroke-width="1.5"/>
-                <line x1="8" y1="16" x2="16" y2="16" stroke-width="1.5"/>
-                <line x1="8" y1="19" x2="13" y2="19" stroke-width="1.5"/>
-                <!-- Detalles corporativos -->
-                <circle cx="10" cy="10" r="1" opacity="0.4" fill="currentColor"/>
-                <rect x="12" y="9.5" width="3" height="1" rx="0.5" opacity="0.3" fill="currentColor"/>
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
               </svg>
             </div>
             <span class="nav-text">Registro de Actividades</span>
-            <div class="nav-glow"></div>
           </router-link>
+          <div class="nav-indicator"></div>
         </li>
-        
+
+        <!-- Usuarios (solo para admin) -->
         <li class="nav-item" :class="{ active: $route.name === 'Usuarios' }" v-if="isAdmin">
           <router-link to="/usuarios" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Ícono profesional de gestión de usuarios -->
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
-                <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
-                <!-- Usuario adicional profesional -->
-                <circle cx="16" cy="4" r="2"/>
-                <path d="M20 8v2a2 2 0 0 1-2 2h-1"/>
-                <!-- Elementos decorativos empresariales -->
-                <rect x="17" y="11" width="4" height="2" rx="1" opacity="0.3" fill="currentColor"/>
-                <circle cx="19" cy="17" r="1" opacity="0.2" fill="currentColor"/>
-                <!-- Indicador de gestión -->
-                <path d="M12 12h6" opacity="0.4" stroke-width="1.5"/>
-                <path d="M15 9v6" opacity="0.3" stroke-width="1"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
             </div>
             <span class="nav-text">Usuarios</span>
-            <div class="nav-glow"></div>
           </router-link>
+          <div class="nav-indicator"></div>
         </li>
 
+        <!-- Historiales -->
         <li class="nav-item" :class="{ active: $route.name === 'Historiales' }">
           <router-link to="/historiales" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Ícono profesional de cronómetro empresarial -->
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
-                <polyline points="12,6 12,12 16,14"/>
-                <!-- Marcadores de tiempo profesionales -->
-                <path d="M12 2v2" stroke-width="3"/>
-                <path d="M12 20v2" stroke-width="3"/>
-                <path d="M2 12h2" stroke-width="3"/>
-                <path d="M20 12h2" stroke-width="3"/>
-                <!-- Detalles de cronómetro premium -->
-                <circle cx="12" cy="12" r="2" opacity="0.3" fill="currentColor"/>
-                <path d="M15.5 8.5L17 7" opacity="0.6"/>
-                <path d="M8.5 15.5L7 17" opacity="0.6"/>
-                <!-- Indicadores de medición -->
-                <circle cx="12" cy="6" r="0.5" opacity="0.4"/>
-                <circle cx="18" cy="12" r="0.5" opacity="0.4"/>
-                <circle cx="12" cy="18" r="0.5" opacity="0.4"/>
-                <circle cx="6" cy="12" r="0.5" opacity="0.4"/>
+                <polyline points="12 6 12 12 16 14"/>
               </svg>
             </div>
             <span class="nav-text">Historiales</span>
-            <div class="nav-glow"></div>
           </router-link>
+          <div class="nav-indicator"></div>
         </li>
-        
+
+        <!-- Notificaciones -->
         <li class="nav-item" :class="{ active: $route.name === 'Notificaciones' }">
           <router-link to="/notificaciones" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Ícono profesional de notificaciones empresariales -->
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                <!-- Indicador de notificación premium -->
-                <circle cx="19" cy="5" r="3" fill="#4CAF50" opacity="0.9"/>
-                <circle cx="19" cy="5" r="1.5" fill="#ffffff" opacity="1"/>
-                <!-- Ondas de transmisión profesionales -->
-                <path d="M21 8c1 0 2 0.5 2 2s-1 2-2 2" opacity="0.5" stroke-width="1.5"/>
-                <path d="M22 6c1.5 0 2.5 1 2.5 4s-1 4-2.5 4" opacity="0.3" stroke-width="1"/>
-                <!-- Detalles empresariales -->
-                <rect x="8" y="12" width="8" height="1" rx="0.5" opacity="0.2" fill="currentColor"/>
-                <rect x="10" y="14" width="4" height="0.5" rx="0.25" opacity="0.15" fill="currentColor"/>
               </svg>
+              <span class="notification-badge" v-if="unreadNotifications">{{ unreadNotifications }}</span>
             </div>
             <span class="nav-text">Notificaciones</span>
-            <div class="nav-glow"></div>
           </router-link>
+          <div class="nav-indicator"></div>
         </li>
-        
+
+        <!-- Permisos de Usuarios (solo para admin) -->
         <li class="nav-item" :class="{ active: $route.name === 'Permisos' }" v-if="isAdmin">
           <router-link to="/permisos" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Ícono profesional de seguridad empresarial -->
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M12 9v6"/>
-                <path d="M9 12h6"/>
-                <!-- Elementos de verificación de seguridad -->
-                <path d="M9 9l1.5 1.5L13 8" opacity="0.6" stroke-width="1.5"/>
-                <!-- Detalles de autorización -->
-                <circle cx="8" cy="7" r="0.5" opacity="0.4"/>
-                <circle cx="16" cy="7" r="0.5" opacity="0.4"/>
-                <circle cx="8" cy="17" r="0.5" opacity="0.4"/>
-                <circle cx="16" cy="17" r="0.5" opacity="0.4"/>
-                <!-- Marco de seguridad -->
-                <rect x="4" y="5" width="16" height="14" rx="2" opacity="0.1" stroke="none" fill="currentColor"/>
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
             </div>
             <span class="nav-text">Permisos de Usuarios</span>
-            <div class="nav-glow"></div>
           </router-link>
+          <div class="nav-indicator"></div>
         </li>
-        
+
+        <!-- Configuración (solo para admin) -->
         <li class="nav-item" :class="{ active: $route.name === 'Configuracion' }" v-if="isAdmin">
           <router-link to="/configuracion" class="nav-link">
-            <div class="nav-icon-wrapper">
-              <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"/>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
               </svg>
             </div>
             <span class="nav-text">Configuración</span>
-            <div class="nav-glow"></div>
           </router-link>
+          <div class="nav-indicator"></div>
         </li>
       </ul>
     </nav>
-      <div class="sidebar-footer">
-      <button @click="showLogoutModal = true" class="logout-btn">
-        <div class="btn-icon-wrapper">
-          <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <!-- Ícono profesional de logout empresarial -->
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16,17 21,12 16,7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-            <!-- Marco de puerta profesional -->
-            <rect x="3" y="3" width="6" height="18" rx="1" opacity="0.1" fill="currentColor"/>
-            <!-- Indicador de salida -->
-            <circle cx="18.5" cy="8" r="0.5" opacity="0.6"/>
-            <circle cx="18.5" cy="16" r="0.5" opacity="0.6"/>
-            <!-- Línea de movimiento -->
-            <path d="M12 12h6" opacity="0.4" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Información del usuario y cerrar sesión -->
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">
+          <svg class="user-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
           </svg>
         </div>
-        <span class="logout-text">Cerrar Sesión</span>
-        <div class="logout-glow"></div>
+        <div class="user-details">
+          <p class="user-name">{{ userDisplayName }}</p>
+          <p class="user-role">{{ roleDisplayName }}</p>
+        </div>
+      </div>
+      <button @click="showLogoutModal = true" class="logout-button">
+        <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>Cerrar Sesión</span>
       </button>
     </div>
     
-    <!-- Modal de confirmación de logout -->
+    <!-- Modal de confirmación de cierre de sesión -->
     <Teleport to="body">
-      <div v-if="showLogoutModal" class="logout-modal-overlay" @click="closeModal">
-        <div class="logout-modal" @click.stop>
-          <div class="modal-header">          <div class="modal-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16,17 21,12 16,7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-          </div>
-            <h3>Cerrar Sesión</h3>
-          </div>
-          
-          <div class="modal-body">
-            <p>¿Estás seguro de que quieres cerrar sesión?</p>
-          </div>
-          
-          <div class="modal-actions">
-            <button @click="closeModal" class="btn-cancel">
-              Cancelar
-            </button>
-            <button @click="confirmLogout" class="btn-confirm">
-              Aceptar
-            </button>
+      <transition name="modal">
+        <div v-if="showLogoutModal" class="logout-modal-overlay" @click="closeModal">
+          <div class="logout-modal-container" @click.stop>
+            
+            <!-- Header con gradiente rojo -->
+            <div class="logout-modal-header">
+              <div class="logout-header-content">
+                <div class="logout-icon-container">
+                  <div class="logout-icon-bg">
+                    <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                      <polyline points="16 17 21 12 16 7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="logout-header-text">
+                  <h3 class="logout-title">Cerrar Sesión</h3>
+                  <p class="logout-subtitle">Finalizar tu sesión actual</p>
+                </div>
+              </div>
+              
+              <!-- Botón cerrar elegante -->
+              <button @click="closeModal" class="logout-close-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Cuerpo del modal con iconografía -->
+            <div class="logout-modal-body">
+              <div class="logout-warning-section">
+                <div class="logout-warning-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <div class="logout-warning-content">
+                  <h4 class="logout-warning-title">¿Confirmar cierre de sesión?</h4>
+                  <p class="logout-warning-text">
+                    Se cerrará tu sesión actual y tendrás que iniciar sesión nuevamente para acceder al sistema.
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Información adicional -->
+              <div class="logout-info-section">
+                <div class="logout-info-item">
+                  <svg class="logout-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>Tu trabajo se ha guardado automáticamente</span>
+                </div>
+                <div class="logout-info-item">
+                  <svg class="logout-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <span>La sesión se cerrará de forma segura</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer con botones mejorados -->
+            <div class="logout-modal-footer">
+              <button @click="closeModal" class="logout-btn logout-btn-cancel">
+                <svg class="logout-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+                <span>Cancelar</span>
+              </button>
+              <button @click="confirmLogout" class="logout-btn logout-btn-confirm">
+                <svg class="logout-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </transition>
     </Teleport>
   </div>
 </template>
@@ -425,22 +403,18 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import authService from '../services/authService'
 
+// Router
 const router = useRouter()
 
-// Estado del sidebar
+// Estados
 const isCollapsed = ref(false)
 const showLogoutModal = ref(false)
-
-// Estado del usuario
 const currentUser = ref(null)
+const unreadNotifications = ref(0)
 
-// Computed properties para el rol
+// Computed properties
 const isAdmin = computed(() => {
   return authService.isAdmin()
-})
-
-const isUser = computed(() => {
-  return authService.isUser()
 })
 
 const userDisplayName = computed(() => {
@@ -455,12 +429,11 @@ const roleDisplayName = computed(() => {
   return role === 'admin' ? 'Administrador' : 'Usuario'
 })
 
-// Funciones del sidebar
+// Métodos
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
 
-// Funciones del modal de logout
 const closeModal = () => {
   showLogoutModal.value = false
 }
@@ -471,36 +444,63 @@ const confirmLogout = () => {
   router.push('/login')
 }
 
-// Cerrar modal con Escape
-const handleKeydown = (event) => {
-  if (event.key === 'Escape' && showLogoutModal.value) {
-    closeModal()
-  }
-}
-
-// Cargar información del usuario al montar
+// Lifecycle hooks
 onMounted(async () => {
   try {
+    // Cargar información del usuario
     currentUser.value = authService.getCurrentUser()
-    // Refrescar información del usuario desde el servidor
     if (currentUser.value) {
       await authService.refreshUserInfo()
       currentUser.value = authService.getCurrentUser()
     }
+    
+    // Simular notificaciones no leídas (esto debería reemplazarse con datos reales)
+    unreadNotifications.value = Math.floor(Math.random() * 10)
+    
+    // Agregar evento para tecla Escape para cerrar el modal
+    window.addEventListener('keydown', handleKeydown)
   } catch (error) {
     console.error('Error cargando información del usuario:', error)
   }
 })
 
-// Agregar listener para Escape
-if (typeof window !== 'undefined') {
-  window.addEventListener('keydown', handleKeydown)
+// Manejadores de eventos
+const handleKeydown = (event) => {
+  if (event.key === 'Escape' && showLogoutModal.value) {
+    closeModal()
+  }
 }
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Source+Sans+Pro:wght@300;400;600;700;900&display=swap');
+/* Importación de fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Variables de colores */
+:root {
+  --primary-dark: #1B5E20;
+  --primary: #2E7D32;
+  --primary-light: #4CAF50;
+  --accent: #FFFFFF;
+  --accent-light: #E8F5E9;
+  --accent-very-light: #F1F8E9;
+  --background: #FFFFFF;
+  --surface: #F5F5F5;
+  --surface-hover: #EEEEEE;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-light: #FFFFFF;
+  --text-highlight: #FFFF8D;
+  --border-light: rgba(255, 255, 255, 0.3);
+  --border-dark: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --error: #FF5252;
+  --warning: #FFD740;
+  --info: #40C4FF;
+  --success: #69F0AE;
+}
+
+/* Base */
 .sidebar {
   position: fixed;
   left: 0;
@@ -508,603 +508,360 @@ if (typeof window !== 'undefined') {
   bottom: 0;
   width: min(220px, 18vw);
   max-width: 240px;
-  min-width: 180px;
-  background: linear-gradient(180deg, 
-    #1B5E20 0%, 
-    #2E7D32 25%,
-    #388E3C 50%,
-    #2E7D32 75%,
+  min-width: 200px;
+  background: linear-gradient(135deg, 
+    #388E3C 0%, 
+    #2E7D32 50%, 
     #1B5E20 100%);
-  border-right: 3px solid #0D4E14;
-  color: #FFFFFF;
+  color: var(--text-light);
   display: flex;
   flex-direction: column;
   z-index: 1000;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 4px 12px rgba(27, 94, 32, 0.4);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  
-  /* Escalado dinámico basado en viewport */
-  font-size: clamp(12px, 1.2vw, 16px);
-}
-.sidebar-header {
-  padding: clamp(2px, 0.5vh, 4px) clamp(2px, 0.4vw, 4px) clamp(3px, 0.6vh, 6px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  background: linear-gradient(135deg, 
-    rgba(13, 78, 20, 0.8) 0%, 
-    rgba(27, 94, 32, 0.6) 100%);
-  flex-shrink: 0;
-  min-height: fit-content;
-  max-height: 8vh;
+  border-radius: 0;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  /* Asegurar que siempre esté visible */
+  transform: translateX(0);
 }
 
-.header-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(1px, 0.2vh, 2px);
-  width: 100%;
-  max-width: min(140px, 90%);
+/* Modo colapsado (solo en desktop) */
+.sidebar.collapsed {
+  width: 70px;
 }
 
-.sidebar-header::after {
-  content: '';
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .brand-tagline,
+.sidebar.collapsed .quick-links span,
+.sidebar.collapsed .nav-text,
+.sidebar.collapsed .user-details,
+.sidebar.collapsed .logout-button span {
+  display: none;
+}
+
+.sidebar.collapsed .nav-icon-container,
+.sidebar.collapsed .link-icon-container {
+  margin: 0 auto;
+}
+
+/* Toggle Button para móviles - Oculto porque el sidebar siempre está visible */
+.sidebar-toggle {
   position: absolute;
-  bottom: 0;
-  left: 24px;
-  right: 24px;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.6) 50%, 
-    transparent 100%);
-}
-
-.logo {
-  width: 56px;
-  height: 56px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: transparent;
-  border-radius: 18px;
-  position: relative;
-  overflow: visible;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  margin-bottom: 4px;
-}
-
-.logo:hover {
-  transform: scale(1.1);
-}
-
-/* Estilos para la animación de flor girando */
-.flower-animation {
-  width: clamp(10px, 1.5vw, 14px);
-  height: clamp(10px, 1.5vw, 14px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  filter: drop-shadow(0 1px 4px rgba(76, 175, 80, 0.2));
-  animation: flowerRotate 8s linear infinite;
-}
-
-.flower-animation::before {
-  content: '';
-  position: absolute;
-  width: 130%;
-  height: 130%;
-  background: radial-gradient(circle, rgba(76, 175, 80, 0.15) 0%, rgba(139, 195, 74, 0.08) 40%, transparent 70%);
+  top: 16px;
+  right: -44px;
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  border: none;
   border-radius: 50%;
-  animation: flowerAura 4s ease-in-out infinite;
-  z-index: -1;
+  color: white;
+  display: none; /* Siempre oculto */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  transition: all 0.3s ease;
 }
 
-.flower-icon {
+.sidebar-toggle:hover {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+.toggle-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* Header */
+.sidebar-header {
+  padding: 12px 12px 8px;
+  position: relative;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-animation {
+  width: 42px;
+  height: 42px;
+  position: relative;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* SVG de la flor girando como en LoginView */
+.logo-flower-svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 3px 12px rgba(76, 175, 80, 0.5));
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  z-index: 1;
-  position: relative;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
-.flower-icon:hover {
-  transform: scale(1.15);
-  filter: drop-shadow(0 6px 25px rgba(76, 175, 80, 0.7));
+/* Animaciones del logo de flor girando igual que en LoginView */
+.flower-rotating-sidebar {
+  animation: smoothRotationSidebar 6s linear infinite;
+  transform-origin: 50px 50px;
 }
 
-/* Animación de rotación continua para la flor */
-@keyframes flowerRotate {
-  0% {
+@keyframes smoothRotationSidebar {
+  from {
     transform: rotate(0deg);
   }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
-@keyframes flowerAura {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.4;
-  }
-  33% {
-    transform: scale(1.1);
-    opacity: 0.7;
-  }
-  66% {
-    transform: scale(1.2);
-    opacity: 0.5;
-  }
+/* Efectos hover para la nueva animación SVG */
+.logo-animation:hover .logo-flower-svg {
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.2));
 }
 
-/* Efectos adicionales para la nueva animación verde */
-.flower-animation::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, transparent 60%, rgba(76, 175, 80, 0.1) 80%, transparent 100%);
-  border-radius: 50%;
-  animation: flowerPulse 3s ease-in-out infinite;
-  z-index: -2;
+.logo-animation:hover .flower-rotating-sidebar {
+  animation-duration: 4s;
 }
 
-@keyframes flowerPulse {
-  0%, 100% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.4);
-    opacity: 0.6;
-  }
-}
-
-/* Tipografía profesional mejorada */
 .logo-text {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.5px;
   width: 100%;
 }
 
-.brand-title {
+.brand-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-light);
+  letter-spacing: 0.5px;
   margin: 0;
-  font-size: clamp(0.5px, 0.05vw, 1px);
-  font-weight: 500;
-  background: linear-gradient(135deg, 
-    #E8F5E8 0%, 
-    #A5D6A7 25%,
-    #66BB6A 50%,
-    #4CAF50 75%,
-    #2E7D32 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: clamp(0.001em, 0.005vw, 0.01em);
-  line-height: 0.8;
-  font-family: 'Source Sans Pro', 'SF Pro Display', 'system-ui', '-apple-system', sans-serif;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   text-transform: uppercase;
-  position: relative;
-  white-space: nowrap;
-  filter: drop-shadow(0 0.2px 0.5px rgba(76, 175, 80, 0.1));
-  padding-bottom: clamp(3px, 0.5vh, 6px);
-  margin-bottom: clamp(2px, 0.3vh, 4px);
+  background: linear-gradient(45deg, #F1F8E9 10%, #E8F5E8 30%, #DCEDC8 50%, #FFF9C4 70%, #FFEB3B 90%);
+  -webkit-background-clip: text;
+  color: transparent;
+  background-clip: text;
+  animation: gradientText 3s ease infinite;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
 }
 
-.brand-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    #E8F5E8 10%,
-    #A5D6A7 25%,
-    #66BB6A 50%,
-    #4CAF50 75%,
-    #2E7D32 90%,
-    transparent 100%);
-  border-radius: 1px;
-  box-shadow: 
-    0 0 4px rgba(76, 175, 80, 0.3),
-    0 0 8px rgba(76, 175, 80, 0.2);
-  animation: lineGlow 2s ease-in-out infinite;
-}
-
-@keyframes lineGlow {
+@keyframes gradientText {
   0%, 100% {
-    opacity: 0.6;
-    transform: translateX(-50%) scaleX(0.8);
-    box-shadow: 
-      0 0 4px rgba(76, 175, 80, 0.3),
-      0 0 8px rgba(76, 175, 80, 0.2);
-  }
-  25% {
-    opacity: 0.9;
-    transform: translateX(-50%) scaleX(1.1);
-    box-shadow: 
-      0 0 8px rgba(76, 175, 80, 0.5),
-      0 0 16px rgba(76, 175, 80, 0.3);
+    background-position: 0% 50%;
   }
   50% {
+    background-position: 100% 50%;
+  }
+}
+
+.brand-tagline {
+  font-size: 11px;
+  font-weight: 500;
+  color: #FFFFFF;
+  opacity: 0.95;
+  margin: 4px 0 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.text-underline {
+  width: 80%;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    #1B5E20 25%,
+    #2E7D32 50%,
+    #1B5E20 75%,
+    transparent 100%);
+  margin: 8px auto 0 auto;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(27, 94, 32, 0.3);
+}
+
+.text-underline::after {
+  content: "";
+  position: absolute;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 20%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.3) 80%,
+    transparent 100%);
+  left: -50%;
+  top: 0;
+  animation: underlineShine 2.5s infinite ease-in-out;
+  border-radius: 2px;
+}
+
+@keyframes underlineShine {
+  0% {
+    left: -50%;
+    opacity: 0;
+  }
+  10% {
     opacity: 1;
-    transform: translateX(-50%) scaleX(1.2);
-    box-shadow: 
-      0 0 12px rgba(76, 175, 80, 0.7),
-      0 0 24px rgba(76, 175, 80, 0.4);
   }
-  75% {
-    opacity: 0.8;
-    transform: translateX(-50%) scaleX(1.0);
-    box-shadow: 
-      0 0 6px rgba(76, 175, 80, 0.4),
-      0 0 12px rgba(76, 175, 80, 0.25);
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: 110%;
+    opacity: 0;
   }
 }
 
-.brand-title:hover {
-  transform: translateY(-1px);
-}
-
-.brand-subtitle {
-  margin: 0;
-  font-size: clamp(2.5px, 0.25vw, 3.5px);
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 300;
-  text-shadow: 0 0.5px 0.5px rgba(0, 0, 0, 0.15);
-  letter-spacing: clamp(0.03em, 0.04vw, 0.06em);
-  text-transform: uppercase;
-  font-family: 'Montserrat', 'Inter', 'Source Sans Pro', sans-serif;
-  opacity: 0.7;
-  transition: all 0.3s ease;
-  font-variant: small-caps;
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: clip;
-}
-
-.brand-subtitle:hover {
-  opacity: 1;
-  transform: translateY(-0.5px);
-}
-
-/* Estilos modernos para el botón del geoportal */
-.geoportal-section {
-  padding: clamp(4px, 0.8vh, 8px) clamp(4px, 0.8vw, 8px) clamp(6px, 1vh, 10px);
-  margin-bottom: clamp(2px, 0.4vh, 4px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  position: relative;
-  background: linear-gradient(135deg, 
-    rgba(13, 78, 20, 0.4) 0%, 
-    rgba(27, 94, 32, 0.3) 100%);
-  flex-shrink: 0;
-  max-height: 12vh;
+/* Links rápidos */
+.quick-links {
   display: flex;
-  flex-direction: row;
-  gap: clamp(2px, 0.5vw, 4px);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  margin: 0 10px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.geoportal-section::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 24px;
-  right: 24px;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
-    transparent 100%);
-}
-
-.geoportal-btn {
-  width: 50%;
-  flex: 1;
-  background: linear-gradient(135deg, 
-    rgba(27, 94, 32, 0.3) 0%, 
-    rgba(46, 125, 50, 0.25) 30%,
-    rgba(76, 175, 80, 0.2) 70%,
-    rgba(139, 195, 74, 0.15) 100%);
-  backdrop-filter: blur(25px) saturate(200%);
-  -webkit-backdrop-filter: blur(25px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: rgba(255, 255, 255, 0.95);
-  padding: clamp(3px, 0.5vh, 5px) clamp(4px, 0.6vw, 6px);
-  border-radius: clamp(6px, 1.2vw, 10px);
-  cursor: pointer;
+.quick-link {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: clamp(1px, 0.2vh, 2px);
-  font-size: clamp(7px, 0.8vw, 9px);
-  font-weight: 500;
   text-decoration: none;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  position: relative;
-  overflow: hidden;
-  min-height: clamp(32px, 4vh, 40px);
-  box-shadow: 
-    0 3px 12px rgba(0, 0, 0, 0.15),
-    0 1px 4px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
-    0 0 20px rgba(76, 175, 80, 0.1);
-}
-
-.geoportal-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.3) 50%, 
-    transparent 100%);
-  transition: left 0.6s ease-in-out;
-  z-index: 1;
-}
-
-.geoportal-btn:hover::before {
-  left: 100%;
-}
-
-.geoportal-btn i,
-.geoportal-btn span {
-  position: relative;
-  z-index: 2;
-}
-
-.geoportal-btn:hover {
-  background: linear-gradient(135deg, 
-    rgba(27, 94, 32, 0.45) 0%, 
-    rgba(46, 125, 50, 0.4) 50%,
-    rgba(76, 175, 80, 0.35) 100%);
-  backdrop-filter: blur(30px) saturate(250%);
-  -webkit-backdrop-filter: blur(30px) saturate(250%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
-    0 0 30px rgba(76, 175, 80, 0.3);
-}
-
-.geoportal-btn:hover .geoportal-glow {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.geoportal-btn:hover .arrow-icon {
-  transform: translateX(6px) rotate(45deg);
-}
-
-.geoportal-btn:active {
-  transform: translateY(-1px) scale(1.01);
-}
-
-.geoportal-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.geoportal-icon {
-  width: clamp(12px, 1.4vw, 14px);
-  height: clamp(12px, 1.4vw, 14px);
-  stroke-width: 2;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+  color: white;
+  gap: 3px;
+  padding: 4px;
+  border-radius: 6px;
   transition: all 0.3s ease;
-}
-
-.arrow-icon {
-  width: clamp(6px, 0.8vw, 8px);
-  height: clamp(6px, 0.8vw, 8px);
-  opacity: 0.8;
-  stroke-width: 2.2;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.15));
-}
-
-.geoportal-text {
-  font-size: clamp(7px, 0.8vw, 9px);
-  font-weight: 500;
-  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
-  text-align: center;
-}
-
-.geoportal-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-  border-radius: 16px;
-  transform: translate(-50%, -50%) scale(0);
-  opacity: 0;
-  transition: all 0.4s ease;
-  pointer-events: none;
-}
-
-/* Estilos modernos para el botón de la App Móvil */
-.mobile-app-btn {
-  width: 50%;
-  flex: 1;
-  background: linear-gradient(135deg, 
-    rgba(21, 101, 192, 0.4) 0%, 
-    rgba(25, 118, 210, 0.35) 30%,
-    rgba(33, 150, 243, 0.3) 70%,
-    rgba(100, 181, 246, 0.25) 100%);
-  backdrop-filter: blur(25px) saturate(200%);
-  -webkit-backdrop-filter: blur(25px) saturate(200%);
-  border: 1px solid rgba(100, 181, 246, 0.3);
-  color: rgba(255, 255, 255, 0.95);
-  padding: clamp(3px, 0.5vh, 5px) clamp(4px, 0.6vw, 6px);
-  border-radius: clamp(6px, 1.2vw, 10px);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(1px, 0.2vh, 2px);
-  font-size: clamp(7px, 0.8vw, 9px);
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  width: 45%;
+  max-width: 70px;
   position: relative;
   overflow: hidden;
-  min-height: clamp(32px, 4vh, 40px);
-  box-shadow: 
-    0 3px 12px rgba(0, 0, 0, 0.15),
-    0 1px 4px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
-    0 0 20px rgba(33, 150, 243, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.mobile-app-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
+/* Tercer botón ocupa toda la fila inferior */
+.quick-link.resumen-ejecutivo {
   width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
-    transparent 100%);
-  transition: left 0.6s ease-in-out;
+  max-width: none;
+  margin-top: 4px;
+}
+
+.quick-link:hover {
+  transform: translateY(-2px);
+}
+
+.quick-link.geoportal {
+  color: white;
+  background: rgba(46, 125, 50, 0.8);
+}
+
+.quick-link.geoportal:hover {
+  background: rgba(46, 125, 50, 0.9);
+}
+
+.quick-link.app-movil {
+  color: white;
+  background: linear-gradient(135deg, rgba(38, 166, 154, 0.7) 0%, rgba(33, 150, 243, 0.7) 100%);
+}
+
+.quick-link.app-movil:hover {
+  background: linear-gradient(135deg, rgba(38, 166, 154, 0.8) 0%, rgba(33, 150, 243, 0.8) 100%);
+}
+
+.quick-link.resumen-ejecutivo {
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.7) 0%, rgba(103, 58, 183, 0.7) 100%);
+}
+
+.quick-link.resumen-ejecutivo:hover {
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.8) 0%, rgba(103, 58, 183, 0.8) 100%);
+}
+
+.link-icon-container {
+  width: 22px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   z-index: 1;
-}
-
-.mobile-app-btn:hover::before {
-  left: 100%;
-}
-
-.mobile-app-btn:hover {
-  background: linear-gradient(135deg, 
-    rgba(21, 101, 192, 0.6) 0%, 
-    rgba(25, 118, 210, 0.55) 30%,
-    rgba(33, 150, 243, 0.5) 70%,
-    rgba(100, 181, 246, 0.45) 100%);
-  backdrop-filter: blur(30px) saturate(250%);
-  -webkit-backdrop-filter: blur(30px) saturate(250%);
-  border: 1px solid rgba(100, 181, 246, 0.5);
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
-    0 0 30px rgba(33, 150, 243, 0.5);
-}
-
-.mobile-app-btn:hover .mobile-app-glow {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.mobile-app-btn:hover .mobile-arrow-icon {
-  transform: translateX(6px) rotate(45deg);
-}
-
-.mobile-app-btn i,
-.mobile-app-btn span {
-  position: relative;
-  z-index: 2;
-}
-
-.mobile-app-btn:active {
-  transform: translateY(-1px) scale(1.01);
-}
-
-.mobile-app-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.mobile-app-icon {
-  width: clamp(12px, 1.4vw, 14px);
-  height: clamp(12px, 1.4vw, 14px);
-  stroke-width: 2;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
   transition: all 0.3s ease;
+  border: none;
 }
 
-.mobile-arrow-icon {
-  width: clamp(6px, 0.8vw, 8px);
-  height: clamp(6px, 0.8vw, 8px);
-  opacity: 0.8;
-  stroke-width: 2.2;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.15));
+.quick-link:hover .link-icon-container {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.25);
 }
 
-.mobile-app-text {
-  font-size: clamp(7px, 0.8vw, 9px);
-  font-weight: 500;
-  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.1);
+.quick-link.geoportal .link-icon-container {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.quick-link.app-movil .link-icon-container {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.link-icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2;
+  color: white;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+.quick-link span {
+  font-size: 8px;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+  color: white;
+  letter-spacing: 0.1px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
-  text-align: center;
 }
 
-.mobile-app-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-  border-radius: 16px;
-  transform: translate(-50%, -50%) scale(0);
-  opacity: 0;
-  transition: all 0.4s ease;
-  pointer-events: none;
+.quick-link:active .link-icon-container {
+  transform: scale(0.95);
 }
 
+/* Navegación */
 .sidebar-nav {
   flex: 1;
-  padding: clamp(12px, 2vh, 24px) 0 0 0;
   overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0;
+  padding: 6px 10px 12px;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
 }
 
 .sidebar-nav ul {
@@ -1114,806 +871,1172 @@ if (typeof window !== 'undefined') {
 }
 
 .nav-item {
-  margin-bottom: 0;  /* Eliminado completamente el margin-bottom */
-  padding: 0 clamp(2px, 0.3vw, 4px);  /* Padding lateral aún más reducido */
+  position: relative;
+  margin-bottom: 5px;
+  overflow: hidden;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: clamp(6px, 0.8vw, 10px);  /* Añadido espacio entre icono y texto */
-  padding: clamp(8px, 1.6vh, 14px) clamp(4px, 0.8vw, 8px);  /* Padding izquierdo más reducido */
-  color: rgba(255, 255, 255, 0.75);
+  padding: 8px 10px;
   text-decoration: none;
-  border-radius: clamp(8px, 1.2vw, 12px);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-light);
+  border-radius: 15px;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  margin-bottom: 0;  /* Eliminado el margin-bottom */
-  backdrop-filter: blur(5px);
-  border: 1px solid transparent;
-  min-height: clamp(44px, 5.5vh, 55px);  /* Altura aumentada para mejor proporción */
+  font-weight: 400;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.nav-link:hover {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.08) 0%, 
-    rgba(255, 255, 255, 0.04) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
-  transform: translateX(2px) scale(1.01);
-  box-shadow: 
-    0 2px 12px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  border-radius: clamp(6px, 1vw, 10px);
-}
-
-.nav-link:hover .nav-glow {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.nav-link:hover .nav-icon {
-  filter: drop-shadow(0 1px 6px rgba(255, 255, 255, 0.2));
-  transform: scale(1.02);
-}
-
-.nav-item.active .nav-link,
-.nav-link.router-link-active,
-.nav-link.router-link-exact-active {
-  /* Efecto de vidrio transparente moderno */
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.15) 0%, 
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.12) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.95);
-  box-shadow: 
-    0 4px 20px rgba(255, 255, 255, 0.1),
-    0 2px 10px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
-  transform: translateX(2px);
-  border-radius: clamp(8px, 1.2vw, 12px);
-}
-
-.nav-item.active .nav-link .nav-icon,
-.nav-link.router-link-active .nav-icon,
-.nav-link.router-link-exact-active .nav-icon {
-  filter: drop-shadow(0 1px 4px rgba(255, 255, 255, 0.4)) 
-          drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
-  transform: scale(1.1);  /* Aumentado para compensar el tamaño más pequeño */
-}
-
-.nav-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(24px, 3vw, 28px);  /* Aumentado para mejor proporción */
-  height: clamp(24px, 3vw, 28px);
-  position: relative;
-  flex-shrink: 0;
-  
-  /* Fondo liquid glass circular */
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 255, 255, 0.05) 100%);
-  backdrop-filter: blur(12px) saturate(180%);
-  border-radius: 50%;  /* Completamente circular */
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    0 1px 4px rgba(0, 0, 0, 0.05),
-    inset 0 1px 2px rgba(255, 255, 255, 0.25);
-  
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nav-item:hover .nav-icon-wrapper {
-  background: linear-gradient(135deg, 
-    rgba(76, 175, 80, 0.25) 0%,
-    rgba(76, 175, 80, 0.15) 50%,
-    rgba(76, 175, 80, 0.08) 100%);
-  border-color: rgba(76, 175, 80, 0.3);
-  box-shadow: 
-    0 4px 12px rgba(76, 175, 80, 0.2),
-    0 2px 6px rgba(76, 175, 80, 0.1),
-    inset 0 1px 3px rgba(255, 255, 255, 0.35);
-  transform: translateY(-1px);
-}
-
-.nav-item.active .nav-icon-wrapper {
-  background: linear-gradient(135deg, 
-    rgba(76, 175, 80, 0.3) 0%,
-    rgba(76, 175, 80, 0.2) 50%,
-    rgba(76, 175, 80, 0.1) 100%);
-  border-color: rgba(76, 175, 80, 0.4);
-  box-shadow: 
-    0 6px 16px rgba(76, 175, 80, 0.25),
-    0 3px 8px rgba(76, 175, 80, 0.15),
-    inset 0 1px 3px rgba(255, 255, 255, 0.4);
-}
-
-.nav-icon {
-  width: clamp(14px, 1.8vw, 16px);  /* Aumentado para mejor proporción */
-  height: clamp(14px, 1.8vw, 16px);
-  stroke-width: 2;  /* Grosor de línea medio */
-  transition: all 0.3s ease;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));  /* Sombra más sutil */
-}
-
-.nav-text {
-  font-size: clamp(15px, 1.6vw, 18px);  /* Aumentado significativamente el tamaño */
-  font-weight: 500;  /* Cambiado a semi-bold para mejor legibilidad */
-  font-family: 'Inter', 'Segoe UI', 'Arial', 'Helvetica', sans-serif;
-  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.01em;
-  white-space: normal;  /* Permitir múltiples líneas */
-  word-wrap: break-word;  /* Romper palabras si es necesario */
-  overflow-wrap: break-word;
-  line-height: 1.3;  /* Líneas más leíbles */
-  flex: 1;
-  min-width: 0;
-  text-align: left;
-  transition: all 0.2s ease;
-  max-height: 2.6em;  /* Máximo 2 líneas con más altura */
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;  /* Propiedad estándar */
-  -webkit-box-orient: vertical;
-  margin-left: clamp(6px, 0.8vw, 10px);  /* Espacio del ícono */
-}
-
-.nav-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(27, 94, 32, 0.3) 0%, transparent 70%);
-  border-radius: 16px;
-  transform: translate(-50%, -50%) scale(0);
-  opacity: 0;
-  transition: all 0.4s ease;
-  pointer-events: none;
-}
-
-.sidebar-footer {
-  padding: 0 clamp(8px, 1.6vw, 16px) clamp(2px, 0.4vh, 4px);
-  position: relative;
-  display: flex;
-  justify-content: center;
-  background: transparent;
-  flex-shrink: 0;
-  margin-top: 0;
-  max-height: 15vh;
-}
-
-/* Línea decorativa eliminada para que no haya separación
-.sidebar-footer::before {
+.nav-link::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 24px;
-  right: 24px;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
-    transparent 100%);
-}
-*/
-
-.logout-btn {
-  width: 100%;
-  max-width: min(180px, 95%);  /* Mucho más ancho */
-  background: linear-gradient(135deg, 
-    rgba(220, 38, 127, 0.8) 0%, 
-    rgba(244, 67, 54, 0.75) 30%,
-    rgba(229, 57, 53, 0.7) 70%,
-    rgba(198, 40, 40, 0.65) 100%);  /* Rojo sólido sin difuminar */
-  border: 1px solid rgba(244, 67, 54, 0.9);  /* Borde rojo más visible */
-  color: rgba(255, 255, 255, 1);  /* Texto completamente blanco */
-  padding: clamp(2px, 0.3vh, 3px) clamp(8px, 1.2vw, 12px);  /* Padding vertical mínimo */
-  border-radius: clamp(12px, 2vw, 18px);  /* Mucho más redondeado */
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(4px, 0.8vw, 8px);  /* Gap más grande */
-  font-size: clamp(9px, 1vw, 12px);  /* Fuente más grande */
-  font-weight: 600;  /* Peso más bold */
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  position: relative;
-  overflow: hidden;
-  min-height: clamp(24px, 2.5vh, 28px);  /* Altura mínima reducida al máximo */
-  box-shadow: 
-    0 4px 16px rgba(244, 67, 54, 0.4),  /* Sombra roja más intensa */
-    0 2px 8px rgba(220, 38, 127, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),  /* Brillo interno */
-    inset 0 -1px 0 rgba(198, 40, 40, 0.4);
-}
-
-.logout-btn:hover {
-  background: linear-gradient(135deg, 
-    rgba(220, 38, 127, 0.9) 0%, 
-    rgba(244, 67, 54, 0.85) 30%,
-    rgba(229, 57, 53, 0.8) 70%,
-    rgba(198, 40, 40, 0.75) 100%);  /* Rojo más intenso sin blur */
-  border: 1px solid rgba(244, 67, 54, 1);  /* Borde rojo sólido */
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 
-    0 6px 24px rgba(244, 67, 54, 0.6),  /* Sombra roja más intensa */
-    0 3px 12px rgba(220, 38, 127, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),  /* Brillo interno */
-    inset 0 -1px 0 rgba(198, 40, 40, 0.5);
-}
-
-.logout-btn:hover .logout-glow {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.logout-btn:hover .logout-icon {
-  animation: slideToSide 0.4s ease-in-out;
-}
-
-.logout-btn:active {
-  transform: translateY(-1px) scale(1.01);
-  animation: slideActivation 0.25s ease-out;
-}
-
-/* Animación simplificada de lado a lado */
-@keyframes slideActivation {
-  0% {
-    transform: translateX(0) translateY(-1px) scale(1.01);
-  }
-  33% {
-    transform: translateX(-4px) translateY(-1px) scale(1.01);
-  }
-  66% {
-    transform: translateX(4px) translateY(-1px) scale(1.01);
-  }
-  100% {
-    transform: translateX(0) translateY(-1px) scale(1.01);
-  }
-}
-
-/* Animación simplificada para el icono */
-@keyframes slideToSide {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(-2px);
-  }
-}
-
-/* Animación sutil de pulsación para el botón */
-@keyframes logoutPulse {
-  0%, 100% {
-    box-shadow: 
-      0 6px 20px rgba(244, 67, 54, 0.2),
-      0 0 0 1px rgba(255, 255, 255, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  }
-  50% {
-    box-shadow: 
-      0 8px 25px rgba(244, 67, 54, 0.3),
-      0 0 0 1px rgba(255, 255, 255, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  }
-}
-
-/* Animación de temblor para el icono en hover */
-@keyframes logoutShake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-  20%, 40%, 60%, 80% { transform: translateX(2px); }
-}
-
-.btn-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(20px, 2.2vw, 24px);  /* Más grande para el botón más ancho */
-  height: clamp(20px, 2.2vw, 24px);
-  flex-shrink: 0;
-  position: relative;
-  z-index: 2;  /* Por encima del efecto de onda */
-  
-  /* Fondo sólido sin blur */
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.25) 0%,
-    rgba(244, 67, 54, 0.2) 50%,  /* Toque de rojo */
-    rgba(255, 255, 255, 0.1) 100%);
-  border-radius: 50%;  /* Completamente circular */
-  border: 1px solid rgba(244, 67, 54, 0.4);  /* Borde rojo más visible */
-  box-shadow: 
-    0 2px 6px rgba(244, 67, 54, 0.2),  /* Sombra con tinte rojo */
-    0 1px 3px rgba(0, 0, 0, 0.15),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);  /* Brillo interno */
-  
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.logout-btn:hover .btn-icon-wrapper {
-  background: linear-gradient(135deg, 
-    rgba(244, 67, 54, 0.3) 0%,  /* Rojo más intenso */
-    rgba(244, 67, 54, 0.2) 50%,
-    rgba(244, 67, 54, 0.1) 100%);
-  border-color: rgba(244, 67, 54, 0.5);  /* Borde rojo más brillante */
-  box-shadow: 
-    0 4px 12px rgba(244, 67, 54, 0.25),  /* Sombra roja más intensa */
-    0 2px 6px rgba(244, 67, 54, 0.15),
-    inset 0 1px 3px rgba(255, 255, 255, 0.4);  /* Brillo interno más fuerte */
-  transform: translateY(-1px);
-}
-
-.logout-icon {
-  width: clamp(12px, 1.3vw, 16px);  /* Más grande para el botón más ancho */
-  height: clamp(12px, 1.3vw, 16px);
-  stroke-width: 2;  /* Línea un poco más fina */
-  transition: all 0.3s ease;
-  filter: drop-shadow(0 0.5px 2px rgba(0, 0, 0, 0.2));  /* Sombra más sutil */
-  position: relative;
-  z-index: 2;  /* Por encima del efecto de onda */
-}
-
-.logout-text {
-  font-size: clamp(7px, 0.7vw, 9px);  /* Letra mucho más pequeña */
-  font-family: 'Arial', sans-serif;  /* Fuente Arial */
-  font-weight: 500;  /* Peso reducido */
-  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.15);  /* Sombra más sutil */
-  letter-spacing: 0.01em;  /* Espaciado más positivo para mejor legibilidad */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-  min-width: 0;
-  position: relative;
-  z-index: 2;  /* Por encima del efecto de onda */
-}
-
-.logout-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-  border-radius: 12px;
-  transform: translate(-50%, -50%) scale(0);
+  background: rgba(255, 255, 255, 0);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 0;
+  border-radius: 15px;
+  backdrop-filter: blur(0px);
+  transform: scale(0.95);
   opacity: 0;
+}
+
+.nav-link:hover::before {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  transform: scale(1);
+  opacity: 1;
+}
+
+.nav-icon-container {
+  width: 26px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  position: relative;
+  z-index: 1;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-icon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
   transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  color: #FFFFFF;
+}
+
+.nav-text {
+  font-size: 12px;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  letter-spacing: 0.3px;
+  color: #FFFFFF;
+}
+
+.nav-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 4px;
+  height: 70%;
+  background: var(--text-highlight);
+  border-radius: 0 4px 4px 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  box-shadow: 0 0 10px rgba(255, 255, 141, 0.6);
+}
+
+/* Estado activo para items de navegación - Liquid Glass Effect */
+.nav-item.active .nav-link::before {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.3) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: scale(1);
+  opacity: 1;
+}
+
+.nav-item.active .nav-icon-container {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.4) 100%);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px) scale(1.05);
+  border-radius: 12px;
+}
+
+.nav-item.active .nav-text {
+  font-weight: 400;
+  color: #FFFFFF;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.nav-item.active .nav-icon {
+  color: #FFFFFF;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+}
+
+.nav-item.active .nav-indicator {
+  opacity: 1;
+  transform: translateY(-50%) scaleY(1);
+}
+
+/* Liquid Glass Transition Effect */
+.nav-item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 25%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 100%);
+  backdrop-filter: blur(10px);
+  transition: left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-radius: 15px;
+  z-index: 2;
   pointer-events: none;
 }
 
-/* Responsive Design para tablets */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .sidebar {
-    width: 260px;
+.nav-item.active::after {
+  left: 100%;
+}
+
+/* Hover effects */
+.nav-link:hover .nav-icon-container {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Notification badge */
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  background-color: var(--error);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  z-index: 2;
+  padding: 0 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer */
+.sidebar-footer {
+  padding: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: transparent;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: transparent;
+  border-radius: 6px;
+  border: none;
+  box-shadow: none;
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.user-icon {
+  width: 15px;
+  height: 15px;
+  color: rgba(255, 255, 255, 0.8);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.user-details {
+  flex: 1;
+  overflow: hidden;
+}
+
+.user-name {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 400;
+  color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.user-role {
+  margin: 0;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0.9;
+  font-weight: 400;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: linear-gradient(135deg, 
+    rgba(255, 87, 34, 0.9) 0%,
+    rgba(244, 67, 54, 0.9) 100%);
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  width: 85%;
+  align-self: center;
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg,
+    rgba(255, 87, 34, 1) 0%,
+    rgba(244, 67, 54, 1) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.logout-button:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.logout-icon {
+  width: 15px;
+  height: 15px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* ===================================
+   MODAL DE LOGOUT MODERNO Y ELEGANTE
+   =================================== */
+
+/* Overlay con blur y animación */
+.logout-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(0, 0, 0, 0.4) 0%, 
+    rgba(20, 20, 20, 0.6) 50%, 
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px;
+}
+
+/* Contenedor principal del modal */
+.logout-modal-container {
+  width: 100%;
+  max-width: 340px;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 
+    0 20px 40px -12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  transform-origin: center;
+}
+
+/* Header con gradiente rojo elegante */
+.logout-modal-header {
+  background: linear-gradient(135deg, 
+    #dc2626 0%, 
+    #ef4444 25%, 
+    #f87171 50%, 
+    #ef4444 75%, 
+    #dc2626 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Patrón de fondo sutil */
+.logout-modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  z-index: 1;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Contenido del header */
+.logout-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Contenedor del icono principal */
+.logout-icon-container {
+  position: relative;
+}
+
+.logout-icon-bg {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.25) 0%, 
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 6px 24px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-icon-bg::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.1) 90deg,
+    transparent 180deg,
+    rgba(255, 255, 255, 0.1) 270deg,
+    transparent 360deg
+  );
+  animation: iconRotate 4s linear infinite;
+}
+
+@keyframes iconRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.logout-icon {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
+}
+
+/* Texto del header */
+.logout-header-text {
+  flex: 1;
+}
+
+.logout-title {
+  margin: 0 0 3px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-family: 'Inter', sans-serif;
+}
+
+.logout-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón cerrar elegante */
+.logout-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  z-index: 3;
+}
+
+.logout-close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.logout-close-btn svg {
+  width: 16px;
+  height: 16px;
+  color: #ffffff;
+}
+
+/* Cuerpo del modal */
+.logout-modal-body {
+  padding: 24px 18px;
+  background: #ffffff;
+}
+
+/* Sección de advertencia */
+.logout-warning-section {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-warning-section::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, #dc2626, #ef4444);
+}
+
+.logout-warning-icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+}
+
+.logout-warning-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+}
+
+.logout-warning-content {
+  flex: 1;
+}
+
+.logout-warning-title {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #7f1d1d;
+  font-family: 'Inter', sans-serif;
+}
+
+.logout-warning-text {
+  margin: 0;
+  font-size: 13px;
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+/* Sección de información */
+.logout-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.logout-info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.logout-info-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.logout-info-icon {
+  width: 20px;
+  height: 20px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.logout-info-item span {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+}
+
+/* Footer con botones */
+.logout-modal-footer {
+  padding: 16px 18px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* Botones del modal */
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.logout-btn:hover::before {
+  left: 100%;
+}
+
+.logout-btn-icon {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+}
+
+.logout-btn:hover .logout-btn-icon {
+  transform: scale(1.1);
+}
+
+/* Botón cancelar */
+.logout-btn-cancel {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.logout-btn-cancel:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón confirmar */
+.logout-btn-confirm {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: #ffffff;
+  border: 2px solid #dc2626;
+  box-shadow: 
+    0 4px 12px rgba(220, 38, 38, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.logout-btn-confirm:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+  border-color: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(220, 38, 38, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.logout-btn-confirm:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px rgba(220, 38, 38, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Animaciones de transición del modal */
+.modal-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-enter-from {
+  opacity: 0;
+  transform: scale(0.8) translateY(20px);
+}
+
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
+}
+
+.modal-enter-to,
+.modal-leave-from {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Responsividad */
+@media (max-width: 480px) {
+  .logout-modal-overlay {
+    padding: 12px;
   }
   
-  .sidebar-header {
-    padding: 20px 16px 24px;
+  .logout-modal-container {
+    max-width: 100%;
+    border-radius: 14px;
+    margin: 0 auto;
   }
   
-  .flower-animation {
+  .logout-modal-header {
+    padding: 16px;
+  }
+  
+  .logout-header-content {
+    gap: 10px;
+  }
+  
+  .logout-icon-bg {
     width: 40px;
     height: 40px;
   }
   
-  .brand-title {
-    font-size: 14px;
-    letter-spacing: 0.1em;
-  }
-  
-  .brand-subtitle {
-    font-size: 11px;
-  }
-  
-  .geoportal-section {
-    padding: 12px 12px 16px;
-  }
-  
-  .geoportal-btn,
-  .mobile-app-btn {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-  
-  .nav-link {
-    padding: 12px 14px;
-    gap: 0px;  /* Eliminado completamente el espacio entre icono y texto en tablets */
-    min-height: 50px;
-  }
-  
-  .nav-text {
-    font-size: 13px;  /* Aumentado significativamente el tamaño de fuente para tablets */
-    font-weight: 400;  /* Normal (sin negritas) para tablets */
-    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;  /* Cambiado a Arial */
-    white-space: normal;
-    word-wrap: break-word;
-    line-height: 1.2;
-    max-height: 2.4em;
-  }
-  
-  .logout-btn {
-    padding: 10px 14px;
-    font-size: 12px;
-  }
-}
-
-/* Responsive Design para móviles landscape */
-@media (max-width: 768px) and (orientation: landscape) {
-  .sidebar {
-    width: 240px;
-    height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: fixed;
-    z-index: 1001;
-  }
-  
-  .sidebar-header {
-    padding: 12px 12px 16px;
-    min-height: auto;
-  }
-  
-  .header-content {
-    gap: 8px;
-  }
-  
-  .flower-animation {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .brand-title {
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    line-height: 1.1;
-  }
-  
-  .brand-subtitle {
-    font-size: 9px;
-  }
-  
-  .geoportal-section {
-    padding: 8px 8px 12px;
-  }
-  
-  .geoportal-btn,
-  .mobile-app-btn {
-    padding: 6px 10px;
-    font-size: 11px;
-    gap: 6px;
-    margin-top: 8px;
-  }
-  
-  .geoportal-icon,
-  .mobile-app-icon {
-    width: 14px;
-    height: 14px;
-  }
-  
-  .arrow-icon,
-  .mobile-arrow-icon {
-    width: 10px;
-    height: 10px;
-  }
-  
-  .sidebar-nav {
-    padding: 12px 0;
-  }
-  
-  .nav-item {
-    margin-bottom: 4px;
-    padding: 0 8px;
-  }
-  
-  .nav-link {
-    padding: 8px 12px;
-    gap: 0px;  /* Eliminado completamente el espacio */
-    min-height: 48px;
-  }
-  
-  .nav-icon {
-    width: 14px;  /* Ajustado para móviles */
-    height: 14px;
-  }
-  
-  .nav-text {
-    font-size: 12px;  /* Aumentado significativamente el tamaño para landscape móvil */
-    font-weight: 400;  /* Normal (sin negritas) para landscape */
-    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
-    white-space: normal;
-    word-wrap: break-word;
-    line-height: 1.2;
-    max-height: 2.4em;
-  }
-  
-  .sidebar-footer {
-    padding: 8px 8px 12px;
-  }
-  
-  .logout-btn {
-    padding: 8px 12px;
-    font-size: 11px;
-    gap: 8px;
-  }
-  
   .logout-icon {
-    width: 14px;
-    height: 14px;
-  }
-}
-
-/* Responsive Design para móviles portrait */
-@media (max-width: 768px) and (orientation: portrait) {
-  .sidebar {
-    width: 100%;
-    height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: fixed;
-    z-index: 1001;
-    display: flex;
-    flex-direction: column;
+    width: 20px;
+    height: 20px;
   }
   
-  .sidebar-header {
-    padding: 16px 16px 20px;
-    flex-shrink: 0;
+  .logout-title {
+    font-size: 16px;
   }
   
-  .header-content {
-    gap: 12px;
-  }
-  
-  .flower-animation {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .brand-title {
-    font-size: 13px;
-    letter-spacing: 0.1em;
-  }
-  
-  .brand-subtitle {
-    font-size: 10px;
-  }
-  
-  .geoportal-section {
-    padding: 12px 16px 16px;
-    flex-shrink: 0;
-  }
-  
-  .geoportal-btn,
-  .mobile-app-btn {
-    padding: 10px 16px;
+  .logout-subtitle {
     font-size: 12px;
-    gap: 10px;
   }
   
-  .mobile-app-btn {
-    margin-top: 10px;
-  }
-  
-  .sidebar-nav {
-    flex: 1;
-    padding: 16px 0;
-    overflow-y: auto;
-  }
-  
-  .nav-item {
-    margin-bottom: 6px;
-    padding: 0 16px;
-  }
-  
-  .nav-link {
-    padding: 12px 16px;
-    gap: 0px;  /* Eliminado completamente el espacio */
-    min-height: 52px;
-  }
-  
-  .nav-icon {
-    width: 14px;  /* Ajustado para móviles portrait */
-    height: 14px;
-  }
-  
-  .nav-text {
-    font-size: 13px;  /* Aumentado significativamente el tamaño para móvil portrait */
-    font-weight: 400;  /* Normal (sin negritas) para portrait */
-    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
-    white-space: normal;
-    word-wrap: break-word;
-    line-height: 1.2;
-  }
-  
-  .sidebar-footer {
-    padding: 16px 16px 20px;
-    flex-shrink: 0;
-  }
-  
-  .logout-btn {
-    padding: 12px 16px;
-    font-size: 12px;
-    gap: 10px;
-  }
-  
-  .logout-icon {
-    width: 16px;
-    height: 16px;
-  }
-}
-
-/* Responsive para pantallas muy pequeñas (móviles pequeños) */
-@media (max-width: 480px) {
-  .sidebar {
-    width: 100%;
-  }
-  
-  .sidebar-header {
-    padding: 12px 12px 16px;
-  }
-  
-  .flower-animation {
-    width: 30px;
-    height: 30px;
-  }
-  
-  .brand-title {
-    font-size: 11px;
-    letter-spacing: 0.08em;
-  }
-  
-  .brand-subtitle {
-    font-size: 9px;
-  }
-  
-  .geoportal-section {
-    padding: 10px 12px 14px;
-  }
-  
-  .geoportal-btn,
-  .mobile-app-btn {
-    padding: 8px 12px;
-    font-size: 11px;
-    gap: 8px;
-    border-radius: 16px;
-  }
-  
-  .geoportal-icon,
-  .mobile-app-icon {
-    width: 14px;
-    height: 14px;
-  }
-  
-  .arrow-icon,
-  .mobile-arrow-icon {
-    width: 10px;
-    height: 10px;
-  }
-  
-  .sidebar-nav {
-    padding: 14px 0;
-  }
-  
-  .nav-item {
-    margin-bottom: 4px;
-    padding: 0 12px;
-  }
-  
-  .nav-link {
-    padding: 10px 14px;
-    gap: 0px;  /* Eliminado completamente el espacio */
-    border-radius: 10px;
-    min-height: 46px;
-  }
-  
-  .nav-icon {
-    width: 14px;  /* Ajustado para móvil pequeño */
-    height: 14px;
-  }
-  
-  .nav-text {
-    font-size: 12px;  /* Aumentado significativamente el tamaño para móvil pequeño */
-    font-weight: 400;  /* Normal (sin negritas) para móvil pequeño */
-    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
-    white-space: normal;
-    word-wrap: break-word;
-    line-height: 1.2;
-  }
-  
-  .sidebar-footer {
-    padding: 12px 12px 16px;
-  }
-  
-  .logout-btn {
-    padding: 10px 14px;
-    font-size: 11px;
-    gap: 8px;
-    border-radius: 10px;
-  }
-  
-  .logout-icon {
-    width: 14px;
-    height: 14px;
-  }
-}
-
-/* Ajustes para pantallas extra pequeñas */
-@media (max-width: 320px) {
-  .sidebar-header {
-    padding: 10px 8px 12px;
-  }
-  
-  .flower-animation {
+  .logout-close-btn {
+    top: 10px;
+    right: 10px;
     width: 28px;
     height: 28px;
   }
   
-  .brand-title {
-    font-size: 10px;
-    letter-spacing: 0.06em;
+  .logout-close-btn svg {
+    width: 14px;
+    height: 14px;
   }
   
-  .brand-subtitle {
-    font-size: 8px;
+  .logout-modal-body {
+    padding: 18px 16px;
   }
   
-  .geoportal-section {
-    padding: 8px 8px 12px;
+  .logout-warning-section {
+    padding: 14px;
+    gap: 10px;
+    margin-bottom: 16px;
   }
   
-  .geoportal-btn,
-  .mobile-app-btn {
-    padding: 6px 10px;
-    font-size: 10px;
+  .logout-warning-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .logout-warning-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .logout-warning-title {
+    font-size: 14px;
+  }
+  
+  .logout-warning-text {
+    font-size: 12px;
+  }
+  
+  .logout-info-section {
+    gap: 8px;
+  }
+  
+  .logout-info-item {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  
+  .logout-info-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .logout-info-item span {
+    font-size: 12px;
+  }
+  
+  .logout-modal-footer {
+    padding: 14px 16px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .logout-btn {
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  
+  .logout-btn-icon {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Para pantallas extra pequeñas */
+@media (max-width: 320px) {
+  .logout-modal-overlay {
+    padding: 8px;
+  }
+  
+  .logout-modal-container {
+    border-radius: 12px;
+  }
+  
+  .logout-modal-header {
+    padding: 14px;
+  }
+  
+  .logout-title {
+    font-size: 15px;
+  }
+  
+  .logout-subtitle {
+    font-size: 11px;
+  }
+  
+  .logout-modal-body {
+    padding: 16px 14px;
+  }
+  
+  .logout-warning-section {
+    padding: 12px;
+  }
+  
+  .logout-modal-footer {
+    padding: 12px 14px;
+  }
+}
+
+/* Para tablets en orientación portrait */
+@media (min-width: 481px) and (max-width: 768px) {
+  .logout-modal-container {
+    max-width: 380px;
+  }
+  
+  .logout-modal-header {
+    padding: 20px;
+  }
+  
+  .logout-modal-body {
+    padding: 26px 20px;
+  }
+  
+  .logout-modal-footer {
+    padding: 18px 20px;
+  }
+}
+
+/* Para tablets en orientación landscape y pantallas medianas */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .logout-modal-container {
+    max-width: 340px;
+  }
+}
+
+/* Para pantallas grandes */
+@media (min-width: 1025px) {
+  .logout-modal-container {
+    max-width: 340px;
+  }
+}
+
+/* Ajustes para altura de pantalla */
+@media (max-height: 600px) {
+  .logout-modal-overlay {
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  
+  .logout-modal-body {
+    padding: 18px 16px;
+  }
+  
+  .logout-warning-section {
+    margin-bottom: 16px;
+  }
+  
+  .logout-info-section {
+    gap: 8px;
+  }
+}
+
+@media (max-height: 500px) {
+  .logout-modal-overlay {
+    padding: 10px;
+    padding-top: 15px;
+  }
+  
+  .logout-modal-header {
+    padding: 14px;
+  }
+  
+  .logout-modal-body {
+    padding: 16px 14px;
+  }
+  
+  .logout-warning-section {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .logout-info-section {
     gap: 6px;
   }
   
+  .logout-info-item {
+    padding: 6px 10px;
+  }
+  
+  .logout-modal-footer {
+    padding: 12px 14px;
+  }
+}
+
+/* Modo oscuro (opcional) */
+@media (prefers-color-scheme: dark) {
+  .logout-modal-container {
+    background: #1f2937;
+  }
+  
+  .logout-modal-body {
+    background: #1f2937;
+  }
+  
+  .logout-warning-section {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    border-color: #6b7280;
+  }
+  
+  .logout-warning-title {
+    color: #fca5a5;
+  }
+  
+  .logout-warning-text {
+    color: #f87171;
+  }
+  
+  .logout-info-item {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .logout-info-item:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+  }
+  
+  .logout-info-icon {
+    color: #9ca3af;
+  }
+  
+  .logout-info-item span {
+    color: #d1d5db;
+  }
+  
+  .logout-modal-footer {
+    background: #374151;
+    border-color: #4b5563;
+  }
+}
+
+/* Responsive Design - Sidebar siempre visible */
+@media (max-width: 992px) {
+  .sidebar {
+    width: 200px;
+    min-width: 180px;
+    max-width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 240px;
+    min-width: 220px;
+    max-width: 260px;
+    z-index: 9999;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar-toggle {
+    display: none; /* Ocultar botón toggle ya que siempre está visible */
+  }
+  
+  /* Asegurar que el contenido principal tenga margen para el sidebar */
+  .main-content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+  }
+  
+  /* Mostrar todos los textos en móvil */
+  .sidebar.collapsed .logo-text,
+  .sidebar.collapsed .brand-tagline,
+  .sidebar.collapsed .quick-links span,
+  .sidebar.collapsed .nav-text,
+  .sidebar.collapsed .user-details,
+  .sidebar.collapsed .logout-button span {
+    display: block;
+  }
+  
+  .sidebar.collapsed .nav-icon-container,
+  .sidebar.collapsed .link-icon-container {
+    margin: 0;
+    margin-right: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 200px;
+    min-width: 180px;
+    max-width: 220px;
+  }
+  
+  .main-content {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+  
+  /* Reducir tamaños para aprovechar mejor el espacio en móviles */
+  .sidebar-header {
+    padding: 8px 10px 6px;
+  }
+  
+  .logo-animation {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 6px;
+  }
+  
+  .brand-name {
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+  
+  .brand-tagline {
+    font-size: 9px;
+    margin: 2px 0 0;
+  }
+  
+  .text-underline {
+    margin: 6px auto 0 auto;
+    height: 2px;
+  }
+  
+  .quick-links {
+    padding: 6px 10px;
+    margin: 0 8px 6px;
+    gap: 6px;
+  }
+  
+  .quick-link {
+    padding: 6px 4px;
+    gap: 2px;
+  }
+  
+  .link-icon-container {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .link-icon {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .quick-link span {
+    font-size: 7px;
+  }
+  
+  .sidebar-nav {
+    padding: 4px 8px 10px;
+  }
+  
   .nav-item {
-    padding: 0 8px;
+    margin-bottom: 3px;
   }
   
   .nav-link {
     padding: 8px 10px;
-    gap: 0px;  /* Eliminado completamente el espacio */
-    min-height: 44px;
+  }
+  
+  .nav-icon-container {
+    width: 22px;
+    height: 22px;
+    margin-right: 6px;
   }
   
   .nav-icon {
-    width: 12px;  /* Ajustado para móviles muy pequeños */
+    width: 12px;
     height: 12px;
   }
   
   .nav-text {
-    font-size: 11px;  /* Aumentado significativamente el tamaño para móvil muy pequeño */
-    font-weight: 400;  /* Normal (sin negritas) para móvil muy pequeño */
-    font-family: 'Arial', 'Helvetica', 'Segoe UI', sans-serif;
-    white-space: normal;
-    word-wrap: break-word;
-    line-height: 1.2;
+    font-size: 11px;
   }
   
   .sidebar-footer {
-    padding: 8px 8px 12px;
+    padding: 8px;
+    gap: 6px;
   }
   
-  .logout-btn {
+  .user-info {
+    padding: 4px;
+    gap: 6px;
+  }
+  
+  .user-avatar {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .user-icon {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .user-name {
+    font-size: 10px;
+  }
+  
+  .user-role {
+    font-size: 8px;
+  }
+  
+  .logout-button {
     padding: 8px 10px;
     font-size: 10px;
-    gap: 6px;
+    min-height: auto;
   }
   
   .logout-icon {
@@ -1922,674 +2045,311 @@ if (typeof window !== 'undefined') {
   }
 }
 
-/* Mejoras para scrolling en móviles */
-@media (max-width: 768px) {
+/* Estilos específicos para orientación landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
   .sidebar {
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    width: 160px;
+    min-width: 140px;
   }
   
-  .sidebar::-webkit-scrollbar {
-    display: none;
+  .main-content {
+    margin-left: 160px;
+    width: calc(100% - 160px);
+  }
+  
+  .sidebar-header {
+    padding: 6px 8px 4px;
+  }
+  
+  .logo-animation {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 3px;
+  }
+  
+  .brand-name {
+    font-size: 10px;
+    letter-spacing: 0.2px;
+  }
+  
+  .brand-tagline {
+    font-size: 7px;
+    margin: 1px 0 0;
+  }
+  
+  .text-underline {
+    margin: 3px auto 0 auto;
+    height: 1px;
+  }
+  
+  .quick-links {
+    padding: 3px 6px;
+    margin: 0 4px 3px;
+    gap: 3px;
+  }
+  
+  .quick-link {
+    padding: 3px 2px;
+    gap: 1px;
+  }
+  
+  .link-icon-container {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .link-icon {
+    width: 7px;
+    height: 7px;
+  }
+  
+  .quick-link span {
+    font-size: 5px;
   }
   
   .sidebar-nav {
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    padding: 2px 4px 6px;
   }
   
-  .sidebar-nav::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-/* Estilos del Modal de Logout */
-.logout-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  padding: 20px;
-  animation: overlayFadeIn 0.3s ease-out;
-}
-
-@keyframes overlayFadeIn {
-  from {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-  to {
-    opacity: 1;
-    backdrop-filter: blur(8px);
-  }
-}
-
-.logout-modal {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  max-width: 400px;
-  width: 100%;
-  max-height: 90vh;
-  overflow: hidden;
-  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8) translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.modal-header {
-  padding: 30px 30px 20px;
-  text-align: center;
-  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
-}
-
-.modal-icon {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 16px;
-  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: iconPulse 2s ease-in-out infinite;
-}
-
-@keyframes iconPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
-  }
-}
-
-.modal-icon svg {
-  width: 28px;
-  height: 28px;
-  color: white;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  color: #2E7D32;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.modal-body {
-  padding: 20px 30px;
-  text-align: center;
-}
-
-.modal-body p {
-  margin: 0;
-  font-size: 16px;
-  color: #555;
-  line-height: 1.5;
-}
-
-.modal-actions {
-  padding: 20px 30px 30px;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.btn-cancel,
-.btn-confirm {
-  flex: 1;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  min-width: 120px;
-}
-
-.btn-cancel {
-  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-  color: #666;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-}
-
-.btn-cancel:hover {
-  background: linear-gradient(135deg, #eeeeee 0%, #d5d5d5 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-confirm {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-}
-
-.btn-confirm:hover {
-  background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-}
-
-.btn-confirm::before,
-.btn-cancel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.btn-confirm:hover::before,
-.btn-cancel:hover::before {
-  left: 100%;
-}
-
-.btn-confirm:active,
-.btn-cancel:active {
-  transform: translateY(0);
-}
-
-/* Responsive Design para modal de logout */
-@media (max-width: 480px) {
-  .logout-modal {
-    margin: 10px;
-    border-radius: 16px;
-    max-width: calc(100vw - 20px);
+  .nav-item {
+    margin-bottom: 1px;
   }
   
-  .modal-header {
-    padding: 20px 16px 12px;
+  .nav-link {
+    padding: 5px 6px;
   }
   
-  .modal-icon {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 12px;
+  .nav-icon-container {
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
   }
   
-  .modal-icon svg {
-    width: 24px;
-    height: 24px;
+  .nav-icon {
+    width: 10px;
+    height: 10px;
   }
   
-  .modal-header h3 {
-    font-size: 18px;
+  .nav-text {
+    font-size: 9px;
   }
   
-  .modal-body {
-    padding: 12px 16px;
+  .sidebar-footer {
+    padding: 4px;
+    gap: 3px;
   }
   
-  .modal-body p {
-    font-size: 14px;
+  .user-info {
+    padding: 2px;
+    gap: 3px;
   }
   
-  .modal-actions {
-    padding: 12px 16px 20px;
-    flex-direction: column;
-    gap: 8px;
+  .user-avatar {
+    width: 16px;
+    height: 16px;
   }
   
-  .btn-cancel,
-  .btn-confirm {
-    min-width: auto;
-    padding: 12px 16px;
-    font-size: 14px;
+  .user-icon {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .user-name {
+    font-size: 8px;
+  }
+  
+  .user-role {
+    font-size: 6px;
+  }
+  
+  .logout-button {
+    padding: 4px 6px;
+    font-size: 8px;
+  }
+  
+  .logout-icon {
+    width: 8px;
+    height: 8px;
   }
 }
 
-@media (max-width: 360px) {
-  .logout-modal {
-    margin: 8px;
+/* Estilos para tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+  .sidebar {
+    width: 250px;
+    min-width: 230px;
   }
   
-  .modal-header {
-    padding: 16px 12px 10px;
-  }
-  
-  .modal-icon {
-    width: 45px;
-    height: 45px;
-    margin-bottom: 10px;
-  }
-  
-  .modal-icon svg {
-    width: 22px;
-    height: 22px;
-  }
-  
-  .modal-header h3 {
-    font-size: 16px;
-  }
-  
-  .modal-body {
-    padding: 10px 12px;
-  }
-  
-  .modal-body p {
-    font-size: 13px;
-  }
-  
-  .modal-actions {
-    padding: 10px 12px 16px;
-  }
-  
-  .btn-cancel,
-  .btn-confirm {
-    padding: 10px 14px;
-    font-size: 13px;
+  .main-content {
+    margin-left: 250px;
+    width: calc(100% - 250px);
   }
 }
 
-/* Mejoras para accesibilidad táctil */
-@media (max-width: 768px) {
-  .nav-link,
-  .geoportal-btn,
-  .mobile-app-btn,
-  .logout-btn {
-    min-height: 44px;
+/* Estilos para pantallas muy pequeñas (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .sidebar {
+    width: 180px;
+    min-width: 160px;
+  }
+  
+  .main-content {
+    margin-left: 180px;
+    width: calc(100% - 180px);
+  }
+  
+  .sidebar-header {
+    padding: 6px 8px 4px;
+  }
+  
+  .logo-animation {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 4px;
+  }
+  
+  .brand-name {
+    font-size: 11px;
+    letter-spacing: 0.2px;
+  }
+  
+  .brand-tagline {
+    font-size: 8px;
+    margin: 1px 0 0;
+  }
+  
+  .text-underline {
+    margin: 4px auto 0 auto;
+    height: 2px;
+  }
+  
+  .quick-links {
+    padding: 4px 8px;
+    margin: 0 6px 4px;
+    gap: 4px;
+  }
+  
+  .quick-link {
+    padding: 4px 2px;
+    gap: 1px;
+  }
+  
+  .link-icon-container {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .link-icon {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .quick-link span {
+    font-size: 6px;
+  }
+  
+  .sidebar-nav {
+    padding: 3px 6px 8px;
+  }
+  
+  .nav-item {
+    margin-bottom: 2px;
+  }
+  
+  .nav-link {
+    padding: 6px 8px;
+  }
+  
+  .nav-icon-container {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+  }
+  
+  .nav-icon {
+    width: 11px;
+    height: 11px;
+  }
+  
+  .nav-text {
+    font-size: 10px;
+  }
+  
+  .sidebar-footer {
+    padding: 6px;
+    gap: 4px;
+  }
+  
+  .user-info {
+    padding: 3px;
+    gap: 4px;
+  }
+  
+  .user-avatar {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .user-icon {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .user-name {
+    font-size: 9px;
+  }
+  
+  .user-role {
+    font-size: 7px;
+  }
+  
+  .logout-button {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+  
+  .logout-icon {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Estilos para dispositivos con notch (iPhone X+, etc.) */
+@supports (padding: max(0px)) {
+  .sidebar {
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-left: max(0px, env(safe-area-inset-left));
+  }
+}
+
+/* Estilos para modo oscuro del sistema */
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Mejoras de accesibilidad táctil - Manteniendo compacto */
+@media (pointer: coarse) {
+  .nav-link {
+    min-height: 36px;
     display: flex;
+    align-items: center;
+  }
+  
+  .quick-link {
+    min-height: 32px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
   }
   
-  .btn-cancel,
-  .btn-confirm {
-    min-height: 44px;
-    touch-action: manipulation;
-  }
-}
-
-/* Reglas para zoom extremo y alta densidad de píxeles */
-@media (max-width: 100vw) and (max-height: 100vh) {
-  .sidebar {
-    font-size: clamp(8px, 1vw, 16px);
-    width: clamp(160px, 20vw, 240px);
-  }
-  
-  .sidebar-header {
-    padding: clamp(6px, 1.5vh, 28px) clamp(4px, 1vw, 20px) clamp(8px, 2vh, 32px);
-    max-height: clamp(80px, 20vh, 160px);
-  }
-  
-  .flower-animation {
-    width: clamp(20px, 3vw, 48px);
-    height: clamp(20px, 3vw, 48px);
-  }
-  
-  .brand-title {
-    font-size: clamp(8px, 1.2vw, 16px);
-    letter-spacing: clamp(0.05em, 0.1vw, 0.15em);
-  }
-  
-  .brand-subtitle {
-    font-size: clamp(6px, 0.8vw, 12px);
-  }
-  
-  .geoportal-section {
-    padding: clamp(4px, 1vh, 16px) clamp(4px, 1vw, 16px) clamp(6px, 1.5vh, 20px);
-    max-height: clamp(60px, 15vh, 120px);
-  }
-  
-  .geoportal-btn,
-  .mobile-app-btn {
-    padding: clamp(4px, 0.8vh, 10px) clamp(6px, 1vw, 14px);
-    font-size: clamp(8px, 0.9vw, 13px);
-    min-height: clamp(28px, 3.5vh, 44px);
-    border-radius: clamp(8px, 1.5vw, 20px);
-  }
-  
-  .geoportal-icon,
-  .mobile-app-icon {
-    width: clamp(10px, 1.2vw, 16px);
-    height: clamp(10px, 1.2vw, 16px);
-  }
-  
-  .arrow-icon,
-  .mobile-arrow-icon {
-    width: clamp(8px, 1vw, 12px);
-    height: clamp(8px, 1vw, 12px);
-  }
-  
-  .sidebar-nav {
-    padding: clamp(8px, 1.5vh, 24px) 0;
-    min-height: clamp(200px, 40vh, 400px);
-  }
-  
-  .nav-item {
-    margin-bottom: clamp(2px, 0.5vh, 8px);
-    padding: 0 clamp(4px, 1vw, 16px);
-  }
-  
-  .nav-link {
-    padding: clamp(6px, 1vh, 16px) clamp(8px, 1.5vw, 18px);
-    gap: clamp(8px, 1.2vw, 16px);
-    min-height: clamp(32px, 4vh, 52px);
-    border-radius: clamp(6px, 1vw, 12px);
-  }
-  
-  .nav-icon {
-    width: clamp(11px, 1.4vw, 14px);  /* Ajustado para zoom */
-    height: clamp(11px, 1.4vw, 14px);
-  }
-  
-  .nav-text {
-    font-size: clamp(8px, 1vw, 12px);  /* Ajustado para desktop amplio */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;
-  }
-  
-  .sidebar-footer {
-    padding: clamp(6px, 1.2vh, 16px) clamp(6px, 1.2vw, 16px) clamp(8px, 1.6vh, 20px);
-    max-height: clamp(60px, 12vh, 100px);
-  }
-  
-  .logout-btn {
-    padding: clamp(6px, 1vh, 12px) clamp(8px, 1.4vw, 16px);
-    font-size: clamp(8px, 0.9vw, 13px);
-    min-height: clamp(32px, 4vh, 48px);
-    border-radius: clamp(6px, 1vw, 12px);
-    gap: clamp(4px, 0.8vw, 10px);
-  }
-  
-  .logout-icon {
-    width: clamp(10px, 1.2vw, 16px);
-    height: clamp(10px, 1.2vw, 16px);
-  }
-}
-
-/* Ajustes para zoom de navegador */
-@media screen and (-webkit-min-device-pixel-ratio: 1.25), 
-       screen and (min-resolution: 120dpi) {
-  .sidebar {
-    font-size: clamp(10px, 1.1vw, 15px);
-  }
-  
-  .brand-title {
-    font-size: clamp(9px, 1.3vw, 15px);
-  }
-  
-  .nav-text,
-  .geoportal-text,
-  .mobile-app-text,
-  .logout-text {
-    font-size: clamp(7px, 0.8vw, 10px);  /* Reducido para alta resolución */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
-  }
-}
-
-/* Ajustes para zoom muy alto */
-@media screen and (-webkit-min-device-pixel-ratio: 2), 
-       screen and (min-resolution: 192dpi) {
-  .sidebar {
-    font-size: clamp(8px, 1vw, 14px);
-    width: clamp(140px, 18vw, 220px);
-  }
-  
-  .flower-animation {
-    width: clamp(18px, 2.5vw, 40px);
-    height: clamp(18px, 2.5vw, 40px);
-  }
-  
-  .brand-title {
-    font-size: clamp(7px, 1.1vw, 14px);
-  }
-  
-  .brand-subtitle {
-    font-size: clamp(5px, 0.7vw, 10px);
-  }
-  
-  .nav-text,
-  .geoportal-text,
-  .mobile-app-text,
-  .logout-text {
-    font-size: clamp(5px, 0.7vw, 9px);  /* Reducido para zoom muy alto */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
-  }
-}
-
-/* Manejo de contenido que se desborda */
-@media (max-height: 500px) {
-  .sidebar {
-    font-size: clamp(8px, 1vw, 12px);
-  }
-  
-  .sidebar-header {
-    padding: clamp(4px, 1vh, 16px) clamp(6px, 1vw, 16px);
-    max-height: 15vh;
-  }
-  
-  .flower-animation {
-    width: clamp(16px, 2.5vw, 32px);
-    height: clamp(16px, 2.5vw, 32px);
-  }
-  
-  .brand-title {
-    font-size: clamp(7px, 1vw, 12px);
-    padding-bottom: clamp(2px, 0.5vh, 6px);
-  }
-  
-  .brand-subtitle {
-    font-size: clamp(5px, 0.7vw, 9px);
-  }
-  
-  .geoportal-section {
-    padding: clamp(3px, 0.8vh, 12px) clamp(6px, 1vw, 12px);
-    max-height: 12vh;
-  }
-  
-  .geoportal-btn,
-  .mobile-app-btn {
-    padding: clamp(3px, 0.6vh, 8px) clamp(6px, 1vw, 12px);
-    font-size: clamp(6px, 0.8vw, 10px);
-    min-height: clamp(24px, 3vh, 36px);
-    margin-top: clamp(3px, 0.8vh, 8px);
-  }
-  
-  .nav-link {
-    padding: clamp(4px, 0.8vh, 12px) clamp(8px, 1.2vw, 14px);
-    min-height: clamp(28px, 3.5vh, 44px);
-  }
-  
-  .nav-text {
-    font-size: clamp(4px, 0.7vw, 10px);  /* Reducido para pantallas ultra anchas */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
-  }
-  
-  .nav-icon {
-    width: clamp(10px, 1.3vw, 12px);  /* Ajustado para pantallas ultra bajas */
-    height: clamp(10px, 1.3vw, 12px);
-  }
-  
-  .sidebar-footer {
-    padding: clamp(4px, 1vh, 12px) clamp(6px, 1vw, 12px);
-    max-height: 10vh;
-  }
-  
-  .logout-btn {
-    padding: clamp(4px, 0.8vh, 10px) clamp(6px, 1.2vw, 14px);
-    font-size: clamp(6px, 0.8vw, 11px);
-    min-height: clamp(28px, 3.5vh, 40px);
-  }
-}
-
-/* Prevención de contenido oculto */
-@media (max-height: 400px) {
-  .sidebar {
-    overflow-y: auto !important;
-    height: 100vh;
-  }
-  
-  .sidebar-header,
-  .geoportal-section,
-  .sidebar-footer {
-    flex-shrink: 0;
-  }
-  
-  .sidebar-nav {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-  }
-  
-  .brand-title {
-    font-size: clamp(6px, 0.9vw, 10px);
-    line-height: 1.1;
-  }
-  
-  .brand-subtitle {
-    font-size: clamp(4px, 0.6vw, 8px);
-  }
-  
-  .nav-text,
-  .geoportal-text,
-  .mobile-app-text,
-  .logout-text {
-    font-size: clamp(3px, 0.5vw, 7px);  /* Reducido para pantallas mega anchas */
-    font-family: 'Daytona', Arial, Helvetica, sans-serif;  /* Cambiado a Daytona */
-  }
-}
-
-/* Animación de cierre */
-.logout-modal-overlay.fade-out {
-  animation: overlayFadeOut 0.3s ease-in;
-}
-
-.logout-modal-overlay.fade-out .logout-modal {
-  animation: modalSlideOut 0.3s ease-in;
-}
-
-@keyframes overlayFadeOut {
-  from {
-    opacity: 1;
-    backdrop-filter: blur(8px);
-  }
-  to {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-}
-
-@keyframes modalSlideOut {
-  from {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.8) translateY(30px);
-  }
-}
-
-/* Optimizaciones finales para escalado dinámico */
-.sidebar * {
-  box-sizing: border-box;
-}
-
-/* Asegurar que el texto nunca se corte */
-.nav-text,
-.geoportal-text,
-.mobile-app-text,
-.logout-text,
-.brand-title,
-.brand-subtitle {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-}
-
-/* Scroll suave en toda la aplicación */
-.sidebar,
-.sidebar-nav {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.sidebar::-webkit-scrollbar,
-.sidebar-nav::-webkit-scrollbar {
-  display: none;
-}
-
-/* Mejora de rendimiento para animaciones */
-.flower-animation,
-.flower-icon,
-.nav-glow,
-.geoportal-glow,
-.mobile-app-glow,
-.logout-glow {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-}
-
-.sidebar {
-  will-change: transform;
-  contain: layout style paint;
-}
-
-/* Estados hover optimizados para zoom */
-@media (hover: hover) and (pointer: fine) {
-  .nav-link:hover,
-  .geoportal-btn:hover,
-  .mobile-app-btn:hover,
-  .logout-btn:hover {
-    transform: translateX(2px) scale(1.01);
-  }
-}
-
-/* Estados activos para touch */
-@media (hover: none) and (pointer: coarse) {
-  .nav-link:active,
-  .geoportal-btn:active,
-  .mobile-app-btn:active,
-  .logout-btn:active {
-    transform: scale(0.98);
-  }
-}
-
-/* Prevención de zoom accidental en iOS */
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  .sidebar input,
-  .sidebar button,
-  .sidebar select,
-  .sidebar textarea {
-    font-size: clamp(16px, 1.2vw, 16px);
+  .logout-button {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>

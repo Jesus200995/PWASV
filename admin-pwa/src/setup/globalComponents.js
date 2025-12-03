@@ -1,6 +1,6 @@
 // Archivo de configuración para registrar componentes globales en la aplicación
 import { app } from '../main.js';
-import Sidebar_NEW from '../components/Sidebar_NEW.vue';
+import Sidebar from '../components/Sidebar.vue';
 
-// Registrar el componente Sidebar_NEW como un componente global con el nombre Sidebar
-app.component('Sidebar_NEW', Sidebar_NEW);
+// Registrar el componente Sidebar como un componente global
+app.component('Sidebar', Sidebar);

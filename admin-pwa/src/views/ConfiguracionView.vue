@@ -363,7 +363,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import Sidebar from '../components/Sidebar_NEW.vue'
+import Sidebar from '../components/Sidebar.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ProgressModal from '../components/ProgressModal.vue'
 import DescargaProgressModal from '../components/DescargaProgressModal.vue'

@@ -610,7 +610,7 @@
 import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import Sidebar from '../components/Sidebar_NEW.vue'
+import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
 import AsistenciasService from '../services/asistenciasService.js'
 import { estadisticasService } from '../services/estadisticasService.js'

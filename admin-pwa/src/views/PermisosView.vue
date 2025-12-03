@@ -953,6 +953,22 @@ export default {
           }
           
           await permisosService.actualizarUsuario(this.usuarioEditando.id, datosActualizacion)
+          
+          // Actualizar inmediatamente en el array local para respuesta instantánea
+          const indexUsuario = this.usuariosAdmin.findIndex(u => u.id === this.usuarioEditando.id)
+          if (indexUsuario !== -1) {
+            this.usuariosAdmin[indexUsuario] = {
+              ...this.usuariosAdmin[indexUsuario],
+              username: datosActualizacion.username,
+              rol: datosActualizacion.rol,
+              permisos: datosActualizacion.permisos,
+              activo: datosActualizacion.activo
+            }
+            // Forzar reactividad en Vue
+            this.usuariosAdmin = [...this.usuariosAdmin]
+            console.log('✅ Lista actualizada instantáneamente')
+          }
+          
           this.mostrarToast('Usuario administrativo actualizado exitosamente', 'success')
           
           // Si se editó el usuario actual, actualizar permisos inmediatamente
@@ -977,11 +993,23 @@ export default {
             ...this.formularioUsuario,
             permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null
           }
-          await permisosService.crearUsuario(datosCreacion)
+          const respuesta = await permisosService.crearUsuario(datosCreacion)
+          
+          // Agregar inmediatamente al array local para respuesta instantánea
+          const nuevoUsuario = {
+            id: respuesta.id || Date.now(), // Usar ID devuelto o temporal
+            username: datosCreacion.username,
+            rol: datosCreacion.rol,
+            permisos: datosCreacion.permisos,
+            activo: true
+          }
+          this.usuariosAdmin = [nuevoUsuario, ...this.usuariosAdmin]
+          console.log('✅ Nuevo usuario agregado instantáneamente a la lista')
+          
           this.mostrarToast('Usuario administrativo creado exitosamente', 'success')
         }
         
-        // Recargar lista y cerrar modal
+        // Recargar lista desde servidor para sincronizar (en background)
         this.cargarUsuariosAdmin()
         this.cerrarModales()
         

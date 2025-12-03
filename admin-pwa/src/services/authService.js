@@ -291,14 +291,14 @@ class AuthService {
     // Si el usuario fue desactivado, cerrar sesión inmediatamente
     if (!sessionData.active) {
       console.log('⚠️ Usuario desactivado, cerrando sesión...')
-      this.forceLogout('Tu cuenta ha sido desactivada. Contacta al administrador.')
+      this.forceLogout('Tu cuenta ha sido desactivada por el administrador. Si crees que esto es un error, contacta con soporte.', 'deactivated')
       return
     }
     
     // Si el usuario no existe, cerrar sesión
     if (sessionData.exists === false) {
       console.log('⚠️ Usuario eliminado, cerrando sesión...')
-      this.forceLogout('Tu cuenta ha sido eliminada del sistema.')
+      this.forceLogout('Tu cuenta ha sido eliminada del sistema. Si necesitas acceso nuevamente, contacta con el administrador.', 'deleted')
       return
     }
     
@@ -364,12 +364,16 @@ class AuthService {
   /**
    * Forzar cierre de sesión (cuando el usuario es desactivado/eliminado)
    */
-  forceLogout(message = 'Tu sesión ha sido cerrada.') {
+  forceLogout(message = 'Tu sesión ha sido cerrada.', reason = 'deactivated') {
     this.logout()
     
-    // Mostrar mensaje y redirigir
-    alert(message)
-    window.location.href = '/login'
+    // Disparar evento para que App.vue muestre el modal profesional
+    window.dispatchEvent(new CustomEvent('force-logout', {
+      detail: {
+        message,
+        reason // 'deactivated', 'deleted', 'expired'
+      }
+    }))
   }
 }
 

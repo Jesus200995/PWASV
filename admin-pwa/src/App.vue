@@ -1,12 +1,72 @@
 <template>
   <div id="app">
     <router-view />
+    
+    <!-- Modal de sesión expirada/desactivada -->
+    <SessionExpiredModal
+      :isVisible="showSessionModal"
+      :title="sessionModalConfig.title"
+      :message="sessionModalConfig.message"
+      :iconType="sessionModalConfig.iconType"
+      @close="handleSessionModalClose"
+      @redirect="handleRedirectToLogin"
+    />
   </div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import authService from './services/authService.js'
+import SessionExpiredModal from './components/SessionExpiredModal.vue'
+
+const router = useRouter()
+
+// Estado del modal de sesión
+const showSessionModal = ref(false)
+const sessionModalConfig = ref({
+  title: 'Cuenta Desactivada',
+  message: 'Tu cuenta ha sido desactivada. Contacta al administrador.',
+  iconType: 'deactivated'
+})
+
+// Handler para mostrar el modal de sesión expirada
+const handleForceLogout = (event) => {
+  const { reason, message } = event.detail || {}
+  
+  // Configurar el modal según el motivo
+  if (reason === 'deleted') {
+    sessionModalConfig.value = {
+      title: 'Cuenta Eliminada',
+      message: message || 'Tu cuenta ha sido eliminada del sistema.',
+      iconType: 'deleted'
+    }
+  } else if (reason === 'expired') {
+    sessionModalConfig.value = {
+      title: 'Sesión Expirada',
+      message: message || 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+      iconType: 'expired'
+    }
+  } else {
+    // Default: desactivada
+    sessionModalConfig.value = {
+      title: 'Cuenta Desactivada',
+      message: message || 'Tu cuenta ha sido desactivada. Contacta al administrador.',
+      iconType: 'deactivated'
+    }
+  }
+  
+  showSessionModal.value = true
+}
+
+const handleSessionModalClose = () => {
+  showSessionModal.value = false
+}
+
+const handleRedirectToLogin = () => {
+  showSessionModal.value = false
+  router.push('/login')
+}
 
 // Iniciar verificación de sesión en tiempo real si el usuario ya está logueado
 onMounted(() => {
@@ -14,11 +74,15 @@ onMounted(() => {
     console.log('🔄 Usuario ya logueado, iniciando verificación de sesión en tiempo real')
     authService.startSessionCheck()
   }
+  
+  // Escuchar evento de forzar logout
+  window.addEventListener('force-logout', handleForceLogout)
 })
 
 // Detener verificación al desmontar
 onUnmounted(() => {
   authService.stopSessionCheck()
+  window.removeEventListener('force-logout', handleForceLogout)
 })
 </script>
 

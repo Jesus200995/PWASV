@@ -1,4 +1,4 @@
-// Servicio de autenticación con manejo de roles
+// Servicio de autenticación con manejo de roles y verificación en tiempo real
 import axios from 'axios'
 import { API_URL, API_CONFIG } from '../config/api.js'
 import healthCheckService from './healthCheckService.js'
@@ -7,7 +7,8 @@ class AuthService {
   constructor() {
     this.token = localStorage.getItem('admin_token')
     this.user = this.getUserFromStorage()
-    this.activeCheckInterval = null
+    this.sessionCheckInterval = null
+    this.onUserUpdated = null // Callback para notificar cambios
   }
 
   /**
@@ -26,6 +27,13 @@ class AuthService {
       console.error('Error parsing user from localStorage:', error)
       return null
     }
+  }
+
+  /**
+   * Registrar callback para cuando el usuario se actualice
+   */
+  setOnUserUpdated(callback) {
+    this.onUserUpdated = callback
   }
 
   /**
@@ -69,8 +77,8 @@ class AuthService {
         localStorage.setItem('admin_user_data', JSON.stringify(userData))
         localStorage.setItem('admin_user', credentials.username) // Para compatibilidad
 
-        // Iniciar verificación periódica de estado activo
-        this.startActiveCheck()
+        // Iniciar verificación en tiempo real de sesión (estado, rol, permisos)
+        this.startSessionCheck()
 
         console.log('✅ Usuario logueado:', userData)
         return { success: true, user: userData }
@@ -138,8 +146,8 @@ class AuthService {
    * Cerrar sesión
    */
   logout() {
-    // Detener verificación de estado activo
-    this.stopActiveCheck()
+    // Detener verificación de sesión
+    this.stopSessionCheck()
     
     this.token = null
     this.user = null
@@ -222,64 +230,145 @@ class AuthService {
   }
 
   /**
-   * Verificar si el usuario sigue activo (llamada al backend)
+   * Verificar estado completo del usuario (activo, rol, permisos)
+   * Retorna la información actualizada o null si el usuario fue desactivado
    */
-  async checkUserActive() {
-    if (!this.user?.username) return true
+  async checkUserSession() {
+    if (!this.user?.username) return null
     
     try {
-      const response = await axios.get(`${API_URL}/auth/check-active/${this.user.username}`, {
+      const response = await axios.get(`${API_URL}/auth/check-session/${this.user.username}`, {
         headers: {
           'Authorization': `Bearer ${this.token}`
-        }
+        },
+        timeout: 5000 // 5 segundos de timeout
       })
       
-      return response.data.active
+      return response.data
     } catch (error) {
-      console.error('Error verificando estado activo:', error)
-      // En caso de error, asumimos que sigue activo para no cerrar sesión por problemas de red
-      return true
+      console.error('Error verificando sesión:', error)
+      // En caso de error de red, intentar con el endpoint básico
+      try {
+        const fallbackResponse = await axios.get(`${API_URL}/auth/check-active/${this.user.username}`, {
+          headers: {
+            'Authorization': `Bearer ${this.token}`
+          },
+          timeout: 5000
+        })
+        return { active: fallbackResponse.data.active, exists: fallbackResponse.data.exists }
+      } catch (fallbackError) {
+        // Si falla también, asumir que sigue activo para no cerrar por problemas de red
+        return { active: true, exists: true }
+      }
     }
   }
 
   /**
-   * Iniciar verificación periódica del estado activo
+   * Iniciar verificación en tiempo real de sesión (cada 5 segundos)
    */
-  startActiveCheck() {
-    // Verificar cada 30 segundos si el usuario sigue activo
-    this.stopActiveCheck() // Limpiar cualquier intervalo previo
+  startSessionCheck() {
+    this.stopSessionCheck() // Limpiar cualquier intervalo previo
     
-    this.activeCheckInterval = setInterval(async () => {
-      const isActive = await this.checkUserActive()
+    // Verificación inicial inmediata
+    this.performSessionCheck()
+    
+    // Verificar cada 5 segundos
+    this.sessionCheckInterval = setInterval(() => {
+      this.performSessionCheck()
+    }, 5000) // 5 segundos para actualizaciones rápidas
+    
+    console.log('🔄 Verificación de sesión en tiempo real iniciada (cada 5s)')
+  }
+
+  /**
+   * Realizar verificación de sesión
+   */
+  async performSessionCheck() {
+    const sessionData = await this.checkUserSession()
+    
+    if (!sessionData) return
+    
+    // Si el usuario fue desactivado, cerrar sesión inmediatamente
+    if (!sessionData.active) {
+      console.log('⚠️ Usuario desactivado, cerrando sesión...')
+      this.forceLogout('Tu cuenta ha sido desactivada. Contacta al administrador.')
+      return
+    }
+    
+    // Si el usuario no existe, cerrar sesión
+    if (sessionData.exists === false) {
+      console.log('⚠️ Usuario eliminado, cerrando sesión...')
+      this.forceLogout('Tu cuenta ha sido eliminada del sistema.')
+      return
+    }
+    
+    // Verificar si hubo cambios en rol o permisos
+    if (sessionData.rol !== undefined || sessionData.permisos !== undefined) {
+      const currentUser = this.user
+      let hasChanges = false
       
-      if (!isActive) {
-        console.log('⚠️ Usuario desactivado, cerrando sesión...')
-        this.forceLogout()
+      // Verificar cambio de rol
+      if (sessionData.rol && sessionData.rol !== currentUser.rol) {
+        console.log(`🔄 Rol actualizado: ${currentUser.rol} → ${sessionData.rol}`)
+        hasChanges = true
       }
-    }, 30000) // 30 segundos
-    
-    console.log('🔄 Verificación de estado activo iniciada')
+      
+      // Verificar cambio de permisos
+      if (sessionData.permisos) {
+        const currentPermisos = JSON.stringify(currentUser.permisos || {})
+        const newPermisos = JSON.stringify(sessionData.permisos)
+        
+        if (currentPermisos !== newPermisos) {
+          console.log('🔄 Permisos actualizados')
+          hasChanges = true
+        }
+      }
+      
+      // Si hubo cambios, actualizar datos locales y notificar
+      if (hasChanges) {
+        this.user = {
+          ...this.user,
+          rol: sessionData.rol || this.user.rol,
+          permisos: sessionData.permisos || this.user.permisos,
+          activo: sessionData.active
+        }
+        
+        localStorage.setItem('admin_user_data', JSON.stringify(this.user))
+        
+        // Notificar a la aplicación del cambio
+        if (this.onUserUpdated) {
+          this.onUserUpdated(this.user)
+        }
+        
+        // Disparar evento global para que los componentes reaccionen
+        window.dispatchEvent(new CustomEvent('user-session-updated', { 
+          detail: this.user 
+        }))
+        
+        console.log('✅ Datos de usuario actualizados en tiempo real')
+      }
+    }
   }
 
   /**
    * Detener verificación periódica
    */
-  stopActiveCheck() {
-    if (this.activeCheckInterval) {
-      clearInterval(this.activeCheckInterval)
-      this.activeCheckInterval = null
-      console.log('⏹️ Verificación de estado activo detenida')
+  stopSessionCheck() {
+    if (this.sessionCheckInterval) {
+      clearInterval(this.sessionCheckInterval)
+      this.sessionCheckInterval = null
+      console.log('⏹️ Verificación de sesión detenida')
     }
   }
 
   /**
-   * Forzar cierre de sesión (cuando el usuario es desactivado)
+   * Forzar cierre de sesión (cuando el usuario es desactivado/eliminado)
    */
-  forceLogout() {
+  forceLogout(message = 'Tu sesión ha sido cerrada.') {
     this.logout()
     
     // Mostrar mensaje y redirigir
-    alert('Tu cuenta ha sido desactivada. Contacta al administrador.')
+    alert(message)
     window.location.href = '/login'
   }
 }

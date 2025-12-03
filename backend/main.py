@@ -1944,6 +1944,54 @@ async def check_user_active(username: str):
         print(f"❌ Error verificando estado de usuario: {e}")
         raise HTTPException(status_code=500, detail=f"Error al verificar usuario: {str(e)}")
 
+# Endpoint para verificación completa de sesión (activo, rol, permisos) - TIEMPO REAL
+@app.get("/auth/check-session/{username}")
+async def check_user_session(username: str):
+    """Verificar estado completo de sesión de un usuario (activo, rol, permisos)"""
+    try:
+        print(f"🔍 Verificando sesión completa de usuario: {username}")
+        
+        cursor.execute("""
+            SELECT id, rol, permisos, activo 
+            FROM admin_users 
+            WHERE username = %s
+        """, (username,))
+        row = cursor.fetchone()
+        
+        if not row:
+            return {
+                "active": False, 
+                "exists": False, 
+                "message": "Usuario no encontrado"
+            }
+        
+        user_id = row[0]
+        user_rol = row[1] or 'user'
+        permisos_str = row[2]
+        activo = row[3] if row[3] is not None else True
+        
+        # Parsear permisos
+        if permisos_str:
+            try:
+                permisos = json.loads(permisos_str)
+            except:
+                permisos = PERMISOS_ADMIN_DEFAULT if user_rol == 'admin' else PERMISOS_USER_DEFAULT
+        else:
+            permisos = PERMISOS_ADMIN_DEFAULT if user_rol == 'admin' else PERMISOS_USER_DEFAULT
+        
+        return {
+            "active": activo,
+            "exists": True,
+            "user_id": user_id,
+            "username": username,
+            "rol": user_rol,
+            "permisos": permisos
+        }
+        
+    except Exception as e:
+        print(f"❌ Error verificando sesión de usuario: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al verificar sesión: {str(e)}")
+
 # Endpoint para verificar permisos específicos
 @app.get("/auth/check-permission/{permission}")
 async def check_permission(permission: str):

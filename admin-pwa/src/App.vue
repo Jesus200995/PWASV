@@ -8,17 +8,17 @@
 import { onMounted, onUnmounted } from 'vue'
 import authService from './services/authService.js'
 
-// Iniciar verificación de estado activo si el usuario ya está logueado
+// Iniciar verificación de sesión en tiempo real si el usuario ya está logueado
 onMounted(() => {
   if (authService.isAuthenticated()) {
-    console.log('🔄 Usuario ya logueado, iniciando verificación de estado activo')
-    authService.startActiveCheck()
+    console.log('🔄 Usuario ya logueado, iniciando verificación de sesión en tiempo real')
+    authService.startSessionCheck()
   }
 })
 
 // Detener verificación al desmontar
 onUnmounted(() => {
-  authService.stopActiveCheck()
+  authService.stopSessionCheck()
 })
 </script>
 

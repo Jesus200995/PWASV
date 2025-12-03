@@ -399,7 +399,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import authService from '../services/authService'
 
@@ -473,6 +473,18 @@ const confirmLogout = () => {
   router.push('/login')
 }
 
+// Handler para actualización de usuario en tiempo real
+const handleUserSessionUpdated = (event) => {
+  console.log('🔄 Sidebar: Usuario actualizado en tiempo real', event.detail)
+  currentUser.value = event.detail
+  
+  // Forzar re-render del sidebar
+  const newUser = authService.getCurrentUser()
+  if (newUser) {
+    currentUser.value = { ...newUser }
+  }
+}
+
 // Lifecycle hooks
 onMounted(async () => {
   try {
@@ -488,9 +500,18 @@ onMounted(async () => {
     
     // Agregar evento para tecla Escape para cerrar el modal
     window.addEventListener('keydown', handleKeydown)
+    
+    // Escuchar actualizaciones de sesión en tiempo real
+    window.addEventListener('user-session-updated', handleUserSessionUpdated)
   } catch (error) {
     console.error('Error cargando información del usuario:', error)
   }
+})
+
+// Cleanup al desmontar
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('user-session-updated', handleUserSessionUpdated)
 })
 
 // Manejadores de eventos

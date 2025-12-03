@@ -370,10 +370,10 @@ class AuthService {
         if (hasRolChange) {
           console.log('⚠️ Cambio de rol detectado - Recargando página inmediatamente...')
           
-          // Mostrar mensaje breve antes del refresh
+          // Mostrar mensaje profesional antes del refresh
           window.dispatchEvent(new CustomEvent('force-refresh', {
             detail: {
-              message: `Tu rol ha sido cambiado a "${sessionData.rol}". La página se recargará para aplicar los cambios.`,
+              message: 'Se han actualizado tus permisos de acceso. Aplicando cambios...',
               reason: 'role-changed'
             }
           }))

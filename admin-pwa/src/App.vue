@@ -74,13 +74,13 @@ const handleForceRefresh = (event) => {
   
   if (reason === 'role-changed') {
     sessionModalConfig.value = {
-      title: 'Rol Actualizado',
-      message: message || 'Tu rol ha sido modificado. La página se recargará.',
+      title: 'Actualizando Permisos',
+      message: message || 'Se están aplicando los cambios de configuración...',
       iconType: 'refresh'
     }
     showSessionModal.value = true
     
-    // El refresh se hace automáticamente desde authService después de 1.5s
+    // El refresh se hace automáticamente desde authService después de 500ms
   }
 }
 

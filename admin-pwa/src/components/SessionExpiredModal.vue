@@ -475,4 +475,105 @@ onUnmounted(() => {
     font-size: 18px;
   }
 }
+
+/* Landscape en móvil y tablets */
+@media (max-height: 500px) and (orientation: landscape) {
+  .session-modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+  
+  .session-modal {
+    padding: 20px 24px;
+    border-radius: 16px;
+    max-width: 500px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: left;
+  }
+  
+  .modal-icon-container {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  
+  .modal-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .modal-title {
+    font-size: 18px;
+    margin-bottom: 4px;
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .modal-message {
+    font-size: 13px;
+    margin-bottom: 8px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .modal-info {
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    font-size: 11px;
+  }
+  
+  .modal-button {
+    padding: 10px 20px;
+    font-size: 13px;
+    width: auto;
+    min-width: 180px;
+  }
+  
+  .auto-redirect {
+    font-size: 11px;
+    margin-top: 8px;
+    width: 100%;
+  }
+}
+
+/* Landscape muy pequeño */
+@media (max-height: 400px) and (orientation: landscape) {
+  .session-modal {
+    padding: 16px 20px;
+    gap: 8px;
+  }
+  
+  .modal-icon-container {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .modal-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .modal-title {
+    font-size: 16px;
+  }
+  
+  .modal-message {
+    font-size: 12px;
+  }
+  
+  .modal-info {
+    display: none;
+  }
+  
+  .auto-redirect {
+    display: none;
+  }
+}
 </style>

@@ -5,7 +5,21 @@
 </template>
 
 <script setup>
-// Componente raíz de la aplicación
+import { onMounted, onUnmounted } from 'vue'
+import authService from './services/authService.js'
+
+// Iniciar verificación de estado activo si el usuario ya está logueado
+onMounted(() => {
+  if (authService.isAuthenticated()) {
+    console.log('🔄 Usuario ya logueado, iniciando verificación de estado activo')
+    authService.startActiveCheck()
+  }
+})
+
+// Detener verificación al desmontar
+onUnmounted(() => {
+  authService.stopActiveCheck()
+})
 </script>
 
 <style>

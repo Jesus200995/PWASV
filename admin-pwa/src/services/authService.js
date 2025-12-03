@@ -7,6 +7,7 @@ class AuthService {
   constructor() {
     this.token = localStorage.getItem('admin_token')
     this.user = this.getUserFromStorage()
+    this.activeCheckInterval = null
   }
 
   /**
@@ -68,6 +69,9 @@ class AuthService {
         localStorage.setItem('admin_user_data', JSON.stringify(userData))
         localStorage.setItem('admin_user', credentials.username) // Para compatibilidad
 
+        // Iniciar verificación periódica de estado activo
+        this.startActiveCheck()
+
         console.log('✅ Usuario logueado:', userData)
         return { success: true, user: userData }
       }
@@ -75,6 +79,12 @@ class AuthService {
       return { success: false, error: 'Token no recibido' }
     } catch (error) {
       console.error('❌ Error de login:', error)
+      
+      // Verificar si es error de usuario inactivo
+      if (error.response?.status === 403) {
+        throw new Error(error.response.data.detail || 'Tu cuenta ha sido desactivada')
+      }
+      
       throw error
     }
   }
@@ -128,6 +138,9 @@ class AuthService {
    * Cerrar sesión
    */
   logout() {
+    // Detener verificación de estado activo
+    this.stopActiveCheck()
+    
     this.token = null
     this.user = null
     localStorage.removeItem('admin_token')
@@ -206,6 +219,68 @@ class AuthService {
       this.user = this.getUserFromStorage()
     }
     return this.user
+  }
+
+  /**
+   * Verificar si el usuario sigue activo (llamada al backend)
+   */
+  async checkUserActive() {
+    if (!this.user?.username) return true
+    
+    try {
+      const response = await axios.get(`${API_URL}/auth/check-active/${this.user.username}`, {
+        headers: {
+          'Authorization': `Bearer ${this.token}`
+        }
+      })
+      
+      return response.data.active
+    } catch (error) {
+      console.error('Error verificando estado activo:', error)
+      // En caso de error, asumimos que sigue activo para no cerrar sesión por problemas de red
+      return true
+    }
+  }
+
+  /**
+   * Iniciar verificación periódica del estado activo
+   */
+  startActiveCheck() {
+    // Verificar cada 30 segundos si el usuario sigue activo
+    this.stopActiveCheck() // Limpiar cualquier intervalo previo
+    
+    this.activeCheckInterval = setInterval(async () => {
+      const isActive = await this.checkUserActive()
+      
+      if (!isActive) {
+        console.log('⚠️ Usuario desactivado, cerrando sesión...')
+        this.forceLogout()
+      }
+    }, 30000) // 30 segundos
+    
+    console.log('🔄 Verificación de estado activo iniciada')
+  }
+
+  /**
+   * Detener verificación periódica
+   */
+  stopActiveCheck() {
+    if (this.activeCheckInterval) {
+      clearInterval(this.activeCheckInterval)
+      this.activeCheckInterval = null
+      console.log('⏹️ Verificación de estado activo detenida')
+    }
+  }
+
+  /**
+   * Forzar cierre de sesión (cuando el usuario es desactivado)
+   */
+  forceLogout() {
+    this.logout()
+    
+    // Mostrar mensaje y redirigir
+    alert('Tu cuenta ha sido desactivada. Contacta al administrador.')
+    window.location.href = '/login'
   }
 }
 

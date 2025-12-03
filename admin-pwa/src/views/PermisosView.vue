@@ -90,11 +90,27 @@
                   </td>
                   <td class="rol-cell">
                     <span class="rol-badge" :class="usuario.rol">
-                      {{ usuario.rol === 'admin' ? '👑 Administrador' : '👤 Usuario' }}
+                      <svg v-if="usuario.rol === 'admin'" class="rol-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                      </svg>
+                      <svg v-else class="rol-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                      <span class="rol-text">{{ usuario.rol === 'admin' ? 'Administrador' : 'Usuario' }}</span>
                     </span>
                   </td>
                   <td class="status-cell">
-                    <span class="status-badge status-active">Activo</span>
+                    <span class="status-badge" :class="usuario.activo !== false ? 'status-active' : 'status-inactive'">
+                      <svg v-if="usuario.activo !== false" class="status-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <svg v-else class="status-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                      </svg>
+                      {{ usuario.activo !== false ? 'Activo' : 'Inactivo' }}
+                    </span>
                   </td>
                   <td class="actions-cell">
                     <div class="action-buttons">
@@ -141,28 +157,52 @@
     </main>
 
     <!-- Modal Crear/Editar Usuario -->
-    <div v-if="mostrarModalCrear || mostrarModalEditar" class="modal-overlay" @click="cerrarModales">
-      <div class="modal-content" @click.stop>
+    <div v-if="mostrarModalCrear || mostrarModalEditar" class="modal-overlay">
+      <div class="modal-content modal-usuario" @click.stop>
         <div class="modal-header">
-          <h3>{{ modoEdicion ? 'Editar Usuario Admin' : 'Nuevo Usuario Admin' }}</h3>
-          <button class="btn-close" @click="cerrarModales">×</button>
+          <div class="modal-header-icon">
+            <svg v-if="!modoEdicion" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="8.5" cy="7" r="4"/>
+              <line x1="20" y1="8" x2="20" y2="14"/>
+              <line x1="23" y1="11" x2="17" y2="11"/>
+            </svg>
+            <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </div>
+          <h3>{{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario Admin' }}</h3>
+          <button class="btn-close" @click="cerrarModales" aria-label="Cerrar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
         
         <div class="modal-body">
-          <!-- Sección de Información básica -->
-          <div class="form-section">
-            <h4>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              Información Básica
-            </h4>
-            
-            <form @submit.prevent="guardarUsuario">
+          <form @submit.prevent="guardarUsuario">
+            <!-- Sección de Información básica -->
+            <div class="form-section">
+              <div class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <h4>Información Básica</h4>
+              </div>
+              
               <!-- Username -->
               <div class="form-group">
-                <label for="username">Nombre de Usuario *</label>
+                <label for="username">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  Nombre de Usuario
+                  <span class="required">*</span>
+                </label>
                 <input
                   id="username"
                   v-model="formularioUsuario.username"
@@ -177,235 +217,497 @@
 
               <!-- Password -->
               <div class="form-group">
-                <label for="password">{{ modoEdicion ? 'Nueva Contraseña (opcional)' : 'Contraseña *' }}</label>
-                <input
-                  id="password"
-                  v-model="formularioUsuario.password"
-                  type="password"
-                  class="form-input"
-                  placeholder="Ingrese la contraseña"
-                  :required="!modoEdicion"
-                />
+                <label for="password">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  {{ modoEdicion ? 'Nueva Contraseña (opcional)' : 'Contraseña' }}
+                  <span v-if="!modoEdicion" class="required">*</span>
+                </label>
+                <div class="input-password-wrapper">
+                  <input
+                    id="password"
+                    v-model="formularioUsuario.password"
+                    :type="mostrarPassword ? 'text' : 'password'"
+                    class="form-input form-input-password"
+                    placeholder="Ingrese la contraseña"
+                    :required="!modoEdicion"
+                  />
+                  <button 
+                    type="button" 
+                    class="btn-toggle-password" 
+                    @click="mostrarPassword = !mostrarPassword"
+                    :title="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  >
+                    <!-- Ojo abierto (visible) -->
+                    <svg v-if="mostrarPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <!-- Ojo cerrado (oculto) -->
+                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  </button>
+                </div>
                 <small class="form-help">
                   {{ modoEdicion ? 'Deje vacío para mantener la contraseña actual' : 'Mínimo 6 caracteres' }}
                 </small>
               </div>
 
-              <!-- Rol -->
-              <div class="form-group">
-                <label>Rol del Usuario *</label>
-                <div class="radio-group">
-                  <div 
-                    class="radio-option" 
-                    :class="{ 'selected': formularioUsuario.rol === 'admin' }"
-                    @click="formularioUsuario.rol = 'admin'"
-                  >
-                    <input
-                      v-model="formularioUsuario.rol"
-                      type="radio"
-                      value="admin"
-                      :disabled="modoEdicion && formularioUsuario.username === 'admin'"
-                    />
-                    <div class="radio-content">
-                      <div class="radio-title">👑 Administrador</div>
-                      <div class="radio-description">
-                        Acceso completo al sistema, puede gestionar usuarios, configuraciones y todos los módulos
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    class="radio-option"
-                    :class="{ 'selected': formularioUsuario.rol === 'user' }"
-                    @click="formularioUsuario.rol = 'user'"
-                  >
-                    <input
-                      v-model="formularioUsuario.rol"
-                      type="radio"
-                      value="user"
-                      :disabled="modoEdicion && formularioUsuario.username === 'admin'"
-                    />
-                    <div class="radio-content">
-                      <div class="radio-title">👤 Usuario</div>
-                      <div class="radio-description">
-                        Acceso limitado, puede ver reportes y consultar información básica del sistema
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Permisos de acceso (solo visible cuando el rol es 'user') -->
-              <div v-if="formularioUsuario.rol === 'user'" class="form-group permisos-section">
-                <label class="permisos-label">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 12l2 2 4-4"/>
-                    <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.5 0 2.92.37 4.17 1.02"/>
+              <!-- Confirmar Password (solo en modo creación) -->
+              <div v-if="!modoEdicion" class="form-group">
+                <label for="confirmPassword">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 12 15 15 9"/>
                   </svg>
-                  Permisos de Acceso a Módulos
+                  Confirmar Contraseña
+                  <span class="required">*</span>
                 </label>
-                <small class="form-help permisos-help">Seleccione los módulos a los que el usuario tendrá acceso</small>
+                <div class="input-password-wrapper">
+                  <input
+                    id="confirmPassword"
+                    v-model="formularioUsuario.confirmPassword"
+                    :type="mostrarConfirmPassword ? 'text' : 'password'"
+                    class="form-input form-input-password"
+                    :class="{ 'input-error': formularioUsuario.confirmPassword && formularioUsuario.password !== formularioUsuario.confirmPassword, 'input-success': formularioUsuario.confirmPassword && formularioUsuario.password === formularioUsuario.confirmPassword }"
+                    placeholder="Confirme la contraseña"
+                    required
+                  />
+                  <button 
+                    type="button" 
+                    class="btn-toggle-password" 
+                    @click="mostrarConfirmPassword = !mostrarConfirmPassword"
+                    :title="mostrarConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  >
+                    <!-- Ojo abierto (visible) -->
+                    <svg v-if="mostrarConfirmPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <!-- Ojo cerrado (oculto) -->
+                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  </button>
+                </div>
+                <small class="form-help" :class="{ 'help-error': formularioUsuario.confirmPassword && formularioUsuario.password !== formularioUsuario.confirmPassword, 'help-success': formularioUsuario.confirmPassword && formularioUsuario.password === formularioUsuario.confirmPassword }">
+                  <template v-if="formularioUsuario.confirmPassword && formularioUsuario.password !== formularioUsuario.confirmPassword">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    Las contraseñas no coinciden
+                  </template>
+                  <template v-else-if="formularioUsuario.confirmPassword && formularioUsuario.password === formularioUsuario.confirmPassword">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Las contraseñas coinciden
+                  </template>
+                  <template v-else>
+                    Vuelva a escribir la contraseña para confirmar
+                  </template>
+                </small>
+              </div>
+            </div>
+
+            <!-- Sección de Estado del Usuario (solo en modo edición) -->
+            <div v-if="modoEdicion" class="form-section estado-section">
+              <div class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+                <h4>Estado de la Cuenta</h4>
+              </div>
+              
+              <div class="estado-toggle-container">
+                <div class="estado-info">
+                  <div class="estado-icon" :class="formularioUsuario.activo ? 'activo' : 'inactivo'">
+                    <!-- Icono de check para activo -->
+                    <svg v-if="formularioUsuario.activo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <!-- Icono de X para inactivo -->
+                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                  </div>
+                  <div class="estado-text">
+                    <span class="estado-label">{{ formularioUsuario.activo ? 'Cuenta Activa' : 'Cuenta Inactiva' }}</span>
+                    <span class="estado-desc">{{ formularioUsuario.activo ? 'El usuario puede acceder al sistema' : 'El usuario NO puede acceder al sistema' }}</span>
+                  </div>
+                </div>
                 
-                <div class="permisos-grid">
-                  <!-- Visor Map -->
-                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.visor }">
-                    <label class="permiso-checkbox">
-                      <input type="checkbox" v-model="formularioUsuario.permisos.visor" />
-                      <span class="checkmark"></span>
-                      <div class="permiso-info">
-                        <span class="permiso-icon">🗺️</span>
-                        <span class="permiso-nombre">Visor de Seguimiento</span>
-                      </div>
-                    </label>
-                  </div>
+                <label class="estado-switch" :class="{ 'disabled': formularioUsuario.username === 'admin' }">
+                  <input 
+                    type="checkbox" 
+                    v-model="formularioUsuario.activo"
+                    :disabled="formularioUsuario.username === 'admin'"
+                  />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              
+              <div v-if="!formularioUsuario.activo" class="estado-warning">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>Al desactivar esta cuenta, el usuario será expulsado inmediatamente si está conectado.</span>
+              </div>
+              
+              <div v-if="formularioUsuario.username === 'admin'" class="admin-protection-notice">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>La cuenta de administrador principal no puede ser desactivada.</span>
+              </div>
+            </div>
 
-                  <!-- Asistencia -->
-                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.asistencia }">
-                    <label class="permiso-checkbox">
-                      <input type="checkbox" v-model="formularioUsuario.permisos.asistencia" />
-                      <span class="checkmark"></span>
-                      <div class="permiso-info">
-                        <span class="permiso-icon">✅</span>
-                        <span class="permiso-nombre">Asistencia</span>
-                      </div>
-                    </label>
+            <!-- Sección de Rol -->
+            <div class="form-section">
+              <div class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <h4>Rol del Usuario</h4>
+              </div>
+              
+              <div class="radio-group-modern">
+                <div 
+                  class="radio-card" 
+                  :class="{ 'selected': formularioUsuario.rol === 'admin' }"
+                  @click="formularioUsuario.rol = 'admin'"
+                >
+                  <input
+                    v-model="formularioUsuario.rol"
+                    type="radio"
+                    value="admin"
+                    :disabled="modoEdicion && formularioUsuario.username === 'admin'"
+                  />
+                  <div class="radio-card-icon admin-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                    </svg>
                   </div>
-
-                  <!-- Registros -->
-                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.registros }">
-                    <label class="permiso-checkbox">
-                      <input type="checkbox" v-model="formularioUsuario.permisos.registros" />
-                      <span class="checkmark"></span>
-                      <div class="permiso-info">
-                        <span class="permiso-icon">📋</span>
-                        <span class="permiso-nombre">Registros</span>
-                      </div>
-                    </label>
+                  <div class="radio-card-content">
+                    <span class="radio-card-title">Administrador</span>
+                    <span class="radio-card-desc">Acceso completo a todos los módulos</span>
                   </div>
-
-                  <!-- Usuarios -->
-                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.usuarios }">
-                    <label class="permiso-checkbox">
-                      <input type="checkbox" v-model="formularioUsuario.permisos.usuarios" />
-                      <span class="checkmark"></span>
-                      <div class="permiso-info">
-                        <span class="permiso-icon">👥</span>
-                        <span class="permiso-nombre">Usuarios</span>
-                      </div>
-                    </label>
-                  </div>
-
-                  <!-- Historiales -->
-                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.historiales }">
-                    <label class="permiso-checkbox">
-                      <input type="checkbox" v-model="formularioUsuario.permisos.historiales" />
-                      <span class="checkmark"></span>
-                      <div class="permiso-info">
-                        <span class="permiso-icon">📜</span>
-                        <span class="permiso-nombre">Historiales</span>
-                      </div>
-                    </label>
-                  </div>
-
-                  <!-- Notificaciones -->
-                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.notificaciones }">
-                    <label class="permiso-checkbox">
-                      <input type="checkbox" v-model="formularioUsuario.permisos.notificaciones" />
-                      <span class="checkmark"></span>
-                      <div class="permiso-info">
-                        <span class="permiso-icon">🔔</span>
-                        <span class="permiso-nombre">Notificaciones</span>
-                      </div>
-                    </label>
-                  </div>
-
-                  <!-- Permisos -->
-                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.permisos }">
-                    <label class="permiso-checkbox">
-                      <input type="checkbox" v-model="formularioUsuario.permisos.permisos" />
-                      <span class="checkmark"></span>
-                      <div class="permiso-info">
-                        <span class="permiso-icon">🔐</span>
-                        <span class="permiso-nombre">Permisos</span>
-                      </div>
-                    </label>
-                  </div>
-
-                  <!-- Configuración -->
-                  <div class="permiso-item" :class="{ 'activo': formularioUsuario.permisos.configuracion }">
-                    <label class="permiso-checkbox">
-                      <input type="checkbox" v-model="formularioUsuario.permisos.configuracion" />
-                      <span class="checkmark"></span>
-                      <div class="permiso-info">
-                        <span class="permiso-icon">⚙️</span>
-                        <span class="permiso-nombre">Configuración</span>
-                      </div>
-                    </label>
+                  <div class="radio-checkmark">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
                   </div>
                 </div>
-
-                <!-- Botones rápidos de selección -->
-                <div class="permisos-actions">
-                  <button type="button" class="btn-permisos-action" @click="seleccionarTodos">
-                    ✓ Seleccionar todos
-                  </button>
-                  <button type="button" class="btn-permisos-action btn-deseleccionar" @click="deseleccionarTodos">
-                    ✕ Deseleccionar todos
-                  </button>
+                
+                <div 
+                  class="radio-card"
+                  :class="{ 'selected': formularioUsuario.rol === 'user' }"
+                  @click="formularioUsuario.rol = 'user'"
+                >
+                  <input
+                    v-model="formularioUsuario.rol"
+                    type="radio"
+                    value="user"
+                    :disabled="modoEdicion && formularioUsuario.username === 'admin'"
+                  />
+                  <div class="radio-card-icon user-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  <div class="radio-card-content">
+                    <span class="radio-card-title">Usuario</span>
+                    <span class="radio-card-desc">Acceso limitado según permisos</span>
+                  </div>
+                  <div class="radio-checkmark">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Info para admin (todos los permisos) -->
-              <div v-if="formularioUsuario.rol === 'admin'" class="admin-permisos-info">
-                <div class="admin-info-icon">👑</div>
-                <div class="admin-info-text">
-                  <strong>Acceso Completo</strong>
-                  <p>Los administradores tienen acceso a todos los módulos del sistema automáticamente.</p>
-                </div>
+            <!-- Permisos de acceso (solo visible cuando el rol es 'user') -->
+            <div v-if="formularioUsuario.rol === 'user'" class="form-section permisos-section-modern">
+              <div class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12l2 2 4-4"/>
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <h4>Permisos de Acceso</h4>
+              </div>
+              <p class="section-description">Seleccione los módulos a los que el usuario tendrá acceso</p>
+              
+              <div class="permisos-grid-modern">
+                <!-- Visor de Seguimiento -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.visor }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.visor" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M2 12h20"/>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Visor de Seguimiento</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Asistencia -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.asistencia }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.asistencia" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Asistencia</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Registros -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.registros }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.registros" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Registros</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Usuarios -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.usuarios }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.usuarios" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Usuarios</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Historiales -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.historiales }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.historiales" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Historiales</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Notificaciones -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.notificaciones }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.notificaciones" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Notificaciones</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Permisos -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.permisos }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.permisos" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Permisos</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Configuración -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.configuracion }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.configuracion" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Configuración</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
               </div>
 
-              <!-- Botones -->
-              <div class="modal-actions">
-                <button type="button" class="btn-secondary" @click="cerrarModales">
-                  Cancelar
+              <!-- Botones rápidos de selección -->
+              <div class="permisos-quick-actions">
+                <button type="button" class="btn-quick-action btn-select-all" @click="seleccionarTodos">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"/>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                  </svg>
+                  Seleccionar todos
                 </button>
-                <button type="submit" class="btn-primary" :disabled="guardando">
-                  <span v-if="guardando" class="loading-spinner-small"></span>
-                  {{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Crear Usuario') }}
+                <button type="button" class="btn-quick-action btn-deselect-all" @click="deseleccionarTodos">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  </svg>
+                  Deseleccionar todos
                 </button>
               </div>
-            </form>
-          </div>
+            </div>
+
+            <!-- Info para admin (todos los permisos) -->
+            <div v-if="formularioUsuario.rol === 'admin'" class="admin-info-banner">
+              <div class="admin-banner-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <div class="admin-banner-content">
+                <strong>Acceso Completo</strong>
+                <p>Los administradores tienen acceso a todos los módulos del sistema automáticamente.</p>
+              </div>
+            </div>
+
+            <!-- Botones del formulario -->
+            <div class="modal-footer">
+              <button type="button" class="btn-modal btn-cancel" @click="cerrarModales">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                Cancelar
+              </button>
+              <button type="submit" class="btn-modal btn-submit" :disabled="guardando">
+                <span v-if="guardando" class="btn-spinner"></span>
+                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Crear Usuario') }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
 
     <!-- Modal Confirmar Eliminación -->
-    <div v-if="mostrarModalEliminar" class="modal-overlay" @click="cancelarEliminar">
+    <div v-if="mostrarModalEliminar" class="modal-overlay">
       <div class="modal-content modal-confirm" @click.stop>
-        <div class="modal-header">
+        <div class="modal-header modal-header-danger">
+          <div class="modal-header-icon danger-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18"/>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              <line x1="10" y1="11" x2="10" y2="17"/>
+              <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+          </div>
           <h3>Confirmar Eliminación</h3>
-          <button class="btn-close" @click="cancelarEliminar">×</button>
+          <button class="btn-close" @click="cancelarEliminar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
         
         <div class="modal-body">
           <div class="confirm-content">
-            <div class="confirm-icon">⚠️</div>
-            <h4>¿Estás seguro de que deseas eliminar este usuario administrativo?</h4>
+            <div class="confirm-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <h4>¿Estás seguro de que deseas eliminar este usuario?</h4>
             <p><strong>Usuario:</strong> {{ usuarioAEliminar?.username }}</p>
-            <p><strong>Rol:</strong> {{ usuarioAEliminar?.rol }}</p>
+            <p><strong>Rol:</strong> {{ usuarioAEliminar?.rol === 'admin' ? 'Administrador' : 'Usuario' }}</p>
             
             <div class="warning-text">
-              Esta acción no se puede deshacer. El usuario perderá acceso inmediatamente al sistema administrativo.
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              Esta acción no se puede deshacer. El usuario perderá acceso inmediatamente.
             </div>
           </div>
 
-          <div class="modal-actions">
-            <button class="btn-secondary" @click="cancelarEliminar">
+          <div class="modal-footer">
+            <button class="btn-modal btn-cancel" @click="cancelarEliminar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
               Cancelar
             </button>
-            <button class="btn-danger" @click="eliminarUsuario" :disabled="eliminando">
-              <span v-if="eliminando" class="loading-spinner-small"></span>
+            <button class="btn-modal btn-delete" @click="eliminarUsuario" :disabled="eliminando">
+              <span v-if="eliminando" class="btn-spinner"></span>
+              <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18"/>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              </svg>
               {{ eliminando ? 'Eliminando...' : 'Eliminar Usuario' }}
             </button>
           </div>
@@ -417,7 +719,15 @@
     <div v-if="toast.show" class="toast" :class="toast.type">
       <div class="toast-content">
         <div class="toast-icon">
-          {{ toast.type === 'success' ? '✅' : '❌' }}
+          <svg v-if="toast.type === 'success'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
         </div>
         <div class="toast-message">{{ toast.message }}</div>
       </div>
@@ -450,10 +760,14 @@ export default {
       modoEdicion: false,
       usuarioEditando: null,
       guardando: false,
+      mostrarPassword: false,
+      mostrarConfirmPassword: false,
       formularioUsuario: {
         username: '',
         password: '',
+        confirmPassword: '',
         rol: 'user',
+        activo: true,
         permisos: {
           visor: false,
           asistencia: false,
@@ -551,9 +865,14 @@ export default {
       this.formularioUsuario = {
         username: usuario.username,
         password: '', // No mostramos la contraseña actual
+        confirmPassword: '',
         rol: usuario.rol,
+        activo: usuario.activo !== false, // Por defecto true si no existe
         permisos: permisosUsuario
       }
+      // Resetear visibilidad de contraseñas
+      this.mostrarPassword = false
+      this.mostrarConfirmPassword = false
       this.mostrarModalEditar = true
     },
 
@@ -579,6 +898,12 @@ export default {
         this.mostrarToast('La contraseña debe tener al menos 6 caracteres', 'error')
         return
       }
+
+      // Validar que las contraseñas coincidan (solo en modo creación)
+      if (!this.modoEdicion && this.formularioUsuario.password !== this.formularioUsuario.confirmPassword) {
+        this.mostrarToast('Las contraseñas no coinciden', 'error')
+        return
+      }
       
       this.guardando = true
       
@@ -588,7 +913,8 @@ export default {
           const datosActualizacion = {
             username: this.formularioUsuario.username,
             rol: this.formularioUsuario.rol,
-            permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null
+            permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null,
+            activo: this.formularioUsuario.activo
           }
           
           // Solo incluir password si se proporcionó
@@ -599,7 +925,7 @@ export default {
           await permisosService.actualizarUsuario(this.usuarioEditando.id, datosActualizacion)
           this.mostrarToast('Usuario administrativo actualizado exitosamente', 'success')
         } else {
-          // Crear nuevo usuario
+          // Crear nuevo usuario (siempre activo)
           const datosCreacion = {
             ...this.formularioUsuario,
             permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null
@@ -632,9 +958,14 @@ export default {
       this.formularioUsuario = {
         username: '',
         password: '',
+        confirmPassword: '',
         rol: 'user',
+        activo: true,
         permisos: { ...this.permisosDefault }
       }
+      // Resetear visibilidad de contraseñas
+      this.mostrarPassword = false
+      this.mostrarConfirmPassword = false
     },
 
     // Métodos para seleccionar/deseleccionar permisos
@@ -1053,7 +1384,7 @@ export default {
   font-weight: 600;
   font-size: 13px;
   padding: 14px 16px;
-  text-align: left;
+  text-align: center;
   border-bottom: 2px solid rgba(76, 175, 80, 0.2);
   white-space: nowrap;
 }
@@ -1062,6 +1393,7 @@ export default {
   padding: 16px;
   border-bottom: 1px solid rgba(76, 175, 80, 0.1);
   vertical-align: middle;
+  text-align: center;
 }
 
 .usuario-row:hover {
@@ -1069,13 +1401,15 @@ export default {
 }
 
 .name-cell {
-  min-width: 250px;
+  min-width: 200px;
+  text-align: left !important;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 12px;
+  justify-content: flex-start;
 }
 
 .user-avatar {
@@ -1096,6 +1430,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  text-align: left;
 }
 
 .user-name {
@@ -1110,38 +1445,102 @@ export default {
 }
 
 .rol-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
   white-space: nowrap;
+  width: 110px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.rol-icon {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
+.rol-text {
+  line-height: 1;
 }
 
 .rol-badge.admin {
-  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-  color: white;
+  background: rgba(255, 152, 0, 0.1);
+  color: #f57c00;
+  border: 1.5px solid #ff9800;
+}
+
+.rol-badge.admin .rol-icon {
+  color: #f57c00;
+}
+
+.rol-badge.admin:hover {
+  background: rgba(255, 152, 0, 0.15);
 }
 
 .rol-badge.user {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-  color: white;
+  background: rgba(33, 150, 243, 0.1);
+  color: #1976d2;
+  border: 1.5px solid #2196f3;
+}
+
+.rol-badge.user .rol-icon {
+  color: #1976d2;
+}
+
+.rol-badge.user:hover {
+  background: rgba(33, 150, 243, 0.15);
+}
+
+.rol-cell {
+  text-align: center;
+}
+
+.status-cell {
+  text-align: center;
 }
 
 .status-badge {
-  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 12px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.status-badge .status-icon {
+  flex-shrink: 0;
 }
 
 .status-active {
-  background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+  background: rgba(76, 175, 80, 0.1);
   color: #2e7d32;
+  border: 1.5px solid #4CAF50;
+}
+
+.status-inactive {
+  background: rgba(244, 67, 54, 0.1);
+  color: #c62828;
+  border: 1.5px solid #f44336;
+}
+
+.actions-cell {
+  text-align: center;
 }
 
 .action-buttons {
-  display: flex;
+  display: inline-flex;
   gap: 8px;
+  justify-content: center;
 }
 
 .btn-action {
@@ -1210,62 +1609,97 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .modal-content {
-  background: white;
+  background: #ffffff;
   border-radius: 16px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
+  width: 100%;
+  max-width: 580px;
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
   box-shadow: 
-    0 24px 48px rgba(0, 0, 0, 0.2),
-    0 12px 24px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+    0 24px 48px rgba(0, 0, 0, 0.25),
+    0 12px 24px rgba(0, 0, 0, 0.15);
+  animation: modalSlideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-usuario {
+  max-width: 640px;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modal-confirm {
-  max-width: 500px;
+  max-width: 480px;
 }
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
-  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
-  border-radius: 16px 16px 0 0;
+  border-bottom: 1px solid #e8f5e9;
+  background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+  flex-shrink: 0;
+}
+
+.modal-header-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-header-icon svg {
+  color: white;
 }
 
 .modal-header h3 {
+  flex: 1;
   font-size: 18px;
   font-weight: 600;
-  color: #2E7D32;
+  color: #1b5e20;
   margin: 0;
   font-family: 'Inter', sans-serif;
 }
 
 .btn-close {
-  background: none;
+  background: transparent;
   border: none;
-  font-size: 24px;
-  color: #666;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .btn-close:hover {
@@ -1275,140 +1709,727 @@ export default {
 
 .modal-body {
   padding: 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 
-/* === FORM STYLES === */
+/* === FORM SECTIONS === */
 .form-section {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, #f8fffe 0%, #f0fff4 100%);
+  background: #fafffe;
   border-radius: 12px;
-  border: 1px solid rgba(76, 175, 80, 0.1);
+  border: 1px solid #e8f5e9;
 }
 
-.form-section h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2E7D32;
-  margin: 0 0 16px 0;
-  font-family: 'Inter', sans-serif;
+.section-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8f5e9;
 }
 
+.section-header svg {
+  color: #4CAF50;
+  flex-shrink: 0;
+}
+
+.section-header h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2E7D32;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.section-description {
+  color: #666;
+  font-size: 13px;
+  margin: 0 0 16px 0;
+}
+
+/* === FORM INPUTS === */
 .form-group {
   margin-bottom: 16px;
 }
 
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
 .form-group label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 6px;
-  font-size: 14px;
+  margin-bottom: 8px;
+  font-size: 13px;
   font-family: 'Inter', sans-serif;
+}
+
+.form-group label svg {
+  color: #4CAF50;
+  flex-shrink: 0;
+}
+
+.required {
+  color: #d32f2f;
+  font-weight: 500;
 }
 
 .form-input {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid rgba(76, 175, 80, 0.2);
+  padding: 12px 14px;
+  border: 2px solid #e0e0e0;
   border-radius: 10px;
   font-size: 14px;
   font-family: 'Inter', sans-serif;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   box-sizing: border-box;
+  background: #fff;
 }
 
 .form-input:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+}
+
+.form-input:disabled {
+  background: #f5f5f5;
+  color: #999;
 }
 
 .form-help {
   font-size: 12px;
-  color: #666;
-  margin-top: 4px;
+  color: #888;
+  margin-top: 6px;
   display: block;
 }
 
-.radio-group {
+/* === PASSWORD INPUT WITH TOGGLE === */
+.input-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input-password {
+  padding-right: 48px !important;
+}
+
+.btn-toggle-password {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.btn-toggle-password:hover {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.btn-toggle-password:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.btn-toggle-password svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Estados de validación para contraseñas */
+.form-input.input-error {
+  border-color: #d32f2f;
+  background: #fff5f5;
+}
+
+.form-input.input-error:focus {
+  border-color: #d32f2f;
+  box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.1);
+}
+
+.form-input.input-success {
+  border-color: #4CAF50;
+  background: #f5fff5;
+}
+
+.form-input.input-success:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.15);
+}
+
+/* Mensajes de ayuda con estado */
+.form-help.help-error {
+  color: #d32f2f;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-help.help-error svg {
+  color: #d32f2f;
+}
+
+.form-help.help-success {
+  color: #4CAF50;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-help.help-success svg {
+  color: #4CAF50;
+}
+
+/* === RADIO CARDS (ROL) === */
+.radio-group-modern {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.radio-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.radio-option {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px;
-  border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: 10px;
+  align-items: center;
+  text-align: center;
+  padding: 16px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: white;
+  transition: all 0.25s ease;
+  background: #fff;
 }
 
-.radio-option:hover {
+.radio-card:hover {
+  border-color: #81c784;
+  background: #f1f8e9;
+}
+
+.radio-card.selected {
   border-color: #4CAF50;
-  background: rgba(76, 175, 80, 0.05);
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
 }
 
-.radio-option.selected {
-  border-color: #4CAF50;
-  background: rgba(76, 175, 80, 0.1);
+.radio-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.radio-option input[type="radio"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #4CAF50;
-  margin: 0;
-  flex-shrink: 0;
+.radio-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  transition: all 0.25s ease;
 }
 
-.radio-content {
+.admin-icon {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  color: #f57c00;
+}
+
+.radio-card.selected .admin-icon {
+  background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
+  color: white;
+}
+
+.user-icon {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1976d2;
+}
+
+.radio-card.selected .user-icon {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  color: white;
+}
+
+.radio-card-content {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.radio-title {
+.radio-card-title {
   font-weight: 600;
   color: #333;
   font-size: 14px;
 }
 
-.radio-description {
+.radio-card-desc {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.3;
+}
+
+.radio-checkmark {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.25s ease;
+}
+
+.radio-card.selected .radio-checkmark {
+  opacity: 1;
+  transform: scale(1);
+  background: #4CAF50;
+  color: white;
+}
+
+/* === PERMISOS GRID MODERN === */
+.permisos-section-modern {
+  background: #fafffe;
+}
+
+.permisos-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.permiso-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.permiso-card:hover {
+  border-color: #a5d6a7;
+  background: #f9fdf9;
+}
+
+.permiso-card.active {
+  border-color: #4CAF50;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+}
+
+.permiso-card input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.permiso-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.permiso-card.active .permiso-card-icon {
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+}
+
+.permiso-card-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.permiso-toggle {
+  flex-shrink: 0;
+}
+
+.toggle-track {
+  width: 40px;
+  height: 22px;
+  background: #e0e0e0;
+  border-radius: 11px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.permiso-card.active .toggle-track {
+  background: #4CAF50;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.permiso-card.active .toggle-thumb {
+  left: 20px;
+}
+
+/* === QUICK ACTIONS === */
+.permisos-quick-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.btn-quick-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-select-all {
+  color: #4CAF50;
+  border-color: #a5d6a7;
+}
+
+.btn-select-all:hover {
+  background: #e8f5e9;
+  border-color: #4CAF50;
+}
+
+.btn-deselect-all {
+  color: #757575;
+}
+
+.btn-deselect-all:hover {
+  background: #f5f5f5;
+  border-color: #bdbdbd;
+}
+
+/* === ADMIN INFO BANNER === */
+.admin-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  border: 1px solid #ffe082;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 4px;
+}
+
+.admin-banner-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #ffa726 0%, #f57c00 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+
+.admin-banner-content {
+  flex: 1;
+}
+
+.admin-banner-content strong {
+  display: block;
+  color: #e65100;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.admin-banner-content p {
+  margin: 0;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* === ESTADO DEL USUARIO TOGGLE === */
+.estado-section {
+  margin-top: 8px;
+}
+
+.estado-toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.estado-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.estado-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.estado-icon.activo {
+  background: linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.estado-icon.inactivo {
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.estado-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.estado-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.estado-desc {
   font-size: 12px;
   color: #666;
 }
 
-.modal-actions {
+/* Switch Toggle */
+.estado-switch {
+  position: relative;
+  width: 56px;
+  height: 30px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.estado-switch.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.estado-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.estado-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 30px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.estado-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.estado-switch input:checked + .slider {
+  background: linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%);
+}
+
+.estado-switch input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.estado-switch.disabled .slider {
+  background: #bdbdbd;
+}
+
+/* Warning de usuario inactivo */
+.estado-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border: 1px solid #ffb74d;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #e65100;
+  line-height: 1.5;
+}
+
+.estado-warning svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #f57c00;
+}
+
+/* Notice de protección para admin */
+.admin-protection-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 1px solid #64b5f6;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #1565c0;
+  line-height: 1.5;
+}
+
+.admin-protection-notice svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #1976d2;
+}
+
+/* Estado activo container */
+.estado-toggle-container:has(.estado-icon.activo) {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-color: #81c784;
+}
+
+/* Estado inactivo container */
+.estado-toggle-container:has(.estado-icon.inactivo) {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-color: #e57373;
+}
+
+/* === MODAL FOOTER === */
+.modal-footer {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid rgba(76, 175, 80, 0.1);
+  border-top: 1px solid #e8f5e9;
 }
 
-.btn-primary:disabled {
-  opacity: 0.6;
+.btn-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  min-width: 120px;
+}
+
+.btn-cancel {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  color: #666;
+}
+
+.btn-cancel:hover {
+  background: #f5f5f5;
+  border-color: #bdbdbd;
+}
+
+.btn-submit {
+  /* Forzar verde suave incluso en modo oscuro */
+  background: #4CAF50 !important;
+  border: none;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #43A047 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.btn-submit:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
   transform: none;
 }
 
-.loading-spinner-small {
+.btn-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid #e8f5e8;
-  border-top: 2px solid #4CAF50;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 /* === CONFIRM MODAL === */
@@ -1417,41 +2438,57 @@ export default {
 }
 
 .confirm-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d32f2f;
 }
 
 .confirm-content h4 {
-  color: #2E7D32;
-  font-size: 18px;
+  color: #333;
+  font-size: 16px;
   font-weight: 600;
   margin: 0 0 12px 0;
   font-family: 'Inter', sans-serif;
+}
+
+.confirm-content p {
+  color: #666;
+  font-size: 14px;
+  margin: 4px 0;
 }
 
 .warning-text {
   color: #d32f2f;
   font-weight: 500;
   margin: 16px 0 0 0;
-  font-size: 14px;
+  font-size: 13px;
+  padding: 12px;
+  background: #ffebee;
+  border-radius: 8px;
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-  color: white;
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important;
+  color: white !important;
   border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
-.btn-danger:hover {
+.btn-danger:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
 }
@@ -1460,6 +2497,60 @@ export default {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Modal Delete Header */
+.modal-header-danger {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-bottom-color: #ffcdd2;
+}
+
+.modal-header-danger h3 {
+  color: #c62828;
+}
+
+.danger-icon {
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%) !important;
+}
+
+/* Delete button */
+.btn-delete {
+  background: #f44336 !important;
+  border: none;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: #d32f2f !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+}
+
+.btn-delete:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Confirm icon style update */
+.warning-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #c62828;
+  font-weight: 500;
+  margin: 16px 0 0 0;
+  font-size: 13px;
+  padding: 12px;
+  background: #ffebee;
+  border-radius: 8px;
+  border: 1px solid #ffcdd2;
+}
+
+.warning-text svg {
+  flex-shrink: 0;
+  color: #d32f2f;
 }
 
 /* === TOAST === */
@@ -1481,8 +2572,16 @@ export default {
   border-left: 4px solid #4CAF50;
 }
 
+.toast.success .toast-icon {
+  color: #4CAF50;
+}
+
 .toast.error {
   border-left: 4px solid #f44336;
+}
+
+.toast.error .toast-icon {
+  color: #f44336;
 }
 
 .toast-content {
@@ -1492,8 +2591,10 @@ export default {
 }
 
 .toast-icon {
-  font-size: 20px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .toast-message {
@@ -1554,10 +2655,39 @@ export default {
     overflow-x: scroll;
   }
   
+  /* Modal responsive */
   .modal-content {
-    width: 95%;
     max-width: none;
-    margin: 0 10px;
+    margin: 0;
+    border-radius: 12px;
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .form-section {
+    padding: 14px;
+  }
+  
+  .radio-group-modern {
+    grid-template-columns: 1fr;
+  }
+  
+  .permisos-grid-modern {
+    grid-template-columns: 1fr;
+  }
+  
+  .permisos-quick-actions {
+    flex-direction: column;
+  }
+  
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+  
+  .btn-modal {
+    width: 100%;
   }
 }
 
@@ -1566,16 +2696,70 @@ export default {
     padding: 12px;
   }
   
+  .modal-overlay {
+    padding: 8px;
+  }
+  
+  .modal-header {
+    padding: 14px 16px;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+  }
+  
+  .modal-header-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .modal-header-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  
   .form-section {
-    padding: 16px;
+    padding: 12px;
   }
   
-  .modal-actions {
-    flex-direction: column;
+  .section-header h4 {
+    font-size: 14px;
   }
   
-  .modal-actions button {
-    width: 100%;
+  .radio-card {
+    padding: 14px 10px;
+  }
+  
+  .radio-card-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .permiso-card {
+    padding: 10px 12px;
+  }
+  
+  .permiso-card-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .permiso-card-name {
+    font-size: 12px;
+  }
+  
+  .toggle-track {
+    width: 36px;
+    height: 20px;
+  }
+  
+  .toggle-thumb {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .permiso-card.active .toggle-thumb {
+    left: 18px;
   }
 }
 
@@ -1584,6 +2768,10 @@ export default {
   .main-content {
     margin-left: 160px;
     width: calc(100vw - 160px);
+  }
+  
+  .modal-content {
+    max-height: 95vh;
   }
 }
 
@@ -1601,200 +2789,24 @@ export default {
   }
 }
 
-/* === PERMISOS CHECKBOXES === */
-.permisos-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px dashed rgba(76, 175, 80, 0.3);
-}
-
-.permisos-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: #2E7D32;
-  font-size: 15px;
-  margin-bottom: 4px;
-}
-
-.permisos-label svg {
-  color: #4CAF50;
-}
-
-.permisos-help {
-  margin-bottom: 16px !important;
-  color: #666;
-}
-
-.permisos-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.permiso-item {
-  background: #f8faf8;
-  border: 2px solid rgba(76, 175, 80, 0.15);
-  border-radius: 10px;
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-.permiso-item:hover {
-  border-color: rgba(76, 175, 80, 0.4);
-  background: #f0f7f0;
-}
-
-.permiso-item.activo {
-  border-color: #4CAF50;
-  background: rgba(76, 175, 80, 0.1);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
-}
-
-.permiso-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  cursor: pointer;
-  position: relative;
-}
-
-.permiso-checkbox input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-.checkmark {
-  height: 20px;
-  width: 20px;
-  min-width: 20px;
-  background-color: #fff;
-  border: 2px solid rgba(76, 175, 80, 0.4);
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.permiso-checkbox:hover .checkmark {
-  border-color: #4CAF50;
-}
-
-.permiso-checkbox input:checked ~ .checkmark {
-  background-color: #4CAF50;
-  border-color: #4CAF50;
-}
-
-.permiso-checkbox input:checked ~ .checkmark::after {
-  content: "✓";
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.permiso-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
-.permiso-icon {
-  font-size: 16px;
-}
-
-.permiso-nombre {
-  font-size: 13px;
-  font-weight: 500;
-  color: #333;
-}
-
-.permisos-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.btn-permisos-action {
-  padding: 6px 12px;
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  background: white;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #4CAF50;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
-}
-
-.btn-permisos-action:hover {
-  background: rgba(76, 175, 80, 0.1);
-  border-color: #4CAF50;
-}
-
-.btn-permisos-action.btn-deseleccionar {
-  color: #666;
-  border-color: rgba(0, 0, 0, 0.2);
-}
-
-.btn-permisos-action.btn-deseleccionar:hover {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: #999;
-}
-
-/* Admin permisos info */
-.admin-permisos-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
-  border: 1px solid rgba(255, 193, 7, 0.3);
-  border-radius: 10px;
-  padding: 16px;
-  margin-top: 16px;
-}
-
-.admin-info-icon {
-  font-size: 28px;
-}
-
-.admin-info-text {
-  flex: 1;
-}
-
-.admin-info-text strong {
-  display: block;
-  color: #f57c00;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-
-.admin-info-text p {
-  margin: 0;
-  color: #666;
-  font-size: 13px;
-}
-
-/* Responsive permisos grid */
-@media (max-width: 768px) {
-  .permisos-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .permisos-grid {
-    grid-template-columns: 1fr;
+/* Force light theme colors for submit button */
+@media (prefers-color-scheme: dark) {
+  .btn-submit {
+    background: #4CAF50 !important;
+    color: #ffffff !important;
   }
   
-  .permisos-actions {
-    flex-direction: column;
+  .btn-submit:hover:not(:disabled) {
+    background: #43A047 !important;
+  }
+  
+  .modal-content {
+    background: #ffffff;
+  }
+  
+  .form-input {
+    background: #ffffff;
+    color: #333;
   }
 }
 </style>

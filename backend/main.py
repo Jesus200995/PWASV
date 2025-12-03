@@ -159,6 +159,7 @@ try:
             username VARCHAR(100) UNIQUE NOT NULL,
             password VARCHAR(255) NOT NULL,
             rol VARCHAR(20) DEFAULT 'admin' CHECK (rol IN ('admin', 'user')),
+            activo BOOLEAN DEFAULT TRUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """, fetch_type='none')
@@ -194,6 +195,24 @@ try:
         print("✅ Migración de columna permisos verificada")
     except Exception as e:
         print(f"⚠️ Error en migración de permisos: {e}")
+    
+    # ===== MIGRACIÓN: Agregar columna activo a tabla admin_users =====
+    try:
+        ejecutar_consulta_segura("""
+            DO $$ 
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'admin_users' AND column_name = 'activo'
+                ) THEN
+                    ALTER TABLE admin_users ADD COLUMN activo BOOLEAN DEFAULT TRUE;
+                    RAISE NOTICE 'Columna activo agregada a admin_users';
+                END IF;
+            END $$;
+        """, fetch_type='none')
+        print("✅ Migración de columna activo verificada")
+    except Exception as e:
+        print(f"⚠️ Error en migración de activo: {e}")
     
     # ===== MIGRACIÓN: Agregar columnas categoria_actividad a tabla registros =====
     try:
@@ -1820,8 +1839,8 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         
         print(f"🔐 Intento de login para usuario: {username}")
         
-        # Buscar usuario administrador en la base de datos incluyendo permisos
-        cursor.execute("SELECT id, password, rol, permisos FROM admin_users WHERE username = %s", (username,))
+        # Buscar usuario administrador en la base de datos incluyendo permisos y estado activo
+        cursor.execute("SELECT id, password, rol, permisos, activo FROM admin_users WHERE username = %s", (username,))
         row = cursor.fetchone()
         
         if not row or not pwd_context.verify(password, row[1]):
@@ -1830,6 +1849,12 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         
         user_id = row[0]
         user_rol = row[2] or 'admin'  # rol por defecto admin
+        user_activo = row[4] if row[4] is not None else True  # activo por defecto True
+        
+        # Verificar si el usuario está activo
+        if not user_activo:
+            print(f"❌ Usuario inactivo intentando acceder: {username}")
+            raise HTTPException(status_code=403, detail="Tu cuenta ha sido desactivada. Contacta al administrador.")
         
         # Parsear permisos
         permisos_str = row[3]
@@ -1860,7 +1885,8 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
                 "username": username,
                 "rol": user_rol,
                 "tipo": "admin_user",
-                "permisos": permisos
+                "permisos": permisos,
+                "activo": user_activo
             }
         }
         
@@ -1891,6 +1917,32 @@ async def get_current_user():
     except Exception as e:
         print(f"❌ Error obteniendo usuario actual: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener usuario: {str(e)}")
+
+# Endpoint para verificar si un usuario está activo (para verificación en tiempo real)
+@app.get("/auth/check-active/{username}")
+async def check_user_active(username: str):
+    """Verificar si un usuario específico está activo"""
+    try:
+        print(f"🔍 Verificando estado activo de usuario: {username}")
+        
+        cursor.execute("SELECT id, activo FROM admin_users WHERE username = %s", (username,))
+        row = cursor.fetchone()
+        
+        if not row:
+            return {"active": False, "exists": False, "message": "Usuario no encontrado"}
+        
+        activo = row[1] if row[1] is not None else True
+        
+        return {
+            "active": activo,
+            "exists": True,
+            "user_id": row[0],
+            "username": username
+        }
+        
+    except Exception as e:
+        print(f"❌ Error verificando estado de usuario: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al verificar usuario: {str(e)}")
 
 # Endpoint para verificar permisos específicos
 @app.get("/auth/check-permission/{permission}")
@@ -4669,6 +4721,7 @@ class AdminUserUpdate(BaseModel):
     password: Optional[str] = None
     rol: Optional[str] = None
     permisos: Optional[dict] = None  # Permisos personalizados
+    activo: Optional[bool] = None  # Estado activo/inactivo
 
 # ==================== ENDPOINTS PARA GESTIÓN DE USUARIOS ADMINISTRATIVOS ====================
 
@@ -4682,9 +4735,9 @@ async def obtener_usuarios_admin():
         if not conn or not cursor:
             raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
         
-        # Obtener todos los usuarios administrativos incluyendo permisos
+        # Obtener todos los usuarios administrativos incluyendo permisos y estado activo
         cursor.execute("""
-            SELECT id, username, rol, permisos
+            SELECT id, username, rol, permisos, activo
             FROM admin_users 
             ORDER BY id ASC
         """)
@@ -4703,11 +4756,15 @@ async def obtener_usuarios_admin():
             else:
                 permisos = PERMISOS_ADMIN_DEFAULT if row[2] == 'admin' else PERMISOS_USER_DEFAULT
             
+            # Estado activo (por defecto True si es NULL)
+            activo = row[4] if row[4] is not None else True
+            
             usuario = {
                 "id": row[0],
                 "username": row[1],
                 "rol": row[2],
-                "permisos": permisos
+                "permisos": permisos,
+                "activo": activo
             }
             usuarios.append(usuario)
         
@@ -4747,10 +4804,10 @@ async def crear_usuario_admin(usuario: AdminUserCreate):
             permisos_default = PERMISOS_ADMIN_DEFAULT if usuario.rol == 'admin' else PERMISOS_USER_DEFAULT
             permisos_json = json.dumps(permisos_default)
         
-        # Insertar nuevo usuario con permisos
+        # Insertar nuevo usuario con permisos (activo por defecto = TRUE)
         cursor.execute("""
-            INSERT INTO admin_users (username, password, rol, permisos) 
-            VALUES (%s, %s, %s, %s) 
+            INSERT INTO admin_users (username, password, rol, permisos, activo) 
+            VALUES (%s, %s, %s, %s, TRUE) 
             RETURNING id
         """, (usuario.username, hashed_password, usuario.rol, permisos_json))
         
@@ -4763,7 +4820,8 @@ async def crear_usuario_admin(usuario: AdminUserCreate):
             "id": nuevo_id,
             "username": usuario.username,
             "rol": usuario.rol,
-            "permisos": json.loads(permisos_json)
+            "permisos": json.loads(permisos_json),
+            "activo": True
         }
         
     except HTTPException:
@@ -4780,7 +4838,7 @@ async def obtener_usuario_admin(user_id: int):
         print(f"🔄 Obteniendo usuario administrativo ID: {user_id}")
         
         cursor.execute("""
-            SELECT id, username, rol, permisos
+            SELECT id, username, rol, permisos, activo
             FROM admin_users 
             WHERE id = %s
         """, (user_id,))
@@ -4799,11 +4857,15 @@ async def obtener_usuario_admin(user_id: int):
         else:
             permisos = PERMISOS_ADMIN_DEFAULT if row[2] == 'admin' else PERMISOS_USER_DEFAULT
         
+        # Estado activo (por defecto True si es NULL)
+        activo = row[4] if row[4] is not None else True
+        
         usuario = {
             "id": row[0],
             "username": row[1],
             "rol": row[2],
-            "permisos": permisos
+            "permisos": permisos,
+            "activo": activo
         }
         
         print(f"✅ Usuario administrativo obtenido: {usuario['username']}")
@@ -4855,6 +4917,11 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
             campos_actualizar.append("permisos = %s")
             valores.append(permisos_json)
         
+        # Campo activo (puede ser True o False)
+        if usuario.activo is not None:
+            campos_actualizar.append("activo = %s")
+            valores.append(usuario.activo)
+        
         if not campos_actualizar:
             raise HTTPException(status_code=400, detail="No hay campos para actualizar")
         
@@ -4865,7 +4932,7 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
         conn.commit()
         
         # Obtener usuario actualizado
-        cursor.execute("SELECT id, username, rol, permisos FROM admin_users WHERE id = %s", (user_id,))
+        cursor.execute("SELECT id, username, rol, permisos, activo FROM admin_users WHERE id = %s", (user_id,))
         row = cursor.fetchone()
         
         # Parsear permisos
@@ -4878,14 +4945,18 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
         else:
             permisos = PERMISOS_ADMIN_DEFAULT if row[2] == 'admin' else PERMISOS_USER_DEFAULT
         
+        # Estado activo
+        activo = row[4] if row[4] is not None else True
+        
         usuario_actualizado = {
             "id": row[0],
             "username": row[1],
             "rol": row[2],
-            "permisos": permisos
+            "permisos": permisos,
+            "activo": activo
         }
         
-        print(f"✅ Usuario administrativo actualizado: {usuario_actualizado['username']}")
+        print(f"✅ Usuario administrativo actualizado: {usuario_actualizado['username']} (activo: {activo})")
         return {
             "message": "Usuario administrativo actualizado exitosamente",
             **usuario_actualizado

@@ -1,205 +1,189 @@
 <template>
-  <div class="login-container">
-    <!-- Liquid Glass Background con efectos mejorados -->
-    <div class="liquid-background">
-      <div class="gradient-overlay"></div>
-      
-      <!-- Elementos decorativos similares a Home.vue -->
-      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
-      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-25 animate-pulse-slow" style="animation-delay: 2s;"></div>
-      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-green-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow" style="animation-delay: 4s;"></div>
-      
-      <div class="liquid-blob blob1"></div>
-      <div class="liquid-blob blob2"></div>
-      <div class="liquid-blob blob3"></div>
-      <div class="liquid-blob blob4"></div>
-      <div class="liquid-blob blob5"></div>
-      <div class="liquid-blob blob6"></div>
-      <div class="floating-particles">
-        <div class="particle" v-for="n in 20" :key="n" :style="getParticleStyle(n)"></div>
+  <div class="login-page">
+    <!-- Fondo con patrón geométrico y gradiente -->
+    <div class="background-layer">
+      <div class="gradient-base"></div>
+      <div class="geometric-pattern"></div>
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+      </div>
+      <div class="glow-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
       </div>
     </div>
-    
-    <!-- Contenedor principal con efecto glassmorphism -->
-    <div class="login-card">
-      <!-- Header con branding renovado -->
-      <div class="login-header">
-        <div class="logo-container">
-          <!-- Nueva flor estática girando -->
-          <div class="logo-bg">
-            <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="petalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#dcfce7;stop-opacity:1" />
-                  <stop offset="30%" style="stop-color:#bbf7d0;stop-opacity:1" />
-                  <stop offset="60%" style="stop-color:#86efac;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#4ade80;stop-opacity:1" />
-                </linearGradient>
-                <linearGradient id="centerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#22c55e;stop-opacity:1" />
-                  <stop offset="50%" style="stop-color:#16a34a;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#15803d;stop-opacity:1" />
-                </linearGradient>
-                <filter id="petalGlow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-                  <feMerge> 
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-                <filter id="centerShadow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#15803d" flood-opacity="0.4"/>
-                </filter>
-              </defs>
-              
-              <!-- Grupo de la flor que girará como una unidad -->
-              <g class="flower-rotating">
-                <!-- Pétalos de la flor (8 pétalos) -->
-                <!-- Pétalo superior -->
-                <ellipse cx="50" cy="25" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"/>
-                
-                <!-- Pétalo superior derecho -->
-                <ellipse cx="65" cy="35" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(45 65 35)"/>
-                
-                <!-- Pétalo derecho -->
-                <ellipse cx="75" cy="50" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(90 75 50)"/>
-                
-                <!-- Pétalo inferior derecho -->
-                <ellipse cx="65" cy="65" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(135 65 65)"/>
-                
-                <!-- Pétalo inferior -->
-                <ellipse cx="50" cy="75" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(180 50 75)"/>
-                
-                <!-- Pétalo inferior izquierdo -->
-                <ellipse cx="35" cy="65" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(225 35 65)"/>
-                
-                <!-- Pétalo izquierdo -->
-                <ellipse cx="25" cy="50" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(270 25 50)"/>
-                
-                <!-- Pétalo superior izquierdo -->
-                <ellipse cx="35" cy="35" rx="8" ry="15" 
-                         fill="url(#petalGradient)" filter="url(#petalGlow)"
-                         transform="rotate(315 35 35)"/>
-                
-                <!-- Centro de la flor -->
-                <circle cx="50" cy="50" r="12" 
-                        fill="url(#centerGradient)" filter="url(#centerShadow)"/>
-                
-                <!-- Detalles del centro -->
-                <circle cx="50" cy="50" r="8" 
-                        fill="#22c55e" opacity="0.8"/>
-                <circle cx="47" cy="47" r="3" 
-                        fill="#86efac" opacity="0.6"/>
-                
-                <!-- Pequeños detalles en los pétalos -->
-                <circle cx="50" cy="30" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="62" cy="38" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="70" cy="50" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="62" cy="62" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="50" cy="70" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="38" cy="62" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="30" cy="50" r="1.5" fill="#22c55e" opacity="0.7"/>
-                <circle cx="38" cy="38" r="1.5" fill="#22c55e" opacity="0.7"/>
-              </g>
-            </svg>
+
+    <!-- Tarjeta de Login -->
+    <div class="login-wrapper">
+      <div class="login-card">
+        <!-- Decoración superior -->
+        <div class="card-decoration">
+          <div class="decoration-line"></div>
+        </div>
+
+        <!-- Logo y Branding -->
+        <div class="brand-section">
+          <div class="logo-wrapper">
+            <div class="logo-ring">
+              <div class="ring-inner"></div>
+            </div>
+            <div class="logo-icon-container">
+              <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="2" result="blur1"/>
+                    <feGaussianBlur stdDeviation="4" result="blur2"/>
+                    <feMerge>
+                      <feMergeNode in="blur2"/>
+                      <feMergeNode in="blur1"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+                <!-- Hoja con contorno neón -->
+                <path 
+                  d="M50 15 C30 25, 20 45, 25 65 C30 80, 45 85, 50 85 C55 85, 70 80, 75 65 C80 45, 70 25, 50 15" 
+                  fill="none" 
+                  stroke="#10b981" 
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  filter="url(#neonGlow)"
+                  class="leaf-outline"/>
+                <!-- Nervadura central neón -->
+                <path 
+                  d="M50 22 L50 78" 
+                  stroke="#10b981" 
+                  stroke-width="1.5" 
+                  fill="none"
+                  stroke-linecap="round"
+                  filter="url(#neonGlow)"
+                  class="leaf-vein"/>
+                <!-- Nervaduras laterales neón -->
+                <path 
+                  d="M50 32 L38 42 M50 44 L34 56 M50 56 L36 66" 
+                  stroke="#10b981" 
+                  stroke-width="1.2" 
+                  fill="none"
+                  stroke-linecap="round"
+                  filter="url(#neonGlow)"
+                  class="leaf-veins-left"/>
+                <path 
+                  d="M50 32 L62 42 M50 44 L66 56 M50 56 L64 66" 
+                  stroke="#10b981" 
+                  stroke-width="1.2" 
+                  fill="none"
+                  stroke-linecap="round"
+                  filter="url(#neonGlow)"
+                  class="leaf-veins-right"/>
+              </svg>
+            </div>
           </div>
+          
+          <h1 class="brand-title">SEMBRANDO VIDA</h1>
+          <p class="brand-subtitle">Administración de Seguimiento y Monitoreo</p>
         </div>
-        
-        <div class="brand-text">
-          <h1 class="main-title">SEMBRANDO VIDA</h1>
-          <p class="subtitle">Administración de app de seguimiento</p>
-        </div>
-      </div>
-      
-      <!-- Formulario con efectos glassmorphism -->
-      <form @submit.prevent="login" class="login-form">
-        <div class="input-group">
-          <label for="username">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            Usuario
-          </label>
-          <div class="input-container">
-            <input 
-              v-model="credentials.username"
-              type="text" 
-              id="username" 
-              placeholder="Ingresa tu usuario" 
-              required
-              :disabled="loading"
-            >
-            <div class="input-glow"></div>
+
+        <!-- Formulario -->
+        <form @submit.prevent="login" class="login-form">
+          <div class="form-group">
+            <label for="username" class="form-label">
+              <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              Usuario
+            </label>
+            <div class="input-wrapper">
+              <input 
+                v-model="credentials.username"
+                type="text" 
+                id="username" 
+                placeholder="Ingresa tu usuario"
+                autocomplete="username"
+                required
+                :disabled="loading"
+              >
+              <div class="input-focus-ring"></div>
+            </div>
           </div>
-        </div>
-        
-        <div class="input-group">
-          <label for="password">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <circle cx="12" cy="16" r="1"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            Contraseña
-          </label>
-          <div class="input-container">
-            <input 
-              v-model="credentials.password"
-              type="password" 
-              id="password" 
-              placeholder="Ingresa tu contraseña" 
-              required
-              :disabled="loading"
-            >
-            <div class="input-glow"></div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">
+              <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <circle cx="12" cy="16" r="1"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Contraseña
+            </label>
+            <div class="input-wrapper">
+              <input 
+                v-model="credentials.password"
+                :type="showPassword ? 'text' : 'password'" 
+                id="password" 
+                placeholder="Ingresa tu contraseña"
+                autocomplete="current-password"
+                required
+                :disabled="loading"
+              >
+              <button 
+                type="button" 
+                class="toggle-password"
+                @click="showPassword = !showPassword"
+                :disabled="loading"
+              >
+                <svg v-if="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              </button>
+              <div class="input-focus-ring"></div>
+            </div>
           </div>
-        </div>
-        
-        <button type="submit" class="login-btn" :disabled="loading">
-          <div class="btn-content">
-            <span v-if="!loading" class="btn-text">
-              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+
+          <button type="submit" class="submit-btn" :disabled="loading">
+            <span v-if="!loading" class="btn-content">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                <polyline points="10,17 15,12 10,7"/>
+                <polyline points="10 17 15 12 10 7"/>
                 <line x1="15" y1="12" x2="3" y2="12"/>
               </svg>
               Iniciar Sesión
             </span>
-            <span v-else class="loading-content">
-              <div class="advanced-spinner">
-                <div class="spinner-ring"></div>
-                <div class="spinner-ring"></div>
-                <div class="spinner-ring"></div>
-              </div>
-              Iniciando sesión...
+            <span v-else class="btn-loading">
+              <div class="spinner"></div>
+              Verificando...
             </span>
-          </div>
-          <div class="btn-liquid-effect"></div>
-        </button>
-        
-        <div v-if="error" class="error-message">
-          <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-          </svg>
-          {{ error }}
+          </button>
+
+          <!-- Mensaje de error -->
+          <transition name="error-fade">
+            <div v-if="error" class="error-alert">
+              <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{{ error }}</span>
+            </div>
+          </transition>
+        </form>
+
+        <!-- Footer -->
+        <div class="card-footer">
+          <p>© 2025 Sembrando Vida</p>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </template>
@@ -218,23 +202,7 @@ const credentials = reactive({
 
 const loading = ref(false)
 const error = ref('')
-
-// Función para generar estilos aleatorios de partículas
-const getParticleStyle = (index) => {
-  const size = Math.random() * 4 + 2
-  const delay = Math.random() * 10
-  const duration = Math.random() * 20 + 15
-  const left = Math.random() * 100
-  const top = Math.random() * 100
-  
-  return {
-    '--size': `${size}px`,
-    '--left': `${left}%`,
-    '--top': `${top}%`,
-    '--delay': `${delay}s`,
-    '--duration': `${duration}s`,
-  }
-}
+const showPassword = ref(false)
 
 const login = async () => {
   if (!credentials.username || !credentials.password) {
@@ -250,7 +218,6 @@ const login = async () => {
     
     if (result.success) {
       console.log('✅ Login exitoso:', result.user)
-      // Redirigir al visor de mapa
       router.push('/visor-map')
     } else {
       error.value = 'Credenciales incorrectas'
@@ -260,7 +227,7 @@ const login = async () => {
     if (err.response?.data?.detail) {
       error.value = err.response.data.detail
     } else {
-      error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.'
+      error.value = 'No se pudo conectar con el servidor'
     }
   } finally {
     loading.value = false
@@ -269,608 +236,622 @@ const login = async () => {
 </script>
 
 <style scoped>
-/* ===================================
-   VARIABLES Y CONFIGURACIÓN BASE
-   =================================== */
-:root {
-  --primary-green: #2e7d32;
-  --secondary-green: #4caf50;
-  --light-green: #66bb6a;
-  --accent-green: #81c784;
-  --white: #ffffff;
-  --glass-white: rgba(255, 255, 255, 0.95);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --shadow-primary: rgba(46, 125, 50, 0.3);
-  --shadow-dark: rgba(0, 0, 0, 0.1);
+/* ========================================
+   FORZAR MODO CLARO - NO DARK MODE
+   ======================================== */
+.login-page,
+.login-page * {
+  color-scheme: light only !important;
 }
 
-/* ===================================
+/* ========================================
+   VARIABLES
+   ======================================== */
+.login-page {
+  --green-50: #ecfdf5;
+  --green-100: #d1fae5;
+  --green-200: #a7f3d0;
+  --green-300: #6ee7b7;
+  --green-400: #34d399;
+  --green-500: #10b981;
+  --green-600: #059669;
+  --green-700: #047857;
+  --green-800: #065f46;
+  --green-900: #064e3b;
+  
+  --white: #ffffff;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+/* ========================================
    CONTENEDOR PRINCIPAL
-   =================================== */
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+   ======================================== */
+.login-page {
   min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 20px;
   position: relative;
   overflow: hidden;
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--green-600);
 }
 
-/* ===================================
-   FONDO LÍQUIDO CON EFECTOS AVANZADOS
-   =================================== */
-.liquid-background {
+/* ========================================
+   FONDO ANIMADO
+   ======================================== */
+.background-layer {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, 
-    #ffffff 0%, 
-    #f8fffe 15%, 
-    #f0fdf4 30%, 
-    #ecfdf5 45%, 
-    #d1fae5 60%, 
-    #a7f3d0 75%, 
-    #86efac 90%, 
-    #6ee7b7 100%
-  );
-  z-index: 0;
-}
-
-@keyframes backgroundShift {
-  0%, 100% { background-position: 0% 50%; }
-  25% { background-position: 100% 50%; }
-  50% { background-position: 100% 100%; }
-  75% { background-position: 0% 100%; }
-}
-
-.gradient-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 25% 25%, 
-    rgba(167, 243, 208, 0.2) 0%, 
-    transparent 70%
-  ),
-  radial-gradient(circle at 75% 25%, 
-    rgba(134, 239, 172, 0.15) 0%, 
-    transparent 65%
-  ),
-  radial-gradient(circle at 25% 75%, 
-    rgba(110, 231, 183, 0.12) 0%, 
-    transparent 60%
-  ),
-  radial-gradient(circle at 75% 75%, 
-    rgba(74, 222, 128, 0.1) 0%, 
-    transparent 55%
-  );
-}
-
-/* Blobs líquidos mejorados */
-.liquid-blob {
-  position: absolute;
-  border-radius: 50%;
-  background: linear-gradient(45deg, 
-    rgba(255, 255, 255, 0.6) 0%, 
-    rgba(248, 255, 254, 0.5) 20%, 
-    rgba(240, 253, 244, 0.4) 40%, 
-    rgba(236, 253, 245, 0.35) 60%, 
-    rgba(209, 250, 229, 0.3) 80%, 
-    rgba(167, 243, 208, 0.25) 100%
-  );
-  backdrop-filter: blur(60px);
-  filter: blur(2px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.blob1 {
-  width: 350px;
-  height: 350px;
-  top: -175px;
-  left: -175px;
-}
-
-.blob2 {
-  width: 450px;
-  height: 450px;
-  top: 40%;
-  right: -225px;
-}
-
-.blob3 {
-  width: 300px;
-  height: 300px;
-  bottom: -150px;
-  left: 30%;
-}
-
-.blob4 {
-  width: 250px;
-  height: 250px;
-  top: 15%;
-  left: 15%;
-  animation-delay: -21s;
-  animation-duration: 26s;
-}
-
-.blob5 {
-  width: 200px;
-  height: 200px;
-  bottom: 25%;
-  right: 25%;
-  animation-delay: -28s;
-  animation-duration: 24s;
-}
-
-.blob6 {
-  width: 180px;
-  height: 180px;
-  top: 60%;
-  left: 10%;
-  animation-delay: -35s;
-  animation-duration: 22s;
-}
-
-@keyframes liquidFloat {
-  0% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
-    border-radius: 50%;
-  }
-  20% {
-    transform: translate(60px, -90px) rotate(72deg) scale(1.1);
-    border-radius: 45% 55% 40% 60%;
-  }
-  40% {
-    transform: translate(-40px, 80px) rotate(144deg) scale(0.9);
-    border-radius: 35% 65% 55% 45%;
-  }
-  60% {
-    transform: translate(-90px, -40px) rotate(216deg) scale(1.05);
-    border-radius: 60% 40% 30% 70%;
-  }
-  80% {
-    transform: translate(30px, 70px) rotate(288deg) scale(0.95);
-    border-radius: 45% 55% 65% 35%;
-  }
-  100% {
-    transform: translate(0, 0) rotate(360deg) scale(1);
-    border-radius: 50%;
-  }
-}
-
-/* Partículas flotantes */
-.floating-particles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.particle {
-  position: absolute;
-  width: var(--size);
-  height: var(--size);
-  background: radial-gradient(circle, 
-    rgba(255, 255, 255, 0.9) 0%, 
-    rgba(248, 255, 254, 0.7) 25%, 
-    rgba(240, 253, 244, 0.6) 50%, 
-    rgba(236, 253, 245, 0.4) 75%, 
-    rgba(209, 250, 229, 0.3) 90%, 
-    transparent 100%
-  );
-  border-radius: 50%;
-  left: var(--left);
-  top: var(--top);
-  animation: particleFloat var(--duration) ease-in-out infinite;
-  animation-delay: var(--delay);
-  opacity: 0.8;
-  box-shadow: 0 0 8px rgba(167, 243, 208, 0.3);
-}
-
-@keyframes particleFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-    opacity: 0.6;
-  }
-  25% {
-    transform: translateY(-30px) rotate(90deg);
-    opacity: 0.9;
-  }
-  50% {
-    transform: translateY(-60px) rotate(180deg);
-    opacity: 0.8;
-  }
-  75% {
-    transform: translateY(-30px) rotate(270deg);
-    opacity: 0.7;
-  }
-}
-
-/* ===================================
-   TARJETA DE LOGIN CON GLASSMORPHISM
-   =================================== */
-.login-card {
-  background: var(--glass-white);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 2px solid var(--glass-border);
-  border-radius: 20px;
-  box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  padding: 32px;
-  width: 100%;
-  max-width: 380px;
-  position: relative;
-  z-index: 10;
-  animation: cardFloat 8s ease-in-out infinite alternate;
+  inset: 0;
   overflow: hidden;
 }
 
-.login-card::before {
-  content: '';
+.gradient-base {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    var(--green-700) 0%,
+    var(--green-600) 25%,
+    var(--green-500) 50%,
+    var(--green-600) 75%,
+    var(--green-700) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+}
+
+@keyframes gradientMove {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.geometric-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 2px, transparent 2px),
+    radial-gradient(circle at 75% 75%, rgba(255,255,255,0.08) 2px, transparent 2px);
+  background-size: 60px 60px;
+  opacity: 0.6;
+}
+
+/* Formas flotantes */
+.floating-shapes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+  backdrop-filter: blur(2px);
+}
+
+.shape-1 {
+  width: 300px;
+  height: 300px;
+  top: -100px;
+  left: -100px;
+  animation: float1 20s ease-in-out infinite;
+}
+
+.shape-2 {
+  width: 200px;
+  height: 200px;
+  top: 20%;
+  right: -50px;
+  animation: float2 18s ease-in-out infinite;
+}
+
+.shape-3 {
+  width: 150px;
+  height: 150px;
+  bottom: 10%;
+  left: 10%;
+  animation: float3 22s ease-in-out infinite;
+}
+
+.shape-4 {
+  width: 100px;
+  height: 100px;
+  top: 60%;
+  right: 20%;
+  animation: float1 16s ease-in-out infinite reverse;
+}
+
+.shape-5 {
+  width: 180px;
+  height: 180px;
+  bottom: -50px;
+  right: 30%;
+  animation: float2 24s ease-in-out infinite;
+}
+
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(30px, -30px) rotate(90deg); }
+  50% { transform: translate(0, -50px) rotate(180deg); }
+  75% { transform: translate(-30px, -20px) rotate(270deg); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-20px, 30px) scale(1.1); }
+  66% { transform: translate(20px, -20px) scale(0.9); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-40px); }
+}
+
+/* Orbes de brillo */
+.glow-orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: var(--green-400);
+  opacity: 0.3;
+  top: -100px;
+  left: -100px;
+  animation: orbPulse 8s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  background: var(--green-300);
+  opacity: 0.25;
+  bottom: -50px;
+  right: -50px;
+  animation: orbPulse 10s ease-in-out infinite 2s;
+}
+
+.orb-3 {
+  width: 250px;
+  height: 250px;
+  background: var(--green-200);
+  opacity: 0.2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: orbPulse 12s ease-in-out infinite 4s;
+}
+
+@keyframes orbPulse {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.1); }
+}
+
+/* ========================================
+   WRAPPER Y TARJETA
+   ======================================== */
+.login-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 420px;
+  animation: cardEntry 0.6s ease-out;
+}
+
+@keyframes cardEntry {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.login-card {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decoración superior */
+.card-decoration {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    var(--secondary-green) 50%, 
-    transparent 100%
-  );
-  animation: topGlow 3s ease-in-out infinite;
+  height: 4px;
+  background: linear-gradient(90deg, var(--green-400), var(--green-600), var(--green-400));
+  overflow: hidden;
 }
 
-@keyframes cardFloat {
-  0% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  100% {
-    transform: translateY(-15px) rotate(0.5deg);
-  }
+.decoration-line {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: shimmer 3s infinite;
 }
 
-@keyframes topGlow {
+@keyframes shimmer {
+  to { left: 100%; }
+}
+
+/* ========================================
+   BRANDING / LOGO
+   ======================================== */
+.brand-section {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 20px;
+}
+
+.logo-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--green-200);
+  animation: ringRotate 10s linear infinite;
+}
+
+.logo-ring::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: var(--green-400);
+  border-radius: 50%;
+  box-shadow: 
+    0 0 6px var(--green-400),
+    0 0 12px var(--green-400),
+    0 0 20px var(--green-300);
+  animation: locationPulse 2s ease-in-out infinite;
+}
+
+.logo-ring::after {
+  content: '';
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle, var(--green-400) 0%, var(--green-300) 30%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  animation: locationGlow 2s ease-out infinite;
+}
+
+@keyframes locationPulse {
   0%, 100% {
-    opacity: 0.3;
-    transform: scaleX(0.5);
+    transform: translateX(-50%) scale(1);
+    box-shadow: 
+      0 0 6px var(--green-400),
+      0 0 12px var(--green-400),
+      0 0 20px var(--green-300);
+    opacity: 1;
   }
   50% {
-    opacity: 1;
-    transform: scaleX(1);
+    transform: translateX(-50%) scale(1.2);
+    box-shadow: 
+      0 0 10px var(--green-300),
+      0 0 20px var(--green-300),
+      0 0 30px var(--green-200);
+    opacity: 0.8;
   }
 }
 
-/* ===================================
-   HEADER CON BRANDING
-   =================================== */
-.login-header {
-  text-align: center;
-  margin-bottom: 35px;
-  position: relative;
+@keyframes locationGlow {
+  0% {
+    transform: translateX(-50%) scale(0.3);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(-50%) scale(2);
+    opacity: 0;
+  }
 }
 
-.logo-container {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.ring-inner {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 2px dashed var(--green-300);
+  opacity: 0.5;
+  animation: ringRotate 15s linear infinite reverse;
 }
 
-.logo-bg {
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.3) 0%, 
-    rgba(255, 255, 255, 0.1) 100%
-  );
+@keyframes ringRotate {
+  to { transform: rotate(360deg); }
+}
+
+.logo-icon-container {
+  position: absolute;
+  inset: 15px;
+  background: linear-gradient(135deg, var(--green-50), var(--white));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(20px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 25px var(--shadow-primary),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  position: relative;
-  overflow: hidden;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
 }
 
-.logo-bg::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    rgba(255, 255, 255, 0.1) 90deg,
-    transparent 180deg,
-    rgba(255, 255, 255, 0.1) 270deg,
-    transparent 360deg
-  );
-  animation: logoRotate 8s linear infinite;
+.logo-svg {
+  width: 45px;
+  height: 45px;
 }
 
-@keyframes logoRotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* Animaciones de la hoja neón */
+.leaf-outline {
+  animation: leafPulse 3s ease-in-out infinite, leafSway 4s ease-in-out infinite;
+  transform-origin: 50px 85px;
 }
 
-.logo-icon {
-  width: 55px;
-  height: 55px;
-  position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 3px 10px var(--shadow-primary));
+.leaf-vein {
+  animation: veinPulse 3s ease-in-out infinite 0.2s;
 }
 
-/* Animaciones del logo de flor girando */
-.flower-rotating {
-  animation: smoothRotation 6s linear infinite;
-  transform-origin: 50px 50px;
+.leaf-veins-left,
+.leaf-veins-right {
+  animation: veinPulse 3s ease-in-out infinite 0.4s;
 }
 
-@keyframes smoothRotation {
-  from {
-    transform: rotate(0deg);
+@keyframes leafPulse {
+  0%, 100% { 
+    stroke: #10b981;
+    filter: url(#neonGlow) drop-shadow(0 0 4px #10b981);
   }
-  to {
-    transform: rotate(360deg);
+  50% { 
+    stroke: #34d399;
+    filter: url(#neonGlow) drop-shadow(0 0 8px #34d399);
   }
 }
 
-/* Sin animaciones individuales de pétalos para evitar conflictos */
-.petal {
-  opacity: 0.95;
-}
-
-/* Animación sutil del centro de la flor */
-.flower-center {
-  animation: centerPulse 4s ease-in-out infinite;
-}
-
-@keyframes centerPulse {
-  0%, 100% {
-    r: 12;
+@keyframes veinPulse {
+  0%, 100% { 
+    opacity: 0.7;
+    stroke: #10b981;
+  }
+  50% { 
     opacity: 1;
-  }
-  50% {
-    r: 13;
-    opacity: 0.9;
+    stroke: #6ee7b7;
   }
 }
 
-/* Animación de los detalles del centro */
-.center-detail {
-  animation: detailRotate 4s ease-in-out infinite reverse;
+@keyframes leafSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
 }
 
-@keyframes detailRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Animación del highlight */
-.center-highlight {
-  animation: highlightShimmer 2.5s ease-in-out infinite;
-}
-
-@keyframes highlightShimmer {
-  0%, 100% {
-    opacity: 0.4;
-    r: 3;
-  }
-  50% {
-    opacity: 0.8;
-    r: 4;
-  }
-}
-
-/* Texto del branding */
-.brand-text {
-  position: relative;
-}
-
-.main-title {
-  margin: 0 0 8px 0;
-  font-size: 20px;
+.brand-title {
+  font-size: 22px;
   font-weight: 800;
-  font-family: 'Poppins', 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: 1.5px;
-  position: relative;
-  text-align: center;
-  display: block;
-  line-height: 1.2;
-  white-space: nowrap;
-  color: #4ade80;
-  background: linear-gradient(
-    90deg,
-    #4ade80 0%,
-    #22c55e 25%,
-    #ffffff 50%,
-    #22c55e 75%,
-    #4ade80 100%
-  );
-  background-size: 200% 100%;
+  background: linear-gradient(135deg, var(--green-600) 0%, var(--green-500) 35%, #d4a843 65%, #c9973f 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: lightSweep 3s ease-in-out infinite;
-  text-shadow: 0 2px 4px rgba(74, 222, 128, 0.3);
-  -webkit-text-stroke: 0.5px #15803d;
+  letter-spacing: 2px;
+  margin: 0 0 8px 0;
   text-transform: uppercase;
 }
 
-@keyframes titleShine {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-/* Animación de luz que pasa de lado a lado */
-@keyframes lightSweep {
-  0% {
-    background-position: -100% 0%;
-  }
-  50% {
-    background-position: 100% 0%;
-  }
-  100% {
-    background-position: -100% 0%;
-  }
-}
-
-.subtitle {
-  color: var(--secondary-green);
-  font-size: 12px;
-  font-weight: 500;
+.brand-subtitle {
+  font-size: 13px;
+  color: var(--gray-600);
   margin: 0;
-  opacity: 0.85;
-  letter-spacing: 0.3px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
-/* ===================================
-   FORMULARIO CON EFECTOS GLASSMORPHISM
-   =================================== */
+/* ========================================
+   FORMULARIO
+   ======================================== */
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.input-group {
-  position: relative;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.input-group label {
+.form-label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: var(--primary-green);
-  margin-bottom: 8px;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.3px;
+  color: var(--gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.input-icon {
+.label-icon {
   width: 16px;
   height: 16px;
-  stroke-width: 2;
+  color: var(--green-600);
 }
 
-.input-container {
+.input-wrapper {
   position: relative;
 }
 
-.input-container input {
+.input-wrapper input {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid rgba(76, 175, 80, 0.2);
-  border-radius: 12px;
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  color: var(--primary-green);
+  padding: 14px 16px;
+  padding-right: 48px;
+  font-size: 15px;
   font-weight: 500;
+  color: var(--gray-800);
+  background: var(--gray-50);
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.3s ease;
   box-sizing: border-box;
 }
 
-.input-container input::placeholder {
-  color: rgba(76, 175, 80, 0.5);
+.input-wrapper input::placeholder {
+  color: var(--gray-400);
   font-weight: 400;
 }
 
-.input-container input:focus {
-  outline: none;
-  border-color: var(--secondary-green);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 
-    0 0 0 4px rgba(76, 175, 80, 0.1),
-    0 8px 25px rgba(76, 175, 80, 0.15);
-  transform: translateY(-2px);
+.input-wrapper input:focus {
+  background: var(--white);
+  border-color: var(--green-500);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
-.input-container input:disabled {
-  background: rgba(245, 245, 245, 0.6);
+.input-wrapper input:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
-  opacity: 0.7;
 }
 
-.input-glow {
+.input-focus-ring {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: -2px;
   border-radius: 14px;
-  background: linear-gradient(45deg, 
-    transparent 0%, 
-    rgba(76, 175, 80, 0.1) 50%, 
-    transparent 100%
-  );
+  background: linear-gradient(135deg, var(--green-400), var(--green-600));
   opacity: 0;
+  z-index: -1;
   transition: opacity 0.3s ease;
-  pointer-events: none;
 }
 
-.input-container input:focus + .input-glow {
-  opacity: 1;
+.input-wrapper input:focus ~ .input-focus-ring {
+  opacity: 0.1;
 }
 
-/* ===================================
-   BOTÓN CON EFECTOS LÍQUIDOS
-   =================================== */
-.login-btn {
-  width: 100%;
-  background: linear-gradient(135deg, 
-    var(--secondary-green) 0%, 
-    var(--primary-green) 100%
-  );
-  color: var(--white);
+/* Toggle password */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
   border: none;
-  padding: 14px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 700;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--gray-400);
+  transition: color 0.2s ease;
+  padding: 0;
+}
+
+.toggle-password:hover:not(:disabled) {
+  color: var(--green-600);
+}
+
+.toggle-password:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-password svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ========================================
+   BOTÓN SUBMIT
+   ======================================== */
+.submit-btn {
+  width: 100%;
+  padding: 16px 24px;
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--green-600) 0%, var(--green-700) 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: 
-    0 6px 20px var(--shadow-primary),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  letter-spacing: 0.4px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
 }
 
-.btn-content {
-  position: relative;
-  z-index: 2;
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
 }
 
-.btn-text, .loading-content {
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(5, 150, 105, 0.5);
+}
+
+.submit-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-btn:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-content,
+.btn-loading {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -880,221 +861,118 @@ const login = async () => {
 .btn-icon {
   width: 20px;
   height: 20px;
-  stroke-width: 2.5;
   transition: transform 0.3s ease;
 }
 
-.login-btn:hover:not(:disabled) .btn-icon {
-  transform: translateX(3px);
+.submit-btn:hover:not(:disabled) .btn-icon {
+  transform: translateX(4px);
 }
 
-.btn-liquid-effect {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.3) 50%, 
-    transparent 100%
-  );
-  transition: left 0.6s ease;
-  z-index: 1;
-}
-
-.login-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, 
-    var(--primary-green) 0%, 
-    #1b5e20 100%
-  );
-  transform: translateY(-3px);
-  box-shadow: 
-    0 12px 35px rgba(46, 125, 50, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.login-btn:hover:not(:disabled) .btn-liquid-effect {
-  left: 100%;
-}
-
-.login-btn:active:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 
-    0 6px 20px rgba(46, 125, 50, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.login-btn:disabled {
-  background: linear-gradient(135deg, #cccccc 0%, #aaaaaa 100%);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Spinner avanzado */
-.advanced-spinner {
-  position: relative;
-  display: inline-block;
+/* Spinner */
+.spinner {
   width: 20px;
   height: 20px;
-}
-
-.spinner-ring {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 2px solid transparent;
-  border-top: 2px solid var(--white);
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: var(--white);
   border-radius: 50%;
-  animation: spinRing 1.2s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
-.spinner-ring:nth-child(1) {
-  animation-delay: 0s;
-  border-top-color: rgba(255, 255, 255, 1);
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.spinner-ring:nth-child(2) {
-  animation-delay: 0.4s;
-  border-top-color: rgba(255, 255, 255, 0.7);
-  width: 80%;
-  height: 80%;
-  top: 10%;
-  left: 10%;
-}
-
-.spinner-ring:nth-child(3) {
-  animation-delay: 0.8s;
-  border-top-color: rgba(255, 255, 255, 0.4);
-  width: 60%;
-  height: 60%;
-  top: 20%;
-  left: 20%;
-}
-
-@keyframes spinRing {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* ===================================
+/* ========================================
    MENSAJE DE ERROR
-   =================================== */
-.error-message {
-  background: linear-gradient(135deg, 
-    rgba(255, 245, 245, 0.95) 0%, 
-    rgba(255, 235, 235, 0.9) 100%
-  );
-  color: #c62828;
-  padding: 16px;
-  border-radius: 12px;
-  text-align: center;
-  border: 2px solid rgba(255, 205, 205, 0.6);
-  backdrop-filter: blur(20px);
-  animation: errorSlideIn 0.5s ease-out;
+   ======================================== */
+.error-alert {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-weight: 500;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #dc2626;
   font-size: 14px;
-  box-shadow: 0 4px 15px rgba(198, 40, 40, 0.2);
+  font-weight: 500;
 }
 
 .error-icon {
   width: 20px;
   height: 20px;
-  stroke-width: 2;
   flex-shrink: 0;
 }
 
-@keyframes errorSlideIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.error-fade-enter-active,
+.error-fade-leave-active {
+  transition: all 0.3s ease;
 }
 
-/* ===================================
-   RESPONSIVIDAD AVANZADA
-   =================================== */
+.error-fade-enter-from,
+.error-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+.card-footer {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.card-footer p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+/* ========================================
+   RESPONSIVO
+   ======================================== */
 
 /* Móviles pequeños */
-@media (max-width: 360px) {
-  .login-container {
-    padding: 10px;
+@media (max-width: 380px) {
+  .login-page {
+    padding: 16px;
   }
   
   .login-card {
-    padding: 25px 20px;
+    padding: 32px 24px;
     border-radius: 20px;
   }
   
-  .logo-bg {
-    width: 70px;
-    height: 70px;
+  .logo-wrapper {
+    width: 75px;
+    height: 75px;
   }
   
-  .logo-icon {
-    width: 55px;
-    height: 55px;
+  .logo-svg {
+    width: 38px;
+    height: 38px;
   }
   
-  .main-title {
-    font-size: 22px;
-    letter-spacing: 1px;
+  .brand-title {
+    font-size: 18px;
+    letter-spacing: 1.5px;
   }
   
-  .subtitle {
-    font-size: 13px;
+  .brand-subtitle {
+    font-size: 12px;
   }
   
-  .input-container input {
-    padding: 14px 16px;
-    font-size: 16px;
+  .input-wrapper input {
+    padding: 12px 14px;
+    padding-right: 44px;
+    font-size: 14px;
   }
   
-  .login-btn {
-    padding: 16px;
-    font-size: 15px;
-  }
-}
-
-/* Móviles medianos */
-@media (max-width: 480px) {
-  .login-container {
-    padding: 15px;
-  }
-  
-  .login-card {
-    padding: 30px 25px;
-    max-width: 100%;
-  }
-  
-  .liquid-blob {
-    filter: blur(3px);
-  }
-  
-  .blob1, .blob2, .blob3 {
-    width: 280px;
-    height: 280px;
-  }
-  
-  .blob4, .blob5, .blob6 {
-    width: 200px;
-    height: 200px;
-  }
-  
-  .main-title {
-    font-size: 24px;
-  }
-  
-  .subtitle {
+  .submit-btn {
+    padding: 14px 20px;
     font-size: 14px;
   }
 }
@@ -1102,264 +980,112 @@ const login = async () => {
 /* Tablets */
 @media (min-width: 481px) and (max-width: 768px) {
   .login-card {
-    max-width: 460px;
-    padding: 45px 35px;
+    padding: 48px 44px;
   }
   
-  .logo-bg {
+  .logo-wrapper {
     width: 100px;
     height: 100px;
   }
   
-  .logo-icon {
-    width: 80px;
-    height: 80px;
+  .logo-svg {
+    width: 50px;
+    height: 50px;
   }
   
-  .main-title {
-    font-size: 30px;
+  .brand-title {
+    font-size: 26px;
   }
 }
 
-/* Laptops y desktop */
-@media (min-width: 769px) and (max-width: 1024px) {
+/* Desktop */
+@media (min-width: 769px) {
   .login-card {
-    max-width: 480px;
+    padding: 48px 44px;
   }
 }
 
-/* Pantallas grandes y 2K */
-@media (min-width: 1025px) {
+/* Altura pequeña */
+@media (max-height: 700px) {
+  .login-page {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 5vh;
+  }
+  
   .login-card {
-    max-width: 420px;
-    padding: 38px 35px;
+    padding: 28px 32px;
   }
   
-  .logo-bg {
-    width: 80px;
-    height: 80px;
+  .brand-section {
+    margin-bottom: 24px;
   }
   
-  .logo-icon {
-    width: 65px;
-    height: 65px;
+  .logo-wrapper {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 16px;
   }
   
-  .main-title {
-    font-size: 22px;
-    letter-spacing: 1.6px;
-    margin-bottom: 10px;
-    font-weight: 800;
-  }
-  
-  .subtitle {
-    font-size: 14px;
+  .login-form {
+    gap: 16px;
   }
 }
 
-/* Para pantallas 2K y superiores */
-@media (min-width: 1440px) {
-  .main-title {
-    font-size: 24px;
-    letter-spacing: 1.8px;
-    font-weight: 800;
+/* Landscape en móviles */
+@media (max-height: 500px) and (orientation: landscape) {
+  .login-page {
+    padding: 12px;
+  }
+  
+  .login-card {
+    padding: 20px 28px;
+    max-width: 380px;
+  }
+  
+  .logo-wrapper {
+    width: 55px;
+    height: 55px;
     margin-bottom: 12px;
   }
   
-  .subtitle {
-    font-size: 15px;
-    margin-top: 6px;
-  }
-}
-
-/* Para pantallas 4K y ultra anchas */
-@media (min-width: 2560px) {
-  .main-title {
-    font-size: 26px;
-    letter-spacing: 2px;
-    font-weight: 800;
-    margin-bottom: 15px;
-    line-height: 1.1;
-    text-shadow: 0 2px 6px rgba(74, 222, 128, 0.4);
+  .logo-svg {
+    width: 30px;
+    height: 30px;
   }
   
-  .subtitle {
+  .brand-title {
     font-size: 16px;
-    margin-top: 8px;
-    font-weight: 500;
+    margin-bottom: 4px;
   }
   
-  .login-card {
-    max-width: 600px;
-    padding: 60px 55px;
-  }
-}
-
-/* Ajustes para altura de pantalla */
-@media (max-height: 700px) {
-  .login-container {
-    align-items: flex-start;
-    padding-top: 30px;
+  .brand-subtitle {
+    font-size: 11px;
   }
   
-  .login-card {
-    padding: 30px;
-  }
-  
-  .login-header {
-    margin-bottom: 25px;
-  }
-  
-  .logo-bg {
-    width: 55px;
-    height: 55px;
-  }
-  
-  .logo-icon {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .main-title {
-    font-size: 16px;
-    letter-spacing: 0.8px;
-    font-weight: 800;
-  }
-}
-
-@media (max-height: 600px) {
-  .login-container {
-    padding: 15px;
-    padding-top: 20px;
-  }
-  
-  .login-card {
-    padding: 25px 20px;
-  }
-  
-  .login-header {
-    margin-bottom: 20px;
+  .brand-section {
+    margin-bottom: 16px;
   }
   
   .login-form {
-    gap: 18px;
+    gap: 12px;
   }
   
-  .input-container input {
-    padding: 14px 18px;
+  .form-group {
+    gap: 4px;
   }
   
-  .login-btn {
-    padding: 16px;
-  }
-}
-
-/* Modo landscape en móviles */
-@media (max-height: 500px) and (orientation: landscape) {
-  .login-container {
-    padding: 10px;
-    justify-content: flex-start;
-    align-items: center;
+  .input-wrapper input {
+    padding: 10px 14px;
   }
   
-  .login-card {
-    padding: 20px;
-    max-width: 400px;
+  .submit-btn {
+    padding: 12px 20px;
   }
   
-  .logo-bg {
-    width: 60px;
-    height: 60px;
+  .card-footer {
+    margin-top: 12px;
+    padding-top: 12px;
   }
-  
-  .logo-icon {
-    width: 45px;
-    height: 45px;
-  }
-  
-  .main-title {
-    font-size: 20px;
-    margin-bottom: 5px;
-  }
-  
-  .subtitle {
-    font-size: 12px;
-  }
-  
-  .login-header {
-    margin-bottom: 15px;
-  }
-  
-  .login-form {
-    gap: 15px;
-  }
-}
-
-/* Modo oscuro (opcional) */
-@media (prefers-color-scheme: dark) {
-  .login-card {
-    background: rgba(30, 30, 30, 0.95);
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .input-container input {
-    background: rgba(50, 50, 50, 0.8);
-    color: #e0e0e0;
-    border-color: rgba(76, 175, 80, 0.3);
-  }
-  
-  .input-container input::placeholder {
-    color: rgba(76, 175, 80, 0.6);
-  }
-  
-  .error-message {
-    background: rgba(50, 30, 30, 0.95);
-    border-color: rgba(255, 100, 100, 0.3);
-    color: #ff6b6b;
-  }
-}
-
-/* Animaciones de entrada para el componente completo */
-@keyframes componentFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Animación pulse lenta similar a Home.vue */
-@keyframes animate-pulse-slow {
-  0%, 100% {
-    opacity: 0.15;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.25;
-    transform: scale(1.05);
-  }
-}
-
-.animate-pulse-slow {
-  animation: animate-pulse-slow 4s ease-in-out infinite;
-}
-
-.login-card {
-  animation: componentFadeIn 0.8s ease-out;
-}
-
-/* Efectos de performance */
-.liquid-blob,
-.particle,
-.logo-bg::before {
-  will-change: transform;
-}
-
-.input-container input,
-.login-btn {
-  will-change: transform, box-shadow;
 }
 </style>

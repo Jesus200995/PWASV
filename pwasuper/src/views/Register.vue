@@ -232,6 +232,35 @@
             </div>
             
             <div>
+              <label for="territorio" class="block text-xs font-medium text-gray-800 mb-1">Territorio (Estado) *</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <select 
+                  v-model="form.territorio" 
+                  id="territorio" 
+                  name="territorio" 
+                  required
+                  class="glass-input w-full pl-9 pr-3 py-2 appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>-- Selecciona tu estado --</option>
+                  <option v-for="estado in estadosMexico" :key="estado" :value="estado">{{ estado }}</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+              <p v-if="territorioError" class="mt-1 text-xs text-red-600">{{ territorioError }}</p>
+              <p class="mt-1 text-xs text-gray-500">Selecciona el estado donde trabajarás</p>
+            </div>
+            
+            <div>
               <label for="supervisor" class="block text-xs font-medium text-gray-800 mb-1">Supervisor Inmediato *</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -497,12 +526,24 @@ const form = reactive({
   segundoApellido: '',
   cargo: '',
   curp: '',
+  territorio: '',
   supervisor: '',
   codigoPais: '+52', // Código de país por defecto (México)
   telefono: '', // Solo los dígitos del teléfono
   password: '',
   confirmPassword: ''
 });
+
+// Lista de estados de México para el selector de territorio
+const estadosMexico = [
+  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas',
+  'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Estado de México',
+  'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit',
+  'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí',
+  'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'
+];
+
+const territorioError = ref('');
 
 // Lista de países más comunes con sus códigos y banderas
 const paises = [
@@ -585,7 +626,8 @@ async function register() {
       supervisor: form.supervisor.trim().toUpperCase(),
       contrasena: form.password,
       curp: form.curp.toUpperCase().trim(),
-      telefono: telefonoCompleto
+      telefono: telefonoCompleto,
+      territorio: form.territorio
     };
     
     console.log('📤 Enviando payload:', payload);
@@ -639,6 +681,7 @@ function validateForm() {
   curpError.value = '';
   curpWarning.value = '';
   termsError.value = '';
+  territorioError.value = '';
   message.text = '';
   
   // Validación de términos y condiciones
@@ -702,6 +745,14 @@ function validateForm() {
   if (!form.curp || !form.curp.trim()) {
     curpError.value = 'La CURP es obligatoria';
     message.text = 'La CURP es obligatoria';
+    message.type = 'error';
+    return false;
+  }
+  
+  // Validación de territorio obligatorio
+  if (!form.territorio || !form.territorio.trim()) {
+    territorioError.value = 'El territorio es obligatorio';
+    message.text = 'Debes seleccionar el estado donde trabajarás';
     message.type = 'error';
     return false;
   }

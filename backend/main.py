@@ -320,6 +320,7 @@ class UserCreate(BaseModel):
     contrasena: str
     curp: str  # CURP obligatoria
     telefono: str  # Teléfono obligatorio
+    territorio: str = None  # Estado de México (opcional pero recomendado)
     rol: str = 'user'  # Rol por defecto es user
 
 class UserLogin(BaseModel):
@@ -506,6 +507,12 @@ async def crear_usuario(usuario: UserCreate):
         if not re.match(r'^\+[0-9]+\s*[0-9]+$', usuario.telefono.strip()):
             raise HTTPException(status_code=400, detail="El formato del teléfono debe incluir código de país con + y números")
         
+        # Validación de territorio (estado de México)
+        territorio_value = None
+        if usuario.territorio and usuario.territorio.strip():
+            territorio_value = usuario.territorio.strip()
+            print(f"📍 Territorio asignado: {territorio_value}")
+        
         # Comprobar si el correo ya existe
         cursor.execute("SELECT id FROM usuarios WHERE correo = %s", (usuario.correo,))
         if cursor.fetchone():
@@ -527,10 +534,10 @@ async def crear_usuario(usuario: UserCreate):
             cursor.execute("ALTER TABLE usuarios ADD COLUMN rol VARCHAR(10) DEFAULT 'user'")
             conn.commit()
         
-        # Insertar usuario con CURP, teléfono y rol (contraseña sin encriptar)
+        # Insertar usuario con CURP, teléfono, territorio y rol (contraseña sin encriptar)
         cursor.execute(
-            "INSERT INTO usuarios (correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono, rol) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
-            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, usuario.contrasena, curp_upper, usuario.telefono, usuario.rol)
+            "INSERT INTO usuarios (correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono, territorio, rol) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+            (usuario.correo, usuario.nombre_completo, usuario.cargo, usuario.supervisor, usuario.contrasena, curp_upper, usuario.telefono, territorio_value, usuario.rol)
         )
         
         user_id = cursor.fetchone()[0]

@@ -502,6 +502,20 @@
               </div>
             </div>
 
+            <!-- Territorio -->
+            <div class="detail-card">
+              <div class="detail-icon territorio-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Territorio</span>
+                <span :class="usuarioSeleccionado.territorio ? 'detail-value territorio-value' : 'detail-value territorio-empty-detail'">{{ usuarioSeleccionado.territorio || 'Sin asignar' }}</span>
+              </div>
+            </div>
+
             <!-- Estado -->
             <div class="detail-card">
               <div class="detail-icon status-icon">
@@ -607,136 +621,171 @@
       </div>
     </div>
 
-    <!-- Modal de edición de usuario -->
-    <div v-if="showEditModal" class="modal-overlay-modern" @click="cancelarEdicion">
-      <div class="modal-content-modern edit-modal" @click.stop>
-        <div class="modal-header-modern edit-header">
-          <div class="modal-title-section">
-            <div class="modal-icon edit-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Modal de edición de usuario - REDISEÑO COMPLETO -->
+    <div v-if="showEditModal" class="edit-modal-overlay" @click="cancelarEdicion">
+      <div class="edit-modal-container" @click.stop>
+        <!-- Header del modal -->
+        <div class="edit-modal-header">
+          <div class="edit-modal-title-wrapper">
+            <div class="edit-modal-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
             </div>
-            <h3 class="modal-title">Editar Usuario</h3>
+            <div class="edit-modal-title-text">
+              <h3>Editar Usuario</h3>
+              <span class="edit-modal-subtitle">ID: #{{ usuarioAEditar?.id }}</span>
+            </div>
           </div>
-          <button @click="cancelarEdicion" class="btn-close-modern">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button @click="cancelarEdicion" class="edit-modal-close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
         
-        <div class="modal-body-modern">
-          <div v-if="usuarioAEditar" class="edit-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="edit-correo">Correo Electrónico</label>
+        <!-- Body del modal -->
+        <div class="edit-modal-body">
+          <div v-if="usuarioAEditar" class="edit-form-container">
+            <!-- Fila 1: Correo y Nombre -->
+            <div class="edit-form-row">
+              <div class="edit-form-field">
+                <label for="edit-correo">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  Correo Electrónico
+                </label>
                 <input 
                   id="edit-correo"
                   v-model="datosEdicion.correo" 
                   type="email" 
-                  class="form-input"
                   placeholder="correo@ejemplo.com"
                 />
               </div>
-              
-              <div class="form-group">
-                <label for="edit-nombre">Nombre Completo</label>
+              <div class="edit-form-field">
+                <label for="edit-nombre">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  Nombre Completo
+                </label>
                 <input 
                   id="edit-nombre"
                   v-model="datosEdicion.nombre_completo" 
                   type="text" 
-                  class="form-input"
-                  placeholder="Nombre completo del usuario"
+                  placeholder="Nombre completo"
                 />
               </div>
-              
-              <div class="form-group">
-                <label for="edit-cargo">Cargo</label>
+            </div>
+
+            <!-- Fila 2: Cargo y Supervisor -->
+            <div class="edit-form-row">
+              <div class="edit-form-field">
+                <label for="edit-cargo">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                  Cargo
+                </label>
                 <input 
                   id="edit-cargo"
                   v-model="datosEdicion.cargo" 
                   type="text" 
-                  class="form-input"
                   placeholder="Cargo o puesto"
                 />
               </div>
-              
-              <div class="form-group">
-                <label for="edit-supervisor">Supervisor</label>
+              <div class="edit-form-field">
+                <label for="edit-supervisor">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  Supervisor
+                </label>
                 <input 
                   id="edit-supervisor"
                   v-model="datosEdicion.supervisor" 
                   type="text" 
-                  class="form-input"
                   placeholder="Nombre del supervisor"
                 />
               </div>
-              
-              <div class="form-group">
-                <label for="edit-contrasena">Contraseña</label>
-                <div class="password-field-container">
+            </div>
+
+            <!-- Fila 3: Contraseña y CURP -->
+            <div class="edit-form-row">
+              <div class="edit-form-field">
+                <label for="edit-contrasena">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Contraseña
+                </label>
+                <div class="edit-password-wrapper">
                   <input 
                     id="edit-contrasena"
                     v-model="datosEdicion.contrasena" 
                     :type="showEditPassword ? 'text' : 'password'"
-                    class="form-input password-input"
                     placeholder="Nueva contraseña (opcional)"
                   />
-                  <button 
-                    @click="showEditPassword = !showEditPassword" 
-                    class="password-toggle-btn-edit" 
-                    type="button"
-                    title="Mostrar/Ocultar contraseña"
-                  >
-                    <svg v-if="showEditPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <button @click="showEditPassword = !showEditPassword" type="button" class="edit-password-toggle">
+                    <svg v-if="showEditPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
                       <line x1="1" y1="1" x2="23" y2="23"/>
                     </svg>
-                    <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                       <circle cx="12" cy="12" r="3"/>
                     </svg>
                   </button>
                 </div>
               </div>
-              
-              <div class="form-group">
-                <label for="edit-curp">CURP</label>
+              <div class="edit-form-field">
+                <label for="edit-curp">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  CURP
+                </label>
                 <input 
                   id="edit-curp"
                   v-model="datosEdicion.curp" 
                   type="text" 
-                  class="form-input"
                   placeholder="CURP de 18 caracteres"
                   maxlength="18"
+                  style="text-transform: uppercase;"
                 />
               </div>
+            </div>
 
-              <div class="form-group">
-                <label for="edit-telefono">Teléfono</label>
+            <!-- Fila 4: Teléfono y Territorio -->
+            <div class="edit-form-row">
+              <div class="edit-form-field">
+                <label for="edit-telefono">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  Teléfono
+                </label>
                 <input 
                   id="edit-telefono"
                   v-model="datosEdicion.telefono" 
                   type="tel" 
-                  class="form-input"
-                  placeholder="Teléfono con código de país"
+                  placeholder="+52 000 000 0000"
                 />
+              </div>
+              <div class="edit-form-field">
+                <label for="edit-territorio">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Territorio
+                </label>
+                <select id="edit-territorio" v-model="datosEdicion.territorio">
+                  <option value="">-- Sin asignar --</option>
+                  <option v-for="estado in estadosMexico" :key="estado" :value="estado">{{ estado }}</option>
+                </select>
               </div>
             </div>
           </div>
         </div>
         
-        <div class="modal-footer-edit">
-          <button @click="cancelarEdicion" class="btn-cancel">
+        <!-- Footer del modal -->
+        <div class="edit-modal-footer">
+          <button @click="cancelarEdicion" class="edit-btn-cancel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             Cancelar
           </button>
-          <button @click="guardarEdicion" class="btn-save" :disabled="editandoUsuario">
-            <svg v-if="editandoUsuario" class="spinner-small" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button @click="guardarEdicion" class="edit-btn-save" :disabled="editandoUsuario">
+            <svg v-if="editandoUsuario" class="spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 12a9 9 0 11-6.219-8.56"/>
             </svg>
+            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             {{ editandoUsuario ? 'Guardando...' : 'Guardar Cambios' }}
           </button>
         </div>
@@ -798,6 +847,16 @@ const actualizarPermisosUsuario = (event) => {
 // Estado de conexión
 const isOnline = ref(navigator.onLine)
 
+// Lista de estados de México para el selector de territorio
+const estadosMexico = [
+  "Aguascalientes", "Baja California", "Baja California Sur", "Campeche",
+  "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila", "Colima",
+  "Durango", "Estado de México", "Guanajuato", "Guerrero", "Hidalgo",
+  "Jalisco", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca",
+  "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa",
+  "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
+]
+
 const API_URL = 'https://apipwa.sembrandodatos.com'
 const usuarios = ref([])
 const usuariosFiltrados = ref([])
@@ -840,7 +899,8 @@ const datosEdicion = ref({
   supervisor: '',
   contrasena: '',
   curp: '',
-  telefono: ''
+  telefono: '',
+  territorio: ''
 })
 
 // Variables para modal de éxito
@@ -1409,7 +1469,8 @@ const editarUsuario = (usuario) => {
     supervisor: usuario.supervisor || '',
     contrasena: usuario.contrasena || '',
     curp: usuario.curp || '',
-    telefono: usuario.telefono || ''
+    telefono: usuario.telefono || '',
+    territorio: usuario.territorio || ''
   }
   showEditModal.value = true
 }
@@ -1427,7 +1488,8 @@ const cancelarEdicion = () => {
     supervisor: '',
     contrasena: '',
     curp: '',
-    telefono: ''
+    telefono: '',
+    territorio: ''
   }
 }
 
@@ -1447,6 +1509,7 @@ const guardarEdicion = async () => {
       supervisor: datosEdicion.value.supervisor,
       curp: datosEdicion.value.curp,
       telefono: datosEdicion.value.telefono,
+      territorio: datosEdicion.value.territorio || null,
       rol: 'user' // Por defecto, los usuarios editados desde admin son 'user'
     }
     
@@ -2874,14 +2937,32 @@ const logout = () => {
   color: white;
 }
 
+/* Modal de edición - Estilo completamente rediseñado */
+.edit-modal {
+  max-width: 680px !important;
+  max-height: 92vh !important;
+  width: 92vw !important;
+}
+
+.edit-modal .modal-header-modern {
+  padding: 18px 24px;
+}
+
+.edit-modal .modal-body-modern {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: calc(92vh - 150px);
+}
+
 .edit-form {
-  padding: 20px 0;
+  width: 100%;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 20px 24px;
+  width: 100%;
 }
 
 .form-group {
@@ -2892,57 +2973,86 @@ const logout = () => {
 
 .form-group label {
   font-weight: 600;
-  color: #333;
-  font-size: 14px;
-  margin-bottom: 4px;
+  color: #374151;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-group label::before {
+  content: '';
+  width: 3px;
+  height: 16px;
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .form-input {
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  background: white;
-  color: #333;
+  width: 100% !important;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  background: #f9fafb;
+  color: #1f2937;
+  box-sizing: border-box;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 18px;
+  padding-right: 48px !important;
+  cursor: pointer;
+  background-color: #f9fafb;
+  width: 100% !important;
+}
+
+.form-select:focus {
+  background-color: white;
 }
 
 .form-input:focus {
   outline: none;
   border-color: #ff9800;
-  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
-  transform: translateY(-1px);
+  box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.12);
+  background: white;
 }
 
 .form-input:hover:not(:focus) {
-  border-color: #bbb;
+  border-color: #d1d5db;
+  background: white;
 }
 
 .form-input::placeholder {
-  color: #999;
-  font-style: italic;
+  color: #9ca3af;
+  font-style: normal;
+  font-weight: 400;
 }
 
 /* Estilos para el campo de contraseña en el modal de edición */
 .password-field-container {
   position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
+  width: 100% !important;
 }
 
-.password-input {
-  padding-right: 50px !important;
-  width: 100%;
+.password-field-container .form-input {
+  width: 100% !important;
+  padding-right: 52px !important;
 }
 
 .password-toggle-btn-edit {
   position: absolute;
-  right: 15px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   background: linear-gradient(135deg, #4CAF50, #45a049);
   border: none;
   border-radius: 50%;
@@ -2975,37 +3085,59 @@ const logout = () => {
 .modal-footer-edit {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 20px 30px;
-  background: #f8f9fa;
-  border-top: 1px solid #e9ecef;
+  gap: clamp(10px, 2vw, 14px);
+  padding: clamp(14px, 3vw, 20px) clamp(16px, 3vw, 24px);
+  background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+  border-top: 2px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.btn-cancel {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+  padding: clamp(10px, 2vw, 12px) clamp(18px, 3vw, 24px);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: clamp(13px, 2.5vw, 15px);
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-cancel:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
 }
 
 .btn-save {
   background: linear-gradient(135deg, #ff9800, #f57c00);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: clamp(10px, 2vw, 12px) clamp(18px, 3vw, 24px);
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-size: clamp(13px, 2.5vw, 15px);
+  font-weight: 600;
+  transition: all 0.25s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.25);
 }
 
 .btn-save:hover:not(:disabled) {
   background: linear-gradient(135deg, #f57c00, #e65100);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 152, 0, 0.35);
 }
 
 .btn-save:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 /* Modal Moderno - Diseño Responsivo */
@@ -3210,6 +3342,23 @@ const logout = () => {
   font-weight: 600; /* Más legible */
   white-space: nowrap; /* Evitar saltos de línea en el número */
   font-size: clamp(10px, 2vw, 12px); /* Tamaño consistente */
+}
+
+/* Estilo especial para el campo de territorio */
+.territorio-icon {
+  background: linear-gradient(135deg, rgba(21, 101, 192, 0.15), rgba(21, 101, 192, 0.1)) !important;
+  color: #1565C0 !important;
+}
+
+.territorio-value {
+  color: #1565C0 !important;
+  font-weight: 600;
+}
+
+.territorio-empty-detail {
+  color: #9e9e9e !important;
+  font-style: italic;
+  font-weight: 400;
 }
 
 /* Estilos especiales para el campo de contraseña */
@@ -3855,6 +4004,45 @@ const logout = () => {
     margin-left: 160px;
     width: calc(100vw - 160px);
   }
+  
+  /* Modal de edición en landscape */
+  .edit-modal {
+    max-width: 85vw !important;
+    max-height: 94vh !important;
+  }
+  
+  .edit-modal .modal-body-modern {
+    padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+    max-height: calc(94vh - 100px);
+  }
+  
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(8px, 1.5vw, 12px);
+  }
+  
+  .form-group {
+    gap: 3px;
+  }
+  
+  .form-group label {
+    font-size: clamp(10px, 1.8vw, 12px);
+  }
+  
+  .form-input {
+    padding: clamp(6px, 1.2vw, 10px) clamp(8px, 1.5vw, 12px);
+    font-size: clamp(11px, 2vw, 13px);
+  }
+  
+  .modal-footer-edit {
+    padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+    gap: 8px;
+  }
+  
+  .btn-save, .btn-cancel {
+    padding: clamp(8px, 1.5vw, 10px) clamp(14px, 2.5vw, 18px);
+    font-size: clamp(11px, 2vw, 13px);
+  }
 }
 
 @media (max-width: 992px) {
@@ -3989,39 +4177,64 @@ const logout = () => {
   }
   
   /* Estilos responsivos para modal de edición */
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  .edit-modal {
+    max-width: 94vw !important;
+    max-height: 94vh !important;
+    margin: 3vh auto;
   }
   
-  .edit-modal {
-    max-width: 90vw !important;
+  .edit-modal .modal-body-modern {
+    padding: clamp(12px, 2.5vw, 18px);
+    max-height: calc(94vh - 130px);
+  }
+  
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(10px, 2vw, 14px);
+  }
+  
+  .form-group {
+    gap: 4px;
+  }
+  
+  .form-group label {
+    font-size: clamp(11px, 2.2vw, 13px);
+  }
+  
+  .form-group label::before {
+    width: 2px;
+    height: 12px;
+  }
+  
+  .form-input {
+    padding: clamp(8px, 1.8vw, 12px) clamp(10px, 2vw, 14px);
+    font-size: clamp(12px, 2.2vw, 14px);
+    border-radius: 8px;
   }
   
   .password-toggle-btn-edit {
-    width: 30px;
-    height: 30px;
-    right: 12px;
+    width: 28px;
+    height: 28px;
+    right: 10px;
   }
   
   .password-toggle-btn-edit svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
   
   .password-input {
-    padding-right: 50px !important;
+    padding-right: 46px !important;
   }
   
   .modal-footer-edit {
-    padding: 16px 20px;
-    flex-direction: column;
-    gap: 8px;
+    padding: clamp(12px, 2.5vw, 16px);
+    gap: 10px;
   }
   
   .btn-save, .btn-cancel {
-    width: 100%;
-    justify-content: center;
+    padding: clamp(10px, 2vw, 12px) clamp(16px, 3vw, 20px);
+    font-size: clamp(12px, 2.2vw, 14px);
   }
   
   .pagination-container {
@@ -4104,6 +4317,47 @@ const logout = () => {
   
   .pagination-numbers {
     gap: clamp(2px, 0.4vw, 3px);
+  }
+  
+  /* Modal de edición en pantallas pequeñas */
+  .edit-modal {
+    max-width: 96vw !important;
+    max-height: 96vh !important;
+  }
+  
+  .edit-modal .modal-body-modern {
+    padding: clamp(10px, 2vw, 14px);
+    max-height: calc(96vh - 120px);
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: clamp(10px, 2vw, 14px);
+  }
+  
+  .form-group:last-child {
+    grid-column: 1;
+  }
+  
+  .form-group label {
+    font-size: clamp(11px, 2.5vw, 13px);
+  }
+  
+  .form-input {
+    padding: clamp(10px, 2vw, 12px);
+    font-size: clamp(13px, 2.8vw, 15px);
+  }
+  
+  .modal-footer-edit {
+    padding: clamp(12px, 2.5vw, 16px);
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn-save, .btn-cancel {
+    width: 100%;
+    justify-content: center;
+    padding: clamp(12px, 2.5vw, 14px);
   }
 }
 
@@ -4740,6 +4994,877 @@ const logout = () => {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+  }
+}
+
+/* ============================================
+   MODALES TOTALMENTE RESPONSIVOS
+   Para cualquier tamaño y orientación de pantalla
+   ============================================ */
+
+/* Modal en orientación horizontal (landscape) */
+@media (orientation: landscape) and (max-height: 600px) {
+  .modal-overlay-modern {
+    padding: 8px;
+  }
+  
+  .modal-content-modern {
+    max-height: 95vh;
+    max-width: 90vw;
+  }
+  
+  .modal-body-modern {
+    max-height: calc(95vh - 60px);
+    overflow-y: auto;
+    padding: 10px 15px;
+  }
+  
+  .user-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+  }
+  
+  .detail-card {
+    padding: 6px 10px;
+  }
+  
+  .detail-label {
+    font-size: 9px;
+  }
+  
+  .detail-value {
+    font-size: 11px;
+  }
+  
+  .modal-header-modern {
+    padding: 10px 15px;
+  }
+  
+  .modal-title {
+    font-size: 14px;
+  }
+}
+
+/* Modal muy pequeño en landscape */
+@media (orientation: landscape) and (max-height: 450px) {
+  .modal-content-modern {
+    max-height: 98vh;
+    border-radius: 10px;
+  }
+  
+  .modal-body-modern {
+    max-height: calc(98vh - 50px);
+    padding: 8px 12px;
+  }
+  
+  .user-details-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  
+  .detail-card {
+    padding: 5px 8px;
+  }
+  
+  .detail-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .detail-label {
+    font-size: 8px;
+  }
+  
+  .detail-value {
+    font-size: 10px;
+  }
+  
+  .modal-header-modern {
+    padding: 8px 12px;
+  }
+  
+  .modal-title {
+    font-size: 12px;
+  }
+  
+  .modal-icon, .btn-close-modern {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Modal en pantallas muy pequeñas (portrait) */
+@media (orientation: portrait) and (max-width: 400px) {
+  .modal-content-modern {
+    max-width: 98vw;
+    max-height: 90vh;
+    margin: 5px;
+    border-radius: 12px;
+  }
+  
+  .modal-body-modern {
+    max-height: calc(90vh - 70px);
+    overflow-y: auto;
+    padding: 10px;
+  }
+  
+  .user-details-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  
+  .detail-card {
+    padding: 8px 10px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .detail-card .detail-info {
+    flex: 1;
+  }
+  
+  .form-group {
+    margin-bottom: 10px;
+  }
+  
+  .form-group label {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-select {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+/* Asegurar scroll en el body del modal */
+.modal-body-modern {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(37, 99, 235, 0.3) transparent;
+}
+
+.modal-body-modern::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body-modern::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-body-modern::-webkit-scrollbar-thumb {
+  background: rgba(37, 99, 235, 0.3);
+  border-radius: 3px;
+}
+
+.modal-body-modern::-webkit-scrollbar-thumb:hover {
+  background: rgba(37, 99, 235, 0.5);
+}
+
+/* Grid responsive para formularios de edición */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 600px) and (orientation: landscape) {
+  .edit-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .edit-form .form-group:last-child {
+    grid-column: span 2;
+  }
+}
+
+/* Fix para inputs en modal de edición */
+.form-group input,
+.form-group select,
+.form-select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Botones de acción del modal responsivos */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 10px;
+}
+
+@media (max-width: 400px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .modal-actions {
+    padding-top: 10px;
+    margin-top: 8px;
+  }
+  
+  .modal-actions button {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  
+  /* Footer de modal de edición en landscape */
+  .modal-footer-edit {
+    padding: 10px 15px;
+  }
+  
+  .modal-footer-edit .btn-save,
+  .modal-footer-edit .btn-cancel {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  
+  /* Footer de modal de eliminar en landscape */
+  .modal-footer-delete {
+    padding: 10px 15px;
+  }
+  
+  .modal-footer-delete .btn-delete,
+  .modal-footer-delete .btn-cancel {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  
+  /* Form grid en landscape muy pequeño */
+  .form-grid {
+    gap: 10px;
+  }
+  
+  .form-group {
+    gap: 4px;
+  }
+  
+  .form-group label {
+    font-size: 11px;
+  }
+  
+  .form-input {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+/* Estilos adicionales para pantallas muy pequeñas en portrait */
+@media (orientation: portrait) and (max-width: 360px) {
+  .modal-content-modern {
+    max-width: 100vw;
+    max-height: 95vh;
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  .modal-footer-edit,
+  .modal-footer-delete {
+    flex-direction: column;
+    padding: 12px;
+    gap: 8px;
+  }
+  
+  .modal-footer-edit button,
+  .modal-footer-delete button {
+    width: 100%;
+  }
+  
+  .form-group label {
+    font-size: 11px;
+  }
+  
+  .form-input {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+/* =====================================================
+   MODAL DE EDICIÓN - REDISEÑO COMPLETO Y RESPONSIVO
+   ===================================================== */
+
+/* Overlay del modal */
+.edit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+/* Contenedor principal del modal */
+.edit-modal-container {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: modalSlideIn 0.25s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header del modal - Estilo vidrio líquido naranja */
+.edit-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, 
+    rgba(255, 152, 0, 0.85) 0%, 
+    rgba(245, 124, 0, 0.9) 50%,
+    rgba(255, 167, 38, 0.85) 100%);
+  backdrop-filter: blur(10px);
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 4px 15px rgba(255, 152, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.edit-modal-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.edit-modal-icon {
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-modal-icon svg {
+  stroke: white;
+  width: 20px;
+  height: 20px;
+}
+
+.edit-modal-title-text h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.edit-modal-subtitle {
+  font-size: 12px;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.edit-modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.edit-modal-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.edit-modal-close svg {
+  stroke: white;
+}
+
+/* Body del modal */
+.edit-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.edit-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Fila del formulario - 2 columnas */
+.edit-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Campo individual */
+.edit-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-form-field label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.edit-form-field label svg {
+  stroke: #ff9800;
+  flex-shrink: 0;
+}
+
+.edit-form-field input,
+.edit-form-field select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #1e293b;
+  background: #ffffff;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.edit-form-field input:focus,
+.edit-form-field select:focus {
+  outline: none;
+  border-color: #ff9800;
+  box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
+}
+
+.edit-form-field input:hover:not(:focus),
+.edit-form-field select:hover:not(:focus) {
+  border-color: #cbd5e1;
+}
+
+.edit-form-field input::placeholder {
+  color: #94a3b8;
+}
+
+.edit-form-field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+/* Campo de contraseña */
+.edit-password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.edit-password-wrapper input {
+  width: 100%;
+  padding-right: 52px;
+}
+
+.edit-password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: white;
+}
+
+.edit-password-toggle:hover {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.edit-password-toggle svg {
+  stroke: white;
+}
+
+/* Footer del modal */
+.edit-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.edit-btn-cancel,
+.edit-btn-save {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-btn-cancel {
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  color: #64748b;
+}
+
+.edit-btn-cancel:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.edit-btn-save {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 14px rgba(255, 152, 0, 0.3);
+}
+
+.edit-btn-save:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
+.edit-btn-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =====================================================
+   RESPONSIVE - TABLETS (768px)
+   ===================================================== */
+@media (max-width: 768px) {
+  .edit-modal-overlay {
+    padding: 12px;
+  }
+  
+  .edit-modal-container {
+    max-width: 100%;
+    max-height: 94vh;
+    border-radius: 14px;
+  }
+  
+  .edit-modal-header {
+    padding: 16px 20px;
+  }
+  
+  .edit-modal-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .edit-modal-title-text h3 {
+    font-size: 18px;
+  }
+  
+  .edit-modal-body {
+    padding: 20px;
+  }
+  
+  .edit-form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  
+  .edit-form-field input,
+  .edit-form-field select {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  
+  .edit-modal-footer {
+    padding: 16px 20px;
+  }
+  
+  .edit-btn-cancel,
+  .edit-btn-save {
+    padding: 11px 20px;
+    font-size: 14px;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE - MÓVILES (480px)
+   ===================================================== */
+@media (max-width: 480px) {
+  .edit-modal-overlay {
+    padding: 8px;
+    align-items: flex-end;
+  }
+  
+  .edit-modal-container {
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+  }
+  
+  .edit-modal-header {
+    padding: 14px 16px;
+  }
+  
+  .edit-modal-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  
+  .edit-modal-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .edit-modal-title-text h3 {
+    font-size: 16px;
+  }
+  
+  .edit-modal-subtitle {
+    font-size: 12px;
+  }
+  
+  .edit-modal-close {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .edit-modal-body {
+    padding: 16px;
+  }
+  
+  .edit-form-container {
+    gap: 16px;
+  }
+  
+  .edit-form-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  
+  .edit-form-field label {
+    font-size: 12px;
+  }
+  
+  .edit-form-field input,
+  .edit-form-field select {
+    padding: 12px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+  
+  .edit-password-toggle {
+    width: 34px;
+    height: 34px;
+  }
+  
+  .edit-modal-footer {
+    padding: 14px 16px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .edit-btn-cancel,
+  .edit-btn-save {
+    width: 100%;
+    padding: 14px;
+    justify-content: center;
+  }
+  
+  .edit-btn-save {
+    order: -1;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE - LANDSCAPE EN MÓVILES
+   ===================================================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .edit-modal-overlay {
+    padding: 8px;
+    align-items: center;
+  }
+  
+  .edit-modal-container {
+    max-height: 96vh;
+    max-width: 90vw;
+    border-radius: 12px;
+  }
+  
+  .edit-modal-header {
+    padding: 12px 16px;
+  }
+  
+  .edit-modal-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+  
+  .edit-modal-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .edit-modal-title-text h3 {
+    font-size: 15px;
+  }
+  
+  .edit-modal-subtitle {
+    font-size: 11px;
+  }
+  
+  .edit-modal-body {
+    padding: 12px 16px;
+  }
+  
+  .edit-form-container {
+    gap: 10px;
+  }
+  
+  .edit-form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .edit-form-field {
+    gap: 4px;
+  }
+  
+  .edit-form-field label {
+    font-size: 11px;
+  }
+  
+  .edit-form-field label svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .edit-form-field input,
+  .edit-form-field select {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+  
+  .edit-password-toggle {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+  }
+  
+  .edit-password-toggle svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .edit-modal-footer {
+    padding: 10px 16px;
+    gap: 10px;
+  }
+  
+  .edit-btn-cancel,
+  .edit-btn-save {
+    padding: 10px 18px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE - TABLETS LANDSCAPE
+   ===================================================== */
+@media (min-width: 768px) and (max-height: 600px) and (orientation: landscape) {
+  .edit-modal-container {
+    max-width: 85vw;
+    max-height: 94vh;
+  }
+  
+  .edit-modal-body {
+    padding: 16px 20px;
+  }
+  
+  .edit-form-row {
+    gap: 16px;
+  }
+  
+  .edit-form-field input,
+  .edit-form-field select {
+    padding: 11px 14px;
+    font-size: 14px;
   }
 }
 </style>

@@ -338,6 +338,7 @@ class UserInfoUpdate(BaseModel):
     supervisor: str = None
     curp: str = None
     telefono: str = None
+    territorio: str = None
 
 class TerminosAceptados(BaseModel):
     usuario_id: int
@@ -1669,17 +1670,17 @@ async def actualizar_info_usuario(user_id: int, info: UserInfoUpdate):
         cursor.execute(
             """UPDATE usuarios 
                SET correo = %s, nombre_completo = %s, cargo = %s, 
-                   supervisor = %s, curp = %s, telefono = %s 
+                   supervisor = %s, curp = %s, telefono = %s, territorio = %s 
                WHERE id = %s""",
             (info.correo, info.nombre_completo, info.cargo, 
-             info.supervisor, curp_upper, info.telefono, user_id)
+             info.supervisor, curp_upper, info.telefono, info.territorio, user_id)
         )
         
         conn.commit()
         
         # Obtener usuario actualizado
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, telefono FROM usuarios WHERE id = %s",
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, telefono, territorio FROM usuarios WHERE id = %s",
             (user_id,)
         )
         
@@ -1691,7 +1692,8 @@ async def actualizar_info_usuario(user_id: int, info: UserInfoUpdate):
             "cargo": resultado[3],
             "supervisor": resultado[4],
             "curp": resultado[5],
-            "telefono": resultado[6]
+            "telefono": resultado[6],
+            "territorio": resultado[7]
         }
         
         print(f"✅ Información personal del usuario {user_id} actualizada exitosamente")

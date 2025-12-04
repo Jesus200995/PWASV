@@ -198,7 +198,7 @@
                     <span class="curp-text">{{ (usuario.curp || 'N/A').toUpperCase() }}</span>
                   </td>
                   <td class="col-territorio">
-                    <span class="territorio-text">{{ usuario.territorio || 'Sin asignar' }}</span>
+                    <span :class="usuario.territorio ? 'territorio-text' : 'territorio-empty'">{{ usuario.territorio || 'Sin asignar' }}</span>
                   </td>
                   <td v-if="puedeVerAcciones" class="col-acciones">
                     <div class="actions-container">
@@ -1101,7 +1101,7 @@ const imprimirUsuarios = () => {
               <td class="col-cargo">${usuario.cargo || 'Sin cargo'}</td>
               <td class="col-supervisor">${usuario.supervisor || 'Sin supervisor'}</td>
               <td class="col-curp">${(usuario.curp || 'Sin CURP').toUpperCase()}</td>
-              <td class="col-territorio">${usuario.territorio || 'Sin asignar'}</td>
+              <td class="col-territorio">${usuario.territorio || ''}</td>
             </tr>
             `
           }).join('')}
@@ -1180,7 +1180,7 @@ const exportarExcel = () => {
     usuario.cargo || 'Sin cargo',
     usuario.supervisor || 'Sin supervisor',
     (usuario.curp || 'Sin CURP').toUpperCase(),
-    usuario.territorio || 'Sin asignar',
+    usuario.territorio || '',
     usuario.telefono || 'Sin teléfono'
   ])
   
@@ -2385,6 +2385,16 @@ const logout = () => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100px;
+}
+
+/* Estilo para territorio vacío */
+.territorio-empty {
+  display: inline-block;
+  font-size: clamp(8px, 1.3vw, 10px);
+  font-weight: 400;
+  font-style: italic;
+  color: #9e9e9e;
+  padding: 2px 8px;
 }
 
 /* Estilos específicos para columnas */

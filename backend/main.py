@@ -1391,11 +1391,11 @@ async def obtener_usuarios():
         tiene_columna_rol = bool(rol_check)
         
         if tiene_columna_rol:
-            # Obtener todos los usuarios con rol
-            query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, rol FROM usuarios ORDER BY id DESC"
+            # Obtener todos los usuarios con rol y territorio
+            query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, rol, territorio FROM usuarios ORDER BY id DESC"
         else:
             # Obtener usuarios sin rol (por compatibilidad)
-            query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono FROM usuarios ORDER BY id DESC"
+            query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, territorio FROM usuarios ORDER BY id DESC"
         
         resultados = ejecutar_consulta_segura(query, fetch_type='all')
         
@@ -1416,7 +1416,8 @@ async def obtener_usuarios():
                 "curp": row[5],
                 "contrasena": row[6],
                 "telefono": row[7] if len(row) > 7 else None,
-                "rol": row[8] if tiene_columna_rol and len(row) > 8 else 'user'
+                "rol": row[8] if tiene_columna_rol and len(row) > 8 else 'user',
+                "territorio": row[9] if tiene_columna_rol and len(row) > 9 else (row[8] if not tiene_columna_rol and len(row) > 8 else None)
             }
             usuarios.append(usuario)
         

@@ -175,12 +175,13 @@
               <thead>
                 <tr>
                   <th class="col-id">ID</th>
-                  <th class="col-nombre">Nombre Completo</th>
+                  <th class="col-nombre">Nombre</th>
                   <th class="col-correo">Correo</th>
                   <th class="col-cargo">Cargo</th>
                   <th class="col-supervisor">Supervisor</th>
-                  <th class="col-fecha">Fecha de Registro</th>
+                  <th class="col-fecha">Fecha</th>
                   <th class="col-curp">CURP</th>
+                  <th class="col-territorio">Territorio</th>
                   <th v-if="puedeVerAcciones" class="col-acciones">Acciones</th>
                 </tr>
               </thead>
@@ -195,6 +196,9 @@
                   <td>{{ formatFecha(usuario.created_at || new Date()) }}</td>
                   <td class="col-curp">
                     <span class="curp-text">{{ (usuario.curp || 'N/A').toUpperCase() }}</span>
+                  </td>
+                  <td class="col-territorio">
+                    <span class="territorio-text">{{ usuario.territorio || 'Sin asignar' }}</span>
                   </td>
                   <td v-if="puedeVerAcciones" class="col-acciones">
                     <div class="actions-container">
@@ -963,12 +967,13 @@ const imprimirUsuarios = () => {
         background-color: white !important; 
       }
       
-      .col-id { width: 80px; text-align: center; }
-      .col-correo { width: 220px; }
-      .col-nombre { width: 200px; }
-      .col-cargo { width: 150px; }
-      .col-supervisor { width: 180px; }
-      .col-curp { width: 140px; text-align: center; }
+      .col-id { width: 60px; text-align: center; }
+      .col-correo { width: 180px; }
+      .col-nombre { width: 140px; }
+      .col-cargo { width: 120px; }
+      .col-supervisor { width: 140px; }
+      .col-curp { width: 120px; text-align: center; }
+      .col-territorio { width: 100px; text-align: center; }
       .col-telefono { width: 120px; font-family: monospace; font-size: 8px; }
       
       .estado-activo { 
@@ -1078,12 +1083,12 @@ const imprimirUsuarios = () => {
         <thead>
           <tr>
             <th class="col-id">ID</th>
-            <th class="col-correo">Correo Electrónico</th>
-            <th class="col-nombre">Nombre Completo</th>
+            <th class="col-correo">Correo</th>
+            <th class="col-nombre">Nombre</th>
             <th class="col-cargo">Cargo</th>
             <th class="col-supervisor">Supervisor</th>
             <th class="col-curp">CURP</th>
-            <th class="col-telefono">Teléfono</th>
+            <th class="col-territorio">Territorio</th>
           </tr>
         </thead>
         <tbody>
@@ -1096,7 +1101,7 @@ const imprimirUsuarios = () => {
               <td class="col-cargo">${usuario.cargo || 'Sin cargo'}</td>
               <td class="col-supervisor">${usuario.supervisor || 'Sin supervisor'}</td>
               <td class="col-curp">${(usuario.curp || 'Sin CURP').toUpperCase()}</td>
-              <td class="col-telefono">${usuario.telefono || 'Sin teléfono'}</td>
+              <td class="col-territorio">${usuario.territorio || 'Sin asignar'}</td>
             </tr>
             `
           }).join('')}
@@ -1141,6 +1146,7 @@ const exportarExcel = () => {
     'Cargo', 
     'Supervisor', 
     'CURP',
+    'Territorio',
     'Teléfono'
   ]
   
@@ -1174,6 +1180,7 @@ const exportarExcel = () => {
     usuario.cargo || 'Sin cargo',
     usuario.supervisor || 'Sin supervisor',
     (usuario.curp || 'Sin CURP').toUpperCase(),
+    usuario.territorio || 'Sin asignar',
     usuario.telefono || 'Sin teléfono'
   ])
   
@@ -1228,7 +1235,8 @@ const filtrarUsuarios = () => {
       (usuario.nombre_completo && usuario.nombre_completo.toLowerCase().includes(termino)) ||
       (usuario.cargo && usuario.cargo.toLowerCase().includes(termino)) ||
       (usuario.supervisor && usuario.supervisor.toLowerCase().includes(termino)) ||
-      (usuario.curp && usuario.curp.toLowerCase().includes(termino))
+      (usuario.curp && usuario.curp.toLowerCase().includes(termino)) ||
+      (usuario.territorio && usuario.territorio.toLowerCase().includes(termino))
     )
   }
   resetearPaginacion()
@@ -2274,7 +2282,7 @@ const logout = () => {
 }
 
 .usuarios-table th.col-nombre {
-  min-width: 200px;
+  min-width: 140px;
   text-align: left;
   padding-left: clamp(8px, 2vw, 12px);
   color: #4CAF50;
@@ -2282,13 +2290,14 @@ const logout = () => {
 }
 
 /* Anchos FIJOS específicos para cada columna */
-.usuarios-table th.col-id { width: 80px; }
-.usuarios-table th.col-nombre { width: 200px; }
-.usuarios-table th.col-correo { width: 220px; }
-.usuarios-table th.col-cargo { width: 150px; }
-.usuarios-table th.col-supervisor { width: 180px; }
-.usuarios-table th.col-fecha { width: 140px; }
-.usuarios-table th.col-curp { width: 140px; }
+.usuarios-table th.col-id { width: 60px; }
+.usuarios-table th.col-nombre { width: 140px; }
+.usuarios-table th.col-correo { width: 180px; }
+.usuarios-table th.col-cargo { width: 120px; }
+.usuarios-table th.col-supervisor { width: 140px; }
+.usuarios-table th.col-fecha { width: 100px; }
+.usuarios-table th.col-curp { width: 120px; }
+.usuarios-table th.col-territorio { width: 110px; }
 .usuarios-table th.col-acciones { 
   width: 200px !important; 
   min-width: 200px !important;
@@ -2312,14 +2321,15 @@ const logout = () => {
 }
 
 /* Anchos mínimos simplificados para celdas */
-.usuarios-table td:nth-child(1) { min-width: 60px; }  /* ID */
-.usuarios-table td:nth-child(2) { min-width: 150px; text-align: left; padding-left: clamp(8px, 2vw, 12px); } /* Nombre */
-.usuarios-table td:nth-child(3) { min-width: 180px; } /* Correo */
-.usuarios-table td:nth-child(4) { min-width: 120px; } /* Cargo */
-.usuarios-table td:nth-child(5) { min-width: 120px; } /* Supervisor */
-.usuarios-table td:nth-child(6) { min-width: 110px; } /* Fecha */
-.usuarios-table td:nth-child(7) { min-width: 140px; } /* CURP */
-.usuarios-table td:nth-child(8) { min-width: 140px; } /* Acciones */
+.usuarios-table td:nth-child(1) { min-width: 50px; }  /* ID */
+.usuarios-table td:nth-child(2) { min-width: 120px; text-align: left; padding-left: clamp(8px, 2vw, 12px); } /* Nombre */
+.usuarios-table td:nth-child(3) { min-width: 150px; } /* Correo */
+.usuarios-table td:nth-child(4) { min-width: 100px; } /* Cargo */
+.usuarios-table td:nth-child(5) { min-width: 100px; } /* Supervisor */
+.usuarios-table td:nth-child(6) { min-width: 90px; } /* Fecha */
+.usuarios-table td:nth-child(7) { min-width: 110px; } /* CURP */
+.usuarios-table td:nth-child(8) { min-width: 100px; } /* Territorio */
+.usuarios-table td:nth-child(9) { min-width: 140px; } /* Acciones */
 
 /* Estilos para columna CURP */
 .col-curp {
@@ -2340,6 +2350,26 @@ const logout = () => {
   border-radius: 4px;
 }
 
+/* Estilos para columna Territorio */
+.col-territorio {
+  width: 110px;
+  text-align: center;
+}
+
+.territorio-text {
+  display: inline-block;
+  font-size: clamp(8px, 1.3vw, 10px);
+  font-weight: 600;
+  color: #1565C0;
+  background: rgba(21, 101, 192, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
 /* Estilos específicos para columnas */
 .col-id {
   width: 80px;
@@ -2350,7 +2380,7 @@ const logout = () => {
 }
 
 .col-nombre {
-  width: 200px;
+  width: 140px;
   text-align: left !important;
   padding-left: clamp(8px, 2vw, 12px) !important;
 }
@@ -2359,8 +2389,12 @@ const logout = () => {
 .nombre-normal {
   display: inline-block;
   color: #2E7D32;
-  font-weight: 700;
-  font-size: clamp(10px, 2vw, 13px);
+  font-weight: 600;
+  font-size: clamp(9px, 1.6vw, 11px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 130px;
 }
 
 .usuarios-table tbody tr {

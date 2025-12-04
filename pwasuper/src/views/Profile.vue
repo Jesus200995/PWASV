@@ -136,6 +136,21 @@
             </div>
           </div>
           
+          <!-- Territorio -->
+          <div class="info-item-enhanced">
+            <div class="flex items-center gap-2">
+              <span class="icon-badge icon-territorio">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+              </span>
+              <div class="flex-1">
+                <p class="label-info">Territorio</p>
+                <p class="value-info value-territorio">{{ user.territorio || 'No asignado' }}</p>
+              </div>
+            </div>
+          </div>
+          
           <!-- Fecha de registro -->
           <div v-if="user.fecha_registro" class="info-item-enhanced">
             <div class="flex items-center gap-2">
@@ -535,6 +550,17 @@
                 <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
               </div>
 
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Territorio (Estado)</label>
+                <select
+                  v-model="editForm.territorio"
+                  class="edit-input-small w-full"
+                >
+                  <option value="">-- Selecciona un estado --</option>
+                  <option v-for="estado in estadosMexico" :key="estado" :value="estado">{{ estado }}</option>
+                </select>
+              </div>
+
               <div class="flex space-x-2 pt-3">
                 <button
                   type="button"
@@ -625,8 +651,18 @@ const editForm = ref({
   curp: '',
   telefono: '',
   codigoPais: '+52',
-  telefonoDigitos: ''
+  telefonoDigitos: '',
+  territorio: ''
 })
+
+// Lista de estados de México para el selector
+const estadosMexico = [
+  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas',
+  'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Estado de México',
+  'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit',
+  'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí',
+  'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'
+]
 
 // Variables para selector de país
 const showCountrySelector = ref(false)
@@ -1049,7 +1085,8 @@ const openEditModal = () => {
     curp: user.value.curp || '',
     telefono: user.value.telefono || '',
     codigoPais: codigoPais,
-    telefonoDigitos: telefonoDigitos
+    telefonoDigitos: telefonoDigitos,
+    territorio: user.value.territorio || ''
   }
   
   // Resetear errores
@@ -1071,7 +1108,8 @@ const closeEditModal = () => {
     curp: '',
     telefono: '',
     codigoPais: '+52',
-    telefonoDigitos: ''
+    telefonoDigitos: '',
+    territorio: ''
   }
   editErrors.value = {}
 }
@@ -1172,7 +1210,8 @@ const updateUserInfo = async () => {
           cargo: editForm.value.cargo.trim(),
           supervisor: editForm.value.supervisor?.trim() || null,
           curp: editForm.value.curp?.trim() || null,
-          telefono: telefonoCompleto
+          telefono: telefonoCompleto,
+          territorio: editForm.value.territorio || null
         },
         {
           timeout: 15000,
@@ -1193,7 +1232,8 @@ const updateUserInfo = async () => {
           cargo: editForm.value.cargo,
           supervisor: editForm.value.supervisor,
           curp: editForm.value.curp,
-          telefono: telefonoCompleto
+          telefono: telefonoCompleto,
+          territorio: editForm.value.territorio
         }
         
         // Actualizar localStorage
@@ -1204,7 +1244,8 @@ const updateUserInfo = async () => {
           cargo: editForm.value.cargo,
           supervisor: editForm.value.supervisor,
           curp: editForm.value.curp,
-          telefono: telefonoCompleto
+          telefono: telefonoCompleto,
+          territorio: editForm.value.territorio
         }
         localStorage.setItem('user', JSON.stringify(updatedUser))
         
@@ -2023,6 +2064,12 @@ const validatePhoneEdit = () => {
   color: #0ea5e9;
 }
 
+.icon-territorio {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(251, 207, 232, 0.2));
+  border-color: rgba(236, 72, 153, 0.4);
+  color: #ec4899;
+}
+
 .icon-date {
   background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(233, 213, 255, 0.2));
   border-color: rgba(168, 85, 247, 0.4);
@@ -2105,6 +2152,14 @@ const validatePhoneEdit = () => {
 
 .value-phone {
   background: linear-gradient(135deg, #0369a1 0%, #0c4a6e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}
+
+.value-territorio {
+  background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

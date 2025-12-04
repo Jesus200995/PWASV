@@ -175,7 +175,7 @@
               <thead>
                 <tr>
                   <th class="col-id">ID</th>
-                  <th class="col-nombre">Nombre</th>
+                  <th class="col-nombre" style="text-align: center;">Nombre</th>
                   <th class="col-correo">Correo</th>
                   <th class="col-cargo">Cargo</th>
                   <th class="col-supervisor">Supervisor</th>
@@ -2283,8 +2283,7 @@ const logout = () => {
 
 .usuarios-table th.col-nombre {
   min-width: 140px;
-  text-align: left;
-  padding-left: clamp(8px, 2vw, 12px);
+  text-align: center;
   color: #4CAF50;
   font-weight: 700;
 }
@@ -2322,10 +2321,28 @@ const logout = () => {
 
 /* Anchos mínimos simplificados para celdas */
 .usuarios-table td:nth-child(1) { min-width: 50px; }  /* ID */
-.usuarios-table td:nth-child(2) { min-width: 120px; text-align: left; padding-left: clamp(8px, 2vw, 12px); } /* Nombre */
-.usuarios-table td:nth-child(3) { min-width: 150px; } /* Correo */
-.usuarios-table td:nth-child(4) { min-width: 100px; } /* Cargo */
-.usuarios-table td:nth-child(5) { min-width: 100px; } /* Supervisor */
+.usuarios-table td:nth-child(2) { 
+  min-width: 150px; 
+  text-align: left; 
+  padding-left: clamp(8px, 2vw, 12px); 
+  white-space: normal !important;
+  word-wrap: break-word;
+} /* Nombre */
+.usuarios-table td:nth-child(3) { 
+  min-width: 150px; 
+  white-space: normal !important;
+  word-wrap: break-word;
+} /* Correo */
+.usuarios-table td:nth-child(4) { 
+  min-width: 100px; 
+  white-space: normal !important;
+  word-wrap: break-word;
+} /* Cargo */
+.usuarios-table td:nth-child(5) { 
+  min-width: 100px; 
+  white-space: normal !important;
+  word-wrap: break-word;
+} /* Supervisor */
 .usuarios-table td:nth-child(6) { min-width: 90px; } /* Fecha */
 .usuarios-table td:nth-child(7) { min-width: 110px; } /* CURP */
 .usuarios-table td:nth-child(8) { min-width: 100px; } /* Territorio */
@@ -2380,21 +2397,21 @@ const logout = () => {
 }
 
 .col-nombre {
-  width: 140px;
+  width: 160px;
+  min-width: 160px;
   text-align: left !important;
   padding-left: clamp(8px, 2vw, 12px) !important;
 }
 
 /* Estilo simple para el nombre (sin animaciones) */
 .nombre-normal {
-  display: inline-block;
+  display: block;
   color: #2E7D32;
   font-weight: 600;
   font-size: clamp(9px, 1.6vw, 11px);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 130px;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.3;
 }
 
 .usuarios-table tbody tr {

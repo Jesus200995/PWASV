@@ -6,6 +6,7 @@ import UpdateNotification from './components/UpdateNotification.vue';
 import SupportBubble from './components/SupportBubble.vue';
 import WelcomeModalNew from './components/WelcomeModalNew.vue';
 import PoinsettiaFlower from './components/PoinsettiaFlower.vue';
+import TerritorioModal from './components/TerritorioModal.vue';
 import { useNotifications } from './composables/useNotifications.js';
 
 const router = useRouter();
@@ -14,6 +15,7 @@ const isLoggingOut = ref(false);
 const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
+const showTerritorioModal = ref(false);
 
 // Sistema de notificaciones en tiempo real
 const { unreadCount, startPolling, stopPolling } = useNotifications();
@@ -81,6 +83,12 @@ onMounted(() => {
       
       // Inicializar sistema de notificaciones una vez que el usuario está identificado
       notificationPollingId = startPolling();
+      
+      // Verificar si el usuario tiene territorio asignado
+      if (!userData.value.territorio) {
+        console.log('⚠️ Usuario sin territorio asignado, mostrando modal obligatorio');
+        showTerritorioModal.value = true;
+      }
       
       // Mostrar mensaje de bienvenida solo si recién inició sesión
       const justLoggedIn = sessionStorage.getItem('justLoggedIn');
@@ -201,10 +209,32 @@ function logout() {
     window.location.href = '/login';
   }, 100);
 }
+
+// Función para manejar cuando se guarda el territorio
+const handleTerritorioSaved = (territorio) => {
+  console.log('✅ Territorio guardado:', territorio);
+  showTerritorioModal.value = false;
+  
+  // Actualizar userData con el nuevo territorio
+  if (userData.value) {
+    userData.value.territorio = territorio;
+  }
+}
+
+// Computed para obtener el ID del usuario actual
+const currentUserId = computed(() => {
+  return userData.value?.id || null;
+});
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Modal obligatorio de selección de territorio -->
+    <TerritorioModal 
+      :isVisible="showTerritorioModal && isLoggedIn"
+      :userId="currentUserId"
+      @territorio-saved="handleTerritorioSaved"
+    />
     <!-- Nuevo modal de bienvenida mejorado -->
     <WelcomeModalNew 
       :show="showWelcome"

@@ -241,6 +241,24 @@ try:
     except Exception as migration_error:
         print(f"⚠️ Advertencia en migración de categoria_actividad: {migration_error}")
     
+    # ===== MIGRACIÓN: Agregar columna territorio a tabla usuarios =====
+    try:
+        ejecutar_consulta_segura("""
+            DO $$ 
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'usuarios' AND column_name = 'territorio'
+                ) THEN
+                    ALTER TABLE usuarios ADD COLUMN territorio VARCHAR(100) DEFAULT NULL;
+                    RAISE NOTICE 'Columna territorio agregada a usuarios';
+                END IF;
+            END $$;
+        """, fetch_type='none')
+        print("✅ Migración de columna territorio verificada")
+    except Exception as e:
+        print(f"⚠️ Error en migración de territorio: {e}")
+    
 except Exception as e:
     print(f"❌ Error en inicialización de base de datos: {e}")
     conn = None
@@ -568,8 +586,8 @@ async def preflight(path: str):
 
 @app.post("/login")
 async def login(usuario: UserLogin):
-    # Buscar usuario por correo
-    cursor.execute("SELECT id, correo, nombre_completo, cargo, contrasena FROM usuarios WHERE correo = %s", (usuario.correo,))
+    # Buscar usuario por correo incluyendo territorio
+    cursor.execute("SELECT id, correo, nombre_completo, cargo, contrasena, territorio FROM usuarios WHERE correo = %s", (usuario.correo,))
     user = cursor.fetchone()
     
     if not user:
@@ -583,7 +601,8 @@ async def login(usuario: UserLogin):
         "id": user[0],
         "correo": user[1],
         "nombre_completo": user[2],
-        "cargo": user[3]
+        "cargo": user[3],
+        "territorio": user[5] if len(user) > 5 else None
     }
 
 # ==================== ENDPOINT PARA VERIFICAR CONTRASEÑA ====================
@@ -1461,9 +1480,9 @@ async def obtener_usuario(user_id: int):
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Buscar usuario por ID con CURP, teléfono y contraseña
+        # Buscar usuario por ID con CURP, teléfono, contraseña y territorio
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono FROM usuarios WHERE id = %s",
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, territorio FROM usuarios WHERE id = %s",
             (user_id,)
         )
         
@@ -1479,7 +1498,8 @@ async def obtener_usuario(user_id: int):
             "supervisor": resultado[4],
             "curp": resultado[5],
             "contrasena": resultado[6],  # Incluir contraseña
-            "telefono": resultado[7] if len(resultado) > 7 else None  # Incluir teléfono si existe
+            "telefono": resultado[7] if len(resultado) > 7 else None,  # Incluir teléfono si existe
+            "territorio": resultado[8] if len(resultado) > 8 else None  # Incluir territorio si existe
         }
         
         print(f"✅ Usuario {user_id} obtenido correctamente")
@@ -1503,6 +1523,7 @@ class UserUpdate(BaseModel):
     curp: str = None
     telefono: str = None
     rol: str = 'user'
+    territorio: str = None
     nueva_contrasena: Optional[str] = None  # Contraseña opcional para actualización
 
 @app.put("/usuarios/{user_id}")
@@ -1562,21 +1583,21 @@ async def actualizar_usuario(user_id: int, usuario: UserUpdate):
             contrasena_final = usuario.nueva_contrasena.strip()
             print("🔑 Actualizando contraseña del usuario")
         
-        # Actualizar usuario con rol
+        # Actualizar usuario con rol y territorio
         cursor.execute(
             """UPDATE usuarios 
                SET correo = %s, nombre_completo = %s, cargo = %s, 
-                   supervisor = %s, contrasena = %s, curp = %s, telefono = %s, rol = %s 
+                   supervisor = %s, contrasena = %s, curp = %s, telefono = %s, rol = %s, territorio = %s 
                WHERE id = %s""",
             (usuario.correo, usuario.nombre_completo, usuario.cargo, 
-             usuario.supervisor, contrasena_final, curp_upper, usuario.telefono, usuario.rol, user_id)
+             usuario.supervisor, contrasena_final, curp_upper, usuario.telefono, usuario.rol, usuario.territorio, user_id)
         )
         
         conn.commit()
         
         # Obtener usuario actualizado
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono, rol FROM usuarios WHERE id = %s",
+            "SELECT id, correo, nombre_completo, cargo, supervisor, contrasena, curp, telefono, rol, territorio FROM usuarios WHERE id = %s",
             (user_id,)
         )
         
@@ -1590,7 +1611,8 @@ async def actualizar_usuario(user_id: int, usuario: UserUpdate):
             "contrasena": resultado[5],
             "curp": resultado[6],
             "telefono": resultado[7],
-            "rol": resultado[8] if len(resultado) > 8 else 'user'
+            "rol": resultado[8] if len(resultado) > 8 else 'user',
+            "territorio": resultado[9] if len(resultado) > 9 else None
         }
         
         print(f"✅ Usuario {user_id} actualizado exitosamente con rol {usuario.rol}")
@@ -1684,6 +1706,68 @@ async def actualizar_info_usuario(user_id: int, info: UserInfoUpdate):
         conn.rollback()
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al actualizar información personal: {str(e)}")
+
+# ==================== ENDPOINT PARA ACTUALIZAR TERRITORIO ====================
+
+# Lista de estados de México
+ESTADOS_MEXICO = [
+    "Aguascalientes", "Baja California", "Baja California Sur", "Campeche",
+    "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila", "Colima",
+    "Durango", "Estado de México", "Guanajuato", "Guerrero", "Hidalgo",
+    "Jalisco", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca",
+    "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa",
+    "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
+]
+
+class TerritorioUpdate(BaseModel):
+    territorio: str
+
+@app.patch("/usuarios/{user_id}/territorio")
+async def actualizar_territorio(user_id: int, data: TerritorioUpdate):
+    """Actualiza el territorio de un usuario"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Validar que el territorio sea un estado válido de México
+        if data.territorio not in ESTADOS_MEXICO:
+            raise HTTPException(status_code=400, detail=f"Territorio inválido. Debe ser uno de los 32 estados de México.")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (user_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Actualizar territorio
+        cursor.execute(
+            "UPDATE usuarios SET territorio = %s WHERE id = %s",
+            (data.territorio, user_id)
+        )
+        conn.commit()
+        
+        print(f"✅ Territorio del usuario {user_id} actualizado a: {data.territorio}")
+        return {
+            "success": True,
+            "mensaje": "Territorio actualizado exitosamente",
+            "territorio": data.territorio
+        }
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al actualizar territorio: {str(e)}")
+
+# Endpoint para obtener lista de estados de México
+@app.get("/estados-mexico")
+async def obtener_estados_mexico():
+    """Devuelve la lista de los 32 estados de la República Mexicana"""
+    return {"estados": ESTADOS_MEXICO}
 
 # Endpoint para eliminar un usuario específico con todos sus datos
 @app.delete("/usuarios/{user_id}")

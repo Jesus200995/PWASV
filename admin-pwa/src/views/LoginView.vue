@@ -30,51 +30,55 @@
             <div class="logo-icon-container">
               <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="2" result="blur1"/>
-                    <feGaussianBlur stdDeviation="4" result="blur2"/>
+                  <linearGradient id="leafGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#a3e635"/>
+                    <stop offset="50%" style="stop-color:#ffffff"/>
+                    <stop offset="100%" style="stop-color:#a3e635"/>
+                  </linearGradient>
+                  <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="1.5" result="blur"/>
                     <feMerge>
-                      <feMergeNode in="blur2"/>
-                      <feMergeNode in="blur1"/>
+                      <feMergeNode in="blur"/>
+                      <feMergeNode in="blur"/>
                       <feMergeNode in="SourceGraphic"/>
                     </feMerge>
                   </filter>
                 </defs>
-                <!-- Hoja con contorno neón -->
+                <!-- Hoja con contorno verde manzana y blanco -->
                 <path 
                   d="M50 15 C30 25, 20 45, 25 65 C30 80, 45 85, 50 85 C55 85, 70 80, 75 65 C80 45, 70 25, 50 15" 
                   fill="none" 
-                  stroke="#ffffff" 
+                  stroke="url(#leafGradient)" 
                   stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  filter="url(#neonGlow)"
+                  filter="url(#softGlow)"
                   class="leaf-outline"/>
-                <!-- Nervadura central neón -->
+                <!-- Nervadura central -->
                 <path 
                   d="M50 22 L50 78" 
-                  stroke="#ffffff" 
+                  stroke="url(#leafGradient)" 
                   stroke-width="1.5" 
                   fill="none"
                   stroke-linecap="round"
-                  filter="url(#neonGlow)"
+                  filter="url(#softGlow)"
                   class="leaf-vein"/>
-                <!-- Nervaduras laterales neón -->
+                <!-- Nervaduras laterales -->
                 <path 
                   d="M50 32 L38 42 M50 44 L34 56 M50 56 L36 66" 
-                  stroke="#ffffff" 
+                  stroke="url(#leafGradient)" 
                   stroke-width="1.2" 
                   fill="none"
                   stroke-linecap="round"
-                  filter="url(#neonGlow)"
+                  filter="url(#softGlow)"
                   class="leaf-veins-left"/>
                 <path 
                   d="M50 32 L62 42 M50 44 L66 56 M50 56 L64 66" 
-                  stroke="#ffffff" 
+                  stroke="url(#leafGradient)" 
                   stroke-width="1.2" 
                   fill="none"
                   stroke-linecap="round"
-                  filter="url(#neonGlow)"
+                  filter="url(#softGlow)"
                   class="leaf-veins-right"/>
               </svg>
             </div>
@@ -302,9 +306,9 @@ const login = async () => {
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, 
-    rgba(6, 78, 59, 0.85) 0%,
-    rgba(5, 150, 105, 0.7) 50%,
-    rgba(6, 78, 59, 0.85) 100%
+    rgba(56, 142, 60, 0.85) 0%,
+    rgba(46, 125, 50, 0.75) 50%,
+    rgba(27, 94, 32, 0.85) 100%
   );
 }
 
@@ -317,10 +321,10 @@ const login = async () => {
   position: absolute;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 2px, transparent 2px),
-    radial-gradient(circle at 75% 75%, rgba(255,255,255,0.08) 2px, transparent 2px);
+    radial-gradient(circle at 25% 25%, rgba(105, 240, 174, 0.12) 2px, transparent 2px),
+    radial-gradient(circle at 75% 75%, rgba(129, 199, 132, 0.1) 2px, transparent 2px);
   background-size: 60px 60px;
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 /* Formas flotantes */
@@ -333,7 +337,7 @@ const login = async () => {
 .shape {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+  background: linear-gradient(135deg, rgba(105, 240, 174, 0.15), rgba(56, 142, 60, 0.1));
   backdrop-filter: blur(2px);
 }
 
@@ -411,8 +415,8 @@ const login = async () => {
 .orb-1 {
   width: 400px;
   height: 400px;
-  background: var(--green-400);
-  opacity: 0.3;
+  background: #69F0AE;
+  opacity: 0.15;
   top: -100px;
   left: -100px;
   animation: orbPulse 8s ease-in-out infinite;
@@ -421,8 +425,8 @@ const login = async () => {
 .orb-2 {
   width: 300px;
   height: 300px;
-  background: var(--green-300);
-  opacity: 0.25;
+  background: #4CAF50;
+  opacity: 0.12;
   bottom: -50px;
   right: -50px;
   animation: orbPulse 10s ease-in-out infinite 2s;
@@ -431,8 +435,8 @@ const login = async () => {
 .orb-3 {
   width: 250px;
   height: 250px;
-  background: var(--green-200);
-  opacity: 0.2;
+  background: #81C784;
+  opacity: 0.1;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -467,7 +471,10 @@ const login = async () => {
 }
 
 .login-card {
-  background: rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, 
+    #388E3C 0%, 
+    #2E7D32 50%, 
+    #1B5E20 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 32px;

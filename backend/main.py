@@ -2673,14 +2673,33 @@ async def obtener_historial_asistencias(usuario_id: int = None, limit: int = Non
         # Convertir tuplas a diccionarios manualmente
         asistencias = []
         for row in resultados:
-            # ✅ SOLUCIÓN: Agregar zona horaria CDMX (-06:00) a los ISO format
-            # para que JavaScript los interprete correctamente sin desplazamientos
+            # Procesar fecha correctamente (es DATE, no DATETIME)
+            # No agregar timezone a la fecha, solo formatearla como YYYY-MM-DD
+            fecha_str = row[2].isoformat() if row[2] else None
+            
+            # Procesar hora_entrada (es TIME o DATETIME)
+            hora_entrada_str = None
+            if row[3]:
+                # Si es un objeto time, convertirlo a string simple
+                if hasattr(row[3], 'isoformat'):
+                    hora_entrada_str = row[3].isoformat()
+                else:
+                    hora_entrada_str = str(row[3])
+            
+            # Procesar hora_salida (es TIME o DATETIME)
+            hora_salida_str = None
+            if row[4]:
+                if hasattr(row[4], 'isoformat'):
+                    hora_salida_str = row[4].isoformat()
+                else:
+                    hora_salida_str = str(row[4])
+            
             asistencia = {
                 "id": row[0],
                 "usuario_id": row[1],
-                "fecha": (row[2].isoformat() + "-06:00") if row[2] else None,
-                "hora_entrada": (row[3].isoformat() + "-06:00") if row[3] else None,
-                "hora_salida": (row[4].isoformat() + "-06:00") if row[4] else None,
+                "fecha": fecha_str,
+                "hora_entrada": hora_entrada_str,
+                "hora_salida": hora_salida_str,
                 "latitud_entrada": float(row[5]) if row[5] else None,
                 "longitud_entrada": float(row[6]) if row[6] else None,
                 "latitud_salida": float(row[7]) if row[7] else None,

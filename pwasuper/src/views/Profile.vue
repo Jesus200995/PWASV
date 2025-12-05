@@ -551,13 +551,13 @@
               </div>
 
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Territorio (Estado)</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Territorio de Sembrando Vida</label>
                 <select
                   v-model="editForm.territorio"
                   class="edit-input-small w-full"
                 >
-                  <option value="">-- Selecciona un estado --</option>
-                  <option v-for="estado in estadosMexico" :key="estado" :value="estado">{{ estado }}</option>
+                  <option value="">-- Selecciona un territorio --</option>
+                  <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">{{ territorio }}</option>
                 </select>
               </div>
 
@@ -655,13 +655,39 @@ const editForm = ref({
   territorio: ''
 })
 
-// Lista de estados de México para el selector
-const estadosMexico = [
-  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas',
-  'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Estado de México',
-  'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit',
-  'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí',
-  'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'
+// Lista de territorios de Sembrando Vida para el selector
+const territoriosSembrandoVida = [
+  'Acapulco - Centro - Norte - Tierra Caliente',
+  'Acayucan',
+  'Balancán',
+  'Chihuahua / Sonora',
+  'Colima',
+  'Comalcalco',
+  'Córdoba',
+  'Costa Chica - Montaña',
+  'Costa Grande - Sierra',
+  'Durango / Zacatecas',
+  'Hidalgo',
+  'Istmo',
+  'Michoacán',
+  'Mixteca',
+  'Morelos',
+  'Nayarit / Jalisco',
+  'Ocosingo',
+  'Palenque',
+  'Papantla',
+  'Pichucalco',
+  'Puebla',
+  'San Luis Potosí',
+  'Sinaloa',
+  'Tamaulipas',
+  'Tantoyuca',
+  'Tapachula',
+  'Teapa',
+  'Tlaxcala / Estado de México',
+  'Tzucacab / Opb',
+  'Xpujil',
+  'Oficinas Centrales'
 ]
 
 // Variables para selector de país

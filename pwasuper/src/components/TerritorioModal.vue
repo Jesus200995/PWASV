@@ -181,7 +181,7 @@ const confirmarTerritorio = async () => {
 
 /* Modal container */
 .territorio-modal {
-  background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+  background: linear-gradient(145deg, #ffffff 0%, #fff7ed 100%);
   border-radius: 24px;
   padding: 32px 24px;
   max-width: 400px;
@@ -189,13 +189,13 @@ const confirmarTerritorio = async () => {
   text-align: center;
   box-shadow: 
     0 25px 50px -12px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(34, 197, 94, 0.2),
+    0 0 0 1px rgba(249, 115, 22, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   position: relative;
   overflow: hidden;
 }
 
-/* Decoración verde superior */
+/* Decoración naranja-roja superior */
 .territorio-modal::before {
   content: '';
   position: absolute;
@@ -203,7 +203,7 @@ const confirmarTerritorio = async () => {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #22c55e, #16a34a, #15803d);
+  background: linear-gradient(90deg, #f97316, #ea580c, #dc2626);
 }
 
 /* Container del icono */
@@ -216,8 +216,8 @@ const confirmarTerritorio = async () => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4);
 }
 
 .modal-icon {
@@ -232,7 +232,7 @@ const confirmarTerritorio = async () => {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(34, 197, 94, 0.3);
+  background: rgba(249, 115, 22, 0.3);
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -251,7 +251,7 @@ const confirmarTerritorio = async () => {
 .modal-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #166534;
+  color: #c2410c;
   margin-bottom: 12px;
   line-height: 1.2;
 }
@@ -264,16 +264,16 @@ const confirmarTerritorio = async () => {
   margin-bottom: 10px;
 }
 
-/* Advertencia amarilla */
+/* Advertencia naranja */
 .modal-advertencia {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   font-size: 0.8rem;
-  color: #b45309;
-  background-color: #fef3c7;
-  border: 1px solid #fcd34d;
+  color: #9a3412;
+  background-color: #ffedd5;
+  border: 1px solid #fdba74;
   border-radius: 6px;
   padding: 8px 12px;
   margin-bottom: 16px;
@@ -283,7 +283,7 @@ const confirmarTerritorio = async () => {
 
 .modal-advertencia svg {
   flex-shrink: 0;
-  color: #d97706;
+  color: #ea580c;
 }
 
 /* Container del select */
@@ -317,13 +317,13 @@ const confirmarTerritorio = async () => {
 
 .territorio-select:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
 }
 
 .territorio-select.has-value {
   color: #111827;
-  border-color: #22c55e;
+  border-color: #f97316;
 }
 
 .territorio-select option {
@@ -338,7 +338,7 @@ const confirmarTerritorio = async () => {
   justify-content: center;
   gap: 10px;
   padding: 16px 24px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
   color: white;
   font-size: 1rem;
   font-weight: 600;
@@ -346,12 +346,12 @@ const confirmarTerritorio = async () => {
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
 }
 
 .confirm-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
 }
 
 .confirm-button:active:not(:disabled) {

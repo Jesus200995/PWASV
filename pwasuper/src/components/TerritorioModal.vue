@@ -101,7 +101,7 @@ const saving = ref(false)
 
 // Lista de territorios de Sembrando Vida
 const territorios = ref([
-  "Acapulco- Centro- Norte- Tierra Caliente",
+  "Acapulco - Centro - Norte - Tierra Caliente",
   "Acayucan",
   "Balancán",
   "Chihuahua / Sonora",
@@ -109,7 +109,7 @@ const territorios = ref([
   "Comalcalco",
   "Córdoba",
   "Costa Chica - Montaña",
-  "Costa Grande- Sierra",
+  "Costa Grande - Sierra",
   "Durango / Zacatecas",
   "Hidalgo",
   "Istmo",

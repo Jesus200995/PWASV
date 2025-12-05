@@ -1721,7 +1721,7 @@ async def actualizar_info_usuario(user_id: int, info: UserInfoUpdate):
 
 # Lista de territorios de Sembrando Vida
 TERRITORIOS_SEMBRANDO_VIDA = [
-    "Acapulco- Centro- Norte- Tierra Caliente",
+    "Acapulco - Centro - Norte - Tierra Caliente",
     "Acayucan",
     "Balancán",
     "Chihuahua / Sonora",
@@ -1729,7 +1729,7 @@ TERRITORIOS_SEMBRANDO_VIDA = [
     "Comalcalco",
     "Córdoba",
     "Costa Chica - Montaña",
-    "Costa Grande- Sierra",
+    "Costa Grande - Sierra",
     "Durango / Zacatecas",
     "Hidalgo",
     "Istmo",

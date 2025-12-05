@@ -853,7 +853,7 @@ const isOnline = ref(navigator.onLine)
 
 // Lista de territorios de Sembrando Vida para el selector de territorio
 const territoriosSembrandoVida = [
-  "Acapulco- Centro- Norte- Tierra Caliente",
+  "Acapulco - Centro - Norte - Tierra Caliente",
   "Acayucan",
   "Balancán",
   "Chihuahua / Sonora",
@@ -861,7 +861,7 @@ const territoriosSembrandoVida = [
   "Comalcalco",
   "Córdoba",
   "Costa Chica - Montaña",
-  "Costa Grande- Sierra",
+  "Costa Grande - Sierra",
   "Durango / Zacatecas",
   "Hidalgo",
   "Istmo",

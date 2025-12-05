@@ -91,6 +91,17 @@ const permisosService = {
         console.log('📋 Permisos a guardar:', datosUsuario.permisos)
       }
       
+      // Incluir es_territorial y territorio
+      if (datosUsuario.es_territorial !== undefined) {
+        usuarioData.es_territorial = datosUsuario.es_territorial
+        console.log('📋 Es territorial a guardar:', datosUsuario.es_territorial)
+      }
+      
+      if (datosUsuario.territorio !== undefined) {
+        usuarioData.territorio = datosUsuario.territorio
+        console.log('📋 Territorio a guardar:', datosUsuario.territorio)
+      }
+      
       const response = await api.post('/admin/usuarios', usuarioData)
       
       console.log('✅ Usuario administrativo creado exitosamente:', response.data)
@@ -130,6 +141,17 @@ const permisosService = {
       if (datosUsuario.activo !== undefined) {
         usuarioData.activo = datosUsuario.activo
         console.log('📋 Estado activo a actualizar:', datosUsuario.activo)
+      }
+      
+      // Incluir es_territorial y territorio
+      if (datosUsuario.es_territorial !== undefined) {
+        usuarioData.es_territorial = datosUsuario.es_territorial
+        console.log('📋 Es territorial a actualizar:', datosUsuario.es_territorial)
+      }
+      
+      if (datosUsuario.territorio !== undefined) {
+        usuarioData.territorio = datosUsuario.territorio
+        console.log('📋 Territorio a actualizar:', datosUsuario.territorio)
       }
       
       const response = await api.put(`/admin/usuarios/${userId}`, usuarioData)

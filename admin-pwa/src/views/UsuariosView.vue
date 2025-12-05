@@ -622,12 +622,13 @@
     </div>
 
     <!-- Modal de edición de usuario - REDISEÑO COMPLETO -->
-    <div v-if="showEditModal" class="edit-modal-overlay" @click="cancelarEdicion">
-      <div class="edit-modal-container" @click.stop>
-        <!-- Header del modal -->
-        <div class="edit-modal-header">
-          <div class="edit-modal-title-wrapper">
-            <div class="edit-modal-icon">
+    <Teleport to="body">
+      <div v-if="showEditModal" class="edit-modal-overlay" @click.self="cancelarEdicion">
+        <div class="edit-modal-container">
+          <!-- Header del modal -->
+          <div class="edit-modal-header">
+            <div class="edit-modal-title-wrapper">
+              <div class="edit-modal-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -791,24 +792,27 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Modal de Éxito -->
-  <div v-if="showSuccessModal" class="modal-overlay-success" @click="cerrarSuccessModal">
-    <div class="modal-content-success" @click.stop>
-      <div class="success-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20,6 9,17 4,12"></polyline>
-        </svg>
+    </Teleport>
+    
+    <!-- Modal de Éxito (movido dentro del contenedor principal) -->
+    <Teleport to="body">
+      <div v-if="showSuccessModal" class="modal-overlay-success" @click.self="cerrarSuccessModal">
+        <div class="modal-content-success">
+          <div class="success-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20,6 9,17 4,12"></polyline>
+            </svg>
+          </div>
+          
+          <h3>¡Usuario actualizado!</h3>
+          <p>Los cambios se guardaron exitosamente en la base de datos.</p>
+          
+          <button @click="cerrarSuccessModal" class="btn-success-ok">
+            Aceptar
+          </button>
+        </div>
       </div>
-      
-      <h3>¡Usuario actualizado!</h3>
-      <p>Los cambios se guardaron exitosamente en la base de datos.</p>
-      
-      <button @click="cerrarSuccessModal" class="btn-success-ok">
-        Aceptar
-      </button>
-    </div>
+    </Teleport>
   </div>
 </template>
 

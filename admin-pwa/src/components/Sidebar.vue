@@ -116,17 +116,19 @@
             </div>
             <div class="user-details">
               <p class="user-name">{{ userDisplayName }}</p>
-              <p class="user-role">{{ roleDisplayName }}</p>
+              <!-- Solo mostrar rol si NO es 'user' (usuario normal) -->
+              <p v-if="userRole !== 'user'" class="user-role">{{ roleDisplayName }}</p>
+              <!-- Línea separadora verde antes del territorio -->
+              <div v-if="isTerritorial && territorioAsignado" class="territorio-separator"></div>
+              <!-- Territorio integrado debajo -->
+              <div v-if="isTerritorial && territorioAsignado" class="user-territorio">
+                <svg class="user-territorio-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                <span class="user-territorio-text">{{ territorioAsignado }}</span>
+              </div>
+              <p v-if="isTerritorial && estadosDelTerritorio" class="user-estados">{{ estadosDelTerritorio }}</p>
             </div>
-          </div>
-          
-          <!-- Indicador de territorio asignado -->
-          <div v-if="isTerritorial && territorioAsignado" class="territorio-indicator">
-            <svg class="territorio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <span class="territorio-nombre">{{ territorioAsignado }}</span>
           </div>
           
           <div class="text-underline"></div>
@@ -455,6 +457,11 @@ const roleDisplayName = computed(() => {
   return role === 'admin' ? 'Administrador' : 'Usuario'
 })
 
+// Computed para obtener el rol del usuario (para condicionales)
+const userRole = computed(() => {
+  return authService.getUserRole()
+})
+
 // Computed para verificar si es admin territorial
 const isTerritorial = computed(() => {
   return authService.isTerritorial()
@@ -463,6 +470,49 @@ const isTerritorial = computed(() => {
 // Computed para obtener el nombre del territorio
 const territorioAsignado = computed(() => {
   return authService.getTerritorio()
+})
+
+// Mapeo de territorios a estados de la república
+const TERRITORIOS_ESTADOS = {
+  'Acapulco - Centro - Norte - Tierra Caliente': ['Guerrero'],
+  'Acayucan': ['Veracruz'],
+  'Balancán': ['Tabasco'],
+  'Chihuahua / Sonora': ['Chihuahua', 'Sonora'],
+  'Colima': ['Colima'],
+  'Comalcalco': ['Tabasco'],
+  'Córdoba': ['Veracruz'],
+  'Costa Chica - Montaña': ['Guerrero'],
+  'Costa Grande - Sierra': ['Guerrero'],
+  'Durango / Zacatecas': ['Durango', 'Zacatecas'],
+  'Hidalgo': ['Hidalgo'],
+  'Istmo': ['Oaxaca'],
+  'Michoacán': ['Michoacán'],
+  'Mixteca': ['Oaxaca'],
+  'Morelos': ['Morelos'],
+  'Nayarit / Jalisco': ['Nayarit', 'Jalisco'],
+  'Ocosingo': ['Chiapas'],
+  'Palenque': ['Chiapas'],
+  'Papantla': ['Veracruz'],
+  'Pichucalco': ['Chiapas'],
+  'Puebla': ['Puebla'],
+  'San Luis Potosí': ['San Luis Potosí'],
+  'Sinaloa': ['Sinaloa'],
+  'Tamaulipas': ['Tamaulipas'],
+  'Tantoyuca': ['Veracruz'],
+  'Tapachula': ['Chiapas'],
+  'Teapa': ['Tabasco'],
+  'Tlaxcala / Estado de México': ['Tlaxcala', 'Estado de México'],
+  'Tzucacab / Opb': ['Quintana Roo'],
+  'Xpujil': ['Campeche']
+}
+
+// Computed para obtener los estados del territorio
+const estadosDelTerritorio = computed(() => {
+  const territorio = territorioAsignado.value
+  if (territorio && TERRITORIOS_ESTADOS[territorio]) {
+    return TERRITORIOS_ESTADOS[territorio].join(', ')
+  }
+  return ''
 })
 
 // Función para verificar permisos
@@ -1242,43 +1292,42 @@ const handleKeydown = (event) => {
   line-height: 1.2;
 }
 
-/* Indicador de territorio asignado */
-.territorio-indicator {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 6px 12px;
-  margin-top: 10px;
-  background: linear-gradient(135deg, 
-    rgba(249, 115, 22, 0.2) 0%,
-    rgba(234, 88, 12, 0.3) 100%);
-  border-radius: 16px;
-  border: 1.5px solid #f97316;
-  box-shadow: 
-    0 0 6px rgba(249, 115, 22, 0.4),
-    0 0 12px rgba(249, 115, 22, 0.2),
-    inset 0 0 8px rgba(249, 115, 22, 0.1);
-  max-width: 100%;
+/* Territorio integrado en user-details */
+.territorio-separator {
+  width: 100%;
+  height: 1px;
+  background: #4ade80;
+  margin: 6px 0 4px 0;
 }
 
-.territorio-indicator .territorio-icon {
-  width: 14px;
-  height: 14px;
+.user-territorio {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 3px;
+}
+
+.user-territorio-icon {
+  width: 10px;
+  height: 10px;
   color: #f97316;
   flex-shrink: 0;
 }
 
-.territorio-indicator .territorio-nombre {
-  font-size: 9px;
-  font-weight: 600;
+.user-territorio-text {
+  font-size: 8px;
+  font-weight: 500;
   color: #fed7aa;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 140px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.user-estados {
+  margin: 2px 0 0 0;
+  font-size: 7px;
+  color: rgba(187, 247, 208, 0.9);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.2;
 }
 
 .logout-button {

@@ -1528,11 +1528,11 @@ class UserUpdate(BaseModel):
     correo: str
     nombre_completo: str
     cargo: str
-    supervisor: str = None
-    curp: str = None
-    telefono: str = None
+    supervisor: Optional[str] = None
+    curp: Optional[str] = None
+    telefono: Optional[str] = None
     rol: str = 'user'
-    territorio: str = None
+    territorio: Optional[str] = None
     nueva_contrasena: Optional[str] = None  # Contraseña opcional para actualización
 
 @app.put("/usuarios/{user_id}")

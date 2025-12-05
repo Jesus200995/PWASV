@@ -239,6 +239,38 @@ class AuthService {
   }
 
   /**
+   * Verificar si el admin actual es territorial (restringido a un territorio)
+   */
+  isTerritorial() {
+    if (!this.user) {
+      this.user = this.getUserFromStorage()
+    }
+    return this.user?.es_territorial === true
+  }
+
+  /**
+   * Obtener el territorio asignado al admin territorial
+   * @returns {string|null} - El nombre del territorio o null si es global
+   */
+  getTerritorio() {
+    if (!this.user) {
+      this.user = this.getUserFromStorage()
+    }
+    return this.user?.territorio || null
+  }
+
+  /**
+   * Obtener filtro de territorio para queries
+   * @returns {string|null} - El territorio si es admin territorial, null si es global
+   */
+  getTerritorioFilter() {
+    if (this.isTerritorial()) {
+      return this.getTerritorio()
+    }
+    return null
+  }
+
+  /**
    * Obtener token de autenticación
    */
   getToken() {

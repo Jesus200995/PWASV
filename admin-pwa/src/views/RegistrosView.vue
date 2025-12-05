@@ -802,6 +802,7 @@ import axios from 'axios'
 import * as XLSX from 'xlsx'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
+import authService from '../services/authService.js'
 
 const router = useRouter()
 
@@ -849,18 +850,28 @@ const cargarMasRegistros = async () => {
     cargandoMas.value = true
     const token = localStorage.getItem('admin_token')
     
+    // Obtener filtro de territorio si el admin es territorial
+    const territorioFilter = authService.getTerritorioFilter()
+    
     console.log('📊 Cargando más registros...')
+    
+    // Construir parámetros con filtro territorial si aplica
+    const params = {
+      page: Math.ceil(registros.value.length / 1000) + 1,
+      page_size: 1000,
+      usuario_id: filtroUsuario.value || undefined
+    }
+    
+    if (territorioFilter) {
+      params.territorio = territorioFilter
+    }
     
     const response = await axios.get(`${API_URL}/admin/registros`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      params: {
-        page: Math.ceil(registros.value.length / 1000) + 1,
-        page_size: 1000,
-        usuario_id: filtroUsuario.value || undefined
-      },
+      params,
       timeout: 30000
     })
     
@@ -985,8 +996,27 @@ const cargarRegistros = async () => {
   
   try {
     const token = localStorage.getItem('admin_token')
-    console.log('📊 Solicitando registros con límite seguro...')
+    
+    // Obtener filtro de territorio si el admin es territorial
+    const territorioFilter = authService.getTerritorioFilter()
+    
+    if (territorioFilter) {
+      console.log(`📊 Solicitando registros del territorio: ${territorioFilter}...`)
+    } else {
+      console.log('📊 Solicitando todos los registros (admin global)...')
+    }
     console.time('Carga de registros')
+    
+    // Construir parámetros con filtro territorial si aplica
+    const params = {
+      page: 1,
+      page_size: 1000, // Paginación optimizada
+      usuario_id: filtroUsuario.value || undefined
+    }
+    
+    if (territorioFilter) {
+      params.territorio = territorioFilter
+    }
     
     // Usar el nuevo endpoint optimizado /admin/registros
     const response = await axios.get(`${API_URL}/admin/registros`, {
@@ -994,11 +1024,7 @@ const cargarRegistros = async () => {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      params: {
-        page: 1,
-        page_size: 1000, // Paginación optimizada
-        usuario_id: filtroUsuario.value || undefined
-      },
+      params,
       timeout: 30000 // Timeout de 30 segundos
     })
     
@@ -1246,18 +1272,29 @@ const cargarRegistrosParaUsuario = async (usuarioId) => {
   
   try {
     const token = localStorage.getItem('admin_token')
+    
+    // Obtener filtro de territorio si el admin es territorial
+    const territorioFilter = authService.getTerritorioFilter()
+    
     console.log(`🔍 Cargando registros para usuario ${usuarioId}...`)
+    
+    // Construir parámetros con filtro territorial si aplica
+    const params = {
+      page: 1,
+      page_size: 1000,
+      usuario_id: usuarioId
+    }
+    
+    if (territorioFilter) {
+      params.territorio = territorioFilter
+    }
     
     const response = await axios.get(`${API_URL}/admin/registros`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      params: {
-        page: 1,
-        page_size: 1000,
-        usuario_id: usuarioId
-      },
+      params,
       timeout: 15000
     })
     

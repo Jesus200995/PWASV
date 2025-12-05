@@ -120,6 +120,15 @@
             </div>
           </div>
           
+          <!-- Indicador de territorio asignado -->
+          <div v-if="isTerritorial && territorioAsignado" class="territorio-indicator">
+            <svg class="territorio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span class="territorio-nombre">{{ territorioAsignado }}</span>
+          </div>
+          
           <div class="text-underline"></div>
         </div>
       </div>
@@ -444,6 +453,16 @@ const userInitials = computed(() => {
 const roleDisplayName = computed(() => {
   const role = authService.getUserRole()
   return role === 'admin' ? 'Administrador' : 'Usuario'
+})
+
+// Computed para verificar si es admin territorial
+const isTerritorial = computed(() => {
+  return authService.isTerritorial()
+})
+
+// Computed para obtener el nombre del territorio
+const territorioAsignado = computed(() => {
+  return authService.getTerritorio()
 })
 
 // Función para verificar permisos
@@ -1221,6 +1240,45 @@ const handleKeydown = (event) => {
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
+}
+
+/* Indicador de territorio asignado */
+.territorio-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  margin-top: 10px;
+  background: linear-gradient(135deg, 
+    rgba(249, 115, 22, 0.2) 0%,
+    rgba(234, 88, 12, 0.3) 100%);
+  border-radius: 16px;
+  border: 1.5px solid #f97316;
+  box-shadow: 
+    0 0 6px rgba(249, 115, 22, 0.4),
+    0 0 12px rgba(249, 115, 22, 0.2),
+    inset 0 0 8px rgba(249, 115, 22, 0.1);
+  max-width: 100%;
+}
+
+.territorio-indicator .territorio-icon {
+  width: 14px;
+  height: 14px;
+  color: #f97316;
+  flex-shrink: 0;
+}
+
+.territorio-indicator .territorio-nombre {
+  font-size: 9px;
+  font-weight: 600;
+  color: #fed7aa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.3px;
 }
 
 .logout-button {

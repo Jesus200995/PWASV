@@ -1,6 +1,7 @@
 // Servicio para el manejo de asistencias
 import axios from 'axios';
 import { API_URL } from '../config/api.js';
+import authService from './authService.js';
 
 class AsistenciasService {
   /**
@@ -12,6 +13,9 @@ class AsistenciasService {
   async obtenerAsistencias(limite = null, offset = 0) {
     let ultimoError = null;
     const maxReintentos = 3;
+    
+    // Obtener filtro de territorio si el admin es territorial
+    const territorioFilter = authService.getTerritorioFilter();
     
     for (let intento = 1; intento <= maxReintentos; intento++) {
       try {
@@ -27,9 +31,17 @@ class AsistenciasService {
           params.append('offset', offset);
         }
         
+        // Agregar filtro de territorio si el admin es territorial
+        if (territorioFilter) {
+          params.append('territorio', territorioFilter);
+          console.log(`🔍 Intento ${intento}/${maxReintentos} - Obteniendo asistencias del territorio: ${territorioFilter}`);
+        } else {
+          console.log(`🔍 Intento ${intento}/${maxReintentos} - Obteniendo todas las asistencias (admin global)...`);
+        }
+        
         url += params.toString();
         
-        console.log(`🔍 Intento ${intento}/${maxReintentos} - Solicitando asistencias desde:`, url);
+        console.log(`🔍 Solicitando asistencias desde:`, url);
         
         const controller = new AbortController();
         // Timeout de 30 segundos para cargas optimizadas

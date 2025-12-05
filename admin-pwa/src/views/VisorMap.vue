@@ -489,6 +489,7 @@ import { usuariosService } from '../services/usuariosService.js'
 import asistenciasService from '../services/asistenciasService.js'
 import { estadisticasService } from '../services/estadisticasService.js'
 import healthCheckService from '../services/healthCheckService.js'
+import authService from '../services/authService.js'
 
 // Token de acceso de Mapbox - En producción debe estar en variables de entorno
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFyaWVsMDgiLCJhIjoiY202emV3MDhhMDN6YjJscHVqaXExdGpjMyJ9.F_ACoKzS_4e280lD0XndEw';
@@ -705,11 +706,21 @@ const cargarRegistrosConReintentos = async (token, maxReintentos = 3) => {
     console.log('⚠️ Endpoint de registros no disponible según health check')
   }
   
+  // Obtener filtro de territorio si el admin es territorial
+  const territorioFilter = authService.getTerritorioFilter()
+  
   for (let intento = 1; intento <= maxReintentos; intento++) {
     try {
-      console.log(`🔄 Intento ${intento}/${maxReintentos} - Cargando registros...`)
+      // Construir URL con parámetro de territorio si aplica
+      let url = `${API_URL}/registros`
+      if (territorioFilter) {
+        url += `?territorio=${encodeURIComponent(territorioFilter)}`
+        console.log(`🔄 Intento ${intento}/${maxReintentos} - Cargando registros del territorio: ${territorioFilter}`)
+      } else {
+        console.log(`🔄 Intento ${intento}/${maxReintentos} - Cargando todos los registros (admin global)...`)
+      }
       
-      const response = await axios.get(`${API_URL}/registros`, {
+      const response = await axios.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

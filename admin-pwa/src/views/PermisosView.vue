@@ -71,6 +71,7 @@
                 <tr>
                   <th>Usuario</th>
                   <th>Rol</th>
+                  <th>Territorio</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -98,6 +99,23 @@
                         <circle cx="12" cy="7" r="4"/>
                       </svg>
                       <span class="rol-text">{{ usuario.rol === 'admin' ? 'Administrador' : 'Usuario' }}</span>
+                    </span>
+                  </td>
+                  <td class="territorio-cell">
+                    <span v-if="usuario.es_territorial" class="territorio-badge territorial">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                      </svg>
+                      {{ usuario.territorio || 'Sin asignar' }}
+                    </span>
+                    <span v-else class="territorio-badge general">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M2 12h20"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                      </svg>
+                      General
                     </span>
                   </td>
                   <td class="status-cell">
@@ -439,6 +457,77 @@
                     </svg>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <!-- Sección Usuario Territorial -->
+            <div class="form-section territorial-section">
+              <div class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <h4>Usuario Territorial</h4>
+              </div>
+              
+              <div class="territorial-toggle-container">
+                <div class="territorial-info">
+                  <div class="territorial-icon" :class="formularioUsuario.es_territorial ? 'activo' : 'inactivo'">
+                    <svg v-if="formularioUsuario.es_territorial" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M2 12h20"/>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                  </div>
+                  <div class="territorial-text">
+                    <span class="territorial-label">{{ formularioUsuario.es_territorial ? 'Usuario Territorial Activo' : 'Usuario General' }}</span>
+                    <span class="territorial-desc">{{ formularioUsuario.es_territorial ? 'Solo verá información de usuarios de su territorio asignado' : 'Verá información de todos los usuarios según sus permisos' }}</span>
+                  </div>
+                </div>
+                
+                <label class="territorial-switch">
+                  <input 
+                    type="checkbox" 
+                    v-model="formularioUsuario.es_territorial"
+                    @change="onTerritorialChange"
+                  />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              
+              <!-- Selector de territorio (solo visible cuando es territorial) -->
+              <div v-if="formularioUsuario.es_territorial" class="territorio-selector-container">
+                <label for="territorio-admin" class="territorio-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  Territorio Asignado
+                  <span class="required">*</span>
+                </label>
+                <select 
+                  id="territorio-admin" 
+                  v-model="formularioUsuario.territorio" 
+                  class="form-select territorio-select"
+                  required
+                >
+                  <option value="">-- Seleccione un territorio --</option>
+                  <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">
+                    {{ territorio }}
+                  </option>
+                </select>
+                <small class="form-help territorio-help">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                  Este usuario solo podrá ver y gestionar usuarios asignados a este territorio
+                </small>
               </div>
             </div>
 
@@ -788,6 +877,8 @@ export default {
         confirmPassword: '',
         rol: 'user',
         activo: true,
+        es_territorial: false,
+        territorio: '',
         permisos: {
           visor: false,
           asistencia: false,
@@ -800,6 +891,40 @@ export default {
           configuracion: false
         }
       },
+      
+      // Lista de territorios de Sembrando Vida
+      territoriosSembrandoVida: [
+        "Acapulco - Centro - Norte - Tierra Caliente",
+        "Acayucan",
+        "Balancán",
+        "Chihuahua / Sonora",
+        "Colima",
+        "Comalcalco",
+        "Córdoba",
+        "Costa Chica - Montaña",
+        "Costa Grande - Sierra",
+        "Durango / Zacatecas",
+        "Hidalgo",
+        "Istmo",
+        "Michoacán",
+        "Mixteca",
+        "Morelos",
+        "Nayarit / Jalisco",
+        "Ocosingo",
+        "Palenque",
+        "Papantla",
+        "Pichucalco",
+        "Puebla",
+        "San Luis Potosí",
+        "Sinaloa",
+        "Tamaulipas",
+        "Tantoyuca",
+        "Tapachula",
+        "Teapa",
+        "Tlaxcala / Estado de México",
+        "Tzucacab / Opb",
+        "Xpujil"
+      ],
       
       // Permisos por defecto para nuevos usuarios (todos en false)
       permisosDefault: {
@@ -859,6 +984,14 @@ export default {
       }
     },
 
+    // Handler cuando se cambia el checkbox de territorial
+    onTerritorialChange() {
+      // Si se desactiva territorial, limpiar el territorio seleccionado
+      if (!this.formularioUsuario.es_territorial) {
+        this.formularioUsuario.territorio = ''
+      }
+    },
+
     // ==================== GESTIÓN DE USUARIOS ADMIN ====================
     
     async cargarUsuariosAdmin() {
@@ -898,6 +1031,8 @@ export default {
         confirmPassword: '',
         rol: usuario.rol,
         activo: usuario.activo !== false, // Por defecto true si no existe
+        es_territorial: usuario.es_territorial || false,
+        territorio: usuario.territorio || '',
         permisos: permisosUsuario
       }
       // Resetear visibilidad de contraseñas
@@ -934,6 +1069,12 @@ export default {
         this.mostrarToast('Las contraseñas no coinciden', 'error')
         return
       }
+
+      // Validar territorio si es usuario territorial
+      if (this.formularioUsuario.es_territorial && !this.formularioUsuario.territorio) {
+        this.mostrarToast('Debe seleccionar un territorio para usuarios territoriales', 'error')
+        return
+      }
       
       this.guardando = true
       
@@ -944,7 +1085,9 @@ export default {
             username: this.formularioUsuario.username,
             rol: this.formularioUsuario.rol,
             permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null,
-            activo: this.formularioUsuario.activo
+            activo: this.formularioUsuario.activo,
+            es_territorial: this.formularioUsuario.es_territorial,
+            territorio: this.formularioUsuario.es_territorial ? this.formularioUsuario.territorio : null
           }
           
           // Solo incluir password si se proporcionó
@@ -962,7 +1105,9 @@ export default {
               username: datosActualizacion.username,
               rol: datosActualizacion.rol,
               permisos: datosActualizacion.permisos,
-              activo: datosActualizacion.activo
+              activo: datosActualizacion.activo,
+              es_territorial: datosActualizacion.es_territorial,
+              territorio: datosActualizacion.territorio
             }
             // Forzar reactividad en Vue
             this.usuariosAdmin = [...this.usuariosAdmin]
@@ -977,7 +1122,9 @@ export default {
             const newUserData = {
               ...currentUser,
               rol: datosActualizacion.rol,
-              permisos: datosActualizacion.permisos || currentUser.permisos
+              permisos: datosActualizacion.permisos || currentUser.permisos,
+              es_territorial: datosActualizacion.es_territorial,
+              territorio: datosActualizacion.territorio
             }
             // Actualizar localStorage
             localStorage.setItem('admin_user_data', JSON.stringify(newUserData))
@@ -991,7 +1138,9 @@ export default {
           // Crear nuevo usuario (siempre activo)
           const datosCreacion = {
             ...this.formularioUsuario,
-            permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null
+            permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null,
+            es_territorial: this.formularioUsuario.es_territorial,
+            territorio: this.formularioUsuario.es_territorial ? this.formularioUsuario.territorio : null
           }
           const respuesta = await permisosService.crearUsuario(datosCreacion)
           
@@ -1001,7 +1150,9 @@ export default {
             username: datosCreacion.username,
             rol: datosCreacion.rol,
             permisos: datosCreacion.permisos,
-            activo: true
+            activo: true,
+            es_territorial: datosCreacion.es_territorial,
+            territorio: datosCreacion.territorio
           }
           this.usuariosAdmin = [nuevoUsuario, ...this.usuariosAdmin]
           console.log('✅ Nuevo usuario agregado instantáneamente a la lista')
@@ -1036,6 +1187,8 @@ export default {
         confirmPassword: '',
         rol: 'user',
         activo: true,
+        es_territorial: false,
+        territorio: '',
         permisos: { ...this.permisosDefault }
       }
       // Resetear visibilidad de contraseñas
@@ -1607,6 +1760,37 @@ export default {
   background: rgba(244, 67, 54, 0.1);
   color: #c62828;
   border: 1.5px solid #f44336;
+}
+
+/* Estilos para badges territoriales */
+.territorial-cell {
+  text-align: center;
+}
+
+.territorial-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.territorial-badge.territorial {
+  background: rgba(249, 115, 22, 0.15);
+  color: #c2410c;
+  border: 1.5px solid #f97316;
+}
+
+.territorial-badge.global {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4338ca;
+  border: 1.5px solid #6366f1;
 }
 
 .actions-cell {
@@ -2553,6 +2737,184 @@ export default {
 .estado-toggle-container:has(.estado-icon.inactivo) {
   background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
   border-color: #e57373;
+}
+
+/* === USUARIO TERRITORIAL === */
+.territorial-section {
+  margin-top: 8px;
+}
+
+.territorial-toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.territorial-toggle-container:has(.territorial-icon.activo) {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-color: #ffb74d;
+}
+
+.territorial-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.territorial-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.territorial-icon.activo {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.territorial-icon.inactivo {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2);
+}
+
+.territorial-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.territorial-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.territorial-desc {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Switch Toggle para Territorial */
+.territorial-switch {
+  position: relative;
+  width: 56px;
+  height: 30px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.territorial-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.territorial-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 30px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.territorial-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.territorial-switch input:checked + .slider {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.territorial-switch input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* Selector de territorio */
+.territorio-selector-container {
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border-radius: 12px;
+  border: 1px solid #fdba74;
+}
+
+.territorio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #c2410c;
+  margin-bottom: 8px;
+}
+
+.territorio-label svg {
+  color: #ea580c;
+}
+
+.territorio-select {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 2px solid #fdba74;
+  border-radius: 10px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ea580c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+}
+
+.territorio-select:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+}
+
+.territorio-help {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #9a3412;
+}
+
+.territorio-help svg {
+  flex-shrink: 0;
+  color: #ea580c;
 }
 
 /* === MODAL FOOTER === */

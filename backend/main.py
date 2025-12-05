@@ -214,6 +214,34 @@ try:
     except Exception as e:
         print(f"⚠️ Error en migración de activo: {e}")
     
+    # ===== MIGRACIÓN: Agregar columnas es_territorial y territorio a tabla admin_users =====
+    try:
+        ejecutar_consulta_segura("""
+            DO $$ 
+            BEGIN
+                -- Agregar columna es_territorial
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'admin_users' AND column_name = 'es_territorial'
+                ) THEN
+                    ALTER TABLE admin_users ADD COLUMN es_territorial BOOLEAN DEFAULT FALSE;
+                    RAISE NOTICE 'Columna es_territorial agregada a admin_users';
+                END IF;
+                
+                -- Agregar columna territorio
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'admin_users' AND column_name = 'territorio'
+                ) THEN
+                    ALTER TABLE admin_users ADD COLUMN territorio VARCHAR(100) DEFAULT NULL;
+                    RAISE NOTICE 'Columna territorio agregada a admin_users';
+                END IF;
+            END $$;
+        """, fetch_type='none')
+        print("✅ Migración de columnas es_territorial y territorio verificada")
+    except Exception as e:
+        print(f"⚠️ Error en migración de es_territorial/territorio: {e}")
+    
     # ===== MIGRACIÓN: Agregar columnas categoria_actividad a tabla registros =====
     try:
         # Verificar si la columna categoria_actividad existe
@@ -785,7 +813,7 @@ async def registrar(
 
 # ENDPOINT CORREGIDO - Esta es la parte importante que debe actualizarse
 @app.get("/registros")
-def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, page_size: int = 1000):
+def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, page_size: int = 1000, territorio: str = None):
     try:
         # Aplicar límite de seguridad para evitar saturación del servidor
         if limit is None or limit > 5000:
@@ -795,33 +823,39 @@ def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, 
         # Calcular offset para paginación
         offset = (page - 1) * page_size if page > 1 else 0
         
-        print(f"🔍 Obteniendo registros - Usuario: {usuario_id}, Límite: {limit}, Página: {page}, Offset: {offset}")
+        print(f"🔍 Obteniendo registros - Usuario: {usuario_id}, Límite: {limit}, Página: {page}, Offset: {offset}, Territorio: {territorio}")
         
-        # Construir consulta según parámetros con paginación optimizada
+        # Construir query base con JOIN si hay filtro de territorio
+        base_select = """SELECT r.id, r.usuario_id, r.latitud, r.longitud, r.descripcion, r.foto_url, r.fecha_hora, r.tipo_actividad, r.categoria_actividad, r.categoria_actividad_otro 
+                        FROM registros r"""
+        
+        if territorio:
+            base_select += " INNER JOIN usuarios u ON r.usuario_id = u.id"
+        
+        # Construir condiciones WHERE
+        conditions = []
+        params = []
+        
         if usuario_id:
-            if limit:
-                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
-                          FROM registros WHERE usuario_id = %s 
-                          ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
-                params = (usuario_id, min(limit, page_size), offset)
-            else:
-                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
-                          FROM registros WHERE usuario_id = %s 
-                          ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
-                params = (usuario_id, page_size, offset)
-        else:
-            if limit:
-                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
-                          FROM registros ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
-                params = (min(limit, page_size), offset)
-            else:
-                query = """SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
-                          FROM registros ORDER BY fecha_hora DESC LIMIT %s OFFSET %s"""
-                params = (page_size, offset)
+            conditions.append("r.usuario_id = %s")
+            params.append(usuario_id)
+        
+        if territorio:
+            conditions.append("u.territorio = %s")
+            params.append(territorio)
+        
+        # Construir query completa
+        query = base_select
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        query += " ORDER BY r.fecha_hora DESC LIMIT %s OFFSET %s"
+        
+        effective_limit = min(limit, page_size) if limit else page_size
+        params.extend([effective_limit, offset])
         
         # Ejecutar consulta con manejo seguro y timeout
         try:
-            resultados = ejecutar_consulta_segura(query, params, fetch_type='all')
+            resultados = ejecutar_consulta_segura(query, tuple(params), fetch_type='all')
         except Exception as db_error:
             print(f"❌ Error de base de datos al obtener registros: {db_error}")
             # Si hay error, devolver respuesta vacía en lugar de fallar
@@ -843,10 +877,20 @@ def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, 
         if page == 1 and len(resultados) == page_size:
             # Solo calcular total si podría haber más páginas
             try:
+                count_query = "SELECT COUNT(*) FROM registros r"
+                if territorio:
+                    count_query += " INNER JOIN usuarios u ON r.usuario_id = u.id"
+                count_conditions = []
+                count_params = []
                 if usuario_id:
-                    cursor.execute("SELECT COUNT(*) FROM registros WHERE usuario_id = %s", (usuario_id,))
-                else:
-                    cursor.execute("SELECT COUNT(*) FROM registros")
+                    count_conditions.append("r.usuario_id = %s")
+                    count_params.append(usuario_id)
+                if territorio:
+                    count_conditions.append("u.territorio = %s")
+                    count_params.append(territorio)
+                if count_conditions:
+                    count_query += " WHERE " + " AND ".join(count_conditions)
+                cursor.execute(count_query, tuple(count_params) if count_params else None)
                 total_registros = cursor.fetchone()[0]
             except Exception:
                 total_registros = len(resultados)  # Fallback al conteo actual
@@ -901,8 +945,8 @@ def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, 
 
 # NUEVO ENDPOINT OPTIMIZADO PARA ADMIN-PWA
 @app.get("/admin/registros")
-def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int = None):
-    """Endpoint optimizado para el admin-pwa con paginación obligatoria"""
+def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int = None, territorio: str = None):
+    """Endpoint optimizado para el admin-pwa con paginación obligatoria y filtro territorial"""
     try:
         # Límites de seguridad para admin
         max_page_size = 200
@@ -911,39 +955,62 @@ def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int 
         
         offset = (page - 1) * page_size
         
-        print(f"🔍 [ADMIN] Obteniendo registros - Página: {page}, Tamaño: {page_size}, Offset: {offset}, Usuario: {usuario_id}")
+        print(f"🔍 [ADMIN] Obteniendo registros - Página: {page}, Tamaño: {page_size}, Offset: {offset}, Usuario: {usuario_id}, Territorio: {territorio}")
         
         # Verificar conexión antes de continuar
         if not verificar_conexion_db():
             raise HTTPException(status_code=503, detail="Servicio de base de datos no disponible")
         
-        # Construir consulta optimizada con índices
-        base_query = """
-            SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
-            FROM registros 
-        """
+        # Construir consulta optimizada con JOIN si hay filtro territorial
+        if territorio:
+            base_query = """
+                SELECT r.id, r.usuario_id, r.latitud, r.longitud, r.descripcion, r.foto_url, r.fecha_hora, r.tipo_actividad, r.categoria_actividad, r.categoria_actividad_otro 
+                FROM registros r
+                INNER JOIN usuarios u ON r.usuario_id = u.id
+            """
+            count_query = "SELECT COUNT(*) FROM registros r INNER JOIN usuarios u ON r.usuario_id = u.id"
+        else:
+            base_query = """
+                SELECT id, usuario_id, latitud, longitud, descripcion, foto_url, fecha_hora, tipo_actividad, categoria_actividad, categoria_actividad_otro 
+                FROM registros 
+            """
+            count_query = "SELECT COUNT(*) FROM registros"
         
-        count_query = "SELECT COUNT(*) FROM registros"
+        # Construir condiciones WHERE
+        conditions = []
+        params = []
         
         if usuario_id:
-            where_clause = " WHERE usuario_id = %s"
+            if territorio:
+                conditions.append("r.usuario_id = %s")
+            else:
+                conditions.append("usuario_id = %s")
+            params.append(usuario_id)
+        
+        if territorio:
+            conditions.append("u.territorio = %s")
+            params.append(territorio)
+        
+        # Agregar WHERE clause si hay condiciones
+        if conditions:
+            where_clause = " WHERE " + " AND ".join(conditions)
             base_query += where_clause
             count_query += where_clause
-            query_params = (usuario_id,)
-            pagination_params = (usuario_id, page_size, offset)
-        else:
-            query_params = ()
-            pagination_params = (page_size, offset)
         
         # Obtener total de registros primero (para paginación)
         try:
-            total_registros = ejecutar_consulta_segura(count_query, query_params, fetch_type='one')[0]
+            total_registros = ejecutar_consulta_segura(count_query, tuple(params) if params else None, fetch_type='one')[0]
         except Exception as count_error:
             print(f"⚠️ Error obteniendo conteo: {count_error}")
             total_registros = 0
         
         # Consulta principal con paginación y orden optimizado
-        main_query = base_query + " ORDER BY id DESC LIMIT %s OFFSET %s"
+        if territorio:
+            main_query = base_query + " ORDER BY r.id DESC LIMIT %s OFFSET %s"
+        else:
+            main_query = base_query + " ORDER BY id DESC LIMIT %s OFFSET %s"
+        
+        pagination_params = tuple(params) + (page_size, offset) if params else (page_size, offset)
         
         try:
             resultados = ejecutar_consulta_segura(main_query, pagination_params, fetch_type='all')
@@ -1386,9 +1453,9 @@ def obtener_estadisticas_tipo_actividad():
 
 # Nuevo endpoint para obtener usuarios (para el panel de administración)
 @app.get("/usuarios")
-async def obtener_usuarios():
+async def obtener_usuarios(territorio: str = None):
     try:
-        print("🔍 Obteniendo usuarios...")
+        print(f"🔍 Obteniendo usuarios... (filtro territorio: {territorio})")
         
         # Verificar si la columna 'rol' existe
         rol_check = ejecutar_consulta_segura("""
@@ -1398,14 +1465,19 @@ async def obtener_usuarios():
         
         tiene_columna_rol = bool(rol_check)
         
+        # Construir query base
         if tiene_columna_rol:
-            # Obtener todos los usuarios con rol y territorio
-            query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, rol, territorio FROM usuarios ORDER BY id DESC"
+            base_query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, rol, territorio FROM usuarios"
         else:
-            # Obtener usuarios sin rol (por compatibilidad)
-            query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, territorio FROM usuarios ORDER BY id DESC"
+            base_query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, territorio FROM usuarios"
         
-        resultados = ejecutar_consulta_segura(query, fetch_type='all')
+        # Agregar filtro de territorio si se proporciona
+        if territorio:
+            query = f"{base_query} WHERE territorio = %s ORDER BY id DESC"
+            resultados = ejecutar_consulta_segura(query, (territorio,), fetch_type='all')
+        else:
+            query = f"{base_query} ORDER BY id DESC"
+            resultados = ejecutar_consulta_segura(query, fetch_type='all')
         
         if not resultados:
             resultados = []
@@ -1995,8 +2067,8 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         
         print(f"🔐 Intento de login para usuario: {username}")
         
-        # Buscar usuario administrador en la base de datos incluyendo permisos y estado activo
-        cursor.execute("SELECT id, password, rol, permisos, activo FROM admin_users WHERE username = %s", (username,))
+        # Buscar usuario administrador en la base de datos incluyendo permisos, estado activo, es_territorial y territorio
+        cursor.execute("SELECT id, password, rol, permisos, activo, es_territorial, territorio FROM admin_users WHERE username = %s", (username,))
         row = cursor.fetchone()
         
         if not row or not pwd_context.verify(password, row[1]):
@@ -2006,6 +2078,8 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         user_id = row[0]
         user_rol = row[2] or 'admin'  # rol por defecto admin
         user_activo = row[4] if row[4] is not None else True  # activo por defecto True
+        es_territorial = row[5] if row[5] is not None else False
+        territorio = row[6]
         
         # Verificar si el usuario está activo
         if not user_activo:
@@ -2022,16 +2096,18 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         else:
             permisos = PERMISOS_ADMIN_DEFAULT if user_rol == 'admin' else PERMISOS_USER_DEFAULT
         
-        # Generar token JWT con información del usuario
+        # Generar token JWT con información del usuario incluyendo territorio
         token_data = {
             "sub": username, 
             "role": user_rol,
             "user_id": user_id,
-            "tipo": "admin_user"
+            "tipo": "admin_user",
+            "es_territorial": es_territorial,
+            "territorio": territorio
         }
         token = jwt.encode(token_data, SECRET_KEY, algorithm="HS256")
         
-        print(f"✅ Login exitoso para usuario: {username} con rol: {user_rol}")
+        print(f"✅ Login exitoso para usuario: {username} con rol: {user_rol}" + (f" (territorial: {territorio})" if es_territorial else ""))
         
         return {
             "access_token": token, 
@@ -2042,7 +2118,9 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
                 "rol": user_rol,
                 "tipo": "admin_user",
                 "permisos": permisos,
-                "activo": user_activo
+                "activo": user_activo,
+                "es_territorial": es_territorial,
+                "territorio": territorio
             }
         }
         
@@ -2545,61 +2623,52 @@ async def debug_tiempo_actual():
         return {"error": str(e)}
 
 @app.get("/asistencias")
-async def obtener_historial_asistencias(usuario_id: int = None, limit: int = None, offset: int = 0):
+async def obtener_historial_asistencias(usuario_id: int = None, limit: int = None, offset: int = 0, territorio: str = None):
     try:
         # Verificar y reconectar si es necesario
         if not verificar_conexion_db():
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        print(f"🔍 Obteniendo historial de asistencias - Usuario: {usuario_id}, Límite: {limit if limit else 'Sin límite'}, Offset: {offset}")
+        print(f"🔍 Obteniendo historial de asistencias - Usuario: {usuario_id}, Límite: {limit if limit else 'Sin límite'}, Offset: {offset}, Territorio: {territorio}")
+        
+        # Construir la query base con JOIN a usuarios si hay filtro de territorio
+        base_select = """SELECT a.id, a.usuario_id, a.fecha, a.hora_entrada, a.hora_salida, 
+                         a.latitud_entrada, a.longitud_entrada, a.latitud_salida, a.longitud_salida,
+                         a.foto_entrada_url, a.foto_salida_url, a.descripcion_entrada, a.descripcion_salida
+                  FROM asistencias a"""
+        
+        if territorio:
+            base_select += " INNER JOIN usuarios u ON a.usuario_id = u.id"
+        
+        # Construir condiciones WHERE
+        conditions = []
+        params = []
         
         if usuario_id:
-            if limit:
-                cursor.execute(
-                    """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
-                              latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
-                              foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
-                       FROM asistencias 
-                       WHERE usuario_id = %s 
-                       ORDER BY fecha DESC, hora_entrada DESC 
-                       LIMIT %s OFFSET %s""",
-                    (usuario_id, limit, offset)
-                )
-            else:
-                cursor.execute(
-                    """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
-                              latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
-                              foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
-                       FROM asistencias 
-                       WHERE usuario_id = %s 
-                       ORDER BY fecha DESC, hora_entrada DESC 
-                       OFFSET %s""",
-                    (usuario_id, offset)
-                )
-        else:
-            if limit:
-                cursor.execute(
-                    """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
-                              latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
-                              foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
-                       FROM asistencias 
-                       ORDER BY fecha DESC, hora_entrada DESC 
-                       LIMIT %s OFFSET %s""",
-                    (limit, offset)
-                )
-            else:
-                cursor.execute(
-                    """SELECT id, usuario_id, fecha, hora_entrada, hora_salida, 
-                              latitud_entrada, longitud_entrada, latitud_salida, longitud_salida,
-                              foto_entrada_url, foto_salida_url, descripcion_entrada, descripcion_salida
-                       FROM asistencias 
-                       ORDER BY fecha DESC, hora_entrada DESC 
-                       OFFSET %s""",
-                    (offset,)
-                )
+            conditions.append("a.usuario_id = %s")
+            params.append(usuario_id)
+        
+        if territorio:
+            conditions.append("u.territorio = %s")
+            params.append(territorio)
+        
+        # Construir query completa
+        query = base_select
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        query += " ORDER BY a.fecha DESC, a.hora_entrada DESC"
+        
+        if limit:
+            query += " LIMIT %s"
+            params.append(limit)
+        
+        query += " OFFSET %s"
+        params.append(offset)
+        
+        cursor.execute(query, tuple(params))
         
         resultados = cursor.fetchall()
-        print(f"📊 Encontradas {len(resultados)} asistencias (limit: {limit}, offset: {offset})")
+        print(f"📊 Encontradas {len(resultados)} asistencias (limit: {limit}, offset: {offset}, territorio: {territorio})")
         
         # Convertir tuplas a diccionarios manualmente
         asistencias = []
@@ -4921,6 +4990,8 @@ class AdminUserCreate(BaseModel):
     password: str
     rol: str = 'user'  # admin o user
     permisos: Optional[dict] = None  # Permisos personalizados
+    es_territorial: bool = False  # Si es usuario territorial
+    territorio: Optional[str] = None  # Territorio asignado (si es_territorial = True)
 
 class AdminUserUpdate(BaseModel):
     username: Optional[str] = None
@@ -4928,6 +4999,8 @@ class AdminUserUpdate(BaseModel):
     rol: Optional[str] = None
     permisos: Optional[dict] = None  # Permisos personalizados
     activo: Optional[bool] = None  # Estado activo/inactivo
+    es_territorial: Optional[bool] = None  # Si es usuario territorial
+    territorio: Optional[str] = None  # Territorio asignado
 
 # ==================== ENDPOINTS PARA GESTIÓN DE USUARIOS ADMINISTRATIVOS ====================
 
@@ -4941,9 +5014,9 @@ async def obtener_usuarios_admin():
         if not conn or not cursor:
             raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
         
-        # Obtener todos los usuarios administrativos incluyendo permisos y estado activo
+        # Obtener todos los usuarios administrativos incluyendo permisos, estado activo, es_territorial y territorio
         cursor.execute("""
-            SELECT id, username, rol, permisos, activo
+            SELECT id, username, rol, permisos, activo, es_territorial, territorio
             FROM admin_users 
             ORDER BY id ASC
         """)
@@ -4965,12 +5038,18 @@ async def obtener_usuarios_admin():
             # Estado activo (por defecto True si es NULL)
             activo = row[4] if row[4] is not None else True
             
+            # Es territorial y territorio
+            es_territorial = row[5] if row[5] is not None else False
+            territorio = row[6]
+            
             usuario = {
                 "id": row[0],
                 "username": row[1],
                 "rol": row[2],
                 "permisos": permisos,
-                "activo": activo
+                "activo": activo,
+                "es_territorial": es_territorial,
+                "territorio": territorio
             }
             usuarios.append(usuario)
         
@@ -5010,24 +5089,35 @@ async def crear_usuario_admin(usuario: AdminUserCreate):
             permisos_default = PERMISOS_ADMIN_DEFAULT if usuario.rol == 'admin' else PERMISOS_USER_DEFAULT
             permisos_json = json.dumps(permisos_default)
         
-        # Insertar nuevo usuario con permisos (activo por defecto = TRUE)
+        # Validar territorio si es territorial
+        territorio_valor = None
+        if usuario.es_territorial:
+            if not usuario.territorio:
+                raise HTTPException(status_code=400, detail="Si es territorial, debe especificar un territorio")
+            if usuario.territorio not in TERRITORIOS_SEMBRANDO_VIDA:
+                raise HTTPException(status_code=400, detail="Territorio inválido. Debe ser uno de los territorios de Sembrando Vida.")
+            territorio_valor = usuario.territorio
+        
+        # Insertar nuevo usuario con permisos, es_territorial y territorio
         cursor.execute("""
-            INSERT INTO admin_users (username, password, rol, permisos, activo) 
-            VALUES (%s, %s, %s, %s, TRUE) 
+            INSERT INTO admin_users (username, password, rol, permisos, activo, es_territorial, territorio) 
+            VALUES (%s, %s, %s, %s, TRUE, %s, %s) 
             RETURNING id
-        """, (usuario.username, hashed_password, usuario.rol, permisos_json))
+        """, (usuario.username, hashed_password, usuario.rol, permisos_json, usuario.es_territorial, territorio_valor))
         
         nuevo_id = cursor.fetchone()[0]
         conn.commit()
         
-        print(f"✅ Usuario administrativo creado con ID: {nuevo_id}")
+        print(f"✅ Usuario administrativo creado con ID: {nuevo_id}" + (f" (territorial: {territorio_valor})" if usuario.es_territorial else ""))
         return {
             "message": "Usuario administrativo creado exitosamente",
             "id": nuevo_id,
             "username": usuario.username,
             "rol": usuario.rol,
             "permisos": json.loads(permisos_json),
-            "activo": True
+            "activo": True,
+            "es_territorial": usuario.es_territorial,
+            "territorio": territorio_valor
         }
         
     except HTTPException:
@@ -5044,7 +5134,7 @@ async def obtener_usuario_admin(user_id: int):
         print(f"🔄 Obteniendo usuario administrativo ID: {user_id}")
         
         cursor.execute("""
-            SELECT id, username, rol, permisos, activo
+            SELECT id, username, rol, permisos, activo, es_territorial, territorio
             FROM admin_users 
             WHERE id = %s
         """, (user_id,))
@@ -5066,12 +5156,18 @@ async def obtener_usuario_admin(user_id: int):
         # Estado activo (por defecto True si es NULL)
         activo = row[4] if row[4] is not None else True
         
+        # Es territorial y territorio
+        es_territorial = row[5] if row[5] is not None else False
+        territorio = row[6]
+        
         usuario = {
             "id": row[0],
             "username": row[1],
             "rol": row[2],
             "permisos": permisos,
-            "activo": activo
+            "activo": activo,
+            "es_territorial": es_territorial,
+            "territorio": territorio
         }
         
         print(f"✅ Usuario administrativo obtenido: {usuario['username']}")
@@ -5128,6 +5224,23 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
             campos_actualizar.append("activo = %s")
             valores.append(usuario.activo)
         
+        # Campo es_territorial
+        if usuario.es_territorial is not None:
+            campos_actualizar.append("es_territorial = %s")
+            valores.append(usuario.es_territorial)
+            
+            # Si se desactiva territorial, limpiar el territorio
+            if not usuario.es_territorial:
+                campos_actualizar.append("territorio = %s")
+                valores.append(None)
+        
+        # Campo territorio (solo si es territorial)
+        if usuario.territorio is not None:
+            if usuario.territorio and usuario.territorio not in TERRITORIOS_SEMBRANDO_VIDA:
+                raise HTTPException(status_code=400, detail="Territorio inválido. Debe ser uno de los territorios de Sembrando Vida.")
+            campos_actualizar.append("territorio = %s")
+            valores.append(usuario.territorio if usuario.territorio else None)
+        
         if not campos_actualizar:
             raise HTTPException(status_code=400, detail="No hay campos para actualizar")
         
@@ -5138,7 +5251,7 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
         conn.commit()
         
         # Obtener usuario actualizado
-        cursor.execute("SELECT id, username, rol, permisos, activo FROM admin_users WHERE id = %s", (user_id,))
+        cursor.execute("SELECT id, username, rol, permisos, activo, es_territorial, territorio FROM admin_users WHERE id = %s", (user_id,))
         row = cursor.fetchone()
         
         # Parsear permisos
@@ -5154,15 +5267,21 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
         # Estado activo
         activo = row[4] if row[4] is not None else True
         
+        # Es territorial y territorio
+        es_territorial = row[5] if row[5] is not None else False
+        territorio = row[6]
+        
         usuario_actualizado = {
             "id": row[0],
             "username": row[1],
             "rol": row[2],
             "permisos": permisos,
-            "activo": activo
+            "activo": activo,
+            "es_territorial": es_territorial,
+            "territorio": territorio
         }
         
-        print(f"✅ Usuario administrativo actualizado: {usuario_actualizado['username']} (activo: {activo})")
+        print(f"✅ Usuario administrativo actualizado: {usuario_actualizado['username']} (activo: {activo}, territorial: {es_territorial})")
         return {
             "message": "Usuario administrativo actualizado exitosamente",
             **usuario_actualizado

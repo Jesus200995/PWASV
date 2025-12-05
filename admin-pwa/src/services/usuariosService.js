@@ -1,5 +1,6 @@
 // Servicio para manejo de usuarios usando la API real con endpoints GET
 import { API_URL } from '../config/api.js'
+import authService from './authService.js'
 
 console.log(`🌐 Usando API: ${API_URL}`);
 
@@ -12,11 +13,21 @@ class UsuariosService {
     let ultimoError = null;
     const maxReintentos = 3;
     
+    // Obtener filtro de territorio si el admin es territorial
+    const territorioFilter = authService.getTerritorioFilter();
+    
     for (let intento = 1; intento <= maxReintentos; intento++) {
       try {
-        console.log(`🔍 Intento ${intento}/${maxReintentos} - Obteniendo usuarios desde la API real...`);
+        // Construir URL con parámetro de territorio si aplica
+        let url = `${API_URL}/usuarios`;
+        if (territorioFilter) {
+          url += `?territorio=${encodeURIComponent(territorioFilter)}`;
+          console.log(`🔍 Intento ${intento}/${maxReintentos} - Obteniendo usuarios del territorio: ${territorioFilter}`);
+        } else {
+          console.log(`🔍 Intento ${intento}/${maxReintentos} - Obteniendo todos los usuarios (admin global)...`);
+        }
         
-        const response = await fetch(`${API_URL}/usuarios`, {
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

@@ -1719,14 +1719,38 @@ async def actualizar_info_usuario(user_id: int, info: UserInfoUpdate):
 
 # ==================== ENDPOINT PARA ACTUALIZAR TERRITORIO ====================
 
-# Lista de estados de México
-ESTADOS_MEXICO = [
-    "Aguascalientes", "Baja California", "Baja California Sur", "Campeche",
-    "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila", "Colima",
-    "Durango", "Estado de México", "Guanajuato", "Guerrero", "Hidalgo",
-    "Jalisco", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca",
-    "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa",
-    "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
+# Lista de territorios de Sembrando Vida
+TERRITORIOS_SEMBRANDO_VIDA = [
+    "Acapulco- Centro- Norte- Tierra Caliente",
+    "Acayucan",
+    "Balancán",
+    "Chihuahua / Sonora",
+    "Colima",
+    "Comalcalco",
+    "Córdoba",
+    "Costa Chica - Montaña",
+    "Costa Grande- Sierra",
+    "Durango / Zacatecas",
+    "Hidalgo",
+    "Istmo",
+    "Michoacán",
+    "Mixteca",
+    "Morelos",
+    "Nayarit / Jalisco",
+    "Ocosingo",
+    "Palenque",
+    "Papantla",
+    "Pichucalco",
+    "Puebla",
+    "San Luis Potosí",
+    "Sinaloa",
+    "Tamaulipas",
+    "Tantoyuca",
+    "Tapachula",
+    "Teapa",
+    "Tlaxcala / Estado de México",
+    "Tzucacab / Opb",
+    "Xpujil"
 ]
 
 class TerritorioUpdate(BaseModel):
@@ -1739,9 +1763,9 @@ async def actualizar_territorio(user_id: int, data: TerritorioUpdate):
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Validar que el territorio sea un estado válido de México
-        if data.territorio not in ESTADOS_MEXICO:
-            raise HTTPException(status_code=400, detail=f"Territorio inválido. Debe ser uno de los 32 estados de México.")
+        # Validar que el territorio sea uno de los territorios de Sembrando Vida
+        if data.territorio not in TERRITORIOS_SEMBRANDO_VIDA:
+            raise HTTPException(status_code=400, detail=f"Territorio inválido. Debe ser uno de los territorios de Sembrando Vida.")
         
         # Verificar que el usuario existe
         cursor.execute("SELECT id FROM usuarios WHERE id = %s", (user_id,))
@@ -1773,11 +1797,49 @@ async def actualizar_territorio(user_id: int, data: TerritorioUpdate):
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al actualizar territorio: {str(e)}")
 
-# Endpoint para obtener lista de estados de México
+# Endpoint para obtener lista de territorios de Sembrando Vida
+@app.get("/territorios-sembrando-vida")
+async def obtener_territorios():
+    """Devuelve la lista de territorios de Sembrando Vida"""
+    return {"territorios": TERRITORIOS_SEMBRANDO_VIDA}
+
+# Mantener endpoint antiguo por compatibilidad (redirige a territorios)
 @app.get("/estados-mexico")
 async def obtener_estados_mexico():
-    """Devuelve la lista de los 32 estados de la República Mexicana"""
-    return {"estados": ESTADOS_MEXICO}
+    """DEPRECADO: Usar /territorios-sembrando-vida en su lugar"""
+    return {"territorios": TERRITORIOS_SEMBRANDO_VIDA}
+
+# Endpoint para resetear todos los territorios de usuarios (para migración)
+@app.post("/admin/reset-territorios")
+async def reset_todos_territorios():
+    """Resetea el campo territorio de todos los usuarios a NULL para que vuelvan a seleccionar"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Contar cuántos usuarios tienen territorio asignado
+        cursor.execute("SELECT COUNT(*) FROM usuarios WHERE territorio IS NOT NULL")
+        usuarios_con_territorio = cursor.fetchone()[0]
+        
+        # Resetear todos los territorios a NULL
+        cursor.execute("UPDATE usuarios SET territorio = NULL WHERE territorio IS NOT NULL")
+        conn.commit()
+        
+        print(f"✅ Se resetearon {usuarios_con_territorio} territorios de usuarios")
+        return {
+            "success": True,
+            "mensaje": f"Se resetearon {usuarios_con_territorio} territorios de usuarios",
+            "usuarios_afectados": usuarios_con_territorio
+        }
+        
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al resetear territorios: {str(e)}")
 
 # Endpoint para eliminar un usuario específico con todos sus datos
 @app.delete("/usuarios/{user_id}")

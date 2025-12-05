@@ -769,7 +769,7 @@
                 </label>
                 <select id="edit-territorio" v-model="datosEdicion.territorio">
                   <option value="">-- Sin asignar --</option>
-                  <option v-for="estado in estadosMexico" :key="estado" :value="estado">{{ estado }}</option>
+                  <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">{{ territorio }}</option>
                 </select>
               </div>
             </div>
@@ -851,14 +851,38 @@ const actualizarPermisosUsuario = (event) => {
 // Estado de conexión
 const isOnline = ref(navigator.onLine)
 
-// Lista de estados de México para el selector de territorio
-const estadosMexico = [
-  "Aguascalientes", "Baja California", "Baja California Sur", "Campeche",
-  "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila", "Colima",
-  "Durango", "Estado de México", "Guanajuato", "Guerrero", "Hidalgo",
-  "Jalisco", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca",
-  "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa",
-  "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
+// Lista de territorios de Sembrando Vida para el selector de territorio
+const territoriosSembrandoVida = [
+  "Acapulco- Centro- Norte- Tierra Caliente",
+  "Acayucan",
+  "Balancán",
+  "Chihuahua / Sonora",
+  "Colima",
+  "Comalcalco",
+  "Córdoba",
+  "Costa Chica - Montaña",
+  "Costa Grande- Sierra",
+  "Durango / Zacatecas",
+  "Hidalgo",
+  "Istmo",
+  "Michoacán",
+  "Mixteca",
+  "Morelos",
+  "Nayarit / Jalisco",
+  "Ocosingo",
+  "Palenque",
+  "Papantla",
+  "Pichucalco",
+  "Puebla",
+  "San Luis Potosí",
+  "Sinaloa",
+  "Tamaulipas",
+  "Tantoyuca",
+  "Tapachula",
+  "Teapa",
+  "Tlaxcala / Estado de México",
+  "Tzucacab / Opb",
+  "Xpujil"
 ]
 
 const API_URL = 'https://apipwa.sembrandodatos.com'

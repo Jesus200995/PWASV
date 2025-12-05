@@ -18,7 +18,7 @@
 
             <!-- Mensaje -->
             <p class="modal-message">
-              Indica el estado de la República Mexicana donde te encuentras
+              Indica el territorio de Sembrando Vida donde te encuentras
             </p>
 
             <!-- Advertencia -->
@@ -39,9 +39,9 @@
                 class="territorio-select"
                 :class="{ 'has-value': selectedTerritorio }"
               >
-                <option value="" disabled>-- Selecciona un estado --</option>
-                <option v-for="estado in estados" :key="estado" :value="estado">
-                  {{ estado }}
+                <option value="" disabled>-- Selecciona un territorio --</option>
+                <option v-for="territorio in territorios" :key="territorio" :value="territorio">
+                  {{ territorio }}
                 </option>
               </select>
             </div>
@@ -99,14 +99,38 @@ const API_URL = 'https://apipwa.sembrandodatos.com'
 const selectedTerritorio = ref('')
 const saving = ref(false)
 
-// Lista de estados de México
-const estados = ref([
-  "Aguascalientes", "Baja California", "Baja California Sur", "Campeche",
-  "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila", "Colima",
-  "Durango", "Estado de México", "Guanajuato", "Guerrero", "Hidalgo",
-  "Jalisco", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca",
-  "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa",
-  "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
+// Lista de territorios de Sembrando Vida
+const territorios = ref([
+  "Acapulco- Centro- Norte- Tierra Caliente",
+  "Acayucan",
+  "Balancán",
+  "Chihuahua / Sonora",
+  "Colima",
+  "Comalcalco",
+  "Córdoba",
+  "Costa Chica - Montaña",
+  "Costa Grande- Sierra",
+  "Durango / Zacatecas",
+  "Hidalgo",
+  "Istmo",
+  "Michoacán",
+  "Mixteca",
+  "Morelos",
+  "Nayarit / Jalisco",
+  "Ocosingo",
+  "Palenque",
+  "Papantla",
+  "Pichucalco",
+  "Puebla",
+  "San Luis Potosí",
+  "Sinaloa",
+  "Tamaulipas",
+  "Tantoyuca",
+  "Tapachula",
+  "Teapa",
+  "Tlaxcala / Estado de México",
+  "Tzucacab / Opb",
+  "Xpujil"
 ])
 
 const confirmarTerritorio = async () => {

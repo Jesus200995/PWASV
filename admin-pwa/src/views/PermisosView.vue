@@ -1734,17 +1734,17 @@ export default {
 }
 
 .rol-badge.user {
-  background: rgba(33, 150, 243, 0.1);
-  color: #1976d2;
-  border: 1.5px solid #2196f3;
+  background: rgba(142, 36, 170, 0.1);
+  color: #8e24aa;
+  border: 1.5px solid #9c27b0;
 }
 
 .rol-badge.user .rol-icon {
-  color: #1976d2;
+  color: #8e24aa;
 }
 
 .rol-badge.user:hover {
-  background: rgba(33, 150, 243, 0.15);
+  background: rgba(142, 36, 170, 0.15);
 }
 
 .rol-cell {

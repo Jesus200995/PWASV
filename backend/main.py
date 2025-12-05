@@ -1822,7 +1822,8 @@ TERRITORIOS_SEMBRANDO_VIDA = [
     "Teapa",
     "Tlaxcala / Estado de México",
     "Tzucacab / Opb",
-    "Xpujil"
+    "Xpujil",
+    "Oficinas Centrales"
 ]
 
 class TerritorioUpdate(BaseModel):

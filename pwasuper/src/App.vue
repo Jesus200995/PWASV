@@ -8,6 +8,7 @@ import WelcomeModalNew from './components/WelcomeModalNew.vue';
 import PoinsettiaFlower from './components/PoinsettiaFlower.vue';
 import TerritorioModal from './components/TerritorioModal.vue';
 import { useNotifications } from './composables/useNotifications.js';
+import { API_URL } from './utils/network.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -16,6 +17,7 @@ const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
 const showTerritorioModal = ref(false);
+let userCheckIntervalId = null;
 
 // Sistema de notificaciones en tiempo real
 const { unreadCount, startPolling, stopPolling } = useNotifications();
@@ -36,7 +38,21 @@ watch(() => route.path, () => {
   } else if (!storedUser && userData.value) {
     userData.value = null;
   }
+  
+  // Verificar territorio en cada cambio de ruta (solo si está logueado)
+  if (userData.value && !userData.value.territorio && route.name !== 'Login' && route.name !== 'Register') {
+    console.log('⚠️ [Route Change] Usuario sin territorio, mostrando modal obligatorio');
+    showTerritorioModal.value = true;
+  }
 });
+
+// Watcher reactivo para userData - verifica territorio cuando cambian los datos del usuario
+watch(userData, (newUserData) => {
+  if (newUserData && !newUserData.territorio) {
+    console.log('⚠️ [Watch userData] Usuario sin territorio asignado, mostrando modal obligatorio');
+    showTerritorioModal.value = true;
+  }
+}, { deep: true, immediate: false });
 
 // Listener para cambios en localStorage (útil para logout desde otras pestañas)
 const handleStorageChange = (e) => {
@@ -46,6 +62,7 @@ const handleStorageChange = (e) => {
       userData.value = null;
       showWelcome.value = false;
       showMobileMenu.value = false;
+      showTerritorioModal.value = false;
       
       // Detener polling de notificaciones
       if (notificationPollingId) {
@@ -54,10 +71,17 @@ const handleStorageChange = (e) => {
       }
       
       router.push('/login');
-    } else if (e.newValue && !userData.value) {
-      // Si se agregó un usuario y no tenemos datos, cargarlos
+    } else if (e.newValue) {
+      // Si se agregó o actualizó un usuario, cargar los datos
       try {
-        userData.value = JSON.parse(e.newValue);
+        const newUserData = JSON.parse(e.newValue);
+        userData.value = newUserData;
+        
+        // Verificar si tiene territorio asignado
+        if (!newUserData.territorio) {
+          console.log('⚠️ [Storage Change] Usuario sin territorio, mostrando modal obligatorio');
+          showTerritorioModal.value = true;
+        }
         
         // Reiniciar polling de notificaciones para el nuevo usuario
         if (notificationPollingId) {
@@ -70,6 +94,63 @@ const handleStorageChange = (e) => {
         localStorage.removeItem('user');
       }
     }
+  }
+};
+
+// Función para verificar periódicamente los datos del usuario desde el servidor
+// Esto detecta cambios realizados por el admin (ej: eliminar territorio)
+const checkUserDataFromServer = async () => {
+  if (!userData.value || !userData.value.id) return;
+  
+  try {
+    const response = await fetch(`${API_URL}/usuarios/${userData.value.id}`);
+    if (response.ok) {
+      const serverUserData = await response.json();
+      
+      // Verificar si el territorio cambió
+      const localTerritorio = userData.value.territorio;
+      const serverTerritorio = serverUserData.territorio;
+      
+      // Si el servidor indica que ya no tiene territorio, actualizar local y mostrar modal
+      if (localTerritorio && !serverTerritorio) {
+        console.log('⚠️ [Server Check] Admin removió el territorio del usuario, actualizando...');
+        userData.value = { ...userData.value, territorio: null };
+        localStorage.setItem('user', JSON.stringify(userData.value));
+        showTerritorioModal.value = true;
+      } 
+      // Si el servidor tiene territorio pero local no, actualizar local
+      else if (!localTerritorio && serverTerritorio) {
+        console.log('✅ [Server Check] Admin asignó territorio al usuario:', serverTerritorio);
+        userData.value = { ...userData.value, territorio: serverTerritorio };
+        localStorage.setItem('user', JSON.stringify(userData.value));
+        showTerritorioModal.value = false;
+      }
+      // Si el territorio cambió a uno diferente, actualizar
+      else if (localTerritorio !== serverTerritorio && serverTerritorio) {
+        console.log('🔄 [Server Check] Territorio actualizado por admin:', serverTerritorio);
+        userData.value = { ...userData.value, territorio: serverTerritorio };
+        localStorage.setItem('user', JSON.stringify(userData.value));
+      }
+    }
+  } catch (error) {
+    console.warn('No se pudo verificar datos del usuario desde el servidor:', error.message);
+  }
+};
+
+// Iniciar verificación periódica cada 30 segundos
+const startUserDataCheck = () => {
+  // Verificar inmediatamente al iniciar
+  checkUserDataFromServer();
+  
+  // Luego cada 30 segundos
+  userCheckIntervalId = setInterval(checkUserDataFromServer, 30000);
+};
+
+// Detener verificación periódica
+const stopUserDataCheck = () => {
+  if (userCheckIntervalId) {
+    clearInterval(userCheckIntervalId);
+    userCheckIntervalId = null;
   }
 };
 
@@ -117,6 +198,11 @@ onMounted(() => {
   
   // Escuchar cambios en localStorage
   window.addEventListener('storage', handleStorageChange);
+  
+  // Iniciar verificación periódica de datos del usuario (si está logueado)
+  if (userData.value) {
+    startUserDataCheck();
+  }
 });
 
 onUnmounted(() => {
@@ -124,6 +210,8 @@ onUnmounted(() => {
   window.removeEventListener('storage', handleStorageChange);
   // Detener el polling de notificaciones
   stopPolling(notificationPollingId);
+  // Detener verificación de datos del usuario
+  stopUserDataCheck();
 });
 
 const isLoggedIn = computed(() => {

@@ -944,7 +944,8 @@ export default {
         "Teapa",
         "Tlaxcala / Estado de México",
         "Tzucacab / Opb",
-        "Xpujil"
+        "Xpujil",
+        "Oficinas Centrales"
       ],
       
       // Permisos por defecto para nuevos usuarios (todos en false)

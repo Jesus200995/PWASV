@@ -3704,30 +3704,32 @@ export default {
 .user-info {
   display: flex;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.35rem); /* Gap más pequeño */
+  gap: clamp(0.5rem, 1.2vw, 0.7rem);
   justify-content: center;
-  text-align: center;
+  text-align: left;
+  padding: 0 8px;
 }
 
 .user-avatar {
-  width: clamp(20px, 3vw, 24px); /* Avatar más pequeño */
-  height: clamp(20px, 3vw, 24px);
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  width: clamp(24px, 3.5vw, 28px);
+  height: clamp(24px, 3.5vw, 28px);
+  background: transparent;
+  border: 2.5px solid #4CAF50; /* Verde medio */
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: 600;
-  font-size: clamp(7px, 1.2vw, 8px); /* Texto más pequeño */
+  color: #4CAF50; /* Verde medio */
+  font-weight: 800;
+  font-size: clamp(8px, 1.3vw, 10px);
   flex-shrink: 0;
 }
 
 .user-details {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   min-width: 0;
   flex: 1;
 }
@@ -4354,9 +4356,10 @@ export default {
   }
 
   .user-avatar {
-    width: clamp(16px, 3vw, 18px); /* Avatar extra pequeño */
-    height: clamp(16px, 3vw, 18px);
-    font-size: clamp(6px, 1.2vw, 7px);
+    width: clamp(20px, 3.2vw, 22px);
+    height: clamp(20px, 3.2vw, 22px);
+    font-size: clamp(7px, 1.3vw, 8px);
+    border-width: 2px;
   }
 
   .time-badge,

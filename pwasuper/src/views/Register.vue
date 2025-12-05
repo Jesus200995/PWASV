@@ -232,7 +232,7 @@
             </div>
             
             <div>
-              <label for="territorio" class="block text-xs font-medium text-gray-800 mb-1">Territorio (Estado) *</label>
+              <label for="territorio" class="block text-xs font-medium text-gray-800 mb-1">Territorio *</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -247,8 +247,8 @@
                   required
                   class="glass-input w-full pl-9 pr-3 py-2 appearance-none cursor-pointer"
                 >
-                  <option value="" disabled>-- Selecciona tu estado --</option>
-                  <option v-for="estado in estadosMexico" :key="estado" :value="estado">{{ estado }}</option>
+                  <option value="" disabled>-- Selecciona tu territorio --</option>
+                  <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">{{ territorio }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,7 +257,7 @@
                 </div>
               </div>
               <p v-if="territorioError" class="mt-1 text-xs text-red-600">{{ territorioError }}</p>
-              <p class="mt-1 text-xs text-gray-500">Selecciona el estado donde trabajarás</p>
+              <p class="mt-1 text-xs text-gray-500">Selecciona el territorio correspondiente a tu área de trabajo</p>
             </div>
             
             <div>
@@ -534,13 +534,38 @@ const form = reactive({
   confirmPassword: ''
 });
 
-// Lista de estados de México para el selector de territorio
-const estadosMexico = [
-  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas',
-  'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Estado de México',
-  'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit',
-  'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí',
-  'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'
+// Lista de los 30 territorios de Sembrando Vida
+const territoriosSembrandoVida = [
+  'Acapulco - Centro - Norte - Tierra Caliente',
+  'Acayucan',
+  'Balancán',
+  'Chihuahua / Sonora',
+  'Colima',
+  'Comalcalco',
+  'Córdoba',
+  'Costa Chica - Montaña',
+  'Costa Grande - Sierra',
+  'Durango / Zacatecas',
+  'Hidalgo',
+  'Istmo',
+  'Michoacán',
+  'Mixteca',
+  'Morelos',
+  'Nayarit / Jalisco',
+  'Ocosingo',
+  'Palenque',
+  'Papantla',
+  'Pichucalco',
+  'Puebla',
+  'San Luis Potosí',
+  'Sinaloa',
+  'Tamaulipas',
+  'Tantoyuca',
+  'Tapachula',
+  'Teapa',
+  'Tlaxcala / Estado de México',
+  'Tzucacab / Opb',
+  'Xpujil'
 ];
 
 const territorioError = ref('');

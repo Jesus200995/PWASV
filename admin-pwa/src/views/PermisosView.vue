@@ -335,7 +335,7 @@
               </div>
             </div>
 
-            <!-- Sección de Estado del Usuario (solo en modo edición) -->
+            <!-- Sección de Estado del Usuario (solo en modo edición) - MOVIDO ARRIBA -->
             <div v-if="modoEdicion" class="form-section estado-section">
               <div class="section-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -391,6 +391,98 @@
                 </svg>
                 <span>La cuenta de administrador principal no puede ser desactivada.</span>
               </div>
+            </div>
+
+            <!-- Sección de Restricción Territorial -->
+            <div class="form-section territorial-section-modern">
+              <div class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <h4>Restricción Territorial</h4>
+              </div>
+              <p class="section-description">Define si este usuario tendrá acceso restringido a un territorio específico</p>
+              
+              <!-- Toggle de Tipo de Acceso -->
+              <div class="territorial-access-toggle">
+                <div 
+                  class="access-option" 
+                  :class="{ 'selected': !formularioUsuario.es_territorial }"
+                  @click="formularioUsuario.es_territorial = false; formularioUsuario.territorio = ''"
+                >
+                  <div class="access-option-icon global-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M2 12h20"/>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                  </div>
+                  <div class="access-option-content">
+                    <span class="access-option-title">Acceso Global</span>
+                    <span class="access-option-desc">Ve información de todos los territorios</span>
+                  </div>
+                  <div class="access-checkmark">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                </div>
+                
+                <div 
+                  class="access-option" 
+                  :class="{ 'selected': formularioUsuario.es_territorial }"
+                  @click="formularioUsuario.es_territorial = true"
+                >
+                  <div class="access-option-icon territorial-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                  </div>
+                  <div class="access-option-content">
+                    <span class="access-option-title">Acceso Territorial</span>
+                    <span class="access-option-desc">Solo ve información de un territorio</span>
+                  </div>
+                  <div class="access-checkmark">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Selector de territorio (solo visible cuando es territorial) -->
+              <transition name="slide-fade">
+                <div v-if="formularioUsuario.es_territorial" class="territorio-selector-wrapper">
+                  <div class="territorio-selector-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span>Selecciona el territorio asignado</span>
+                  </div>
+                  <select 
+                    id="territorio-admin" 
+                    v-model="formularioUsuario.territorio" 
+                    class="form-select territorio-select-modern"
+                    required
+                  >
+                    <option value="">-- Seleccione un territorio --</option>
+                    <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">
+                      {{ territorio }}
+                    </option>
+                  </select>
+                  <div class="territorio-info-box">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="16" x2="12" y2="12"/>
+                      <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    <span>Este usuario solo podrá ver usuarios, registros y asistencias del territorio seleccionado</span>
+                  </div>
+                </div>
+              </transition>
             </div>
 
             <!-- Sección de Rol -->
@@ -457,77 +549,6 @@
                     </svg>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Sección Usuario Territorial -->
-            <div class="form-section territorial-section">
-              <div class="section-header">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-                <h4>Usuario Territorial</h4>
-              </div>
-              
-              <div class="territorial-toggle-container">
-                <div class="territorial-info">
-                  <div class="territorial-icon" :class="formularioUsuario.es_territorial ? 'activo' : 'inactivo'">
-                    <svg v-if="formularioUsuario.es_territorial" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                      <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                    <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M2 12h20"/>
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                    </svg>
-                  </div>
-                  <div class="territorial-text">
-                    <span class="territorial-label">{{ formularioUsuario.es_territorial ? 'Usuario Territorial Activo' : 'Usuario General' }}</span>
-                    <span class="territorial-desc">{{ formularioUsuario.es_territorial ? 'Solo verá información de usuarios de su territorio asignado' : 'Verá información de todos los usuarios según sus permisos' }}</span>
-                  </div>
-                </div>
-                
-                <label class="territorial-switch">
-                  <input 
-                    type="checkbox" 
-                    v-model="formularioUsuario.es_territorial"
-                    @change="onTerritorialChange"
-                  />
-                  <span class="slider"></span>
-                </label>
-              </div>
-              
-              <!-- Selector de territorio (solo visible cuando es territorial) -->
-              <div v-if="formularioUsuario.es_territorial" class="territorio-selector-container">
-                <label for="territorio-admin" class="territorio-label">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  Territorio Asignado
-                  <span class="required">*</span>
-                </label>
-                <select 
-                  id="territorio-admin" 
-                  v-model="formularioUsuario.territorio" 
-                  class="form-select territorio-select"
-                  required
-                >
-                  <option value="">-- Seleccione un territorio --</option>
-                  <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">
-                    {{ territorio }}
-                  </option>
-                </select>
-                <small class="form-help territorio-help">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="16" x2="12" y2="12"/>
-                    <line x1="12" y1="8" x2="12.01" y2="8"/>
-                  </svg>
-                  Este usuario solo podrá ver y gestionar usuarios asignados a este territorio
-                </small>
               </div>
             </div>
 
@@ -1762,35 +1783,54 @@ export default {
   border: 1.5px solid #f44336;
 }
 
-/* Estilos para badges territoriales */
-.territorial-cell {
+/* Estilos para badges territoriales en tabla */
+.territorio-cell {
   text-align: center;
+  vertical-align: middle;
 }
 
-.territorial-badge {
+.territorio-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 10px;
-  border-radius: 12px;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 16px;
   font-size: 10px;
   font-weight: 600;
-  max-width: 150px;
+  max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
-.territorial-badge.territorial {
-  background: rgba(249, 115, 22, 0.15);
-  color: #c2410c;
-  border: 1.5px solid #f97316;
+.territorio-badge svg {
+  flex-shrink: 0;
 }
 
-.territorial-badge.global {
-  background: rgba(99, 102, 241, 0.1);
-  color: #4338ca;
-  border: 1.5px solid #6366f1;
+.territorio-badge.territorial {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.2) 100%);
+  color: #0f766e;
+  border: 1.5px solid #14b8a6;
+  box-shadow: 0 1px 3px rgba(20, 184, 166, 0.15);
+}
+
+.territorio-badge.territorial:hover {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.25) 0%, rgba(13, 148, 136, 0.3) 100%);
+  box-shadow: 0 2px 6px rgba(20, 184, 166, 0.25);
+}
+
+.territorio-badge.general {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(2, 132, 199, 0.18) 100%);
+  color: #0369a1;
+  border: 1.5px solid #0ea5e9;
+  box-shadow: 0 1px 3px rgba(14, 165, 233, 0.12);
+}
+
+.territorio-badge.general:hover {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(2, 132, 199, 0.28) 100%);
+  box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
 }
 
 .actions-cell {
@@ -1968,7 +2008,7 @@ export default {
 }
 
 .modal-body {
-  padding: 24px;
+  padding: 16px;
   overflow-y: auto;
   flex: 1;
   max-height: calc(100vh - 180px);
@@ -1976,29 +2016,31 @@ export default {
 
 /* === FORM SECTIONS === */
 .form-section {
-  margin-bottom: 20px;
-  padding: 20px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
   background: #fafffe;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid #e8f5e9;
 }
 
 .section-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #e8f5e9;
 }
 
 .section-header svg {
+  width: 16px;
+  height: 16px;
   color: #4CAF50;
   flex-shrink: 0;
 }
 
 .section-header h4 {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: #2E7D32;
   margin: 0;
@@ -2007,13 +2049,13 @@ export default {
 
 .section-description {
   color: #666;
-  font-size: 13px;
-  margin: 0 0 16px 0;
+  font-size: 11px;
+  margin: 0 0 10px 0;
 }
 
 /* === FORM INPUTS === */
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .form-group:last-child {
@@ -2023,15 +2065,17 @@ export default {
 .form-group label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 8px;
-  font-size: 13px;
+  margin-bottom: 5px;
+  font-size: 11px;
   font-family: 'Inter', sans-serif;
 }
 
 .form-group label svg {
+  width: 12px;
+  height: 12px;
   color: #4CAF50;
   flex-shrink: 0;
 }
@@ -2043,10 +2087,10 @@ export default {
 
 .form-input {
   width: 100%;
-  padding: 12px 14px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 8px 10px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 12px;
   font-family: 'Inter', sans-serif;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -2056,7 +2100,7 @@ export default {
 .form-input:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
 .form-input:disabled {
@@ -2065,9 +2109,9 @@ export default {
 }
 
 .form-help {
-  font-size: 12px;
+  font-size: 10px;
   color: #888;
-  margin-top: 6px;
+  margin-top: 4px;
   display: block;
 }
 
@@ -2079,23 +2123,23 @@ export default {
 }
 
 .form-input-password {
-  padding-right: 48px !important;
+  padding-right: 36px !important;
 }
 
 .btn-toggle-password {
   position: absolute;
-  right: 8px;
+  right: 6px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   border: none;
   background: transparent;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s ease;
   color: #666;
 }
@@ -2110,8 +2154,8 @@ export default {
 }
 
 .btn-toggle-password svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Estados de validación para contraseñas */
@@ -2162,7 +2206,7 @@ export default {
 .radio-group-modern {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 
 .radio-card {
@@ -2171,23 +2215,27 @@ export default {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 16px 12px;
+  padding: 12px 10px;
   border: 2px solid #e0e0e0;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.25s ease;
   background: #fff;
 }
 
 .radio-card:hover {
-  border-color: #81c784;
-  background: #f1f8e9;
+  border-color: #bdbdbd;
+  background: #fafafa;
 }
 
 .radio-card.selected {
-  border-color: #4CAF50;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Admin seleccionado - Naranja */
+.radio-card.selected:has(.admin-icon),
+.radio-card.selected .admin-icon ~ * {
+  border-color: transparent;
 }
 
 .radio-card input[type="radio"] {
@@ -2198,16 +2246,22 @@ export default {
 }
 
 .radio-card-icon {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   transition: all 0.25s ease;
 }
 
+.radio-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Admin - Naranja */
 .admin-icon {
   background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
   color: #f57c00;
@@ -2218,40 +2272,51 @@ export default {
   color: white;
 }
 
+.radio-card:has(.admin-icon).selected {
+  border-color: #f57c00;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+}
+
+/* Usuario - Púrpura/Violeta */
 .user-icon {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  color: #1976d2;
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  color: #8e24aa;
 }
 
 .radio-card.selected .user-icon {
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  background: linear-gradient(135deg, #8e24aa 0%, #6a1b9a 100%);
   color: white;
+}
+
+.radio-card:has(.user-icon).selected {
+  border-color: #8e24aa;
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
 }
 
 .radio-card-content {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .radio-card-title {
   font-weight: 600;
   color: #333;
-  font-size: 14px;
+  font-size: 11px;
 }
 
 .radio-card-desc {
-  font-size: 11px;
+  font-size: 9px;
   color: #666;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .radio-checkmark {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 24px;
-  height: 24px;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #e0e0e0;
   display: flex;
@@ -2262,44 +2327,69 @@ export default {
   transition: all 0.25s ease;
 }
 
-.radio-card.selected .radio-checkmark {
+.radio-checkmark svg {
+  width: 10px;
+  height: 10px;
+}
+
+.radio-card:has(.admin-icon).selected .radio-checkmark {
   opacity: 1;
   transform: scale(1);
-  background: #4CAF50;
+  background: #f57c00;
+  color: white;
+}
+
+.radio-card:has(.user-icon).selected .radio-checkmark {
+  opacity: 1;
+  transform: scale(1);
+  background: #8e24aa;
   color: white;
 }
 
 /* === PERMISOS GRID MODERN === */
 .permisos-section-modern {
-  background: #fafffe;
+  background: linear-gradient(135deg, #faf5fc 0%, #f3e5f5 100%);
+  border-color: #e1bee7;
+}
+
+.permisos-section-modern .section-header svg {
+  color: #8e24aa;
+}
+
+.permisos-section-modern .section-header h4 {
+  color: #6a1b9a;
+}
+
+.permisos-section-modern .section-description {
+  color: #7b1fa2;
 }
 
 .permisos-grid-modern {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 6px;
 }
 
 .permiso-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border: 2px solid #e8e8e8;
-  border-radius: 10px;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   background: #fff;
 }
 
 .permiso-card:hover {
-  border-color: #a5d6a7;
-  background: #f9fdf9;
+  border-color: #ce93d8;
+  background: #faf5fc;
 }
 
 .permiso-card.active {
-  border-color: #4CAF50;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-color: #8e24aa;
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
 }
 
 .permiso-card input[type="checkbox"] {
@@ -2310,9 +2400,9 @@ export default {
 }
 
 .permiso-card-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   background: #f5f5f5;
   display: flex;
   align-items: center;
@@ -2322,14 +2412,19 @@ export default {
   color: #666;
 }
 
+.permiso-card-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
 .permiso-card.active .permiso-card-icon {
-  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  background: linear-gradient(135deg, #8e24aa 0%, #6a1b9a 100%);
   color: white;
 }
 
 .permiso-card-name {
   flex: 1;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   color: #333;
 }
@@ -2339,32 +2434,32 @@ export default {
 }
 
 .toggle-track {
-  width: 40px;
-  height: 22px;
+  width: 32px;
+  height: 16px;
   background: #e0e0e0;
-  border-radius: 11px;
+  border-radius: 8px;
   position: relative;
   transition: all 0.2s ease;
 }
 
 .permiso-card.active .toggle-track {
-  background: #4CAF50;
+  background: #8e24aa;
 }
 
 .toggle-thumb {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 18px;
-  height: 18px;
+  width: 12px;
+  height: 12px;
   background: white;
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
 }
 
 .permiso-card.active .toggle-thumb {
-  left: 20px;
+  left: 18px;
 }
 
 /* === WRAPPER PARA PERMISOS CON SUB-PERMISOS === */
@@ -2385,12 +2480,12 @@ export default {
 
 /* === SUB-PERMISOS INTEGRADOS === */
 .sub-permiso-container {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border: 2px solid #4CAF50;
-  border-top: 1px dashed #86efac;
-  border-radius: 0 0 10px 10px;
-  padding: 10px 14px;
-  margin-top: -2px;
+  background: linear-gradient(135deg, #faf5fc 0%, #f3e5f5 100%);
+  border: 1.5px solid #8e24aa;
+  border-top: 1px dashed #ce93d8;
+  border-radius: 0 0 8px 8px;
+  padding: 6px 10px;
+  margin-top: -1.5px;
   animation: slideDown 0.2s ease-out;
 }
 
@@ -2408,10 +2503,10 @@ export default {
 .sub-permiso-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   cursor: pointer;
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.6);
   transition: all 0.2s ease;
 }
@@ -2425,23 +2520,25 @@ export default {
 }
 
 .sub-permiso-item svg {
+  width: 12px;
+  height: 12px;
   color: #9ca3af;
   transition: color 0.2s ease;
 }
 
 .sub-permiso-item.active svg {
-  color: #22c55e;
+  color: #8e24aa;
 }
 
 .sub-permiso-text {
   flex: 1;
-  font-size: 12px;
+  font-size: 10px;
   color: #4b5563;
   font-weight: 500;
 }
 
 .sub-permiso-item.active .sub-permiso-text {
-  color: #166534;
+  color: #6a1b9a;
 }
 
 /* Mini toggle para sub-permisos */
@@ -2450,24 +2547,24 @@ export default {
 }
 
 .sub-toggle-track {
-  width: 32px;
-  height: 16px;
+  width: 26px;
+  height: 14px;
   background: #d1d5db;
-  border-radius: 8px;
+  border-radius: 7px;
   position: relative;
   transition: background 0.2s ease;
 }
 
 .sub-permiso-item.active .sub-toggle-track {
-  background: #22c55e;
+  background: #8e24aa;
 }
 
 .sub-toggle-thumb {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   background: white;
   border-radius: 50%;
   transition: left 0.2s ease;
@@ -2481,35 +2578,40 @@ export default {
 /* === QUICK ACTIONS === */
 .permisos-quick-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 14px;
-  padding-top: 14px;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px dashed #e0e0e0;
 }
 
 .btn-quick-action {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 4px;
+  padding: 5px 10px;
   border: 1px solid #e0e0e0;
   background: #fff;
-  border-radius: 8px;
-  font-size: 12px;
+  border-radius: 6px;
+  font-size: 10px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: 'Inter', sans-serif;
 }
 
+.btn-quick-action svg {
+  width: 12px;
+  height: 12px;
+}
+
 .btn-select-all {
-  color: #4CAF50;
-  border-color: #a5d6a7;
+  color: #8e24aa;
+  border-color: #ce93d8;
 }
 
 .btn-select-all:hover {
-  background: #e8f5e9;
-  border-color: #4CAF50;
+  background: #f3e5f5;
+  border-color: #8e24aa;
 }
 
 .btn-deselect-all {
@@ -2525,24 +2627,29 @@ export default {
 .admin-info-banner {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
   border: 1px solid #ffe082;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 10px 12px;
   margin-top: 4px;
 }
 
 .admin-banner-icon {
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   background: linear-gradient(135deg, #ffa726 0%, #f57c00 100%);
-  border-radius: 10px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   color: white;
+}
+
+.admin-banner-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .admin-banner-content {
@@ -2552,15 +2659,15 @@ export default {
 .admin-banner-content strong {
   display: block;
   color: #e65100;
-  font-size: 14px;
-  margin-bottom: 4px;
+  font-size: 12px;
+  margin-bottom: 2px;
 }
 
 .admin-banner-content p {
   margin: 0;
   color: #666;
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 11px;
+  line-height: 1.3;
 }
 
 /* === ESTADO DEL USUARIO TOGGLE === */
@@ -2572,10 +2679,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
+  gap: 10px;
+  padding: 10px 12px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid #dee2e6;
   transition: all 0.3s ease;
 }
@@ -2583,14 +2690,14 @@ export default {
 .estado-info {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   flex: 1;
 }
 
 .estado-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2598,32 +2705,37 @@ export default {
   transition: all 0.3s ease;
 }
 
+.estado-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
 .estado-icon.activo {
   background: linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
 }
 
 .estado-icon.inactivo {
   background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  box-shadow: 0 3px 8px rgba(244, 67, 54, 0.3);
 }
 
 .estado-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .estado-label {
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
   color: #333;
 }
 
 .estado-desc {
-  font-size: 12px;
+  font-size: 10px;
   color: #666;
 }
 
@@ -2739,182 +2851,273 @@ export default {
   border-color: #e57373;
 }
 
-/* === USUARIO TERRITORIAL === */
-.territorial-section {
+/* === SECCIÓN RESTRICCIÓN TERRITORIAL MODERNA === */
+.territorial-section-modern {
   margin-top: 8px;
 }
 
-.territorial-toggle-container {
+.territorial-section-modern .section-description {
+  font-size: 11px;
+  color: #666;
+  margin: -8px 0 10px 0;
+  padding-left: 2px;
+}
+
+/* Toggle de acceso territorial - estilo tarjetas */
+.territorial-access-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.access-option {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12px;
-  border: 1px solid #dee2e6;
-  transition: all 0.3s ease;
+  gap: 6px;
+  padding: 12px 10px;
+  background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.territorial-toggle-container:has(.territorial-icon.activo) {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  border-color: #ffb74d;
+.access-option:hover {
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.territorial-info {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex: 1;
+.access-option.selected {
+  border-width: 2px;
 }
 
-.territorial-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+/* Opción Global seleccionada - AZUL */
+.access-option.selected:has(.global-icon) {
+  background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 100%);
+  border-color: #0ea5e9;
+  box-shadow: 0 3px 10px rgba(14, 165, 233, 0.2);
+}
+
+.access-option.selected:has(.global-icon) .global-icon {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  color: white;
+  box-shadow: 0 3px 8px rgba(14, 165, 233, 0.35);
+}
+
+/* Opción Territorial seleccionada - CYAN/TEAL */
+.access-option.selected:has(.territorial-icon) {
+  background: linear-gradient(145deg, #ccfbf1 0%, #99f6e4 100%);
+  border-color: #14b8a6;
+  box-shadow: 0 3px 10px rgba(20, 184, 166, 0.2);
+}
+
+.access-option.selected:has(.territorial-icon) .territorial-icon {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  color: white;
+  box-shadow: 0 3px 8px rgba(20, 184, 166, 0.35);
+}
+
+.access-option-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   transition: all 0.3s ease;
 }
 
-.territorial-icon.activo {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+.access-option-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
-.territorial-icon.inactivo {
+.access-option-icon.global-icon {
   background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2);
 }
 
-.territorial-text {
+.access-option-icon.territorial-icon {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  color: white;
+}
+
+.access-option-content {
+  text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
-.territorial-label {
-  font-size: 15px;
+.access-option-title {
+  font-size: 11px;
   font-weight: 600;
   color: #333;
 }
 
-.territorial-desc {
-  font-size: 12px;
+.access-option-desc {
+  font-size: 9px;
   color: #666;
+  line-height: 1.25;
 }
 
-/* Switch Toggle para Territorial */
-.territorial-switch {
-  position: relative;
-  width: 56px;
-  height: 30px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.territorial-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.territorial-switch .slider {
+/* Checkmark de selección */
+.access-checkmark {
   position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 30px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.territorial-switch .slider:before {
-  position: absolute;
-  content: "";
-  height: 24px;
-  width: 24px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  transition: all 0.3s ease;
 }
 
-.territorial-switch input:checked + .slider {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+.access-checkmark svg {
+  width: 10px;
+  height: 10px;
+  color: #999;
 }
 
-.territorial-switch input:checked + .slider:before {
-  transform: translateX(26px);
+.access-option.selected .access-checkmark {
+  opacity: 1;
 }
 
-/* Selector de territorio */
-.territorio-selector-container {
-  margin-top: 16px;
-  padding: 16px;
-  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-  border-radius: 12px;
-  border: 1px solid #fdba74;
+.access-option.selected:has(.global-icon) .access-checkmark {
+  background: #0ea5e9;
 }
 
-.territorio-label {
+.access-option.selected:has(.global-icon) .access-checkmark svg {
+  color: white;
+}
+
+.access-option.selected:has(.territorial-icon) .access-checkmark {
+  background: #14b8a6;
+}
+
+.access-option.selected:has(.territorial-icon) .access-checkmark svg {
+  color: white;
+}
+
+/* Selector de territorio animado */
+.territorio-selector-wrapper {
+  margin-top: 10px;
+  padding: 12px;
+  background: linear-gradient(145deg, #f0fdfa 0%, #ccfbf1 100%);
+  border-radius: 8px;
+  border: 1.5px solid #5eead4;
+}
+
+.territorio-selector-header {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
-  color: #c2410c;
+  color: #0f766e;
   margin-bottom: 8px;
 }
 
-.territorio-label svg {
-  color: #ea580c;
+.territorio-selector-header svg {
+  width: 13px;
+  height: 13px;
+  color: #14b8a6;
 }
 
-.territorio-select {
+.territorio-select-modern {
   width: 100%;
-  padding: 12px 16px;
-  font-size: 14px;
-  border: 2px solid #fdba74;
-  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 12px;
+  border: 1.5px solid #5eead4;
+  border-radius: 8px;
   background-color: white;
   color: #333;
   cursor: pointer;
   transition: all 0.3s ease;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ea580c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2314b8a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 18px;
+  background-position: right 10px center;
+  background-size: 14px;
+  font-weight: 500;
 }
 
-.territorio-select:focus {
+.territorio-select-modern:focus {
   outline: none;
-  border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
 
-.territorio-help {
+.territorio-info-box {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   margin-top: 8px;
-  font-size: 11px;
-  color: #9a3412;
+  padding: 7px 9px;
+  background: rgba(20, 184, 166, 0.1);
+  border-radius: 6px;
+  font-size: 10px;
+  color: #0f766e;
+  line-height: 1.3;
 }
 
-.territorio-help svg {
+.territorio-info-box svg {
   flex-shrink: 0;
-  color: #ea580c;
+  width: 11px;
+  height: 11px;
+  margin-top: 1px;
+  color: #14b8a6;
+}
+
+/* Animación slide-fade */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+/* Responsive para móviles */
+@media (max-width: 480px) {
+  .territorial-access-toggle {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .access-option {
+    flex-direction: row;
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .access-option-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .access-option-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .access-option-content {
+    text-align: left;
+    flex: 1;
+  }
 }
 
 /* === MODAL FOOTER === */

@@ -21,11 +21,6 @@
     <!-- Tarjeta de Login -->
     <div class="login-wrapper">
       <div class="login-card">
-        <!-- Decoración superior -->
-        <div class="card-decoration">
-          <div class="decoration-line"></div>
-        </div>
-
         <!-- Logo y Branding -->
         <div class="brand-section">
           <div class="logo-wrapper">
@@ -49,7 +44,7 @@
                 <path 
                   d="M50 15 C30 25, 20 45, 25 65 C30 80, 45 85, 50 85 C55 85, 70 80, 75 65 C80 45, 70 25, 50 15" 
                   fill="none" 
-                  stroke="#10b981" 
+                  stroke="#ffffff" 
                   stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -58,7 +53,7 @@
                 <!-- Nervadura central neón -->
                 <path 
                   d="M50 22 L50 78" 
-                  stroke="#10b981" 
+                  stroke="#ffffff" 
                   stroke-width="1.5" 
                   fill="none"
                   stroke-linecap="round"
@@ -67,7 +62,7 @@
                 <!-- Nervaduras laterales neón -->
                 <path 
                   d="M50 32 L38 42 M50 44 L34 56 M50 56 L36 66" 
-                  stroke="#10b981" 
+                  stroke="#ffffff" 
                   stroke-width="1.2" 
                   fill="none"
                   stroke-linecap="round"
@@ -75,7 +70,7 @@
                   class="leaf-veins-left"/>
                 <path 
                   d="M50 32 L62 42 M50 44 L66 56 M50 56 L64 66" 
-                  stroke="#10b981" 
+                  stroke="#ffffff" 
                   stroke-width="1.2" 
                   fill="none"
                   stroke-linecap="round"
@@ -291,7 +286,7 @@ const login = async () => {
   position: relative;
   overflow: hidden;
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--green-600);
+  background: url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed;
 }
 
 /* ========================================
@@ -307,14 +302,10 @@ const login = async () => {
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, 
-    var(--green-700) 0%,
-    var(--green-600) 25%,
-    var(--green-500) 50%,
-    var(--green-600) 75%,
-    var(--green-700) 100%
+    rgba(6, 78, 59, 0.85) 0%,
+    rgba(5, 150, 105, 0.7) 50%,
+    rgba(6, 78, 59, 0.85) 100%
   );
-  background-size: 400% 400%;
-  animation: gradientMove 15s ease infinite;
 }
 
 @keyframes gradientMove {
@@ -476,25 +467,47 @@ const login = async () => {
 }
 
 .login-card {
-  background: var(--white);
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 32px;
   padding: 40px 36px;
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   position: relative;
   overflow: hidden;
 }
 
-/* Decoración superior */
-.card-decoration {
+/* Efecto de brillo líquido */
+.login-card::before {
+  content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--green-400), var(--green-600), var(--green-400));
-  overflow: hidden;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: skewX(-20deg);
+  animation: liquidShine 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes liquidShine {
+  0%, 100% { left: -50%; opacity: 0; }
+  50% { left: 50%; opacity: 1; }
+}
+
+/* Decoración superior - OCULTA */
+.card-decoration {
+  display: none;
 }
 
 .decoration-line {
@@ -530,7 +543,7 @@ const login = async () => {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 3px solid var(--green-200);
+  border: 3px solid rgba(134, 239, 172, 0.5);
   animation: ringRotate 10s linear infinite;
 }
 
@@ -542,7 +555,7 @@ const login = async () => {
   transform: translateX(-50%);
   width: 12px;
   height: 12px;
-  background: var(--green-400);
+  background: #86efac;
   border-radius: 50%;
   box-shadow: 
     0 0 6px var(--green-400),
@@ -599,8 +612,8 @@ const login = async () => {
   position: absolute;
   inset: 8px;
   border-radius: 50%;
-  border: 2px dashed var(--green-300);
-  opacity: 0.5;
+  border: 2px dashed rgba(134, 239, 172, 0.5);
+  opacity: 0.7;
   animation: ringRotate 15s linear infinite reverse;
 }
 
@@ -611,12 +624,11 @@ const login = async () => {
 .logo-icon-container {
   position: absolute;
   inset: 15px;
-  background: linear-gradient(135deg, var(--green-50), var(--white));
+  background: transparent;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .logo-svg {
@@ -667,23 +679,39 @@ const login = async () => {
 }
 
 .brand-title {
-  font-size: 22px;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--green-600) 0%, var(--green-500) 35%, #d4a843 65%, #c9973f 100%);
+  font-size: 18px;
+  font-weight: 600;
+  background: linear-gradient(90deg, 
+    #86efac 0%,
+    #86efac 35%,
+    #ffffff 50%,
+    #86efac 65%,
+    #86efac 100%
+  );
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   margin: 0 0 8px 0;
   text-transform: uppercase;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  animation: shimmerText 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes shimmerText {
+  0% { background-position: 100% 50%; }
+  100% { background-position: -100% 50%; }
 }
 
 .brand-subtitle {
-  font-size: 13px;
-  color: var(--gray-600);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
   margin: 0;
   font-weight: 500;
   letter-spacing: 0.5px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* ========================================
@@ -707,15 +735,16 @@ const login = async () => {
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--gray-700);
+  color: rgba(255, 255, 255, 0.95);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .label-icon {
   width: 16px;
   height: 16px;
-  color: var(--green-600);
+  color: #86efac;
 }
 
 .input-wrapper {
@@ -728,24 +757,26 @@ const login = async () => {
   padding-right: 48px;
   font-size: 15px;
   font-weight: 500;
-  color: var(--gray-800);
-  background: var(--gray-50);
-  border: 2px solid var(--gray-200);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 12px;
   outline: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .input-wrapper input::placeholder {
-  color: var(--gray-400);
+  color: rgba(255, 255, 255, 0.5);
   font-weight: 400;
 }
 
 .input-wrapper input:focus {
-  background: var(--white);
-  border-color: var(--green-500);
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(134, 239, 172, 0.6);
+  box-shadow: 0 0 20px rgba(134, 239, 172, 0.3);
 }
 
 .input-wrapper input:disabled {
@@ -781,13 +812,13 @@ const login = async () => {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--gray-400);
+  color: rgba(255, 255, 255, 0.6);
   transition: color 0.2s ease;
   padding: 0;
 }
 
 .toggle-password:hover:not(:disabled) {
-  color: var(--green-600);
+  color: #86efac;
 }
 
 .toggle-password:disabled {
@@ -810,14 +841,16 @@ const login = async () => {
   font-size: 15px;
   font-weight: 700;
   color: var(--white);
-  background: linear-gradient(135deg, var(--green-600) 0%, var(--green-700) 100%);
-  border: none;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .submit-btn::before {
@@ -833,7 +866,8 @@ const login = async () => {
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(5, 150, 105, 0.5);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 1) 100%);
 }
 
 .submit-btn:hover:not(:disabled)::before {
@@ -922,13 +956,13 @@ const login = async () => {
   text-align: center;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid var(--gray-100);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .card-footer p {
   margin: 0;
-  font-size: 12px;
-  color: var(--gray-400);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* ========================================

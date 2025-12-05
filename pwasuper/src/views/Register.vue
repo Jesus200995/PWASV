@@ -565,7 +565,8 @@ const territoriosSembrandoVida = [
   'Teapa',
   'Tlaxcala / Estado de México',
   'Tzucacab / Opb',
-  'Xpujil'
+  'Xpujil',
+  'Oficinas Centrales'
 ];
 
 const territorioError = ref('');

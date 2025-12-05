@@ -581,7 +581,8 @@ const TERRITORIOS_ESTADOS = {
   'Teapa': ['Tabasco'],
   'Tlaxcala / Estado de México': ['Tlaxcala', 'México'],
   'Tzucacab / Opb': ['Quintana Roo'],
-  'Xpujil': ['Campeche']
+  'Xpujil': ['Campeche'],
+  'Oficinas Centrales': ['Ciudad de México']
 }
 
 // URL del GeoJSON de estados de México (fuente pública)

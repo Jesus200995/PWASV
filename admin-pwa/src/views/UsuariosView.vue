@@ -882,7 +882,8 @@ const territoriosSembrandoVida = [
   "Teapa",
   "Tlaxcala / Estado de México",
   "Tzucacab / Opb",
-  "Xpujil"
+  "Xpujil",
+  "Oficinas Centrales"
 ]
 
 const API_URL = 'https://apipwa.sembrandodatos.com'

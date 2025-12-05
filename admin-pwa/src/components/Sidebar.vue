@@ -500,7 +500,8 @@ const TERRITORIOS_ESTADOS = {
   'Teapa': ['Tabasco'],
   'Tlaxcala / Estado de México': ['Tlaxcala', 'Estado de México'],
   'Tzucacab / Opb': ['Quintana Roo'],
-  'Xpujil': ['Campeche']
+  'Xpujil': ['Campeche'],
+  'Oficinas Centrales': ['Ciudad de México']
 }
 
 // Computed para obtener los estados del territorio

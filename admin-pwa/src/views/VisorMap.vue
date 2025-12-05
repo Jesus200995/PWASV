@@ -550,6 +550,46 @@ const registros = ref([])
 const asistencias = ref([])
 const usuarios = ref([])
 
+// Mapeo de territorios de Sembrando Vida a estados de la República Mexicana
+const TERRITORIOS_ESTADOS = {
+  'Acapulco - Centro - Norte - Tierra Caliente': ['Guerrero'],
+  'Acayucan': ['Veracruz'],
+  'Balancán': ['Tabasco'],
+  'Chihuahua / Sonora': ['Chihuahua', 'Sonora'],
+  'Colima': ['Colima'],
+  'Comalcalco': ['Tabasco'],
+  'Córdoba': ['Veracruz'],
+  'Costa Chica - Montaña': ['Guerrero'],
+  'Costa Grande - Sierra': ['Guerrero'],
+  'Durango / Zacatecas': ['Durango', 'Zacatecas'],
+  'Hidalgo': ['Hidalgo'],
+  'Istmo': ['Oaxaca'],
+  'Michoacán': ['Michoacán'],
+  'Mixteca': ['Oaxaca'],
+  'Morelos': ['Morelos'],
+  'Nayarit / Jalisco': ['Nayarit', 'Jalisco'],
+  'Ocosingo': ['Chiapas'],
+  'Palenque': ['Chiapas'],
+  'Papantla': ['Veracruz'],
+  'Pichucalco': ['Chiapas'],
+  'Puebla': ['Puebla'],
+  'San Luis Potosí': ['San Luis Potosí'],
+  'Sinaloa': ['Sinaloa'],
+  'Tamaulipas': ['Tamaulipas'],
+  'Tantoyuca': ['Veracruz'],
+  'Tapachula': ['Chiapas'],
+  'Teapa': ['Tabasco'],
+  'Tlaxcala / Estado de México': ['Tlaxcala', 'México'],
+  'Tzucacab / Opb': ['Quintana Roo'],
+  'Xpujil': ['Campeche']
+}
+
+// URL del GeoJSON de estados de México (fuente pública)
+const MEXICO_STATES_GEOJSON_URL = 'https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json'
+
+// Variable para controlar si la capa de estados ya fue agregada
+let estadosLayerAdded = false
+
 // Variables de filtrado como en VisorView.vue
 const filtroTipo = ref('')
 const filtroPeriodo = ref('all')
@@ -1057,6 +1097,174 @@ const determinarTipoActividad = (actividad) => {
   }
 }
 
+// Función para cargar y mostrar los contornos de estados según el territorio del admin
+const cargarContornosEstados = async (mapInstance) => {
+  try {
+    // Obtener el territorio del admin actual
+    const territorioAdmin = authService.getTerritorio()
+    
+    // Si no es admin territorial, no mostrar contornos
+    if (!territorioAdmin) {
+      console.log('📍 Admin global - no se muestran contornos de estados')
+      return
+    }
+    
+    // Obtener los estados correspondientes al territorio
+    const estadosDelTerritorio = TERRITORIOS_ESTADOS[territorioAdmin]
+    
+    if (!estadosDelTerritorio || estadosDelTerritorio.length === 0) {
+      console.log(`⚠️ No se encontraron estados para el territorio: ${territorioAdmin}`)
+      return
+    }
+    
+    console.log(`📍 Admin territorial de "${territorioAdmin}" - Mostrando estados: ${estadosDelTerritorio.join(', ')}`)
+    
+    // Evitar agregar la capa múltiples veces
+    if (estadosLayerAdded) {
+      console.log('📍 Capa de estados ya existe, actualizando filtro...')
+      // Actualizar el filtro de las capas existentes
+      const filtroEstados = [
+        'in',
+        ['get', 'name'],
+        ['literal', estadosDelTerritorio]
+      ]
+      if (mapInstance.getLayer('estados-highlight')) {
+        mapInstance.setFilter('estados-highlight', filtroEstados)
+      }
+      if (mapInstance.getLayer('estados-fill')) {
+        mapInstance.setFilter('estados-fill', filtroEstados)
+      }
+      if (mapInstance.getLayer('estados-outline-inner')) {
+        mapInstance.setFilter('estados-outline-inner', filtroEstados)
+      }
+      return
+    }
+    
+    // Cargar el GeoJSON de estados de México
+    console.log('🗺️ Cargando GeoJSON de estados de México...')
+    const response = await fetch(MEXICO_STATES_GEOJSON_URL)
+    
+    if (!response.ok) {
+      throw new Error(`Error al cargar GeoJSON: ${response.status}`)
+    }
+    
+    const geojsonData = await response.json()
+    console.log('✅ GeoJSON cargado correctamente, estados encontrados:', geojsonData.features?.length)
+    
+    // Debug: mostrar nombres de estados disponibles
+    if (geojsonData.features) {
+      const nombresEstados = geojsonData.features.map(f => f.properties.name)
+      console.log('📋 Estados en GeoJSON:', nombresEstados)
+    }
+    
+    // Agregar fuente de datos de estados
+    if (!mapInstance.getSource('estados-mexico')) {
+      mapInstance.addSource('estados-mexico', {
+        type: 'geojson',
+        data: geojsonData
+      })
+    }
+    
+    // Determinar la capa de referencia para agregar debajo de los puntos
+    const capaReferencia = mapInstance.getLayer('unclustered-point') ? 'unclustered-point' : undefined
+    
+    // Agregar capa de relleno gris con transparencia
+    if (!mapInstance.getLayer('estados-fill')) {
+      mapInstance.addLayer({
+        id: 'estados-fill',
+        type: 'fill',
+        source: 'estados-mexico',
+        filter: [
+          'in',
+          ['get', 'name'],
+          ['literal', estadosDelTerritorio]
+        ],
+        paint: {
+          'fill-color': '#808080', // Gris medio
+          'fill-opacity': 0.25 // Un poco más fuerte
+        }
+      }, capaReferencia) // Agregar debajo de los puntos si existe
+    }
+    
+    // Agregar capa de contorno café preciso
+    if (!mapInstance.getLayer('estados-highlight')) {
+      mapInstance.addLayer({
+        id: 'estados-highlight',
+        type: 'line',
+        source: 'estados-mexico',
+        filter: [
+          'in',
+          ['get', 'name'],
+          ['literal', estadosDelTerritorio]
+        ],
+        paint: {
+          'line-color': '#8B4513', // Café medio (SaddleBrown)
+          'line-width': 2.5, // Más delgado
+          'line-opacity': 0.9
+        }
+      }, capaReferencia) // Agregar debajo de los puntos si existe
+    }
+    
+    // Eliminar la segunda capa de contorno (ya no es necesaria con línea más fina)
+    // La capa principal es suficiente para un contorno preciso y elegante
+    
+    estadosLayerAdded = true
+    console.log('✅ Contornos de estados agregados correctamente')
+    
+    // Ajustar el zoom para mostrar los estados del territorio
+    ajustarVistaAEstados(mapInstance, geojsonData, estadosDelTerritorio)
+    
+  } catch (err) {
+    console.error('❌ Error al cargar contornos de estados:', err)
+  }
+}
+
+// Función para ajustar la vista del mapa a los estados del territorio
+const ajustarVistaAEstados = (mapInstance, geojsonData, estadosDelTerritorio) => {
+  try {
+    // Encontrar los bounds de los estados del territorio
+    let minLng = Infinity, maxLng = -Infinity
+    let minLat = Infinity, maxLat = -Infinity
+    
+    geojsonData.features.forEach(feature => {
+      if (estadosDelTerritorio.includes(feature.properties.name)) {
+        // Obtener las coordenadas del feature
+        const coords = feature.geometry.coordinates
+        
+        // Función recursiva para procesar coordenadas
+        const processCoords = (coordArray) => {
+          if (typeof coordArray[0] === 'number') {
+            // Es un punto [lng, lat]
+            minLng = Math.min(minLng, coordArray[0])
+            maxLng = Math.max(maxLng, coordArray[0])
+            minLat = Math.min(minLat, coordArray[1])
+            maxLat = Math.max(maxLat, coordArray[1])
+          } else {
+            // Es un array de arrays
+            coordArray.forEach(c => processCoords(c))
+          }
+        }
+        
+        processCoords(coords)
+      }
+    })
+    
+    // Si encontramos bounds válidos, ajustar la vista
+    if (minLng !== Infinity && maxLng !== -Infinity) {
+      const bounds = [[minLng, minLat], [maxLng, maxLat]]
+      console.log('🎯 Ajustando vista a bounds:', bounds)
+      
+      mapInstance.fitBounds(bounds, {
+        padding: { top: 50, bottom: 50, left: 50, right: 50 },
+        duration: 1000,
+        maxZoom: 8
+      })
+    }
+  } catch (err) {
+    console.error('Error al ajustar vista a estados:', err)
+  }
+}
+
 // Función para inicializar el mapa con Mapbox
 const inicializarMapa = (datos) => {
   loading.value = true
@@ -1381,6 +1589,9 @@ const inicializarMapa = (datos) => {
       if (datos && datos.length > 0) {
         actualizarPuntosMapa(datos);
       }
+      
+      // Cargar contornos de estados si el admin es territorial
+      cargarContornosEstados(map)
       
       mapInitialized.value = true
       loading.value = false;

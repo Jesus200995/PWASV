@@ -1484,23 +1484,60 @@ def obtener_actividades_dia():
 
 # NUEVO ENDPOINT PARA ESTADÍSTICAS POR TIPO DE ACTIVIDAD
 @app.get("/estadisticas/tipo-actividad")
-def obtener_estadisticas_tipo_actividad():
-    """Obtener estadísticas de registros por tipo de actividad"""
+def obtener_estadisticas_tipo_actividad(territorio: str = None):
+    """Obtener estadísticas de registros por tipo de actividad.
+    Si se proporciona territorio, filtra las estadísticas solo para usuarios de ese territorio."""
     try:
-        print("📊 Obteniendo estadísticas por tipo de actividad")
+        print(f"📊 Obteniendo estadísticas por tipo de actividad (territorio: {territorio or 'TODOS'})")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
+        # Si hay filtro por territorio, obtener los IDs de usuarios de ese territorio
+        usuario_ids_territorio = None
+        filtro_usuarios_sql = ""
+        if territorio:
+            cursor.execute("SELECT id FROM usuarios WHERE territorio = %s", (territorio,))
+            usuario_ids_territorio = [row[0] for row in cursor.fetchall()]
+            print(f"📊 Usuarios en territorio '{territorio}': {len(usuario_ids_territorio)}")
+            
+            if not usuario_ids_territorio:
+                # Si no hay usuarios en el territorio, devolver estadísticas en cero
+                return {"estadisticas_tipo": {
+                    "total": {
+                        "campo": 0,
+                        "gabinete": 0,
+                        "total_general": 0
+                    },
+                    "dia_actual": {
+                        "campo": 0,
+                        "gabinete": 0,
+                        "total_dia": 0,
+                        "fecha_cdmx": datetime.now(pytz.timezone('America/Mexico_City')).date().isoformat()
+                    },
+                    "territorio": territorio
+                }}
+        
         # Obtener estadísticas generales por tipo
-        cursor.execute("""
-            SELECT 
-                COALESCE(tipo_actividad, 'campo') as tipo,
-                COUNT(*) as total
-            FROM registros 
-            GROUP BY COALESCE(tipo_actividad, 'campo')
-            ORDER BY total DESC
-        """)
+        if territorio and usuario_ids_territorio:
+            cursor.execute("""
+                SELECT 
+                    COALESCE(tipo_actividad, 'campo') as tipo,
+                    COUNT(*) as total
+                FROM registros 
+                WHERE usuario_id = ANY(%s)
+                GROUP BY COALESCE(tipo_actividad, 'campo')
+                ORDER BY total DESC
+            """, (usuario_ids_territorio,))
+        else:
+            cursor.execute("""
+                SELECT 
+                    COALESCE(tipo_actividad, 'campo') as tipo,
+                    COUNT(*) as total
+                FROM registros 
+                GROUP BY COALESCE(tipo_actividad, 'campo')
+                ORDER BY total DESC
+            """)
         tipos_general = cursor.fetchall()
         
         # Obtener estadísticas del día actual por tipo en CDMX
@@ -1514,15 +1551,26 @@ def obtener_estadisticas_tipo_actividad():
         inicio_utc = inicio_dia_cdmx.astimezone(pytz.UTC)
         fin_utc = fin_dia_cdmx.astimezone(pytz.UTC)
         
-        cursor.execute("""
-            SELECT 
-                COALESCE(tipo_actividad, 'campo') as tipo,
-                COUNT(*) as total_dia
-            FROM registros 
-            WHERE fecha_hora >= %s AND fecha_hora <= %s
-            GROUP BY COALESCE(tipo_actividad, 'campo')
-            ORDER BY total_dia DESC
-        """, (inicio_utc, fin_utc))
+        if territorio and usuario_ids_territorio:
+            cursor.execute("""
+                SELECT 
+                    COALESCE(tipo_actividad, 'campo') as tipo,
+                    COUNT(*) as total_dia
+                FROM registros 
+                WHERE fecha_hora >= %s AND fecha_hora <= %s AND usuario_id = ANY(%s)
+                GROUP BY COALESCE(tipo_actividad, 'campo')
+                ORDER BY total_dia DESC
+            """, (inicio_utc, fin_utc, usuario_ids_territorio))
+        else:
+            cursor.execute("""
+                SELECT 
+                    COALESCE(tipo_actividad, 'campo') as tipo,
+                    COUNT(*) as total_dia
+                FROM registros 
+                WHERE fecha_hora >= %s AND fecha_hora <= %s
+                GROUP BY COALESCE(tipo_actividad, 'campo')
+                ORDER BY total_dia DESC
+            """, (inicio_utc, fin_utc))
         tipos_dia = cursor.fetchall()
         
         # Convertir resultados
@@ -1550,7 +1598,11 @@ def obtener_estadisticas_tipo_actividad():
             }
         }
         
-        print(f"📊 Estadísticas por tipo de actividad obtenidas: {resultado}")
+        # Agregar info de territorio si se filtró
+        if territorio:
+            resultado["territorio"] = territorio
+        
+        print(f"📊 Estadísticas por tipo de actividad obtenidas{' para territorio: ' + territorio if territorio else ''}: {resultado}")
         return {"estadisticas_tipo": resultado}
         
     except Exception as e:

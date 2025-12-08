@@ -843,7 +843,7 @@ const cargarEstadisticasDiaActual = async () => {
   try {
     console.log('📊 Cargando estadísticas del día actual CDMX...')
     
-    // Obtener estadísticas completas del día actual
+    // Obtener estadísticas completas del día actual (ya incluye filtro por territorio si es admin territorial)
     const estadisticas = await estadisticasService.obtenerEstadisticasDiaActual()
     
     // Actualizar el objeto reactivo
@@ -853,9 +853,25 @@ const cargarEstadisticasDiaActual = async () => {
     estadisticasDiaActual.actividadesDia = estadisticas.actividadesDia || 0
     estadisticasDiaActual.fechaCDMX = estadisticas.fechaCDMX
     
-    // Obtener estadísticas por tipo de actividad
+    // Obtener estadísticas por tipo de actividad (con filtro de territorio si aplica)
     try {
-      const respuestaTipos = await axios.get(`${API_URL}/estadisticas/tipo-actividad`)
+      // Verificar si el admin es territorial para agregar el filtro
+      let urlTipoActividad = `${API_URL}/estadisticas/tipo-actividad`
+      
+      try {
+        const userDataStr = localStorage.getItem('admin_user_data')
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr)
+          if (userData.es_territorial && userData.territorio) {
+            urlTipoActividad += `?territorio=${encodeURIComponent(userData.territorio)}`
+            console.log(`🌍 Filtrando estadísticas por tipo para territorio: ${userData.territorio}`)
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ Error obteniendo territorio del admin:', e)
+      }
+      
+      const respuestaTipos = await axios.get(urlTipoActividad)
       const estadisticasTipos = respuestaTipos.data.estadisticas_tipo
       
       // Actualizar contadores específicos por tipo
@@ -864,7 +880,8 @@ const cargarEstadisticasDiaActual = async () => {
       
       console.log('📊 Estadísticas por tipo cargadas:', {
         campo: estadisticasDiaActual.campoHoy,
-        gabinete: estadisticasDiaActual.gabineteHoy
+        gabinete: estadisticasDiaActual.gabineteHoy,
+        territorio: estadisticasTipos.territorio || 'TODOS'
       })
     } catch (errorTipos) {
       console.warn('⚠️ Error cargando estadísticas por tipo:', errorTipos)

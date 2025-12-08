@@ -579,6 +579,94 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Confirmación de Transferencia (Bonito y Responsivo) -->
+    <Transition name="modal-fade">
+      <div v-if="showConfirmTransferencia" class="confirm-transfer-overlay" @click="cancelarConfirmTransferencia">
+        <Transition name="modal-scale">
+          <div class="confirm-transfer-modal" @click.stop>
+            <!-- Icono de advertencia animado -->
+            <div class="confirm-icon-container">
+              <div class="confirm-icon warning">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Título -->
+            <h3 class="confirm-title">¿Confirmar Transferencia?</h3>
+
+            <!-- Contenido -->
+            <div class="confirm-content">
+              <p class="confirm-description">
+                Estás a punto de transferir:
+              </p>
+              
+              <div class="transfer-summary">
+                <div class="summary-item">
+                  <span class="summary-icon">📝</span>
+                  <span class="summary-text">
+                    <strong>{{ usuarioOrigen?.total_actividades || 0 }}</strong> actividades
+                  </span>
+                </div>
+                <div v-if="incluirAsistencias" class="summary-item">
+                  <span class="summary-icon">🕐</span>
+                  <span class="summary-text">
+                    <strong>{{ usuarioOrigen?.total_asistencias || 0 }}</strong> asistencias
+                  </span>
+                </div>
+              </div>
+
+              <div class="transfer-users">
+                <div class="user-card from">
+                  <span class="user-label">De:</span>
+                  <span class="user-name">{{ usuarioOrigen?.nombre_completo }}</span>
+                </div>
+                <div class="transfer-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12,5 19,12 12,19"></polyline>
+                  </svg>
+                </div>
+                <div class="user-card to">
+                  <span class="user-label">A:</span>
+                  <span class="user-name">{{ usuarioDestino?.nombre_completo }}</span>
+                </div>
+              </div>
+
+              <div class="warning-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Esta acción <strong>NO SE PUEDE DESHACER</strong></span>
+              </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="confirm-actions">
+              <button @click="cancelarConfirmTransferencia" class="btn-cancel-confirm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                Cancelar
+              </button>
+              <button @click="confirmarTransferenciaFinal" class="btn-confirm-transfer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20,6 9,17 4,12"></polyline>
+                </svg>
+                Sí, Transferir
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -633,6 +721,10 @@ const transfiriendo = ref(false)
 const progresoTransferencia = ref(0)
 const mensajeProgreso = ref('')
 const incluirAsistencias = ref(false)
+
+// Variables para el modal de confirmación de transferencia
+const showConfirmTransferencia = ref(false)
+const confirmTransferenciaCallback = ref(null)
 
 // Variables para las acciones de eliminación masiva
 const eliminandoRegistros = ref(false)
@@ -1853,15 +1945,12 @@ const ejecutarTransferencia = async () => {
     return
   }
   
-  // Confirmación antes de transferir
-  const confirmacion = confirm(
-    `¿Estás seguro de transferir ${usuarioOrigen.value.total_actividades} actividades` +
-    `${incluirAsistencias.value ? ` y ${usuarioOrigen.value.total_asistencias} asistencias` : ''} ` +
-    `de ${usuarioOrigen.value.nombre_completo} a ${usuarioDestino.value.nombre_completo}?\n\n` +
-    `Esta acción NO SE PUEDE DESHACER.`
-  )
-  
-  if (!confirmacion) return
+  // Mostrar modal de confirmación bonito
+  showConfirmTransferencia.value = true
+}
+
+const confirmarTransferenciaFinal = async () => {
+  showConfirmTransferencia.value = false
   
   transfiriendo.value = true
   progresoTransferencia.value = 10
@@ -1944,6 +2033,10 @@ const ejecutarTransferencia = async () => {
     progresoTransferencia.value = 0
     mensajeProgreso.value = ''
   }
+}
+
+const cancelarConfirmTransferencia = () => {
+  showConfirmTransferencia.value = false
 }
 
 // ==================== FIN FUNCIONES DE TRANSFERENCIA ====================
@@ -2852,9 +2945,9 @@ const logout = () => {
 
 /* ==================== ESTILOS DEL MODAL DE TRANSFERENCIA ==================== */
 .modal-transferencia {
-  max-width: 600px;
+  max-width: min(600px, 95vw);
   width: 95%;
-  max-height: 90vh;
+  max-height: min(90vh, 800px);
   overflow-y: auto;
   border-radius: 16px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -2863,17 +2956,20 @@ const logout = () => {
 .modal-header-transferencia {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  padding: 20px;
+  padding: clamp(14px, 4vw, 20px);
   border-radius: 16px 16px 0 0;
   display: flex;
   align-items: center;
   gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .modal-header-transferencia h3 {
   flex: 1;
   margin: 0;
-  font-size: 18px;
+  font-size: clamp(15px, 4vw, 18px);
   font-weight: 600;
 }
 
@@ -2900,13 +2996,13 @@ const logout = () => {
 }
 
 .header-icon-transferencia svg {
-  width: 24px;
-  height: 24px;
+  width: clamp(20px, 5vw, 24px);
+  height: clamp(20px, 5vw, 24px);
   stroke: white;
 }
 
 .modal-body-transferencia {
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
 }
 
 /* Barra de progreso */
@@ -2974,14 +3070,16 @@ const logout = () => {
   display: flex;
   gap: 10px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .input-curp {
   flex: 1;
-  padding: 12px 16px;
+  min-width: 200px;
+  padding: clamp(10px, 2.5vw, 12px) clamp(12px, 3vw, 16px);
   border: 2px solid #e5e7eb;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: clamp(12px, 3vw, 14px);
   font-family: 'Inter', monospace;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -3003,16 +3101,17 @@ const logout = () => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 12px 20px;
+  padding: clamp(10px, 2.5vw, 12px) clamp(14px, 3.5vw, 20px);
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
   border: none;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: clamp(12px, 3vw, 13px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-buscar:hover:not(:disabled) {
@@ -3067,13 +3166,13 @@ const logout = () => {
 }
 
 .tarjeta-avatar {
-  width: 50px;
-  height: 50px;
+  width: clamp(40px, 10vw, 50px);
+  height: clamp(40px, 10vw, 50px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: clamp(18px, 5vw, 22px);
   font-weight: 700;
   color: white;
   flex-shrink: 0;
@@ -3094,7 +3193,7 @@ const logout = () => {
 
 .tarjeta-info h5 {
   margin: 0 0 4px 0;
-  font-size: 15px;
+  font-size: clamp(13px, 3.5vw, 15px);
   font-weight: 600;
   color: #1f2937;
   white-space: nowrap;
@@ -3103,7 +3202,7 @@ const logout = () => {
 }
 
 .tarjeta-correo {
-  font-size: 12px;
+  font-size: clamp(10px, 2.8vw, 12px);
   color: #6b7280;
   margin: 0 0 2px 0;
   white-space: nowrap;
@@ -3112,10 +3211,11 @@ const logout = () => {
 }
 
 .tarjeta-curp {
-  font-size: 11px;
+  font-size: clamp(9px, 2.5vw, 11px);
   color: #9ca3af;
   margin: 0 0 8px 0;
   font-family: monospace;
+  word-break: break-all;
 }
 
 .tarjeta-stats {
@@ -3346,6 +3446,412 @@ const logout = () => {
   .btn-transferir {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* ==================== MODAL DE CONFIRMACIÓN DE TRANSFERENCIA ==================== */
+.confirm-transfer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.confirm-transfer-modal {
+  background: white;
+  border-radius: 20px;
+  padding: clamp(20px, 5vw, 32px);
+  width: 100%;
+  max-width: min(450px, 95vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+/* Icono de advertencia */
+.confirm-icon-container {
+  margin-bottom: 20px;
+}
+
+.confirm-icon {
+  width: clamp(60px, 15vw, 80px);
+  height: clamp(60px, 15vw, 80px);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-warning 2s ease-in-out infinite;
+}
+
+.confirm-icon.warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 3px solid #f59e0b;
+}
+
+.confirm-icon svg {
+  width: clamp(30px, 8vw, 40px);
+  height: clamp(30px, 8vw, 40px);
+  stroke: #d97706;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 15px rgba(245, 158, 11, 0);
+  }
+}
+
+/* Título */
+.confirm-title {
+  font-size: clamp(18px, 4.5vw, 24px);
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Contenido */
+.confirm-content {
+  margin-bottom: 24px;
+}
+
+.confirm-description {
+  font-size: clamp(13px, 3.5vw, 15px);
+  color: #6b7280;
+  margin: 0 0 16px 0;
+}
+
+/* Resumen de transferencia */
+.transfer-summary {
+  display: flex;
+  justify-content: center;
+  gap: clamp(12px, 4vw, 24px);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 10px;
+  border: 1px solid #86efac;
+}
+
+.summary-icon {
+  font-size: clamp(18px, 4vw, 22px);
+}
+
+.summary-text {
+  font-size: clamp(12px, 3vw, 14px);
+  color: #059669;
+}
+
+.summary-text strong {
+  font-weight: 700;
+  color: #047857;
+}
+
+/* Usuarios de transferencia */
+.transfer-users {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 3vw, 16px);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.user-card {
+  padding: clamp(10px, 2.5vw, 14px) clamp(12px, 3vw, 18px);
+  border-radius: 12px;
+  min-width: clamp(100px, 25vw, 140px);
+  max-width: 45%;
+}
+
+.user-card.from {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+}
+
+.user-card.to {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 2px solid #3b82f6;
+}
+
+.user-label {
+  display: block;
+  font-size: clamp(10px, 2.5vw, 11px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.user-card.from .user-label {
+  color: #92400e;
+}
+
+.user-card.to .user-label {
+  color: #1e40af;
+}
+
+.user-name {
+  display: block;
+  font-size: clamp(11px, 2.8vw, 13px);
+  font-weight: 600;
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.transfer-arrow {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.transfer-arrow svg {
+  width: clamp(24px, 6vw, 32px);
+  height: clamp(24px, 6vw, 32px);
+  animation: arrow-bounce 1s ease-in-out infinite;
+}
+
+@keyframes arrow-bounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+/* Caja de advertencia */
+.warning-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: clamp(12px, 3vw, 16px);
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  color: #dc2626;
+  font-size: clamp(12px, 3vw, 14px);
+  text-align: center;
+  flex-wrap: wrap;
+}
+
+.warning-box svg {
+  width: clamp(18px, 4vw, 22px);
+  height: clamp(18px, 4vw, 22px);
+  flex-shrink: 0;
+}
+
+.warning-box strong {
+  font-weight: 700;
+}
+
+/* Botones de confirmación */
+.confirm-actions {
+  display: flex;
+  gap: clamp(10px, 3vw, 16px);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-cancel-confirm,
+.btn-confirm-transfer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: clamp(12px, 3vw, 14px) clamp(20px, 5vw, 28px);
+  border-radius: 12px;
+  font-size: clamp(13px, 3.5vw, 15px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  min-width: clamp(120px, 30vw, 150px);
+}
+
+.btn-cancel-confirm svg,
+.btn-confirm-transfer svg {
+  width: clamp(16px, 4vw, 20px);
+  height: clamp(16px, 4vw, 20px);
+}
+
+.btn-cancel-confirm {
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px solid #d1d5db;
+}
+
+.btn-cancel-confirm:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  transform: translateY(-2px);
+}
+
+.btn-confirm-transfer {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+
+.btn-confirm-transfer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+/* Animaciones del modal */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-scale-enter-active {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-scale-leave-active {
+  transition: all 0.2s ease;
+}
+
+.modal-scale-enter-from {
+  opacity: 0;
+  transform: scale(0.8) translateY(20px);
+}
+
+.modal-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* Responsive adicional para el modal de confirmación */
+@media (max-width: 400px) {
+  .confirm-transfer-modal {
+    padding: 20px 16px;
+  }
+  
+  .transfer-users {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .user-card {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .transfer-arrow {
+    transform: rotate(90deg);
+  }
+  
+  .confirm-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-cancel-confirm,
+  .btn-confirm-transfer {
+    width: 100%;
+  }
+}
+
+/* Landscape mode para móviles */
+@media (max-height: 500px) and (orientation: landscape) {
+  .confirm-transfer-modal {
+    max-height: 95vh;
+    padding: 16px;
+  }
+  
+  .confirm-icon {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .confirm-icon svg {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .confirm-icon-container {
+    margin-bottom: 12px;
+  }
+  
+  .confirm-title {
+    margin-bottom: 10px;
+  }
+  
+  .confirm-content {
+    margin-bottom: 16px;
+  }
+  
+  .transfer-summary {
+    margin-bottom: 12px;
+  }
+  
+  .transfer-users {
+    margin-bottom: 12px;
+  }
+}
+
+/* Ajustes responsivos adicionales para el modal de transferencia principal */
+@media (max-height: 700px) {
+  .modal-transferencia {
+    max-height: 95vh;
+  }
+  
+  .modal-body-transferencia {
+    padding: 16px;
+  }
+  
+  .transferencia-seccion {
+    margin-bottom: 14px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .modal-transferencia {
+    max-height: 98vh;
+    max-width: 90vw;
+  }
+  
+  .modal-header-transferencia {
+    padding: 12px 16px;
+  }
+  
+  .modal-body-transferencia {
+    padding: 12px 16px;
+  }
+  
+  .tarjeta-usuario {
+    padding: 10px;
+    flex-direction: row;
+    text-align: left;
+  }
+  
+  .tarjeta-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
   }
 }
 </style>

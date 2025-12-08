@@ -1073,45 +1073,93 @@ def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int 
 
 # NUEVO ENDPOINT PARA ESTADÍSTICAS COMPLETAS (SIN LÍMITES)
 @app.get("/estadisticas")
-def obtener_estadisticas():
-    """Obtener estadísticas completas del sistema sin límites"""
+def obtener_estadisticas(territorio: str = None):
+    """Obtener estadísticas completas del sistema sin límites.
+    Si se proporciona territorio, filtra las estadísticas solo para usuarios de ese territorio."""
     try:
-        print("🔍 Obteniendo estadísticas completas del sistema")
+        print(f"🔍 Obteniendo estadísticas completas del sistema (territorio: {territorio or 'TODOS'})")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
+        # Si hay filtro por territorio, obtener los IDs de usuarios de ese territorio
+        usuario_ids_territorio = None
+        if territorio:
+            cursor.execute("SELECT id FROM usuarios WHERE territorio = %s", (territorio,))
+            usuario_ids_territorio = [row[0] for row in cursor.fetchall()]
+            print(f"📊 Usuarios en territorio '{territorio}': {len(usuario_ids_territorio)}")
+            
+            if not usuario_ids_territorio:
+                # Si no hay usuarios en el territorio, devolver estadísticas en cero
+                return {"estadisticas": {
+                    "total_registros": 0,
+                    "total_usuarios": 0,
+                    "registros_hoy": 0,
+                    "total_asistencias": 0,
+                    "asistencias_hoy": 0,
+                    "usuarios_presentes": 0,
+                    "territorio": territorio
+                }}
+        
         # Obtener total real de registros (actividades)
-        cursor.execute("SELECT COUNT(*) FROM registros")
+        if territorio and usuario_ids_territorio:
+            cursor.execute("SELECT COUNT(*) FROM registros WHERE usuario_id = ANY(%s)", (usuario_ids_territorio,))
+        else:
+            cursor.execute("SELECT COUNT(*) FROM registros")
         total_registros = cursor.fetchone()[0]
         
         # Obtener total de usuarios
-        cursor.execute("SELECT COUNT(*) FROM usuarios")
+        if territorio:
+            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE territorio = %s", (territorio,))
+        else:
+            cursor.execute("SELECT COUNT(*) FROM usuarios")
         total_usuarios = cursor.fetchone()[0]
         
         # Obtener registros de hoy
-        cursor.execute("SELECT COUNT(*) FROM registros WHERE DATE(fecha_hora) = CURRENT_DATE")
+        if territorio and usuario_ids_territorio:
+            cursor.execute("SELECT COUNT(*) FROM registros WHERE DATE(fecha_hora) = CURRENT_DATE AND usuario_id = ANY(%s)", (usuario_ids_territorio,))
+        else:
+            cursor.execute("SELECT COUNT(*) FROM registros WHERE DATE(fecha_hora) = CURRENT_DATE")
         registros_hoy = cursor.fetchone()[0]
         
         # Obtener total de asistencias
-        cursor.execute("SELECT COUNT(*) FROM asistencias")
+        if territorio and usuario_ids_territorio:
+            cursor.execute("SELECT COUNT(*) FROM asistencias WHERE usuario_id = ANY(%s)", (usuario_ids_territorio,))
+        else:
+            cursor.execute("SELECT COUNT(*) FROM asistencias")
         total_asistencias = cursor.fetchone()[0]
         
         # Obtener asistencias de hoy (usando zona horaria de Ciudad de México)
-        cursor.execute("""
-            SELECT COUNT(*) FROM asistencias 
-            WHERE fecha = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
-        """)
+        if territorio and usuario_ids_territorio:
+            cursor.execute("""
+                SELECT COUNT(*) FROM asistencias 
+                WHERE fecha = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
+                AND usuario_id = ANY(%s)
+            """, (usuario_ids_territorio,))
+        else:
+            cursor.execute("""
+                SELECT COUNT(*) FROM asistencias 
+                WHERE fecha = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
+            """)
         asistencias_hoy = cursor.fetchone()[0]
         
         # Obtener usuarios presentes AHORA (con entrada pero SIN salida) - tiempo real CDMX
         # Solo cuenta usuarios que marcaron entrada hoy pero aún NO han marcado salida
-        cursor.execute("""
-            SELECT COUNT(DISTINCT usuario_id) FROM asistencias 
-            WHERE fecha = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
-            AND hora_entrada IS NOT NULL
-            AND hora_salida IS NULL
-        """)
+        if territorio and usuario_ids_territorio:
+            cursor.execute("""
+                SELECT COUNT(DISTINCT usuario_id) FROM asistencias 
+                WHERE fecha = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
+                AND hora_entrada IS NOT NULL
+                AND hora_salida IS NULL
+                AND usuario_id = ANY(%s)
+            """, (usuario_ids_territorio,))
+        else:
+            cursor.execute("""
+                SELECT COUNT(DISTINCT usuario_id) FROM asistencias 
+                WHERE fecha = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
+                AND hora_entrada IS NOT NULL
+                AND hora_salida IS NULL
+            """)
         usuarios_presentes = cursor.fetchone()[0]
         
         estadisticas = {
@@ -1123,7 +1171,11 @@ def obtener_estadisticas():
             "usuarios_presentes": usuarios_presentes
         }
         
-        print(f"✅ Estadísticas obtenidas (tiempo real CDMX):")
+        # Agregar info de territorio si se filtró
+        if territorio:
+            estadisticas["territorio"] = territorio
+        
+        print(f"✅ Estadísticas obtenidas (tiempo real CDMX){' para territorio: ' + territorio if territorio else ''}:")
         print(f"   - Total asistencias: {total_asistencias:,}")
         print(f"   - Asistencias hoy: {asistencias_hoy}")
         print(f"   - Usuarios PRESENTES ahora (con entrada, sin salida): {usuarios_presentes}")
@@ -1142,10 +1194,11 @@ def obtener_estadisticas():
 
 # NUEVOS ENDPOINTS PARA ESTADÍSTICAS DEL DÍA EN HORARIO CDMX
 @app.get("/estadisticas/dia-actual")
-def obtener_estadisticas_dia_actual():
-    """Obtener estadísticas del día actual en horario CDMX (America/Mexico_City)"""
+def obtener_estadisticas_dia_actual(territorio: str = None):
+    """Obtener estadísticas del día actual en horario CDMX (America/Mexico_City).
+    Si se proporciona territorio, filtra las estadísticas solo para usuarios de ese territorio."""
     try:
-        print("🔍 Obteniendo estadísticas del día actual en horario CDMX")
+        print(f"🔍 Obteniendo estadísticas del día actual en horario CDMX (territorio: {territorio or 'TODOS'})")
         
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
@@ -1157,6 +1210,24 @@ def obtener_estadisticas_dia_actual():
         
         print(f"📅 Calculando para fecha CDMX: {fecha_hoy_cdmx}")
         
+        # Si hay filtro por territorio, obtener los IDs de usuarios de ese territorio
+        usuario_ids_territorio = None
+        if territorio:
+            cursor.execute("SELECT id FROM usuarios WHERE territorio = %s", (territorio,))
+            usuario_ids_territorio = [row[0] for row in cursor.fetchall()]
+            print(f"📊 Usuarios en territorio '{territorio}': {len(usuario_ids_territorio)}")
+            
+            if not usuario_ids_territorio:
+                # Si no hay usuarios en el territorio, devolver estadísticas en cero
+                return {"estadisticas": {
+                    "total_usuarios_dia": 0,
+                    "entradas_dia": 0,
+                    "salidas_dia": 0,
+                    "actividades_dia": 0,
+                    "fecha_cdmx": fecha_hoy_cdmx.isoformat(),
+                    "territorio": territorio
+                }}
+        
         # Obtener rango de fechas en UTC para el día actual CDMX
         inicio_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.min.time()))
         fin_dia_cdmx = cdmx_tz.localize(datetime.combine(fecha_hoy_cdmx, datetime.max.time()))
@@ -1166,37 +1237,68 @@ def obtener_estadisticas_dia_actual():
         fin_utc = fin_dia_cdmx.astimezone(pytz.UTC)
         
         # 1. Total de usuarios únicos que tuvieron al menos un registro hoy
-        cursor.execute("""
-            SELECT COUNT(DISTINCT usuario_id) FROM (
-                SELECT usuario_id FROM registros 
-                WHERE fecha_hora >= %s AND fecha_hora <= %s
-                UNION
-                SELECT usuario_id FROM asistencias 
-                WHERE (hora_entrada >= %s AND hora_entrada <= %s) 
-                   OR (hora_salida >= %s AND hora_salida <= %s)
-            ) AS usuarios_activos
-        """, (inicio_utc, fin_utc, inicio_utc, fin_utc, inicio_utc, fin_utc))
+        if territorio and usuario_ids_territorio:
+            cursor.execute("""
+                SELECT COUNT(DISTINCT usuario_id) FROM (
+                    SELECT usuario_id FROM registros 
+                    WHERE fecha_hora >= %s AND fecha_hora <= %s AND usuario_id = ANY(%s)
+                    UNION
+                    SELECT usuario_id FROM asistencias 
+                    WHERE ((hora_entrada >= %s AND hora_entrada <= %s) 
+                       OR (hora_salida >= %s AND hora_salida <= %s))
+                       AND usuario_id = ANY(%s)
+                ) AS usuarios_activos
+            """, (inicio_utc, fin_utc, usuario_ids_territorio, inicio_utc, fin_utc, inicio_utc, fin_utc, usuario_ids_territorio))
+        else:
+            cursor.execute("""
+                SELECT COUNT(DISTINCT usuario_id) FROM (
+                    SELECT usuario_id FROM registros 
+                    WHERE fecha_hora >= %s AND fecha_hora <= %s
+                    UNION
+                    SELECT usuario_id FROM asistencias 
+                    WHERE (hora_entrada >= %s AND hora_entrada <= %s) 
+                       OR (hora_salida >= %s AND hora_salida <= %s)
+                ) AS usuarios_activos
+            """, (inicio_utc, fin_utc, inicio_utc, fin_utc, inicio_utc, fin_utc))
         total_usuarios_dia = cursor.fetchone()[0]
         
         # 2. Total de entradas del día
-        cursor.execute("""
-            SELECT COUNT(*) FROM asistencias 
-            WHERE hora_entrada >= %s AND hora_entrada <= %s
-        """, (inicio_utc, fin_utc))
+        if territorio and usuario_ids_territorio:
+            cursor.execute("""
+                SELECT COUNT(*) FROM asistencias 
+                WHERE hora_entrada >= %s AND hora_entrada <= %s AND usuario_id = ANY(%s)
+            """, (inicio_utc, fin_utc, usuario_ids_territorio))
+        else:
+            cursor.execute("""
+                SELECT COUNT(*) FROM asistencias 
+                WHERE hora_entrada >= %s AND hora_entrada <= %s
+            """, (inicio_utc, fin_utc))
         entradas_dia = cursor.fetchone()[0]
         
         # 3. Total de salidas del día
-        cursor.execute("""
-            SELECT COUNT(*) FROM asistencias 
-            WHERE hora_salida >= %s AND hora_salida <= %s
-        """, (inicio_utc, fin_utc))
+        if territorio and usuario_ids_territorio:
+            cursor.execute("""
+                SELECT COUNT(*) FROM asistencias 
+                WHERE hora_salida >= %s AND hora_salida <= %s AND usuario_id = ANY(%s)
+            """, (inicio_utc, fin_utc, usuario_ids_territorio))
+        else:
+            cursor.execute("""
+                SELECT COUNT(*) FROM asistencias 
+                WHERE hora_salida >= %s AND hora_salida <= %s
+            """, (inicio_utc, fin_utc))
         salidas_dia = cursor.fetchone()[0]
         
         # 4. Total de actividades/registros del día
-        cursor.execute("""
-            SELECT COUNT(*) FROM registros 
-            WHERE fecha_hora >= %s AND fecha_hora <= %s
-        """, (inicio_utc, fin_utc))
+        if territorio and usuario_ids_territorio:
+            cursor.execute("""
+                SELECT COUNT(*) FROM registros 
+                WHERE fecha_hora >= %s AND fecha_hora <= %s AND usuario_id = ANY(%s)
+            """, (inicio_utc, fin_utc, usuario_ids_territorio))
+        else:
+            cursor.execute("""
+                SELECT COUNT(*) FROM registros 
+                WHERE fecha_hora >= %s AND fecha_hora <= %s
+            """, (inicio_utc, fin_utc))
         actividades_dia = cursor.fetchone()[0]
         
         estadisticas_dia = {
@@ -1207,7 +1309,11 @@ def obtener_estadisticas_dia_actual():
             "fecha_cdmx": fecha_hoy_cdmx.isoformat()
         }
         
-        print(f"✅ Estadísticas del día CDMX obtenidas: {estadisticas_dia}")
+        # Agregar info de territorio si se filtró
+        if territorio:
+            estadisticas_dia["territorio"] = territorio
+        
+        print(f"✅ Estadísticas del día CDMX obtenidas{' para territorio: ' + territorio if territorio else ''}: {estadisticas_dia}")
         return {"estadisticas": estadisticas_dia}
         
     except psycopg2.Error as e:

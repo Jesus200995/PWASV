@@ -5,12 +5,38 @@ import { API_URL } from '../config/api.js'
 console.log(`🌐 EstadísticasService usando API: ${API_URL}`)
 
 class EstadisticasService {
+  // Método auxiliar para obtener el territorio del admin territorial
+  _getTerritorioAdmin() {
+    try {
+      const userDataStr = localStorage.getItem('admin_user_data')
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr)
+        if (userData.es_territorial && userData.territorio) {
+          console.log(`🌍 Admin territorial detectado - Territorio: ${userData.territorio}`)
+          return userData.territorio
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Error obteniendo territorio del admin:', error)
+      return null
+    }
+  }
+
   async obtenerEstadisticas() {
     try {
-      console.log('🔍 Obteniendo estadísticas desde el servidor...')
+      const territorio = this._getTerritorioAdmin()
+      console.log(`🔍 Obteniendo estadísticas desde el servidor... (territorio: ${territorio || 'TODOS'})`)
       
       const token = localStorage.getItem('admin_token')
-      const response = await axios.get(`${API_URL}/estadisticas`, {
+      let url = `${API_URL}/estadisticas`
+      
+      // Agregar filtro de territorio si es admin territorial
+      if (territorio) {
+        url += `?territorio=${encodeURIComponent(territorio)}`
+      }
+      
+      const response = await axios.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -27,7 +53,8 @@ class EstadisticasService {
           registrosHoy: stats.registros_hoy || 0,
           totalAsistencias: stats.total_asistencias || 0,
           asistenciasHoy: stats.asistencias_hoy || 0,
-          usuariosPresentes: stats.usuarios_presentes || 0
+          usuariosPresentes: stats.usuarios_presentes || 0,
+          territorio: stats.territorio || null
         }
       }
       
@@ -50,10 +77,18 @@ class EstadisticasService {
   // Método para obtener estadísticas del día actual en horario CDMX
   async obtenerEstadisticasDiaActual() {
     try {
-      console.log('📅 Obteniendo estadísticas del día actual CDMX...')
+      const territorio = this._getTerritorioAdmin()
+      console.log(`📅 Obteniendo estadísticas del día actual CDMX... (territorio: ${territorio || 'TODOS'})`)
       
       const token = localStorage.getItem('admin_token')
-      const response = await axios.get(`${API_URL}/estadisticas/dia-actual`, {
+      let url = `${API_URL}/estadisticas/dia-actual`
+      
+      // Agregar filtro de territorio si es admin territorial
+      if (territorio) {
+        url += `?territorio=${encodeURIComponent(territorio)}`
+      }
+      
+      const response = await axios.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -69,7 +104,8 @@ class EstadisticasService {
           entradasDia: stats.entradas_dia || 0,
           salidasDia: stats.salidas_dia || 0,
           actividadesDia: stats.actividades_dia || 0,
-          fechaCDMX: stats.fecha_cdmx || null
+          fechaCDMX: stats.fecha_cdmx || null,
+          territorio: stats.territorio || null
         }
       }
       
@@ -192,36 +228,55 @@ class EstadisticasService {
   // Método para obtener estadísticas con fallback local
   async obtenerEstadisticasConFallback(registros = [], usuarios = [], asistencias = []) {
     try {
-      // Intentar obtener desde el servidor primero
+      // Intentar obtener desde el servidor primero (ya incluye filtro por territorio si aplica)
       return await this.obtenerEstadisticas()
     } catch (error) {
       console.warn('⚠️ Usando estadísticas locales como fallback')
+      
+      // Obtener territorio para filtrar localmente si es admin territorial
+      const territorio = this._getTerritorioAdmin()
+      
+      // Filtrar datos locales por territorio si aplica
+      let registrosFiltrados = registros
+      let usuariosFiltrados = usuarios
+      let asistenciasFiltradas = asistencias
+      
+      if (territorio) {
+        // Filtrar usuarios por territorio
+        usuariosFiltrados = usuarios.filter(u => u.territorio === territorio)
+        const usuarioIdsFiltrados = new Set(usuariosFiltrados.map(u => u.id))
+        
+        // Filtrar registros y asistencias por usuarios del territorio
+        registrosFiltrados = registros.filter(r => usuarioIdsFiltrados.has(r.usuario_id))
+        asistenciasFiltradas = asistencias.filter(a => usuarioIdsFiltrados.has(a.usuario_id))
+      }
       
       // Calcular estadísticas localmente como fallback
       const hoy = new Date().toDateString()
       const hoyISO = new Date().toISOString().split('T')[0]
       
-      const registrosHoy = registros.filter(r => {
+      const registrosHoy = registrosFiltrados.filter(r => {
         const fechaRegistro = new Date(r.fecha_hora).toDateString()
         return fechaRegistro === hoy
       }).length
       
-      const asistenciasHoy = asistencias.filter(a => a.fecha === hoyISO).length
+      const asistenciasHoy = asistenciasFiltradas.filter(a => a.fecha === hoyISO).length
       
       const usuariosPresentes = new Set()
-      asistencias.forEach(a => {
+      asistenciasFiltradas.forEach(a => {
         if (a.fecha === hoyISO && a.hora_entrada) {
           usuariosPresentes.add(a.usuario_id)
         }
       })
       
       return {
-        totalRegistros: registros.length,
-        totalUsuarios: usuarios.length,
+        totalRegistros: registrosFiltrados.length,
+        totalUsuarios: usuariosFiltrados.length,
         registrosHoy: registrosHoy,
-        totalAsistencias: asistencias.length,
+        totalAsistencias: asistenciasFiltradas.length,
         asistenciasHoy: asistenciasHoy,
-        usuariosPresentes: usuariosPresentes.size
+        usuariosPresentes: usuariosPresentes.size,
+        territorio: territorio
       }
     }
   }

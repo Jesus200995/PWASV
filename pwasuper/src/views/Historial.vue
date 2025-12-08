@@ -867,19 +867,42 @@ function formatFechaCompleta(fechaStr) {
   try {
     if (!fechaStr) return '';
     
-    // ✅ SOLUCIÓN: El backend ahora envía fechas con zona horaria CDMX (-06:00)
-    // JavaScript interpretará esto correctamente como la hora/fecha de CDMX
-    const fecha = new Date(fechaStr);
+    // ✅ SOLUCIÓN CORRECTA: Extraer fecha directamente del string
+    let año, mes, dia;
     
-    // Verificar que la fecha sea válida
-    if (isNaN(fecha.getTime())) {
+    if (fechaStr.includes('T')) {
+      // Formato ISO: "2025-12-08T10:30:00"
+      const partesFecha = fechaStr.split('T')[0].split('-');
+      año = parseInt(partesFecha[0]);
+      mes = parseInt(partesFecha[1]) - 1;
+      dia = parseInt(partesFecha[2]);
+    } else if (fechaStr.includes('-')) {
+      // Formato simple: "2025-12-08"
+      const partesFecha = fechaStr.split('-');
+      año = parseInt(partesFecha[0]);
+      mes = parseInt(partesFecha[1]) - 1;
+      dia = parseInt(partesFecha[2]);
+    } else {
+      // Fallback
+      const fecha = new Date(fechaStr);
+      if (isNaN(fecha.getTime())) {
+        console.error('Fecha inválida:', fechaStr);
+        return fechaStr;
+      }
+      año = fecha.getFullYear();
+      mes = fecha.getMonth();
+      dia = fecha.getDate();
+    }
+    
+    // Crear fecha local con los valores extraídos
+    const fechaLocal = new Date(año, mes, dia, 12, 0, 0);
+    
+    if (isNaN(fechaLocal.getTime())) {
       console.error('Fecha inválida:', fechaStr);
       return fechaStr;
     }
     
-    // NO NECESITAMOS timeZone porque el Date ya está en CDMX
-    // Pero lo incluimos para ser consistentes
-    return fecha.toLocaleDateString('es-MX', {
+    return fechaLocal.toLocaleDateString('es-MX', {
       weekday: 'short',
       day: '2-digit',
       month: 'short',
@@ -896,8 +919,7 @@ function formatHoraCDMX(fechaStr) {
   try {
     if (!fechaStr) return '';
     
-    // ✅ SOLUCIÓN: El backend ahora envía fechas con zona horaria CDMX (-06:00)
-    // JavaScript interpretará esto correctamente
+    // ✅ SOLUCIÓN: Siempre usar timeZone para asegurar hora correcta
     const fecha = new Date(fechaStr);
     
     // Verificar que la fecha sea válida
@@ -906,11 +928,12 @@ function formatHoraCDMX(fechaStr) {
       return fechaStr;
     }
     
-    // La hora ya está correcta gracias a la zona horaria del backend
+    // IMPORTANTE: Siempre especificar timeZone para evitar problemas
     return fecha.toLocaleTimeString('es-MX', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
+      timeZone: 'America/Mexico_City'
     });
   } catch (e) {
     console.error('Error al formatear hora CDMX:', e, fechaStr);
@@ -928,25 +951,59 @@ function obtenerFechaCDMX(fechaStr) {
     
     console.log(`🔍 obtenerFechaCDMX: procesando "${fechaStr}"`);
     
-    // ✅ SOLUCIÓN: El backend ahora envía fechas con zona horaria CDMX (-06:00)
-    // JavaScript interpretará esto correctamente
-    const fecha = new Date(fechaStr);
+    // ✅ SOLUCIÓN CORRECTA: Extraer la fecha directamente del string
+    // para evitar problemas de conversión UTC -> local
+    let año, mes, dia;
     
-    if (isNaN(fecha.getTime())) {
-      console.error('❌ Fecha inválida:', fechaStr);
+    // Detectar el formato de la fecha
+    if (fechaStr.includes('T')) {
+      // Formato ISO: "2025-12-08T10:30:00" o "2025-12-08T10:30:00-06:00"
+      const partesFecha = fechaStr.split('T')[0].split('-');
+      año = parseInt(partesFecha[0]);
+      mes = parseInt(partesFecha[1]) - 1; // Meses en JS son 0-11
+      dia = parseInt(partesFecha[2]);
+    } else if (fechaStr.includes('-')) {
+      // Formato simple: "2025-12-08"
+      const partesFecha = fechaStr.split('-');
+      año = parseInt(partesFecha[0]);
+      mes = parseInt(partesFecha[1]) - 1;
+      dia = parseInt(partesFecha[2]);
+    } else if (fechaStr.includes('/')) {
+      // Formato alternativo: "08/12/2025" o "12/08/2025"
+      const partesFecha = fechaStr.split('/');
+      // Asumimos formato DD/MM/YYYY
+      dia = parseInt(partesFecha[0]);
+      mes = parseInt(partesFecha[1]) - 1;
+      año = parseInt(partesFecha[2]);
+    } else {
+      // Fallback: intentar parsear directamente
+      const fecha = new Date(fechaStr);
+      if (isNaN(fecha.getTime())) {
+        console.error('❌ Fecha inválida:', fechaStr);
+        return '';
+      }
+      año = fecha.getFullYear();
+      mes = fecha.getMonth();
+      dia = fecha.getDate();
+    }
+    
+    // Crear fecha local (NO UTC) con los valores extraídos
+    const fechaLocal = new Date(año, mes, dia, 12, 0, 0); // Usar mediodía para evitar edge cases
+    
+    if (isNaN(fechaLocal.getTime())) {
+      console.error('❌ Fecha inválida después de parseo:', fechaStr);
       return '';
     }
     
-    // Retornar fecha en formato: "Lun, 30 de Octubre de 2025"
-    // Incluye el año tal como está en la base de datos
-    const resultado = fecha.toLocaleDateString('es-MX', {
+    // Formatear la fecha usando locale español
+    const resultado = fechaLocal.toLocaleDateString('es-MX', {
       weekday: 'short',
       day: '2-digit',
       month: 'long',
       year: 'numeric'
     });
     
-    console.log(`✅ obtenerFechaCDMX: "${fechaStr}" -> "${resultado}"`);
+    console.log(`✅ obtenerFechaCDMX: "${fechaStr}" -> "${resultado}" (año=${año}, mes=${mes+1}, dia=${dia})`);
     return resultado;
   } catch (e) {
     console.error('❌ Error al formatear fecha CDMX:', e, 'Input:', fechaStr);

@@ -78,6 +78,18 @@
               </button>
             </div>
             <div v-show="mostrarFiltros" class="filter-controls-compact">
+              <!-- Selector de territorio para admin general -->
+              <div v-if="esAdminGeneral" class="filter-group-compact">
+                <div class="filter-item-compact">
+                  <svg class="filter-icon-small" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                  <select v-model="territorioSeleccionado" class="compact-select" @change="onTerritorioChange">
+                    <option value="">Todos los territorios</option>
+                    <option v-for="territorio in listaTerritorio" :key="territorio" :value="territorio">{{ territorio }}</option>
+                  </select>
+                </div>
+              </div>
               <div class="filter-group-compact">
                 <div class="filter-item-compact">
                   <svg class="filter-icon-small" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
@@ -192,8 +204,8 @@
         
         <!-- Contenedor del mapa con Mapbox -->
         <div class="mapa-wrapper">
-          <!-- Encabezado del territorio (solo para admin territorial) -->
-          <div v-if="esAdminTerritorial && territorioAdmin" class="territorio-header">
+          <!-- Encabezado del territorio (para admin territorial o admin que seleccionó territorio) -->
+          <div v-if="(esAdminTerritorial && territorioAdmin) || (esAdminGeneral && territorioSeleccionado)" class="territorio-header">
             <div class="territorio-header-content">
               <div class="territorio-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -202,7 +214,7 @@
                 </svg>
               </div>
               <div class="territorio-info">
-                <h2 class="territorio-nombre">{{ territorioAdmin }}</h2>
+                <h2 class="territorio-nombre">{{ territorioAdmin || territorioSeleccionado }}</h2>
                 <p class="territorio-estados">
                   <span class="estados-label">Estados:</span>
                   <span class="estados-lista">{{ estadosTerritorio.join(' • ') }}</span>
@@ -213,7 +225,7 @@
               <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
-              <span>Territorio Asignado</span>
+              <span>{{ esAdminTerritorial ? 'Territorio Asignado' : 'Territorio Seleccionado' }}</span>
             </div>
           </div>
           
@@ -654,6 +666,11 @@ const territorioAdmin = ref(null)
 const estadosTerritorio = ref([])
 const esAdminTerritorial = ref(false)
 
+// Estado para admin con rol 'admin' que puede seleccionar territorio
+const esAdminGeneral = ref(false)
+const territorioSeleccionado = ref('')
+const listaTerritorio = Object.keys(TERRITORIOS_ESTADOS).sort()
+
 // Función para obtener info del territorio del admin
 const obtenerInfoTerritorio = () => {
   try {
@@ -665,10 +682,81 @@ const obtenerInfoTerritorio = () => {
         territorioAdmin.value = userData.territorio
         estadosTerritorio.value = TERRITORIOS_ESTADOS[userData.territorio] || []
         console.log(`🌍 Admin territorial: ${userData.territorio} → Estados: ${estadosTerritorio.value.join(', ')}`)
+      } else if (userData.rol === 'admin') {
+        // Admin general puede seleccionar territorio
+        esAdminGeneral.value = true
+        console.log('👤 Admin general detectado - puede seleccionar territorio')
       }
     }
   } catch (e) {
     console.warn('⚠️ Error obteniendo info de territorio:', e)
+  }
+}
+
+// Función para manejar el cambio de territorio por admin general
+const onTerritorioChange = async () => {
+  if (territorioSeleccionado.value) {
+    // Actualizar estados del territorio seleccionado
+    estadosTerritorio.value = TERRITORIOS_ESTADOS[territorioSeleccionado.value] || []
+    console.log(`🌍 Territorio seleccionado: ${territorioSeleccionado.value} → Estados: ${estadosTerritorio.value.join(', ')}`)
+  } else {
+    // Limpiar estados si no hay territorio seleccionado
+    estadosTerritorio.value = []
+    console.log('🌍 Sin territorio seleccionado - mostrando todos')
+  }
+  
+  // Recargar estadísticas con el nuevo filtro de territorio
+  await actualizarEstadisticasConTerritorio()
+}
+
+// Función para actualizar estadísticas con filtro de territorio
+const actualizarEstadisticasConTerritorio = async () => {
+  try {
+    const token = localStorage.getItem('admin_token')
+    
+    // Determinar el territorio a usar (territorial fijo o seleccionado por admin)
+    const territorioFiltro = esAdminTerritorial.value 
+      ? territorioAdmin.value 
+      : (esAdminGeneral.value ? territorioSeleccionado.value : null)
+    
+    // Construir URL con filtro de territorio si aplica
+    let urlEstadisticas = `${API_URL}/estadisticas/dia-actual`
+    let urlTipoActividad = `${API_URL}/estadisticas/tipo-actividad`
+    
+    if (territorioFiltro) {
+      const territorioEncoded = encodeURIComponent(territorioFiltro)
+      urlEstadisticas += `?territorio=${territorioEncoded}`
+      urlTipoActividad += `?territorio=${territorioEncoded}`
+    }
+    
+    console.log(`📊 Actualizando estadísticas... ${territorioFiltro ? `Territorio: ${territorioFiltro}` : 'Todos los territorios'}`)
+    
+    // Obtener estadísticas del día actual
+    const respEstadisticas = await axios.get(urlEstadisticas, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    
+    const estadisticas = respEstadisticas.data.estadisticas || respEstadisticas.data
+    estadisticasDiaActual.totalUsuariosDia = estadisticas.totalUsuariosDia || 0
+    estadisticasDiaActual.entradasDia = estadisticas.entradasDia || 0
+    estadisticasDiaActual.salidasDia = estadisticas.salidasDia || 0
+    estadisticasDiaActual.actividadesDia = estadisticas.actividadesDia || 0
+    
+    // Obtener estadísticas por tipo de actividad
+    const respTipos = await axios.get(urlTipoActividad)
+    const estadisticasTipos = respTipos.data.estadisticas_tipo
+    estadisticasDiaActual.campoHoy = estadisticasTipos.dia_actual?.campo || 0
+    estadisticasDiaActual.gabineteHoy = estadisticasTipos.dia_actual?.gabinete || 0
+    
+    console.log('✅ Estadísticas actualizadas:', {
+      entradas: estadisticasDiaActual.entradasDia,
+      salidas: estadisticasDiaActual.salidasDia,
+      campo: estadisticasDiaActual.campoHoy,
+      gabinete: estadisticasDiaActual.gabineteHoy
+    })
+    
+  } catch (error) {
+    console.error('❌ Error actualizando estadísticas:', error)
   }
 }
 
@@ -1514,8 +1602,9 @@ const inicializarMapa = (datos) => {
           console.log('🎯 Centrando mapa en coordenadas:', coordinates);
           
           // Centrar el mapa con un pequeño offset hacia abajo usando padding
-          // Si hay admin territorial con barra, aumentar el padding superior
-          const paddingTop = esAdminTerritorial.value ? 380 : 300;
+          // Si hay barra de territorio (admin territorial o admin que seleccionó territorio), aumentar el padding superior
+          const tieneBarraTerritorio = esAdminTerritorial.value || (esAdminGeneral.value && territorioSeleccionado.value)
+          const paddingTop = tieneBarraTerritorio ? 380 : 300;
           map.flyTo({
             center: coordinates, // Usar coordenadas originales
             zoom: map.getZoom() + 4.0, // Zoom alto
@@ -4617,6 +4706,11 @@ watch(filtroTipo, () => {
 .filter-controls-compact {
   margin-top: 8px;
   animation: slideDown 0.3s ease-out;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 @keyframes slideDown {
@@ -4637,6 +4731,9 @@ watch(filtroTipo, () => {
   padding: 12px;
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08);
   transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .filter-group-compact:hover {
@@ -4650,6 +4747,8 @@ watch(filtroTipo, () => {
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
+  width: 100%;
+  min-width: 0;
 }
 
 .filter-item-compact:last-child {
@@ -4670,6 +4769,9 @@ watch(filtroTipo, () => {
 
 .compact-select {
   flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
   background: white;
   border: 1px solid rgba(76, 175, 80, 0.2);
   color: #2c3e50;
@@ -4685,6 +4787,10 @@ watch(filtroTipo, () => {
   background-position: right 6px center;
   background-repeat: no-repeat;
   background-size: 12px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .compact-select:hover {

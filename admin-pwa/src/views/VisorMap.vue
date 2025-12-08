@@ -768,10 +768,11 @@ const actualizarEstadisticasConTerritorio = async () => {
     })
     
     const estadisticas = respEstadisticas.data.estadisticas || respEstadisticas.data
-    estadisticasDiaActual.totalUsuariosDia = estadisticas.totalUsuariosDia || 0
-    estadisticasDiaActual.entradasDia = estadisticas.entradasDia || 0
-    estadisticasDiaActual.salidasDia = estadisticas.salidasDia || 0
-    estadisticasDiaActual.actividadesDia = estadisticas.actividadesDia || 0
+    // El backend devuelve snake_case, pero también verificar camelCase por compatibilidad
+    estadisticasDiaActual.totalUsuariosDia = estadisticas.total_usuarios_dia || estadisticas.totalUsuariosDia || 0
+    estadisticasDiaActual.entradasDia = estadisticas.entradas_dia || estadisticas.entradasDia || 0
+    estadisticasDiaActual.salidasDia = estadisticas.salidas_dia || estadisticas.salidasDia || 0
+    estadisticasDiaActual.actividadesDia = estadisticas.actividades_dia || estadisticas.actividadesDia || 0
     
     // Obtener estadísticas por tipo de actividad
     const respTipos = await axios.get(urlTipoActividad)

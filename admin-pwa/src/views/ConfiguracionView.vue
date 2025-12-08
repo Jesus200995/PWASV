@@ -260,6 +260,18 @@
                 </svg>
                 {{ eliminandoImagenes ? 'Eliminando...' : 'Eliminar Imágenes' }}
               </button>
+
+              <button @click="abrirModalTransferencia" class="action-btn transfer-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 3h5v5"></path>
+                  <line x1="21" y1="3" x2="14" y2="10"></line>
+                  <path d="M8 21H3v-5"></path>
+                  <line x1="3" y1="21" x2="10" y2="14"></line>
+                  <path d="M21 14v7h-7"></path>
+                  <path d="M3 10V3h7"></path>
+                </svg>
+                Transferir Actividades
+              </button>
             </div>
           </div>
 
@@ -356,6 +368,217 @@
       ref="descargaCSVProgressRef"
       :show="showDescargaCSVProgress"
     />
+
+    <!-- Modal de Transferencia de Actividades -->
+    <div v-if="showTransferenciaModal" class="modal-overlay" @click="cerrarModalTransferencia">
+      <div class="modal-content modal-transferencia" @click.stop>
+        <div class="modal-header modal-header-transferencia">
+          <div class="header-icon-transferencia">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 3h5v5"></path>
+              <line x1="21" y1="3" x2="14" y2="10"></line>
+              <path d="M8 21H3v-5"></path>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+          </div>
+          <h3>Transferir Actividades</h3>
+          <button @click="cerrarModalTransferencia" class="btn-close">×</button>
+        </div>
+        
+        <div class="modal-body modal-body-transferencia">
+          <!-- Barra de progreso -->
+          <div v-if="transfiriendo" class="transferencia-progress">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" :style="{ width: progresoTransferencia + '%' }"></div>
+            </div>
+            <p class="progress-text">{{ mensajeProgreso }}</p>
+          </div>
+
+          <!-- Usuario Origen -->
+          <div class="transferencia-seccion">
+            <h4 class="seccion-titulo">
+              <span class="seccion-icon origen">📤</span>
+              Usuario Origen (De quien se transferirán)
+            </h4>
+            <div class="busqueda-curp">
+              <input 
+                v-model="curpOrigen" 
+                type="text" 
+                class="input-curp"
+                placeholder="Ingresa CURP del usuario origen (18 caracteres)"
+                maxlength="18"
+                :disabled="transfiriendo"
+                @input="curpOrigen = curpOrigen.toUpperCase()"
+              >
+              <button 
+                @click="buscarUsuarioOrigen" 
+                class="btn-buscar"
+                :disabled="curpOrigen.length !== 18 || buscandoOrigen || transfiriendo"
+              >
+                <svg v-if="!buscandoOrigen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span v-else class="spinner-small"></span>
+                {{ buscandoOrigen ? 'Buscando...' : 'Buscar' }}
+              </button>
+            </div>
+            
+            <!-- Tarjeta Usuario Origen -->
+            <div v-if="usuarioOrigen" class="tarjeta-usuario tarjeta-origen">
+              <div class="tarjeta-avatar">
+                <span>{{ usuarioOrigen.nombre_completo?.charAt(0) || '?' }}</span>
+              </div>
+              <div class="tarjeta-info">
+                <h5>{{ usuarioOrigen.nombre_completo }}</h5>
+                <p class="tarjeta-correo">{{ usuarioOrigen.correo }}</p>
+                <p class="tarjeta-curp">CURP: {{ usuarioOrigen.curp }}</p>
+                <div class="tarjeta-stats">
+                  <span class="stat-badge actividades">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14,2 14,8 20,8"></polyline>
+                    </svg>
+                    {{ usuarioOrigen.total_actividades }} actividades
+                  </span>
+                  <span class="stat-badge asistencias">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12,6 12,12 16,14"></polyline>
+                    </svg>
+                    {{ usuarioOrigen.total_asistencias }} asistencias
+                  </span>
+                </div>
+              </div>
+              <button @click="limpiarUsuarioOrigen" class="btn-limpiar" :disabled="transfiriendo">✕</button>
+            </div>
+            <div v-else-if="errorOrigen" class="error-mensaje">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              {{ errorOrigen }}
+            </div>
+          </div>
+
+          <!-- Flecha de transferencia -->
+          <div v-if="usuarioOrigen && usuarioDestino" class="flecha-transferencia">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19,12 12,19 5,12"></polyline>
+            </svg>
+          </div>
+
+          <!-- Usuario Destino -->
+          <div class="transferencia-seccion">
+            <h4 class="seccion-titulo">
+              <span class="seccion-icon destino">📥</span>
+              Usuario Destino (A quien se transferirán)
+            </h4>
+            <div class="busqueda-curp">
+              <input 
+                v-model="curpDestino" 
+                type="text" 
+                class="input-curp"
+                placeholder="Ingresa CURP del usuario destino (18 caracteres)"
+                maxlength="18"
+                :disabled="transfiriendo"
+                @input="curpDestino = curpDestino.toUpperCase()"
+              >
+              <button 
+                @click="buscarUsuarioDestino" 
+                class="btn-buscar"
+                :disabled="curpDestino.length !== 18 || buscandoDestino || transfiriendo"
+              >
+                <svg v-if="!buscandoDestino" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span v-else class="spinner-small"></span>
+                {{ buscandoDestino ? 'Buscando...' : 'Buscar' }}
+              </button>
+            </div>
+            
+            <!-- Tarjeta Usuario Destino -->
+            <div v-if="usuarioDestino" class="tarjeta-usuario tarjeta-destino">
+              <div class="tarjeta-avatar">
+                <span>{{ usuarioDestino.nombre_completo?.charAt(0) || '?' }}</span>
+              </div>
+              <div class="tarjeta-info">
+                <h5>{{ usuarioDestino.nombre_completo }}</h5>
+                <p class="tarjeta-correo">{{ usuarioDestino.correo }}</p>
+                <p class="tarjeta-curp">CURP: {{ usuarioDestino.curp }}</p>
+                <div class="tarjeta-stats">
+                  <span class="stat-badge actividades">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14,2 14,8 20,8"></polyline>
+                    </svg>
+                    {{ usuarioDestino.total_actividades }} actividades
+                  </span>
+                  <span class="stat-badge asistencias">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12,6 12,12 16,14"></polyline>
+                    </svg>
+                    {{ usuarioDestino.total_asistencias }} asistencias
+                  </span>
+                </div>
+              </div>
+              <button @click="limpiarUsuarioDestino" class="btn-limpiar" :disabled="transfiriendo">✕</button>
+            </div>
+            <div v-else-if="errorDestino" class="error-mensaje">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              {{ errorDestino }}
+            </div>
+          </div>
+
+          <!-- Opciones de transferencia -->
+          <div v-if="usuarioOrigen && usuarioDestino" class="opciones-transferencia">
+            <label class="checkbox-option">
+              <input type="checkbox" v-model="incluirAsistencias" :disabled="transfiriendo">
+              <span class="checkbox-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12,6 12,12 16,14"></polyline>
+                </svg>
+                Incluir asistencias en la transferencia
+              </span>
+            </label>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="modal-actions">
+            <button 
+              @click="cerrarModalTransferencia" 
+              class="btn-cancelar"
+              :disabled="transfiriendo"
+            >
+              Cancelar
+            </button>
+            <button 
+              @click="ejecutarTransferencia" 
+              class="btn-transferir"
+              :disabled="!usuarioOrigen || !usuarioDestino || transfiriendo || usuarioOrigen.total_actividades === 0"
+            >
+              <svg v-if="!transfiriendo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 3h5v5"></path>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <path d="M8 21H3v-5"></path>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+              <span v-else class="spinner-small"></span>
+              {{ transfiriendo ? 'Transfiriendo...' : 'Transferir Actividades' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -395,6 +618,21 @@ const confirmAction = ref(null)
 const confirmTitle = ref('')
 const confirmMessage = ref('')
 const confirmType = ref('warning')
+
+// Variables para el modal de transferencia de actividades
+const showTransferenciaModal = ref(false)
+const curpOrigen = ref('')
+const curpDestino = ref('')
+const usuarioOrigen = ref(null)
+const usuarioDestino = ref(null)
+const buscandoOrigen = ref(false)
+const buscandoDestino = ref(false)
+const errorOrigen = ref('')
+const errorDestino = ref('')
+const transfiriendo = ref(false)
+const progresoTransferencia = ref(0)
+const mensajeProgreso = ref('')
+const incluirAsistencias = ref(false)
 
 // Variables para las acciones de eliminación masiva
 const eliminandoRegistros = ref(false)
@@ -1494,6 +1732,222 @@ const onProgressCompletado = () => {
   }, 2000)
 }
 
+// ==================== FUNCIONES DE TRANSFERENCIA DE ACTIVIDADES ====================
+
+const abrirModalTransferencia = () => {
+  showTransferenciaModal.value = true
+  // Limpiar estados anteriores
+  curpOrigen.value = ''
+  curpDestino.value = ''
+  usuarioOrigen.value = null
+  usuarioDestino.value = null
+  errorOrigen.value = ''
+  errorDestino.value = ''
+  transfiriendo.value = false
+  progresoTransferencia.value = 0
+  mensajeProgreso.value = ''
+  incluirAsistencias.value = false
+}
+
+const cerrarModalTransferencia = () => {
+  if (transfiriendo.value) return // No cerrar mientras se transfiere
+  showTransferenciaModal.value = false
+}
+
+const buscarUsuarioOrigen = async () => {
+  if (curpOrigen.value.length !== 18) {
+    errorOrigen.value = 'La CURP debe tener exactamente 18 caracteres'
+    return
+  }
+  
+  buscandoOrigen.value = true
+  errorOrigen.value = ''
+  usuarioOrigen.value = null
+  
+  try {
+    const response = await axios.get(`${apiConfig.url}/usuarios/buscar-curp/${curpOrigen.value}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    })
+    
+    usuarioOrigen.value = response.data
+    
+    // Validar que no sea el mismo que el destino
+    if (usuarioDestino.value && usuarioOrigen.value.curp === usuarioDestino.value.curp) {
+      errorOrigen.value = 'No puedes seleccionar el mismo usuario como origen y destino'
+      usuarioOrigen.value = null
+    }
+  } catch (error) {
+    if (error.response?.status === 404) {
+      errorOrigen.value = 'No se encontró ningún usuario con esa CURP'
+    } else if (error.response?.status === 400) {
+      errorOrigen.value = error.response.data.detail || 'CURP inválida'
+    } else {
+      errorOrigen.value = 'Error al buscar usuario. Intenta nuevamente.'
+    }
+  } finally {
+    buscandoOrigen.value = false
+  }
+}
+
+const buscarUsuarioDestino = async () => {
+  if (curpDestino.value.length !== 18) {
+    errorDestino.value = 'La CURP debe tener exactamente 18 caracteres'
+    return
+  }
+  
+  buscandoDestino.value = true
+  errorDestino.value = ''
+  usuarioDestino.value = null
+  
+  try {
+    const response = await axios.get(`${apiConfig.url}/usuarios/buscar-curp/${curpDestino.value}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    })
+    
+    usuarioDestino.value = response.data
+    
+    // Validar que no sea el mismo que el origen
+    if (usuarioOrigen.value && usuarioDestino.value.curp === usuarioOrigen.value.curp) {
+      errorDestino.value = 'No puedes seleccionar el mismo usuario como origen y destino'
+      usuarioDestino.value = null
+    }
+  } catch (error) {
+    if (error.response?.status === 404) {
+      errorDestino.value = 'No se encontró ningún usuario con esa CURP'
+    } else if (error.response?.status === 400) {
+      errorDestino.value = error.response.data.detail || 'CURP inválida'
+    } else {
+      errorDestino.value = 'Error al buscar usuario. Intenta nuevamente.'
+    }
+  } finally {
+    buscandoDestino.value = false
+  }
+}
+
+const limpiarUsuarioOrigen = () => {
+  usuarioOrigen.value = null
+  curpOrigen.value = ''
+  errorOrigen.value = ''
+}
+
+const limpiarUsuarioDestino = () => {
+  usuarioDestino.value = null
+  curpDestino.value = ''
+  errorDestino.value = ''
+}
+
+const ejecutarTransferencia = async () => {
+  if (!usuarioOrigen.value || !usuarioDestino.value) {
+    mostrarMensaje('❌ Error', 'Debes seleccionar ambos usuarios para la transferencia')
+    return
+  }
+  
+  if (usuarioOrigen.value.total_actividades === 0 && !incluirAsistencias.value) {
+    mostrarMensaje('❌ Error', 'El usuario origen no tiene actividades para transferir')
+    return
+  }
+  
+  // Confirmación antes de transferir
+  const confirmacion = confirm(
+    `¿Estás seguro de transferir ${usuarioOrigen.value.total_actividades} actividades` +
+    `${incluirAsistencias.value ? ` y ${usuarioOrigen.value.total_asistencias} asistencias` : ''} ` +
+    `de ${usuarioOrigen.value.nombre_completo} a ${usuarioDestino.value.nombre_completo}?\n\n` +
+    `Esta acción NO SE PUEDE DESHACER.`
+  )
+  
+  if (!confirmacion) return
+  
+  transfiriendo.value = true
+  progresoTransferencia.value = 10
+  mensajeProgreso.value = 'Preparando transferencia...'
+  
+  try {
+    progresoTransferencia.value = 30
+    mensajeProgreso.value = 'Conectando con el servidor...'
+    
+    const response = await axios.post(`${apiConfig.url}/usuarios/transferir-actividades`, {
+      curp_origen: usuarioOrigen.value.curp,
+      curp_destino: usuarioDestino.value.curp,
+      incluir_asistencias: incluirAsistencias.value
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 60000 // 1 minuto de timeout para transferencias grandes
+    })
+    
+    progresoTransferencia.value = 80
+    mensajeProgreso.value = 'Finalizando transferencia...'
+    
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    progresoTransferencia.value = 100
+    mensajeProgreso.value = '¡Transferencia completada!'
+    
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // Cerrar modal y mostrar resultado
+    showTransferenciaModal.value = false
+    
+    const resultado = response.data
+    mostrarMensaje('✅ Transferencia Exitosa', 
+      `<div style="text-align: left;">
+        <h4 style="color: #10b981; margin-bottom: 15px;">✅ Actividades Transferidas</h4>
+        <hr style="margin: 15px 0;">
+        <h5 style="color: #059669;">📤 Usuario Origen:</h5>
+        <p><strong>${resultado.detalles.usuario_origen.nombre}</strong></p>
+        <p style="font-size: 12px; color: #666;">${resultado.detalles.usuario_origen.correo}</p>
+        <hr style="margin: 15px 0;">
+        <h5 style="color: #0284c7;">📥 Usuario Destino:</h5>
+        <p><strong>${resultado.detalles.usuario_destino.nombre}</strong></p>
+        <p style="font-size: 12px; color: #666;">${resultado.detalles.usuario_destino.correo}</p>
+        <hr style="margin: 15px 0;">
+        <h5 style="color: #7c3aed;">📊 Resumen:</h5>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          <li><strong>📝 Actividades transferidas:</strong> ${resultado.detalles.actividades_transferidas}</li>
+          ${resultado.detalles.asistencias_transferidas > 0 ? 
+            `<li><strong>🕐 Asistencias transferidas:</strong> ${resultado.detalles.asistencias_transferidas}</li>` : ''}
+        </ul>
+        <hr style="margin: 15px 0;">
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">
+          Las actividades han sido transferidas exitosamente. Los registros ahora pertenecen al usuario destino.
+        </p>
+      </div>`
+    )
+    
+  } catch (error) {
+    console.error('Error en transferencia:', error)
+    
+    let errorMsg = 'Error al transferir actividades: '
+    
+    if (error.response?.status === 404) {
+      errorMsg += error.response.data.detail || 'Usuario no encontrado'
+    } else if (error.response?.status === 400) {
+      errorMsg += error.response.data.detail || 'Datos inválidos'
+    } else if (error.response?.status === 500) {
+      errorMsg += 'Error del servidor. Intenta más tarde.'
+    } else if (error.request) {
+      errorMsg += 'No se pudo conectar con el servidor.'
+    } else {
+      errorMsg += error.message || 'Error desconocido'
+    }
+    
+    mostrarMensaje('❌ Error', errorMsg)
+  } finally {
+    transfiriendo.value = false
+    progresoTransferencia.value = 0
+    mensajeProgreso.value = ''
+  }
+}
+
+// ==================== FIN FUNCIONES DE TRANSFERENCIA ====================
+
 const logout = () => {
   // No usar confirm(), el modal se maneja en el Sidebar
   localStorage.removeItem('admin_token')
@@ -2040,6 +2494,32 @@ const logout = () => {
   box-shadow: 0 2px 4px rgba(236, 72, 153, 0.2);
 }
 
+.transfer-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.transfer-btn::before {
+  content: '🔄';
+  position: absolute;
+  left: 8px;
+  font-size: 12px;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.transfer-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+}
+
 .action-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -2367,6 +2847,505 @@ const logout = () => {
   .main-content {
     margin-left: 180px;
     width: calc(100vw - 180px);
+  }
+}
+
+/* ==================== ESTILOS DEL MODAL DE TRANSFERENCIA ==================== */
+.modal-transferencia {
+  max-width: 600px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-header-transferencia {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-header-transferencia h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal-header-transferencia .btn-close {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+}
+
+.modal-header-transferencia .btn-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.header-icon-transferencia {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon-transferencia svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+}
+
+.modal-body-transferencia {
+  padding: 24px;
+}
+
+/* Barra de progreso */
+.transferencia-progress {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: #059669;
+  text-align: center;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Secciones de transferencia */
+.transferencia-seccion {
+  margin-bottom: 20px;
+}
+
+.seccion-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.seccion-icon {
+  font-size: 18px;
+}
+
+.seccion-icon.origen {
+  color: #f59e0b;
+}
+
+.seccion-icon.destino {
+  color: #3b82f6;
+}
+
+/* Búsqueda de CURP */
+.busqueda-curp {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.input-curp {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'Inter', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+}
+
+.input-curp:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.input-curp:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.btn-buscar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-buscar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-buscar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-buscar svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Spinner pequeño */
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Tarjeta de usuario */
+.tarjeta-usuario {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.tarjeta-origen {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2px solid #f59e0b;
+}
+
+.tarjeta-destino {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 2px solid #3b82f6;
+}
+
+.tarjeta-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.tarjeta-origen .tarjeta-avatar {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.tarjeta-destino .tarjeta-avatar {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.tarjeta-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tarjeta-info h5 {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tarjeta-correo {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tarjeta-curp {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 0 0 8px 0;
+  font-family: monospace;
+}
+
+.tarjeta-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.stat-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.stat-badge.actividades {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.stat-badge.asistencias {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+}
+
+.btn-limpiar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(0, 0, 0, 0.1);
+  color: #6b7280;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-limpiar:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.btn-limpiar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mensaje de error */
+.error-mensaje {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.error-mensaje svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Flecha de transferencia */
+.flecha-transferencia {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+  color: #10b981;
+}
+
+.flecha-transferencia svg {
+  width: 32px;
+  height: 32px;
+  animation: bounceDown 1s ease-in-out infinite;
+}
+
+@keyframes bounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* Opciones de transferencia */
+.opciones-transferencia {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #10b981;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.checkbox-label svg {
+  width: 16px;
+  height: 16px;
+  color: #8b5cf6;
+}
+
+/* Botones de acción del modal */
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancelar {
+  padding: 12px 24px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancelar:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.btn-cancelar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-transferir {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-transferir:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-transferir:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-transferir svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Responsive para modal de transferencia */
+@media (max-width: 600px) {
+  .modal-transferencia {
+    max-width: 100%;
+    margin: 10px;
+    max-height: calc(100vh - 20px);
+  }
+  
+  .busqueda-curp {
+    flex-direction: column;
+  }
+  
+  .btn-buscar {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .tarjeta-usuario {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .tarjeta-stats {
+    justify-content: center;
+  }
+  
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .btn-cancelar,
+  .btn-transferir {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

@@ -6240,6 +6240,201 @@ async def exportar_registros_csv():
 
 # ==================== FIN EXPORTAR REGISTROS A CSV ====================
 
+# ==================== BUSCAR USUARIO POR CURP ====================
+
+@app.get("/usuarios/buscar-curp/{curp}")
+async def buscar_usuario_por_curp(curp: str):
+    """
+    Buscar usuario por CURP y devolver su información junto con conteo de actividades
+    """
+    try:
+        print(f"🔍 Buscando usuario con CURP: {curp}")
+        
+        # Convertir CURP a mayúsculas y limpiar espacios
+        curp_upper = curp.upper().strip()
+        
+        if len(curp_upper) != 18:
+            raise HTTPException(status_code=400, detail="La CURP debe tener exactamente 18 caracteres")
+        
+        # Buscar usuario por CURP
+        usuario = ejecutar_consulta_segura(
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, telefono, territorio, rol FROM usuarios WHERE curp = %s",
+            (curp_upper,),
+            fetch_type='one'
+        )
+        
+        if not usuario:
+            raise HTTPException(status_code=404, detail=f"No se encontró usuario con CURP: {curp_upper}")
+        
+        # Contar actividades (registros) del usuario
+        conteo_actividades = ejecutar_consulta_segura(
+            "SELECT COUNT(*) FROM registros WHERE usuario_id = %s",
+            (usuario[0],),
+            fetch_type='one'
+        )
+        
+        # Contar asistencias del usuario
+        conteo_asistencias = ejecutar_consulta_segura(
+            "SELECT COUNT(*) FROM asistencias WHERE usuario_id = %s",
+            (usuario[0],),
+            fetch_type='one'
+        )
+        
+        resultado = {
+            "id": usuario[0],
+            "correo": usuario[1],
+            "nombre_completo": usuario[2],
+            "cargo": usuario[3],
+            "supervisor": usuario[4],
+            "curp": usuario[5],
+            "telefono": usuario[6],
+            "territorio": usuario[7],
+            "rol": usuario[8] if len(usuario) > 8 else 'user',
+            "total_actividades": conteo_actividades[0] if conteo_actividades else 0,
+            "total_asistencias": conteo_asistencias[0] if conteo_asistencias else 0
+        }
+        
+        print(f"✅ Usuario encontrado: {resultado['nombre_completo']} - Actividades: {resultado['total_actividades']}")
+        return resultado
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error buscando usuario por CURP: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al buscar usuario: {str(e)}")
+
+# ==================== TRANSFERIR ACTIVIDADES ENTRE USUARIOS ====================
+
+class TransferenciaActividades(BaseModel):
+    curp_origen: str
+    curp_destino: str
+    incluir_asistencias: bool = False
+
+@app.post("/usuarios/transferir-actividades")
+async def transferir_actividades(datos: TransferenciaActividades):
+    """
+    Transferir todas las actividades (registros) de un usuario a otro por CURP.
+    Opcionalmente también puede transferir asistencias.
+    """
+    try:
+        print(f"🔄 Iniciando transferencia de actividades:")
+        print(f"   Origen CURP: {datos.curp_origen}")
+        print(f"   Destino CURP: {datos.curp_destino}")
+        print(f"   Incluir asistencias: {datos.incluir_asistencias}")
+        
+        # Validar y limpiar CURPs
+        curp_origen = datos.curp_origen.upper().strip()
+        curp_destino = datos.curp_destino.upper().strip()
+        
+        if len(curp_origen) != 18 or len(curp_destino) != 18:
+            raise HTTPException(status_code=400, detail="Las CURPs deben tener exactamente 18 caracteres")
+        
+        if curp_origen == curp_destino:
+            raise HTTPException(status_code=400, detail="La CURP de origen y destino no pueden ser iguales")
+        
+        # Buscar usuario origen
+        usuario_origen = ejecutar_consulta_segura(
+            "SELECT id, nombre_completo, correo FROM usuarios WHERE curp = %s",
+            (curp_origen,),
+            fetch_type='one'
+        )
+        
+        if not usuario_origen:
+            raise HTTPException(status_code=404, detail=f"No se encontró usuario origen con CURP: {curp_origen}")
+        
+        # Buscar usuario destino
+        usuario_destino = ejecutar_consulta_segura(
+            "SELECT id, nombre_completo, correo FROM usuarios WHERE curp = %s",
+            (curp_destino,),
+            fetch_type='one'
+        )
+        
+        if not usuario_destino:
+            raise HTTPException(status_code=404, detail=f"No se encontró usuario destino con CURP: {curp_destino}")
+        
+        id_origen = usuario_origen[0]
+        id_destino = usuario_destino[0]
+        
+        print(f"📊 Usuario origen ID: {id_origen} ({usuario_origen[1]})")
+        print(f"📊 Usuario destino ID: {id_destino} ({usuario_destino[1]})")
+        
+        # Contar actividades antes de transferir
+        conteo_antes = ejecutar_consulta_segura(
+            "SELECT COUNT(*) FROM registros WHERE usuario_id = %s",
+            (id_origen,),
+            fetch_type='one'
+        )
+        actividades_a_transferir = conteo_antes[0] if conteo_antes else 0
+        
+        if actividades_a_transferir == 0 and not datos.incluir_asistencias:
+            raise HTTPException(status_code=400, detail="El usuario origen no tiene actividades para transferir")
+        
+        # Transferir actividades (registros)
+        ejecutar_consulta_segura(
+            "UPDATE registros SET usuario_id = %s WHERE usuario_id = %s",
+            (id_destino, id_origen),
+            fetch_type='none'
+        )
+        
+        print(f"✅ {actividades_a_transferir} actividades transferidas")
+        
+        # Transferir asistencias si se solicita
+        asistencias_transferidas = 0
+        if datos.incluir_asistencias:
+            conteo_asistencias = ejecutar_consulta_segura(
+                "SELECT COUNT(*) FROM asistencias WHERE usuario_id = %s",
+                (id_origen,),
+                fetch_type='one'
+            )
+            asistencias_a_transferir = conteo_asistencias[0] if conteo_asistencias else 0
+            
+            if asistencias_a_transferir > 0:
+                ejecutar_consulta_segura(
+                    "UPDATE asistencias SET usuario_id = %s WHERE usuario_id = %s",
+                    (id_destino, id_origen),
+                    fetch_type='none'
+                )
+                asistencias_transferidas = asistencias_a_transferir
+                print(f"✅ {asistencias_transferidas} asistencias transferidas")
+        
+        resultado = {
+            "status": "success",
+            "mensaje": "Transferencia completada exitosamente",
+            "detalles": {
+                "usuario_origen": {
+                    "id": id_origen,
+                    "nombre": usuario_origen[1],
+                    "correo": usuario_origen[2],
+                    "curp": curp_origen
+                },
+                "usuario_destino": {
+                    "id": id_destino,
+                    "nombre": usuario_destino[1],
+                    "correo": usuario_destino[2],
+                    "curp": curp_destino
+                },
+                "actividades_transferidas": actividades_a_transferir,
+                "asistencias_transferidas": asistencias_transferidas
+            }
+        }
+        
+        print(f"✅ Transferencia completada: {actividades_a_transferir} actividades, {asistencias_transferidas} asistencias")
+        return resultado
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en transferencia de actividades: {e}")
+        # Hacer rollback en caso de error
+        try:
+            if conn and not conn.closed:
+                conn.rollback()
+        except:
+            pass
+        raise HTTPException(status_code=500, detail=f"Error al transferir actividades: {str(e)}")
+
+# ==================== FIN TRANSFERIR ACTIVIDADES ====================
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

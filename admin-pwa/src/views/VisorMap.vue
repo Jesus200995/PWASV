@@ -191,7 +191,33 @@
         </div>
         
         <!-- Contenedor del mapa con Mapbox -->
-        <div class="mapa-container">
+        <div class="mapa-wrapper">
+          <!-- Encabezado del territorio (solo para admin territorial) -->
+          <div v-if="esAdminTerritorial && territorioAdmin" class="territorio-header">
+            <div class="territorio-header-content">
+              <div class="territorio-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </div>
+              <div class="territorio-info">
+                <h2 class="territorio-nombre">{{ territorioAdmin }}</h2>
+                <p class="territorio-estados">
+                  <span class="estados-label">Estados:</span>
+                  <span class="estados-lista">{{ estadosTerritorio.join(' • ') }}</span>
+                </p>
+              </div>
+            </div>
+            <div class="territorio-badge">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              <span>Territorio Asignado</span>
+            </div>
+          </div>
+          
+          <div class="mapa-container">
           <div v-if="loading" class="loading-container">
             <div class="spinner-large"></div>
             <p>Cargando mapa optimizado...</p>
@@ -448,6 +474,7 @@
             <div class="popup-arrow"></div>
           </div>
         </div>
+        </div><!-- Cierre de mapa-wrapper -->
       </div>
     </main>
     
@@ -621,6 +648,29 @@ const estadisticasDiaActual = reactive({
 
 // Estado para el total de usuarios registrados en el sistema
 const totalUsuariosRegistrados = ref('0')
+
+// Estado para mostrar información del territorio del admin territorial
+const territorioAdmin = ref(null)
+const estadosTerritorio = ref([])
+const esAdminTerritorial = ref(false)
+
+// Función para obtener info del territorio del admin
+const obtenerInfoTerritorio = () => {
+  try {
+    const userDataStr = localStorage.getItem('admin_user_data')
+    if (userDataStr) {
+      const userData = JSON.parse(userDataStr)
+      if (userData.es_territorial && userData.territorio) {
+        esAdminTerritorial.value = true
+        territorioAdmin.value = userData.territorio
+        estadosTerritorio.value = TERRITORIOS_ESTADOS[userData.territorio] || []
+        console.log(`🌍 Admin territorial: ${userData.territorio} → Estados: ${estadosTerritorio.value.join(', ')}`)
+      }
+    }
+  } catch (e) {
+    console.warn('⚠️ Error obteniendo info de territorio:', e)
+  }
+}
 
 // Función para obtener la fecha actual en CDMX (tiempo real)
 const obtenerFechaCDMX = () => {
@@ -1464,6 +1514,8 @@ const inicializarMapa = (datos) => {
           console.log('🎯 Centrando mapa en coordenadas:', coordinates);
           
           // Centrar el mapa con un pequeño offset hacia abajo usando padding
+          // Si hay admin territorial con barra, aumentar el padding superior
+          const paddingTop = esAdminTerritorial.value ? 380 : 300;
           map.flyTo({
             center: coordinates, // Usar coordenadas originales
             zoom: map.getZoom() + 4.0, // Zoom alto
@@ -1472,7 +1524,7 @@ const inicializarMapa = (datos) => {
             curve: 1, 
             speed: 0.8,
             // Padding para crear más espacio arriba y posicionar el punto más abajo
-            padding: { top: 300, bottom: 50, left: 50, right: 50 }
+            padding: { top: paddingTop, bottom: 50, left: 50, right: 50 }
           });
           
           // PASO 3: Esperar a que termine la animación del mapa
@@ -2228,6 +2280,9 @@ const logout = () => {
 // Ciclo de vida del componente
 onMounted(async () => {
   console.log('🚀 VisorMap iniciando...')
+  
+  // Obtener información del territorio del admin territorial
+  obtenerInfoTerritorio()
   
   // Asegurar que el CSS de Mapbox esté cargado (por si falla la importación en el estilo)
   const addMapboxCSS = () => {
@@ -3137,16 +3192,173 @@ watch(filtroTipo, () => {
   margin: 3px 0;
 }
 
+/* Wrapper del mapa con territorio header */
+.mapa-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+  height: 100%;
+}
+
+/* Encabezado del territorio para admin territorial */
+.territorio-header {
+  background: linear-gradient(135deg, #1a5f2a 0%, #2d8a3e 50%, #34a853 100%);
+  border-radius: 10px 10px 0 0;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(26, 95, 42, 0.25);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.territorio-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.territorio-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.territorio-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.1));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.territorio-icon::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 50%
+  );
+  border-radius: 50%;
+}
+
+.territorio-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  stroke-width: 2;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.territorio-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.territorio-nombre {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.3px;
+}
+
+.territorio-estados {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.estados-label {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+}
+
+.estados-lista {
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  font-size: 0.7rem;
+}
+
+.territorio-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.18);
+  padding: 5px 10px;
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+}
+
+.territorio-badge svg {
+  width: 12px;
+  height: 12px;
+  fill: #90EE90;
+}
+
 /* Contenedor del mapa */
 .mapa-container {
   flex: 1;
   background: white;
-  border-radius: 12px;
+  border-radius: 0 0 12px 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   position: relative;
-  min-height: 600px;
+  min-height: 550px;
   height: 100%;
+}
+
+/* Cuando no hay territorio header, el mapa tiene bordes redondeados completos */
+.mapa-wrapper:not(:has(.territorio-header)) .mapa-container {
+  border-radius: 12px;
 }
 
 .mapa-area {
@@ -3232,7 +3444,7 @@ watch(filtroTipo, () => {
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  z-index: 10;
+  z-index: 1000;
   transform: translate(-50%, -100%);
   pointer-events: auto;
   font-family: 'Inter', 'Poppins', sans-serif;
@@ -4054,6 +4266,82 @@ watch(filtroTipo, () => {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Responsive para el encabezado del territorio */
+@media (max-width: 768px) {
+  .territorio-header {
+    padding: 8px 14px;
+    flex-direction: column;
+    gap: 8px;
+    border-radius: 8px 8px 0 0;
+  }
+  
+  .territorio-header-content {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  
+  .territorio-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .territorio-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .territorio-nombre {
+    font-size: 0.95rem;
+  }
+  
+  .territorio-estados {
+    font-size: 0.7rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+  
+  .estados-lista {
+    padding: 2px 8px;
+    font-size: 0.65rem;
+  }
+  
+  .territorio-badge {
+    align-self: flex-end;
+    font-size: 0.6rem;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .territorio-header {
+    padding: 6px 10px;
+  }
+  
+  .territorio-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .territorio-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .territorio-nombre {
+    font-size: 0.85rem;
+  }
+  
+  .territorio-estados {
+    font-size: 0.65rem;
+  }
+  
+  .estados-label {
+    display: none;
   }
 }
 

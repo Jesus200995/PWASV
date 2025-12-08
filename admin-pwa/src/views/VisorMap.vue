@@ -555,6 +555,9 @@ let puntosSource = null
 let hasDatosUsuario = ref(false)
 const mapInitialized = ref(false)
 
+// Datos originales para filtrado por territorio
+let datosMapaOriginales = []
+
 // Estado del popup personalizado
 const showCustomPopup = ref(false)
 const popupX = ref(0)
@@ -630,6 +633,9 @@ const MEXICO_STATES_GEOJSON_URL = 'https://raw.githubusercontent.com/angelnmara/
 // Variable para controlar si la capa de estados ya fue agregada
 let estadosLayerAdded = false
 
+// Variable para guardar el GeoJSON de estados para reutilizarlo
+let estadosGeoJsonData = null
+
 // Variables de filtrado como en VisorView.vue
 const filtroTipo = ref('')
 const filtroPeriodo = ref('all')
@@ -671,6 +677,9 @@ const esAdminGeneral = ref(false)
 const territorioSeleccionado = ref('')
 const listaTerritorio = Object.keys(TERRITORIOS_ESTADOS).sort()
 
+// IDs de usuarios del territorio seleccionado (para filtrado)
+let usuariosTerritorioIds = []
+
 // Función para obtener info del territorio del admin
 const obtenerInfoTerritorio = () => {
   try {
@@ -695,14 +704,36 @@ const obtenerInfoTerritorio = () => {
 
 // Función para manejar el cambio de territorio por admin general
 const onTerritorioChange = async () => {
+  // Restablecer el filtro de tipo de actividad a "Todas las actividades"
+  filtroTipo.value = ''
+  
   if (territorioSeleccionado.value) {
     // Actualizar estados del territorio seleccionado
     estadosTerritorio.value = TERRITORIOS_ESTADOS[territorioSeleccionado.value] || []
     console.log(`🌍 Territorio seleccionado: ${territorioSeleccionado.value} → Estados: ${estadosTerritorio.value.join(', ')}`)
+    
+    // Mostrar contornos de estados del territorio
+    if (map) {
+      await cargarContornosEstadosPorTerritorio(map, territorioSeleccionado.value)
+    }
+    
+    // Filtrar puntos del mapa por territorio
+    await filtrarPuntosPorTerritorio(territorioSeleccionado.value)
+    
   } else {
     // Limpiar estados si no hay territorio seleccionado
     estadosTerritorio.value = []
+    usuariosTerritorioIds = [] // Limpiar filtro de usuarios
     console.log('🌍 Sin territorio seleccionado - mostrando todos')
+    
+    // Quitar contornos de estados
+    quitarContornosEstados()
+    
+    // Restaurar contador de usuarios totales
+    await cargarTotalUsuarios()
+    
+    // Mostrar todos los puntos (aplicar solo filtro de tipo si hay)
+    aplicarFiltrosConTerritorio()
   }
   
   // Recargar estadísticas con el nuevo filtro de territorio
@@ -757,6 +788,169 @@ const actualizarEstadisticasConTerritorio = async () => {
     
   } catch (error) {
     console.error('❌ Error actualizando estadísticas:', error)
+  }
+}
+
+// Función para filtrar puntos del mapa por territorio
+const filtrarPuntosPorTerritorio = async (territorio) => {
+  if (!datosMapaOriginales.length) {
+    console.log('⚠️ No hay datos originales para filtrar')
+    return
+  }
+  
+  try {
+    const token = localStorage.getItem('admin_token')
+    
+    // Obtener usuarios del territorio desde el backend
+    const response = await axios.get(`${API_URL}/usuarios`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    
+    const usuariosLista = response.data.usuarios || response.data || []
+    
+    // Filtrar usuarios que pertenecen al territorio seleccionado
+    usuariosTerritorioIds = usuariosLista
+      .filter(u => u.territorio === territorio)
+      .map(u => u.id)
+    
+    console.log(`👥 Usuarios del territorio "${territorio}": ${usuariosTerritorioIds.length}`)
+    
+    // Actualizar el contador de total usuarios con los del territorio
+    totalUsuariosRegistrados.value = usuariosTerritorioIds.length.toLocaleString('es')
+    
+    // Aplicar filtros (esto también aplicará el filtro de tipo si hay uno seleccionado)
+    aplicarFiltrosConTerritorio()
+    
+  } catch (error) {
+    console.error('❌ Error filtrando puntos por territorio:', error)
+  }
+}
+
+// Función para cargar contornos de estados por territorio seleccionado
+const cargarContornosEstadosPorTerritorio = async (mapInstance, territorio) => {
+  try {
+    const estadosDelTerritorio = TERRITORIOS_ESTADOS[territorio]
+    
+    if (!estadosDelTerritorio || estadosDelTerritorio.length === 0) {
+      console.log(`⚠️ No se encontraron estados para el territorio: ${territorio}`)
+      return
+    }
+    
+    console.log(`📍 Territorio "${territorio}" - Mostrando estados: ${estadosDelTerritorio.join(', ')}`)
+    
+    // Si no tenemos el GeoJSON cargado, cargarlo
+    if (!estadosGeoJsonData) {
+      console.log('🗺️ Cargando GeoJSON de estados de México...')
+      const response = await fetch(MEXICO_STATES_GEOJSON_URL)
+      
+      if (!response.ok) {
+        throw new Error(`Error al cargar GeoJSON: ${response.status}`)
+      }
+      
+      estadosGeoJsonData = await response.json()
+      console.log('✅ GeoJSON cargado correctamente')
+    }
+    
+    // Si las capas ya existen, solo actualizar el filtro
+    if (estadosLayerAdded) {
+      const filtroEstados = [
+        'in',
+        ['get', 'name'],
+        ['literal', estadosDelTerritorio]
+      ]
+      
+      if (mapInstance.getLayer('estados-highlight')) {
+        mapInstance.setFilter('estados-highlight', filtroEstados)
+      }
+      if (mapInstance.getLayer('estados-fill')) {
+        mapInstance.setFilter('estados-fill', filtroEstados)
+      }
+      if (mapInstance.getLayer('estados-outline-inner')) {
+        mapInstance.setFilter('estados-outline-inner', filtroEstados)
+      }
+      
+      // Ajustar vista a los estados usando el GeoJSON guardado
+      ajustarVistaAEstados(mapInstance, estadosGeoJsonData, estadosDelTerritorio)
+      return
+    }
+    
+    // Agregar fuente de datos de estados
+    if (!mapInstance.getSource('estados-mexico')) {
+      mapInstance.addSource('estados-mexico', {
+        type: 'geojson',
+        data: estadosGeoJsonData
+      })
+    }
+    
+    // Determinar la capa de referencia
+    const capaReferencia = mapInstance.getLayer('unclustered-point') ? 'unclustered-point' : undefined
+    
+    // Agregar capa de relleno gris
+    if (!mapInstance.getLayer('estados-fill')) {
+      mapInstance.addLayer({
+        id: 'estados-fill',
+        type: 'fill',
+        source: 'estados-mexico',
+        filter: ['in', ['get', 'name'], ['literal', estadosDelTerritorio]],
+        paint: {
+          'fill-color': '#808080',
+          'fill-opacity': 0.25
+        }
+      }, capaReferencia)
+    }
+    
+    // Agregar capa de contorno café
+    if (!mapInstance.getLayer('estados-highlight')) {
+      mapInstance.addLayer({
+        id: 'estados-highlight',
+        type: 'line',
+        source: 'estados-mexico',
+        filter: ['in', ['get', 'name'], ['literal', estadosDelTerritorio]],
+        paint: {
+          'line-color': '#8B4513',
+          'line-width': 2.5,
+          'line-opacity': 0.9
+        }
+      }, capaReferencia)
+    }
+    
+    estadosLayerAdded = true
+    console.log('✅ Contornos de estados agregados')
+    
+    // Ajustar vista
+    ajustarVistaAEstados(mapInstance, estadosGeoJsonData, estadosDelTerritorio)
+    
+  } catch (err) {
+    console.error('❌ Error al cargar contornos de estados:', err)
+  }
+}
+
+// Función para quitar contornos de estados
+const quitarContornosEstados = () => {
+  if (!map) return
+  
+  try {
+    // Remover capas
+    if (map.getLayer('estados-fill')) {
+      map.removeLayer('estados-fill')
+    }
+    if (map.getLayer('estados-highlight')) {
+      map.removeLayer('estados-highlight')
+    }
+    if (map.getLayer('estados-outline-inner')) {
+      map.removeLayer('estados-outline-inner')
+    }
+    
+    // Remover fuente
+    if (map.getSource('estados-mexico')) {
+      map.removeSource('estados-mexico')
+    }
+    
+    estadosLayerAdded = false
+    console.log('🗑️ Contornos de estados removidos')
+    
+  } catch (err) {
+    console.error('❌ Error quitando contornos:', err)
   }
 }
 
@@ -839,6 +1033,9 @@ const cargarDatos = async () => {
     // Calcular las últimas actividades por usuario
     const ultimasActividades = obtenerUltimasActividadesPorUsuario(registrosEnriquecidos, asistenciasResult)
     console.log(`📊 Últimas actividades calculadas: ${ultimasActividades.length}`)
+    
+    // Guardar datos originales para filtrado posterior por territorio
+    datosMapaOriginales = [...ultimasActividades]
     
     // Si el mapa ya está cargado, actualizar puntos
     if (map && mapInitialized.value) {
@@ -2257,14 +2454,31 @@ const cerrarPopup = () => {
 
 // Función para aplicar filtros y actualizar las capas del mapa
 const aplicarFiltros = () => {
+  // Usar la nueva función que considera el territorio seleccionado
+  aplicarFiltrosConTerritorio()
+}
+
+// Función para aplicar filtros considerando territorio seleccionado
+const aplicarFiltrosConTerritorio = () => {
   if (!map || !puntosSource) return
 
   try {
-    console.log('🎛️ Aplicando clasificador:', { filtroTipo: filtroTipo.value })
+    console.log('🎛️ Aplicando clasificador:', { 
+      filtroTipo: filtroTipo.value,
+      territorio: territorioSeleccionado.value || 'Todos',
+      usuariosEnTerritorio: usuariosTerritorioIds.length
+    })
     
-    // Obtener las últimas actividades con los filtros aplicados
-    const registrosFiltrados = filtrarRegistros()
-    const actividadesFiltradas = obtenerUltimasActividadesPorUsuario(registrosFiltrados, asistencias.value)
+    // Empezar con los datos originales (ya son las últimas actividades procesadas)
+    let actividadesFiltradas = [...datosMapaOriginales]
+    
+    // Si hay territorio seleccionado, filtrar por usuarios del territorio
+    if (territorioSeleccionado.value && usuariosTerritorioIds.length > 0) {
+      actividadesFiltradas = actividadesFiltradas.filter(punto => 
+        usuariosTerritorioIds.includes(punto.usuario_id)
+      )
+      console.log(`📍 Datos filtrados por territorio: ${actividadesFiltradas.length}`)
+    }
     
     // Filtrar por tipo de actividad si está especificado
     let actividadesFinales = actividadesFiltradas

@@ -90,7 +90,7 @@
                 </div>
                 <div class="flex-1">
                   <div class="font-semibold text-sm">WhatsApp</div>
-                  <div class="text-xs opacity-90">Respuesta inmediata</div>
+                  <div class="text-xs opacity-90">Chat directo</div>
                 </div>
                 <div class="w-5 h-5">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -117,13 +117,23 @@ class AsistenciasService {
    */
   async obtenerUsuarios() {
     try {
-      console.log('🔍 Solicitando usuarios desde:', `${API_URL}/usuarios`);
+      // Obtener filtro de territorio si el admin es territorial
+      const territorioFilter = authService.getTerritorioFilter();
+      
+      // Construir URL con parámetro de territorio si aplica
+      let url = `${API_URL}/usuarios`;
+      if (territorioFilter) {
+        url += `?territorio=${encodeURIComponent(territorioFilter)}`;
+        console.log(`🔍 Solicitando usuarios del territorio: ${territorioFilter}`);
+      } else {
+        console.log('🔍 Solicitando todos los usuarios (admin global)');
+      }
       
       const controller = new AbortController();
       // Timeout de 30 segundos
       const timeoutId = setTimeout(() => controller.abort(), 30000);
       
-      const response = await fetch(`${API_URL}/usuarios`, {
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +148,7 @@ class AsistenciasService {
       }
 
       const data = await response.json();
-      console.log('✅ Usuarios obtenidos para mapeo:', data);
+      console.log(`✅ Usuarios obtenidos para mapeo: ${data.usuarios?.length || 0} usuarios`);
       
       return data.usuarios || [];
     } catch (error) {

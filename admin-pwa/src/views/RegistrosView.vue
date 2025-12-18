@@ -1096,8 +1096,20 @@ const calcularEstadisticas = async () => {
     // Obtener estadísticas del servidor para datos precisos
     const token = localStorage.getItem('admin_token')
     
+    // Obtener filtro de territorio si el admin es territorial
+    const territorioFilter = authService.getTerritorioFilter()
+    
     try {
-      const response = await axios.get(`${API_URL}/estadisticas`, {
+      // Construir URL con parámetro de territorio si aplica
+      let url = `${API_URL}/estadisticas`
+      if (territorioFilter) {
+        url += `?territorio=${encodeURIComponent(territorioFilter)}`
+        console.log(`📊 Obteniendo estadísticas del territorio: ${territorioFilter}`)
+      } else {
+        console.log('📊 Obteniendo estadísticas globales')
+      }
+      
+      const response = await axios.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -1111,6 +1123,9 @@ const calcularEstadisticas = async () => {
         totalActividades.value = stats.total_registros?.toLocaleString('es') || '0'
         actividadesHoy.value = stats.registros_hoy?.toLocaleString('es') || '0'
         totalRegistrosServidor.value = stats.total_registros || 0
+        
+        const territorioInfo = stats.territorio ? ` (territorio: ${stats.territorio})` : ' (global)'
+        console.log(`✅ Estadísticas cargadas${territorioInfo}: ${totalActividades.value} total, ${actividadesHoy.value} hoy`)
       }
     } catch (statsError) {
       console.warn('⚠️ No se pudieron obtener estadísticas del servidor, usando datos locales...')

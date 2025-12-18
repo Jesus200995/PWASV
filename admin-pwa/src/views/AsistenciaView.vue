@@ -645,6 +645,7 @@ import Sidebar from '../components/Sidebar.vue'
 import MapaAsistenciaModal from '../components/MapaAsistenciaModal.vue'
 import AsistenciasService from '../services/asistenciasService.js'
 import EstadisticasService from '../services/estadisticasService.js'
+import authService from '../services/authService.js'
 import { API_URL } from '../config/api.js'
 import * as XLSX from 'xlsx'
 
@@ -943,13 +944,26 @@ export default {
 
     async cargarEstadisticas() {
       try {
-        console.log('🔍 Cargando estadísticas desde el servidor...')
+        // Obtener filtro de territorio si el admin es territorial
+        const territorioFilter = authService.getTerritorioFilter()
+        
+        if (territorioFilter) {
+          console.log(`🔍 Cargando estadísticas del territorio: ${territorioFilter}...`)
+        } else {
+          console.log('🔍 Cargando estadísticas globales desde el servidor...')
+        }
         
         // Obtener estadísticas directamente del servidor
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 10000) // Timeout de 10 segundos
         
-        const response = await fetch(`${API_URL}/estadisticas`, {
+        // Construir URL con parámetro de territorio si aplica
+        let url = `${API_URL}/estadisticas`
+        if (territorioFilter) {
+          url += `?territorio=${encodeURIComponent(territorioFilter)}`
+        }
+        
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -980,7 +994,8 @@ export default {
           // Guardar el total del servidor para saber cuántas asistencias hay en total
           this.totalAsistenciasServidor = stats.total_asistencias || 0
           
-          console.log(`✅ Estadísticas cargadas del servidor (tiempo real CDMX):`)
+          const territorioInfo = stats.territorio ? ` para territorio: ${stats.territorio}` : ' (global)'
+          console.log(`✅ Estadísticas cargadas del servidor (tiempo real CDMX)${territorioInfo}:`)
           console.log(`   - Total asistencias: ${this.totalAsistenciasServidor.toLocaleString('es')}`)
           console.log(`   - Asistencias hoy: ${stats.asistencias_hoy || 0}`)
           console.log(`   - Usuarios PRESENTES ahora (con entrada, sin salida): ${stats.usuarios_presentes || 0}`)

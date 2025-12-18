@@ -2340,12 +2340,12 @@ async def check_user_active(username: str):
 # Endpoint para verificación completa de sesión (activo, rol, permisos) - TIEMPO REAL
 @app.get("/auth/check-session/{username}")
 async def check_user_session(username: str):
-    """Verificar estado completo de sesión de un usuario (activo, rol, permisos)"""
+    """Verificar estado completo de sesión de un usuario (activo, rol, permisos, territorio)"""
     try:
         print(f"🔍 Verificando sesión completa de usuario: {username}")
         
         cursor.execute("""
-            SELECT id, rol, permisos, activo 
+            SELECT id, rol, permisos, activo, es_territorial, territorio 
             FROM admin_users 
             WHERE username = %s
         """, (username,))
@@ -2362,6 +2362,8 @@ async def check_user_session(username: str):
         user_rol = row[1] or 'user'
         permisos_str = row[2]
         activo = row[3] if row[3] is not None else True
+        es_territorial = row[4] if row[4] is not None else False
+        territorio = row[5]
         
         # Parsear permisos
         if permisos_str:
@@ -2378,7 +2380,9 @@ async def check_user_session(username: str):
             "user_id": user_id,
             "username": username,
             "rol": user_rol,
-            "permisos": permisos
+            "permisos": permisos,
+            "es_territorial": es_territorial,
+            "territorio": territorio
         }
         
     except Exception as e:

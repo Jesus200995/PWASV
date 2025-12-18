@@ -364,11 +364,12 @@ class AuthService {
       return
     }
     
-    // Verificar si hubo cambios en rol o permisos
-    if (sessionData.rol !== undefined || sessionData.permisos !== undefined) {
+    // Verificar si hubo cambios en rol, permisos o territorio
+    if (sessionData.rol !== undefined || sessionData.permisos !== undefined || sessionData.territorio !== undefined) {
       const currentUser = this.user
       let hasRolChange = false
       let hasPermisosChange = false
+      let hasTerritorioChange = false
       
       // Verificar cambio de rol
       if (sessionData.rol && sessionData.rol !== currentUser.rol) {
@@ -387,26 +388,39 @@ class AuthService {
         }
       }
       
+      // Verificar cambio de territorio
+      if (sessionData.territorio !== currentUser.territorio || sessionData.es_territorial !== currentUser.es_territorial) {
+        console.log(`🔄 Territorio actualizado: ${currentUser.territorio || 'global'} → ${sessionData.territorio || 'global'}`)
+        hasTerritorioChange = true
+      }
+      
       // Si hubo cambios, actualizar datos locales y notificar
-      if (hasRolChange || hasPermisosChange) {
+      if (hasRolChange || hasPermisosChange || hasTerritorioChange) {
         this.user = {
           ...this.user,
           rol: sessionData.rol || this.user.rol,
           permisos: sessionData.permisos || this.user.permisos,
-          activo: sessionData.active
+          activo: sessionData.active,
+          es_territorial: sessionData.es_territorial !== undefined ? sessionData.es_territorial : this.user.es_territorial,
+          territorio: sessionData.territorio !== undefined ? sessionData.territorio : this.user.territorio
         }
         
         localStorage.setItem('admin_user_data', JSON.stringify(this.user))
         
-        // Si cambió el ROL, forzar refresh inmediato de la página
-        if (hasRolChange) {
-          console.log('⚠️ Cambio de rol detectado - Recargando página inmediatamente...')
+        // Si cambió el ROL o el territorio, forzar refresh inmediato de la página
+        if (hasRolChange || hasTerritorioChange) {
+          const reason = hasTerritorioChange ? 'territorio-changed' : 'role-changed'
+          const message = hasTerritorioChange 
+            ? 'Se ha actualizado tu territorio asignado. Aplicando cambios...'
+            : 'Se han actualizado tus permisos de acceso. Aplicando cambios...'
+          
+          console.log(`⚠️ Cambio de ${hasTerritorioChange ? 'territorio' : 'rol'} detectado - Recargando página inmediatamente...`)
           
           // Mostrar mensaje profesional antes del refresh
           window.dispatchEvent(new CustomEvent('force-refresh', {
             detail: {
-              message: 'Se han actualizado tus permisos de acceso. Aplicando cambios...',
-              reason: 'role-changed'
+              message,
+              reason
             }
           }))
           
@@ -417,7 +431,7 @@ class AuthService {
           return
         }
         
-        // Si solo cambiaron permisos (no rol), solo notificar sin refresh
+        // Si solo cambiaron permisos (no rol ni territorio), solo notificar sin refresh
         // Notificar a la aplicación del cambio
         if (this.onUserUpdated) {
           this.onUserUpdated(this.user)

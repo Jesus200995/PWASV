@@ -78,8 +78,8 @@
               </button>
             </div>
             <div v-show="mostrarFiltros" class="filter-controls-compact">
-              <!-- Selector de territorio para admin general -->
-              <div v-if="esAdminGeneral" class="filter-group-compact">
+              <!-- Selector de territorio para admin general o usuarios con permiso -->
+              <div v-if="puedeVerFiltradorTerritorio" class="filter-group-compact">
                 <div class="filter-item-compact">
                   <svg class="filter-icon-small" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
@@ -204,8 +204,8 @@
         
         <!-- Contenedor del mapa con Mapbox -->
         <div class="mapa-wrapper">
-          <!-- Encabezado del territorio (para admin territorial o admin que seleccionó territorio) -->
-          <div v-if="(esAdminTerritorial && territorioAdmin) || (esAdminGeneral && territorioSeleccionado)" class="territorio-header">
+          <!-- Encabezado del territorio (para admin territorial o usuarios con permiso que seleccionaron territorio) -->
+          <div v-if="(esAdminTerritorial && territorioAdmin) || (puedeVerFiltradorTerritorio && territorioSeleccionado)" class="territorio-header">
             <div class="territorio-header-content">
               <div class="territorio-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -519,7 +519,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '../components/Sidebar.vue'
 import axios from 'axios'
@@ -677,6 +677,16 @@ const esAdminGeneral = ref(false)
 const territorioSeleccionado = ref('')
 const listaTerritorio = Object.keys(TERRITORIOS_ESTADOS).sort()
 
+// Computed para verificar si el usuario puede ver el filtrador de territorio
+const puedeVerFiltradorTerritorio = computed(() => {
+  const user = authService.getCurrentUser()
+  // Admin general siempre puede ver el filtrador
+  if (user?.rol === 'admin' && !user?.es_territorial) return true
+  // Usuario con permiso específico puede verlo
+  if (user?.permisos?.visor_filtrador_territorio === true) return true
+  return false
+})
+
 // IDs de usuarios del territorio seleccionado (para filtrado)
 let usuariosTerritorioIds = []
 
@@ -745,10 +755,10 @@ const actualizarEstadisticasConTerritorio = async () => {
   try {
     const token = localStorage.getItem('admin_token')
     
-    // Determinar el territorio a usar (territorial fijo o seleccionado por admin)
+    // Determinar el territorio a usar (territorial fijo o seleccionado por usuario con permiso)
     const territorioFiltro = esAdminTerritorial.value 
       ? territorioAdmin.value 
-      : (esAdminGeneral.value ? territorioSeleccionado.value : null)
+      : (puedeVerFiltradorTerritorio.value ? territorioSeleccionado.value : null)
     
     // Construir URL con filtro de territorio si aplica
     let urlEstadisticas = `${API_URL}/estadisticas/dia-actual`
@@ -1800,8 +1810,8 @@ const inicializarMapa = (datos) => {
           console.log('🎯 Centrando mapa en coordenadas:', coordinates);
           
           // Centrar el mapa con un pequeño offset hacia abajo usando padding
-          // Si hay barra de territorio (admin territorial o admin que seleccionó territorio), aumentar el padding superior
-          const tieneBarraTerritorio = esAdminTerritorial.value || (esAdminGeneral.value && territorioSeleccionado.value)
+          // Si hay barra de territorio (admin territorial o usuario con permiso que seleccionó territorio), aumentar el padding superior
+          const tieneBarraTerritorio = esAdminTerritorial.value || (puedeVerFiltradorTerritorio.value && territorioSeleccionado.value)
           const paddingTop = tieneBarraTerritorio ? 380 : 300;
           map.flyTo({
             center: coordinates, // Usar coordenadas originales

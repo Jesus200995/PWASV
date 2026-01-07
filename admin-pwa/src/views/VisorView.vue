@@ -83,6 +83,20 @@
                 <option value="month">Este mes</option>
               </select>            </div>
             
+            <!-- Filtro por Territorio (solo visible para admin o usuarios con permiso) -->
+            <div v-if="puedeVerFiltradorTerritorio" class="filter-item">
+              <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3" fill="white"/>
+              </svg>
+              <select v-model="filtroTerritorio" class="modern-select territorio-select" @change="aplicarFiltros">
+                <option value="">Todos los territorios</option>
+                <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">
+                  {{ territorio }}
+                </option>
+              </select>
+            </div>
+            
             <div class="filter-item search-item">
               <div class="modern-search-wrapper">
                 <svg class="search-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -429,6 +443,7 @@ import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
 import asistenciasService from '../services/asistenciasService.js'
 import { estadisticasService } from '../services/estadisticasService.js'
+import authService from '../services/authService.js'
 
 const router = useRouter()
 
@@ -459,6 +474,7 @@ let markersLayer = null
 // Filtros y búsqueda
 const filtroTipo = ref('')
 const filtroPeriodo = ref('all')
+const filtroTerritorio = ref('') // Nuevo filtro por territorio
 const busquedaUsuario = ref('')
 const usuarioEncontrado = ref(null)
 const ultimasActividades = ref([])
@@ -468,6 +484,51 @@ const sugerenciaSeleccionada = ref(-1)
 
 // Variables de tiempo para sugerencias solamente
 const timeoutSugerencias = ref(null)
+
+// Verificar si el usuario puede ver el filtrador de territorio
+const puedeVerFiltradorTerritorio = computed(() => {
+  const user = authService.getCurrentUser()
+  // Admin siempre puede ver el filtrador
+  if (user?.rol === 'admin') return true
+  // Usuario con permiso específico puede verlo
+  if (user?.permisos?.visor_filtrador_territorio === true) return true
+  return false
+})
+
+// Lista de territorios de Sembrando Vida (igual que en PermisosView)
+const territoriosSembrandoVida = [
+  "Acapulco - Centro - Norte - Tierra Caliente",
+  "Acayucan",
+  "Balancán",
+  "Chihuahua / Sonora",
+  "Colima",
+  "Comalcalco",
+  "Córdoba",
+  "Costa Chica - Montaña",
+  "Costa Grande - Sierra",
+  "Durango / Zacatecas",
+  "Hidalgo",
+  "Istmo",
+  "Michoacán",
+  "Mixteca",
+  "Morelos",
+  "Nayarit / Jalisco",
+  "Ocosingo",
+  "Palenque",
+  "Papantla",
+  "Pichucalco",
+  "Puebla",
+  "San Luis Potosí",
+  "Sinaloa",
+  "Tamaulipas",
+  "Tantoyuca",
+  "Tapachula",
+  "Teapa",
+  "Tlaxcala / Estado de México",
+  "Tzucacab / Opb",
+  "Xpujil",
+  "Oficinas Centrales"
+]
 
 // Registro seleccionado y estado del panel de detalles
 const registroSeleccionado = ref(null)
@@ -1447,6 +1508,19 @@ const actualizarMarcadoresConFiltros = () => {
           return true
       }
     })
+  }
+  
+  // Aplicar filtro por territorio
+  if (filtroTerritorio.value) {
+    actividadesFiltradas = actividadesFiltradas.filter(actividad => {
+      // Verificar el territorio del usuario asociado a la actividad
+      const usuarioActividad = actividad.usuario
+      if (usuarioActividad && usuarioActividad.territorio) {
+        return usuarioActividad.territorio === filtroTerritorio.value
+      }
+      return false // Si no tiene territorio asignado, no mostrar cuando hay filtro activo
+    })
+    console.log(`🌍 Filtro por territorio aplicado: ${filtroTerritorio.value} - ${actividadesFiltradas.length} actividades`)
   }
   
   actualizarMarcadores(actividadesFiltradas)
@@ -2506,6 +2580,12 @@ watch([filtroTipo, filtroPeriodo], () => {
 .modern-select:focus {
   background: rgba(76, 175, 80, 0.08);
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Estilo específico para selector de territorio */
+.territorio-select {
+  min-width: 140px;
+  max-width: 200px;
 }
 
 /* Leyenda integrada en los filtros - Completamente responsiva y MÁS COMPACTA */

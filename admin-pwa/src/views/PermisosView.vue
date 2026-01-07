@@ -564,23 +564,42 @@
               <p class="section-description">Seleccione los módulos a los que el usuario tendrá acceso</p>
               
               <div class="permisos-grid-modern">
-                <!-- Visor de Seguimiento -->
-                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.visor }">
-                  <input type="checkbox" v-model="formularioUsuario.permisos.visor" />
-                  <div class="permiso-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M2 12h20"/>
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                    </svg>
-                  </div>
-                  <span class="permiso-card-name">Visor de Seguimiento</span>
-                  <div class="permiso-toggle">
-                    <div class="toggle-track">
-                      <div class="toggle-thumb"></div>
+                <!-- Visor de Seguimiento (con sub-permiso de filtrador por territorio) -->
+                <div class="permiso-card-wrapper" :class="{ 'expanded': formularioUsuario.permisos.visor }">
+                  <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.visor }">
+                    <input type="checkbox" v-model="formularioUsuario.permisos.visor" @change="onVisorChange" />
+                    <div class="permiso-card-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M2 12h20"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                      </svg>
                     </div>
+                    <span class="permiso-card-name">Visor de Seguimiento</span>
+                    <div class="permiso-toggle">
+                      <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                      </div>
+                    </div>
+                  </label>
+                  
+                  <!-- Sub-permiso: Filtrador por Territorio -->
+                  <div v-if="formularioUsuario.permisos.visor" class="sub-permiso-container">
+                    <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.visor_filtrador_territorio }">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.visor_filtrador_territorio" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                      </svg>
+                      <span class="sub-permiso-text">Filtrador por territorio</span>
+                      <div class="sub-toggle">
+                        <div class="sub-toggle-track">
+                          <div class="sub-toggle-thumb"></div>
+                        </div>
+                      </div>
+                    </label>
                   </div>
-                </label>
+                </div>
 
                 <!-- Asistencia -->
                 <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.asistencia }">
@@ -902,6 +921,7 @@ export default {
         territorio: '',
         permisos: {
           visor: false,
+          visor_filtrador_territorio: false,
           asistencia: false,
           registros: false,
           usuarios: false,
@@ -951,6 +971,7 @@ export default {
       // Permisos por defecto para nuevos usuarios (todos en false)
       permisosDefault: {
         visor: false,
+        visor_filtrador_territorio: false,
         asistencia: false,
         registros: false,
         usuarios: false,
@@ -1006,6 +1027,14 @@ export default {
       }
     },
 
+    // Handler cuando se cambia el permiso de visor
+    onVisorChange() {
+      // Si se desactiva visor, también desactivar visor_filtrador_territorio
+      if (!this.formularioUsuario.permisos.visor) {
+        this.formularioUsuario.permisos.visor_filtrador_territorio = false
+      }
+    },
+
     // Handler cuando se cambia el checkbox de territorial
     onTerritorialChange() {
       // Si se desactiva territorial, limpiar el territorio seleccionado
@@ -1046,6 +1075,18 @@ export default {
       
       // Cargar permisos del usuario o usar defaults
       const permisosUsuario = usuario.permisos ? { ...usuario.permisos } : { ...this.permisosDefault }
+      
+      // MIGRACIÓN: Si el usuario ya tiene visor activo pero no tiene el nuevo sub-permiso definido,
+      // activarlo automáticamente (para usuarios que ya tenían visor antes de esta actualización)
+      if (permisosUsuario.visor === true && permisosUsuario.visor_filtrador_territorio === undefined) {
+        permisosUsuario.visor_filtrador_territorio = true
+        console.log('🔄 Migración automática: Activando visor_filtrador_territorio para usuario con visor existente')
+      }
+      
+      // Asegurar que el nuevo permiso existe en el objeto
+      if (permisosUsuario.visor_filtrador_territorio === undefined) {
+        permisosUsuario.visor_filtrador_territorio = false
+      }
       
       this.formularioUsuario = {
         username: usuario.username,

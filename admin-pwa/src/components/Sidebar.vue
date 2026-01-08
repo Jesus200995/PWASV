@@ -156,7 +156,7 @@
       </a>
       
       <!-- Resumen Ejecutivo -->
-      <a href="http://dashboard.sembrandodatos.com/public/dashboard/985f5eb8-b563-452a-9f9d-1c65fde51730" target="_blank" class="quick-link resumen-ejecutivo">
+      <a href="https://dashboard.sembrandodatos.com/public/dashboard/8b229025-50fd-477e-80ed-174d293cc82f?territorio=" target="_blank" class="quick-link resumen-ejecutivo">
         <div class="link-icon-container">
           <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>

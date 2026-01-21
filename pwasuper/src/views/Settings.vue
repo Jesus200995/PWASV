@@ -58,7 +58,7 @@
                 ></div>
               </div>
               <p class="text-xs text-gray-600">
-                {{ itemCount }} elemento(s) | Se actualiza cada 3 segundos
+                {{ itemCount }} elemento(s) | Actualización: tiempo real
               </p>
             </div>
           </div>
@@ -597,9 +597,15 @@ async function clearCache() {
     toastType.value = 'success';
     showToast.value = true;
 
-    // Esperar un poco y recalcular en tiempo real
+    // Esperar un bit y recalcular en tiempo real
     await new Promise(resolve => setTimeout(resolve, 500));
     await calculateCacheSize();
+    
+    // Recalcular agresivamente cada 200ms durante 2 segundos para feedback inmediato
+    for (let i = 0; i < 10; i++) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+      await calculateCacheSize();
+    }
 
     // Ocultar toast después de 4 segundos
     setTimeout(() => {
@@ -621,16 +627,30 @@ async function clearCache() {
 
 // Al montar el componente
 onMounted(() => {
+  // Calcular inmediatamente
   calculateCacheSize();
   
-  // Recalcular cada 3 segundos (más rápido para feedback en tiempo real)
+  // Recalcular cada segundo para feedback en tiempo real exacto
   const interval = setInterval(() => {
     calculateCacheSize();
-  }, 3000);
+  }, 1000);
+  
+  // Listener para cambios en localStorage
+  window.addEventListener('storage', () => {
+    calculateCacheSize();
+  });
+  
+  // También recalcular cuando la pestaña vuelve a ser visible
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      calculateCacheSize();
+    }
+  });
   
   // Limpiar al desmontar
   return () => {
     clearInterval(interval);
+    window.removeEventListener('storage', calculateCacheSize);
   };
 });
 </script>

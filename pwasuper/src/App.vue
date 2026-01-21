@@ -177,9 +177,6 @@ onMounted(() => {
     try {
       userData.value = JSON.parse(storedUser);
       
-      // Asegurarse de que activeIcon se inicialice a null al montar el componente
-      activeIcon.value = null;
-      
       // Inicializar sistema de notificaciones una vez que el usuario está identificado
       notificationPollingId = startPolling();
       
@@ -409,10 +406,10 @@ const currentUserId = computed(() => {
             <router-link
               to="/"
               @click="closeMobileMenu"
-le, hazlo de u              class="flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               :class="{ 'bg-green-50 text-green-700': route.name === 'Home' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" />
               </svg>
               <span>Inicio</span>
@@ -421,10 +418,10 @@ le, hazlo de u              class="flex items-center px-2 py-2 rounded-md text-s
             <router-link
               to="/historial"
               @click="closeMobileMenu"
-              class="flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               :class="{ 'bg-green-50 text-green-700': route.name === 'Historial' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
               </svg>
               <span>Historial</span>
@@ -433,10 +430,10 @@ le, hazlo de u              class="flex items-center px-2 py-2 rounded-md text-s
             <router-link
               to="/notificaciones"
               @click="closeMobileMenu"
-              class="flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors relative"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors relative"
               :class="{ 'bg-green-50 text-green-700': route.name === 'Notificaciones' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
               <span>Notificaciones</span>
@@ -448,10 +445,10 @@ le, hazlo de u              class="flex items-center px-2 py-2 rounded-md text-s
             <router-link
               to="/profile"
               @click="closeMobileMenu"
-              class="flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               :class="{ 'bg-green-50 text-green-700': route.name === 'Profile' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
               <span>Mi Perfil</span>
@@ -460,33 +457,33 @@ le, hazlo de u              class="flex items-center px-2 py-2 rounded-md text-s
             <router-link
               to="/support"
               @click="closeMobileMenu"
-              class="flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               :class="{ 'bg-green-50 text-green-700': route.name === 'Support' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
               </svg>
               <span>Soporte</span>
             </router-link>
 
             <router-link
-              to="/settings" 
+              to="/settings"
               @click="closeMobileMenu"
-              class="flex items-center px-2 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-              :class="{ 'bg-primary/10 text-primary': route.name === 'Settings' }"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              :class="{ 'bg-green-50 text-green-700': route.name === 'Settings' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.17.992c.529.19.99.471 1.403.803l.913-.677c.47-.345 1.09-.27 1.53.213l.843.843c.483.44.56 1.06.214 1.53l-.677.913c.332.413.613.874.803 1.403l.992.17c.542.09.94.56.94 1.11v1.094c0 .55-.398 1.02-.94 1.11l-.992.17c-.19.529-.471.99-.803 1.403l.677.913c.345.47.27 1.09-.213 1.53l-.843.843c-.44.483-1.06.56-1.53.214l-.913-.677c-.413.332-.874.613-1.403.803l-.17.992c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.02-.398-1.11-.94l-.17-.992c-.529-.19-.99-.471-1.403-.803l-.913.677c-.47.345-1.09.27-1.53-.213l-.843-.843c-.483-.44-.56-1.06-.214-1.53l.677-.913c-.332-.413-.613-.874-.803-1.403l-.992-.17c-.542-.09-.94-.56-.94-1.11V12.75c0-.55.398-1.02.94-1.11l.992-.17c.19-.529.471-.99.803-1.403l-.677-.913c-.345-.47-.27-1.09.213-1.53l.843-.843c.44-.483 1.06-.56 1.53-.214l.913.677c.413-.332.874-.613 1.403-.803l.17-.992zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-1.003 1.11-1.227l.12-.06c.543-.248 1.15-.248 1.694 0l.12.06c.55.224 1.02.685 1.11 1.227l.028.168c.202.992 1.016 1.65 1.992 1.65h.21c.992 0 1.806.658 1.992 1.65l.028.168c.09.542.56 1.003 1.11 1.227l.12.06c.543-.248 1.15-.248 1.694 0l.12-.06c.55-.224 1.02-.685 1.11-1.227l.028-.168c.202-.992-1.016-1.65-1.992-1.65h-.21c-.992 0-1.806-.658-1.992-1.65l-.028-.168zM12 6.75a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5zM12 15a3 3 0 100-6 3 3 0 000 6z" />
               </svg>
-              <span class="font-medium">Configuración</span>
+              <span>Configuración</span>
             </router-link>
-            
+
             <div class="border-t border-gray-200 pt-2 mt-2">
               <button
                 @click="logout"
-                class="flex items-center w-full px-2 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                class="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                 </svg>
                 <span>Cerrar Sesión</span>

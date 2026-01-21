@@ -48,28 +48,26 @@
 
 <style scoped>
 .plant-icon-container {
-  background: transparent;
-  border: 2.5px solid #22c55e;
-  box-shadow: 
-    0 0 6px #22c55e,
-    0 0 12px rgba(34, 197, 94, 0.4);
+  background: #ffffff;
+  border: 3px solid #86efac;
+  box-shadow: none;
 }
 
 .neon-glow {
   border: 2px solid transparent;
-  animation: neon-pulse 2s ease-in-out infinite;
+  box-shadow: none;
 }
 
 @keyframes neon-pulse {
   0%, 100% {
     box-shadow: 
-      0 0 4px #22c55e,
-      0 0 8px rgba(34, 197, 94, 0.3);
+      0 0 4px #ffffff,
+      0 0 8px rgba(255, 255, 255, 0.3);
   }
   50% {
     box-shadow: 
-      0 0 8px #4ade80,
-      0 0 16px rgba(74, 222, 128, 0.5);
+      0 0 8px #f3f4f6,
+      0 0 16px rgba(243, 244, 246, 0.5);
   }
 }
 </style>

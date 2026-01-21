@@ -75,53 +75,54 @@
     <!-- Banner fijo debajo del header -->
     <div 
       v-if="showBanner" 
-      class="fixed left-0 right-0 z-30 shadow-sm transition-all duration-300"
+      class="fixed left-0 right-0 z-30 shadow-sm transition-all duration-300 rounded-full mx-4"
       :class="getBannerClasses()"
-      :style="{ top: '64px' }"
+      :style="{ top: '66px' }"
     >
       <div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6">
-        <div class="flex items-center justify-between py-2">
+        <div class="flex items-center justify-between py-1.5">
           <div class="flex items-center">
             <!-- Icono de estado -->
             <div class="flex-shrink-0 mr-2">
               <!-- Offline -->
-              <svg v-if="!isOnline" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-if="!isOnline" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m2.829 2.829L18 18M8.464 15.536a5 5 0 010-7.072m0 0l2.829 2.829m-2.829-2.829L6 6M5.636 18.364a9 9 0 010-12.728m0 0l2.829 2.829m-2.829-2.829L3 3" />
               </svg>
               <!-- Syncing -->
-              <div v-else-if="isSyncing" class="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+              <div v-else-if="isSyncing" class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-current"></div>
               <!-- Online -->
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
               </svg>
             </div>
 
             <!-- Texto de estado -->
             <div>
-              <p class="text-xs font-medium">
+              <p class="font-medium" style="font-size: 10px; line-height: 1.2;">
                 {{ getBannerTitle() }}
               </p>
-              <p v-if="getBannerSubtitle()" class="text-xs opacity-70">
+              <p v-if="getBannerSubtitle()" class="opacity-80" style="font-size: 10px; line-height: 1.2;">
                 {{ getBannerSubtitle() }}
               </p>
             </div>
           </div>
 
           <!-- Hora/fecha y botón de acción -->
-          <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-2">
             <!-- Reloj CDMX -->
-            <div class="text-xs text-right">
+            <div class="text-right" style="font-size: 10px; line-height: 1.2;">
               <div class="font-mono font-medium">{{ horaActual }}</div>
-              <div class="text-xs opacity-70">{{ fechaActual }}</div>
+              <div class="opacity-80">{{ fechaActual }}</div>
             </div>
             
             <!-- Botón de acción -->
             <button
               v-if="pendientes.total > 0"
               @click="openModal"
-              class="text-xs px-2 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors"
+              class="px-1.5 py-0.5 rounded-full bg-white bg-opacity-25 hover:bg-opacity-30 transition-colors"
+              style="font-size: 10px; line-height: 1;"
             >
-              Ver detalles
+              Detalles
             </button>
           </div>
         </div>
@@ -192,13 +193,13 @@ const showBanner = computed(() => {
 // Métodos para obtener clases CSS
 const getBannerClasses = () => {
   if (!isOnline.value) {
-    return 'bg-red-700 text-white';
+    return 'bg-red-600 text-white';
   } else if (isSyncing.value) {
-    return 'bg-blue-700 text-white';
+    return 'bg-sky-600 text-white';
   } else if (pendientes.value.total > 0) {
-    return 'bg-yellow-600 text-white';
+    return 'bg-yellow-500 text-yellow-950';
   } else {
-    return 'bg-green-700 text-white';
+    return 'bg-lime-600 text-white';
   }
 };
 

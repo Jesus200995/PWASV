@@ -334,15 +334,15 @@ const currentUserId = computed(() => {
     <ConnectivityStatus :show="route.name === 'Home' && !showMobileMenu" />
 
     <!-- Header móvil con menú hamburguesa -->
-    <header v-if="isLoggedIn" class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-      <div class="max-w-sm mx-auto px-4 py-3">
+    <header v-if="isLoggedIn" class="header-decorative bg-green-800 shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-40 mx-2 mt-2 rounded-3xl">
+      <div class="max-w-sm mx-auto px-3 py-2">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <!-- Icono de plantita con contorno neón -->
             <PoinsettiaFlower />
             <div>
-              <h1 class="header-title text-base mb-0">Sembrando Vida</h1>
-              <p class="text-xs text-gray-500 -mt-0.5">{{ userName }}</p>
+              <h1 class="header-title text-sm mb-0 text-white">Sembrando Vida</h1>
+              <p class="text-xs text-gray-100 -mt-1">{{ userName }}</p>
             </div>
           </div>
           
@@ -350,11 +350,11 @@ const currentUserId = computed(() => {
             <!-- Botón de notificaciones -->
             <router-link 
               to="/notificaciones"
-              class="relative p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-              :class="{ 'bg-blue-50 text-blue-600': route.name === 'Notificaciones' }"
+              class="relative p-1.5 rounded-lg text-white hover:text-gray-200 hover:bg-green-600 transition-colors"
+              :class="{ 'bg-green-600 text-white': route.name === 'Notificaciones' }"
             >
               <!-- Icono de campanita -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
               <!-- Badge de notificaciones no leídas -->
@@ -366,9 +366,9 @@ const currentUserId = computed(() => {
             <!-- Botón del menú hamburguesa -->
           <button 
             @click="showMobileMenu = !showMobileMenu"
-            class="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            class="p-1.5 rounded-lg text-white hover:text-gray-200 hover:bg-green-600 transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
@@ -378,23 +378,23 @@ const currentUserId = computed(() => {
     </header>
 
     <!-- Menú desplegable móvil -->
-    <transition name="slide-down">
+    <Transition name="menu-slide">
       <div 
         v-if="isLoggedIn && showMobileMenu" 
-        class="fixed top-16 inset-x-0 z-30 bg-white border-b border-gray-200 shadow-lg"
+        class="fixed top-16 inset-x-0 z-30 bg-white border-b border-green-200 shadow-lg rounded-b-3xl mx-2"
       >
-        <div class="max-w-sm mx-auto px-4 py-2">
-          <nav class="space-y-1">
+        <div class="max-w-xs mx-auto px-2 py-1">
+          <nav class="space-y-0.5">
             <router-link 
               to="/" 
               @click="closeMobileMenu"
-              class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-              :class="{ 'bg-primary/10 text-primary': route.name === 'Home' }"
+              class="flex items-center px-2 py-2 rounded-lg text-green-800 hover:bg-green-50 transition-colors"
+              :class="{ 'bg-green-50 text-green-700': route.name === 'Home' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              <span class="font-medium">Inicio</span>
+              <span class="text-sm font-medium">Inicio</span>
             </router-link>
             
             <router-link 
@@ -463,15 +463,15 @@ const currentUserId = computed(() => {
               <span class="font-medium">Configuración</span>
             </router-link>
             
-            <div class="border-t border-gray-200 pt-2 mt-2">
+            <div class="border-t border-green-200 pt-1 mt-1">
               <button 
                 @click="logout" 
-                class="flex items-center w-full px-3 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                class="flex items-center w-full px-2 py-2 rounded-lg text-green-700 hover:bg-green-50 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span class="font-medium">Cerrar Sesión</span>
+                <span class="text-sm font-medium">Cerrar Sesión</span>
               </button>
             </div>
           </nav>
@@ -487,7 +487,7 @@ const currentUserId = computed(() => {
     ></div>
 
     <!-- Contenido principal -->
-    <main class="main-content" :style="{ paddingTop: isLoggedIn ? '48px' : '0' }">
+    <main class="main-content" :style="{ paddingTop: isLoggedIn ? '120px' : '0' }">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -519,30 +519,9 @@ const currentUserId = computed(() => {
   font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   letter-spacing: 0.5px;
-  color: #16a34a;
-  background: linear-gradient(
-    90deg,
-    #16a34a 0%,
-    #16a34a 40%,
-    #4ade80 50%,
-    #16a34a 60%,
-    #16a34a 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: textShine 2.5s ease-in-out infinite;
+  color: #ffffff;
 }
 
-@keyframes textShine {
-  0% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: -100% 50%;
-  }
-}
 
 /* Colores personalizados para verde manzana */
 :root {
@@ -565,5 +544,41 @@ const currentUserId = computed(() => {
 
 .text-apple-green-dark {
   color: #5DB33C;
+}
+
+/* Patrón decorativo para el header con hojas */
+.header-decorative {
+  position: relative;
+  overflow: hidden;
+  background-color: #006400; /* Verde fuerte actualizado */
+}
+
+.header-decorative::before {
+  background-image: 
+    /* Hojas grandes verdes suaves */
+    radial-gradient(ellipse 60px 80px at 8% 20%, rgba(144, 238, 144, 0.7) 0%, rgba(144, 238, 144, 0.5) 30%, transparent 60%),
+    radial-gradient(ellipse 55px 75px at 25% 15%, rgba(152, 251, 152, 0.65) 0%, rgba(152, 251, 152, 0.45) 30%, transparent 60%),
+    radial-gradient(ellipse 65px 85px at 42% 18%, rgba(144, 238, 144, 0.7) 0%, rgba(144, 238, 144, 0.5) 30%, transparent 60%),
+    radial-gradient(ellipse 58px 78px at 58% 22%, rgba(152, 251, 152, 0.65) 0%, rgba(152, 251, 152, 0.45) 30%, transparent 60%),
+    radial-gradient(ellipse 62px 82px at 75% 16%, rgba(144, 238, 144, 0.7) 0%, rgba(144, 238, 144, 0.5) 30%, transparent 60%),
+    radial-gradient(ellipse 56px 76px at 90% 21%, rgba(152, 251, 152, 0.65) 0%, rgba(152, 251, 152, 0.45) 30%, transparent 60%);
+  /* Se eliminaron todos los gradientes de hojas blancas */
+}
+
+.header-decorative > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Animación del menú móvil */
+.menu-slide-enter-active,
+.menu-slide-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-slide-enter-from,
+.menu-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>

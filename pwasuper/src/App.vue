@@ -17,7 +17,22 @@ const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
 const showTerritorioModal = ref(false);
+const activeIcon = ref(null);
 let userCheckIntervalId = null;
+
+const setActiveIcon = (icon) => {
+  activeIcon.value = icon;
+};
+
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value;
+  if (showMobileMenu.value) {
+    setActiveIcon('menu');
+  } else {
+    setActiveIcon(null);
+  }
+};
+
 
 // Sistema de notificaciones en tiempo real
 const { unreadCount, startPolling, stopPolling } = useNotifications();
@@ -348,14 +363,15 @@ const currentUserId = computed(() => {
           
           <div class="flex items-center space-x-2">
             <!-- Botón de notificaciones -->
-            <router-link 
+            <router-link
               to="/notificaciones"
-              class="relative p-1.5 rounded-lg text-white hover:text-gray-200 hover:bg-green-600 transition-colors"
-              :class="{ 'bg-green-600 text-white': route.name === 'Notificaciones' }"
+              class="relative p-1.5 rounded-full text-white hover:bg-green-600 focus:outline-none transition-colors"
+              :class="{ 'bg-green-600': activeIcon === 'notificaciones' }"
+              @click="setActiveIcon('notificaciones')"
             >
-              <!-- Icono de campanita -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+              <!-- Icono de campanita moderno (Heroicons) -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
               <!-- Badge de notificaciones no leídas -->
               <span v-if="unreadCount > 0" class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
@@ -364,14 +380,16 @@ const currentUserId = computed(() => {
             </router-link>
             
             <!-- Botón del menú hamburguesa -->
-          <button 
-            @click="showMobileMenu = !showMobileMenu"
-            class="p-1.5 rounded-lg text-white hover:text-gray-200 hover:bg-green-600 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+            <button
+              @click="toggleMobileMenu"
+              class="p-1.5 rounded-full text-white hover:bg-green-600 focus:outline-none transition-colors"
+              :class="{ 'bg-green-600': activeIcon === 'menu' }"
+            >
+              <!-- Icono de menú moderno (Heroicons) -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -383,95 +401,92 @@ const currentUserId = computed(() => {
         v-if="isLoggedIn && showMobileMenu" 
         class="fixed top-16 inset-x-0 z-30 bg-white border-b border-green-200 shadow-lg rounded-b-3xl mx-2"
       >
-        <div class="max-w-xs mx-auto px-2 py-1">
-          <nav class="space-y-0.5">
-            <router-link 
-              to="/" 
+        <div class="px-4 py-2">
+          <nav class="space-y-1">
+            <router-link
+              to="/"
               @click="closeMobileMenu"
-              class="flex items-center px-2 py-2 rounded-lg text-green-800 hover:bg-green-50 transition-colors"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               :class="{ 'bg-green-50 text-green-700': route.name === 'Home' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" />
               </svg>
-              <span class="text-sm font-medium">Inicio</span>
+              <span>Inicio</span>
             </router-link>
-            
-            <router-link 
-              to="/historial" 
+
+            <router-link
+              to="/historial"
               @click="closeMobileMenu"
-              class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-              :class="{ 'bg-primary/10 text-primary': route.name === 'Historial' }"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              :class="{ 'bg-green-50 text-green-700': route.name === 'Historial' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
               </svg>
-              <span class="font-medium">Historial</span>
+              <span>Historial</span>
             </router-link>
-            
-            <router-link 
-              to="/notificaciones" 
+
+            <router-link
+              to="/notificaciones"
               @click="closeMobileMenu"
-              class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors relative"
-              :class="{ 'bg-primary/10 text-primary': route.name === 'Notificaciones' }"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors relative"
+              :class="{ 'bg-green-50 text-green-700': route.name === 'Notificaciones' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
-              <span class="font-medium">Notificaciones</span>
-              <!-- Badge de notificaciones no leídas en el menú -->
+              <span>Notificaciones</span>
               <span v-if="unreadCount > 0" class="ml-auto h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                 {{ unreadCount > 9 ? '9+' : unreadCount }}
               </span>
             </router-link>
-            
-            <router-link 
-              to="/profile" 
+
+            <router-link
+              to="/profile"
               @click="closeMobileMenu"
-              class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-              :class="{ 'bg-primary/10 text-primary': route.name === 'Profile' }"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              :class="{ 'bg-green-50 text-green-700': route.name === 'Profile' }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span class="font-medium">Mi Perfil</span>
+              <span>Mi Perfil</span>
             </router-link>
-            
-            <router-link 
-              to="/support" 
+
+            <router-link
+              to="/support"
               @click="closeMobileMenu"
-              class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-              :class="{ 'bg-primary/10 text-primary': route.name === 'Support' }"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              :class="{ 'bg-green-50 text-green-700': route.name === 'Support' }"
             >
-              <font-awesome-icon 
-                icon="headset"
-                class="h-5 w-5 mr-3"
-              />
-              <span class="font-medium">Soporte</span>
-            </router-link>
-            
-            <router-link 
-              to="/settings" 
-              @click="closeMobileMenu"
-              class="flex items-center px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-              :class="{ 'bg-primary/10 text-primary': route.name === 'Settings' }"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
               </svg>
-              <span class="font-medium">Configuración</span>
+              <span>Soporte</span>
             </router-link>
-            
-            <div class="border-t border-green-200 pt-1 mt-1">
-              <button 
-                @click="logout" 
-                class="flex items-center w-full px-2 py-2 rounded-lg text-green-700 hover:bg-green-50 transition-colors"
+
+            <router-link
+              to="/settings"
+              @click="closeMobileMenu"
+              class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              :class="{ 'bg-green-50 text-green-700': route.name === 'Settings' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-1.003 1.11-1.227l.12-.06c.543-.248 1.15-.248 1.694 0l.12.06c.55.224 1.02.685 1.11 1.227l.028.168c.202.992 1.016 1.65 1.992 1.65h.21c.992 0 1.806.658 1.992 1.65l.028.168c.09.542.56 1.003 1.11 1.227l.12.06c.543-.248 1.15-.248 1.694 0l.12-.06c.55-.224 1.02-.685 1.11-1.227l.028-.168c.202-.992-1.016-1.65-1.992-1.65h-.21c-.992 0-1.806-.658-1.992-1.65l-.028-.168zM12 6.75a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+              </svg>
+              <span>Configuración</span>
+            </router-link>
+
+            <div class="border-t border-gray-200 pt-2 mt-2">
+              <button
+                @click="logout"
+                class="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                 </svg>
-                <span class="text-sm font-medium">Cerrar Sesión</span>
+                <span>Cerrar Sesión</span>
               </button>
             </div>
           </nav>
@@ -580,5 +595,9 @@ const currentUserId = computed(() => {
 .menu-slide-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+body {
+  background-color: #F9FAFB; /* bg-gray-50 */
 }
 </style>

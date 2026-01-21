@@ -48,33 +48,35 @@
           <div class="bg-white/40 backdrop-filter backdrop-blur-sm rounded-xl p-3 mb-4 border border-white/20">
             <div class="space-y-2">
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700 font-medium">Tamaño del caché</span>
-                <span class="text-sm font-bold text-indigo-600">{{ cacheSize }}</span>
+                <span class="text-sm text-gray-700 font-medium">📊 Caché Usado</span>
+                <span class="text-sm font-bold text-orange-600">{{ cacheSize }}</span>
               </div>
-              <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+              <div class="w-full bg-gray-300 rounded-full h-2.5 overflow-hidden">
                 <div
-                  class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-500"
+                  class="h-full bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 transition-all duration-500 rounded-full"
                   :style="{ width: cachePercentage + '%' }"
                 ></div>
               </div>
               <p class="text-xs text-gray-600">
-                {{ itemCount }} archivo(s) almacenado(s)
+                {{ itemCount }} elemento(s) | Se actualiza cada 3 segundos
               </p>
             </div>
           </div>
 
-          <!-- Descripción de qué se borrará -->
-          <div class="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-2.5 mb-4 text-sm">
+          <!-- Descripción detallada de qué se limpiarà -->
+          <div class="bg-orange-50 border-l-4 border-orange-500 rounded-r-lg p-3 mb-4 text-sm">
             <div class="flex items-start gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p class="font-medium text-blue-900 text-xs mb-1">Se eliminará:</p>
-                <ul class="text-xs text-blue-800 space-y-0.5">
-                  <li>✓ Imágenes en caché</li>
-                  <li>✓ Datos temporales offline</li>
-                  <li>✓ Archivos de respaldo</li>
+                <p class="font-medium text-orange-900 text-xs mb-1.5">Se limpiará completamente:</p>
+                <ul class="text-xs text-orange-800 space-y-0.75">
+                  <li>✓ IndexedDB (registros y asistencias offline)</li>
+                  <li>✓ localStorage (datos temporales)</li>
+                  <li>✓ sessionStorage (sesión)</li>
+                  <li>✓ Cache API (archivos en caché)</li>
+                  <li>• Datos de usuario y credenciales se preservarán</li>
                 </ul>
               </div>
             </div>
@@ -231,33 +233,78 @@
     </div>
 
     <!-- Modal de confirmación -->
-    <div v-if="showConfirmDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-      <div class="glass-card max-w-sm w-full transform transition-all">
-        <div class="flex items-center gap-2 mb-2">
-          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2m0-14a9 9 0 100 18 9 9 0 000-18z" />
-            </svg>
+    <div v-if="showConfirmDialog" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full transform transition-all p-6 border border-gray-100">
+        <!-- Header del modal -->
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-gray-900">Limpiar Caché</h3>
+              <p class="text-xs text-gray-500 mt-0.5">Esta acción no se puede deshacer</p>
+            </div>
           </div>
-          <h3 class="text-base font-bold text-gray-900">¿Borrar caché?</h3>
+          <button
+            @click="showConfirmDialog = false"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        <p class="text-xs text-gray-700 mb-3 leading-relaxed">
-          Se eliminarán {{ itemCount }} archivo(s) y se liberarán {{ cacheSize }}. Esta acción es irreversible.
-        </p>
+        <!-- Contenido del modal -->
+        <div class="bg-gray-50 rounded-xl p-4 mb-5 border border-gray-200">
+          <p class="text-sm text-gray-700 leading-relaxed mb-4">
+            Se eliminarán <strong class="text-orange-600">{{ itemCount }} elemento(s)</strong> ocupando <strong class="text-orange-600">{{ cacheSize }}</strong> de espacio:
+          </p>
+          
+          <ul class="space-y-2 text-xs text-gray-700">
+            <li class="flex items-start gap-2">
+              <span class="text-orange-500 font-bold mt-0.5">•</span>
+              <span>IndexedDB (registros offline)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-orange-500 font-bold mt-0.5">•</span>
+              <span>localStorage (datos temporales)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-orange-500 font-bold mt-0.5">•</span>
+              <span>Cache API (archivos cacheados)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 font-bold mt-0.5">✓</span>
+              <span class="text-gray-600">Tu información de usuario será preservada</span>
+            </li>
+          </ul>
+        </div>
 
+        <!-- Botones -->
         <div class="flex gap-2">
           <button
             @click="showConfirmDialog = false"
-            class="flex-1 py-2 px-3 rounded-lg border-2 border-gray-300 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
+            class="flex-1 py-2.5 px-3 rounded-lg border-2 border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-100 transition-colors duration-200"
           >
             Cancelar
           </button>
           <button
             @click="clearCache"
-            class="flex-1 py-2 px-3 rounded-lg bg-gradient-to-r from-red-500 to-orange-600 text-white font-medium text-sm hover:shadow-lg transition-all active:scale-95"
+            :disabled="isClearing"
+            class="flex-1 py-2.5 px-3 rounded-lg bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 text-white font-semibold text-sm hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
           >
-            Sí, Borrar
+            <svg v-if="!isClearing" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>{{ isClearing ? 'Limpiando...' : 'Sí, Limpiar' }}</span>
           </button>
         </div>
       </div>
@@ -266,25 +313,40 @@
     <!-- Toast de notificación -->
     <transition name="slide-up">
       <div v-if="showToast" class="fixed bottom-4 left-3 right-3 max-w-sm mx-auto z-50">
-        <div class="glass-card flex items-center gap-2 p-3 rounded-xl border-l-4 text-sm" :class="{
-          'border-green-500 bg-green-50/50': toastType === 'success',
-          'border-red-500 bg-red-50/50': toastType === 'error',
-          'border-blue-500 bg-blue-50/50': toastType === 'info'
-        }">
-          <svg v-if="toastType === 'success'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-          <svg v-else-if="toastType === 'error'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span class="font-medium flex-1" :class="{
-            'text-green-900': toastType === 'success',
-            'text-red-900': toastType === 'error',
-            'text-blue-900': toastType === 'info'
-          }">{{ toastMessage }}</span>
+        <div v-if="toastType === 'success'" class="bg-white rounded-xl shadow-2xl border-l-4 border-green-500 p-4 flex items-start gap-3 animate-pulse-slow">
+          <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="font-bold text-green-900">¡Caché limpiado!</p>
+            <p class="text-sm text-green-700 mt-0.5">{{ toastMessage }}</p>
+          </div>
+        </div>
+        
+        <div v-else-if="toastType === 'error'" class="bg-white rounded-xl shadow-2xl border-l-4 border-red-500 p-4 flex items-start gap-3">
+          <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mt-0.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="font-bold text-red-900">Error al limpiar</p>
+            <p class="text-sm text-red-700 mt-0.5">{{ toastMessage }}</p>
+          </div>
+        </div>
+        
+        <div v-else class="bg-white rounded-xl shadow-2xl border-l-4 border-blue-500 p-4 flex items-start gap-3">
+          <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="font-bold text-blue-900">Información</p>
+            <p class="text-sm text-blue-700 mt-0.5">{{ toastMessage }}</p>
+          </div>
         </div>
       </div>
     </transition>
@@ -333,39 +395,123 @@ const cachePercentage = computed(() => {
 // Funciones
 async function calculateCacheSize() {
   try {
-    // Obtener información de caché de IndexedDB
     let totalSize = 0;
     let totalItems = 0;
 
-    // Obtener información de registros offline
-    const pendientes = await offlineService.obtenerResumenPendientes();
-    if (pendientes && pendientes.registros) {
-      const registrosItems = pendientes.registros.items || [];
-      totalItems += registrosItems.length;
-      // Estimación de tamaño (cada registro ~1MB aprox con foto)
-      totalSize += registrosItems.length * 1;
-    }
+    // ============ IndexedDB ============
+    let indexedDbSize = 0;
+    let indexedDbItems = 0;
 
-    // Obtener información de localStorage
-    let localStorageSize = 0;
-    for (let key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
-        const value = localStorage[key];
-        localStorageSize += (value ? value.length : 0) + (key ? key.length : 0);
+    try {
+      await offlineService.initDB();
+      const registros = await offlineService.obtenerRegistrosPendientes();
+      const asistencias = await offlineService.obtenerAsistenciasPendientes();
+
+      // Contar items y calcular tamaño
+      if (registros && registros.items) {
+        indexedDbItems += registros.items.length;
+        registros.items.forEach(item => {
+          indexedDbSize += JSON.stringify(item).length;
+        });
       }
-    }
-    totalSize += localStorageSize / (1024 * 1024); // Convertir a MB
 
-    // Obtener contador de registros pendientes y sincronizados
-    if (pendientes) {
-      pendingRecords.value = pendientes.registros ? (pendientes.registros.items ? pendientes.registros.items.length : 0) : 0;
-      syncedRecords.value = 0; // Se podría mejorar con una consulta al backend
+      if (asistencias && asistencias.items) {
+        indexedDbItems += asistencias.items.length;
+        asistencias.items.forEach(item => {
+          indexedDbSize += JSON.stringify(item).length;
+        });
+      }
+    } catch (e) {
+      console.warn('⚠️ Error calculando IndexedDB:', e);
     }
 
+    // ============ localStorage ============
+    let localStorageSize = 0;
+    let localStorageItems = 0;
+
+    try {
+      for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          const value = localStorage[key];
+          localStorageSize += (value ? value.length : 0) + (key ? key.length : 0);
+          localStorageItems++;
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ Error calculando localStorage:', e);
+    }
+
+    // ============ sessionStorage ============
+    let sessionStorageSize = 0;
+    let sessionStorageItems = 0;
+
+    try {
+      for (let key in sessionStorage) {
+        if (sessionStorage.hasOwnProperty(key)) {
+          const value = sessionStorage[key];
+          sessionStorageSize += (value ? value.length : 0) + (key ? key.length : 0);
+          sessionStorageItems++;
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ Error calculando sessionStorage:', e);
+    }
+
+    // ============ Cache API ============
+    let cacheApiSize = 0;
+    let cacheApiItems = 0;
+
+    try {
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        for (const cacheName of cacheNames) {
+          const cache = await caches.open(cacheName);
+          const responses = await cache.keys();
+          cacheApiItems += responses.length;
+          
+          for (const request of responses) {
+            try {
+              const response = await cache.match(request);
+              if (response && response.blob) {
+                const blob = await response.blob();
+                cacheApiSize += blob.size;
+              }
+            } catch (e) {
+              // Ignorar errores individuales
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ Error calculando Cache API:', e);
+    }
+
+    // ============ Calcular total ============
+    totalSize = (indexedDbSize + localStorageSize + sessionStorageSize + cacheApiSize) / (1024 * 1024); // MB
+    totalItems = indexedDbItems + localStorageItems + sessionStorageItems + cacheApiItems;
+
+    // Actualizar valores
     itemCount.value = totalItems;
-    cacheSize.value = totalSize.toFixed(2) + ' MB';
+    cacheSize.value = totalSize < 0.01 ? '0 MB' : totalSize.toFixed(2) + ' MB';
+
+    // Obtener registros pendientes para sincronización
+    try {
+      const pendientes = await offlineService.obtenerResumenPendientes();
+      if (pendientes && pendientes.registros) {
+        pendingRecords.value = pendientes.registros.total || pendientes.registros.items?.length || 0;
+      }
+      syncedRecords.value = 0;
+    } catch (e) {
+      console.warn('⚠️ Error obteniendo resumen:', e);
+    }
+
+    console.log(`📊 Caché calculado: ${cacheSize.value} (${totalItems} items)`);
+    console.log(`   IndexedDB: ${(indexedDbSize / 1024 / 1024).toFixed(2)}MB (${indexedDbItems} items)`);
+    console.log(`   localStorage: ${(localStorageSize / 1024 / 1024).toFixed(2)}MB (${localStorageItems} items)`);
+    console.log(`   sessionStorage: ${(sessionStorageSize / 1024 / 1024).toFixed(2)}MB (${sessionStorageItems} items)`);
+    console.log(`   Cache API: ${(cacheApiSize / 1024 / 1024).toFixed(2)}MB (${cacheApiItems} items)`);
   } catch (error) {
-    console.error('Error al calcular tamaño del caché:', error);
+    console.error('❌ Error al calcular caché:', error);
     cacheSize.value = '0 MB';
     itemCount.value = 0;
   }
@@ -376,39 +522,98 @@ async function clearCache() {
   showConfirmDialog.value = false;
 
   try {
-    // Limpiar IndexedDB
-    await offlineService.limpiarTodo();
+    const sizeBefore = cacheSize.value;
+    const itemsBefore = itemCount.value;
 
-    // Limpiar localStorage (excepto datos críticos de usuario)
-    const userDataKey = 'user';
-    const userData = localStorage.getItem(userDataKey);
-    localStorage.clear();
-    if (userData) {
-      localStorage.setItem(userDataKey, userData);
+    console.log('🗑️ Iniciando limpieza de caché...');
+
+    // ============ Limpiar IndexedDB ============
+    try {
+      await offlineService.limpiarTodo();
+      console.log('✅ IndexedDB limpiado completamente');
+    } catch (e) {
+      console.error('❌ Error limpiando IndexedDB:', e);
     }
 
-    // Mostrar toast de éxito
-    toastMessage.value = '✓ Caché eliminado correctamente. Se liberaron ' + cacheSize.value;
+    // ============ Limpiar localStorage (excepto datos críticos) ============
+    try {
+      const criticalKeys = ['user', 'theme', 'language'];
+      const criticalData = {};
+      
+      // Guardar datos críticos
+      criticalKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) criticalData[key] = value;
+      });
+      
+      // Limpiar todo
+      localStorage.clear();
+      
+      // Restaurar datos críticos
+      Object.entries(criticalData).forEach(([key, value]) => {
+        localStorage.setItem(key, value);
+      });
+      
+      console.log('✅ localStorage limpiado (datos críticos preservados)');
+    } catch (e) {
+      console.error('❌ Error limpiando localStorage:', e);
+    }
+
+    // ============ Limpiar sessionStorage ============
+    try {
+      sessionStorage.clear();
+      console.log('✅ sessionStorage limpiado');
+    } catch (e) {
+      console.error('❌ Error limpiando sessionStorage:', e);
+    }
+
+    // ============ Limpiar Cache API (Service Worker cache) ============
+    try {
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        console.log(`🔍 Encontrados ${cacheNames.length} caches:`, cacheNames);
+        
+        const deletePromises = cacheNames.map(async (cacheName) => {
+          try {
+            const deleted = await caches.delete(cacheName);
+            console.log(`✅ Cache API "${cacheName}" eliminado`);
+            return deleted;
+          } catch (e) {
+            console.error(`❌ Error eliminando cache "${cacheName}":`, e);
+          }
+        });
+        
+        await Promise.all(deletePromises);
+        console.log('✅ Todos los Caches API limpiados');
+      }
+    } catch (e) {
+      console.error('❌ Error limpiando Cache API:', e);
+    }
+
+    // ============ Mostrar resultado ============
+    console.log(`✅ Limpieza completada: Se liberaron ${sizeBefore} (${itemsBefore} items)`);
+    
+    toastMessage.value = `✓ Se liberaron ${sizeBefore} de espacio (${itemsBefore} elementos eliminados)`;
     toastType.value = 'success';
     showToast.value = true;
 
-    // Recalcular el tamaño
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Esperar un poco y recalcular en tiempo real
+    await new Promise(resolve => setTimeout(resolve, 500));
     await calculateCacheSize();
 
-    // Ocultar toast después de 3 segundos
+    // Ocultar toast después de 4 segundos
     setTimeout(() => {
       showToast.value = false;
-    }, 3000);
+    }, 4000);
   } catch (error) {
-    console.error('Error al limpiar caché:', error);
+    console.error('❌ Error durante limpieza de caché:', error);
     toastMessage.value = '✗ Error al limpiar el caché: ' + error.message;
     toastType.value = 'error';
     showToast.value = true;
 
     setTimeout(() => {
       showToast.value = false;
-    }, 4000);
+    }, 5000);
   } finally {
     isClearing.value = false;
   }
@@ -418,8 +623,10 @@ async function clearCache() {
 onMounted(() => {
   calculateCacheSize();
   
-  // Recalcular cada 5 segundos
-  const interval = setInterval(calculateCacheSize, 5000);
+  // Recalcular cada 3 segundos (más rápido para feedback en tiempo real)
+  const interval = setInterval(() => {
+    calculateCacheSize();
+  }, 3000);
   
   // Limpiar al desmontar
   return () => {

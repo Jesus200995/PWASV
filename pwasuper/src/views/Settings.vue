@@ -398,34 +398,7 @@ async function calculateCacheSize() {
     let totalSize = 0;
     let totalItems = 0;
 
-    // ============ IndexedDB ============
-    let indexedDbSize = 0;
-    let indexedDbItems = 0;
-
-    try {
-      await offlineService.initDB();
-      const registros = await offlineService.obtenerRegistrosPendientes();
-      const asistencias = await offlineService.obtenerAsistenciasPendientes();
-
-      // Contar items y calcular tamaño
-      if (registros && registros.items) {
-        indexedDbItems += registros.items.length;
-        registros.items.forEach(item => {
-          indexedDbSize += JSON.stringify(item).length;
-        });
-      }
-
-      if (asistencias && asistencias.items) {
-        indexedDbItems += asistencias.items.length;
-        asistencias.items.forEach(item => {
-          indexedDbSize += JSON.stringify(item).length;
-        });
-      }
-    } catch (e) {
-      console.warn('⚠️ Error calculando IndexedDB:', e);
-    }
-
-    // ============ localStorage ============
+    // ============ localStorage (más rápido, calcularlo primero) ============
     let localStorageSize = 0;
     let localStorageItems = 0;
 
@@ -457,7 +430,34 @@ async function calculateCacheSize() {
       console.warn('⚠️ Error calculando sessionStorage:', e);
     }
 
-    // ============ Cache API ============
+    // ============ IndexedDB (más pesado, calcularlo después) ============
+    let indexedDbSize = 0;
+    let indexedDbItems = 0;
+
+    try {
+      await offlineService.initDB();
+      const registros = await offlineService.obtenerRegistrosPendientes();
+      const asistencias = await offlineService.obtenerAsistenciasPendientes();
+
+      // Contar items y calcular tamaño
+      if (registros && registros.items) {
+        indexedDbItems += registros.items.length;
+        registros.items.forEach(item => {
+          indexedDbSize += JSON.stringify(item).length;
+        });
+      }
+
+      if (asistencias && asistencias.items) {
+        indexedDbItems += asistencias.items.length;
+        asistencias.items.forEach(item => {
+          indexedDbSize += JSON.stringify(item).length;
+        });
+      }
+    } catch (e) {
+      console.warn('⚠️ Error calculando IndexedDB:', e);
+    }
+
+    // ============ Cache API (más pesado) ============
     let cacheApiSize = 0;
     let cacheApiItems = 0;
 
@@ -490,7 +490,7 @@ async function calculateCacheSize() {
     totalSize = (indexedDbSize + localStorageSize + sessionStorageSize + cacheApiSize) / (1024 * 1024); // MB
     totalItems = indexedDbItems + localStorageItems + sessionStorageItems + cacheApiItems;
 
-    // Actualizar valores
+    // Actualizar valores reactivos
     itemCount.value = totalItems;
     cacheSize.value = totalSize < 0.01 ? '0 MB' : totalSize.toFixed(2) + ' MB';
 
@@ -505,15 +505,12 @@ async function calculateCacheSize() {
       console.warn('⚠️ Error obteniendo resumen:', e);
     }
 
-    console.log(`📊 Caché calculado: ${cacheSize.value} (${totalItems} items)`);
-    console.log(`   IndexedDB: ${(indexedDbSize / 1024 / 1024).toFixed(2)}MB (${indexedDbItems} items)`);
-    console.log(`   localStorage: ${(localStorageSize / 1024 / 1024).toFixed(2)}MB (${localStorageItems} items)`);
-    console.log(`   sessionStorage: ${(sessionStorageSize / 1024 / 1024).toFixed(2)}MB (${sessionStorageItems} items)`);
-    console.log(`   Cache API: ${(cacheApiSize / 1024 / 1024).toFixed(2)}MB (${cacheApiItems} items)`);
+    // Solo loguear en cambios significativos
+    if (totalSize > 0.1) {
+      console.log(`📊 Caché: ${cacheSize.value} (${totalItems} items)`);
+    }
   } catch (error) {
     console.error('❌ Error al calcular caché:', error);
-    cacheSize.value = '0 MB';
-    itemCount.value = 0;
   }
 }
 
@@ -598,12 +595,12 @@ async function clearCache() {
     showToast.value = true;
 
     // Esperar un bit y recalcular en tiempo real
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 300));
     await calculateCacheSize();
     
-    // Recalcular agresivamente cada 200ms durante 2 segundos para feedback inmediato
-    for (let i = 0; i < 10; i++) {
-      await new Promise(resolve => setTimeout(resolve, 200));
+    // Recalcular cada 150ms durante 2 segundos para feedback inmediato (verá el cambio en tiempo real)
+    for (let i = 0; i < 15; i++) {
+      await new Promise(resolve => setTimeout(resolve, 150));
       await calculateCacheSize();
     }
 
@@ -630,17 +627,39 @@ onMounted(() => {
   // Calcular inmediatamente
   calculateCacheSize();
   
-  // Recalcular cada segundo para feedback en tiempo real exacto
+  // Recalcular cada 300ms para actualización en tiempo real constante
   const interval = setInterval(() => {
     calculateCacheSize();
-  }, 1000);
+  }, 300);
   
-  // Listener para cambios en localStorage
-  window.addEventListener('storage', () => {
+  // Listener para cambios en localStorage (dispara cada vez que se modifica)
+  const handleStorageChange = () => {
     calculateCacheSize();
-  });
+  };
   
-  // También recalcular cuando la pestaña vuelve a ser visible
+  window.addEventListener('storage', handleStorageChange);
+  
+  // Interceptar accesos a localStorage para detectar cambios locales
+  const originalSetItem = localStorage.setItem;
+  const originalRemoveItem = localStorage.removeItem;
+  const originalClear = localStorage.clear;
+  
+  localStorage.setItem = function(key, value) {
+    originalSetItem.call(this, key, value);
+    calculateCacheSize();
+  };
+  
+  localStorage.removeItem = function(key) {
+    originalRemoveItem.call(this, key);
+    calculateCacheSize();
+  };
+  
+  localStorage.clear = function() {
+    originalClear.call(this);
+    calculateCacheSize();
+  };
+  
+  // Recalcular cuando la pestaña vuelve a ser visible
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       calculateCacheSize();
@@ -650,7 +669,11 @@ onMounted(() => {
   // Limpiar al desmontar
   return () => {
     clearInterval(interval);
-    window.removeEventListener('storage', calculateCacheSize);
+    window.removeEventListener('storage', handleStorageChange);
+    // Restaurar métodos originales
+    localStorage.setItem = originalSetItem;
+    localStorage.removeItem = originalRemoveItem;
+    localStorage.clear = originalClear;
   };
 });
 </script>

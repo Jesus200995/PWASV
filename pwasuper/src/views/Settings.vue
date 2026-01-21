@@ -41,6 +41,24 @@
               <h2 class="text-base font-bold text-gray-900">Caché de la App</h2>
               <p class="text-xs text-gray-600">Libera espacio en tu dispositivo</p>
             </div>
+            <!-- Botón de actualizar -->
+            <button
+              @click="refreshCache"
+              :disabled="isRefreshing"
+              class="flex-shrink-0 p-1.5 rounded-lg hover:bg-white/30 transition-colors disabled:opacity-50"
+              title="Actualizar caché"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                class="h-5 w-5 text-gray-700 transition-transform duration-500"
+                :class="{ 'animate-spin': isRefreshing }"
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
           </div>
           <div class="green-line mb-4"></div>
 
@@ -354,7 +372,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRouter } from 'vue-router';
 import offlineService from '../services/offlineService.js';
 
@@ -362,6 +380,7 @@ const router = useRouter();
 
 // Estado reactivo
 const isClearing = ref(false);
+const isRefreshing = ref(false);
 const showConfirmDialog = ref(false);
 const showDatabaseInfo = ref(false);
 const showToast = ref(false);
@@ -514,6 +533,19 @@ async function calculateCacheSize() {
   }
 }
 
+// Función para refrescar manualmente el caché
+async function refreshCache() {
+  isRefreshing.value = true;
+  try {
+    await calculateCacheSize();
+    console.log('🔄 Caché refrescado manualmente');
+  } catch (error) {
+    console.error('❌ Error refrescando caché:', error);
+  } finally {
+    isRefreshing.value = false;
+  }
+}
+
 async function clearCache() {
   isClearing.value = true;
   showConfirmDialog.value = false;
@@ -621,6 +653,12 @@ async function clearCache() {
     isClearing.value = false;
   }
 }
+
+// Cuando el componente se activa (vuelve a ser visible)
+onActivated(() => {
+  console.log('🔄 Settings.vue activado - Refrescando caché');
+  calculateCacheSize();
+});
 
 // Al montar el componente
 onMounted(() => {

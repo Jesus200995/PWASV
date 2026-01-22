@@ -2,9 +2,8 @@
   <div class="relative w-9 h-9 flex items-center justify-center mr-3">
     <!-- Círculo solo contorno verde neón -->
     <div class="plant-icon-container w-full h-full rounded-full flex items-center justify-center">
-      <!-- SVG de plantita/brote -->
+      <!-- SVG de plantita/brote - sin xmlns para evitar requests externos -->
       <svg
-        xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         class="w-5 h-5"
         fill="none"

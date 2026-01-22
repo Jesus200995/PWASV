@@ -376,7 +376,9 @@ const currentUserId = computed(() => {
             <!-- Icono de plantita con contorno neón -->
             <PoinsettiaFlower />
             <div>
-              <h1 class="header-title text-sm mb-0 text-white">Sembrando Vida</h1>
+              <h1 class="header-title text-sm mb-0 font-semibold" style="color: #39ff14; letter-spacing: 0.02em;">
+                Sembrando Vida
+              </h1>
               <p class="text-xs text-gray-100 -mt-1">{{ userName }}</p>
             </div>
           </div>
@@ -884,5 +886,48 @@ body {
 
 .animate-pulse-slow {
   animation: pulse-slow 4s ease-in-out infinite;
+}
+
+/* Animación de brillo para el título Sembrando Vida con efecto rayado verde-blanco */
+.sembrando-vida-shine {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.sembrando-vida-shine span {
+  display: inline-block;
+  background: repeating-linear-gradient(
+    45deg,
+    #ffffff,
+    #ffffff 2px,
+    #a7f3d0 2px,
+    #a7f3d0 4px
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: letter-shine-header 3s ease-in-out infinite;
+  animation-delay: calc(var(--char-index) * 0.15s);
+}
+
+.sembrando-vida-shine .space-char {
+  min-width: 0.3em;
+  background: none;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes letter-shine-header {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+    transform: scale(1);
+  }
+  15% {
+    filter: brightness(1.8) drop-shadow(0 0 4px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
+    transform: scale(1.05);
+  }
+  30% {
+    filter: brightness(1) drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+    transform: scale(1);
+  }
 }
 </style>

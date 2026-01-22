@@ -3313,14 +3313,14 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Efecto de vidrio azul suave para entrada */
 .glass-card-blue {
-  background: linear-gradient(135deg, rgba(219, 234, 254, 0.15), rgba(191, 219, 254, 0.12), rgba(147, 197, 253, 0.1));
+  background: #ffffff !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
-  border: 1px solid rgba(37, 99, 235, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.35);
   box-shadow: 
-    0 8px 32px 0 rgba(37, 99, 235, 0.08),
-    0 0 0 1px rgba(59, 130, 246, 0.15);
+    0 4px 20px rgba(59, 130, 246, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.05);
   padding: 1.25rem;
   position: relative;
   overflow: hidden;
@@ -3333,12 +3333,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   left: -50%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(147, 197, 253, 0.08),
-    transparent
-  );
+  background: transparent;
   transform: skewX(-25deg);
   transition: all 0.6s;
 }
@@ -3349,14 +3344,14 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Efecto de vidrio rojo suave para término */
 .glass-card-red {
-  background: linear-gradient(135deg, rgba(254, 226, 226, 0.15), rgba(254, 202, 202, 0.12), rgba(252, 165, 165, 0.1));
+  background: #ffffff !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
-  border: 1px solid rgba(220, 38, 38, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   box-shadow: 
-    0 8px 32px 0 rgba(220, 38, 38, 0.08),
-    0 0 0 1px rgba(239, 68, 68, 0.15);
+    0 4px 20px rgba(239, 68, 68, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.05);
   padding: 1.25rem;
   position: relative;
   overflow: hidden;
@@ -3369,12 +3364,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   left: -50%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(252, 165, 165, 0.08),
-    transparent
-  );
+  background: transparent;
   transform: skewX(-25deg);
   transition: all 0.6s;
 }
@@ -3385,14 +3375,14 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Efecto de vidrio morado para actividades */
 .glass-card-purple {
-  background: linear-gradient(135deg, rgba(250, 245, 255, 0.4), rgba(243, 232, 255, 0.35), rgba(237, 233, 254, 0.3));
+  background: #ffffff !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
-  border: 1px solid rgba(147, 51, 234, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.35);
   box-shadow: 
-    0 8px 32px 0 rgba(147, 51, 234, 0.25),
-    0 0 0 1px rgba(168, 85, 247, 0.15);
+    0 4px 20px rgba(168, 85, 247, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.05);
   padding: 1.25rem;
   position: relative;
   overflow: hidden;
@@ -3405,12 +3395,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   left: -50%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(196, 181, 253, 0.25),
-    transparent
-  );
+  background: transparent;
   transform: skewX(-25deg);
   transition: all 0.6s;
 }

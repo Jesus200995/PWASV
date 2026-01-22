@@ -257,7 +257,7 @@
                 </div>
                 <div class="flex-1 text-left">
                   <h3 class="text-sm font-bold text-gray-800 tracking-tight">Información Importante</h3>
-                  <p class="text-[10px] text-gray-500 font-medium mt-0.5">Requisitos de asistencia</p>
+                  <p class="text-[10px] text-gray-500 font-medium mt-0.5">Requisitos de jornada</p>
                 </div>
               </div>
               
@@ -272,7 +272,7 @@
                   </div>
                   <div class="flex-1 text-left">
                     <p class="text-xs font-semibold text-gray-700 leading-tight">Registro de inicio requerido</p>
-                    <p class="text-[10px] text-gray-500 mt-0.5 leading-relaxed">Debe registrar su entrada para acceder al módulo de actividades</p>
+                    <p class="text-[10px] text-gray-500 mt-0.5 leading-relaxed">Debe registrar su inicio para acceder al módulo de actividades</p>
                   </div>
                 </div>
                 
@@ -3263,7 +3263,7 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Efecto de vidrio realista - Glassmorphism */
 .glass-card {
-  background: linear-gradient(135deg, rgba(254, 252, 232, 0.35), rgba(255, 251, 235, 0.3), rgba(254, 249, 195, 0.25));
+  background: linear-gradient(135deg, rgba(220, 252, 231, 0.35), rgba(236, 253, 245, 0.3), rgba(240, 253, 244, 0.25));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
@@ -3286,7 +3286,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(254, 240, 138, 0.2),
+    rgba(167, 243, 208, 0.2),
     transparent
   );
   transform: skewX(-25deg);

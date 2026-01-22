@@ -1,10 +1,13 @@
 <template>
-  <div class="fixed inset-0 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 overflow-hidden" style="z-index: 0;">
-    <!-- Elementos decorativos para mejorar el efecto de vidrio -->
+  <div class="fixed inset-0 overflow-hidden" style="z-index: 0; background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(240, 253, 244, 0.6) 50%, rgba(220, 252, 231, 0.4) 100%);">
+    <!-- Burbujas verdes decorativas -->
     <div class="absolute inset-0">
-      <div class="absolute top-1/4 right-1/4 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
-      <div class="absolute bottom-1/3 left-1/4 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
-      <div class="absolute top-2/3 right-1/3 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
+      <div class="absolute top-1/4 right-1/4 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow"></div>
+      <div class="absolute bottom-1/3 left-1/4 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute top-2/3 right-1/3 w-64 h-64 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow" style="animation-delay: 4s;"></div>
+      <div class="absolute top-1/2 left-1/2 w-56 h-56 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-pulse-slow" style="animation-delay: 1s;"></div>
+      <div class="absolute top-10 left-10 w-48 h-48 bg-emerald-200 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-pulse-slow" style="animation-delay: 3s;"></div>
+      <div class="absolute bottom-20 right-20 w-52 h-52 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-18 animate-pulse-slow" style="animation-delay: 2.5s;"></div>
     </div>
 
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">

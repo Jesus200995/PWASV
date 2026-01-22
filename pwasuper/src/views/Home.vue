@@ -61,7 +61,7 @@
       </div>
 
       <!-- Sistema de Asistencia Integrado -->
-      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" class="relative px-3 py-2">
+      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" :class="modoAsistencia ? 'glass-card-green relative px-3 py-2' : 'relative px-3 py-2'">
         <!-- Icono de regresar (solo visible en modo asistencia) -->
         <button 
           v-if="modoAsistencia"
@@ -575,7 +575,7 @@
     />
 
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
-    <div v-if="seccionActiva === 'actividades' && !modoAsistencia" class="glass-card">
+    <div v-if="seccionActiva === 'actividades' && !modoAsistencia" class="glass-card-purple">
       <!-- Mensaje de estado de actividades bloqueadas -->
       <div v-if="!entradaMarcada || salidaMarcada" class="mb-4">
         <div class="bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded-lg">
@@ -595,12 +595,11 @@
       </div>
 
       <div class="text-center mb-3">
-        <h2 class="text-sm font-bold text-gray-800 mb-1 purple-title"
+        <h2 class="text-xl font-semibold text-purple-600 mb-1"
+            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: -0.02em;"
             :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }">
           Registra Tus Actividades
         </h2>
-        <!-- Línea tipo marcatextos -->
-        <div class="green-line mx-auto mb-1" :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"></div>
       </div>
       
       <!-- Info del usuario -->
@@ -3228,6 +3227,78 @@ watch([entradaMarcada, salidaMarcada], () => {
 }
 
 .glass-card:hover::before {
+  left: 150%;
+}
+
+/* Efecto de vidrio verde para asistencia */
+.glass-card-green {
+  background: linear-gradient(135deg, rgba(240, 253, 244, 0.4), rgba(236, 253, 245, 0.35), rgba(220, 252, 231, 0.3));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+  box-shadow: 
+    0 8px 32px 0 rgba(22, 163, 74, 0.25),
+    0 0 0 1px rgba(16, 185, 129, 0.15);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card-green::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(167, 243, 208, 0.25),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: all 0.6s;
+}
+
+.glass-card-green:hover::before {
+  left: 150%;
+}
+
+/* Efecto de vidrio morado para actividades */
+.glass-card-purple {
+  background: linear-gradient(135deg, rgba(250, 245, 255, 0.4), rgba(243, 232, 255, 0.35), rgba(237, 233, 254, 0.3));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(147, 51, 234, 0.2);
+  box-shadow: 
+    0 8px 32px 0 rgba(147, 51, 234, 0.25),
+    0 0 0 1px rgba(168, 85, 247, 0.15);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card-purple::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(196, 181, 253, 0.25),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: all 0.6s;
+}
+
+.glass-card-purple:hover::before {
   left: 150%;
 }
 

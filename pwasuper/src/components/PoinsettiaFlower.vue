@@ -6,7 +6,7 @@
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
-        class="w-5 h-5 plant-grow absolute"
+        class="w-5 h-5"
         fill="none"
       >
         <!-- Tallo principal -->
@@ -15,7 +15,7 @@
           stroke="#22c55e" 
           stroke-width="2.5" 
           stroke-linecap="round"
-          class="stem-grow"
+          class="stem-shine"
         />
         <!-- Hoja izquierda -->
         <path 
@@ -25,7 +25,7 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="leaf-left"
+          class="leaf-left-shine"
         />
         <!-- Hoja derecha superior -->
         <path 
@@ -35,32 +35,13 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="leaf-right"
+          class="leaf-right-shine"
         />
-      </svg>
-      
-      <!-- Flor girando (aparece cuando la planta desaparece) -->
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        class="w-5 h-5 flower-spin absolute"
-        fill="none"
-      >
-        <!-- Pétalos de la flor -->
-        <circle cx="12" cy="12" r="2.5" fill="#fbbf24" class="flower-center"/>
-        <circle cx="12" cy="7" r="3.5" fill="#22c55e" opacity="0.8" class="petal"/>
-        <circle cx="17" cy="12" r="3.5" fill="#22c55e" opacity="0.8" class="petal"/>
-        <circle cx="12" cy="17" r="3.5" fill="#22c55e" opacity="0.8" class="petal"/>
-        <circle cx="7" cy="12" r="3.5" fill="#22c55e" opacity="0.8" class="petal"/>
-        <circle cx="15" cy="9" r="2.8" fill="#10b981" opacity="0.7" class="petal"/>
-        <circle cx="15" cy="15" r="2.8" fill="#10b981" opacity="0.7" class="petal"/>
-        <circle cx="9" cy="15" r="2.8" fill="#10b981" opacity="0.7" class="petal"/>
-        <circle cx="9" cy="9" r="2.8" fill="#10b981" opacity="0.7" class="petal"/>
       </svg>
     </div>
     
-    <!-- Efecto de brillo neón animado -->
-    <div class="absolute inset-0 rounded-full neon-glow pointer-events-none"></div>
+    <!-- Efecto de brillo ocasional -->
+    <div class="absolute inset-0 rounded-full plant-glow-pulse pointer-events-none"></div>
   </div>
 </template>
 
@@ -75,141 +56,71 @@
   box-shadow: none;
 }
 
-.neon-glow {
-  border: 2px solid transparent;
-  box-shadow: none;
-}
-
-@keyframes neon-pulse {
-  0%, 100% {
-    box-shadow: 
-      0 0 4px #ffffff,
-      0 0 8px rgba(255, 255, 255, 0.3);
+/* Animación de brillo suave línea por línea */
+@keyframes stem-shine {
+  0%, 70% {
+    filter: brightness(1) drop-shadow(0 0 1px rgba(34, 197, 94, 0.2));
   }
-  50% {
-    box-shadow: 
-      0 0 8px #f3f4f6,
-      0 0 16px rgba(243, 244, 246, 0.5);
+  75% {
+    filter: brightness(1.6) drop-shadow(0 0 6px rgba(34, 197, 94, 0.9)) drop-shadow(0 0 10px rgba(16, 185, 129, 0.6));
+  }
+  80%, 100% {
+    filter: brightness(1) drop-shadow(0 0 1px rgba(34, 197, 94, 0.2));
   }
 }
 
-/* Animación de crecimiento de la planta */
-@keyframes plant-grow {
-  0% {
-    transform: scale(0.3) translateY(8px);
-    opacity: 0;
+@keyframes leaf-left-shine {
+  0%, 75% {
+    filter: brightness(1) drop-shadow(0 0 1px rgba(34, 197, 94, 0.2));
   }
-  30% {
-    transform: scale(0.6) translateY(4px);
-    opacity: 0.5;
+  82% {
+    filter: brightness(1.6) drop-shadow(0 0 6px rgba(34, 197, 94, 0.9)) drop-shadow(0 0 10px rgba(16, 185, 129, 0.6));
   }
-  60% {
-    transform: scale(1.05) translateY(0);
-    opacity: 1;
-  }
-  80% {
-    transform: scale(0.98) translateY(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) translateY(0);
-    opacity: 1;
+  87%, 100% {
+    filter: brightness(1) drop-shadow(0 0 1px rgba(34, 197, 94, 0.2));
   }
 }
 
-@keyframes stem-grow {
-  0% {
-    stroke-dasharray: 15;
-    stroke-dashoffset: 15;
-    opacity: 0;
+@keyframes leaf-right-shine {
+  0%, 82% {
+    filter: brightness(1) drop-shadow(0 0 1px rgba(34, 197, 94, 0.2));
   }
-  40% {
-    stroke-dasharray: 15;
-    stroke-dashoffset: 0;
-    opacity: 1;
+  89% {
+    filter: brightness(1.6) drop-shadow(0 0 6px rgba(34, 197, 94, 0.9)) drop-shadow(0 0 10px rgba(16, 185, 129, 0.6));
   }
-  100% {
-    stroke-dasharray: 15;
-    stroke-dashoffset: 0;
-    opacity: 1;
+  94%, 100% {
+    filter: brightness(1) drop-shadow(0 0 1px rgba(34, 197, 94, 0.2));
   }
 }
 
-@keyframes leaf-appear {
-  0%, 40% {
-    opacity: 0;
-    transform: scale(0) rotate(-20deg);
+@keyframes glow-pulse {
+  0%, 70% {
+    box-shadow: 0 0 3px rgba(34, 197, 94, 0.15);
   }
-  70% {
-    opacity: 1;
-    transform: scale(1.1) rotate(5deg);
+  75% {
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.6), 0 0 18px rgba(16, 185, 129, 0.4);
   }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
+  89% {
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.7), 0 0 20px rgba(16, 185, 129, 0.5);
   }
-}
-
-.plant-grow {
-  animation: plant-grow 4.5s ease-in-out infinite alternate;
-  transform-origin: center bottom;
-}
-
-.stem-grow {
-  animation: stem-grow 4.5s ease-in-out infinite alternate;
-}
-
-.leaf-left {
-  animation: leaf-appear 4.5s ease-in-out infinite alternate;
-  animation-delay: 0.6s;
-  transform-origin: right center;
-}
-
-.leaf-right {
-  animation: leaf-appear 4.5s ease-in-out infinite alternate;
-  animation-delay: 0.9s;
-  transform-origin: left bottom;
-}
-
-/* Animación de flor girando */
-@keyframes flower-spin-rotate {
-  0% {
-    transform: rotate(0deg) scale(0);
-    opacity: 0;
-  }
-  40% {
-    transform: rotate(0deg) scale(0);
-    opacity: 0;
-  }
-  50% {
-    transform: rotate(180deg) scale(1);
-    opacity: 1;
-  }
-  90% {
-    transform: rotate(540deg) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: rotate(720deg) scale(0);
-    opacity: 0;
+  94%, 100% {
+    box-shadow: 0 0 3px rgba(34, 197, 94, 0.15);
   }
 }
 
-.flower-spin {
-  animation: flower-spin-rotate 4.5s ease-in-out infinite alternate-reverse;
-  transform-origin: center;
+.stem-shine {
+  animation: stem-shine 5s ease-in-out infinite;
 }
 
-.flower-center {
-  animation: pulse 1s ease-in-out infinite;
+.leaf-left-shine {
+  animation: leaf-left-shine 5s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+.leaf-right-shine {
+  animation: leaf-right-shine 5s ease-in-out infinite;
+}
+
+.plant-glow-pulse {
+  animation: glow-pulse 5s ease-in-out infinite;
 }
 </style>

@@ -3263,7 +3263,7 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Efecto de vidrio realista - Glassmorphism */
 .glass-card {
-  background: linear-gradient(135deg, rgba(220, 252, 231, 0.35), rgba(236, 253, 245, 0.3), rgba(240, 253, 244, 0.25));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 255, 250, 0.92), rgba(245, 255, 249, 0.9));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
@@ -3286,7 +3286,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(167, 243, 208, 0.2),
+    rgba(167, 243, 208, 0.1),
     transparent
   );
   transform: skewX(-25deg);

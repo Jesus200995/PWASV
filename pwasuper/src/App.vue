@@ -385,8 +385,9 @@ const currentUserId = computed(() => {
             <!-- Botón de notificaciones -->
             <router-link
               to="/notificaciones"
-              class="relative p-1.5 rounded-full text-white hover:bg-green-700 focus:outline-none transition-colors"
-              :class="{ 'bg-green-700': route.name === 'Notificaciones' }"
+              class="relative p-1.5 rounded-full text-white hover:bg-green-700 focus:outline-none focus:ring-0 transition-colors"
+              :class="route.name === 'Notificaciones' ? 'bg-green-700' : 'bg-transparent'"
+              style="-webkit-tap-highlight-color: transparent;"
             >
               <!-- Icono de campanita moderno (Heroicons) -->
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
@@ -401,8 +402,9 @@ const currentUserId = computed(() => {
             <!-- Botón del menú hamburguesa -->
             <button
               @click="toggleMobileMenu"
-              class="p-1.5 rounded-full text-white hover:bg-green-700 focus:outline-none transition-colors"
-              :class="{ 'bg-green-900': showMobileMenu }"
+              class="p-1.5 rounded-full text-white hover:bg-green-700 focus:outline-none focus:ring-0 active:bg-green-900 transition-colors"
+              :class="showMobileMenu ? 'bg-green-900' : 'bg-transparent'"
+              style="-webkit-tap-highlight-color: transparent;"
             >
               <!-- Icono de menú moderno (Heroicons) -->
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">

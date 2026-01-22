@@ -1576,32 +1576,24 @@ async function getUbicacion() {
           throw new Error('Coordenadas inválidas recibidas');
         }
         
-        // Información detallada de precisión para el usuario
+        // Log de precisión solo en consola (sin mostrar al usuario)
         if (location.accuracy) {
           const precision = Math.round(location.accuracy);
           if (location.accuracy <= 10) {
             console.log('🎯 EXCELENTE precisión GPS:', precision + 'm');
-            error.value = `¡Excelente! Precisión GPS: ${precision}m ⭐`;
           } else if (location.accuracy <= 30) {
             console.log('✅ MUY BUENA precisión GPS:', precision + 'm');
-            error.value = `Muy buena precisión GPS: ${precision}m ✓`;
           } else if (location.accuracy <= 50) {
             console.log('✅ BUENA precisión GPS:', precision + 'm');
-            error.value = `Buena precisión GPS: ${precision}m`;
           } else if (location.accuracy <= 100) {
             console.log('📍 Precisión GPS aceptable:', precision + 'm');
-            error.value = `Precisión aceptable: ${precision}m`;
           } else {
             console.log('⚠️ Precisión GPS baja:', precision + 'm');
-            error.value = `Precisión: ${precision}m. Muévete a un área más abierta para mejor señal GPS.`;
           }
           
-          // Mostrar si viene de caché
           if (location.fromCache) {
-            error.value += ' (ubicación guardada)';
+            console.log('📦 Ubicación desde caché');
           }
-          
-          setTimeout(() => error.value = null, 6000);
         } else {
           console.log('✅ Ubicación GPS obtenida (precisión no disponible)');
         }
@@ -1726,28 +1718,22 @@ async function getUbicacionRegistro() {
           throw new Error('Coordenadas inválidas para registro');
         }
         
-        // Información de precisión para registros
+        // Log de precisión solo en consola para registros
         if (location.accuracy) {
           const precision = Math.round(location.accuracy);
           if (location.accuracy <= 30) {
             console.log('✅ EXCELENTE precisión GPS para registro:', precision + 'm');
-            error.value = `Registro GPS: ${precision}m ⭐`;
           } else if (location.accuracy <= 50) {
             console.log('✅ BUENA precisión GPS para registro:', precision + 'm');
-            error.value = `Registro GPS: ${precision}m ✓`;
           } else if (location.accuracy <= 100) {
             console.log('📍 Precisión GPS aceptable para registro:', precision + 'm');
-            error.value = `Registro: ${precision}m`;
           } else {
             console.log('⚠️ Precisión GPS baja para registro:', precision + 'm');
-            error.value = `Registro: ${precision}m (señal GPS débil)`;
           }
           
           if (location.fromCache) {
-            error.value += ' (guardada)';
+            console.log('📦 Registro desde caché');
           }
-          
-          setTimeout(() => error.value = null, 5000);
         }
         
         return; // Salir exitosamente

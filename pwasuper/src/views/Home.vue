@@ -459,28 +459,28 @@
             </div>
             
             <!-- Botones para capturar foto -->
-            <div v-if="!foto" class="space-y-2">
+            <div v-if="!foto" class="space-y-2.5">
               <!-- Botón para tomar foto con cámara -->
               <button
                 @click="tomarFotoConCamara"
-                class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors duration-200"
+                class="photo-button-glass photo-button-pink w-full flex items-center justify-center px-4 py-2.5 text-white rounded-full transition-all duration-300"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span class="font-medium">Tomar Foto</span>
+                <span class="font-semibold text-sm">Cámara</span>
               </button>
               
               <!-- Botón para seleccionar de galería -->
               <button
                 @click="seleccionarDeGaleria"
-                class="w-full flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:bg-gray-800 transition-colors duration-200"
+                class="photo-button-glass photo-button-gallery w-full flex items-center justify-center px-4 py-2.5 text-white rounded-full transition-all duration-300"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span class="font-medium">Seleccionar de Galería</span>
+                <span class="font-semibold text-sm">Galería</span>
               </button>
             </div>
             
@@ -949,20 +949,20 @@
           </div>
           
           <!-- Botones para capturar foto -->
-          <div v-if="!fotoRegistro" class="space-y-2">
+          <div v-if="!fotoRegistro" class="space-y-2.5">
             <!-- Botón para tomar foto con cámara -->
             <button
               @click="tomarFotoConCamaraRegistro"
               :disabled="!entradaMarcada || salidaMarcada"
-              class="w-full flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors duration-200"
+              class="photo-button-glass photo-button-pink w-full flex items-center justify-center px-4 py-2.5 text-white rounded-full transition-all duration-300"
               :class="{ 'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada }"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span class="font-medium">
-                <span v-if="entradaMarcada && !salidaMarcada">Tomar Foto</span>
+              <span class="font-semibold text-sm">
+                <span v-if="entradaMarcada && !salidaMarcada">Cámara</span>
                 <span v-else-if="!entradaMarcada">Marca entrada primero</span>
                 <span v-else>Función bloqueada</span>
               </span>
@@ -972,14 +972,14 @@
             <button
               @click="seleccionarDeGaleriaRegistro"
               :disabled="!entradaMarcada || salidaMarcada"
-              class="w-full flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 active:bg-gray-800 transition-colors duration-200"
+              class="photo-button-glass photo-button-gallery w-full flex items-center justify-center px-4 py-2.5 text-white rounded-full transition-all duration-300"
               :class="{ 'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada }"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span class="font-medium">
-                <span v-if="entradaMarcada && !salidaMarcada">Seleccionar de Galería</span>
+              <span class="font-semibold text-sm">
+                <span v-if="entradaMarcada && !salidaMarcada">Galería</span>
                 <span v-else-if="!entradaMarcada">Marca entrada primero</span>
                 <span v-else>Función bloqueada</span>
               </span>
@@ -4815,5 +4815,95 @@ watch([entradaMarcada, salidaMarcada], () => {
   background: linear-gradient(90deg, #eab308, #f59e0b, #eab308);
   border-radius: 1px;
   box-shadow: 0 1px 3px rgba(234, 179, 8, 0.3);
+}
+
+/* Botones de foto con efecto liquid glass */
+.photo-button-glass {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-tap-highlight-color: transparent;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+.photo-button-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.photo-button-glass:hover::before {
+  left: 100%;
+}
+
+/* Botón de cámara - rosa fuerte liquid glass */
+.photo-button-pink {
+  background: linear-gradient(
+    135deg,
+    rgba(236, 72, 153, 0.65) 0%,
+    rgba(219, 39, 119, 0.7) 50%,
+    rgba(190, 24, 93, 0.75) 100%
+  );
+}
+
+.photo-button-pink:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgba(236, 72, 153, 0.75) 0%,
+    rgba(219, 39, 119, 0.8) 50%,
+    rgba(190, 24, 93, 0.85) 100%
+  );
+  transform: translateY(-2px);
+}
+
+.photo-button-pink:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Botón de galería - gris liquid glass */
+.photo-button-gallery {
+  background: linear-gradient(
+    135deg,
+    rgba(75, 85, 99, 0.65) 0%,
+    rgba(55, 65, 81, 0.7) 50%,
+    rgba(31, 41, 55, 0.75) 100%
+  );
+}
+
+.photo-button-gallery:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgba(75, 85, 99, 0.75) 0%,
+    rgba(55, 65, 81, 0.8) 50%,
+    rgba(31, 41, 55, 0.85) 100%
+  );
+  transform: translateY(-2px);
+}
+
+.photo-button-gallery:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Efecto disabled para botones de foto */
+.photo-button-glass:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.photo-button-glass:disabled::before {
+  display: none;
 }
 </style>

@@ -331,12 +331,30 @@ const currentUserId = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 relative overflow-hidden">
-    <!-- Elementos decorativos para mejorar el efecto de vidrio -->
-    <div class="absolute inset-0">
-      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
-      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
-      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
+  <div class="min-h-screen liquid-glass-bg relative overflow-hidden fullscreen-bg">
+    <!-- Fondo de vidrio líquido con burbujas verdes -->
+    <div class="absolute inset-0 z-0 fullscreen-layer">
+      <!-- Degradado base blanco-verde más intenso -->
+      <div class="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-100 to-green-200"></div>
+      
+      <!-- Burbujas verdes grandes flotantes -->
+      <div class="absolute top-10 left-10 w-64 h-64 bg-green-300/40 rounded-full filter blur-3xl animate-bubble-float-1"></div>
+      <div class="absolute top-32 right-20 w-48 h-48 bg-emerald-300/35 rounded-full filter blur-3xl animate-bubble-float-2"></div>
+      <div class="absolute bottom-20 left-32 w-56 h-56 bg-teal-300/40 rounded-full filter blur-3xl animate-bubble-float-3"></div>
+      <div class="absolute bottom-40 right-16 w-40 h-40 bg-green-400/35 rounded-full filter blur-2xl animate-bubble-float-4"></div>
+      <div class="absolute top-1/2 left-1/3 w-52 h-52 bg-emerald-400/30 rounded-full filter blur-3xl animate-bubble-float-5"></div>
+      
+      <!-- Burbujas pequeñas dispersas -->
+      <div class="absolute top-1/4 right-1/4 w-24 h-24 bg-green-300/50 rounded-full filter blur-xl animate-bubble-rise-1"></div>
+      <div class="absolute top-2/3 left-1/5 w-32 h-32 bg-emerald-300/45 rounded-full filter blur-xl animate-bubble-rise-2"></div>
+      <div class="absolute bottom-1/3 right-1/3 w-28 h-28 bg-teal-300/50 rounded-full filter blur-xl animate-bubble-rise-3"></div>
+      
+      <!-- Capa de vidrio líquido con brillo -->
+      <div class="absolute inset-0 bg-white/15 backdrop-blur-sm"></div>
+      
+      <!-- Reflejos de luz animados -->
+      <div class="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-white/40 to-transparent animate-shimmer-slow"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-green-200/40 to-transparent animate-pulse-gentle"></div>
     </div>
 
     <!-- Modal obligatorio de selección de territorio -->
@@ -356,7 +374,7 @@ const currentUserId = computed(() => {
     <ConnectivityStatus :show="route.name === 'Home' && !showMobileMenu" />
 
     <!-- Header móvil con menú hamburguesa -->
-    <header v-if="isLoggedIn" class="header-decorative bg-green-800 shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-40 mx-2 mt-2 rounded-3xl">
+    <header v-if="isLoggedIn" class="header-decorative bg-green-800 shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-40 mx-2 mt-2" :class="showMobileMenu ? 'rounded-t-3xl' : 'rounded-3xl'">
       <div class="max-w-sm mx-auto px-3 py-2">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
@@ -406,15 +424,15 @@ const currentUserId = computed(() => {
     <Transition name="menu-slide">
       <div 
         v-if="isLoggedIn && showMobileMenu" 
-        class="fixed top-16 inset-x-0 z-30 bg-white border-b border-green-200 shadow-lg rounded-b-3xl mx-2"
+        class="fixed top-[60px] inset-x-0 z-30 bg-green-800 shadow-lg rounded-b-3xl mx-2"
       >
         <div class="px-2 py-2">
           <nav class="space-y-1.5">
             <router-link
               to="/"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-              :class="{ 'bg-green-50 text-green-700': route.name === 'Home' }"
+              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              :class="{ 'bg-green-600': route.name === 'Home' }"
             >
               <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
@@ -425,8 +443,8 @@ const currentUserId = computed(() => {
             <router-link
               to="/historial"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-              :class="{ 'bg-green-50 text-green-700': route.name === 'Historial' }"
+              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              :class="{ 'bg-green-600': route.name === 'Historial' }"
             >
               <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
@@ -437,8 +455,8 @@ const currentUserId = computed(() => {
             <router-link
               to="/notificaciones"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors relative"
-              :class="{ 'bg-green-50 text-green-700': route.name === 'Notificaciones' }"
+              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors relative"
+              :class="{ 'bg-green-600': route.name === 'Notificaciones' }"
             >
               <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -452,8 +470,8 @@ const currentUserId = computed(() => {
             <router-link
               to="/profile"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-              :class="{ 'bg-green-50 text-green-700': route.name === 'Profile' }"
+              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              :class="{ 'bg-green-600': route.name === 'Profile' }"
             >
               <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
@@ -464,8 +482,8 @@ const currentUserId = computed(() => {
             <router-link
               to="/support"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-              :class="{ 'bg-green-50 text-green-700': route.name === 'Support' }"
+              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              :class="{ 'bg-green-600': route.name === 'Support' }"
             >
               <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.829V11a1 1 0 11-2 0v-.171a3.001 3.001 0 01-1.402-5.618 1 1 0 111.73-1A1 1 0 0010 7a1 1 0 001 1h.01a1 1 0 100-2H11a1 1 0 00-1-1zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
@@ -476,8 +494,8 @@ const currentUserId = computed(() => {
             <router-link
               to="/settings"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-              :class="{ 'bg-green-50 text-green-700': route.name === 'Settings' }"
+              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              :class="{ 'bg-green-600': route.name === 'Settings' }"
             >
               <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
@@ -485,15 +503,15 @@ const currentUserId = computed(() => {
               <span>Configuración</span>
             </router-link>
 
-            <div class="border-t border-gray-200 pt-2 mt-2">
+            <div class="border-t border-green-600 pt-2 mt-2">
               <button
                 @click="logout"
-                class="flex items-center w-full pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                class="flex items-center w-full pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-red-300 hover:bg-red-900/30 hover:text-red-200 transition-colors"
               >
-                <svg class="h-4 w-4 mr-2.5 flex-shrink-0 text-red-600" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
                 </svg>
-                <span class="text-red-600">Cerrar Sesión</span>
+                <span>Cerrar Sesión</span>
               </button>
             </div>
           </nav>
@@ -501,11 +519,11 @@ const currentUserId = computed(() => {
       </div>
     </transition>
 
-    <!-- Overlay para cerrar el menú -->
+    <!-- Overlay para cerrar el menú con efecto de difuminado -->
     <div 
       v-if="isLoggedIn && showMobileMenu"
       @click="closeMobileMenu"
-      class="fixed inset-0 bg-black bg-opacity-25 z-20"
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20 transition-all duration-300"
     ></div>
 
     <!-- Contenido principal -->
@@ -605,7 +623,241 @@ const currentUserId = computed(() => {
 }
 
 body {
-  background: linear-gradient(to bottom right, #f0fdf4, #ecfdf5, #f0fdfa); /* from-green-50 via-emerald-50 to-teal-50 */
+  background: linear-gradient(to bottom right, #d1fae5, #a7f3d0, #6ee7b7);
+}
+
+/* ====== FULLSCREEN Y SAFE AREAS ====== */
+
+/* Fondo que abarca toda la pantalla incluyendo áreas del sistema */
+.fullscreen-bg {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  min-height: 100dvh; /* Dynamic viewport height */
+  width: 100vw;
+  width: 100dvw;
+  position: relative;
+}
+
+.fullscreen-layer {
+  top: calc(-1 * env(safe-area-inset-top));
+  bottom: calc(-1 * env(safe-area-inset-bottom));
+  left: calc(-1 * env(safe-area-inset-left));
+  right: calc(-1 * env(safe-area-inset-right));
+  position: fixed;
+}
+
+/* Asegurar que el fondo cubra toda la pantalla */
+html {
+  height: -webkit-fill-available;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* ====== LIQUID GLASS BACKGROUND ====== */
+
+/* Fondo principal liquid glass */
+.liquid-glass-bg {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 35%, #6ee7b7 70%, #34d399 100%);
+  background-size: 400% 400%;
+  animation: liquid-gradient 20s ease infinite;
+}
+
+@keyframes liquid-gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Animaciones de burbujas flotantes grandes */
+@keyframes bubble-float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  33% {
+    transform: translate(40px, -60px) scale(1.15);
+    opacity: 0.4;
+  }
+  66% {
+    transform: translate(-30px, 40px) scale(0.95);
+    opacity: 0.25;
+  }
+}
+
+@keyframes bubble-float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.25;
+  }
+  33% {
+    transform: translate(-50px, 50px) scale(1.1);
+    opacity: 0.35;
+  }
+  66% {
+    transform: translate(25px, -35px) scale(0.9);
+    opacity: 0.2;
+  }
+}
+
+@keyframes bubble-float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  33% {
+    transform: translate(60px, 30px) scale(1.2);
+    opacity: 0.4;
+  }
+  66% {
+    transform: translate(-40px, -50px) scale(0.85);
+    opacity: 0.25;
+  }
+}
+
+@keyframes bubble-float-4 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.25;
+  }
+  33% {
+    transform: translate(-35px, -45px) scale(1.1);
+    opacity: 0.35;
+  }
+  66% {
+    transform: translate(45px, 55px) scale(0.95);
+    opacity: 0.2;
+  }
+}
+
+@keyframes bubble-float-5 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+  33% {
+    transform: translate(50px, -40px) scale(1.15);
+    opacity: 0.3;
+  }
+  66% {
+    transform: translate(-55px, 35px) scale(0.9);
+    opacity: 0.15;
+  }
+}
+
+/* Burbujas que suben */
+@keyframes bubble-rise-1 {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-100px) translateX(20px) scale(1.1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-200px) translateX(-10px) scale(0.9);
+    opacity: 0.3;
+  }
+}
+
+@keyframes bubble-rise-2 {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(-120px) translateX(-25px) scale(1.15);
+    opacity: 0.45;
+  }
+  100% {
+    transform: translateY(-240px) translateX(15px) scale(0.85);
+    opacity: 0.25;
+  }
+}
+
+@keyframes bubble-rise-3 {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-90px) translateX(30px) scale(1.2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-180px) translateX(-20px) scale(0.9);
+    opacity: 0.3;
+  }
+}
+
+/* Shimmer suave */
+@keyframes shimmer-slow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Pulso gentil */
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Aplicar animaciones */
+.animate-bubble-float-1 {
+  animation: bubble-float-1 12s ease-in-out infinite;
+}
+
+.animate-bubble-float-2 {
+  animation: bubble-float-2 15s ease-in-out infinite;
+}
+
+.animate-bubble-float-3 {
+  animation: bubble-float-3 13s ease-in-out infinite;
+}
+
+.animate-bubble-float-4 {
+  animation: bubble-float-4 11s ease-in-out infinite;
+}
+
+.animate-bubble-float-5 {
+  animation: bubble-float-5 14s ease-in-out infinite;
+}
+
+.animate-bubble-rise-1 {
+  animation: bubble-rise-1 20s ease-in-out infinite;
+}
+
+.animate-bubble-rise-2 {
+  animation: bubble-rise-2 18s ease-in-out infinite;
+}
+
+.animate-bubble-rise-3 {
+  animation: bubble-rise-3 22s ease-in-out infinite;
+}
+
+.animate-shimmer-slow {
+  animation: shimmer-slow 8s ease-in-out infinite;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 6s ease-in-out infinite;
 }
 
 /* Animación para elementos decorativos */

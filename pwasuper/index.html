@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/pwa-192x192.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#10b981" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#10b981" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#065f46" />
+    <meta name="theme-color" content="#6ee7b7" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#6ee7b7" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#34d399" />
     <meta name="description" content="Sistema de registro de asistencia y actividades con funcionalidad offline" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Sembrando Vida" />
     
     <!-- Manifest PWA -->
@@ -52,14 +52,27 @@
       
       /* Fondo de vidrio para evitar color morado durante la carga */
       html, body {
-        background: linear-gradient(to bottom right, #f0fdfa, #ecfdf5, #f0fdfa) !important;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 35%, #6ee7b7 70%, #34d399 100%) !important;
         margin: 0;
         padding: 0;
         min-height: 100vh;
+        min-height: -webkit-fill-available;
+        width: 100vw;
+        overflow-x: hidden;
+      }
+      
+      /* Soporte para safe areas (barra de estado, isla dinámica, etc.) */
+      #app {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
       }
     </style>
   </head>
-  <body style="background: linear-gradient(to bottom right, #f0fdfa, #ecfdf5, #f0fdfa);">
+  <body style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 35%, #6ee7b7 70%, #34d399 100%); margin: 0; padding: 0;">
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
     

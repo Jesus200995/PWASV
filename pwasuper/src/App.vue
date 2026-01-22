@@ -502,7 +502,8 @@ const currentUserId = computed(() => {
             <div class="border-t border-green-600 pt-2 mt-2">
               <button
                 @click="logout"
-                class="flex items-center w-full pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-red-300 hover:bg-red-900/30 hover:text-red-200 transition-colors"
+                class="flex items-center w-full pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-red-300 hover:bg-red-900/30 hover:text-red-200 transition-colors focus:outline-none focus:ring-0 active:bg-red-900/30"
+                style="-webkit-tap-highlight-color: transparent;"
               >
                 <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />

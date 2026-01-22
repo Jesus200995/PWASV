@@ -326,7 +326,7 @@ const currentUserId = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen liquid-glass-bg relative overflow-hidden fullscreen-bg">
+  <div class="min-h-screen liquid-glass-bg relative fullscreen-bg">
     <!-- Fondo de vidrio líquido con burbujas verdes -->
     <div class="absolute inset-0 z-0 fullscreen-layer">
       <!-- Degradado base blanco-verde más intenso -->
@@ -590,6 +590,18 @@ const currentUserId = computed(() => {
   background-color: #006400; /* Verde fuerte actualizado */
 }
 
+/* Optimización del scroll - solo cuando sea necesario */
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+}
+
 .header-decorative::before {
   background-image: 
     /* Hojas grandes verdes suaves */
@@ -654,6 +666,7 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* ====== LIQUID GLASS BACKGROUND ====== */

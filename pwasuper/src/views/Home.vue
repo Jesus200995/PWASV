@@ -3314,94 +3314,52 @@ watch([entradaMarcada, salidaMarcada], () => {
 /* Efecto de vidrio azul suave para entrada */
 .glass-card-blue {
   background: #ffffff !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  box-shadow: 
-    0 4px 20px rgba(59, 130, 246, 0.12),
-    0 1px 3px rgba(0, 0, 0, 0.05);
-  padding: 1.25rem;
-  position: relative;
-  overflow: hidden;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  padding: 1.25rem !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 .glass-card-blue::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -50%;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  transform: skewX(-25deg);
-  transition: all 0.6s;
-}
-
-.glass-card-blue:hover::before {
-  left: 150%;
+  display: none !important;
 }
 
 /* Efecto de vidrio rojo suave para término */
 .glass-card-red {
   background: #ffffff !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  box-shadow: 
-    0 4px 20px rgba(239, 68, 68, 0.12),
-    0 1px 3px rgba(0, 0, 0, 0.05);
-  padding: 1.25rem;
-  position: relative;
-  overflow: hidden;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  padding: 1.25rem !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 .glass-card-red::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -50%;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  transform: skewX(-25deg);
-  transition: all 0.6s;
-}
-
-.glass-card-red:hover::before {
-  left: 150%;
+  display: none !important;
 }
 
 /* Efecto de vidrio morado para actividades */
 .glass-card-purple {
   background: #ffffff !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  box-shadow: 
-    0 4px 20px rgba(168, 85, 247, 0.12),
-    0 1px 3px rgba(0, 0, 0, 0.05);
-  padding: 1.25rem;
-  position: relative;
-  overflow: hidden;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  padding: 1.25rem !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 .glass-card-purple::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -50%;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  transform: skewX(-25deg);
-  transition: all 0.6s;
-}
-
-.glass-card-purple:hover::before {
-  left: 150%;
+  display: none !important;
 }
 
 .glass-input {

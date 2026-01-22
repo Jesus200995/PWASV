@@ -102,23 +102,25 @@ class GeoLocationService {
   }
 
   /**
-   * Obtener ubicación actual con fallback a caché
+   * Obtener ubicación actual con máxima precisión (móviles)
+   * Usa watchPosition para mayor precisión y funciona offline
    * @param {Object} options - Opciones de geolocalización
    * @returns {Promise} Promise con la ubicación
    */
   async getCurrentLocation(options = {}) {
     const defaultOptions = {
       enableHighAccuracy: true,
-      timeout: 25000, // 25 segundos para mayor precisión
-      maximumAge: 60000, // 1 minuto para obtener ubicación más fresca
-      useCache: true, // Permitir usar caché como fallback
+      timeout: 30000, // 30 segundos para máxima precisión en móviles
+      maximumAge: 0, // NUNCA usar caché del navegador, siempre ubicación fresca
+      useCache: true, // Permitir usar nuestro caché como fallback
+      minAccuracy: 50, // Precisión mínima aceptable en metros
+      maxWaitTime: 8000, // Tiempo máximo esperando mejor precisión
       ...options
     };
 
     return new Promise((resolve, reject) => {
       // Verificar si el navegador soporta geolocalización
       if (!navigator.geolocation) {
-        // Si no hay soporte y tenemos ubicación en caché, usarla
         if (defaultOptions.useCache && this.lastKnownLocation) {
           console.warn('Navegador no soporta geolocalización, usando ubicación en caché');
           resolve({
@@ -132,11 +134,13 @@ class GeoLocationService {
         return;
       }
 
-      // Variables para manejar timeouts y fallbacks
       let resolved = false;
       let fallbackTimer = null;
+      let watchId = null;
+      let bestPosition = null;
+      let waitTimer = null;
 
-      // Función para resolver con caché si está disponible
+      // Función para resolver con caché
       const resolveWithCache = () => {
         if (!resolved && defaultOptions.useCache && this.lastKnownLocation) {
           resolved = true;
@@ -151,78 +155,153 @@ class GeoLocationService {
         return false;
       };
 
-      // Configurar fallback a caché después de un tiempo
-      if (defaultOptions.useCache && this.lastKnownLocation) {
-        fallbackTimer = setTimeout(() => {
-          if (!resolved) {
-            console.warn('Geolocalización tardando mucho, usando caché');
-            resolveWithCache();
-          }
-        }, Math.min(defaultOptions.timeout, 15000)); // Usar caché después de 15 segundos máximo
-      }
+      // Función para limpiar watchers
+      const cleanup = () => {
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+        }
+        if (fallbackTimer) {
+          clearTimeout(fallbackTimer);
+          fallbackTimer = null;
+        }
+        if (waitTimer) {
+          clearTimeout(waitTimer);
+          waitTimer = null;
+        }
+      };
 
-      // Intentar obtener ubicación actual
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          if (resolved) return;
+      // Función para resolver con la mejor posición
+      const resolveWithBestPosition = () => {
+        if (resolved) return;
+        
+        cleanup();
+        
+        if (bestPosition) {
           resolved = true;
-          
-          if (fallbackTimer) {
-            clearTimeout(fallbackTimer);
-          }
-
           const locationData = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-            timestamp: position.timestamp,
+            latitude: bestPosition.coords.latitude,
+            longitude: bestPosition.coords.longitude,
+            accuracy: bestPosition.coords.accuracy,
+            altitude: bestPosition.coords.altitude,
+            altitudeAccuracy: bestPosition.coords.altitudeAccuracy,
+            heading: bestPosition.coords.heading,
+            speed: bestPosition.coords.speed,
+            timestamp: bestPosition.timestamp,
             fromCache: false
           };
 
-          // Guardar como última ubicación conocida
           this.updateLastKnownLocation(locationData);
-
+          console.log('✅ Ubicación óptima obtenida:', Math.round(locationData.accuracy) + 'm');
           resolve(locationData);
-        },
-        (error) => {
-          if (resolved) return;
-          
-          if (fallbackTimer) {
-            clearTimeout(fallbackTimer);
+        } else if (resolveWithCache()) {
+          return;
+        } else {
+          resolved = true;
+          reject(new Error('No se pudo obtener ubicación'));
+        }
+      };
+
+      // Configurar fallback a caché después de timeout completo
+      if (defaultOptions.useCache && this.lastKnownLocation) {
+        fallbackTimer = setTimeout(() => {
+          if (!resolved) {
+            console.warn('Timeout de geolocalización, usando caché');
+            resolveWithCache();
           }
+        }, defaultOptions.timeout);
+      }
 
-          console.error('Error de geolocalización:', error);
+      // Usar watchPosition para obtener la mejor ubicación posible
+      // watchPosition es más preciso que getCurrentPosition en móviles
+      try {
+        watchId = navigator.geolocation.watchPosition(
+          (position) => {
+            if (resolved) {
+              cleanup();
+              return;
+            }
 
-          // Intentar usar caché como fallback
+            console.log(`📍 Ubicación recibida: ${Math.round(position.coords.accuracy)}m precisión`);
+
+            // Guardar la mejor posición (menor accuracy = mejor precisión)
+            if (!bestPosition || position.coords.accuracy < bestPosition.coords.accuracy) {
+              bestPosition = position;
+              console.log(`🎯 Nueva mejor precisión: ${Math.round(position.coords.accuracy)}m`);
+
+              // Si alcanzamos precisión excelente, resolver inmediatamente
+              if (position.coords.accuracy <= defaultOptions.minAccuracy) {
+                console.log('🎯 Precisión óptima alcanzada!');
+                resolveWithBestPosition();
+                return;
+              }
+
+              // Reiniciar timer de espera por mejor precisión
+              if (waitTimer) {
+                clearTimeout(waitTimer);
+              }
+              
+              waitTimer = setTimeout(() => {
+                // Después de maxWaitTime sin mejoras, usar la mejor que tenemos
+                console.log('⏱️ Tiempo de espera completado, usando mejor precisión obtenida');
+                resolveWithBestPosition();
+              }, defaultOptions.maxWaitTime);
+            }
+          },
+          (error) => {
+            if (resolved) return;
+
+            console.error('❌ Error de geolocalización:', error.code, error.message);
+
+            cleanup();
+
+            // Si tenemos una posición guardada durante el watch, usarla
+            if (bestPosition) {
+              console.warn('⚠️ Error pero tenemos posición previa, usándola');
+              resolveWithBestPosition();
+              return;
+            }
+
+            // Intentar usar caché
+            if (resolveWithCache()) {
+              return;
+            }
+
+            // Generar mensaje de error apropiado
+            let errorMessage = 'Error obteniendo ubicación';
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = 'Permisos de ubicación denegados. Por favor, habilita el acceso a la ubicación en tu navegador.';
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = 'Ubicación no disponible. Verifica que tengas GPS activado y estés en un área con señal.';
+                break;
+              case error.TIMEOUT:
+                errorMessage = 'Tiempo de espera agotado. Intenta en un área con mejor señal GPS.';
+                break;
+              default:
+                errorMessage = `Error de ubicación: ${error.message}`;
+            }
+
+            resolved = true;
+            reject(new Error(errorMessage));
+          },
+          {
+            enableHighAccuracy: true, // CRÍTICO: Activa GPS de alta precisión
+            timeout: defaultOptions.timeout,
+            maximumAge: 0 // CRÍTICO: NUNCA usar caché del navegador
+          }
+        );
+      } catch (error) {
+        cleanup();
+        if (!resolved) {
           if (resolveWithCache()) {
             return;
           }
-
-          // Si no hay caché disponible, rechazar con error mejorado
-          let errorMessage = 'Error obteniendo ubicación';
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage = 'Permisos de ubicación denegados. Por favor, habilita el acceso a la ubicación en tu navegador.';
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = 'Ubicación no disponible. Verifica que tengas GPS activado.';
-              break;
-            case error.TIMEOUT:
-              errorMessage = 'Tiempo de espera agotado obteniendo ubicación.';
-              break;
-            default:
-              errorMessage = `Error de ubicación: ${error.message}`;
-          }
-
           resolved = true;
-          reject(new Error(errorMessage));
-        },
-        {
-          enableHighAccuracy: defaultOptions.enableHighAccuracy,
-          timeout: defaultOptions.timeout,
-          maximumAge: defaultOptions.maximumAge
+          reject(error);
         }
-      );
+      }
     });
   }
 

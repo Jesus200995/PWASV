@@ -354,52 +354,79 @@
                 class="text-xs">✓ Completado</span>
             </div>
             
-            <!-- Botón de ubicación circular con diseño moderno -->
-            <div class="location-container-circular">
+            <!-- Botón de ubicación empresarial moderno -->
+            <div class="location-container-corporate">
               <button
                 type="button"
                 @click="getUbicacion"
                 :disabled="obteniendoUbicacion"
-                class="location-button-circular relative flex flex-col items-center justify-center w-28 h-28 sm:w-32 sm:h-32 font-medium text-white rounded-full shadow-2xl transform transition-all duration-500 hover:scale-110 active:scale-95"
+                class="location-button-corporate relative w-full py-4 px-6 font-semibold text-white shadow-lg transform transition-all duration-300 hover:-translate-y-1 active:translate-y-0"
                 :class="{
-                  'opacity-50 cursor-not-allowed': obteniendoUbicacion,
-                  'location-button-success-circular': latitud && longitud && !obteniendoUbicacion
+                  'opacity-60 cursor-not-allowed': obteniendoUbicacion,
+                  'location-button-success-corporate': latitud && longitud && !obteniendoUbicacion,
+                  'rounded-2xl': !latitud || !longitud,
+                  'rounded-t-2xl': latitud && longitud
                 }"
               >
-                <!-- Spinner de carga -->
-                <div v-if="obteniendoUbicacion" class="flex flex-col items-center">
-                  <div class="animate-spin rounded-full h-6 w-6 border-t-3 border-b-3 border-white mb-1"></div>
-                  <span class="text-xs font-normal tracking-normal text-center leading-tight">Ubicando...</span>
-                </div>
+                <!-- Efecto de brillo superior -->
+                <div class="location-button-shine"></div>
                 
-                <!-- Estado completado -->
-                <div v-else-if="latitud && longitud" class="flex flex-col items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1 text-emerald-800 glass-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span class="text-xs font-medium tracking-normal glass-text-circular text-center leading-tight">Ubicación Obtenida</span>
-                </div>
-                
-                <!-- Estado inicial -->
-                <div v-else class="flex flex-col items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1 text-white location-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span class="text-xs font-medium tracking-normal text-white location-text-circular text-center leading-tight">Obtener Ubicación</span>
+                <!-- Contenido del botón -->
+                <div class="relative z-10 flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <!-- Spinner de carga -->
+                    <div v-if="obteniendoUbicacion" class="flex items-center space-x-3">
+                      <div class="animate-spin rounded-full h-6 w-6 border-3 border-white border-t-transparent"></div>
+                      <span class="text-sm font-semibold tracking-wide">Obteniendo ubicación...</span>
+                    </div>
+                    
+                    <!-- Estado completado -->
+                    <template v-else-if="latitud && longitud">
+                      <div class="location-icon-wrapper-success">
+                        <svg class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div class="flex flex-col items-start">
+                        <span class="text-sm font-semibold tracking-wide">Ubicación Confirmada</span>
+                        <span class="text-xs opacity-90 font-medium">GPS activo</span>
+                      </div>
+                    </template>
+                    
+                    <!-- Estado inicial -->
+                    <template v-else>
+                      <div class="location-icon-wrapper">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                      <div class="flex flex-col items-start">
+                        <span class="text-sm font-semibold tracking-wide">Obtener Ubicación</span>
+                        <span class="text-xs opacity-90 font-medium">Toca para activar GPS</span>
+                      </div>
+                    </template>
+                  </div>
+                  
+                  <!-- Flecha indicadora -->
+                  <div v-if="!obteniendoUbicacion && !latitud && !longitud" class="location-arrow">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 </div>
               </button>
 
-              <!-- Coordenadas pegadas al botón circular -->
-              <div v-if="latitud && longitud" class="coordinates-display-circular">
-                <div class="coordinates-grid-circular">
-                  <div class="coordinate-item-circular">
-                    <span class="coordinate-label-circular">Lat:</span>
-                    <span class="coordinate-value-circular">{{ latitud }}</span>
+              <!-- Coordenadas minimalistas verde -->
+              <div v-if="latitud && longitud" class="coordinates-card-corporate">
+                <div class="flex items-center justify-center space-x-3">
+                  <div class="coordinate-badge">
+                    <span class="coordinate-label-corp">Lat</span>
+                    <span class="coordinate-value-corp">{{ latitud }}</span>
                   </div>
-                  <div class="coordinate-item-circular">
-                    <span class="coordinate-label-circular">Lon:</span>
-                    <span class="coordinate-value-circular">{{ longitud }}</span>
+                  <div class="coordinate-badge">
+                    <span class="coordinate-label-corp">Lon</span>
+                    <span class="coordinate-value-corp">{{ longitud }}</span>
                   </div>
                 </div>
               </div>
@@ -617,73 +644,92 @@
       </div>
 
       <form @submit.prevent="enviarRegistro" :class="{ 'opacity-50 pointer-events-none': !entradaMarcada || salidaMarcada }">
-        <!-- Botón para obtener ubicación circular para actividades -->
-        <div class="location-container-circular mb-3 flex justify-center">
+        <!-- Botón para obtener ubicación empresarial moderno para actividades -->
+        <div class="location-container-corporate mb-3">
           <button
             type="button"
             @click="getUbicacionRegistro"
             :disabled="!entradaMarcada || salidaMarcada"
-            class="location-button-circular relative flex flex-col items-center justify-center w-28 h-28 sm:w-32 sm:h-32 font-medium text-white rounded-full shadow-2xl transform transition-all duration-500 hover:scale-110 active:scale-95"
+            class="location-button-corporate relative w-full py-4 px-6 font-semibold text-white shadow-lg transform transition-all duration-300 hover:-translate-y-1 active:translate-y-0"
             :class="{
-              'location-button-success-circular': latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada,
-              'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada
+              'location-button-success-corporate': latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada,
+              'location-button-disabled-corporate': !entradaMarcada || salidaMarcada,
+              'rounded-2xl': !latitudRegistro || !longitudRegistro,
+              'rounded-t-2xl': latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada
             }"
           >
-            <!-- Estado completado -->
-            <div v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada" class="flex flex-col items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1 text-emerald-800 glass-icon-circular" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-xs font-medium tracking-normal glass-text-circular text-center leading-tight">Ubicación Obtenida</span>
-            </div>
+            <!-- Efecto de brillo superior -->
+            <div class="location-button-shine"></div>
             
-            <!-- Estado bloqueado -->
-            <div v-else-if="!entradaMarcada || salidaMarcada" class="flex flex-col items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mb-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-xs font-medium text-gray-400 text-center leading-tight">
-                <span v-if="!entradaMarcada">Marca Entrada Primero</span>
-                <span v-else>Actividades Bloqueadas</span>
-              </span>
-            </div>
-            
-            <!-- Estado inicial -->
-            <div v-else class="flex flex-col items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-7 w-7 mb-1 text-white location-icon-circular"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2.5"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2.5"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              <span class="text-xs font-medium tracking-normal text-white location-text-circular text-center leading-tight">Obtener Ubicación</span>
+            <!-- Contenido del botón -->
+            <div class="relative z-10 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <!-- Estado completado -->
+                <template v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada">
+                  <div class="location-icon-wrapper-success">
+                    <svg class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col items-start">
+                    <span class="text-sm font-semibold tracking-wide">Ubicación Confirmada</span>
+                    <span class="text-xs opacity-90 font-medium">GPS activo</span>
+                  </div>
+                </template>
+                
+                <!-- Estado bloqueado -->
+                <template v-else-if="!entradaMarcada || salidaMarcada">
+                  <div class="location-icon-wrapper-disabled">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col items-start">
+                    <span class="text-sm font-semibold tracking-wide">
+                      <span v-if="!entradaMarcada">Ubicación Bloqueada</span>
+                      <span v-else>Actividades Cerradas</span>
+                    </span>
+                    <span class="text-xs opacity-75 font-medium">
+                      <span v-if="!entradaMarcada">Marca entrada primero</span>
+                      <span v-else>Salida registrada</span>
+                    </span>
+                  </div>
+                </template>
+                
+                <!-- Estado inicial -->
+                <template v-else>
+                  <div class="location-icon-wrapper">
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col items-start">
+                    <span class="text-sm font-semibold tracking-wide">Obtener Ubicación</span>
+                    <span class="text-xs opacity-90 font-medium">Toca para activar GPS</span>
+                  </div>
+                </template>
+              </div>
+              
+              <!-- Flecha indicadora -->
+              <div v-if="entradaMarcada && !salidaMarcada && !latitudRegistro && !longitudRegistro" class="location-arrow">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </div>
           </button>
 
-          <!-- Coordenadas pegadas al botón circular -->
-          <div v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada" class="coordinates-display-circular">
-            <div class="coordinates-grid-circular">
-              <div class="coordinate-item-circular">
-                <span class="coordinate-label-circular">Lat:</span>
-                <span class="coordinate-value-circular">{{ latitudRegistro }}</span>
+          <!-- Coordenadas minimalistas verde -->
+          <div v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada" class="coordinates-card-corporate">
+            <div class="flex items-center justify-center space-x-3">
+              <div class="coordinate-badge">
+                <span class="coordinate-label-corp">Lat</span>
+                <span class="coordinate-value-corp">{{ latitudRegistro }}</span>
               </div>
-              <div class="coordinate-item-circular">
-                <span class="coordinate-label-circular">Lon:</span>
-                <span class="coordinate-value-circular">{{ longitudRegistro }}</span>
+              <div class="coordinate-badge">
+                <span class="coordinate-label-corp">Lon</span>
+                <span class="coordinate-value-corp">{{ longitudRegistro }}</span>
               </div>
             </div>
           </div>
@@ -1487,38 +1533,44 @@ async function getUbicacion() {
   error.value = null;
 
   try {
-    console.log('🔍 Iniciando obtención de ubicación con máxima precisión (funciona offline)...');
+    console.log('🔍 Iniciando obtención de ubicación con MÁXIMA precisión (funciona offline)...');
     
-    // Estrategia de múltiples intentos para máxima precisión
+    // Estrategia optimizada para móviles - usar watchPosition es más preciso
     const configuraciones = [
       {
-        timeout: 30000, // 30 segundos - máxima precisión
+        timeout: 30000, // 30 segundos - máxima precisión GPS
         enableHighAccuracy: true,
-        maximumAge: 0, // No usar caché, ubicación fresca
+        maximumAge: 0, // CRÍTICO: NO usar caché del navegador
+        minAccuracy: 20, // Buscar precisión de 20m o mejor
+        maxWaitTime: 10000, // Esperar 10s por mejor precisión
+        useCache: false
+      },
+      {
+        timeout: 25000, // 25 segundos - alta precisión
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        minAccuracy: 50, // Precisión de 50m o mejor
+        maxWaitTime: 8000,
         useCache: false
       },
       {
         timeout: 20000, // 20 segundos - buena precisión
         enableHighAccuracy: true,
-        maximumAge: 30000, // Máximo 30 segundos de edad
-        useCache: false
-      },
-      {
-        timeout: 15000, // 15 segundos - precisión estándar
-        enableHighAccuracy: true,
-        maximumAge: 60000, // Máximo 1 minuto de edad
-        useCache: true
+        maximumAge: 0,
+        minAccuracy: 100, // Precisión de 100m o mejor
+        maxWaitTime: 6000,
+        useCache: true // Último intento puede usar caché
       }
     ];
     
     // Intentar con cada configuración
     for (let i = 0; i < configuraciones.length; i++) {
       try {
-        console.log(`🎯 Intento ${i + 1}/${configuraciones.length} - Buscando máxima precisión...`);
+        console.log(`🎯 Intento ${i + 1}/${configuraciones.length} - Buscando GPS de alta precisión...`);
         
         const location = await geoLocationService.getCurrentLocation(configuraciones[i]);
 
-        console.log(`✅ Ubicación obtenida en intento ${i + 1}:`, location);
+        console.log(`✅ Ubicación GPS obtenida en intento ${i + 1}:`, location);
 
         latitud.value = location.latitude;
         longitud.value = location.longitude;
@@ -1528,24 +1580,34 @@ async function getUbicacion() {
           throw new Error('Coordenadas inválidas recibidas');
         }
         
-        // Información de precisión para el usuario
+        // Información detallada de precisión para el usuario
         if (location.accuracy) {
+          const precision = Math.round(location.accuracy);
           if (location.accuracy <= 10) {
-            console.log('🎯 Excelente precisión obtenida:', location.accuracy + 'm');
-            error.value = `¡Excelente! Ubicación obtenida con precisión de ${Math.round(location.accuracy)}m.`;
+            console.log('🎯 EXCELENTE precisión GPS:', precision + 'm');
+            error.value = `¡Excelente! Precisión GPS: ${precision}m ⭐`;
+          } else if (location.accuracy <= 30) {
+            console.log('✅ MUY BUENA precisión GPS:', precision + 'm');
+            error.value = `Muy buena precisión GPS: ${precision}m ✓`;
           } else if (location.accuracy <= 50) {
-            console.log('✅ Buena precisión obtenida:', location.accuracy + 'm');
-            error.value = `Buena precisión: ${Math.round(location.accuracy)}m.`;
-          } else if (location.accuracy <= 200) {
-            console.log('📍 Precisión aceptable:', location.accuracy + 'm');
-            error.value = `Precisión aceptable: ${Math.round(location.accuracy)}m.`;
+            console.log('✅ BUENA precisión GPS:', precision + 'm');
+            error.value = `Buena precisión GPS: ${precision}m`;
+          } else if (location.accuracy <= 100) {
+            console.log('📍 Precisión GPS aceptable:', precision + 'm');
+            error.value = `Precisión aceptable: ${precision}m`;
           } else {
-            console.log('⚠️ Baja precisión:', location.accuracy + 'm');
-            error.value = `Precisión baja: ${Math.round(location.accuracy)}m. Intenta moverte a un área más abierta.`;
+            console.log('⚠️ Precisión GPS baja:', precision + 'm');
+            error.value = `Precisión: ${precision}m. Muévete a un área más abierta para mejor señal GPS.`;
           }
-          setTimeout(() => error.value = null, 5000);
+          
+          // Mostrar si viene de caché
+          if (location.fromCache) {
+            error.value += ' (ubicación guardada)';
+          }
+          
+          setTimeout(() => error.value = null, 6000);
         } else {
-          console.log('✅ Ubicación obtenida exitosamente (precisión no disponible)');
+          console.log('✅ Ubicación GPS obtenida (precisión no disponible)');
         }
         
         return; // Salir exitosamente
@@ -1556,11 +1618,13 @@ async function getUbicacion() {
           // Si todos los intentos fallaron, usar fallback
           throw intentoError;
         }
+        // Esperar un poco antes del siguiente intento
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
     
   } catch (err) {
-    console.warn('⚠️ Todos los intentos de geolocalización fallaron, usando fallback offline:', err);
+    console.warn('⚠️ Todos los intentos de GPS fallaron, usando fallback offline:', err);
     
     // Fallback offline: usar servicio simple (funciona sin internet)
     try {
@@ -1619,26 +1683,32 @@ async function getUbicacionRegistro() {
   error.value = null;
 
   try {
-    console.log('🔍 Iniciando obtención de ubicación para registro (funciona offline)...');
+    console.log('🔍 Iniciando obtención de ubicación GPS para registro (funciona offline)...');
     
     // Usar la misma estrategia optimizada para registros
     const configuraciones = [
       {
-        timeout: 25000, // 25 segundos - alta precisión para registros
+        timeout: 30000, // 30 segundos - máxima precisión para registros
         enableHighAccuracy: true,
-        maximumAge: 0, // Ubicación fresca para registros importantes
+        maximumAge: 0, // CRÍTICO: ubicación fresca para registros
+        minAccuracy: 20, // Buscar 20m o mejor
+        maxWaitTime: 10000,
         useCache: false
       },
       {
-        timeout: 20000, // 20 segundos
+        timeout: 25000, // 25 segundos - alta precisión
         enableHighAccuracy: true,
-        maximumAge: 30000,
+        maximumAge: 0,
+        minAccuracy: 50,
+        maxWaitTime: 8000,
         useCache: false
       },
       {
-        timeout: 15000, // 15 segundos fallback
+        timeout: 20000, // 20 segundos fallback
         enableHighAccuracy: true,
-        maximumAge: 60000,
+        maximumAge: 0,
+        minAccuracy: 100,
+        maxWaitTime: 6000,
         useCache: true
       }
     ];
@@ -1646,11 +1716,11 @@ async function getUbicacionRegistro() {
     // Intentar con cada configuración
     for (let i = 0; i < configuraciones.length; i++) {
       try {
-        console.log(`🎯 Intento ${i + 1}/${configuraciones.length} para registro - Buscando precisión...`);
+        console.log(`🎯 Intento ${i + 1}/${configuraciones.length} para registro - Buscando GPS de alta precisión...`);
         
         const location = await geoLocationService.getCurrentLocation(configuraciones[i]);
 
-        console.log(`✅ Ubicación para registro obtenida en intento ${i + 1}:`, location);
+        console.log(`✅ Ubicación GPS para registro obtenida en intento ${i + 1}:`, location);
 
         latitudRegistro.value = location.latitude;
         longitudRegistro.value = location.longitude;
@@ -1662,13 +1732,26 @@ async function getUbicacionRegistro() {
         
         // Información de precisión para registros
         if (location.accuracy) {
-          if (location.accuracy <= 50) {
-            console.log('✅ Buena precisión para registro:', location.accuracy + 'm');
+          const precision = Math.round(location.accuracy);
+          if (location.accuracy <= 30) {
+            console.log('✅ EXCELENTE precisión GPS para registro:', precision + 'm');
+            error.value = `Registro GPS: ${precision}m ⭐`;
+          } else if (location.accuracy <= 50) {
+            console.log('✅ BUENA precisión GPS para registro:', precision + 'm');
+            error.value = `Registro GPS: ${precision}m ✓`;
+          } else if (location.accuracy <= 100) {
+            console.log('📍 Precisión GPS aceptable para registro:', precision + 'm');
+            error.value = `Registro: ${precision}m`;
           } else {
-            console.log('📍 Precisión aceptable para registro:', location.accuracy + 'm');
-            error.value = `Registro con precisión de ${Math.round(location.accuracy)}m.`;
-            setTimeout(() => error.value = null, 4000);
+            console.log('⚠️ Precisión GPS baja para registro:', precision + 'm');
+            error.value = `Registro: ${precision}m (señal GPS débil)`;
           }
+          
+          if (location.fromCache) {
+            error.value += ' (guardada)';
+          }
+          
+          setTimeout(() => error.value = null, 5000);
         }
         
         return; // Salir exitosamente
@@ -1678,11 +1761,13 @@ async function getUbicacionRegistro() {
         if (i === configuraciones.length - 1) {
           throw intentoError;
         }
+        // Esperar antes del siguiente intento
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
     
   } catch (err) {
-    console.warn('⚠️ Geolocalización falló para registro, usando fallback offline:', err);
+    console.warn('⚠️ GPS falló para registro, usando fallback offline:', err);
     
     // Fallback offline para registros
     try {
@@ -3973,261 +4058,277 @@ watch([entradaMarcada, salidaMarcada], () => {
     inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Nuevos estilos para botones de ubicación circulares con diseño moderno */
-.location-container-circular {
+/* Estilos corporativos modernos para botones de ubicación */
+.location-container-corporate {
   position: relative;
   margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-.location-button-circular {
+/* Botón principal con gradiente corporativo */
+.location-button-corporate {
   background: linear-gradient(135deg, 
-    rgba(255, 200, 0, 1) 0%,         /* Gold más intenso */
-    rgba(238, 180, 34, 1) 40%,       /* Goldenrod más saturado */
-    rgba(204, 149, 11, 1) 100%       /* Gold profundo más intenso */
+    #1e40af 0%,      /* Azul corporativo profundo */
+    #1e3a8a 50%,     /* Azul oscuro */
+    #1e293b 100%     /* Slate oscuro */
   );
-  border: 3px solid rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 
-    0 8px 25px 0 rgba(0, 0, 0, 0.2),
-    inset 0 2px 0 0 rgba(255, 255, 255, 0.5),
-    inset 0 -2px 0 0 rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(59, 130, 246, 0.3);
   position: relative;
   overflow: hidden;
-  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.2),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
-.location-button-circular:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.12);
-  box-shadow: 
-    0 12px 35px 0 rgba(0, 0, 0, 0.3),
-    inset 0 3px 0 0 rgba(255, 255, 255, 0.7),
-    inset 0 -2px 0 0 rgba(0, 0, 0, 0.2);
+.location-button-corporate:hover:not(:disabled) {
   background: linear-gradient(135deg, 
-    rgba(255, 180, 0, 1) 0%,
-    rgba(255, 165, 0, 1) 40%,
-    rgba(224, 140, 0, 1) 100%
+    #2563eb 0%,
+    #1d4ed8 50%,
+    #1e40af 100%
   );
-  border-color: rgba(255, 255, 255, 0.8);
-}
-
-.location-button-circular:active:not(:disabled) {
-  transform: translateY(-1px) scale(1.06);
   box-shadow: 
-    0 6px 25px 0 rgba(255, 215, 0, 0.45),
-    inset 0 2px 4px 0 rgba(0, 0, 0, 0.15);
-}
-
-/* Estado de éxito circular - versión simple sin efectos excesivos */
-.location-button-success-circular {
-  background: linear-gradient(135deg, 
-    rgba(154, 255, 0, 0.9) 0%,
-    rgba(124, 230, 0, 0.9) 50%,
-    rgba(100, 200, 0, 0.9) 100%
-  ) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 2px solid rgba(154, 255, 0, 0.8) !important;
-  box-shadow: 
-    0 4px 12px 0 rgba(0, 0, 0, 0.15),
-    0 0 4px 1px rgba(154, 255, 0, 0.2) !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.location-button-success-circular:hover:not(:disabled) {
-  background: linear-gradient(135deg, 
-    rgba(140, 240, 0, 0.9) 0%,
-    rgba(115, 215, 0, 0.9) 50%,
-    rgba(95, 185, 0, 0.9) 100%
-  ) !important;
-  border: 2px solid rgba(140, 240, 0, 0.8) !important;
-  box-shadow: 
-    0 6px 16px 0 rgba(0, 0, 0, 0.2),
-    0 0 6px 1px rgba(140, 240, 0, 0.3) !important;
-  transform: translateY(-1px) scale(1.02);
-}
-
-/* Efecto de ondas para el botón normal circular */
-.location-button-circular::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
-  opacity: 0;
-}
-
-.location-button-circular:hover::before {
-  width: 120%;
-  height: 120%;
-  opacity: 1;
-}
-
-/* Contenedor y estilos para las coordenadas circulares */
-.coordinates-display-circular {
-  margin-top: 0.5rem;
-  background: linear-gradient(135deg, 
-    rgba(21, 128, 61, 0.25) 0%,
-    rgba(15, 118, 110, 0.35) 100%
-  );
-  border: 1px solid rgba(34, 197, 94, 0.6);
-  border-radius: 12px;
-  padding: 0.5rem;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 
-    0 3px 12px 0 rgba(34, 197, 94, 0.3),
+    0 20px 35px -10px rgba(37, 99, 235, 0.4),
+    0 10px 15px -8px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
-  animation: slide-down-circular 0.4s ease-out;
-  max-width: 160px;
+  border-color: rgba(96, 165, 250, 0.5);
+}
+
+/* Efecto de brillo superior */
+.location-button-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
   width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent
+  );
+  transition: left 0.5s ease;
 }
 
-.coordinates-grid-circular {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
+.location-button-corporate:hover .location-button-shine {
+  left: 100%;
 }
 
-.coordinate-item-circular {
+/* Icono wrapper con círculo de fondo */
+.location-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: transparent;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  padding: 0.25rem;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  border: 1px solid rgba(173, 255, 47, 0.15);
-}
-
-.coordinate-label-circular {
-  font-size: 0.5rem;
-  font-weight: 600;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 0.125rem;
-  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.coordinate-value-circular {
-  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-  font-size: 0.5rem;
-  font-weight: 600;
-  color: rgb(21, 128, 61);
-  background: rgba(255, 255, 255, 0.7);
-  padding: 0.125rem 0.25rem;
-  border-radius: 4px;
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  word-break: break-all;
-  line-height: 1.1;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
-}
-
-/* Estilos para los elementos dentro del botón circular de vidrio */
-.glass-text-circular {
-  color: rgba(6, 78, 59, 0.95);
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.02em;
-  font-weight: 500;
-  line-height: 1.1;
-  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-.glass-icon-circular {
-  filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.6));
-  color: rgba(6, 78, 59, 0.8) !important;
-  opacity: 0.95;
-}
-
-/* Efectos para el botón circular Obtener Ubicación */
-.location-text-circular {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  transition: all 0.3s ease;
-  line-height: 1.1;
-  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 500;
-}
-
-.location-icon-circular {
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+  justify-content: center;
   transition: all 0.3s ease;
 }
 
-.location-button-circular:hover .location-text-circular {
-  letter-spacing: 0.03em;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.location-button-circular:hover .location-icon-circular {
+.location-button-corporate:hover .location-icon-wrapper {
   transform: scale(1.1);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
-/* Animaciones para botones circulares */
-@keyframes slide-down-circular {
+/* Wrapper para estado exitoso */
+.location-icon-wrapper-success {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #10ff00;
+  filter: drop-shadow(0 0 6px rgba(16, 255, 0, 0.5));
+  animation: success-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Animación de aparición del icono de éxito */
+@keyframes success-pop {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Wrapper para estado deshabilitado */
+.location-icon-wrapper-disabled {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+}
+
+/* Flecha indicadora */
+.location-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.location-button-corporate:hover .location-arrow {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+}
+
+/* Botón en estado de éxito */
+.location-button-success-corporate {
+  background: linear-gradient(135deg, 
+    #059669 0%,
+    #047857 50%,
+    #065f46 100%
+  ) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 
+    0 10px 25px -5px rgba(5, 150, 105, 0.3),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
+    0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+.location-button-success-corporate:hover:not(:disabled) {
+  background: linear-gradient(135deg, 
+    #10b981 0%,
+    #059669 50%,
+    #047857 100%
+  ) !important;
+  box-shadow: 
+    0 20px 35px -10px rgba(16, 185, 129, 0.4),
+    0 10px 15px -8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+    0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* Botón deshabilitado */
+.location-button-disabled-corporate {
+  background: linear-gradient(135deg, 
+    #6b7280 0%,
+    #4b5563 50%,
+    #374151 100%
+  ) !important;
+  border-color: rgba(156, 163, 175, 0.3) !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
+.location-button-disabled-corporate:hover {
+  transform: none !important;
+}
+
+/* Tarjeta de coordenadas minimalista verde */
+.coordinates-card-corporate {
+  margin-top: 0;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 0 0 16px 16px;
+  padding: 0.75rem 1rem;
+  animation: slide-in-corporate 0.3s ease-out;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Badge de coordenadas - verde con blanco */
+.coordinate-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: transparent;
+  padding: 0;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.coordinate-label-corp {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.coordinate-value-corp {
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Animación de entrada */
+@keyframes slide-in-corporate {
   0% {
     opacity: 0;
-    transform: translateY(-15px) scale(0.9);
+    transform: translateY(-10px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-/* Responsive para botones circulares */
-@media (max-width: 480px) {
-  .location-button-circular {
-    width: 6rem !important; /* 24 - más grande */
-    height: 6rem !important; /* 24 - más grande */
+/* Responsive */
+@media (max-width: 640px) {
+  .location-button-corporate {
+    padding: 1rem 1.25rem;
   }
   
-  .location-icon-circular,
-  .glass-icon-circular {
-    width: 1.5rem !important; /* h-6 w-6 */
-    height: 1.5rem !important;
+  .location-icon-wrapper,
+  .location-icon-wrapper-success,
+  .location-icon-wrapper-disabled {
+    width: 44px;
+    height: 44px;
   }
   
-  .location-text-circular,
-  .glass-text-circular {
-    font-size: 0.625rem !important; /* text-xs */
-    line-height: 1 !important;
+  .location-icon-wrapper-success {
+    width: 52px;
+    height: 52px;
   }
   
-  .coordinates-display-circular {
-    padding: 0.375rem;
-    max-width: 160px;
+  .location-icon-wrapper svg,
+  .location-icon-wrapper-disabled svg {
+    width: 2rem;
+    height: 2rem;
   }
   
-  .coordinate-label-circular {
-    font-size: 0.4rem;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  .location-icon-wrapper-success svg {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
   }
   
-  .coordinate-value-circular {
-    font-size: 0.4rem;
-    padding: 0.125rem 0.1875rem;
-    font-weight: 600;
-    color: rgb(21, 128, 61);
+  .coordinates-card-corporate {
+    padding: 0.5rem 0.75rem;
   }
   
-  .coordinates-grid-circular {
-    gap: 0.375rem;
+  .coordinate-value-corp {
+    font-size: 0.5625rem;
+    max-width: 80px;
+  }
+  
+  .coordinate-label-corp {
+    font-size: 0.5625rem;
   }
 }
 

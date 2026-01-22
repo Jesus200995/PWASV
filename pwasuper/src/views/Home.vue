@@ -61,7 +61,7 @@
       </div>
 
       <!-- Sistema de Asistencia Integrado -->
-      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" :class="modoAsistencia ? 'glass-card-green relative px-3 py-2' : 'relative px-3 py-2'">
+      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" :class="modoAsistencia ? (tipoAsistencia === 'entrada' ? 'glass-card-blue relative px-3 py-2' : 'glass-card-red relative px-3 py-2') : 'relative px-3 py-2'">
         <!-- Icono de regresar (solo visible en modo asistencia) -->
         <button 
           v-if="modoAsistencia"
@@ -294,30 +294,30 @@
         </div>
         
         <!-- Mensaje de estado de asistencia -->
-        <div v-if="mensajeAsistencia && !modoAsistencia" class="text-center mb-3">
+        <div v-if="mensajeAsistencia && !modoAsistencia" class="flex justify-center mb-3">
           <transition name="fade-slide">
             <div 
-              class="inline-flex items-center px-2 py-1.5 rounded-lg text-xs font-medium shadow-sm border backdrop-blur-sm"
+              class="inline-flex items-center px-3 py-1.5 rounded-2xl text-xs font-medium shadow-sm border backdrop-blur-md"
               :class="{
-                'bg-green-50 text-green-700 border-green-200': mensajeAsistencia.includes('éxito') || mensajeAsistencia.includes('registrada') || mensajeAsistencia.includes('Sincronización exitosa'),
-                'bg-red-50 text-red-700 border-red-200': mensajeAsistencia.includes('Error') || mensajeAsistencia.includes('error'),
-                'bg-blue-50 text-blue-700 border-blue-200': mensajeAsistencia.includes('Sincronización') || mensajeAsistencia.includes('progreso'),
-                'bg-yellow-50 text-yellow-700 border-yellow-200': mensajeAsistencia.includes('Ya') || mensajeAsistencia.includes('offline')
+                'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-emerald-200': mensajeAsistencia.includes('éxito') || mensajeAsistencia.includes('registrada') || mensajeAsistencia.includes('Sincronización exitosa'),
+                'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-200': mensajeAsistencia.includes('Error') || mensajeAsistencia.includes('error'),
+                'bg-gradient-to-r from-slate-50 to-slate-100 text-slate-700 border-slate-300': mensajeAsistencia.includes('Sincronización') || mensajeAsistencia.includes('progreso'),
+                'bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border-amber-200': mensajeAsistencia.includes('Ya') || mensajeAsistencia.includes('offline')
               }"
             >
-              <svg v-if="mensajeAsistencia.includes('éxito') || mensajeAsistencia.includes('registrada') || mensajeAsistencia.includes('Sincronización exitosa')" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-if="mensajeAsistencia.includes('éxito') || mensajeAsistencia.includes('registrada') || mensajeAsistencia.includes('Sincronización exitosa')" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
               </svg>
-              <svg v-else-if="mensajeAsistencia.includes('Error') || mensajeAsistencia.includes('error')" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-else-if="mensajeAsistencia.includes('Error') || mensajeAsistencia.includes('error')" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <svg v-else-if="mensajeAsistencia.includes('Sincronización') || mensajeAsistencia.includes('progreso')" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 mr-1.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-else-if="mensajeAsistencia.includes('Sincronización') || mensajeAsistencia.includes('progreso')" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 animate-spin text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="text-xs">{{ mensajeAsistencia }}</span>
+              <span class="text-xs tracking-wide">{{ mensajeAsistencia }}</span>
             </div>
           </transition>
         </div>
@@ -546,18 +546,14 @@
           </div>
 
           <!-- Advertencia si faltan datos -->
-          <div v-if="!puedeEnviarAsistencia" class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div class="flex items-center text-yellow-800">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          <div v-if="!puedeEnviarAsistencia" class="mt-4 p-2.5 bg-gradient-to-r from-slate-50 to-slate-100 border border-slate-300 rounded-2xl backdrop-blur-md shadow-sm">
+            <div class="flex items-center justify-center text-slate-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="text-sm font-medium">
-                Faltan datos: 
-                {{ !latitud || !longitud ? 'Ubicación' : '' }}
-                {{ (!latitud || !longitud) && !foto ? ', ' : '' }}
-                {{ !foto ? 'Foto' : '' }}
-                {{ ((!latitud || !longitud) || !foto) && !descripcion.trim() ? ', ' : '' }}
-                {{ !descripcion.trim() ? 'Descripción' : '' }}
+              <span class="text-xs font-medium tracking-wide">
+                Completa: 
+                <span class="font-semibold">{{ !latitud || !longitud ? 'Ubicación' : '' }}{{ (!latitud || !longitud) && !foto ? ', ' : '' }}{{ !foto ? 'Foto' : '' }}{{ ((!latitud || !longitud) || !foto) && !descripcion.trim() ? ', ' : '' }}{{ !descripcion.trim() ? 'Descripción' : '' }}</span>
               </span>
             </div>
           </div>
@@ -3315,22 +3311,22 @@ watch([entradaMarcada, salidaMarcada], () => {
   left: 150%;
 }
 
-/* Efecto de vidrio verde para asistencia */
-.glass-card-green {
-  background: linear-gradient(135deg, rgba(240, 253, 244, 0.4), rgba(236, 253, 245, 0.35), rgba(220, 252, 231, 0.3));
+/* Efecto de vidrio azul suave para entrada */
+.glass-card-blue {
+  background: linear-gradient(135deg, rgba(219, 234, 254, 0.15), rgba(191, 219, 254, 0.12), rgba(147, 197, 253, 0.1));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
-  border: 1px solid rgba(22, 163, 74, 0.2);
+  border: 1px solid rgba(37, 99, 235, 0.3);
   box-shadow: 
-    0 8px 32px 0 rgba(22, 163, 74, 0.25),
-    0 0 0 1px rgba(16, 185, 129, 0.15);
+    0 8px 32px 0 rgba(37, 99, 235, 0.08),
+    0 0 0 1px rgba(59, 130, 246, 0.15);
   padding: 1.25rem;
   position: relative;
   overflow: hidden;
 }
 
-.glass-card-green::before {
+.glass-card-blue::before {
   content: '';
   position: absolute;
   top: 0;
@@ -3340,14 +3336,50 @@ watch([entradaMarcada, salidaMarcada], () => {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(167, 243, 208, 0.25),
+    rgba(147, 197, 253, 0.08),
     transparent
   );
   transform: skewX(-25deg);
   transition: all 0.6s;
 }
 
-.glass-card-green:hover::before {
+.glass-card-blue:hover::before {
+  left: 150%;
+}
+
+/* Efecto de vidrio rojo suave para término */
+.glass-card-red {
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.15), rgba(254, 202, 202, 0.12), rgba(252, 165, 165, 0.1));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  box-shadow: 
+    0 8px 32px 0 rgba(220, 38, 38, 0.08),
+    0 0 0 1px rgba(239, 68, 68, 0.15);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card-red::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(252, 165, 165, 0.08),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: all 0.6s;
+}
+
+.glass-card-red:hover::before {
   left: 150%;
 }
 

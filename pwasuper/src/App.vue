@@ -26,11 +26,6 @@ const setActiveIcon = (icon) => {
 
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value;
-  if (showMobileMenu.value) {
-    setActiveIcon('menu');
-  } else {
-    setActiveIcon(null);
-  }
 };
 
 
@@ -407,8 +402,8 @@ const currentUserId = computed(() => {
             <!-- Botón del menú hamburguesa -->
             <button
               @click="toggleMobileMenu"
-              class="p-1.5 rounded-full text-white hover:bg-green-600 focus:outline-none transition-colors"
-              :class="{ 'bg-green-600': activeIcon === 'menu' }"
+              class="p-1.5 rounded-full text-white hover:bg-green-700 focus:outline-none transition-colors"
+              :class="{ 'bg-green-700': showMobileMenu }"
             >
               <!-- Icono de menú moderno (Heroicons) -->
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">

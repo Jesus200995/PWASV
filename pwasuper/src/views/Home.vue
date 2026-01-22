@@ -4,8 +4,10 @@
       <!-- Botones de selección de sección -->
       <div v-if="!modoAsistencia" class="glass-card">
         <div class="text-center mb-3">
-          <h1 class="text-xl font-bold text-gray-800 mb-2 modern-title">Panel de Registro</h1>
-          <div class="green-line mx-auto mb-2"></div>
+          <h1 class="text-xl font-medium text-yellow-600 mb-1 title-shine" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.05em;">
+            <span style="--char-index: 0">P</span><span style="--char-index: 1">a</span><span style="--char-index: 2">n</span><span style="--char-index: 3">e</span><span style="--char-index: 4">l</span><span class="space-char" style="--char-index: 5"> </span><span style="--char-index: 6">d</span><span style="--char-index: 7">e</span><span class="space-char" style="--char-index: 8"> </span><span style="--char-index: 9">R</span><span style="--char-index: 10">e</span><span style="--char-index: 11">g</span><span style="--char-index: 12">i</span><span style="--char-index: 13">s</span><span style="--char-index: 14">t</span><span style="--char-index: 15">r</span><span style="--char-index: 16">o</span>
+          </h1>
+          <div class="yellow-line mx-auto mb-1.5"></div>
           <p class="text-xs text-gray-500 mb-3">Selecciona el tipo de registro que deseas realizar</p>
           
           <!-- Botones de navegación entre secciones -->
@@ -59,7 +61,7 @@
       </div>
 
       <!-- Sistema de Asistencia Integrado -->
-      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" class="glass-card relative">
+      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" class="relative px-3 py-2">
         <!-- Icono de regresar (solo visible en modo asistencia) -->
         <button 
           v-if="modoAsistencia"
@@ -73,8 +75,7 @@
         </button>
         
         <div class="text-center mb-2">
-          <h2 class="text-lg font-bold text-gray-800 mb-1 modern-title">Control de Jornada</h2>
-          <div class="green-line mx-auto mb-1"></div>
+          <h2 class="text-xl font-semibold text-green-700 mb-1" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: -0.02em;">Control de Jornada</h2>
           <p class="text-xs text-gray-500">
             {{ modoAsistencia ? 'Completa los datos para ' + (tipoAsistencia === 'entrada' ? 'registro de inicio' : 'registro de término') : 'Registra tu inicio y término de jornada' }}
           </p>
@@ -240,54 +241,53 @@
 
         <!-- Aviso amigable sobre registro de asistencia -->
         <div v-if="!modoAsistencia" class="text-center mb-2 relative">
-          <!-- Ícono suave en esquina izquierda (más pequeño) -->
-          <div class="absolute -left-0.5 -top-0.5 w-4 h-4 bg-gradient-to-br from-rose-300/80 via-red-300/70 to-rose-400/60 rounded-full shadow-md backdrop-blur-sm border border-rose-200/50 z-30 overflow-hidden">
-            <!-- Efecto vidrio líquido en círculo -->
-            <div class="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-rose-100/20 pointer-events-none rounded-full"></div>
-            
-            <!-- Reflejo líquido superior -->
-            <div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/50 to-transparent rounded-full"></div>
-            
-            <!-- Ondas líquidas (más pequeñas) -->
-            <div class="absolute inset-0 opacity-30">
-              <div class="absolute top-0.5 left-0.5 w-1 h-1 bg-white/60 rounded-full animate-ping"></div>
-            </div>
-            
-            <!-- Ícono suave (más pequeño) -->
-            <div class="relative z-10 w-full h-full flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-rose-700/80 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-          
-          <!-- Contenedor principal rediseñado -->
-          <div class="relative bg-gradient-to-br from-red-900 via-red-950 to-black backdrop-blur-sm rounded-xl shadow-xl border border-red-800/30 overflow-hidden mx-2">
-            <!-- Borde superior rojo elegante -->
-            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-red-400 to-red-500"></div>
+          <!-- Contenedor principal estilo empresarial -->
+          <div class="relative bg-white/95 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200/50 overflow-hidden">
+            <!-- Barra lateral de acento -->
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 via-orange-500 to-red-500"></div>
             
             <!-- Contenido principal -->
-            <div class="relative p-4">
-              <!-- Icono y encabezado -->
-              <div class="flex items-center justify-center mb-3">
-                <div class="flex items-center space-x-2">
-                  <div class="w-7 h-7 rounded-full bg-red-500 flex items-center justify-center shadow-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.718 9.168-4.309M6 15a2 2 0 002 2h1.832c4.1 0 7.625 1.718 9.168 4.309" />
-                    </svg>
-                  </div>
-                  <span class="font-semibold text-red-100 tracking-wide uppercase" style="font-size: 0.6rem;">Importante</span>
+            <div class="relative p-4 pl-5">
+              <!-- Header con icono y título -->
+              <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-200/60">
+                <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center border border-amber-200/50 shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div class="flex-1 text-left">
+                  <h3 class="text-sm font-bold text-gray-800 tracking-tight">Información Importante</h3>
+                  <p class="text-[10px] text-gray-500 font-medium mt-0.5">Requisitos de asistencia</p>
                 </div>
               </div>
               
-              <!-- Mensaje principal -->
-              <div class="text-center space-y-1">
-                <h3 class="text-2xs font-semibold text-white leading-tight" style="font-size: 0.65rem;">
-                  Registro de inicio es necesario para usar actividades
-                </h3>
-                <p class="text-2xs text-red-200 font-medium" style="font-size: 0.6rem;">
-                  Al registrar término se finaliza el acceso del día
-                </p>
+              <!-- Lista de información -->
+              <div class="space-y-2.5">
+                <!-- Item 1 -->
+                <div class="flex items-start gap-3 group">
+                  <div class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center border border-blue-200/50 group-hover:bg-blue-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex-1 text-left">
+                    <p class="text-xs font-semibold text-gray-700 leading-tight">Registro de inicio requerido</p>
+                    <p class="text-[10px] text-gray-500 mt-0.5 leading-relaxed">Debe registrar su entrada para acceder al módulo de actividades</p>
+                  </div>
+                </div>
+                
+                <!-- Item 2 -->
+                <div class="flex items-start gap-3 group">
+                  <div class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-md bg-red-50 flex items-center justify-center border border-red-200/50 group-hover:bg-red-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="flex-1 text-left">
+                    <p class="text-xs font-semibold text-gray-700 leading-tight">Cierre de jornada</p>
+                    <p class="text-[10px] text-gray-500 mt-0.5 leading-relaxed">El registro de término finaliza el acceso del día actual</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -4593,5 +4593,56 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 .grid button:not(:disabled):active {
   transform: scale(0.98);
+}
+
+/* Animación de brillo para el título Panel de Registro */
+.title-shine {
+  position: relative;
+}
+
+.title-shine span {
+  display: inline-block;
+  animation: letter-shine 4s ease-in-out infinite;
+  animation-delay: calc(var(--char-index) * 0.1s);
+}
+
+.title-shine .space-char {
+  min-width: 0.5em;
+  display: inline-block;
+}
+
+@keyframes letter-shine {
+  0%, 70% {
+    text-shadow: none;
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  75% {
+    text-shadow: 
+      0 0 8px rgba(234, 179, 8, 0.8),
+      0 0 15px rgba(234, 179, 8, 0.6),
+      0 0 20px rgba(234, 179, 8, 0.4);
+    filter: brightness(1.5);
+    transform: scale(1.1);
+  }
+  80% {
+    text-shadow: none;
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  100% {
+    text-shadow: none;
+    filter: brightness(1);
+    transform: scale(1);
+  }
+}
+
+/* Línea amarilla para Panel de Registro */
+.yellow-line {
+  width: 180px;
+  height: 2px;
+  background: linear-gradient(90deg, #eab308, #f59e0b, #eab308);
+  border-radius: 1px;
+  box-shadow: 0 1px 3px rgba(234, 179, 8, 0.3);
 }
 </style>

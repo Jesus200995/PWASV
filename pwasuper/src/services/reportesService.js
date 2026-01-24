@@ -49,13 +49,17 @@ class ReportesService {
    */
   async obtenerActividadesMesEspecifico(usuarioId, mes, anio) {
     try {
-      console.log(`📊 Obteniendo actividades de ${mes + 1}/${anio}`);
+      console.log(`📊 Obteniendo actividades de ${mes + 1}/${anio} para usuario ${usuarioId}`);
       
       const inicioDeMes = new Date(anio, mes, 1);
       const finDelMes = new Date(anio, mes + 1, 0);
       
       const fechaInicio = inicioDeMes.toISOString().split('T')[0];
       const fechaFin = finDelMes.toISOString().split('T')[0];
+      
+      console.log(`📅 Rango calculado: ${fechaInicio} a ${fechaFin}`);
+      console.log(`🔗 URL: ${API_URL}/historial/${usuarioId}`);
+      console.log(`📋 Parámetros:`, { fecha_inicio: fechaInicio, fecha_fin: fechaFin, limit: 1000 });
       
       const response = await axios.get(`${API_URL}/historial/${usuarioId}`, {
         params: {
@@ -66,9 +70,13 @@ class ReportesService {
         timeout: 10000
       });
       
+      console.log(`✅ Respuesta del servidor:`, response.data);
+      console.log(`📊 Total de actividades obtenidas: ${response.data.historial?.length || 0}`);
+      
       return response.data;
     } catch (error) {
-      console.error('❌ Error obteniendo actividades:', error);
+      console.error('❌ Error obteniendo actividades:', error.message);
+      console.error('📋 Detalles del error:', error.response?.data || error);
       throw this._procesarError(error);
     }
   }

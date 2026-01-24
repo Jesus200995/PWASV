@@ -357,20 +357,34 @@ export default {
       try {
         this.cargando = true;
         const usuario = JSON.parse(localStorage.getItem('user'));
+        
+        if (!usuario || !usuario.id) {
+          console.error('❌ No hay usuario en localStorage');
+          throw new Error('Usuario no autenticado');
+        }
+        
+        console.log(`📋 Cargando actividades para usuario ${usuario.id} - Mes ${this.mesSeleccionado} Año ${this.anioSeleccionado}`);
+        
         const resultado = await reportesService.obtenerActividadesMesEspecifico(
           usuario.id,
           this.mesSeleccionado,
           this.anioSeleccionado
         );
 
+        if (!resultado) {
+          throw new Error('No se recibió respuesta del servidor');
+        }
+
         this.actividades = resultado.historial || [];
-        console.log('✅ Actividades cargadas:', this.actividades);
+        console.log(`✅ Actividades cargadas: ${this.actividades.length}`);
+        
+        if (this.actividades.length === 0) {
+          console.warn('⚠️ No hay actividades para el período seleccionado');
+        }
       } catch (error) {
         console.error('❌ Error cargando actividades:', error);
-        this.$notify?.({
-          type: 'error',
-          message: 'Error al cargar las actividades'
-        });
+        this.actividades = [];
+        alert(`Error: ${error.message}`);
       } finally {
         this.cargando = false;
       }

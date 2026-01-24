@@ -7,6 +7,141 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s; background-color: rgba(56, 142, 60, 0.3);"></div>
     </div>
 
+    <!-- Modal de Confirmación de Firma -->
+    <Teleport to="body">
+      <Transition name="modal-fade">
+        <div 
+          v-if="mostrarModalFirma" 
+          class="fixed inset-0 z-50 flex items-center justify-center p-4"
+          @click.self="cerrarModalFirma"
+        >
+          <!-- Overlay -->
+          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+          
+          <!-- Modal -->
+          <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-modal-enter">
+            <!-- Header del Modal -->
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-4 sm:px-6">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/>
+                      <path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-bold text-white">Firma Requerida</h3>
+                    <p class="text-xs text-white/80">Autenticación del reporte</p>
+                  </div>
+                </div>
+                <button 
+                  @click="cerrarModalFirma"
+                  class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Contenido del Modal -->
+            <div class="px-4 py-5 sm:px-6">
+              <!-- Información del Reporte -->
+              <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-4 border border-blue-100">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-gray-900">Reporte de Actividades</p>
+                    <p class="text-xs text-gray-600 mt-0.5">{{ mesActual }} {{ anioSeleccionado }}</p>
+                    <div class="flex items-center gap-2 mt-2">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ actividades.length }} actividades
+                      </span>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" :class="formatoSeleccionado === 'pdf' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
+                        {{ formatoSeleccionado.toUpperCase() }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Aviso importante -->
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                <div class="flex gap-3">
+                  <div class="flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-semibold text-amber-800">Importante</h4>
+                    <p class="text-xs text-amber-700 mt-1">
+                      Al firmar este reporte, usted certifica que la información contenida es verídica y corresponde a sus actividades realizadas.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Datos del firmante -->
+              <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                <p class="text-xs text-gray-500 font-medium mb-2">FIRMANTE</p>
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">{{ iniciales }}</span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ usuarioInfo.nombre }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ usuarioInfo.correo }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Checkbox de confirmación -->
+              <label class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+                <input 
+                  type="checkbox" 
+                  v-model="confirmarFirma"
+                  class="w-4 h-4 mt-0.5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                >
+                <span class="text-xs text-gray-700">
+                  Confirmo que he revisado el contenido del reporte y autorizo su descarga con mi firma digital.
+                </span>
+              </label>
+            </div>
+            
+            <!-- Footer del Modal -->
+            <div class="bg-gray-50 px-4 py-4 sm:px-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <button
+                @click="cerrarModalFirma"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors order-2 sm:order-1"
+              >
+                Cancelar
+              </button>
+              <button
+                @click="confirmarYDescargar"
+                :disabled="!confirmarFirma || !firmaValida"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-xl transition-all order-1 sm:order-2 flex items-center justify-center gap-2"
+                :class="confirmarFirma && firmaValida 
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg' 
+                  : 'bg-gray-300 cursor-not-allowed'"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Firmar y Descargar
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
       <div class="page-container relative z-10 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 min-h-full max-w-full">
         <div class="w-full max-w-lg mx-auto space-y-4">
@@ -238,7 +373,7 @@
 
             <!-- Botón de Descarga -->
             <button
-              @click="generarReporte"
+              @click="iniciarDescarga"
               :disabled="cargando || generandoReporte || actividades.length === 0"
               class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm"
             >
@@ -249,8 +384,16 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span class="truncate">{{ generandoReporte ? 'Generando...' : 'Descargar' }}</span>
+              <span class="truncate">{{ generandoReporte ? 'Generando...' : 'Descargar Reporte' }}</span>
             </button>
+            
+            <!-- Aviso de firma requerida -->
+            <p v-if="!firmaValida && actividades.length > 0" class="text-xs text-amber-600 text-center mt-2 flex items-center justify-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              Firma tu reporte antes de descargar
+            </p>
           </div>
 
           <!-- Historial de Reportes -->
@@ -331,7 +474,10 @@ export default {
       meses: [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-      ]
+      ],
+      // Modal de confirmación de firma
+      mostrarModalFirma: false,
+      confirmarFirma: false
     };
   },
   computed: {
@@ -352,6 +498,19 @@ export default {
       if (this.actividades.length === 0) return 'Sin datos';
       if (this.$refs.firmaComponent?.hayFirma) return 'Firmado';
       return 'Sin firmar';
+    },
+    // Verificar si hay firma válida
+    firmaValida() {
+      return this.$refs.firmaComponent?.hayFirma || false;
+    },
+    // Obtener iniciales del usuario
+    iniciales() {
+      if (!this.usuarioInfo.nombre) return 'U';
+      const partes = this.usuarioInfo.nombre.split(' ');
+      if (partes.length >= 2) {
+        return (partes[0][0] + partes[1][0]).toUpperCase();
+      }
+      return partes[0].substring(0, 2).toUpperCase();
     }
   },
   methods: {
@@ -453,6 +612,44 @@ export default {
 
     capitalizar(texto) {
       return texto.charAt(0).toUpperCase() + texto.slice(1);
+    },
+
+    // Iniciar proceso de descarga - verificar firma primero
+    iniciarDescarga() {
+      if (this.actividades.length === 0) {
+        alert('No hay actividades para generar el reporte');
+        return;
+      }
+
+      // Verificar si hay firma
+      if (!this.$refs.firmaComponent?.hayFirma) {
+        alert('Por favor, firma el reporte antes de descargarlo');
+        // Hacer scroll al componente de firma
+        const firmaSection = document.querySelector('.glass-card:has([ref="firmaComponent"])') || 
+                            document.querySelectorAll('.glass-card')[3];
+        if (firmaSection) {
+          firmaSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      // Mostrar modal de confirmación
+      this.confirmarFirma = false;
+      this.mostrarModalFirma = true;
+    },
+
+    // Cerrar modal
+    cerrarModalFirma() {
+      this.mostrarModalFirma = false;
+      this.confirmarFirma = false;
+    },
+
+    // Confirmar y proceder con la descarga
+    async confirmarYDescargar() {
+      if (!this.confirmarFirma || !this.firmaValida) return;
+      
+      this.cerrarModalFirma();
+      await this.generarReporte();
     },
 
     async generarReporte() {
@@ -754,6 +951,32 @@ export default {
 
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in;
+}
+
+/* Modal animations */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-modal-enter {
+  animation: modal-enter 0.3s ease-out forwards;
 }
 
 /* Responsive adjustments */

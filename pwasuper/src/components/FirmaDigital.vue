@@ -7,7 +7,10 @@
       <p class="text-xs text-gray-500 mb-2">Firmar con el mouse o dedo</p>
     </div>
     
-    <div class="border-2 border-dashed border-gray-300 rounded-lg overflow-hidden bg-white hover:border-blue-400 transition-colors">
+    <div 
+      class="border-2 rounded-lg overflow-hidden bg-white transition-colors"
+      :class="hayFirma ? 'border-green-400 border-solid' : 'border-dashed border-gray-300 hover:border-blue-400'"
+    >
       <canvas
         ref="canvas"
         :width="canvasWidth"
@@ -23,21 +26,23 @@
       />
     </div>
     
-    <div class="flex gap-2 mt-3">
+    <!-- Indicador de estado de firma -->
+    <div class="flex items-center justify-between mt-2">
+      <div class="flex items-center gap-1.5">
+        <div 
+          class="w-2 h-2 rounded-full"
+          :class="hayFirma ? 'bg-green-500' : 'bg-gray-300'"
+        ></div>
+        <span class="text-xs" :class="hayFirma ? 'text-green-600 font-medium' : 'text-gray-500'">
+          {{ hayFirma ? 'Firmado' : 'Sin firmar' }}
+        </span>
+      </div>
       <button
         @click="limpiarFirma"
         type="button"
-        class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+        class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
       >
         Limpiar
-      </button>
-      <button
-        @click="descargarFirma"
-        type="button"
-        :disabled="!hayFirma"
-        class="flex-1 px-3 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
-      >
-        Descargar
       </button>
     </div>
   </div>
@@ -152,12 +157,9 @@ export default {
       return canvas.toDataURL('image/png');
     },
     
-    descargarFirma() {
-      const canvas = this.$refs.canvas;
-      const link = document.createElement('a');
-      link.href = canvas.toDataURL('image/png');
-      link.download = `firma_${new Date().getTime()}.png`;
-      link.click();
+    // Método para verificar si hay firma válida
+    tieneFirma() {
+      return this.hayFirma;
     }
   }
 };

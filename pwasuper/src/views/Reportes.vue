@@ -200,11 +200,7 @@
               </div>
               <div class="mb-2">
                 <p class="text-xs text-gray-600 font-medium">Cargo</p>
-                <p class="text-sm font-semibold text-gray-900 truncate">{{ usuarioInfo.cargo || 'Facilitador Comunitario' }}</p>
-              </div>
-              <div class="mb-2">
-                <p class="text-xs text-gray-600 font-medium">CURP</p>
-                <p class="text-xs font-semibold text-gray-900 truncate">{{ usuarioInfo.curp || 'No registrado' }}</p>
+                <p class="text-sm font-semibold text-gray-900 truncate">{{ usuarioInfo.cargo || 'N/A' }}</p>
               </div>
               <div>
                 <p class="text-xs text-gray-600 font-medium">Correo</p>
@@ -329,8 +325,7 @@ export default {
       usuarioInfo: {
         nombre: '',
         cargo: '',
-        correo: '',
-        curp: ''
+        correo: ''
       },
       reportesGenerados: [],
       meses: [
@@ -508,257 +503,135 @@ export default {
 
       const pageHeight = doc.internal.pageSize.getHeight();
       const pageWidth = doc.internal.pageSize.getWidth();
-      let currentY = 10;
+      let currentY = 20;
 
-      // ===== ENCABEZADO OFICIAL =====
-      // Franja guinda superior
-      doc.setFillColor(105, 27, 63); // Color guinda oficial
-      doc.rect(0, 0, pageWidth, 15, 'F');
+      // Encabezado
+      doc.setFillColor(59, 130, 246);
+      doc.rect(0, 0, pageWidth, 30, 'F');
 
-      // Texto "SECRETARÍA DE BIENESTAR"
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(9);
+      doc.setFontSize(24);
       doc.setFont(undefined, 'bold');
-      doc.text('SECRETARÍA DE BIENESTAR', pageWidth / 2, 7, { align: 'center' });
-      doc.setFontSize(7);
-      doc.setFont(undefined, 'normal');
-      doc.text('Programa Sembrando Vida', pageWidth / 2, 11, { align: 'center' });
+      doc.text('REPORTE DE ACTIVIDADES', pageWidth / 2, 15, { align: 'center' });
 
-      currentY = 20;
-
-      // Título del documento
-      doc.setTextColor(105, 27, 63);
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text('INFORME DE ACTIVIDADES', pageWidth / 2, currentY, { align: 'center' });
-      
-      currentY += 8;
       doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${this.mesActual} ${this.anioSeleccionado}`, pageWidth / 2, 25, { align: 'center' });
+
+      currentY = 40;
+
+      // Información del usuario
       doc.setTextColor(0, 0, 0);
-      doc.text(`${this.mesActual.toUpperCase()} ${this.anioSeleccionado}`, pageWidth / 2, currentY, { align: 'center' });
-
-      // Línea divisoria
-      currentY += 5;
-      doc.setDrawColor(105, 27, 63);
-      doc.setLineWidth(0.5);
-      doc.line(15, currentY, pageWidth - 15, currentY);
-
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('INFORMACIÓN DEL USUARIO', 20, currentY);
       currentY += 8;
 
-      // ===== DATOS DEL FACILITADOR =====
-      doc.setFillColor(240, 240, 240);
-      doc.rect(15, currentY - 3, pageWidth - 30, 30, 'F');
-      
-      doc.setTextColor(105, 27, 63);
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text('DATOS DEL FACILITADOR', 18, currentY + 2);
-      
-      currentY += 8;
-      doc.setFontSize(8);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont(undefined, 'normal');
-      
-      doc.text(`NOMBRE:`, 18, currentY);
-      doc.setFont(undefined, 'bold');
-      doc.text(this.usuarioInfo.nombre.toUpperCase(), 38, currentY);
-      
-      currentY += 5;
-      doc.setFont(undefined, 'normal');
-      doc.text(`CARGO:`, 18, currentY);
-      doc.setFont(undefined, 'bold');
-      doc.text((this.usuarioInfo.cargo || 'FACILITADOR COMUNITARIO').toUpperCase(), 38, currentY);
-      
-      currentY += 5;
-      doc.setFont(undefined, 'normal');
-      doc.text(`CURP:`, 18, currentY);
-      doc.setFont(undefined, 'bold');
-      doc.text((this.usuarioInfo.curp || 'NO REGISTRADO').toUpperCase(), 38, currentY);
-      
-      currentY += 5;
-      doc.setFont(undefined, 'normal');
-      doc.text(`CORREO:`, 18, currentY);
-      doc.setFont(undefined, 'bold');
-      doc.text(this.usuarioInfo.correo.toLowerCase(), 38, currentY);
-
-      currentY += 10;
-
-      // ===== RESUMEN DE ACTIVIDADES =====
-      doc.setFillColor(105, 27, 63);
-      doc.rect(15, currentY, pageWidth - 30, 7, 'F');
-      
-      doc.setTextColor(255, 255, 255);
       doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.text('RESUMEN DE ACTIVIDADES DESARROLLADAS', pageWidth / 2, currentY + 5, { align: 'center' });
-      
-      currentY += 12;
+      doc.setFont(undefined, 'normal');
+      doc.text(`Nombre: ${this.usuarioInfo.nombre}`, 20, currentY);
+      currentY += 6;
+      doc.text(`Cargo: ${this.usuarioInfo.cargo || 'No especificado'}`, 20, currentY);
+      currentY += 6;
+      doc.text(`Correo: ${this.usuarioInfo.correo}`, 20, currentY);
+      currentY += 6;
+      doc.text(`Fecha de Generación: ${new Date().toLocaleString('es-MX')}`, 20, currentY);
+      currentY += 8;
 
+      // Resumen
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(11);
+      doc.text('RESUMEN', 20, currentY);
+      currentY += 8;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      
       const campo = this.actividades.filter(a => a.tipo_actividad === 'campo').length;
       const gabinete = this.actividades.filter(a => a.tipo_actividad === 'gabinete').length;
-
-      doc.setTextColor(0, 0, 0);
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'normal');
-      doc.text(`Total de Actividades Registradas: ${this.actividades.length}`, 18, currentY);
-      currentY += 5;
-      doc.text(`Actividades de Campo: ${campo}`, 18, currentY);
-      currentY += 5;
-      doc.text(`Actividades de Gabinete: ${gabinete}`, 18, currentY);
-
-      currentY += 10;
-
-      // ===== TABLA DE ACTIVIDADES =====
-      // Encabezado de tabla
-      doc.setFillColor(105, 27, 63);
-      doc.rect(15, currentY - 2, 15, 7, 'F');
-      doc.rect(30, currentY - 2, 50, 7, 'F');
-      doc.rect(80, currentY - 2, 25, 7, 'F');
-      doc.rect(105, currentY - 2, pageWidth - 120, 7, 'F');
       
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(7);
+      doc.text(`Total de Registros: ${this.actividades.length}`, 20, currentY);
+      currentY += 6;
+      doc.text(`Actividades de Campo: ${campo}`, 20, currentY);
+      currentY += 6;
+      doc.text(`Actividades de Gabinete: ${gabinete}`, 20, currentY);
+      currentY += 12;
+
+      // Tabla de Actividades
       doc.setFont(undefined, 'bold');
-      doc.text('Núm.', 22.5, currentY + 2, { align: 'center' });
-      doc.text('ACTIVIDAD REALIZADA', 55, currentY + 2, { align: 'center' });
-      doc.text('TIPO', 92.5, currentY + 2, { align: 'center' });
-      doc.text('CATEGORÍA', 145, currentY + 2, { align: 'center' });
+      doc.setFontSize(11);
+      doc.text('DETALLE DE ACTIVIDADES', 20, currentY);
+      currentY += 8;
 
-      currentY += 9;
+      // Headers
+      doc.setFillColor(37, 99, 235);
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
 
-      // Datos de la tabla
+      const tableY = currentY;
+      doc.rect(20, tableY - 4, 170, 6, 'F');
+      doc.text('Fecha', 25, tableY);
+      doc.text('Hora', 60, tableY);
+      doc.text('Tipo', 90, tableY);
+      doc.text('Descripción', 110, tableY);
+
+      currentY += 8;
       doc.setTextColor(0, 0, 0);
-      doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
 
+      // Datos
       this.actividades.forEach((actividad, index) => {
-        if (currentY > pageHeight - 40) {
+        if (currentY > pageHeight - 30) {
           doc.addPage();
-          
-          // Repetir encabezado en nueva página
-          doc.setFillColor(105, 27, 63);
-          doc.rect(0, 0, pageWidth, 8, 'F');
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(7);
-          doc.text('INFORME DE ACTIVIDADES (continuación)', pageWidth / 2, 5, { align: 'center' });
-          
-          currentY = 15;
-          
-          // Encabezado de tabla
-          doc.setFillColor(105, 27, 63);
-          doc.rect(15, currentY - 2, 15, 7, 'F');
-          doc.rect(30, currentY - 2, 50, 7, 'F');
-          doc.rect(80, currentY - 2, 25, 7, 'F');
-          doc.rect(105, currentY - 2, pageWidth - 120, 7, 'F');
-          
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(7);
-          doc.setFont(undefined, 'bold');
-          doc.text('Núm.', 22.5, currentY + 2, { align: 'center' });
-          doc.text('ACTIVIDAD REALIZADA', 55, currentY + 2, { align: 'center' });
-          doc.text('TIPO', 92.5, currentY + 2, { align: 'center' });
-          doc.text('CATEGORÍA', 145, currentY + 2, { align: 'center' });
-          
-          currentY += 9;
+          currentY = 20;
         }
 
         const fecha = this.formatearFecha(actividad.fecha_hora);
-        const tipo = (actividad.tipo_actividad || 'No especificado').toUpperCase();
-        const categoria = (actividad.categoria_actividad || 'Sin categoría').toUpperCase();
-        const descripcion = actividad.descripcion || 'Sin descripción';
+        const hora = this.formatearHora(actividad.fecha_hora);
+        const tipo = this.capitalizar(actividad.tipo_actividad || '-');
+        const desc = (actividad.descripcion || actividad.categoria_actividad || '-').substring(0, 30);
 
-        // Fondo alternado
         if (index % 2 === 0) {
-          doc.setFillColor(250, 250, 250);
-          doc.rect(15, currentY - 4, pageWidth - 30, 10, 'F');
+          doc.setFillColor(240, 244, 255);
+          doc.rect(20, currentY - 3, 170, 5, 'F');
         }
 
-        // Bordes de celda
-        doc.setDrawColor(200, 200, 200);
-        doc.setLineWidth(0.1);
-        doc.rect(15, currentY - 4, 15, 10);
-        doc.rect(30, currentY - 4, 50, 10);
-        doc.rect(80, currentY - 4, 25, 10);
-        doc.rect(105, currentY - 4, pageWidth - 120, 10);
+        doc.text(fecha, 25, currentY);
+        doc.text(hora, 60, currentY);
+        doc.text(tipo, 90, currentY);
+        doc.text(desc, 110, currentY);
 
-        doc.setTextColor(0, 0, 0);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${index + 1}`, 22.5, currentY, { align: 'center' });
-        
-        doc.setFont(undefined, 'normal');
-        // Texto de actividad con fecha
-        const textoActividad = `${fecha}.- ${tipo === 'CAMPO' ? 'Campo' : 'Oficina'}\n${descripcion}`;
-        const lineas = doc.splitTextToSize(textoActividad, 48);
-        doc.text(lineas.slice(0, 2), 31, currentY - 1);
-        
-        doc.text(tipo.substring(0, 8), 92.5, currentY, { align: 'center' });
-        
-        const categLineas = doc.splitTextToSize(categoria, pageWidth - 125);
-        doc.text(categLineas[0], 106, currentY);
-
-        currentY += 12;
+        currentY += 6;
       });
 
-      currentY += 10;
-
-      // ===== FIRMAS =====
-      if (currentY > pageHeight - 60) {
-        doc.addPage();
-        currentY = 20;
-      }
-
-      // Línea divisoria antes de firmas
-      doc.setDrawColor(105, 27, 63);
-      doc.setLineWidth(0.5);
-      doc.line(15, currentY, pageWidth - 15, currentY);
-      currentY += 15;
-
-      // Firma del Facilitador
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(0, 0, 0);
-      
-      if (this.$refs.firmaComponent?.hayFirma) {
-        const firmaBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
-        doc.addImage(firmaBase64, 'PNG', 25, currentY - 5, 50, 20);
-        currentY += 18;
-      } else {
-        currentY += 15;
-      }
-
-      doc.line(25, currentY, 75, currentY);
-      currentY += 5;
-      doc.text('Elaboró', pageWidth / 4, currentY, { align: 'center' });
       currentY += 8;
-      doc.setFontSize(7);
-      doc.setFont(undefined, 'normal');
-      doc.text('Facilitador Comunitario', pageWidth / 4, currentY, { align: 'center' });
-      currentY += 4;
-      doc.setFont(undefined, 'bold');
-      doc.text(this.usuarioInfo.nombre.toUpperCase(), pageWidth / 4, currentY, { align: 'center' });
 
-      // Firma del Coordinador (espacio vacío)
-      const firmaY = currentY - 37;
-      doc.line(pageWidth - 75, firmaY + 15, pageWidth - 25, firmaY + 15);
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'bold');
-      doc.text('Aprobó', pageWidth * 3 / 4, firmaY + 20, { align: 'center' });
-      doc.setFontSize(7);
-      doc.setFont(undefined, 'normal');
-      doc.text('Encargada de Despacho de la', pageWidth * 3 / 4, firmaY + 28, { align: 'center' });
-      doc.text('Coordinación Territorial', pageWidth * 3 / 4, firmaY + 32, { align: 'center' });
+      // Firma
+      if (this.$refs.firmaComponent?.hayFirma) {
+        if (currentY > pageHeight - 50) {
+          doc.addPage();
+          currentY = 20;
+        }
 
-      // Pie de página
-      currentY = pageHeight - 15;
-      doc.setFillColor(105, 27, 63);
-      doc.rect(0, currentY, pageWidth, 15, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(6);
-      doc.text(`Generado el ${new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' })}`, pageWidth / 2, currentY + 8, { align: 'center' });
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(10);
+        doc.text('FIRMA DIGITAL', 20, currentY);
+        currentY += 10;
+
+        const firmaBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
+        doc.addImage(firmaBase64, 'PNG', 20, currentY, 80, 30);
+        currentY += 35;
+
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Firmado por: ${this.usuarioInfo.nombre}`, 20, currentY);
+        currentY += 4;
+        doc.text(`Fecha de Firma: ${new Date().toLocaleString('es-MX')}`, 20, currentY);
+      }
 
       // Descargar
-      const nombreArchivo = `INFORME_ACTIVIDADES_${this.usuarioInfo.nombre.toUpperCase().replace(/ /g, '_')}_${this.mesActual.toUpperCase()}_${this.anioSeleccionado}.pdf`;
-      doc.save(nombreArchivo);
+      doc.save(`Reporte_${this.mesActual}_${this.anioSeleccionado}.pdf`);
     },
 
     generarCSV() {
@@ -805,8 +678,7 @@ export default {
       this.usuarioInfo = {
         nombre: usuario.nombre_completo || usuario.nombre || 'Usuario',
         cargo: usuario.cargo || '',
-        correo: usuario.correo || '',
-        curp: usuario.curp || ''
+        correo: usuario.correo || ''
       };
     }
 

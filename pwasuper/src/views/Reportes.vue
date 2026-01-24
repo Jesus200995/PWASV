@@ -125,9 +125,9 @@
               </button>
               <button
                 @click="confirmarYDescargar"
-                :disabled="!confirmarFirma || !firmaValida"
+                :disabled="!confirmarFirma"
                 class="flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-xl transition-all order-1 sm:order-2 flex items-center justify-center gap-2"
-                :class="confirmarFirma && firmaValida 
+                :class="confirmarFirma 
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg' 
                   : 'bg-gray-300 cursor-not-allowed'"
               >
@@ -386,14 +386,6 @@
               </svg>
               <span class="truncate">{{ generandoReporte ? 'Generando...' : 'Descargar Reporte' }}</span>
             </button>
-            
-            <!-- Aviso de firma requerida -->
-            <p v-if="!firmaValida && actividades.length > 0" class="text-xs text-amber-600 text-center mt-2 flex items-center justify-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-              </svg>
-              Firma tu reporte antes de descargar
-            </p>
           </div>
 
           <!-- Historial de Reportes -->
@@ -468,7 +460,8 @@ export default {
       usuarioInfo: {
         nombre: '',
         cargo: '',
-        correo: ''
+        correo: '',
+        territorio: ''
       },
       reportesGenerados: [],
       meses: [
@@ -498,10 +491,6 @@ export default {
       if (this.actividades.length === 0) return 'Sin datos';
       if (this.$refs.firmaComponent?.hayFirma) return 'Firmado';
       return 'Sin firmar';
-    },
-    // Verificar si hay firma válida
-    firmaValida() {
-      return this.$refs.firmaComponent?.hayFirma || false;
     },
     // Obtener iniciales del usuario
     iniciales() {
@@ -614,6 +603,11 @@ export default {
       return texto.charAt(0).toUpperCase() + texto.slice(1);
     },
 
+    // Verificar si hay firma válida (método en lugar de computed para reactividad con refs)
+    esFirmaValida() {
+      return this.$refs.firmaComponent?.hayFirma || false;
+    },
+
     // Iniciar proceso de descarga - verificar firma primero
     iniciarDescarga() {
       if (this.actividades.length === 0) {
@@ -646,7 +640,7 @@ export default {
 
     // Confirmar y proceder con la descarga
     async confirmarYDescargar() {
-      if (!this.confirmarFirma || !this.firmaValida) return;
+      if (!this.confirmarFirma || !this.esFirmaValida()) return;
       
       this.cerrarModalFirma();
       await this.generarReporte();
@@ -700,131 +694,320 @@ export default {
 
       const pageHeight = doc.internal.pageSize.getHeight();
       const pageWidth = doc.internal.pageSize.getWidth();
-      let currentY = 20;
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
+      let currentY = 0;
 
-      // Encabezado
-      doc.setFillColor(59, 130, 246);
-      doc.rect(0, 0, pageWidth, 30, 'F');
+      // ========== ENCABEZADO PRINCIPAL ==========
+      // Fondo degradado del header
+      doc.setFillColor(37, 99, 235); // Azul principal
+      doc.rect(0, 0, pageWidth, 40, 'F');
+      
+      // Línea decorativa inferior del header
+      doc.setFillColor(30, 64, 175); // Azul más oscuro
+      doc.rect(0, 38, pageWidth, 2, 'F');
 
+      // Título principal centrado
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(24);
+      doc.setFontSize(22);
       doc.setFont(undefined, 'bold');
-      doc.text('REPORTE DE ACTIVIDADES', pageWidth / 2, 15, { align: 'center' });
+      doc.text('REPORTE DE ACTIVIDADES', pageWidth / 2, 18, { align: 'center' });
 
+      // Subtítulo con período
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${this.mesActual} ${this.anioSeleccionado}`, pageWidth / 2, 28, { align: 'center' });
+
+      // Fecha de generación
+      doc.setFontSize(8);
+      const fechaGeneracion = new Date().toLocaleString('es-MX', {
+        dateStyle: 'full',
+        timeStyle: 'short'
+      });
+      doc.text(`Generado: ${fechaGeneracion}`, pageWidth / 2, 35, { align: 'center' });
+
+      currentY = 50;
+
+      // ========== INFORMACIÓN DEL USUARIO (Tarjeta centrada) ==========
+      const cardHeight = 45;
+      const cardY = currentY;
+      
+      // Fondo de la tarjeta
+      doc.setFillColor(248, 250, 252); // Gris muy claro
+      doc.roundedRect(margin, cardY, contentWidth, cardHeight, 3, 3, 'F');
+      
+      // Borde de la tarjeta
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(margin, cardY, contentWidth, cardHeight, 3, 3, 'S');
+
+      // Título de la sección
+      doc.setTextColor(30, 64, 175);
       doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${this.mesActual} ${this.anioSeleccionado}`, pageWidth / 2, 25, { align: 'center' });
-
-      currentY = 40;
-
-      // Información del usuario
-      doc.setTextColor(0, 0, 0);
-      doc.setFontSize(11);
       doc.setFont(undefined, 'bold');
-      doc.text('INFORMACIÓN DEL USUARIO', 20, currentY);
-      currentY += 8;
+      doc.text('DATOS DEL USUARIO', pageWidth / 2, cardY + 8, { align: 'center' });
 
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
-      doc.text(`Nombre: ${this.usuarioInfo.nombre}`, 20, currentY);
-      currentY += 6;
-      doc.text(`Cargo: ${this.usuarioInfo.cargo || 'No especificado'}`, 20, currentY);
-      currentY += 6;
-      doc.text(`Correo: ${this.usuarioInfo.correo}`, 20, currentY);
-      currentY += 6;
-      doc.text(`Fecha de Generación: ${new Date().toLocaleString('es-MX')}`, 20, currentY);
-      currentY += 8;
+      // Línea separadora
+      doc.setDrawColor(203, 213, 225);
+      doc.line(margin + 10, cardY + 12, pageWidth - margin - 10, cardY + 12);
 
-      // Resumen
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(11);
-      doc.text('RESUMEN', 20, currentY);
-      currentY += 8;
-
+      // Datos del usuario en dos columnas centradas
+      doc.setTextColor(71, 85, 105);
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
       
+      const col1X = margin + 15;
+      const col2X = pageWidth / 2 + 5;
+      let dataY = cardY + 20;
+      
+      // Columna 1
+      doc.setFont(undefined, 'bold');
+      doc.text('Nombre:', col1X, dataY);
+      doc.setFont(undefined, 'normal');
+      doc.text(this.usuarioInfo.nombre, col1X + 20, dataY);
+      
+      doc.setFont(undefined, 'bold');
+      doc.text('Correo:', col1X, dataY + 8);
+      doc.setFont(undefined, 'normal');
+      doc.text(this.usuarioInfo.correo, col1X + 20, dataY + 8);
+      
+      // Columna 2
+      doc.setFont(undefined, 'bold');
+      doc.text('Cargo:', col2X, dataY);
+      doc.setFont(undefined, 'normal');
+      doc.text(this.usuarioInfo.cargo || 'No especificado', col2X + 18, dataY);
+      
+      doc.setFont(undefined, 'bold');
+      doc.text('Territorio:', col2X, dataY + 8);
+      doc.setFont(undefined, 'normal');
+      doc.text(this.usuarioInfo.territorio || 'No asignado', col2X + 24, dataY + 8);
+
+      currentY = cardY + cardHeight + 10;
+
+      // ========== RESUMEN DE ACTIVIDADES (Tarjetas de estadísticas) ==========
       const campo = this.actividades.filter(a => a.tipo_actividad === 'campo').length;
       const gabinete = this.actividades.filter(a => a.tipo_actividad === 'gabinete').length;
+      const otro = this.actividades.length - campo - gabinete;
       
-      doc.text(`Total de Registros: ${this.actividades.length}`, 20, currentY);
-      currentY += 6;
-      doc.text(`Actividades de Campo: ${campo}`, 20, currentY);
-      currentY += 6;
-      doc.text(`Actividades de Gabinete: ${gabinete}`, 20, currentY);
-      currentY += 12;
-
-      // Tabla de Actividades
+      const statCardWidth = (contentWidth - 10) / 3;
+      const statCardHeight = 25;
+      
+      // Tarjeta Total
+      doc.setFillColor(59, 130, 246); // Azul
+      doc.roundedRect(margin, currentY, statCardWidth, statCardHeight, 2, 2, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text('TOTAL', margin + statCardWidth / 2, currentY + 8, { align: 'center' });
+      doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
+      doc.text(String(this.actividades.length), margin + statCardWidth / 2, currentY + 18, { align: 'center' });
+      
+      // Tarjeta Campo
+      doc.setFillColor(34, 197, 94); // Verde
+      doc.roundedRect(margin + statCardWidth + 5, currentY, statCardWidth, statCardHeight, 2, 2, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text('CAMPO', margin + statCardWidth + 5 + statCardWidth / 2, currentY + 8, { align: 'center' });
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text(String(campo), margin + statCardWidth + 5 + statCardWidth / 2, currentY + 18, { align: 'center' });
+      
+      // Tarjeta Gabinete
+      doc.setFillColor(168, 85, 247); // Púrpura
+      doc.roundedRect(margin + (statCardWidth + 5) * 2, currentY, statCardWidth, statCardHeight, 2, 2, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text('GABINETE', margin + (statCardWidth + 5) * 2 + statCardWidth / 2, currentY + 8, { align: 'center' });
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text(String(gabinete), margin + (statCardWidth + 5) * 2 + statCardWidth / 2, currentY + 18, { align: 'center' });
+
+      currentY += statCardHeight + 12;
+
+      // ========== TABLA DE ACTIVIDADES ==========
+      // Título de la sección
+      doc.setTextColor(30, 64, 175);
       doc.setFontSize(11);
-      doc.text('DETALLE DE ACTIVIDADES', 20, currentY);
+      doc.setFont(undefined, 'bold');
+      doc.text('DETALLE DE ACTIVIDADES', pageWidth / 2, currentY, { align: 'center' });
       currentY += 8;
 
-      // Headers
+      // Definir columnas de la tabla (centrada)
+      const tableWidth = contentWidth;
+      const colWidths = [45, 25, 30, 70]; // Fecha, Hora, Tipo, Descripción
+      const tableX = margin;
+      
+      // Header de la tabla
       doc.setFillColor(37, 99, 235);
+      doc.rect(tableX, currentY, tableWidth, 8, 'F');
+      
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(8);
       doc.setFont(undefined, 'bold');
+      
+      let colX = tableX + 3;
+      doc.text('FECHA', colX, currentY + 5.5);
+      colX += colWidths[0];
+      doc.text('HORA', colX, currentY + 5.5);
+      colX += colWidths[1];
+      doc.text('TIPO', colX, currentY + 5.5);
+      colX += colWidths[2];
+      doc.text('DESCRIPCIÓN', colX, currentY + 5.5);
 
-      const tableY = currentY;
-      doc.rect(20, tableY - 4, 170, 6, 'F');
-      doc.text('Fecha', 25, tableY);
-      doc.text('Hora', 60, tableY);
-      doc.text('Tipo', 90, tableY);
-      doc.text('Descripción', 110, tableY);
-
-      currentY += 8;
-      doc.setTextColor(0, 0, 0);
+      currentY += 10;
+      
+      // Filas de datos
+      doc.setTextColor(51, 65, 85);
+      doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
+      
+      const rowHeight = 7;
 
-      // Datos
       this.actividades.forEach((actividad, index) => {
-        if (currentY > pageHeight - 30) {
-          doc.addPage();
-          currentY = 20;
-        }
-
-        const fecha = this.formatearFecha(actividad.fecha_hora);
-        const hora = this.formatearHora(actividad.fecha_hora);
-        const tipo = this.capitalizar(actividad.tipo_actividad || '-');
-        const desc = (actividad.descripcion || actividad.categoria_actividad || '-').substring(0, 30);
-
-        if (index % 2 === 0) {
-          doc.setFillColor(240, 244, 255);
-          doc.rect(20, currentY - 3, 170, 5, 'F');
-        }
-
-        doc.text(fecha, 25, currentY);
-        doc.text(hora, 60, currentY);
-        doc.text(tipo, 90, currentY);
-        doc.text(desc, 110, currentY);
-
-        currentY += 6;
-      });
-
-      currentY += 8;
-
-      // Firma
-      if (this.$refs.firmaComponent?.hayFirma) {
+        // Verificar si necesitamos nueva página
         if (currentY > pageHeight - 50) {
           doc.addPage();
           currentY = 20;
+          
+          // Re-dibujar header de tabla en nueva página
+          doc.setFillColor(37, 99, 235);
+          doc.rect(tableX, currentY, tableWidth, 8, 'F');
+          
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          
+          let headerX = tableX + 3;
+          doc.text('FECHA', headerX, currentY + 5.5);
+          headerX += colWidths[0];
+          doc.text('HORA', headerX, currentY + 5.5);
+          headerX += colWidths[1];
+          doc.text('TIPO', headerX, currentY + 5.5);
+          headerX += colWidths[2];
+          doc.text('DESCRIPCIÓN', headerX, currentY + 5.5);
+          
+          currentY += 10;
+          doc.setTextColor(51, 65, 85);
+          doc.setFont(undefined, 'normal');
         }
 
+        // Alternar color de fondo
+        if (index % 2 === 0) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(tableX, currentY - 1, tableWidth, rowHeight, 'F');
+        }
+
+        // Bordes de la fila
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.1);
+        doc.rect(tableX, currentY - 1, tableWidth, rowHeight, 'S');
+
+        const fecha = this.formatearFecha(actividad.fecha_hora);
+        const hora = this.formatearHora(actividad.fecha_hora);
+        const tipo = this.capitalizar(actividad.tipo_actividad || 'otro');
+        const desc = (actividad.descripcion || actividad.categoria_actividad || '-').substring(0, 45);
+
+        colX = tableX + 3;
+        doc.text(fecha, colX, currentY + 4);
+        colX += colWidths[0];
+        doc.text(hora, colX, currentY + 4);
+        colX += colWidths[1];
+        
+        // Color según tipo
+        if (actividad.tipo_actividad === 'campo') {
+          doc.setTextColor(22, 163, 74); // Verde
+        } else if (actividad.tipo_actividad === 'gabinete') {
+          doc.setTextColor(147, 51, 234); // Púrpura
+        } else {
+          doc.setTextColor(59, 130, 246); // Azul
+        }
+        doc.text(tipo, colX, currentY + 4);
+        doc.setTextColor(51, 65, 85);
+        
+        colX += colWidths[2];
+        doc.text(desc, colX, currentY + 4);
+
+        currentY += rowHeight;
+      });
+
+      currentY += 15;
+
+      // ========== FIRMA DIGITAL ==========
+      if (this.$refs.firmaComponent?.hayFirma) {
+        // Verificar si necesitamos nueva página para la firma
+        if (currentY > pageHeight - 70) {
+          doc.addPage();
+          currentY = 20;
+        }
+
+        // Título de firma
+        doc.setTextColor(30, 64, 175);
+        doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
-        doc.setFontSize(10);
-        doc.text('FIRMA DIGITAL', 20, currentY);
-        currentY += 10;
+        doc.text('FIRMA DIGITAL', pageWidth / 2, currentY, { align: 'center' });
+        currentY += 8;
 
+        // Contenedor de firma centrado
+        const firmaWidth = 100;
+        const firmaHeight = 40;
+        const firmaX = (pageWidth - firmaWidth) / 2;
+        
+        // Borde de la firma
+        doc.setDrawColor(203, 213, 225);
+        doc.setLineWidth(0.5);
+        doc.rect(firmaX, currentY, firmaWidth, firmaHeight, 'S');
+        
+        // Imagen de firma
         const firmaBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
-        doc.addImage(firmaBase64, 'PNG', 20, currentY, 80, 30);
-        currentY += 35;
+        doc.addImage(firmaBase64, 'PNG', firmaX + 5, currentY + 2, firmaWidth - 10, firmaHeight - 4);
+        
+        currentY += firmaHeight + 5;
 
+        // Línea de firma
+        doc.setDrawColor(100, 116, 139);
+        doc.line(firmaX, currentY, firmaX + firmaWidth, currentY);
+        
+        // Texto del firmante centrado
+        doc.setTextColor(71, 85, 105);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text(this.usuarioInfo.nombre, pageWidth / 2, currentY + 6, { align: 'center' });
+        
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8);
+        doc.text(this.usuarioInfo.cargo || 'Usuario', pageWidth / 2, currentY + 11, { align: 'center' });
+        
+        const fechaFirma = new Date().toLocaleString('es-MX', {
+          dateStyle: 'long',
+          timeStyle: 'short'
+        });
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Firmado electrónicamente el ${fechaFirma}`, pageWidth / 2, currentY + 16, { align: 'center' });
+      }
+
+      // ========== PIE DE PÁGINA ==========
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // Línea superior del pie
+        doc.setDrawColor(203, 213, 225);
+        doc.setLineWidth(0.3);
+        doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
+        
+        // Número de página
+        doc.setTextColor(100, 116, 139);
         doc.setFontSize(8);
         doc.setFont(undefined, 'normal');
-        doc.text(`Firmado por: ${this.usuarioInfo.nombre}`, 20, currentY);
-        currentY += 4;
-        doc.text(`Fecha de Firma: ${new Date().toLocaleString('es-MX')}`, 20, currentY);
+        doc.text(`Página ${i} de ${totalPages}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+        
+        // Texto del sistema
+        doc.setFontSize(7);
+        doc.text('Documento generado automáticamente - Sistema de Reportes', pageWidth / 2, pageHeight - 4, { align: 'center' });
       }
 
       // Descargar
@@ -832,7 +1015,7 @@ export default {
     },
 
     generarCSV() {
-      const headers = ['Fecha', 'Hora', 'Tipo', 'Categoría', 'Descripción', 'Usuario', 'Cargo', 'Correo'];
+      const headers = ['Fecha', 'Hora', 'Tipo', 'Categoría', 'Descripción', 'Usuario', 'Cargo', 'Territorio', 'Correo'];
       
       const rows = this.actividades.map(actividad => [
         this.formatearFecha(actividad.fecha_hora),
@@ -842,6 +1025,7 @@ export default {
         actividad.descripcion || '',
         this.usuarioInfo.nombre,
         this.usuarioInfo.cargo || '',
+        this.usuarioInfo.territorio || '',
         this.usuarioInfo.correo
       ]);
 
@@ -875,7 +1059,8 @@ export default {
       this.usuarioInfo = {
         nombre: usuario.nombre_completo || usuario.nombre || 'Usuario',
         cargo: usuario.cargo || '',
-        correo: usuario.correo || ''
+        correo: usuario.correo || '',
+        territorio: usuario.territorio || 'No asignado'
       };
     }
 

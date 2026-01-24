@@ -24,9 +24,6 @@ const API_URLS = {
   production: "https://apipwa.sembrandodatos.com"
 };
 
-// URL de la API de producción para notificaciones (según requerimientos)
-export const API_URL = "https://apipwa.sembrandodatos.com";
-
 // Función para detectar automáticamente el entorno
 function detectEnvironment() {
   // Si estamos en localhost, usar desarrollo
@@ -44,6 +41,9 @@ function getApiUrl() {
   // Si hay múltiples URLs, devolver la primera
   return Array.isArray(urls) ? urls[0] : urls;
 }
+
+// Exportar API_URL dinámica basada en el entorno actual
+export const API_URL = getApiUrl();
 
 // Función para obtener todas las URLs de desarrollo
 function getAllDevelopmentUrls() {

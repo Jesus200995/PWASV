@@ -1,6 +1,8 @@
 import { API_URL } from '../utils/network.js';
 import axios from 'axios';
 
+console.log(`🔗 ReportesService - API_URL configurada como: ${API_URL}`);
+
 /**
  * Servicio para la gestión de reportes
  */

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba API Reportes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #38a169;
+        }
+        .output {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .output pre {
+            font-size: 12px;
+            color: #2d3748;
+            line-height: 1.5;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        .status.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        tr:hover {
+            background: #f7fafc;
+        }
+        .spinner {
+            display: inline-block;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Prueba de API Reportes</h1>
+
+        <!-- Configuración -->
+        <div class="test-section">
+            <h2>⚙️ Configuración</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label>API URL</label>
+                    <input type="text" id="apiUrl" value="http://localhost:8000" placeholder="http://localhost:8000">
+                </div>
+                <div class="control-group">
+                    <label>ID Usuario</label>
+                    <input type="number" id="usuarioId" value="1" min="1">
+                </div>
+                <div class="control-group">
+                    <label>Límite</label>
+                    <input type="number" id="limit" value="100" min="1">
+                </div>
+            </div>
+        </div>
+
+        <!-- Prueba 1: Sin filtros -->
+        <div class="test-section">
+            <h2>Prueba 1: Sin filtros</h2>
+            <button class="btn-primary" onclick="prueba1()">Ejecutar</button>
+            <div id="output1" class="output" style="display:none;"></div>
+        </div>
+
+        <!-- Prueba 2: Mes actual -->
+        <div class="test-section">
+            <h2>Prueba 2: Mes Actual</h2>
+            <button class="btn-primary" onclick="prueba2()">Ejecutar</button>
+            <div id="output2" class="output" style="display:none;"></div>
+        </div>
+
+        <!-- Prueba 3: Mes específico -->
+        <div class="test-section">
+            <h2>Prueba 3: Mes Específico (Enero 2026)</h2>
+            <button class="btn-primary" onclick="prueba3()">Ejecutar</button>
+            <div id="output3" class="output" style="display:none;"></div>
+        </div>
+
+        <!-- Prueba 4: Con tipo -->
+        <div class="test-section">
+            <h2>Prueba 4: Con filtro de tipo (entrada)</h2>
+            <button class="btn-primary" onclick="prueba4()">Ejecutar</button>
+            <div id="output4" class="output" style="display:none;"></div>
+        </div>
+
+        <!-- Prueba 5: Usuario inválido -->
+        <div class="test-section">
+            <h2>Prueba 5: Usuario Inválido (99999)</h2>
+            <button class="btn-primary" onclick="prueba5()">Ejecutar</button>
+            <div id="output5" class="output" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function getConfig() {
+            return {
+                apiUrl: document.getElementById('apiUrl').value,
+                usuarioId: document.getElementById('usuarioId').value,
+                limit: document.getElementById('limit').value
+            };
+        }
+
+        async function hacerPeticion(url, params) {
+            const queryString = new URLSearchParams(params).toString();
+            const fullUrl = `${url}?${queryString}`;
+            
+            console.log('🔗 URL:', fullUrl);
+            
+            const response = await fetch(fullUrl);
+            return response.json();
+        }
+
+        function mostrarResultado(outputId, titulo, params, resultado) {
+            const div = document.getElementById(outputId);
+            div.style.display = 'block';
+            
+            let html = `<pre>`;
+            html += `<strong>${titulo}</strong>\n`;
+            html += `Parámetros:\n${JSON.stringify(params, null, 2)}\n\n`;
+            html += `Resultado:\n${JSON.stringify(resultado, null, 2)}\n`;
+            
+            // Mostrar tabla si hay datos
+            if (resultado.historial && resultado.historial.length > 0) {
+                html += `\n\n<strong>Primeros registros:</strong>\n`;
+                resultado.historial.slice(0, 5).forEach((item, idx) => {
+                    html += `\n${idx + 1}. ${item.fecha} ${item.hora} - ${item.tipo} (${item.descripcion || '-'})\n`;
+                });
+            }
+            
+            html += `</pre>`;
+            div.innerHTML = html;
+        }
+
+        function mostrarError(outputId, error) {
+            const div = document.getElementById(outputId);
+            div.style.display = 'block';
+            div.innerHTML = `<pre style="color: red;"><strong>❌ Error:</strong>\n${error}</pre>`;
+        }
+
+        async function prueba1() {
+            const config = getConfig();
+            const url = `${config.apiUrl}/historial/${config.usuarioId}`;
+            
+            try {
+                const resultado = await hacerPeticion(url, { limit: config.limit });
+                mostrarResultado('output1', 'Prueba 1: Sin filtros', { limit: config.limit }, resultado);
+            } catch (error) {
+                mostrarError('output1', error.message);
+            }
+        }
+
+        async function prueba2() {
+            const config = getConfig();
+            const hoy = new Date();
+            const inicioDeMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            
+            const params = {
+                fecha_inicio: inicioDeMes.toISOString().split('T')[0],
+                fecha_fin: hoy.toISOString().split('T')[0],
+                limit: config.limit
+            };
+            
+            const url = `${config.apiUrl}/historial/${config.usuarioId}`;
+            
+            try {
+                const resultado = await hacerPeticion(url, params);
+                mostrarResultado('output2', 'Prueba 2: Mes Actual', params, resultado);
+            } catch (error) {
+                mostrarError('output2', error.message);
+            }
+        }
+
+        async function prueba3() {
+            const config = getConfig();
+            
+            const params = {
+                fecha_inicio: '2026-01-01',
+                fecha_fin: '2026-01-31',
+                limit: config.limit
+            };
+            
+            const url = `${config.apiUrl}/historial/${config.usuarioId}`;
+            
+            try {
+                const resultado = await hacerPeticion(url, params);
+                mostrarResultado('output3', 'Prueba 3: Enero 2026', params, resultado);
+            } catch (error) {
+                mostrarError('output3', error.message);
+            }
+        }
+
+        async function prueba4() {
+            const config = getConfig();
+            const hoy = new Date();
+            const inicioDeMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            
+            const params = {
+                fecha_inicio: inicioDeMes.toISOString().split('T')[0],
+                fecha_fin: hoy.toISOString().split('T')[0],
+                tipo: 'entrada',
+                limit: config.limit
+            };
+            
+            const url = `${config.apiUrl}/historial/${config.usuarioId}`;
+            
+            try {
+                const resultado = await hacerPeticion(url, params);
+                mostrarResultado('output4', 'Prueba 4: Con filtro de tipo', params, resultado);
+            } catch (error) {
+                mostrarError('output4', error.message);
+            }
+        }
+
+        async function prueba5() {
+            const config = getConfig();
+            const url = `${config.apiUrl}/historial/99999`;
+            
+            try {
+                const resultado = await hacerPeticion(url, { limit: config.limit });
+                mostrarResultado('output5', 'Prueba 5: Usuario inválido', {}, resultado);
+            } catch (error) {
+                mostrarError('output5', error.message);
+            }
+        }
+
+        // Ejecutar automáticamente
+        console.log('✅ Página de pruebas cargada');
+    </script>
+</body>
+</html>

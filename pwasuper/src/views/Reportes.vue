@@ -461,7 +461,9 @@ export default {
         nombre: '',
         cargo: '',
         correo: '',
-        territorio: ''
+        territorio: '',
+        curp: '',
+        supervisor: ''
       },
       reportesGenerados: [],
       meses: [
@@ -729,7 +731,7 @@ export default {
       currentY = 50;
 
       // ========== INFORMACIÓN DEL USUARIO (Tarjeta centrada) ==========
-      const cardHeight = 45;
+      const cardHeight = 55;
       const cardY = currentY;
       
       // Fondo de la tarjeta
@@ -767,20 +769,30 @@ export default {
       doc.text(this.usuarioInfo.nombre, col1X + 20, dataY);
       
       doc.setFont(undefined, 'bold');
-      doc.text('Correo:', col1X, dataY + 8);
+      doc.text('CURP:', col1X, dataY + 7);
       doc.setFont(undefined, 'normal');
-      doc.text(this.usuarioInfo.correo, col1X + 20, dataY + 8);
+      doc.text(this.usuarioInfo.curp || 'No registrada', col1X + 20, dataY + 7);
+      
+      doc.setFont(undefined, 'bold');
+      doc.text('Correo:', col1X, dataY + 14);
+      doc.setFont(undefined, 'normal');
+      doc.text(this.usuarioInfo.correo, col1X + 20, dataY + 14);
       
       // Columna 2
       doc.setFont(undefined, 'bold');
       doc.text('Cargo:', col2X, dataY);
       doc.setFont(undefined, 'normal');
-      doc.text(this.usuarioInfo.cargo || 'No especificado', col2X + 18, dataY);
+      doc.text(this.usuarioInfo.cargo || 'No especificado', col2X + 22, dataY);
       
       doc.setFont(undefined, 'bold');
-      doc.text('Territorio:', col2X, dataY + 8);
+      doc.text('Territorio:', col2X, dataY + 7);
       doc.setFont(undefined, 'normal');
-      doc.text(this.usuarioInfo.territorio || 'No asignado', col2X + 24, dataY + 8);
+      doc.text(this.usuarioInfo.territorio || 'No asignado', col2X + 22, dataY + 7);
+      
+      doc.setFont(undefined, 'bold');
+      doc.text('Responsable:', col2X, dataY + 14);
+      doc.setFont(undefined, 'normal');
+      doc.text(this.usuarioInfo.supervisor || 'No asignado', col2X + 28, dataY + 14);
 
       currentY = cardY + cardHeight + 10;
 
@@ -935,58 +947,109 @@ export default {
 
       currentY += 15;
 
-      // ========== FIRMA DIGITAL ==========
+      // ========== SECCIÓN DE FIRMAS (Dos firmas lado a lado) ==========
       if (this.$refs.firmaComponent?.hayFirma) {
-        // Verificar si necesitamos nueva página para la firma
-        if (currentY > pageHeight - 70) {
+        // Verificar si necesitamos nueva página para las firmas
+        if (currentY > pageHeight - 90) {
           doc.addPage();
           currentY = 20;
         }
 
-        // Título de firma
+        // Título de sección de firmas
         doc.setTextColor(30, 64, 175);
         doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
-        doc.text('FIRMA DIGITAL', pageWidth / 2, currentY, { align: 'center' });
-        currentY += 8;
+        doc.text('FIRMAS DE VALIDACIÓN', pageWidth / 2, currentY, { align: 'center' });
+        currentY += 10;
 
-        // Contenedor de firma centrado
-        const firmaWidth = 100;
-        const firmaHeight = 40;
-        const firmaX = (pageWidth - firmaWidth) / 2;
+        // Configuración de las dos columnas de firma
+        const firmaWidth = 75;
+        const firmaHeight = 35;
+        const espacioEntreFirems = 20;
+        const firmaUsuarioX = margin + 5;
+        const firmaResponsableX = pageWidth - margin - firmaWidth - 5;
         
-        // Borde de la firma
+        // ========== FIRMA DEL USUARIO (Izquierda) ==========
+        // Etiqueta
+        doc.setTextColor(71, 85, 105);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.text('FIRMA DEL USUARIO', firmaUsuarioX + firmaWidth / 2, currentY, { align: 'center' });
+        currentY += 5;
+        
+        const firmaY = currentY;
+        
+        // Contenedor de firma del usuario
         doc.setDrawColor(203, 213, 225);
         doc.setLineWidth(0.5);
-        doc.rect(firmaX, currentY, firmaWidth, firmaHeight, 'S');
+        doc.rect(firmaUsuarioX, firmaY, firmaWidth, firmaHeight, 'S');
         
-        // Imagen de firma
+        // Imagen de firma del usuario
         const firmaBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
-        doc.addImage(firmaBase64, 'PNG', firmaX + 5, currentY + 2, firmaWidth - 10, firmaHeight - 4);
+        doc.addImage(firmaBase64, 'PNG', firmaUsuarioX + 3, firmaY + 2, firmaWidth - 6, firmaHeight - 4);
         
-        currentY += firmaHeight + 5;
-
-        // Línea de firma
+        // Línea de firma usuario
         doc.setDrawColor(100, 116, 139);
-        doc.line(firmaX, currentY, firmaX + firmaWidth, currentY);
+        doc.setLineWidth(0.3);
+        doc.line(firmaUsuarioX, firmaY + firmaHeight + 3, firmaUsuarioX + firmaWidth, firmaY + firmaHeight + 3);
         
-        // Texto del firmante centrado
-        doc.setTextColor(71, 85, 105);
-        doc.setFontSize(9);
+        // Datos del usuario firmante
+        doc.setTextColor(51, 65, 85);
+        doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
-        doc.text(this.usuarioInfo.nombre, pageWidth / 2, currentY + 6, { align: 'center' });
+        doc.text(this.usuarioInfo.nombre, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 9, { align: 'center' });
         
         doc.setFont(undefined, 'normal');
-        doc.setFontSize(8);
-        doc.text(this.usuarioInfo.cargo || 'Usuario', pageWidth / 2, currentY + 11, { align: 'center' });
+        doc.setFontSize(7);
+        doc.text(this.usuarioInfo.cargo || 'Usuario', firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 14, { align: 'center' });
+        doc.text(`CURP: ${this.usuarioInfo.curp || 'N/A'}`, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 19, { align: 'center' });
         
+        // ========== FIRMA DEL RESPONSABLE (Derecha) ==========
+        // Etiqueta
+        doc.setTextColor(71, 85, 105);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.text('FIRMA DEL RESPONSABLE', firmaResponsableX + firmaWidth / 2, currentY, { align: 'center' });
+        
+        // Contenedor de firma del responsable (vacío para firma manual)
+        doc.setDrawColor(203, 213, 225);
+        doc.setLineWidth(0.5);
+        doc.setFillColor(252, 252, 253);
+        doc.rect(firmaResponsableX, firmaY, firmaWidth, firmaHeight, 'FD');
+        
+        // Texto indicativo dentro del recuadro
+        doc.setTextColor(180, 190, 200);
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'italic');
+        doc.text('Espacio para firma', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight / 2, { align: 'center' });
+        
+        // Línea de firma responsable
+        doc.setDrawColor(100, 116, 139);
+        doc.setLineWidth(0.3);
+        doc.line(firmaResponsableX, firmaY + firmaHeight + 3, firmaResponsableX + firmaWidth, firmaY + firmaHeight + 3);
+        
+        // Datos del responsable
+        doc.setTextColor(51, 65, 85);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.text(this.usuarioInfo.supervisor || 'Responsable', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 9, { align: 'center' });
+        
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+        doc.text('Supervisor / Responsable', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 14, { align: 'center' });
+        doc.text(`Territorio: ${this.usuarioInfo.territorio || 'N/A'}`, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 19, { align: 'center' });
+        
+        currentY = firmaY + firmaHeight + 28;
+        
+        // Fecha de firma centrada
         const fechaFirma = new Date().toLocaleString('es-MX', {
           dateStyle: 'long',
           timeStyle: 'short'
         });
-        doc.setFontSize(7);
         doc.setTextColor(100, 116, 139);
-        doc.text(`Firmado electrónicamente el ${fechaFirma}`, pageWidth / 2, currentY + 16, { align: 'center' });
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Documento firmado electrónicamente el ${fechaFirma}`, pageWidth / 2, currentY, { align: 'center' });
       }
 
       // ========== PIE DE PÁGINA ==========
@@ -1015,7 +1078,7 @@ export default {
     },
 
     generarCSV() {
-      const headers = ['Fecha', 'Hora', 'Tipo', 'Categoría', 'Descripción', 'Usuario', 'Cargo', 'Territorio', 'Correo'];
+      const headers = ['Fecha', 'Hora', 'Tipo', 'Categoría', 'Descripción', 'Usuario', 'CURP', 'Cargo', 'Territorio', 'Correo', 'Supervisor'];
       
       const rows = this.actividades.map(actividad => [
         this.formatearFecha(actividad.fecha_hora),
@@ -1024,9 +1087,11 @@ export default {
         actividad.categoria_actividad || '-',
         actividad.descripcion || '',
         this.usuarioInfo.nombre,
+        this.usuarioInfo.curp || '',
         this.usuarioInfo.cargo || '',
         this.usuarioInfo.territorio || '',
-        this.usuarioInfo.correo
+        this.usuarioInfo.correo,
+        this.usuarioInfo.supervisor || ''
       ]);
 
       const csv = [
@@ -1060,7 +1125,9 @@ export default {
         nombre: usuario.nombre_completo || usuario.nombre || 'Usuario',
         cargo: usuario.cargo || '',
         correo: usuario.correo || '',
-        territorio: usuario.territorio || 'No asignado'
+        territorio: usuario.territorio || 'No asignado',
+        curp: usuario.curp || 'No registrada',
+        supervisor: usuario.supervisor || 'No asignado'
       };
     }
 

@@ -622,8 +622,8 @@ async def preflight(path: str):
 
 @app.post("/login")
 async def login(usuario: UserLogin):
-    # Buscar usuario por correo incluyendo territorio
-    cursor.execute("SELECT id, correo, nombre_completo, cargo, contrasena, territorio FROM usuarios WHERE correo = %s", (usuario.correo,))
+    # Buscar usuario por correo incluyendo territorio, curp y supervisor
+    cursor.execute("SELECT id, correo, nombre_completo, cargo, contrasena, territorio, curp, supervisor FROM usuarios WHERE correo = %s", (usuario.correo,))
     user = cursor.fetchone()
     
     if not user:
@@ -638,7 +638,9 @@ async def login(usuario: UserLogin):
         "correo": user[1],
         "nombre_completo": user[2],
         "cargo": user[3],
-        "territorio": user[5] if len(user) > 5 else None
+        "territorio": user[5] if len(user) > 5 else None,
+        "curp": user[6] if len(user) > 6 else None,
+        "supervisor": user[7] if len(user) > 7 else None
     }
 
 # ==================== ENDPOINT PARA VERIFICAR CONTRASEÑA ====================

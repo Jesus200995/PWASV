@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Reportes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .test-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        .test-section h2 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 0;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 12px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+            color: #333;
+        }
+        .result.error {
+            background: #fee;
+            border-color: #fcc;
+            color: #c33;
+        }
+        .result.success {
+            background: #efe;
+            border-color: #cfc;
+            color: #3c3;
+        }
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .status.checking {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test API Reportes</h1>
+        <p class="subtitle">Verificar conexión y datos del servidor</p>
+
+        <div id="status" class="status checking">
+            <span class="loading"></span> Verificando conexión...
+        </div>
+
+        <div class="test-section">
+            <h2>1️⃣ Verificar Servidor</h2>
+            <button onclick="testBackend()">Probar Conexión Backend</button>
+            <div id="result1" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2️⃣ Obtener Usuario</h2>
+            <div class="input-group">
+                <label>ID de Usuario:</label>
+                <input type="number" id="usuarioId" value="1" min="1">
+            </div>
+            <button onclick="testUsuario()">Obtener Usuario</button>
+            <div id="result2" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3️⃣ Obtener Historial (Sin Filtro)</h2>
+            <button onclick="testHistorial()">Obtener Historial</button>
+            <div id="result3" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4️⃣ Historial con Filtro de Fecha</h2>
+            <div class="input-group">
+                <label>Fecha Inicio (YYYY-MM-DD):</label>
+                <input type="date" id="fechaInicio">
+            </div>
+            <div class="input-group">
+                <label>Fecha Fin (YYYY-MM-DD):</label>
+                <input type="date" id="fechaFin">
+            </div>
+            <button onclick="testHistorialFiltrado()">Obtener Historial Filtrado</button>
+            <div id="result4" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5️⃣ Información de Configuración</h2>
+            <button onclick="showConfig()">Mostrar Configuración</button>
+            <div id="result5" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener API_URL igual que el frontend
+        const API_URLs = {
+            development: ["http://localhost:8000", "http://localhost:8001"],
+            production: "https://apipwa.sembrandodatos.com"
+        };
+
+        function detectEnvironment() {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'development';
+            }
+            return 'production';
+        }
+
+        function getApiUrl() {
+            const environment = detectEnvironment();
+            const urls = API_URLs[environment];
+            return Array.isArray(urls) ? urls[0] : urls;
+        }
+
+        const API_URL = getApiUrl();
+
+        console.log('🔗 API_URL:', API_URL);
+        console.log('🌍 Environment:', detectEnvironment());
+
+        // Verificar conexión al cargar
+        checkConnection();
+
+        async function checkConnection() {
+            try {
+                const response = await fetch(API_URL + '/debug/usuarios-estructura', { method: 'HEAD' });
+                if (response.ok) {
+                    document.getElementById('status').className = 'status online';
+                    document.getElementById('status').innerHTML = '✅ Servidor Online';
+                } else {
+                    throw new Error('Respuesta ' + response.status);
+                }
+            } catch (error) {
+                document.getElementById('status').className = 'status offline';
+                document.getElementById('status').innerHTML = '❌ Servidor Offline - ' + API_URL;
+            }
+        }
+
+        async function makeRequest(url, label) {
+            const resultDiv = document.getElementById(label);
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<span class="loading"></span> Cargando...';
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<strong>✅ Éxito:</strong><br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<strong>❌ Error ${response.status}:</strong><br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Error de conexión:</strong><br>${error.message}<br><br><strong>URL:</strong><br>${url}`;
+            }
+        }
+
+        function testBackend() {
+            makeRequest(API_URL + '/debug/usuarios-estructura', 'result1');
+        }
+
+        function testUsuario() {
+            const id = document.getElementById('usuarioId').value;
+            makeRequest(API_URL + `/usuario/${id}`, 'result2');
+        }
+
+        function testHistorial() {
+            const id = document.getElementById('usuarioId').value;
+            makeRequest(API_URL + `/historial/${id}?limit=10`, 'result3');
+        }
+
+        function testHistorialFiltrado() {
+            const id = document.getElementById('usuarioId').value;
+            const inicio = document.getElementById('fechaInicio').value;
+            const fin = document.getElementById('fechaFin').value;
+
+            if (!inicio || !fin) {
+                alert('Por favor completa ambas fechas');
+                return;
+            }
+
+            const url = `${API_URL}/historial/${id}?fecha_inicio=${inicio}&fecha_fin=${fin}&limit=100`;
+            makeRequest(url, 'result4');
+        }
+
+        function showConfig() {
+            const resultDiv = document.getElementById('result5');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result success';
+            resultDiv.innerHTML = `
+<strong>Configuración del Cliente:</strong><br>
+<pre>API_URL: ${API_URL}
+Hostname: ${window.location.hostname}
+Environment: ${detectEnvironment()}
+Usuario Actual: ${JSON.stringify(JSON.parse(localStorage.getItem('user') || '{}'), null, 2)}</pre>
+            `;
+        }
+
+        // Establecer fechas por defecto (mes actual)
+        const hoy = new Date();
+        const inicioDeMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        const finDelMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+
+        document.getElementById('fechaInicio').valueAsDate = inicioDeMes;
+        document.getElementById('fechaFin').valueAsDate = finDelMes;
+    </script>
+</body>
+</html>

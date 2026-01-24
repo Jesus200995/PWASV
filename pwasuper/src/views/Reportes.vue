@@ -1,317 +1,299 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pt-24">
-    <!-- Header -->
-    <div class="fixed top-0 left-0 right-0 z-10 bg-white shadow-md border-b-4 border-blue-500">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-              <i class="fas fa-file-pdf text-white text-xl"></i>
-            </div>
-            <div>
-              <h1 class="text-3xl font-bold text-gray-900">Mis Reportes</h1>
-              <p class="text-sm text-gray-500">Genera y descarga tus reportes mensuales</p>
-            </div>
-          </div>
-          <router-link
-            to="/home"
-            class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <i class="fas fa-times text-xl"></i>
-          </router-link>
-        </div>
-      </div>
+  <div class="fixed inset-0 overflow-hidden" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(76, 175, 80, 0.08) 50%, rgba(59, 130, 246, 0.05) 100%);">
+    <!-- Elementos decorativos -->
+    <div class="absolute inset-0">
+      <div class="absolute top-1/4 left-1/4 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="background-color: rgba(59, 130, 246, 0.3);"></div>
+      <div class="absolute top-3/4 right-1/4 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s; background-color: rgba(76, 175, 80, 0.3);"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s; background-color: rgba(56, 142, 60, 0.3);"></div>
     </div>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Cards principales -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Card de Actividades -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-blue-500">
-          <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm font-medium">Actividades Mes</p>
-                <p class="text-4xl font-bold text-blue-600 mt-2">{{ estadisticas.totalActividades }}</p>
+    <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
+      <div class="page-container relative z-10 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 min-h-full max-w-full">
+        <div class="w-full max-w-lg mx-auto space-y-4">
+          <!-- Header de Reportes -->
+          <div class="glass-card text-center">
+            <div class="flex items-center justify-center mb-3">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-xl" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M7 3H4a1 1 0 00-1 1v16a1 1 0 001 1h16a1 1 0 001-1V8.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0015 2H9a1 1 0 00-1 1v2H7a1 1 0 00-1 1v2zm2-2v2h6V2H9z"/>
+                </svg>
               </div>
-              <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center text-white opacity-20">
-                <i class="fas fa-tasks text-3xl"></i>
+            </div>
+            
+            <h1 class="text-xl font-bold text-gray-800 mb-2 modern-title">Mis Reportes</h1>
+            <div class="red-line mx-auto mb-2"></div>
+            <p class="text-gray-600 text-xs mb-3">Genera reportes mensuales de tus actividades</p>
+            
+            <!-- Estadísticas rápidas -->
+            <div class="grid grid-cols-3 gap-2 mt-3">
+              <div class="p-2 bg-blue-50 rounded-lg">
+                <p class="text-xs text-gray-600 font-medium">Actividades</p>
+                <p class="text-lg font-bold text-blue-600">{{ estadisticas.totalActividades }}</p>
+              </div>
+              <div class="p-2 bg-green-50 rounded-lg">
+                <p class="text-xs text-gray-600 font-medium">Período</p>
+                <p class="text-xs font-bold text-green-600 truncate">{{ mesActual }}</p>
+              </div>
+              <div class="p-2 bg-purple-50 rounded-lg">
+                <p class="text-xs text-gray-600 font-medium">Estado</p>
+                <p class="text-xs font-bold text-purple-600">{{ estadoReporte }}</p>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Card de Rango de Fechas -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-green-500">
-          <div class="bg-gradient-to-r from-green-50 to-green-100 px-6 py-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm font-medium">Período</p>
-                <p class="text-lg font-bold text-green-600 mt-2">{{ mesActual }}</p>
-                <p class="text-xs text-gray-500 mt-1">{{ dateRange }}</p>
+          <!-- Selector de Período -->
+          <div class="glass-card">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: #3B82F6;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
               </div>
-              <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white opacity-20">
-                <i class="fas fa-calendar text-3xl"></i>
+              <div>
+                <h2 class="text-base font-semibold text-gray-800">Período</h2>
+                <p class="text-xs text-gray-500">Selecciona mes y año</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1.5">Mes</label>
+                <select
+                  v-model.number="mesSeleccionado"
+                  @change="cambiarPeriodo"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option v-for="(mes, index) in meses" :key="index" :value="index">
+                    {{ mes }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1.5">Año</label>
+                <select
+                  v-model.number="anioSeleccionado"
+                  @change="cambiarPeriodo"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option v-for="year in anos" :key="year" :value="year">
+                    {{ year }}
+                  </option>
+                </select>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Card de Estado -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-t-4 border-purple-500">
-          <div class="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm font-medium">Estado</p>
-                <p class="text-xl font-bold text-purple-600 mt-2">{{ estadoReporte }}</p>
-                <p class="text-xs text-gray-500 mt-1">Listo para generar</p>
+          <!-- Sección de Actividades -->
+          <div class="glass-card">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: #6366F1;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                </svg>
               </div>
-              <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center text-white opacity-20">
-                <i class="fas fa-check-circle text-3xl"></i>
+              <div>
+                <h2 class="text-base font-semibold text-gray-800">Actividades</h2>
+                <p class="text-xs text-gray-500">Listado del período seleccionado</p>
+              </div>
+            </div>
+
+            <!-- Loading -->
+            <div v-if="cargando" class="flex justify-center items-center py-8">
+              <div class="text-center">
+                <div class="inline-block">
+                  <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+                <p class="mt-3 text-xs text-gray-600">Cargando actividades...</p>
+              </div>
+            </div>
+
+            <!-- Tabla de Actividades -->
+            <div v-else class="">
+              <table v-if="actividades.length > 0" class="w-full text-xs">
+                <thead>
+                  <tr class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+                    <th class="px-2 py-2 text-left font-semibold">Fecha</th>
+                    <th class="px-2 py-2 text-left font-semibold">Hora</th>
+                    <th class="hidden sm:table-cell px-2 py-2 text-left font-semibold">Tipo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(actividad, index) in actividades"
+                    :key="index"
+                    class="border-b border-gray-200 hover:bg-blue-50 transition-colors"
+                  >
+                    <td class="px-2 py-2 text-gray-900 font-medium">
+                      {{ formatearFecha(actividad.fecha) }}
+                    </td>
+                    <td class="px-2 py-2 text-gray-700">
+                      {{ formatearHora(actividad.hora) }}
+                    </td>
+                    <td class="hidden sm:table-cell px-2 py-2">
+                      <span
+                        :class="[
+                          'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                          actividad.tipo === 'entrada' 
+                            ? 'bg-green-100 text-green-800'
+                            : actividad.tipo === 'salida'
+                            ? 'bg-orange-100 text-orange-800'
+                            : 'bg-blue-100 text-blue-800'
+                        ]"
+                      >
+                        {{ capitalizar(actividad.tipo) }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div v-else class="text-center py-6">
+                <div class="w-12 h-12 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
+                  <i class="fas fa-inbox text-gray-400 text-lg"></i>
+                </div>
+                <p class="text-gray-500 text-xs">Sin actividades en este período</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Selector de Mes -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <i class="fas fa-calendar-alt text-blue-500"></i>
-          Seleccionar Período
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Mes</label>
-            <select
-              v-model.number="mesSeleccionado"
-              @change="cambiarPeriodo"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          <!-- Firma Digital -->
+          <div class="glass-card">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: #A855F7;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/>
+                  <path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-base font-semibold text-gray-800">Firma</h2>
+                <p class="text-xs text-gray-500">Autentica tu reporte</p>
+              </div>
+            </div>
+            <FirmaDigital
+              ref="firmaComponent"
+              label="Firmar aquí"
+            />
+          </div>
+
+          <!-- Opciones de Descarga -->
+          <div class="glass-card">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: #10B981;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-base font-semibold text-gray-800">Descargar</h2>
+                <p class="text-xs text-gray-500">Genera tu reporte</p>
+              </div>
+            </div>
+
+            <!-- Información de Usuario -->
+            <div class="rounded-lg p-3 border mb-3" style="background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.15)); border-color: rgba(59, 130, 246, 0.3);">
+              <div class="mb-2">
+                <p class="text-xs text-gray-600 font-medium">Nombre</p>
+                <p class="text-sm font-semibold text-gray-900 truncate">{{ usuarioInfo.nombre }}</p>
+              </div>
+              <div class="mb-2">
+                <p class="text-xs text-gray-600 font-medium">Cargo</p>
+                <p class="text-sm font-semibold text-gray-900 truncate">{{ usuarioInfo.cargo || 'N/A' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-600 font-medium">Correo</p>
+                <p class="text-xs font-semibold text-gray-900 truncate">{{ usuarioInfo.correo }}</p>
+              </div>
+            </div>
+
+            <!-- Opciones de Formato -->
+            <div class="space-y-2 mb-3">
+              <label class="flex items-center p-2.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                <input
+                  type="radio"
+                  v-model="formatoSeleccionado"
+                  value="pdf"
+                  class="w-4 h-4 text-blue-600"
+                />
+                <span class="ml-2">
+                  <span class="text-xs font-medium text-gray-900 block">PDF</span>
+                  <p class="text-xs text-gray-500">Con tabla y firma</p>
+                </span>
+              </label>
+              <label class="flex items-center p-2.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                <input
+                  type="radio"
+                  v-model="formatoSeleccionado"
+                  value="csv"
+                  class="w-4 h-4 text-blue-600"
+                />
+                <span class="ml-2">
+                  <span class="text-xs font-medium text-gray-900 block">CSV</span>
+                  <p class="text-xs text-gray-500">Para Excel</p>
+                </span>
+              </label>
+            </div>
+
+            <!-- Botón de Descarga -->
+            <button
+              @click="generarReporte"
+              :disabled="cargando || generandoReporte || actividades.length === 0"
+              class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm"
             >
-              <option v-for="(mes, index) in meses" :key="index" :value="index">
-                {{ mes }}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Año</label>
-            <select
-              v-model.number="anioSeleccionado"
-              @change="cambiarPeriodo"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option v-for="year in anos" :key="year" :value="year">
-                {{ year }}
-              </option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sección de Actividades -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <i class="fas fa-list text-indigo-500"></i>
-          Actividades del Período
-        </h2>
-
-        <!-- Loading -->
-        <div v-if="cargando" class="flex justify-center items-center py-12">
-          <div class="text-center">
-            <div class="inline-block">
-              <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg v-if="!generandoReporte" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-            </div>
-            <p class="mt-4 text-gray-600">Cargando actividades...</p>
-          </div>
-        </div>
-
-        <!-- Tabla de Actividades -->
-        <div v-else class="overflow-x-auto">
-          <table v-if="actividades.length > 0" class="w-full">
-            <thead>
-              <tr class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                <th class="px-4 py-3 text-left text-sm font-semibold">Fecha</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold">Hora</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold">Tipo</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold">Descripción</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(actividad, index) in actividades"
-                :key="index"
-                class="border-b border-gray-200 hover:bg-blue-50 transition-colors"
-              >
-                <td class="px-4 py-4 text-sm text-gray-900 font-medium">
-                  {{ formatearFecha(actividad.fecha) }}
-                </td>
-                <td class="px-4 py-4 text-sm text-gray-700">
-                  {{ formatearHora(actividad.hora) }}
-                </td>
-                <td class="px-4 py-4 text-sm">
-                  <span
-                    :class="[
-                      'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium',
-                      actividad.tipo === 'entrada' 
-                        ? 'bg-green-100 text-green-800'
-                        : actividad.tipo === 'salida'
-                        ? 'bg-orange-100 text-orange-800'
-                        : 'bg-blue-100 text-blue-800'
-                    ]"
-                  >
-                    <i :class="[
-                      'fas mr-1.5',
-                      actividad.tipo === 'entrada' ? 'fa-sign-in-alt' : 
-                      actividad.tipo === 'salida' ? 'fa-sign-out-alt' : 'fa-clipboard'
-                    ]"></i>
-                    {{ capitalizar(actividad.tipo) }}
-                  </span>
-                </td>
-                <td class="px-4 py-4 text-sm text-gray-600">
-                  {{ actividad.descripcion || '-' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div v-else class="text-center py-12">
-            <div class="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
-              <i class="fas fa-inbox text-gray-400 text-2xl"></i>
-            </div>
-            <p class="text-gray-500 text-lg">No hay actividades registradas para este período</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sección de Firma y Generación de PDF -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <!-- Firma -->
-        <div class="bg-white rounded-2xl shadow-lg p-6">
-          <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <i class="fas fa-pen-fancy text-purple-500"></i>
-            Firma Digital
-          </h2>
-          <p class="text-sm text-gray-600 mb-4">
-            Firma el reporte para autenticarlo. Esto será incluido en el PDF final.
-          </p>
-          <FirmaDigital
-            ref="firmaComponent"
-            label="Firmar aquí"
-          />
-        </div>
-
-        <!-- Opciones de Descarga -->
-        <div class="bg-white rounded-2xl shadow-lg p-6">
-          <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <i class="fas fa-download text-green-500"></i>
-            Generar Reporte
-          </h2>
-
-          <!-- Información de Usuario -->
-          <div class="bg-gray-50 rounded-lg p-4 mb-6">
-            <div class="mb-3">
-              <p class="text-xs text-gray-500">Nombre Completo</p>
-              <p class="text-lg font-semibold text-gray-900">{{ usuarioInfo.nombre }}</p>
-            </div>
-            <div class="mb-3">
-              <p class="text-xs text-gray-500">Cargo</p>
-              <p class="text-lg font-semibold text-gray-900">{{ usuarioInfo.cargo || 'No especificado' }}</p>
-            </div>
-            <div>
-              <p class="text-xs text-gray-500">Correo</p>
-              <p class="text-lg font-semibold text-gray-900">{{ usuarioInfo.correo }}</p>
-            </div>
+              <span class="truncate">{{ generandoReporte ? 'Generando...' : 'Descargar' }}</span>
+            </button>
           </div>
 
-          <!-- Opciones de Formato -->
-          <div class="space-y-3 mb-6">
-            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
-              <input
-                type="radio"
-                v-model="formatoSeleccionado"
-                value="pdf"
-                class="w-4 h-4 text-blue-600"
-              />
-              <span class="ml-3">
-                <span class="text-sm font-medium text-gray-900">PDF Completo</span>
-                <p class="text-xs text-gray-500">Incluye tabla de actividades y firma</p>
-              </span>
-            </label>
-            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
-              <input
-                type="radio"
-                v-model="formatoSeleccionado"
-                value="csv"
-                class="w-4 h-4 text-blue-600"
-              />
-              <span class="ml-3">
-                <span class="text-sm font-medium text-gray-900">CSV (Excel)</span>
-                <p class="text-xs text-gray-500">Importable a hojas de cálculo</p>
-              </span>
-            </label>
-          </div>
-
-          <!-- Botón de Descarga -->
-          <button
-            @click="generarReporte"
-            :disabled="cargando || generandoReporte"
-            class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-          >
-            <i v-if="!generandoReporte" class="fas fa-download"></i>
-            <svg v-else class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            {{ generandoReporte ? 'Generando...' : 'Descargar Reporte' }}
-          </button>
-
-          <!-- Información de Firma -->
-          <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div class="flex gap-3">
-              <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-              <div class="text-sm text-blue-800">
-                <p class="font-semibold">Nota sobre firmas</p>
-                <p>La firma es opcional pero recomendada. Se incluirá en el PDF final si está presente.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Historial de Reportes Descargados -->
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <i class="fas fa-history text-orange-500"></i>
-          Reportes Generados Recientemente
-        </h2>
-        <div v-if="reportesGenerados.length > 0" class="space-y-3">
-          <div
-            v-for="reporte in reportesGenerados"
-            :key="reporte.id"
-            class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                <i class="fas fa-file text-orange-600"></i>
+          <!-- Historial de Reportes -->
+          <div class="glass-card">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: #F59E0B;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
               </div>
               <div>
-                <p class="font-medium text-gray-900">{{ reporte.nombre }}</p>
-                <p class="text-xs text-gray-500">{{ reporte.fecha }}</p>
+                <h2 class="text-base font-semibold text-gray-800">Historial</h2>
+                <p class="text-xs text-gray-500">Reportes generados</p>
               </div>
             </div>
-            <span :class="[
-              'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-              reporte.tipo === 'PDF' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-            ]">
-              {{ reporte.tipo }}
-            </span>
+            <div v-if="reportesGenerados.length > 0" class="space-y-2">
+              <div
+                v-for="reporte in reportesGenerados"
+                :key="reporte.id"
+                class="flex items-center justify-between p-2.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-xs"
+              >
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="flex-shrink-0 w-7 h-7 bg-orange-100 rounded flex items-center justify-center">
+                    <i class="fas fa-file text-orange-600 text-xs"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="font-medium text-gray-900 text-xs truncate">{{ reporte.nombre }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ reporte.fecha }}</p>
+                  </div>
+                </div>
+                <span :class="[
+                  'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium flex-shrink-0',
+                  reporte.tipo === 'PDF' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                ]">
+                  {{ reporte.tipo }}
+                </span>
+              </div>
+            </div>
+            <div v-else class="text-center py-4">
+              <p class="text-xs text-gray-500">Sin reportes generados</p>
+            </div>
           </div>
-        </div>
-        <div v-else class="text-center py-8">
-          <p class="text-gray-500">No hay reportes generados recientemente</p>
+
         </div>
       </div>
     </div>
@@ -662,6 +644,47 @@ export default {
 </script>
 
 <style scoped>
+/* Estilos glass-card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+}
+
+.modern-title {
+  position: relative;
+  overflow: hidden;
+  color: #0F172A;
+}
+
+.red-line {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #3B82F6, #2563EB);
+  border-radius: 2px;
+}
+
+/* Animación para elementos decorativos */
+@keyframes pulse-slow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.2;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+/* Animación de aparición */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -675,5 +698,13 @@ export default {
 
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .page-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 </style>

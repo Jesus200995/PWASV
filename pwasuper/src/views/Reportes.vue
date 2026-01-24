@@ -123,27 +123,27 @@
                 <tbody>
                   <tr
                     v-for="(actividad, index) in actividades"
-                    :key="index"
+                    :key="actividad.id || index"
                     class="border-b border-gray-200 hover:bg-blue-50 transition-colors"
                   >
                     <td class="px-2 py-2 text-gray-900 font-medium">
-                      {{ formatearFecha(actividad.fecha) }}
+                      {{ formatearFecha(actividad.fecha_hora) }}
                     </td>
                     <td class="px-2 py-2 text-gray-700">
-                      {{ formatearHora(actividad.hora) }}
+                      {{ formatearHora(actividad.fecha_hora) }}
                     </td>
                     <td class="hidden sm:table-cell px-2 py-2">
                       <span
                         :class="[
                           'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                          actividad.tipo === 'entrada' 
+                          actividad.tipo_actividad === 'campo' 
                             ? 'bg-green-100 text-green-800'
-                            : actividad.tipo === 'salida'
-                            ? 'bg-orange-100 text-orange-800'
+                            : actividad.tipo_actividad === 'gabinete'
+                            ? 'bg-purple-100 text-purple-800'
                             : 'bg-blue-100 text-blue-800'
                         ]"
                       >
-                        {{ capitalizar(actividad.tipo) }}
+                        {{ capitalizar(actividad.tipo_actividad || 'campo') }}
                       </span>
                     </td>
                   </tr>
@@ -304,7 +304,8 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import FirmaDigital from '../components/FirmaDigital.vue';
-import reportesService from '../services/reportesService.js';
+import axios from 'axios';
+import { API_URL } from '../utils/network.js';
 
 export default {
   name: 'Reportes',
@@ -314,6 +315,7 @@ export default {
   data() {
     return {
       actividades: [],
+      todasLasActividades: [],
       cargando: false,
       generandoReporte: false,
       mesSeleccionado: new Date().getMonth(),
@@ -363,40 +365,74 @@ export default {
           throw new Error('Usuario no autenticado');
         }
         
-        console.log(`📋 Cargando actividades para usuario ${usuario.id} - Mes ${this.mesSeleccionado} Año ${this.anioSeleccionado}`);
+        console.log(`📋 Cargando TODAS las actividades para usuario ${usuario.id}`);
         
-        const resultado = await reportesService.obtenerActividadesMesEspecifico(
-          usuario.id,
-          this.mesSeleccionado,
-          this.anioSeleccionado
-        );
+        // Usar el endpoint /registros igual que en Historial.vue
+        const response = await axios.get(`${API_URL}/registros?usuario_id=${usuario.id}`, {
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
 
-        if (!resultado) {
+        console.log('✅ Respuesta del servidor:', response.data);
+
+        if (!response.data || !response.data.registros) {
           throw new Error('No se recibió respuesta del servidor');
         }
 
-        this.actividades = resultado.historial || [];
-        console.log(`✅ Actividades cargadas: ${this.actividades.length}`);
+        // Guardar TODAS las actividades sin filtrar
+        this.todasLasActividades = response.data.registros || [];
         
-        if (this.actividades.length === 0) {
-          console.warn('⚠️ No hay actividades para el período seleccionado');
-        }
+        // Filtrar por mes/año seleccionado
+        this.filtrarActividadesPorPeriodo();
+        
+        console.log(`✅ Total de actividades: ${this.todasLasActividades.length}`);
+        console.log(`✅ Actividades en período seleccionado: ${this.actividades.length}`);
+        
       } catch (error) {
         console.error('❌ Error cargando actividades:', error);
         this.actividades = [];
-        alert(`Error: ${error.message}`);
+        this.todasLasActividades = [];
+        if (error.response) {
+          alert(`Error del servidor: ${error.response.data.detail || error.response.statusText}`);
+        } else if (error.request) {
+          alert('No se pudo conectar con el servidor');
+        } else {
+          alert(`Error: ${error.message}`);
+        }
       } finally {
         this.cargando = false;
       }
     },
 
-    cambiarPeriodo() {
-      this.cargarActividades();
+    filtrarActividadesPorPeriodo() {
+      // Filtrar actividades por mes y año seleccionado
+      const inicioDeMes = new Date(this.anioSeleccionado, this.mesSeleccionado, 1);
+      const finDelMes = new Date(this.anioSeleccionado, this.mesSeleccionado + 1, 0, 23, 59, 59);
+      
+      this.actividades = this.todasLasActividades.filter(actividad => {
+        if (!actividad.fecha_hora) return false;
+        
+        const fechaActividad = new Date(actividad.fecha_hora);
+        return fechaActividad >= inicioDeMes && fechaActividad <= finDelMes;
+      });
+      
+      console.log(`🔍 Filtrado: ${this.actividades.length} actividades entre ${inicioDeMes.toLocaleDateString()} y ${finDelMes.toLocaleDateString()}`);
     },
 
-    formatearFecha(fecha) {
-      if (!fecha) return '-';
-      const date = new Date(fecha);
+    cambiarPeriodo() {
+      // Solo filtrar si ya tenemos actividades cargadas
+      if (this.todasLasActividades && this.todasLasActividades.length > 0) {
+        this.filtrarActividadesPorPeriodo();
+      } else {
+        this.cargarActividades();
+      }
+    },
+
+    formatearFecha(fechaHora) {
+      if (!fechaHora) return '-';
+      const date = new Date(fechaHora);
       return date.toLocaleDateString('es-MX', {
         weekday: 'short',
         year: 'numeric',
@@ -405,9 +441,14 @@ export default {
       });
     },
 
-    formatearHora(hora) {
-      if (!hora) return '-';
-      return hora;
+    formatearHora(fechaHora) {
+      if (!fechaHora) return '-';
+      const date = new Date(fechaHora);
+      return date.toLocaleTimeString('es-MX', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
     },
 
     capitalizar(texto) {

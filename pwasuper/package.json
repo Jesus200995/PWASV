@@ -14,7 +14,9 @@
     "@fortawesome/vue-fontawesome": "^3.1.2",
     "@vueuse/core": "^13.3.0",
     "axios": "^1.9.0",
+    "html2canvas": "^1.4.1",
     "idb-keyval": "^6.2.2",
+    "jspdf": "^4.0.0",
     "leaflet": "^1.9.4",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1"

@@ -490,6 +490,18 @@ const currentUserId = computed(() => {
             </router-link>
 
             <router-link
+              to="/reportes"
+              @click="closeMobileMenu"
+              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              :class="{ 'bg-green-600': route.name === 'Reportes' }"
+            >
+              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+              </svg>
+              <span>Reportes</span>
+            </router-link>
+
+            <router-link
               to="/settings"
               @click="closeMobileMenu"
               class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"

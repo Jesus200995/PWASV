@@ -547,14 +547,14 @@ export default {
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
       
-      const entradas = this.actividades.filter(a => a.tipo === 'entrada').length;
-      const salidas = this.actividades.filter(a => a.tipo === 'salida').length;
+      const campo = this.actividades.filter(a => a.tipo_actividad === 'campo').length;
+      const gabinete = this.actividades.filter(a => a.tipo_actividad === 'gabinete').length;
       
       doc.text(`Total de Registros: ${this.actividades.length}`, 20, currentY);
       currentY += 6;
-      doc.text(`Entradas: ${entradas}`, 20, currentY);
+      doc.text(`Actividades de Campo: ${campo}`, 20, currentY);
       currentY += 6;
-      doc.text(`Salidas: ${salidas}`, 20, currentY);
+      doc.text(`Actividades de Gabinete: ${gabinete}`, 20, currentY);
       currentY += 12;
 
       // Tabla de Actividades
@@ -587,10 +587,10 @@ export default {
           currentY = 20;
         }
 
-        const fecha = this.formatearFecha(actividad.fecha);
-        const hora = this.formatearHora(actividad.hora);
-        const tipo = this.capitalizar(actividad.tipo);
-        const desc = (actividad.descripcion || '-').substring(0, 30);
+        const fecha = this.formatearFecha(actividad.fecha_hora);
+        const hora = this.formatearHora(actividad.fecha_hora);
+        const tipo = this.capitalizar(actividad.tipo_actividad || '-');
+        const desc = (actividad.descripcion || actividad.categoria_actividad || '-').substring(0, 30);
 
         if (index % 2 === 0) {
           doc.setFillColor(240, 244, 255);
@@ -635,12 +635,13 @@ export default {
     },
 
     generarCSV() {
-      const headers = ['Fecha', 'Hora', 'Tipo', 'Descripción', 'Usuario', 'Cargo', 'Correo'];
+      const headers = ['Fecha', 'Hora', 'Tipo', 'Categoría', 'Descripción', 'Usuario', 'Cargo', 'Correo'];
       
       const rows = this.actividades.map(actividad => [
-        this.formatearFecha(actividad.fecha),
-        this.formatearHora(actividad.hora),
-        this.capitalizar(actividad.tipo),
+        this.formatearFecha(actividad.fecha_hora),
+        this.formatearHora(actividad.fecha_hora),
+        this.capitalizar(actividad.tipo_actividad || '-'),
+        actividad.categoria_actividad || '-',
         actividad.descripcion || '',
         this.usuarioInfo.nombre,
         this.usuarioInfo.cargo || '',

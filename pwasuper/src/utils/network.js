@@ -1,12 +1,34 @@
 // Utilidad para verificar conexión a internet
-export function checkInternetConnection() {
+export async function checkInternetConnection() {
+  // Si estamos en localhost, primero verificar si el servidor local está disponible
+  const environment = detectEnvironment();
+  
+  if (environment === 'development') {
+    // En desarrollo, verificar primero si el servidor local responde
+    try {
+      const localUrl = getApiUrl();
+      const response = await fetch(`${localUrl}/health`, {
+        method: 'HEAD',
+        cache: 'no-store',
+        signal: AbortSignal.timeout(2000) // 2 segundos timeout
+      });
+      
+      if (response.ok || response.status === 404) {
+        // Si el servidor local responde (aunque sea 404), consideramos que hay "conexión"
+        console.log('✅ Servidor local disponible en:', localUrl);
+        return true;
+      }
+    } catch (error) {
+      console.warn('⚠️ Servidor local no responde, verificando internet externa...');
+    }
+  }
+  
+  // Si no es desarrollo o el servidor local no responde, verificar conexión externa
   return new Promise((resolve) => {
-    // Intentar hacer una petición a un servicio externo
     fetch('https://www.google.com', { 
       mode: 'no-cors',
       cache: 'no-store',
-      method: 'HEAD',
-      timeout: 5000 
+      method: 'HEAD'
     })
       .then(() => resolve(true))
       .catch(() => resolve(false));

@@ -794,12 +794,12 @@ export default {
       
       currentY += 6;
       
-      // Fila 2: R.F.C
+      // Fila 2: CURP
       doc.rect(margin, currentY, col1Width, 6);
       doc.rect(margin + col1Width, currentY, col2Width, 6);
       
       doc.setFont(undefined, 'bold');
-      doc.text('R.F.C.', margin + 2, currentY + 4);
+      doc.text('CURP', margin + 2, currentY + 4);
       doc.setFont(undefined, 'normal');
       doc.text(this.usuarioInfo.curp || 'No registrado', margin + col1Width + 2, currentY + 4);
       
@@ -995,9 +995,9 @@ export default {
         doc.setFont(undefined, 'bold');
         doc.text('Elaboró', firmaUsuarioX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
         
-        // Etiqueta "Aprobó"
+        // Etiqueta "Autorizó"
         doc.rect(firmaResponsableX, firmaY - 8, firmaWidth, 7, 'FD');
-        doc.text('Aprobó', firmaResponsableX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
+        doc.text('Autorizó', firmaResponsableX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
         
         // ========== FIRMA DEL PRESTADOR DE SERVICIOS (Izquierda) ==========
         // Contenedor de firma del usuario
@@ -1050,6 +1050,21 @@ export default {
         doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 30, { align: 'center' });
         
         currentY = firmaY + firmaHeight + 40; // Ajustado para la línea extra
+      }
+
+      // ========== PIE DE PÁGINA CON INFORMACIÓN DE CONTACTO ==========
+      const totalPages = doc.internal.getNumberOfPages();
+      
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // Color guinda: RGB(128, 0, 32) aproximadamente
+        doc.setTextColor(128, 0, 32);
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'normal');
+        
+        const footerText = 'Paseo de la Reforma # 116, Piso 16, Col. Juárez, Alc. Cuauhtémoc, CDMX C.P. 06600 Tel.: (55) 5328 5000 www.gob.mx/bienestar';
+        doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: 'center' });
       }
 
       // Descargar

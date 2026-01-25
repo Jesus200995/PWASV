@@ -187,6 +187,9 @@
           <!-- Selector de Período -->
           <div class="glass-card">
             <div class="flex items-center mb-3">
+              <!-- 🟢 INDICADOR DE VERSIÓN ACTUALIZADA -->
+              <div class="w-3 h-3 rounded-full bg-green-500 mr-2 animate-pulse" title="Versión 1.0.1"></div>
+              
               <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: #3B82F6;">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>

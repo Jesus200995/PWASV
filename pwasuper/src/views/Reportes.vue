@@ -441,6 +441,7 @@ import html2canvas from 'html2canvas';
 import FirmaDigital from '../components/FirmaDigital.vue';
 import axios from 'axios';
 import { API_URL } from '../utils/network.js';
+import superiorImage from '../../images/superior.png';
 
 export default {
   name: 'Reportes',
@@ -711,42 +712,14 @@ export default {
       const contentWidth = pageWidth - (margin * 2);
       let currentY = 10;
 
-      // ========== ENCABEZADO CON LOGOS Y TÍTULOS ==========
-      // Nota: Los logos reales requerirían imágenes en base64
-      // Por ahora usamos recuadros de texto para representar los logos
+      // ========== ENCABEZADO CON IMAGEN DE LOGOS ==========
+      // Agregar imagen superior con los tres logos
+      const imgWidth = contentWidth;
+      const imgHeight = 15; // Ajustar según proporciones de la imagen
       
-      // Logo izquierdo - Secretaría de Bienestar
-      doc.setDrawColor(0, 0, 0);
-      doc.setLineWidth(0.3);
-      doc.rect(margin, currentY, 50, 15);
-      doc.setFontSize(7);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(139, 69, 19);
-      doc.text('Bienestar', margin + 25, currentY + 7, { align: 'center' });
-      doc.setFontSize(6);
-      doc.setFont(undefined, 'normal');
-      doc.text('Secretaría de Bienestar', margin + 25, currentY + 11, { align: 'center' });
+      doc.addImage(superiorImage, 'PNG', margin, currentY, imgWidth, imgHeight);
       
-      // Logo centro - Sembrando Vida
-      const centerX = pageWidth / 2;
-      doc.rect(centerX - 25, currentY, 50, 15);
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(0, 128, 0);
-      doc.text('SEMBRANDO', centerX, currentY + 6, { align: 'center' });
-      doc.setFontSize(9);
-      doc.text('VIDA', centerX, currentY + 11, { align: 'center' });
-      doc.setFontSize(5);
-      doc.setFont(undefined, 'normal');
-      doc.text('PROGRAMA DE SEMBRANDO TERRITORIOS', centerX, currentY + 14, { align: 'center' });
-      
-      // Logo derecho
-      doc.rect(pageWidth - margin - 50, currentY, 50, 15);
-      doc.setFontSize(6);
-      doc.setTextColor(0, 0, 0);
-      doc.text('[Logo Nacional]', pageWidth - margin - 25, currentY + 8, { align: 'center' });
-      
-      currentY += 20;
+      currentY += imgHeight + 5;
       
       // Recuadro principal con títulos
       doc.setDrawColor(0, 0, 0);

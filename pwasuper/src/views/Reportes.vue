@@ -541,8 +541,11 @@ export default {
           throw new Error('No se recibió respuesta del servidor');
         }
 
-        // Guardar TODAS las actividades sin filtrar
-        this.todasLasActividades = response.data.registros || [];
+        // Procesar las URLs de las fotos para que sean rutas absolutas (como en Historial.vue)
+        this.todasLasActividades = response.data.registros.map(r => ({
+          ...r,
+          foto_url: r.foto_url ? `${API_URL}/${r.foto_url}` : null
+        }));
         
         // Filtrar por mes/año seleccionado
         this.filtrarActividadesPorPeriodo();
@@ -1255,13 +1258,8 @@ export default {
             }
             
             try {
-              // Construir URL completa de la imagen
-              let fotoUrl = actividad.foto_url;
-              if (!fotoUrl.startsWith('http')) {
-                // Si es ruta relativa, agregar URL base del servidor
-                const baseUrl = API_URL.replace('/api', '');
-                fotoUrl = `${baseUrl}${fotoUrl.startsWith('/') ? '' : '/'}${fotoUrl}`;
-              }
+              // La URL ya viene completa del servidor
+              const fotoUrl = actividad.foto_url;
               
               console.log(`📷 [${i + 1}/${maxImagenes}] Cargando imagen: ${fotoUrl}`);
               

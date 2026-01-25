@@ -809,35 +809,44 @@ export default {
     },
 
     async generarPDF() {
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
+      try {
+        console.log('📄 Iniciando generación de PDF...');
+        
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
 
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const margin = 15;
-      const contentWidth = pageWidth - (margin * 2);
-      let currentY = 10;
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 15;
+        const contentWidth = pageWidth - (margin * 2);
+        let currentY = 10;
 
-      // ========== ENCABEZADO CON IMAGEN DE LOGOS ==========
-      // Cargar imagen y obtener dimensiones reales para mantener proporción
-      const img = new Image();
-      img.src = superiorImage;
-      
-      // Calcular dimensiones manteniendo aspect ratio
-      const imgOriginalWidth = img.naturalWidth || img.width;
-      const imgOriginalHeight = img.naturalHeight || img.height;
-      const aspectRatio = imgOriginalHeight / imgOriginalWidth;
-      
-      // Establecer ancho al contenido y calcular altura proporcionalmente
-      const imgWidth = contentWidth;
-      const imgHeight = imgWidth * aspectRatio;
-      
-      doc.addImage(superiorImage, 'PNG', margin, currentY, imgWidth, imgHeight);
-      
-      currentY += imgHeight + 5;
+        // ========== ENCABEZADO CON IMAGEN DE LOGOS ==========
+        console.log('🖼️ Cargando imagen de encabezado...');
+        
+        // Cargar imagen como base64 para evitar problemas de CORS y formato
+        let superiorImageBase64;
+        try {
+          superiorImageBase64 = await this.cargarImagenComoBase64(superiorImage);
+        } catch (error) {
+          console.warn('⚠️ No se pudo cargar imagen de encabezado, continuando sin ella:', error);
+          // Continuar sin imagen de encabezado
+          currentY = 10;
+        }
+        
+        if (superiorImageBase64) {
+          // Calcular dimensiones manteniendo aspect ratio (proporción 500x100 aprox)
+          const aspectRatio = 0.2; // 100/500
+          const imgWidth = contentWidth;
+          const imgHeight = imgWidth * aspectRatio;
+          
+          doc.addImage(superiorImageBase64, 'JPEG', margin, currentY, imgWidth, imgHeight);
+          currentY += imgHeight + 5;
+          console.log('✅ Imagen de encabezado agregada');
+        }
       
       // Recuadro principal con títulos
       doc.setDrawColor(0, 0, 0);
@@ -1174,9 +1183,14 @@ export default {
           currentY = 10;
 
           // ========== ENCABEZADO DE LA PÁGINA DE EVIDENCIAS ==========
-          // Cargar imagen de logos
-          doc.addImage(superiorImage, 'PNG', margin, currentY, contentWidth, contentWidth * (img.naturalHeight || 100) / (img.naturalWidth || 500));
-          currentY += (contentWidth * (img.naturalHeight || 100) / (img.naturalWidth || 500)) + 5;
+          // Cargar imagen de logos (reutilizar la misma imagen cargada)
+          if (superiorImageBase64) {
+            const aspectRatio = 0.2;
+            const imgWidth = contentWidth;
+            const imgHeight = imgWidth * aspectRatio;
+            doc.addImage(superiorImageBase64, 'JPEG', margin, currentY, imgWidth, imgHeight);
+            currentY += imgHeight + 5;
+          }
           
           // Título de la sección
           doc.setDrawColor(0, 0, 0);
@@ -1404,8 +1418,16 @@ export default {
       }
 
       // Descargar
+      console.log('💾 Descargando PDF...');
       doc.save(`Reporte_${this.mesActual}_${this.anioSeleccionado}.pdf`);
-    },
+      console.log('✅ PDF generado y descargado exitosamente');
+      
+    } catch (error) {
+      console.error('❌ Error crítico generando PDF:', error);
+      alert('Error al generar el PDF. Por favor, intenta de nuevo.');
+      throw error;
+    }
+  },
 
     // Método auxiliar para cargar imagen como Base64
     async cargarImagenComoBase64(url) {

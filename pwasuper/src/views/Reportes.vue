@@ -1133,18 +1133,39 @@ export default {
           return;
         }
 
+        console.log(`🔍 Cargando historial para usuario ID: ${this.usuarioInfo.id}`);
         const response = await axios.get(`${API_URL}/reportes/historial/${this.usuarioInfo.id}`);
         
+        console.log('📦 Respuesta del servidor:', response.data);
+        
         if (response.data.success && response.data.reportes) {
-          this.reportesGenerados = response.data.reportes;
+          // Formatear fechas para mostrar en formato legible
+          this.reportesGenerados = response.data.reportes.map(reporte => ({
+            ...reporte,
+            fecha: reporte.fecha ? new Date(reporte.fecha).toLocaleString('es-MX', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : 'Sin fecha'
+          }));
           console.log(`✅ Historial de reportes cargado: ${response.data.total} reportes`);
+          console.log('📋 Reportes formateados:', this.reportesGenerados);
+        } else {
+          console.log('⚠️ No se encontraron reportes en la respuesta');
+          this.reportesGenerados = [];
         }
       } catch (error) {
-        console.error('⚠️ Error cargando historial de reportes:', error);
+        console.error('❌ Error cargando historial de reportes:', error);
+        console.error('Detalles del error:', error.response?.data || error.message);
         // Si hay error, intentar cargar desde localStorage como fallback
         const reportesGuardados = localStorage.getItem('reportesGenerados');
         if (reportesGuardados) {
           this.reportesGenerados = JSON.parse(reportesGuardados);
+          console.log('📋 Reportes cargados desde localStorage');
+        } else {
+          this.reportesGenerados = [];
         }
       }
     }

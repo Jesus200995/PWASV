@@ -654,9 +654,16 @@ export default {
 
     // Confirmar y proceder con la descarga
     async confirmarYDescargar() {
-      if (!this.confirmarFirma || !this.esFirmaValida()) return;
+      // Validar checkbox de confirmación
+      if (!this.confirmarFirma) {
+        console.warn('Checkbox de confirmación no marcado');
+        return;
+      }
       
+      // Cerrar modal inmediatamente para mejor UX
       this.cerrarModalFirma();
+      
+      // Generar reporte
       await this.generarReporte();
     },
 

@@ -995,7 +995,8 @@ export default {
         doc.setFont(undefined, 'bold');
         doc.text('Elaboró', firmaUsuarioX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
         
-        // Etiqueta "Autorizó"
+        // Etiqueta "Autorizó" - restablecer color de fondo
+        doc.setFillColor(255, 218, 185); // Color durazno/naranja claro
         doc.rect(firmaResponsableX, firmaY - 8, firmaWidth, 7, 'FD');
         doc.text('Autorizó', firmaResponsableX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
         

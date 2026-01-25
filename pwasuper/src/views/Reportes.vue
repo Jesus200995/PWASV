@@ -841,41 +841,6 @@ export default {
       
       currentY += 10;
       
-      // ========== TÍTULO DE SECCIÓN ==========
-      doc.rect(margin, currentY, contentWidth, 6);
-      doc.setFillColor(240, 240, 240);
-      doc.rect(margin, currentY, contentWidth, 6, 'FD');
-      
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(9);
-      doc.text('RESUMEN DE ACTIVIDADES DESARROLLADAS', pageWidth / 2, currentY + 4, { align: 'center' });
-      
-      currentY += 10;
-
-      // Definir columnas de la tabla (centrada)
-      const tableWidth = contentWidth;
-      const colWidths = [45, 25, 30, 70]; // Fecha, Hora, Tipo, Descripción
-      const tableX = margin;
-      
-      // Header de la tabla
-      doc.setFillColor(37, 99, 235);
-      doc.rect(tableX, currentY, tableWidth, 8, 'F');
-      
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'bold');
-      
-      let colX = tableX + 3;
-      doc.text('FECHA', colX, currentY + 5.5);
-      colX += colWidths[0];
-      doc.text('HORA', colX, currentY + 5.5);
-      colX += colWidths[1];
-      doc.text('TIPO', colX, currentY + 5.5);
-      colX += colWidths[2];
-      doc.text('DESCRIPCIÓN', colX, currentY + 5.5);
-
-      currentY += 10;
-      
       // ========== TABLA DE ACTIVIDADES ==========
       // Definir columnas de la tabla
       const tableWidth = contentWidth;

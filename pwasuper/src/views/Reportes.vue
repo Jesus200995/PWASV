@@ -1152,14 +1152,14 @@ export default {
 
       // ========== SEGUNDA PÁGINA: EVIDENCIAS FOTOGRÁFICAS ==========
       // Filtrar actividades de los últimos 7 días del período con fotos
-      const finPeriodo = new Date(this.anioSeleccionado, this.mesSeleccionado + 1, 0);
-      const hace7Dias = new Date(finPeriodo);
+      const finPeriodoFotos = new Date(this.anioSeleccionado, this.mesSeleccionado + 1, 0);
+      const hace7Dias = new Date(finPeriodoFotos);
       hace7Dias.setDate(hace7Dias.getDate() - 7);
       
       const actividadesConFoto = this.actividades.filter(actividad => {
         if (!actividad.foto_url) return false;
         const fechaActividad = new Date(actividad.fecha_hora);
-        return fechaActividad >= hace7Dias && fechaActividad <= finPeriodo;
+        return fechaActividad >= hace7Dias && fechaActividad <= finPeriodoFotos;
       });
 
       console.log(`📸 Actividades con foto (últimos 7 días): ${actividadesConFoto.length}`);

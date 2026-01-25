@@ -689,14 +689,31 @@ export default {
           this.generarCSV();
         }
 
-        // Agregar a historial
+        // Agregar a historial local
         const fecha = new Date().toLocaleString('es-MX');
+        const nombreReporte = `Reporte ${this.mesActual} ${this.anioSeleccionado}`;
+        
         this.reportesGenerados.unshift({
           id: Date.now(),
-          nombre: `Reporte ${this.mesActual} ${this.anioSeleccionado}`,
+          nombre: nombreReporte,
           fecha,
           tipo: this.formatoSeleccionado.toUpperCase()
         });
+
+        // Guardar en la base de datos
+        try {
+          await axios.post(`${API_URL}/reportes/guardar`, {
+            usuario_id: this.usuarioInfo.id,
+            nombre_reporte: nombreReporte,
+            mes: this.mesActual,
+            anio: this.anioSeleccionado,
+            tipo: this.formatoSeleccionado.toUpperCase()
+          });
+          console.log('✅ Reporte guardado en la base de datos');
+        } catch (error) {
+          console.error('⚠️ Error guardando reporte en BD:', error);
+          // No mostramos error al usuario, solo lo registramos
+        }
 
         this.$notify?.({
           type: 'success',
@@ -1107,6 +1124,29 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    },
+
+    async cargarHistorialReportes() {
+      try {
+        if (!this.usuarioInfo.id) {
+          console.log('⚠️ No hay ID de usuario para cargar historial');
+          return;
+        }
+
+        const response = await axios.get(`${API_URL}/reportes/historial/${this.usuarioInfo.id}`);
+        
+        if (response.data.success && response.data.reportes) {
+          this.reportesGenerados = response.data.reportes;
+          console.log(`✅ Historial de reportes cargado: ${response.data.total} reportes`);
+        }
+      } catch (error) {
+        console.error('⚠️ Error cargando historial de reportes:', error);
+        // Si hay error, intentar cargar desde localStorage como fallback
+        const reportesGuardados = localStorage.getItem('reportesGenerados');
+        if (reportesGuardados) {
+          this.reportesGenerados = JSON.parse(reportesGuardados);
+        }
+      }
     }
   },
 
@@ -1119,6 +1159,7 @@ export default {
     const usuario = JSON.parse(localStorage.getItem('user'));
     if (usuario) {
       this.usuarioInfo = {
+        id: usuario.id || null,
         nombre: usuario.nombre_completo || usuario.nombre || 'Usuario',
         cargo: usuario.cargo || '',
         correo: usuario.correo || '',
@@ -1131,16 +1172,8 @@ export default {
     // Cargar actividades
     this.cargarActividades();
 
-    // Cargar reportes del localStorage si existen
-    const reportesGuardados = localStorage.getItem('reportesGenerados');
-    if (reportesGuardados) {
-      this.reportesGenerados = JSON.parse(reportesGuardados);
-    }
-  },
-
-  beforeUnmount() {
-    // Guardar reportes generados
-    localStorage.setItem('reportesGenerados', JSON.stringify(this.reportesGenerados));
+    // Cargar historial de reportes desde la base de datos
+    await this.cargarHistorialReportes();
   }
 };
 </script>

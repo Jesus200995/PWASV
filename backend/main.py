@@ -1611,6 +1611,93 @@ def obtener_estadisticas_tipo_actividad(territorio: str = None):
         print(f"❌ Error obteniendo estadísticas por tipo: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+# ==================== ENDPOINTS PARA REPORTES GENERADOS ====================
+
+@app.post("/reportes/guardar")
+async def guardar_reporte(datos: dict):
+    """Guardar un reporte generado en la base de datos"""
+    try:
+        usuario_id = datos.get('usuario_id')
+        nombre_reporte = datos.get('nombre_reporte')
+        mes = datos.get('mes')
+        anio = datos.get('anio')
+        tipo = datos.get('tipo')  # PDF o CSV
+        
+        if not all([usuario_id, nombre_reporte, tipo]):
+            raise HTTPException(status_code=400, detail="Faltan datos requeridos")
+        
+        print(f"💾 Guardando reporte: {nombre_reporte} para usuario {usuario_id}")
+        
+        cursor.execute("""
+            INSERT INTO reportes_generados 
+            (usuario_id, nombre_reporte, mes, anio, tipo, fecha_generacion)
+            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+            RETURNING id, fecha_generacion
+        """, (usuario_id, nombre_reporte, mes, anio, tipo))
+        
+        resultado = cursor.fetchone()
+        conn.commit()
+        
+        print(f"✅ Reporte guardado con ID: {resultado[0]}")
+        
+        return {
+            "success": True,
+            "reporte_id": resultado[0],
+            "fecha_generacion": resultado[1].isoformat() if resultado[1] else None
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error guardando reporte: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al guardar reporte: {str(e)}")
+
+@app.get("/reportes/historial/{usuario_id}")
+async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
+    """Obtener el historial de reportes generados por un usuario"""
+    try:
+        print(f"📋 Obteniendo historial de reportes para usuario {usuario_id}")
+        
+        cursor.execute("""
+            SELECT 
+                id,
+                nombre_reporte,
+                mes,
+                anio,
+                tipo,
+                fecha_generacion
+            FROM reportes_generados
+            WHERE usuario_id = %s
+            ORDER BY fecha_generacion DESC
+            LIMIT %s
+        """, (usuario_id, limite))
+        
+        reportes = cursor.fetchall()
+        
+        resultado = []
+        for reporte in reportes:
+            resultado.append({
+                "id": reporte[0],
+                "nombre": reporte[1],
+                "mes": reporte[2],
+                "anio": reporte[3],
+                "tipo": reporte[4],
+                "fecha": reporte[5].isoformat() if reporte[5] else None
+            })
+        
+        print(f"✅ {len(resultado)} reportes encontrados")
+        
+        return {
+            "success": True,
+            "reportes": resultado,
+            "total": len(resultado)
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo historial de reportes: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 # Nuevo endpoint para obtener usuarios (para el panel de administración)
 @app.get("/usuarios")
 async def obtener_usuarios(territorio: str = None):

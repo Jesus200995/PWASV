@@ -153,6 +153,12 @@
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
       <div class="page-container relative z-10 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 min-h-full max-w-full">
         <div class="w-full max-w-lg mx-auto space-y-4">
+          
+          <!-- 🔴 INDICADOR DE VERSIÓN ACTUALIZADA - VISIBLE -->
+          <div class="bg-red-500 text-white text-center py-2 px-4 rounded-lg font-bold text-lg animate-pulse">
+            ✅ VERSIÓN 1.0.2 CARGADA
+          </div>
+          
           <!-- Header de Reportes -->
           <div class="glass-card text-center">
             <div class="flex items-center justify-center mb-3">

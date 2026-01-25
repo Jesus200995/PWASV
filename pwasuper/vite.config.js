@@ -18,7 +18,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/app\.sembrandodatos\.com\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'app-cache-v1.0.1',
+              cacheName: 'app-cache-v1.0.3',
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 // 1 hora

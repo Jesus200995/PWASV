@@ -827,7 +827,7 @@ export default {
       // Definir columnas de la tabla
       const tableWidth = contentWidth;
       const tableX = margin;
-      const colWidths = [20, 38, 25, 22, 65]; // No., Fecha, Inicio, Término, Actividad
+      const colWidths = [15, 32, 18, 22, 22, 61]; // No., Fecha, Tipo, Inicio, Término, Actividad
       
       // Header de la tabla
       doc.setDrawColor(0, 0, 0);
@@ -840,7 +840,7 @@ export default {
       doc.setFont(undefined, 'bold');
       
       let colX = tableX + 2;
-      doc.text('No.', colX + 8, currentY + 5.5, { align: 'center' });
+      doc.text('No.', colX + colWidths[0]/2, currentY + 5.5, { align: 'center' });
       doc.line(colX + colWidths[0], currentY, colX + colWidths[0], currentY + 8);
       
       colX += colWidths[0];
@@ -848,15 +848,19 @@ export default {
       doc.line(colX + colWidths[1], currentY, colX + colWidths[1], currentY + 8);
       
       colX += colWidths[1];
-      doc.text('Hora Inicio', colX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
+      doc.text('Tipo', colX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
       doc.line(colX + colWidths[2], currentY, colX + colWidths[2], currentY + 8);
       
       colX += colWidths[2];
-      doc.text('Hora Término', colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+      doc.text('Hora Inicio', colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
       doc.line(colX + colWidths[3], currentY, colX + colWidths[3], currentY + 8);
       
       colX += colWidths[3];
-      doc.text('Actividad desarrollada', colX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
+      doc.text('Hora Término', colX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
+      doc.line(colX + colWidths[4], currentY, colX + colWidths[4], currentY + 8);
+      
+      colX += colWidths[4];
+      doc.text('Actividad desarrollada', colX + colWidths[5]/2, currentY + 5.5, { align: 'center' });
 
       currentY += 8;
       
@@ -884,7 +888,7 @@ export default {
           doc.setFont(undefined, 'bold');
           
           let headerX = tableX + 2;
-          doc.text('No.', headerX + 8, currentY + 5.5, { align: 'center' });
+          doc.text('No.', headerX + colWidths[0]/2, currentY + 5.5, { align: 'center' });
           doc.line(headerX + colWidths[0], currentY, headerX + colWidths[0], currentY + 8);
           
           headerX += colWidths[0];
@@ -892,15 +896,19 @@ export default {
           doc.line(headerX + colWidths[1], currentY, headerX + colWidths[1], currentY + 8);
           
           headerX += colWidths[1];
-          doc.text('Hora Inicio', headerX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
+          doc.text('Tipo', headerX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
           doc.line(headerX + colWidths[2], currentY, headerX + colWidths[2], currentY + 8);
           
           headerX += colWidths[2];
-          doc.text('Hora Término', headerX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+          doc.text('Hora Inicio', headerX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
           doc.line(headerX + colWidths[3], currentY, headerX + colWidths[3], currentY + 8);
           
           headerX += colWidths[3];
-          doc.text('Actividad desarrollada', headerX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
+          doc.text('Hora Término', headerX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
+          doc.line(headerX + colWidths[4], currentY, headerX + colWidths[4], currentY + 8);
+          
+          headerX += colWidths[4];
+          doc.text('Actividad desarrollada', headerX + colWidths[5]/2, currentY + 5.5, { align: 'center' });
           
           currentY += 8;
           doc.setTextColor(0, 0, 0);
@@ -915,12 +923,13 @@ export default {
 
         const fecha = this.formatearFecha(actividad.fecha_hora);
         const hora = this.formatearHora(actividad.fecha_hora);
-        const activDesc = (actividad.descripcion || actividad.categoria_actividad || 'Actividad de ' + (actividad.tipo_actividad || 'campo')).substring(0, 60);
+        const tipo = this.capitalizar(actividad.tipo_actividad || 'Campo');
+        const activDesc = (actividad.descripcion || actividad.categoria_actividad || 'Actividad de ' + (actividad.tipo_actividad || 'campo')).substring(0, 50);
 
         colX = tableX + 2;
         
         // No.
-        doc.text(String(index + 1), colX + 8, currentY + 5.5, { align: 'center' });
+        doc.text(String(index + 1), colX + colWidths[0]/2, currentY + 5.5, { align: 'center' });
         doc.line(colX + colWidths[0], currentY, colX + colWidths[0], currentY + rowHeight);
         
         // Fecha
@@ -928,19 +937,24 @@ export default {
         doc.text(fecha, colX + 2, currentY + 5.5);
         doc.line(colX + colWidths[1], currentY, colX + colWidths[1], currentY + rowHeight);
         
-        // Hora Inicio
+        // Tipo (Campo/Gabinete)
         colX += colWidths[1];
-        doc.text(hora, colX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
+        doc.text(tipo, colX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
         doc.line(colX + colWidths[2], currentY, colX + colWidths[2], currentY + rowHeight);
         
-        // Hora Término (estimado +1 hora)
+        // Hora Inicio
         colX += colWidths[2];
-        const horaTermino = this.calcularHoraTermino(actividad.fecha_hora);
-        doc.text(horaTermino, colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+        doc.text(hora, colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
         doc.line(colX + colWidths[3], currentY, colX + colWidths[3], currentY + rowHeight);
         
-        // Actividad
+        // Hora Término (estimado +1 hora)
         colX += colWidths[3];
+        const horaTermino = this.calcularHoraTermino(actividad.fecha_hora);
+        doc.text(horaTermino, colX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
+        doc.line(colX + colWidths[4], currentY, colX + colWidths[4], currentY + rowHeight);
+        
+        // Actividad
+        colX += colWidths[4];
         doc.text(activDesc, colX + 2, currentY + 5.5);
 
         currentY += rowHeight;

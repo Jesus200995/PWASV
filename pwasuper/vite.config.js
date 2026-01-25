@@ -7,7 +7,27 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
+      injectRegister: 'auto',
+      workbox: {
+        clientsClaim: true,
+        skipWaiting: true,
+        cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/app\.sembrandodatos\.com\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'app-cache-v1.0.1',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 // 1 hora
+              },
+              networkTimeoutSeconds: 10
+            }
+          }
+        ]
+      },
       manifest: {
         name: 'Sembrando Datos',
         short_name: 'Sembrando Datos',

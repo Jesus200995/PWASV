@@ -983,56 +983,48 @@ export default {
         doc.text('Autorizó', firmaResponsableX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
         
         // ========== FIRMA DEL PRESTADOR DE SERVICIOS (Izquierda) ==========
-        // Contenedor de firma del usuario
-        doc.setDrawColor(0, 0, 0);
-        doc.setLineWidth(0.3);
-        doc.rect(firmaUsuarioX, firmaY, firmaWidth, firmaHeight, 'S');
-        
-        // Imagen de firma del usuario
+        // Imagen de firma del usuario (sin rectángulo contenedor)
         const firmaBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
-        doc.addImage(firmaBase64, 'PNG', firmaUsuarioX + 2, firmaY + 2, firmaWidth - 4, firmaHeight - 4);
+        doc.addImage(firmaBase64, 'PNG', firmaUsuarioX, firmaY, firmaWidth, firmaHeight);
         
         // Línea de firma usuario
         doc.setDrawColor(0, 0, 0);
         doc.setLineWidth(0.5);
-        doc.line(firmaUsuarioX, firmaY + firmaHeight + 15, firmaUsuarioX + firmaWidth, firmaY + firmaHeight + 15);
+        doc.line(firmaUsuarioX, firmaY + firmaHeight + 5, firmaUsuarioX + firmaWidth, firmaY + firmaHeight + 5);
         
-        // Nombre del usuario
+        // Cargo del usuario (primero)
         doc.setTextColor(0, 0, 0);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        const cargoUsuario = this.usuarioInfo.cargo || 'Facilitador Comunitario';
+        doc.text(cargoUsuario, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+        
+        // Nombre del usuario (después, en negrita)
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
         const nombreUsuario = this.usuarioInfo.nombre || 'Sin nombre';
-        doc.text(nombreUsuario, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 20, { align: 'center' });
-        
-        // Cargo del usuario
-        doc.setFontSize(7);
-        doc.setFont(undefined, 'normal');
-        const cargoUsuario = this.usuarioInfo.cargo || 'Facilitador Comunitario';
-        doc.text(cargoUsuario, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 25, { align: 'center' });
+        doc.text(nombreUsuario, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 17, { align: 'center' });
         
         // ========== FIRMA DEL RESPONSABLE (Derecha) ==========
-        // Contenedor de firma del responsable (vacío para firma manual)
-        doc.setDrawColor(0, 0, 0);
-        doc.setLineWidth(0.3);
-        doc.rect(firmaResponsableX, firmaY, firmaWidth, firmaHeight, 'S');
+        // Sin imagen, solo espacio vacío para firma manual
         
         // Línea de firma responsable
         doc.setLineWidth(0.5);
-        doc.line(firmaResponsableX, firmaY + firmaHeight + 15, firmaResponsableX + firmaWidth, firmaY + firmaHeight + 15);
+        doc.line(firmaResponsableX, firmaY + firmaHeight + 5, firmaResponsableX + firmaWidth, firmaY + firmaHeight + 5);
         
-        // Nombre del supervisor/responsable
+        // Cargo del responsable (primero, puede ser en dos líneas)
+        doc.setFontSize(7.5);
+        doc.setFont(undefined, 'normal');
+        doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+        doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+        
+        // Nombre del supervisor/responsable (después, en negrita)
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
         const nombreSupervisor = this.usuarioInfo.supervisor || 'Sin asignar';
-        doc.text(nombreSupervisor, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 20, { align: 'center' });
+        doc.text(nombreSupervisor, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
         
-        // Cargo del responsable
-        doc.setFontSize(7);
-        doc.setFont(undefined, 'normal');
-        doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 25, { align: 'center' });
-        doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 30, { align: 'center' });
-        
-        currentY = firmaY + firmaHeight + 40; // Ajustado para la línea extra
+        currentY = firmaY + firmaHeight + 30;
       }
 
       // ========== PIE DE PÁGINA CON INFORMACIÓN DE CONTACTO ==========

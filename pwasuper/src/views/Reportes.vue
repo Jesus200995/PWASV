@@ -654,17 +654,24 @@ export default {
 
     // Confirmar y proceder con la descarga
     async confirmarYDescargar() {
-      // Validar checkbox de confirmación
-      if (!this.confirmarFirma) {
-        console.warn('Checkbox de confirmación no marcado');
+      if (!this.confirmarFirma) return;
+      
+      // Esperar un tick para asegurar que el estado de la firma esté actualizado
+      await this.$nextTick();
+      
+      // Verificar firma de manera más robusta
+      const firmaValida = this.$refs.firmaComponent?.hayFirma || false;
+      if (!firmaValida) {
+        alert('La firma no es válida. Por favor, vuelve a firmar.');
         return;
       }
       
-      // Cerrar modal inmediatamente para mejor UX
       this.cerrarModalFirma();
       
-      // Generar reporte
-      await this.generarReporte();
+      // Pequeña pausa para asegurar que todo esté listo
+      setTimeout(async () => {
+        await this.generarReporte();
+      }, 100);
     },
 
     async generarReporte() {

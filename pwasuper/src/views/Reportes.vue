@@ -829,21 +829,29 @@ export default {
         
         // Cargar imagen como base64 para evitar problemas de CORS y formato
         let superiorImageBase64;
+        let imgDimensions;
         try {
-          superiorImageBase64 = await this.cargarImagenComoBase64(superiorImage);
+          const result = await this.cargarImagenComoBase64(superiorImage);
+          superiorImageBase64 = result.data;
+          imgDimensions = result.dimensions;
         } catch (error) {
           console.warn('⚠️ No se pudo cargar imagen de encabezado, continuando sin ella:', error);
           // Continuar sin imagen de encabezado
           currentY = 10;
         }
         
-        if (superiorImageBase64) {
-          // Calcular dimensiones manteniendo aspect ratio (proporción 500x100 aprox)
-          const aspectRatio = 0.2; // 100/500
-          const imgWidth = contentWidth;
-          const imgHeight = imgWidth * aspectRatio;
+        if (superiorImageBase64 && imgDimensions) {
+          // Calcular dimensiones reales manteniendo aspect ratio
+          const realAspectRatio = imgDimensions.height / imgDimensions.width;
           
-          doc.addImage(superiorImageBase64, 'JPEG', margin, currentY, imgWidth, imgHeight);
+          // Usar 70% del ancho para que sea más pequeña
+          const imgWidth = contentWidth * 0.7;
+          const imgHeight = imgWidth * realAspectRatio;
+          
+          // Centrar la imagen
+          const imgX = margin + (contentWidth - imgWidth) / 2;
+          
+          doc.addImage(superiorImageBase64, 'PNG', imgX, currentY, imgWidth, imgHeight);
           currentY += imgHeight + 5;
           console.log('✅ Imagen de encabezado agregada');
         }
@@ -1184,11 +1192,13 @@ export default {
 
           // ========== ENCABEZADO DE LA PÁGINA DE EVIDENCIAS ==========
           // Cargar imagen de logos (reutilizar la misma imagen cargada)
-          if (superiorImageBase64) {
-            const aspectRatio = 0.2;
-            const imgWidth = contentWidth;
-            const imgHeight = imgWidth * aspectRatio;
-            doc.addImage(superiorImageBase64, 'JPEG', margin, currentY, imgWidth, imgHeight);
+          if (superiorImageBase64 && imgDimensions) {
+            const realAspectRatio = imgDimensions.height / imgDimensions.width;
+            const imgWidth = contentWidth * 0.7;
+            const imgHeight = imgWidth * realAspectRatio;
+            const imgX = margin + (contentWidth - imgWidth) / 2;
+            
+            doc.addImage(superiorImageBase64, 'PNG', imgX, currentY, imgWidth, imgHeight);
             currentY += imgHeight + 5;
           }
           
@@ -1256,7 +1266,8 @@ export default {
               console.log(`📷 [${i + 1}/${maxImagenes}] Cargando imagen: ${fotoUrl}`);
               
               // Cargar imagen como base64 con timeout
-              const imgData = await this.cargarImagenComoBase64(fotoUrl);
+              const imgResult = await this.cargarImagenComoBase64(fotoUrl);
+              const imgData = imgResult.data;
               
               if (imgData) {
                 console.log(`✅ [${i + 1}/${maxImagenes}] Imagen cargada exitosamente`);
@@ -1450,8 +1461,12 @@ export default {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
+            // Guardar dimensiones originales
+            const originalWidth = img.width;
+            const originalHeight = img.height;
+            
             // Redimensionar si es muy grande
-            const maxSize = 400;
+            const maxSize = 800;
             let width = img.width;
             let height = img.height;
             
@@ -1472,9 +1487,16 @@ export default {
             canvas.height = height;
             ctx.drawImage(img, 0, 0, width, height);
             
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            const dataUrl = canvas.toDataURL('image/png', 0.95);
             console.log(`✅ Imagen convertida a base64 (${(dataUrl.length / 1024).toFixed(2)} KB)`);
-            resolve(dataUrl);
+            
+            resolve({
+              data: dataUrl,
+              dimensions: {
+                width: originalWidth,
+                height: originalHeight
+              }
+            });
           } catch (error) {
             console.error('❌ Error al convertir imagen:', error);
             clearTimeout(timeoutId);

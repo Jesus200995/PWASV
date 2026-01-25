@@ -847,8 +847,8 @@ export default {
           // Calcular dimensiones reales manteniendo aspect ratio
           const realAspectRatio = imgDimensions.height / imgDimensions.width;
           
-          // Usar 70% del ancho para que sea más pequeña
-          const imgWidth = contentWidth * 0.7;
+          // Usar 95% del ancho para que sea grande sin distorsión
+          const imgWidth = contentWidth * 0.95;
           const imgHeight = imgWidth * realAspectRatio;
           
           // Centrar la imagen
@@ -1186,7 +1186,14 @@ export default {
         });
 
         console.log(`📸 Actividades con foto encontradas: ${actividadesConFoto.length}`);
-        console.log('🔍 Actividades con foto:', actividadesConFoto.map(a => ({ foto_url: a.foto_url, fecha: a.fecha_hora })));
+        console.log('🔍 Actividades con foto:', actividadesConFoto.map(a => ({ 
+          foto_url: a.foto_url, 
+          fecha: a.fecha_hora,
+          tipo: a.tipo_actividad 
+        })));
+        
+        console.log('📊 DEBUG - Total actividades cargadas:', this.actividades.length);
+        console.log('📊 DEBUG - Actividades con foto_url:', this.actividades.filter(a => a.foto_url).length);
 
         if (actividadesConFoto.length > 0) {
           // Crear nueva página para evidencias fotográficas
@@ -1197,7 +1204,7 @@ export default {
           // Cargar imagen de logos (reutilizar la misma imagen cargada)
           if (superiorImageBase64 && imgDimensions) {
             const realAspectRatio = imgDimensions.height / imgDimensions.width;
-            const imgWidth = contentWidth * 0.7;
+            const imgWidth = contentWidth * 0.95;
             const imgHeight = imgWidth * realAspectRatio;
             const imgX = margin + (contentWidth - imgWidth) / 2;
             
@@ -1405,10 +1412,14 @@ export default {
           console.log('✅ Página de evidencias fotográficas completada');
         } else {
           console.log('ℹ️ No hay actividades con fotos en los últimos 7 días');
+          console.log('📊 DEBUG - Rango de fechas:', { hace7Dias, finPeriodoFotos });
+          console.log('📊 DEBUG - Actividades totales en periodo:', this.actividades.length);
         }
       } catch (evidenciasError) {
-        console.error('❌ Error generando página de evidencias:', evidenciasError);
+        console.error('❌ Error CRÍTICO generando página de evidencias:', evidenciasError);
+        console.error('Stack trace:', evidenciasError.stack);
         // Continuar con el resto del PDF aunque falle la sección de evidencias
+        alert('Advertencia: Hubo un error al generar la página de evidencias fotográficas. Se generará el PDF sin esta sección.');
       }
 
       // ========== PIE DE PÁGINA CON INFORMACIÓN DE CONTACTO ==========

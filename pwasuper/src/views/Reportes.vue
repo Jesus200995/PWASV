@@ -1150,6 +1150,205 @@ export default {
         currentY = firmaY + firmaHeight + 30;
       }
 
+      // ========== SEGUNDA PÁGINA: EVIDENCIAS FOTOGRÁFICAS ==========
+      // Filtrar actividades de los últimos 7 días del período con fotos
+      const finPeriodo = new Date(this.anioSeleccionado, this.mesSeleccionado + 1, 0);
+      const hace7Dias = new Date(finPeriodo);
+      hace7Dias.setDate(hace7Dias.getDate() - 7);
+      
+      const actividadesConFoto = this.actividades.filter(actividad => {
+        if (!actividad.foto_url) return false;
+        const fechaActividad = new Date(actividad.fecha_hora);
+        return fechaActividad >= hace7Dias && fechaActividad <= finPeriodo;
+      });
+
+      console.log(`📸 Actividades con foto (últimos 7 días): ${actividadesConFoto.length}`);
+
+      if (actividadesConFoto.length > 0) {
+        // Crear nueva página para evidencias fotográficas
+        doc.addPage();
+        currentY = 10;
+
+        // ========== ENCABEZADO DE LA PÁGINA DE EVIDENCIAS ==========
+        // Cargar imagen de logos
+        doc.addImage(superiorImage, 'PNG', margin, currentY, contentWidth, contentWidth * (img.naturalHeight || 100) / (img.naturalWidth || 500));
+        currentY += (contentWidth * (img.naturalHeight || 100) / (img.naturalWidth || 500)) + 5;
+        
+        // Título de la sección
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, currentY, contentWidth, 12);
+        
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('EVIDENCIAS FOTOGRÁFICAS DE ACTIVIDADES', pageWidth / 2, currentY + 5, { align: 'center' });
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Últimos 7 días del período - ${this.mesActual} ${this.anioSeleccionado}`, pageWidth / 2, currentY + 10, { align: 'center' });
+        
+        currentY += 15;
+
+        // ========== GRID DE IMÁGENES ==========
+        const imgGridWidth = 55; // Ancho de cada imagen
+        const imgGridHeight = 45; // Alto de cada imagen
+        const imgsPerRow = 3;
+        const imgSpacing = 5;
+        const labelHeight = 12;
+        
+        // Cargar imágenes y dibujarlas
+        let imgIndex = 0;
+        
+        for (const actividad of actividadesConFoto) {
+          // Verificar si necesitamos nueva página
+          if (currentY + imgGridHeight + labelHeight + 15 > pageHeight - 40) {
+            doc.addPage();
+            currentY = 20;
+            
+            // Título continuación
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text('EVIDENCIAS FOTOGRÁFICAS (Continuación)', pageWidth / 2, currentY, { align: 'center' });
+            currentY += 10;
+          }
+          
+          const col = imgIndex % imgsPerRow;
+          const imgX = margin + (col * (imgGridWidth + imgSpacing));
+          
+          // Si es primera columna de una fila nueva, ajustar Y
+          if (col === 0 && imgIndex > 0) {
+            currentY += imgGridHeight + labelHeight + 10;
+          }
+          
+          try {
+            // Construir URL completa de la imagen
+            let fotoUrl = actividad.foto_url;
+            if (!fotoUrl.startsWith('http')) {
+              // Si es ruta relativa, agregar URL base del servidor
+              const baseUrl = API_URL.replace('/api', '');
+              fotoUrl = baseUrl + (fotoUrl.startsWith('/') ? '' : '/') + fotoUrl;
+            }
+            
+            console.log(`📷 Cargando imagen: ${fotoUrl}`);
+            
+            // Cargar imagen como base64
+            const imgData = await this.cargarImagenComoBase64(fotoUrl);
+            
+            if (imgData) {
+              // Borde de la imagen
+              doc.setDrawColor(0, 0, 0);
+              doc.setLineWidth(0.3);
+              doc.rect(imgX, currentY, imgGridWidth, imgGridHeight);
+              
+              // Imagen
+              doc.addImage(imgData, 'JPEG', imgX + 1, currentY + 1, imgGridWidth - 2, imgGridHeight - 2);
+              
+              // Etiqueta debajo con información
+              const tipoAct = this.capitalizar(actividad.tipo_actividad || 'Campo');
+              const fechaAct = this.formatearFecha(actividad.fecha_hora);
+              const horaAct = this.formatearHora(actividad.fecha_hora);
+              
+              // Fondo de etiqueta según tipo
+              if (actividad.tipo_actividad === 'campo') {
+                doc.setFillColor(34, 197, 94); // Verde
+              } else {
+                doc.setFillColor(147, 51, 234); // Morado
+              }
+              doc.rect(imgX, currentY + imgGridHeight, imgGridWidth, labelHeight, 'F');
+              
+              // Texto de etiqueta
+              doc.setTextColor(255, 255, 255);
+              doc.setFontSize(7);
+              doc.setFont(undefined, 'bold');
+              doc.text(tipoAct, imgX + imgGridWidth / 2, currentY + imgGridHeight + 4, { align: 'center' });
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(6);
+              doc.text(`${fechaAct}`, imgX + imgGridWidth / 2, currentY + imgGridHeight + 8, { align: 'center' });
+              doc.text(`${horaAct}`, imgX + imgGridWidth / 2, currentY + imgGridHeight + 11, { align: 'center' });
+            }
+          } catch (imgError) {
+            console.warn(`⚠️ No se pudo cargar imagen: ${actividad.foto_url}`, imgError);
+            
+            // Dibujar placeholder si falla la carga
+            doc.setFillColor(240, 240, 240);
+            doc.rect(imgX, currentY, imgGridWidth, imgGridHeight, 'F');
+            doc.setDrawColor(200, 200, 200);
+            doc.rect(imgX, currentY, imgGridWidth, imgGridHeight, 'S');
+            
+            doc.setTextColor(150, 150, 150);
+            doc.setFontSize(8);
+            doc.text('Imagen no', imgX + imgGridWidth / 2, currentY + imgGridHeight / 2 - 3, { align: 'center' });
+            doc.text('disponible', imgX + imgGridWidth / 2, currentY + imgGridHeight / 2 + 3, { align: 'center' });
+          }
+          
+          imgIndex++;
+          
+          // Limitar a 12 imágenes por reporte para no hacer el PDF muy pesado
+          if (imgIndex >= 12) break;
+        }
+        
+        // Ajustar Y después de la última fila
+        currentY += imgGridHeight + labelHeight + 15;
+
+        // ========== FIRMA EN PÁGINA DE EVIDENCIAS ==========
+        if (this.$refs.firmaComponent?.hayFirma) {
+          // Verificar si hay espacio para firmas
+          if (currentY > pageHeight - 70) {
+            doc.addPage();
+            currentY = 30;
+          }
+
+          const firmaWidth = 70;
+          const firmaHeight = 30;
+          const firmaUsuarioX = margin + 5;
+          const firmaResponsableX = pageWidth - margin - firmaWidth - 5;
+          const firmaY = currentY;
+          
+          // Etiquetas
+          doc.setFillColor(255, 218, 185);
+          doc.setDrawColor(0, 0, 0);
+          doc.setLineWidth(0.3);
+          
+          doc.rect(firmaUsuarioX, firmaY - 8, firmaWidth, 7, 'FD');
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bold');
+          doc.text('Elaboró', firmaUsuarioX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
+          
+          doc.setFillColor(255, 218, 185);
+          doc.rect(firmaResponsableX, firmaY - 8, firmaWidth, 7, 'FD');
+          doc.text('Autorizó', firmaResponsableX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
+          
+          // Firma del usuario
+          const firmaBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
+          doc.addImage(firmaBase64, 'PNG', firmaUsuarioX, firmaY, firmaWidth, firmaHeight);
+          
+          // Líneas de firma
+          doc.setLineWidth(0.5);
+          doc.line(firmaUsuarioX, firmaY + firmaHeight + 5, firmaUsuarioX + firmaWidth, firmaY + firmaHeight + 5);
+          doc.line(firmaResponsableX, firmaY + firmaHeight + 5, firmaResponsableX + firmaWidth, firmaY + firmaHeight + 5);
+          
+          // Información del usuario
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'normal');
+          const cargoUsuario = this.usuarioInfo.cargo || 'Facilitador Comunitario';
+          doc.text(cargoUsuario, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+          doc.setFont(undefined, 'bold');
+          doc.text(this.usuarioInfo.nombre || 'Sin nombre', firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 17, { align: 'center' });
+          
+          // Información del responsable
+          doc.setFontSize(7.5);
+          doc.setFont(undefined, 'normal');
+          doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+          doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.text(this.usuarioInfo.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
+        }
+      }
+
       // ========== PIE DE PÁGINA CON INFORMACIÓN DE CONTACTO ==========
       const totalPages = doc.internal.getNumberOfPages();
       
@@ -1167,6 +1366,60 @@ export default {
 
       // Descargar
       doc.save(`Reporte_${this.mesActual}_${this.anioSeleccionado}.pdf`);
+    },
+
+    // Método auxiliar para cargar imagen como Base64
+    async cargarImagenComoBase64(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Redimensionar si es muy grande
+            const maxSize = 400;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > maxSize || height > maxSize) {
+              if (width > height) {
+                height = (height / width) * maxSize;
+                width = maxSize;
+              } else {
+                width = (width / height) * maxSize;
+                height = maxSize;
+              }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            resolve(dataUrl);
+          } catch (error) {
+            console.warn('Error al convertir imagen:', error);
+            reject(error);
+          }
+        };
+        
+        img.onerror = (error) => {
+          console.warn('Error al cargar imagen:', url, error);
+          reject(error);
+        };
+        
+        // Timeout para evitar que se quede colgado
+        setTimeout(() => {
+          if (!img.complete) {
+            reject(new Error('Timeout al cargar imagen'));
+          }
+        }, 10000);
+        
+        img.src = url;
+      });
     },
 
     generarCSV() {

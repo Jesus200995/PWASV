@@ -656,25 +656,80 @@ export default {
     async confirmarYDescargar() {
       if (!this.confirmarFirma) return;
       
-      // Esperar un tick para asegurar que el estado de la firma esté actualizado
-      await this.$nextTick();
-      
-      // Verificar firma de manera más robusta
+      // Verificar firma
       const firmaValida = this.$refs.firmaComponent?.hayFirma || false;
       if (!firmaValida) {
         alert('La firma no es válida. Por favor, vuelve a firmar.');
         return;
       }
       
-      this.cerrarModalFirma();
+      // Iniciar estado de carga ANTES de cerrar el modal
+      this.generandoReporte = true;
       
-      // Pequeña pausa para asegurar que todo esté listo
-      setTimeout(async () => {
-        await this.generarReporte();
-      }, 100);
+      // Cerrar el modal
+      this.mostrarModalFirma = false;
+      this.confirmarFirma = false;
+      
+      // Generar el reporte inmediatamente
+      try {
+        if (this.actividades.length === 0) {
+          alert('No hay actividades para generar el reporte');
+          this.generandoReporte = false;
+          return;
+        }
+
+        console.log('📄 Iniciando generación de reporte...');
+        
+        if (this.formatoSeleccionado === 'pdf') {
+          await this.generarPDF();
+        } else {
+          this.generarCSV();
+        }
+
+        // Agregar a historial local
+        const fecha = new Date().toLocaleString('es-MX');
+        const nombreReporte = `Reporte ${this.mesActual} ${this.anioSeleccionado}`;
+        
+        this.reportesGenerados.unshift({
+          id: Date.now(),
+          nombre: nombreReporte,
+          fecha,
+          tipo: this.formatoSeleccionado.toUpperCase()
+        });
+
+        // Guardar en la base de datos
+        try {
+          await axios.post(`${API_URL}/reportes/guardar`, {
+            usuario_id: this.usuarioInfo.id,
+            nombre_reporte: nombreReporte,
+            mes: this.mesActual,
+            anio: this.anioSeleccionado,
+            tipo: this.formatoSeleccionado.toUpperCase()
+          });
+          console.log('✅ Reporte guardado en la base de datos');
+        } catch (error) {
+          console.error('⚠️ Error guardando reporte en BD:', error);
+        }
+
+        this.$notify?.({
+          type: 'success',
+          message: 'Reporte generado correctamente'
+        });
+        
+        console.log('✅ Reporte generado exitosamente');
+      } catch (error) {
+        console.error('❌ Error generando reporte:', error);
+        this.$notify?.({
+          type: 'error',
+          message: 'Error al generar el reporte'
+        });
+      } finally {
+        this.generandoReporte = false;
+      }
     },
 
     async generarReporte() {
+      // Este método ya no se usa directamente, pero lo mantenemos por compatibilidad
       try {
         if (this.actividades.length === 0) {
           alert('No hay actividades para generar el reporte');

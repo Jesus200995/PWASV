@@ -605,6 +605,17 @@ export default {
       return texto.charAt(0).toUpperCase() + texto.slice(1);
     },
 
+    calcularHoraTermino(fechaHora) {
+      if (!fechaHora) return '-';
+      const date = new Date(fechaHora);
+      date.setHours(date.getHours() + 1); // Suma 1 hora
+      return date.toLocaleTimeString('es-MX', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    },
+
     // Verificar si hay firma válida (método en lugar de computed para reactividad con refs)
     esFirmaValida() {
       return this.$refs.firmaComponent?.hayFirma || false;
@@ -696,156 +707,150 @@ export default {
 
       const pageHeight = doc.internal.pageSize.getHeight();
       const pageWidth = doc.internal.pageSize.getWidth();
-      const margin = 20;
+      const margin = 15;
       const contentWidth = pageWidth - (margin * 2);
-      let currentY = 0;
+      let currentY = 10;
 
-      // ========== ENCABEZADO PRINCIPAL ==========
-      // Fondo degradado del header
-      doc.setFillColor(37, 99, 235); // Azul principal
-      doc.rect(0, 0, pageWidth, 40, 'F');
+      // ========== ENCABEZADO CON LOGOS Y TÍTULOS ==========
+      // Nota: Los logos reales requerirían imágenes en base64
+      // Por ahora usamos recuadros de texto para representar los logos
       
-      // Línea decorativa inferior del header
-      doc.setFillColor(30, 64, 175); // Azul más oscuro
-      doc.rect(0, 38, pageWidth, 2, 'F');
-
-      // Título principal centrado
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
-      doc.setFont(undefined, 'bold');
-      doc.text('REPORTE DE ACTIVIDADES', pageWidth / 2, 18, { align: 'center' });
-
-      // Subtítulo con período
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${this.mesActual} ${this.anioSeleccionado}`, pageWidth / 2, 28, { align: 'center' });
-
-      // Fecha de generación
-      doc.setFontSize(8);
-      const fechaGeneracion = new Date().toLocaleString('es-MX', {
-        dateStyle: 'full',
-        timeStyle: 'short'
-      });
-      doc.text(`Generado: ${fechaGeneracion}`, pageWidth / 2, 35, { align: 'center' });
-
-      currentY = 50;
-
-      // ========== INFORMACIÓN DEL USUARIO (Tarjeta centrada) ==========
-      const cardHeight = 55;
-      const cardY = currentY;
-      
-      // Fondo de la tarjeta
-      doc.setFillColor(248, 250, 252); // Gris muy claro
-      doc.roundedRect(margin, cardY, contentWidth, cardHeight, 3, 3, 'F');
-      
-      // Borde de la tarjeta
-      doc.setDrawColor(226, 232, 240);
+      // Logo izquierdo - Secretaría de Bienestar
+      doc.setDrawColor(0, 0, 0);
       doc.setLineWidth(0.3);
-      doc.roundedRect(margin, cardY, contentWidth, cardHeight, 3, 3, 'S');
-
-      // Título de la sección
-      doc.setTextColor(30, 64, 175);
-      doc.setFontSize(10);
+      doc.rect(margin, currentY, 50, 15);
+      doc.setFontSize(7);
       doc.setFont(undefined, 'bold');
-      doc.text('DATOS DEL USUARIO', pageWidth / 2, cardY + 8, { align: 'center' });
-
-      // Línea separadora
-      doc.setDrawColor(203, 213, 225);
-      doc.line(margin + 10, cardY + 12, pageWidth - margin - 10, cardY + 12);
-
-      // Datos del usuario en dos columnas centradas
-      doc.setTextColor(71, 85, 105);
+      doc.setTextColor(139, 69, 19);
+      doc.text('Bienestar', margin + 25, currentY + 7, { align: 'center' });
+      doc.setFontSize(6);
+      doc.setFont(undefined, 'normal');
+      doc.text('Secretaría de Bienestar', margin + 25, currentY + 11, { align: 'center' });
+      
+      // Logo centro - Sembrando Vida
+      const centerX = pageWidth / 2;
+      doc.rect(centerX - 25, currentY, 50, 15);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 128, 0);
+      doc.text('SEMBRANDO', centerX, currentY + 6, { align: 'center' });
       doc.setFontSize(9);
+      doc.text('VIDA', centerX, currentY + 11, { align: 'center' });
+      doc.setFontSize(5);
       doc.setFont(undefined, 'normal');
+      doc.text('PROGRAMA DE SEMBRANDO TERRITORIOS', centerX, currentY + 14, { align: 'center' });
       
-      const col1X = margin + 15;
-      const col2X = pageWidth / 2 + 5;
-      let dataY = cardY + 20;
+      // Logo derecho
+      doc.rect(pageWidth - margin - 50, currentY, 50, 15);
+      doc.setFontSize(6);
+      doc.setTextColor(0, 0, 0);
+      doc.text('[Logo Nacional]', pageWidth - margin - 25, currentY + 8, { align: 'center' });
       
-      // Columna 1
+      currentY += 20;
+      
+      // Recuadro principal con títulos
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, currentY, contentWidth, 25);
+      
+      // Títulos centrados
+      doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
-      doc.text('Nombre:', col1X, dataY);
-      doc.setFont(undefined, 'normal');
-      doc.text(this.usuarioInfo.nombre, col1X + 20, dataY);
+      doc.setTextColor(0, 0, 0);
+      doc.text('SECRETARÍA DE BIENESTAR', pageWidth / 2, currentY + 6, { align: 'center' });
+      doc.text('SUBSECRETARÍA DE INCLUSIÓN PRODUCTIVA Y DESARROLLO RURAL', pageWidth / 2, currentY + 11, { align: 'center' });
+      doc.text('FORMATO DE SEGUIMIENTO A ACTIVIDADES PROGRAMADAS', pageWidth / 2, currentY + 16, { align: 'center' });
       
-      doc.setFont(undefined, 'bold');
-      doc.text('CURP:', col1X, dataY + 7);
-      doc.setFont(undefined, 'normal');
-      doc.text(this.usuarioInfo.curp || 'No registrada', col1X + 20, dataY + 7);
-      
-      doc.setFont(undefined, 'bold');
-      doc.text('Correo:', col1X, dataY + 14);
-      doc.setFont(undefined, 'normal');
-      doc.text(this.usuarioInfo.correo, col1X + 20, dataY + 14);
-      
-      // Columna 2
-      doc.setFont(undefined, 'bold');
-      doc.text('Cargo:', col2X, dataY);
-      doc.setFont(undefined, 'normal');
-      doc.text(this.usuarioInfo.cargo || 'No especificado', col2X + 22, dataY);
-      
-      doc.setFont(undefined, 'bold');
-      doc.text('Territorio:', col2X, dataY + 7);
-      doc.setFont(undefined, 'normal');
-      doc.text(this.usuarioInfo.territorio || 'No asignado', col2X + 22, dataY + 7);
-      
-      doc.setFont(undefined, 'bold');
-      doc.text('Responsable:', col2X, dataY + 14);
-      doc.setFont(undefined, 'normal');
-      doc.text(this.usuarioInfo.supervisor || 'No asignado', col2X + 28, dataY + 14);
-
-      currentY = cardY + cardHeight + 10;
-
-      // ========== RESUMEN DE ACTIVIDADES (Tarjetas de estadísticas) ==========
-      const campo = this.actividades.filter(a => a.tipo_actividad === 'campo').length;
-      const gabinete = this.actividades.filter(a => a.tipo_actividad === 'gabinete').length;
-      const otro = this.actividades.length - campo - gabinete;
-      
-      const statCardWidth = (contentWidth - 10) / 3;
-      const statCardHeight = 25;
-      
-      // Tarjeta Total
-      doc.setFillColor(59, 130, 246); // Azul
-      doc.roundedRect(margin, currentY, statCardWidth, statCardHeight, 2, 2, 'F');
-      doc.setTextColor(255, 255, 255);
+      // Fecha en la esquina superior derecha
+      const fechaActual = new Date().toLocaleDateString('es-MX', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
       doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
-      doc.text('TOTAL', margin + statCardWidth / 2, currentY + 8, { align: 'center' });
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text(String(this.actividades.length), margin + statCardWidth / 2, currentY + 18, { align: 'center' });
+      doc.text('Fecha:', pageWidth - margin - 35, currentY + 21);
+      doc.rect(pageWidth - margin - 25, currentY + 18, 25, 5);
+      doc.text(fechaActual, pageWidth - margin - 12.5, currentY + 21.5, { align: 'center' });
       
-      // Tarjeta Campo
-      doc.setFillColor(34, 197, 94); // Verde
-      doc.roundedRect(margin + statCardWidth + 5, currentY, statCardWidth, statCardHeight, 2, 2, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'normal');
-      doc.text('CAMPO', margin + statCardWidth + 5 + statCardWidth / 2, currentY + 8, { align: 'center' });
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text(String(campo), margin + statCardWidth + 5 + statCardWidth / 2, currentY + 18, { align: 'center' });
+      currentY += 30;
       
-      // Tarjeta Gabinete
-      doc.setFillColor(168, 85, 247); // Púrpura
-      doc.roundedRect(margin + (statCardWidth + 5) * 2, currentY, statCardWidth, statCardHeight, 2, 2, 'F');
-      doc.setTextColor(255, 255, 255);
+      // ========== TABLA DE INFORMACIÓN DEL PRESTADOR ==========
+      const tableStartY = currentY;
+      const col1Width = contentWidth * 0.5;
+      const col2Width = contentWidth * 0.5;
+      
+      // Fila 1: Nombre del prestador
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      
       doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.text('Nombre del prestador de Servicios', margin + 2, currentY + 4);
       doc.setFont(undefined, 'normal');
-      doc.text('GABINETE', margin + (statCardWidth + 5) * 2 + statCardWidth / 2, currentY + 8, { align: 'center' });
-      doc.setFontSize(14);
+      doc.text(this.usuarioInfo.nombre, margin + col1Width + 2, currentY + 4);
+      
+      currentY += 6;
+      
+      // Fila 2: R.F.C
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      
       doc.setFont(undefined, 'bold');
-      doc.text(String(gabinete), margin + (statCardWidth + 5) * 2 + statCardWidth / 2, currentY + 18, { align: 'center' });
-
-      currentY += statCardHeight + 12;
-
-      // ========== TABLA DE ACTIVIDADES ==========
-      // Título de la sección
-      doc.setTextColor(30, 64, 175);
-      doc.setFontSize(11);
+      doc.text('R.F.C.', margin + 2, currentY + 4);
+      doc.setFont(undefined, 'normal');
+      doc.text(this.usuarioInfo.curp || 'No registrado', margin + col1Width + 2, currentY + 4);
+      
+      currentY += 6;
+      
+      // Fila 3: Periodo
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      
       doc.setFont(undefined, 'bold');
-      doc.text('DETALLE DE ACTIVIDADES', pageWidth / 2, currentY, { align: 'center' });
+      doc.text('Periodo', margin + 2, currentY + 4);
+      doc.setFont(undefined, 'normal');
+      const inicioPeriodo = new Date(this.anioSeleccionado, this.mesSeleccionado, 1);
+      const finPeriodo = new Date(this.anioSeleccionado, this.mesSeleccionado + 1, 0);
+      const periodoTexto = `Del ${inicioPeriodo.toLocaleDateString('es-MX')} al ${finPeriodo.toLocaleDateString('es-MX')}`;
+      doc.text(periodoTexto, margin + col1Width + 2, currentY + 4);
+      
       currentY += 8;
+      
+      // Fila 4: Programa Social del Apoyo (celda completa)
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      
+      doc.setFont(undefined, 'bold');
+      doc.text('Programa Social del Apoyo', margin + 2, currentY + 4);
+      doc.setFont(undefined, 'normal');
+      doc.text('SEMBRANDO VIDA', margin + col1Width + 2, currentY + 4);
+      
+      currentY += 8;
+      
+      // Fila 5: Territorio (celda completa)
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      
+      doc.setFont(undefined, 'bold');
+      doc.text('Territorio y entidad donde presta sus servicios', margin + 2, currentY + 4);
+      doc.setFont(undefined, 'normal');
+      doc.text(this.usuarioInfo.territorio || 'No asignado', margin + col1Width + 2, currentY + 4);
+      
+      currentY += 10;
+      
+      // ========== TÍTULO DE SECCIÓN ==========
+      doc.rect(margin, currentY, contentWidth, 6);
+      doc.setFillColor(240, 240, 240);
+      doc.rect(margin, currentY, contentWidth, 6, 'FD');
+      
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(9);
+      doc.text('RESUMEN DE ACTIVIDADES DESARROLLADAS', pageWidth / 2, currentY + 4, { align: 'center' });
+      
+      currentY += 10;
 
       // Definir columnas de la tabla (centrada)
       const tableWidth = contentWidth;
@@ -871,12 +876,49 @@ export default {
 
       currentY += 10;
       
-      // Filas de datos
-      doc.setTextColor(51, 65, 85);
+      // ========== TABLA DE ACTIVIDADES ==========
+      // Definir columnas de la tabla
+      const tableWidth = contentWidth;
+      const tableX = margin;
+      const colWidths = [20, 38, 25, 22, 65]; // No., Fecha, Inicio, Término, Actividad
+      
+      // Header de la tabla
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(tableX, currentY, tableWidth, 8, 'FD');
+      
+      doc.setTextColor(0, 0, 0);
       doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      
+      let colX = tableX + 2;
+      doc.text('No.', colX + 8, currentY + 5.5, { align: 'center' });
+      doc.line(colX + colWidths[0], currentY, colX + colWidths[0], currentY + 8);
+      
+      colX += colWidths[0];
+      doc.text('Fecha', colX + colWidths[1]/2, currentY + 5.5, { align: 'center' });
+      doc.line(colX + colWidths[1], currentY, colX + colWidths[1], currentY + 8);
+      
+      colX += colWidths[1];
+      doc.text('Hora Inicio', colX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
+      doc.line(colX + colWidths[2], currentY, colX + colWidths[2], currentY + 8);
+      
+      colX += colWidths[2];
+      doc.text('Hora Término', colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+      doc.line(colX + colWidths[3], currentY, colX + colWidths[3], currentY + 8);
+      
+      colX += colWidths[3];
+      doc.text('Actividad desarrollada', colX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
+
+      currentY += 8;
+      
+      // Filas de datos
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
       
-      const rowHeight = 7;
+      const rowHeight = 8;
 
       this.actividades.forEach((actividad, index) => {
         // Verificar si necesitamos nueva página
@@ -885,192 +927,164 @@ export default {
           currentY = 20;
           
           // Re-dibujar header de tabla en nueva página
-          doc.setFillColor(37, 99, 235);
-          doc.rect(tableX, currentY, tableWidth, 8, 'F');
+          doc.setDrawColor(0, 0, 0);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(tableX, currentY, tableWidth, 8, 'FD');
           
-          doc.setTextColor(255, 255, 255);
+          doc.setTextColor(0, 0, 0);
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           
-          let headerX = tableX + 3;
-          doc.text('FECHA', headerX, currentY + 5.5);
-          headerX += colWidths[0];
-          doc.text('HORA', headerX, currentY + 5.5);
-          headerX += colWidths[1];
-          doc.text('TIPO', headerX, currentY + 5.5);
-          headerX += colWidths[2];
-          doc.text('DESCRIPCIÓN', headerX, currentY + 5.5);
+          let headerX = tableX + 2;
+          doc.text('No.', headerX + 8, currentY + 5.5, { align: 'center' });
+          doc.line(headerX + colWidths[0], currentY, headerX + colWidths[0], currentY + 8);
           
-          currentY += 10;
-          doc.setTextColor(51, 65, 85);
+          headerX += colWidths[0];
+          doc.text('Fecha', headerX + colWidths[1]/2, currentY + 5.5, { align: 'center' });
+          doc.line(headerX + colWidths[1], currentY, headerX + colWidths[1], currentY + 8);
+          
+          headerX += colWidths[1];
+          doc.text('Hora Inicio', headerX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
+          doc.line(headerX + colWidths[2], currentY, headerX + colWidths[2], currentY + 8);
+          
+          headerX += colWidths[2];
+          doc.text('Hora Término', headerX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+          doc.line(headerX + colWidths[3], currentY, headerX + colWidths[3], currentY + 8);
+          
+          headerX += colWidths[3];
+          doc.text('Actividad desarrollada', headerX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
+          
+          currentY += 8;
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(7);
           doc.setFont(undefined, 'normal');
         }
 
-        // Alternar color de fondo
-        if (index % 2 === 0) {
-          doc.setFillColor(248, 250, 252);
-          doc.rect(tableX, currentY - 1, tableWidth, rowHeight, 'F');
-        }
-
         // Bordes de la fila
-        doc.setDrawColor(226, 232, 240);
-        doc.setLineWidth(0.1);
-        doc.rect(tableX, currentY - 1, tableWidth, rowHeight, 'S');
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(tableX, currentY, tableWidth, rowHeight, 'S');
 
         const fecha = this.formatearFecha(actividad.fecha_hora);
         const hora = this.formatearHora(actividad.fecha_hora);
-        const tipo = this.capitalizar(actividad.tipo_actividad || 'otro');
-        const desc = (actividad.descripcion || actividad.categoria_actividad || '-').substring(0, 45);
+        const activDesc = (actividad.descripcion || actividad.categoria_actividad || 'Actividad de ' + (actividad.tipo_actividad || 'campo')).substring(0, 60);
 
-        colX = tableX + 3;
-        doc.text(fecha, colX, currentY + 4);
+        colX = tableX + 2;
+        
+        // No.
+        doc.text(String(index + 1), colX + 8, currentY + 5.5, { align: 'center' });
+        doc.line(colX + colWidths[0], currentY, colX + colWidths[0], currentY + rowHeight);
+        
+        // Fecha
         colX += colWidths[0];
-        doc.text(hora, colX, currentY + 4);
+        doc.text(fecha, colX + 2, currentY + 5.5);
+        doc.line(colX + colWidths[1], currentY, colX + colWidths[1], currentY + rowHeight);
+        
+        // Hora Inicio
         colX += colWidths[1];
+        doc.text(hora, colX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
+        doc.line(colX + colWidths[2], currentY, colX + colWidths[2], currentY + rowHeight);
         
-        // Color según tipo
-        if (actividad.tipo_actividad === 'campo') {
-          doc.setTextColor(22, 163, 74); // Verde
-        } else if (actividad.tipo_actividad === 'gabinete') {
-          doc.setTextColor(147, 51, 234); // Púrpura
-        } else {
-          doc.setTextColor(59, 130, 246); // Azul
-        }
-        doc.text(tipo, colX, currentY + 4);
-        doc.setTextColor(51, 65, 85);
-        
+        // Hora Término (estimado +1 hora)
         colX += colWidths[2];
-        doc.text(desc, colX, currentY + 4);
+        const horaTermino = this.calcularHoraTermino(actividad.fecha_hora);
+        doc.text(horaTermino, colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+        doc.line(colX + colWidths[3], currentY, colX + colWidths[3], currentY + rowHeight);
+        
+        // Actividad
+        colX += colWidths[3];
+        doc.text(activDesc, colX + 2, currentY + 5.5);
 
         currentY += rowHeight;
       });
 
       currentY += 15;
 
-      // ========== SECCIÓN DE FIRMAS (Dos firmas lado a lado) ==========
+      // ========== SECCIÓN DE FIRMAS (Formato oficial) ==========
       if (this.$refs.firmaComponent?.hayFirma) {
         // Verificar si necesitamos nueva página para las firmas
-        if (currentY > pageHeight - 90) {
+        if (currentY > pageHeight - 70) {
           doc.addPage();
-          currentY = 20;
+          currentY = 30;
         }
 
-        // Título de sección de firmas
-        doc.setTextColor(30, 64, 175);
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.text('FIRMAS DE VALIDACIÓN', pageWidth / 2, currentY, { align: 'center' });
-        currentY += 10;
-
         // Configuración de las dos columnas de firma
-        const firmaWidth = 75;
-        const firmaHeight = 35;
-        const espacioEntreFirems = 20;
+        const firmaWidth = 70;
+        const firmaHeight = 30;
+        const espacioEntreFiremas = 20;
         const firmaUsuarioX = margin + 5;
         const firmaResponsableX = pageWidth - margin - firmaWidth - 5;
         
-        // ========== FIRMA DEL USUARIO (Izquierda) ==========
-        // Etiqueta
-        doc.setTextColor(71, 85, 105);
-        doc.setFontSize(8);
-        doc.setFont(undefined, 'bold');
-        doc.text('FIRMA DEL USUARIO', firmaUsuarioX + firmaWidth / 2, currentY, { align: 'center' });
-        currentY += 5;
-        
         const firmaY = currentY;
         
+        // ========== ETIQUETAS "Elaboró" y "Aprobó" ==========
+        doc.setFillColor(255, 218, 185); // Color durazno/naranja claro
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        
+        // Etiqueta "Elaboró"
+        doc.rect(firmaUsuarioX, firmaY - 8, firmaWidth, 7, 'FD');
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('Elaboró', firmaUsuarioX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
+        
+        // Etiqueta "Aprobó"
+        doc.rect(firmaResponsableX, firmaY - 8, firmaWidth, 7, 'FD');
+        doc.text('Aprobó', firmaResponsableX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
+        
+        // ========== FIRMA DEL PRESTADOR DE SERVICIOS (Izquierda) ==========
         // Contenedor de firma del usuario
-        doc.setDrawColor(203, 213, 225);
-        doc.setLineWidth(0.5);
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
         doc.rect(firmaUsuarioX, firmaY, firmaWidth, firmaHeight, 'S');
         
         // Imagen de firma del usuario
         const firmaBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
-        doc.addImage(firmaBase64, 'PNG', firmaUsuarioX + 3, firmaY + 2, firmaWidth - 6, firmaHeight - 4);
+        doc.addImage(firmaBase64, 'PNG', firmaUsuarioX + 2, firmaY + 2, firmaWidth - 4, firmaHeight - 4);
         
         // Línea de firma usuario
-        doc.setDrawColor(100, 116, 139);
-        doc.setLineWidth(0.3);
-        doc.line(firmaUsuarioX, firmaY + firmaHeight + 3, firmaUsuarioX + firmaWidth, firmaY + firmaHeight + 3);
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.line(firmaUsuarioX, firmaY + firmaHeight + 15, firmaUsuarioX + firmaWidth, firmaY + firmaHeight + 15);
         
-        // Datos del usuario firmante
-        doc.setTextColor(51, 65, 85);
+        // Nombre del usuario
+        doc.setTextColor(0, 0, 0);
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
-        doc.text(this.usuarioInfo.nombre, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 9, { align: 'center' });
+        const nombreUsuario = this.usuarioInfo.nombre || 'Sin nombre';
+        doc.text(nombreUsuario, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 20, { align: 'center' });
         
-        doc.setFont(undefined, 'normal');
+        // Cargo del usuario
         doc.setFontSize(7);
-        doc.text(this.usuarioInfo.cargo || 'Usuario', firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 14, { align: 'center' });
-        doc.text(`CURP: ${this.usuarioInfo.curp || 'N/A'}`, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 19, { align: 'center' });
+        doc.setFont(undefined, 'normal');
+        const cargoUsuario = this.usuarioInfo.cargo || 'Facilitador Comunitario';
+        doc.text(cargoUsuario, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 25, { align: 'center' });
         
         // ========== FIRMA DEL RESPONSABLE (Derecha) ==========
-        // Etiqueta
-        doc.setTextColor(71, 85, 105);
-        doc.setFontSize(8);
-        doc.setFont(undefined, 'bold');
-        doc.text('FIRMA DEL RESPONSABLE', firmaResponsableX + firmaWidth / 2, currentY, { align: 'center' });
-        
         // Contenedor de firma del responsable (vacío para firma manual)
-        doc.setDrawColor(203, 213, 225);
-        doc.setLineWidth(0.5);
-        doc.setFillColor(252, 252, 253);
-        doc.rect(firmaResponsableX, firmaY, firmaWidth, firmaHeight, 'FD');
-        
-        // Texto indicativo dentro del recuadro
-        doc.setTextColor(180, 190, 200);
-        doc.setFontSize(7);
-        doc.setFont(undefined, 'italic');
-        doc.text('Espacio para firma', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight / 2, { align: 'center' });
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(firmaResponsableX, firmaY, firmaWidth, firmaHeight, 'S');
         
         // Línea de firma responsable
-        doc.setDrawColor(100, 116, 139);
-        doc.setLineWidth(0.3);
-        doc.line(firmaResponsableX, firmaY + firmaHeight + 3, firmaResponsableX + firmaWidth, firmaY + firmaHeight + 3);
+        doc.setLineWidth(0.5);
+        doc.line(firmaResponsableX, firmaY + firmaHeight + 15, firmaResponsableX + firmaWidth, firmaY + firmaHeight + 15);
         
-        // Datos del responsable
-        doc.setTextColor(51, 65, 85);
+        // Nombre del supervisor/responsable
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
-        doc.text(this.usuarioInfo.supervisor || 'Responsable', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 9, { align: 'center' });
+        const nombreSupervisor = this.usuarioInfo.supervisor || 'Sin asignar';
+        doc.text(nombreSupervisor, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 20, { align: 'center' });
         
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(7);
-        doc.text('Supervisor / Responsable', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 14, { align: 'center' });
-        doc.text(`Territorio: ${this.usuarioInfo.territorio || 'N/A'}`, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 19, { align: 'center' });
-        
-        currentY = firmaY + firmaHeight + 28;
-        
-        // Fecha de firma centrada
-        const fechaFirma = new Date().toLocaleString('es-MX', {
-          dateStyle: 'long',
-          timeStyle: 'short'
-        });
-        doc.setTextColor(100, 116, 139);
+        // Cargo del responsable
         doc.setFontSize(7);
         doc.setFont(undefined, 'normal');
-        doc.text(`Documento firmado electrónicamente el ${fechaFirma}`, pageWidth / 2, currentY, { align: 'center' });
-      }
-
-      // ========== PIE DE PÁGINA ==========
-      const totalPages = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= totalPages; i++) {
-        doc.setPage(i);
+        doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 25, { align: 'center' });
+        doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 30, { align: 'center' });
         
-        // Línea superior del pie
-        doc.setDrawColor(203, 213, 225);
-        doc.setLineWidth(0.3);
-        doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
-        
-        // Número de página
-        doc.setTextColor(100, 116, 139);
-        doc.setFontSize(8);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Página ${i} de ${totalPages}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
-        
-        // Texto del sistema
-        doc.setFontSize(7);
-        doc.text('Documento generado automáticamente - Sistema de Reportes', pageWidth / 2, pageHeight - 4, { align: 'center' });
+        currentY = firmaY + firmaHeight + 40; // Ajustado para la línea extra
       }
 
       // Descargar

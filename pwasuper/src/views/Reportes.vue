@@ -13,10 +13,12 @@
         <div 
           v-if="mostrarModalFirma" 
           class="fixed inset-0 z-50 flex items-center justify-center p-4"
-          @click.self="cerrarModalFirma"
         >
-          <!-- Overlay -->
-          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+          <!-- Overlay - clic aquí cierra el modal SOLO si no está procesando -->
+          <div 
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            @click="!procesandoDescarga && cerrarModalFirma()"
+          ></div>
           
           <!-- Modal -->
           <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-modal-enter">
@@ -119,22 +121,28 @@
             <div class="bg-gray-50 px-4 py-4 sm:px-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 @click="cerrarModalFirma"
+                :disabled="procesandoDescarga"
                 class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors order-2 sm:order-1"
+                :class="{ 'opacity-50 cursor-not-allowed': procesandoDescarga }"
               >
                 Cancelar
               </button>
               <button
-                @click="confirmarYDescargar"
-                :disabled="!confirmarFirma"
+                @click.stop.prevent="confirmarYDescargar"
+                :disabled="!confirmarFirma || procesandoDescarga"
                 class="flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-xl transition-all order-1 sm:order-2 flex items-center justify-center gap-2"
-                :class="confirmarFirma 
+                :class="confirmarFirma && !procesandoDescarga
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg' 
                   : 'bg-gray-300 cursor-not-allowed'"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-if="!procesandoDescarga" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
-                Firmar y Descargar
+                <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ procesandoDescarga ? 'Generando...' : 'Firmar y Descargar' }}
               </button>
             </div>
           </div>
@@ -473,7 +481,8 @@ export default {
       ],
       // Modal de confirmación de firma
       mostrarModalFirma: false,
-      confirmarFirma: false
+      confirmarFirma: false,
+      procesandoDescarga: false
     };
   },
   computed: {
@@ -652,9 +661,18 @@ export default {
       this.confirmarFirma = false;
     },
 
-    // Confirmar y proceder con la descarga
+    // Confirmar y proceder con la descarga - NO CIERRA EL MODAL HASTA TERMINAR
     async confirmarYDescargar() {
-      if (!this.confirmarFirma) return;
+      // Prevenir doble clic
+      if (this.procesandoDescarga) {
+        console.log('⚠️ Ya se está procesando una descarga');
+        return;
+      }
+      
+      if (!this.confirmarFirma) {
+        console.log('⚠️ No se ha confirmado la firma');
+        return;
+      }
       
       // Verificar firma
       const firmaValida = this.$refs.firmaComponent?.hayFirma || false;
@@ -663,28 +681,29 @@ export default {
         return;
       }
       
-      // Iniciar estado de carga ANTES de cerrar el modal
+      // Verificar actividades
+      if (this.actividades.length === 0) {
+        alert('No hay actividades para generar el reporte');
+        return;
+      }
+
+      console.log('🚀 Iniciando proceso de descarga...');
+      
+      // Activar estado de procesamiento - EL MODAL SE MANTIENE ABIERTO
+      this.procesandoDescarga = true;
       this.generandoReporte = true;
       
-      // Cerrar el modal
-      this.mostrarModalFirma = false;
-      this.confirmarFirma = false;
-      
-      // Generar el reporte inmediatamente
       try {
-        if (this.actividades.length === 0) {
-          alert('No hay actividades para generar el reporte');
-          this.generandoReporte = false;
-          return;
-        }
-
-        console.log('📄 Iniciando generación de reporte...');
+        console.log('📄 Generando reporte...');
         
+        // Generar el reporte
         if (this.formatoSeleccionado === 'pdf') {
           await this.generarPDF();
         } else {
           this.generarCSV();
         }
+
+        console.log('✅ Reporte generado exitosamente');
 
         // Agregar a historial local
         const fecha = new Date().toLocaleString('es-MX');
@@ -716,7 +735,6 @@ export default {
           message: 'Reporte generado correctamente'
         });
         
-        console.log('✅ Reporte generado exitosamente');
       } catch (error) {
         console.error('❌ Error generando reporte:', error);
         this.$notify?.({
@@ -724,7 +742,12 @@ export default {
           message: 'Error al generar el reporte'
         });
       } finally {
+        // AHORA sí cerramos el modal, DESPUÉS de terminar todo
+        this.procesandoDescarga = false;
         this.generandoReporte = false;
+        this.mostrarModalFirma = false;
+        this.confirmarFirma = false;
+        console.log('🏁 Proceso de descarga finalizado');
       }
     },
 

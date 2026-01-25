@@ -1150,7 +1150,7 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     // Generar años disponibles (años pasados y futuros)
     const currentYear = new Date().getFullYear();
     this.anos = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);

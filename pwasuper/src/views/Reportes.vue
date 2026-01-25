@@ -153,12 +153,6 @@
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
       <div class="page-container relative z-10 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 min-h-full max-w-full">
         <div class="w-full max-w-lg mx-auto space-y-4">
-          
-          <!-- 🔴 INDICADOR DE VERSIÓN ACTUALIZADA - VISIBLE -->
-          <div class="bg-red-500 text-white text-center py-2 px-4 rounded-lg font-bold text-lg animate-pulse">
-            ✅ VERSIÓN 1.0.2 CARGADA
-          </div>
-          
           <!-- Header de Reportes -->
           <div class="glass-card text-center">
             <div class="flex items-center justify-center mb-3">
@@ -193,9 +187,6 @@
           <!-- Selector de Período -->
           <div class="glass-card">
             <div class="flex items-center mb-3">
-              <!-- 🟢 INDICADOR DE VERSIÓN ACTUALIZADA -->
-              <div class="w-3 h-3 rounded-full bg-green-500 mr-2 animate-pulse" title="Versión 1.0.1"></div>
-              
               <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: #3B82F6;">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>

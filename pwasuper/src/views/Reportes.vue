@@ -713,9 +713,18 @@ export default {
       let currentY = 10;
 
       // ========== ENCABEZADO CON IMAGEN DE LOGOS ==========
-      // Agregar imagen superior con los tres logos
+      // Cargar imagen y obtener dimensiones reales para mantener proporción
+      const img = new Image();
+      img.src = superiorImage;
+      
+      // Calcular dimensiones manteniendo aspect ratio
+      const imgOriginalWidth = img.naturalWidth || img.width;
+      const imgOriginalHeight = img.naturalHeight || img.height;
+      const aspectRatio = imgOriginalHeight / imgOriginalWidth;
+      
+      // Establecer ancho al contenido y calcular altura proporcionalmente
       const imgWidth = contentWidth;
-      const imgHeight = 15; // Ajustar según proporciones de la imagen
+      const imgHeight = imgWidth * aspectRatio;
       
       doc.addImage(superiorImage, 'PNG', margin, currentY, imgWidth, imgHeight);
       

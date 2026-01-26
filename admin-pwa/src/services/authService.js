@@ -278,17 +278,51 @@ class AuthService {
   }
 
   /**
-   * Refrescar información del usuario
-   * Nota: No llama al backend porque el endpoint /auth/me no devuelve el usuario correcto
-   * Los datos del usuario se obtienen durante el login y se guardan en localStorage
+   * Refrescar información del usuario desde el backend
+   * Obtiene los datos actualizados del usuario incluyendo nombre_completo y cargo
    */
   async refreshUserInfo() {
-    // Simplemente devolver los datos ya guardados del usuario
-    // El backend ya envía user_info en la respuesta del login
-    if (!this.user) {
-      this.user = this.getUserFromStorage()
+    try {
+      // Si no hay usuario, obtener de localStorage
+      if (!this.user) {
+        this.user = this.getUserFromStorage()
+      }
+      
+      // Si tenemos el ID del usuario, obtener datos actualizados del backend
+      if (this.user?.id) {
+        const response = await axios.get(`${API_URL}/admin/usuarios/${this.user.id}`, {
+          headers: {
+            'Authorization': `Bearer ${this.token}`
+          },
+          timeout: 5000
+        })
+        
+        if (response.data) {
+          // Actualizar datos del usuario con la info del backend
+          const updatedUser = {
+            ...this.user,
+            nombre_completo: response.data.nombre_completo || '',
+            curp: response.data.curp || '',
+            cargo: response.data.cargo || '',
+            rol: response.data.rol || this.user.rol,
+            permisos: response.data.permisos || this.user.permisos,
+            es_territorial: response.data.es_territorial || false,
+            territorio: response.data.territorio || null
+          }
+          
+          this.user = updatedUser
+          localStorage.setItem('admin_user_data', JSON.stringify(updatedUser))
+          console.log('✅ Info de usuario actualizada desde backend:', updatedUser)
+          return updatedUser
+        }
+      }
+      
+      return this.user
+    } catch (error) {
+      console.warn('⚠️ No se pudo refrescar info del usuario:', error.message)
+      // En caso de error, devolver los datos guardados
+      return this.user
     }
-    return this.user
   }
 
   /**

@@ -111,26 +111,24 @@
           
           <!-- Información del usuario -->
           <div class="user-info" style="margin-top: 12px;">
-            <div class="user-avatar">
-              <span class="user-initials">{{ userInitials }}</span>
+            <!-- Territorio arriba para usuarios territoriales -->
+            <div v-if="isTerritorial && territorioAsignado" class="user-territorio">
+              <span class="user-territorio-text">{{ territorioAsignado }}</span>
             </div>
-            <div class="user-details">
-              <!-- Nombre completo como título principal -->
-              <p class="user-fullname">{{ userFullName }}</p>
-              <!-- Username como subtítulo pequeño -->
-              <p class="user-username">@{{ userDisplayName }}</p>
-              <!-- Cargo del usuario -->
-              <p v-if="userCargo" class="user-cargo">{{ userCargo }}</p>
-              <!-- Solo mostrar rol si NO es 'user' (usuario normal) -->
-              <p v-if="userRole !== 'user'" class="user-role">{{ roleDisplayName }}</p>
-              <!-- Línea separadora verde antes del territorio -->
-              <div v-if="isTerritorial && territorioAsignado" class="territorio-separator"></div>
-              <!-- Territorio integrado debajo -->
-              <div v-if="isTerritorial && territorioAsignado" class="user-territorio">
-                <span class="user-territorio-text">{{ territorioAsignado }}</span>
+            <p v-if="isTerritorial && estadosDelTerritorio" class="user-estados">{{ estadosDelTerritorio }}</p>
+            <!-- Línea separadora verde después del territorio -->
+            <div v-if="isTerritorial && territorioAsignado" class="territorio-separator"></div>
+            <!-- Fila: Avatar + Nombre -->
+            <div class="user-header-row">
+              <div class="user-avatar">
+                <span class="user-initials">{{ userInitials }}</span>
               </div>
-              <p v-if="isTerritorial && estadosDelTerritorio" class="user-estados">{{ estadosDelTerritorio }}</p>
+              <p class="user-fullname">{{ userFullName }}</p>
             </div>
+            <!-- 2. Cargo del usuario -->
+            <p v-if="userCargo" class="user-cargo">{{ userCargo }}</p>
+            <!-- 3. Username -->
+            <p class="user-username">@{{ userDisplayName }}</p>
           </div>
           
           <div class="text-underline"></div>
@@ -1233,34 +1231,41 @@ const handleKeydown = (event) => {
 }
 
 .user-info {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 3px;
+  padding: 8px 10px;
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 20px;
-  border: 1.5px solid #39FF14;
-  box-shadow: 
-    0 0 6px rgba(57, 255, 20, 0.4),
-    0 0 12px rgba(57, 255, 20, 0.2),
-    inset 0 0 8px rgba(57, 255, 20, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  box-shadow: none;
   transition: all 0.3s ease;
-  width: auto;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Fila con avatar y nombre */
+.user-header-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
 }
 
 .user-info:hover {
-  border-color: #7FFF00;
-  box-shadow: 
-    0 0 10px rgba(57, 255, 20, 0.6),
-    0 0 18px rgba(57, 255, 20, 0.3),
-    inset 0 0 12px rgba(57, 255, 20, 0.15);
+  border-color: rgba(57, 255, 20, 0.7);
+  box-shadow: 0 0 4px rgba(57, 255, 20, 0.2);
 }
 
 .user-avatar {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: transparent;
   display: flex;
@@ -1284,11 +1289,13 @@ const handleKeydown = (event) => {
 
 .user-details {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  max-width: calc(100% - 40px);
 }
 
 .user-name {
@@ -1310,46 +1317,54 @@ const handleKeydown = (event) => {
 /* Nombre completo como título principal */
 .user-fullname {
   margin: 0;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
   color: #39FF14;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
   text-shadow: 
     0 0 4px rgba(57, 255, 20, 0.5),
     0 0 8px rgba(57, 255, 20, 0.3),
     0 1px 2px rgba(0, 0, 0, 0.5);
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
   line-height: 1.3;
+  flex: 1;
+  min-width: 0;
 }
 
 /* Username como subtítulo pequeño */
 .user-username {
-  margin: 2px 0 0 0;
-  font-size: 9px;
-  color: rgba(57, 255, 20, 0.7);
+  margin: 0;
+  font-size: 8px;
+  color: rgba(57, 255, 20, 0.75);
   font-weight: 500;
   font-style: italic;
+  text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
 }
 
 /* Cargo del usuario */
 .user-cargo {
-  margin: 3px 0 0 0;
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-size: 7px;
+  color: rgba(255, 255, 255, 0.95);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  background: rgba(57, 255, 20, 0.15);
+  letter-spacing: 0.4px;
+  background: rgba(57, 255, 20, 0.2);
   padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid rgba(57, 255, 20, 0.3);
-  display: inline-block;
+  border-radius: 8px;
+  border: 1px solid rgba(57, 255, 20, 0.4);
+  text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .user-role {
@@ -1385,15 +1400,15 @@ const handleKeydown = (event) => {
 }
 
 .user-territorio-text {
-  font-size: 8px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   color: #fed7aa;
   line-height: 1.2;
 }
 
 .user-estados {
   margin: 2px 0 0 0;
-  font-size: 7px;
+  font-size: 9px;
   color: rgba(187, 247, 208, 0.9);
   font-weight: 400;
   font-style: italic;

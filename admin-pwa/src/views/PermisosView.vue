@@ -561,8 +561,14 @@
                     required
                   >
                     <option value="">-- Seleccione un territorio --</option>
-                    <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">
-                      {{ territorio }}
+                    <option 
+                      v-for="terr in territoriosConEstado" 
+                      :key="terr.nombre" 
+                      :value="terr.nombre"
+                      :disabled="terr.ocupado"
+                      :class="{ 'territorio-ocupado': terr.ocupado }"
+                    >
+                      {{ terr.ocupado ? '🔒 ' + terr.nombre + ' (Asignado a: ' + terr.usuarioAsignado + ')' : terr.nombre }}
                     </option>
                   </select>
                   <div class="territorio-info-box">
@@ -1092,6 +1098,36 @@ export default {
     usuariosFiltrados() {
       if (!this.filtroRol) return this.usuariosAdmin
       return this.usuariosAdmin.filter(usuario => usuario.rol === this.filtroRol)
+    },
+    
+    // Territorios que ya están asignados a usuarios territoriales
+    territoriosOcupados() {
+      const ocupados = new Set()
+      this.usuariosAdmin.forEach(usuario => {
+        // Solo contar como ocupado si es territorial y tiene territorio asignado
+        // Y no es el usuario que estamos editando actualmente
+        if (usuario.es_territorial && usuario.territorio) {
+          // Si estamos editando, no bloquear el territorio del usuario que editamos
+          if (this.modoEdicion && this.usuarioEditando && usuario.id === this.usuarioEditando.id) {
+            return
+          }
+          ocupados.add(usuario.territorio)
+        }
+      })
+      return ocupados
+    },
+    
+    // Lista de territorios con info de disponibilidad
+    territoriosConEstado() {
+      return this.territoriosSembrandoVida.map(territorio => {
+        const ocupado = this.territoriosOcupados.has(territorio)
+        const usuarioAsignado = ocupado ? this.usuariosAdmin.find(u => u.es_territorial && u.territorio === territorio) : null
+        return {
+          nombre: territorio,
+          ocupado,
+          usuarioAsignado: usuarioAsignado ? usuarioAsignado.username : null
+        }
+      })
     }
   },
   
@@ -3274,6 +3310,15 @@ export default {
   outline: none;
   border-color: #14b8a6;
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+}
+
+/* Estilos para opciones de territorio ocupado/bloqueado */
+.territorio-select-modern option.territorio-ocupado,
+.territorio-select-modern option:disabled {
+  color: #9ca3af;
+  font-style: italic;
+  background-color: #f3f4f6;
+  cursor: not-allowed;
 }
 
 .territorio-info-box {

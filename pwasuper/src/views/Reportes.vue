@@ -1020,9 +1020,21 @@ export default {
       doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
       
-      const rowHeight = 8;
+      const baseRowHeight = 8;
+      const lineHeight = 3; // Altura de cada línea de texto
 
       this.actividades.forEach((actividad, index) => {
+        // Obtener la descripción completa
+        const activDesc = actividad.descripcion || actividad.categoria_actividad || 'Actividad de ' + (actividad.tipo_actividad || 'campo');
+        
+        // Calcular cuántas líneas necesita la descripción
+        const maxTextWidth = colWidths[5] - 4; // Ancho disponible para texto con margen
+        const textLines = doc.splitTextToSize(activDesc, maxTextWidth);
+        const numLines = textLines.length;
+        
+        // Calcular altura de fila basada en el número de líneas (mínimo 8, máximo según contenido)
+        const rowHeight = Math.max(baseRowHeight, numLines * lineHeight + 3);
+        
         // Verificar si necesitamos nueva página
         if (currentY > pageHeight - 50) {
           doc.addPage();
@@ -1075,38 +1087,43 @@ export default {
         const fecha = this.formatearFecha(actividad.fecha_hora);
         const hora = this.formatearHora(actividad.fecha_hora);
         const tipo = this.capitalizar(actividad.tipo_actividad || 'Campo');
-        const activDesc = (actividad.descripcion || actividad.categoria_actividad || 'Actividad de ' + (actividad.tipo_actividad || 'campo')).substring(0, 50);
 
         colX = tableX + 2;
         
+        // Posición vertical centrada para celdas de una línea
+        const textYCenter = currentY + (rowHeight / 2) + 1.5;
+        
         // No.
-        doc.text(String(index + 1), colX + colWidths[0]/2, currentY + 5.5, { align: 'center' });
+        doc.text(String(index + 1), colX + colWidths[0]/2, textYCenter, { align: 'center' });
         doc.line(colX + colWidths[0], currentY, colX + colWidths[0], currentY + rowHeight);
         
         // Fecha
         colX += colWidths[0];
-        doc.text(fecha, colX + 2, currentY + 5.5);
+        doc.text(fecha, colX + 2, textYCenter);
         doc.line(colX + colWidths[1], currentY, colX + colWidths[1], currentY + rowHeight);
         
         // Tipo (Campo/Gabinete)
         colX += colWidths[1];
-        doc.text(tipo, colX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
+        doc.text(tipo, colX + colWidths[2]/2, textYCenter, { align: 'center' });
         doc.line(colX + colWidths[2], currentY, colX + colWidths[2], currentY + rowHeight);
         
         // Hora Inicio
         colX += colWidths[2];
-        doc.text(hora, colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+        doc.text(hora, colX + colWidths[3]/2, textYCenter, { align: 'center' });
         doc.line(colX + colWidths[3], currentY, colX + colWidths[3], currentY + rowHeight);
         
         // Hora Término (estimado +1 hora)
         colX += colWidths[3];
         const horaTermino = this.calcularHoraTermino(actividad.fecha_hora);
-        doc.text(horaTermino, colX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
+        doc.text(horaTermino, colX + colWidths[4]/2, textYCenter, { align: 'center' });
         doc.line(colX + colWidths[4], currentY, colX + colWidths[4], currentY + rowHeight);
         
-        // Actividad
+        // Actividad - Descripción completa con múltiples líneas
         colX += colWidths[4];
-        doc.text(activDesc, colX + 2, currentY + 5.5);
+        // Dibujar cada línea de texto
+        textLines.forEach((line, lineIndex) => {
+          doc.text(line, colX + 2, currentY + 4 + (lineIndex * lineHeight));
+        });
 
         currentY += rowHeight;
       });
@@ -1309,21 +1326,53 @@ export default {
           
           currentY += 50;
         } else {
+          // ========== SELECCIÓN DE 7 IMÁGENES VARIADAS ==========
+          // Separar por tipo para obtener variedad
+          const actividadesCampo = actividadesConFoto.filter(a => (a.tipo_actividad || 'campo').toLowerCase() === 'campo');
+          const actividadesGabinete = actividadesConFoto.filter(a => (a.tipo_actividad || '').toLowerCase() === 'gabinete');
+          
+          // Seleccionar imágenes variadas (alternar entre campo y gabinete si hay de ambos)
+          let imagenesSeleccionadas = [];
+          const maxImagenes = 6;
+          
+          if (actividadesCampo.length > 0 && actividadesGabinete.length > 0) {
+            // Hay de ambos tipos - alternar
+            let indexCampo = 0;
+            let indexGabinete = 0;
+            while (imagenesSeleccionadas.length < maxImagenes) {
+              if (indexCampo < actividadesCampo.length) {
+                imagenesSeleccionadas.push(actividadesCampo[indexCampo]);
+                indexCampo++;
+              }
+              if (imagenesSeleccionadas.length >= maxImagenes) break;
+              if (indexGabinete < actividadesGabinete.length) {
+                imagenesSeleccionadas.push(actividadesGabinete[indexGabinete]);
+                indexGabinete++;
+              }
+              if (indexCampo >= actividadesCampo.length && indexGabinete >= actividadesGabinete.length) break;
+            }
+          } else {
+            // Solo hay de un tipo
+            imagenesSeleccionadas = actividadesConFoto.slice(0, maxImagenes);
+          }
+          
+          console.log(`📷 Seleccionadas ${imagenesSeleccionadas.length} imágenes variadas (Campo: ${actividadesCampo.length}, Gabinete: ${actividadesGabinete.length})`);
+          
           // ========== GRID DE IMÁGENES ==========
           const imgGridWidth = 55; // Ancho de cada imagen
           const imgGridHeight = 45; // Alto de cada imagen
           const imgsPerRow = 3;
           const imgSpacing = 5;
-          const labelHeight = 12;
+          const labelHeight = 14; // Aumentado para mejor visualización
           
           // Cargar imágenes y dibujarlas
           let imgIndex = 0;
-          const totalImagenes = actividadesConFoto.length; // Mostrar todas las imágenes disponibles
+          const totalImagenes = imagenesSeleccionadas.length;
           
           console.log(`📷 Procesando ${totalImagenes} imágenes...`);
           
           for (let i = 0; i < totalImagenes; i++) {
-            const actividad = actividadesConFoto[i];
+            const actividad = imagenesSeleccionadas[i];
             
             // Verificar si necesitamos nueva página
             if (currentY + imgGridHeight + labelHeight + 15 > pageHeight - 40) {
@@ -1369,15 +1418,16 @@ export default {
                 const tipoAct = actividad.tipo_actividad || 'campo';
                 const tipoTexto = tipoAct.toLowerCase() === 'campo' ? 'CAMPO' : 'GABINETE';
                 
-                // Formato compacto: DD/MM HH:MM
+                // Formato compacto solo números: DD/MM/AA HH:MM
                 const fechaObj = new Date(actividad.fecha_hora);
                 const dia = String(fechaObj.getDate()).padStart(2, '0');
                 const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+                const anio = String(fechaObj.getFullYear()).slice(-2);
                 const hora = String(fechaObj.getHours()).padStart(2, '0');
                 const min = String(fechaObj.getMinutes()).padStart(2, '0');
-                const fechaHoraCompacta = `${dia}/${mes} ${hora}:${min}`;
+                const fechaCompacta = `${dia}/${mes}/${anio} ${hora}:${min}`;
                 
-                // Fondo de etiqueta según tipo - Más grande y visible
+                // Fondo de etiqueta según tipo
                 if (tipoAct.toLowerCase() === 'campo') {
                   doc.setFillColor(34, 197, 94); // Verde para Campo
                 } else {
@@ -1390,16 +1440,16 @@ export default {
                 doc.setLineWidth(0.2);
                 doc.rect(imgX, currentY + imgGridHeight, imgGridWidth, labelHeight, 'S');
                 
-                // Tipo de actividad - Grande y en negrita
+                // Tipo de actividad - Grande y en negrita (CAMPO o GABINETE)
                 doc.setTextColor(255, 255, 255);
-                doc.setFontSize(9);
+                doc.setFontSize(10);
                 doc.setFont(undefined, 'bold');
-                doc.text(tipoTexto, imgX + imgGridWidth / 2, currentY + imgGridHeight + 5, { align: 'center' });
+                doc.text(tipoTexto, imgX + imgGridWidth / 2, currentY + imgGridHeight + 6, { align: 'center' });
                 
-                // Fecha y hora compacta en una línea
+                // Fecha compacta - Pequeña debajo
                 doc.setFont(undefined, 'normal');
-                doc.setFontSize(7);
-                doc.text(fechaHoraCompacta, imgX + imgGridWidth / 2, currentY + imgGridHeight + 10, { align: 'center' });
+                doc.setFontSize(6);
+                doc.text(fechaCompacta, imgX + imgGridWidth / 2, currentY + imgGridHeight + 11, { align: 'center' });
               } else {
                 throw new Error('No se pudo obtener datos de la imagen');
               }
@@ -1421,13 +1471,14 @@ export default {
               const tipoAct = actividad.tipo_actividad || 'campo';
               const tipoTexto = tipoAct.toLowerCase() === 'campo' ? 'CAMPO' : 'GABINETE';
               
-              // Formato compacto: DD/MM HH:MM
+              // Formato compacto solo números: DD/MM/AA HH:MM
               const fechaObj = new Date(actividad.fecha_hora);
               const dia = String(fechaObj.getDate()).padStart(2, '0');
               const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+              const anio = String(fechaObj.getFullYear()).slice(-2);
               const hora = String(fechaObj.getHours()).padStart(2, '0');
               const min = String(fechaObj.getMinutes()).padStart(2, '0');
-              const fechaHoraCompacta = `${dia}/${mes} ${hora}:${min}`;
+              const fechaCompacta = `${dia}/${mes}/${anio} ${hora}:${min}`;
               
               if (tipoAct.toLowerCase() === 'campo') {
                 doc.setFillColor(34, 197, 94);
@@ -1442,12 +1493,12 @@ export default {
               doc.rect(imgX, currentY + imgGridHeight, imgGridWidth, labelHeight, 'S');
               
               doc.setTextColor(255, 255, 255);
-              doc.setFontSize(9);
+              doc.setFontSize(10);
               doc.setFont(undefined, 'bold');
-              doc.text(tipoTexto, imgX + imgGridWidth / 2, currentY + imgGridHeight + 5, { align: 'center' });
+              doc.text(tipoTexto, imgX + imgGridWidth / 2, currentY + imgGridHeight + 6, { align: 'center' });
               doc.setFont(undefined, 'normal');
-              doc.setFontSize(7);
-              doc.text(fechaHoraCompacta, imgX + imgGridWidth / 2, currentY + imgGridHeight + 10, { align: 'center' });
+              doc.setFontSize(6);
+              doc.text(fechaCompacta, imgX + imgGridWidth / 2, currentY + imgGridHeight + 11, { align: 'center' });
             }
             
             imgIndex++;

@@ -17,7 +17,7 @@
         >
           <!-- Contenedor principal del modal -->
           <div class="pdf-modal-container">
-            <!-- Header del visor -->
+            <!-- Header del visor - VERDE FUERTE -->
             <div class="pdf-modal-header">
               <div class="pdf-modal-header-left">
                 <div class="pdf-modal-icon">
@@ -58,7 +58,7 @@
                 <!-- Botón descargar -->
                 <button 
                   @click="descargarDesdVisor"
-                  class="pdf-modal-btn pdf-modal-btn-success"
+                  class="pdf-modal-btn pdf-modal-btn-download"
                   title="Descargar PDF"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -90,22 +90,23 @@
                 <p>Cargando PDF...</p>
               </div>
               
-              <!-- Contenedor de páginas del PDF -->
+              <!-- Contenedor de páginas del PDF renderizadas como imágenes -->
               <div 
-                v-else-if="paginasPDFRenderizadas.length > 0"
+                v-else-if="imagenesPDFRenderizadas.length > 0"
                 class="pdf-pages-container"
                 :style="{ transform: `scale(${zoomNivelPDF})`, transformOrigin: 'top center' }"
               >
                 <div 
-                  v-for="(pagina, index) in paginasPDFRenderizadas" 
+                  v-for="(imagen, index) in imagenesPDFRenderizadas" 
                   :key="index"
                   class="pdf-page-wrapper"
                   :data-page="index + 1"
                 >
-                  <canvas 
-                    :ref="el => { if (el) canvasRefs[index] = el }"
-                    class="pdf-page-canvas"
-                  ></canvas>
+                  <img 
+                    :src="imagen"
+                    class="pdf-page-image"
+                    :alt="'Página ' + (index + 1)"
+                  />
                   <div class="pdf-page-number">Página {{ index + 1 }}</div>
                 </div>
               </div>
@@ -722,14 +723,13 @@ export default {
       mostrarModalVisorPDF: false,
       pdfBlobUrl: null,
       nombreReporteVisor: '',
-      paginasPDFRenderizadas: [],
+      imagenesPDFRenderizadas: [],
       paginaActualPDF: 1,
       totalPaginasPDF: 1,
       zoomNivelPDF: 1,
       cargandoPDFVisor: false,
       errorPDFVisor: null,
       pdfDocumento: null,
-      canvasRefs: {},
       // Estado de conexión
       isOnline: true,
       error: null
@@ -927,17 +927,22 @@ export default {
       if (this.pdfBlobUrl) {
         window.URL.revokeObjectURL(this.pdfBlobUrl);
       }
+      // Limpiar URLs de imágenes
+      this.imagenesPDFRenderizadas.forEach(url => {
+        if (url && url.startsWith('data:')) {
+          // Las data URLs no necesitan revocarse
+        }
+      });
       this.mostrarModalVisorPDF = false;
       this.pdfBlobUrl = null;
       this.nombreReporteVisor = '';
-      this.paginasPDFRenderizadas = [];
+      this.imagenesPDFRenderizadas = [];
       this.paginaActualPDF = 1;
       this.totalPaginasPDF = 1;
       this.zoomNivelPDF = 1;
       this.cargandoPDFVisor = false;
       this.errorPDFVisor = null;
       this.pdfDocumento = null;
-      this.canvasRefs = {};
     },
 
     // Zoom in del PDF
@@ -995,11 +1000,11 @@ export default {
       }
     },
 
-    // Renderizar PDF con PDF.js
+    // Renderizar PDF con PDF.js - CORREGIDO para usar imágenes
     async renderizarPDF(pdfData) {
       this.cargandoPDFVisor = true;
       this.errorPDFVisor = null;
-      this.paginasPDFRenderizadas = [];
+      this.imagenesPDFRenderizadas = [];
       
       try {
         // Cargar PDF.js dinámicamente desde CDN
@@ -1013,23 +1018,22 @@ export default {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         
         // Cargar el documento PDF
+        console.log('📄 Cargando documento PDF...');
         const loadingTask = pdfjsLib.getDocument({ data: pdfData });
         this.pdfDocumento = await loadingTask.promise;
         
         this.totalPaginasPDF = this.pdfDocumento.numPages;
         console.log(`📄 PDF cargado: ${this.totalPaginasPDF} páginas`);
         
-        // Preparar array de páginas
-        this.paginasPDFRenderizadas = new Array(this.totalPaginasPDF).fill(null);
-        
-        // Esperar a que Vue renderice los canvas
-        await this.$nextTick();
-        
-        // Renderizar todas las páginas
+        // Renderizar todas las páginas como imágenes
+        const imagenes = [];
         for (let i = 1; i <= this.totalPaginasPDF; i++) {
-          await this.renderizarPaginaPDF(i);
+          const imagenDataUrl = await this.renderizarPaginaComoImagen(i);
+          imagenes.push(imagenDataUrl);
+          console.log(`✅ Página ${i} renderizada`);
         }
         
+        this.imagenesPDFRenderizadas = imagenes;
         this.cargandoPDFVisor = false;
         
       } catch (error) {
@@ -1060,43 +1064,39 @@ export default {
       });
     },
 
-    // Renderizar una página específica del PDF
-    async renderizarPaginaPDF(numeroPagina) {
+    // Renderizar una página del PDF como imagen (data URL)
+    async renderizarPaginaComoImagen(numeroPagina) {
       try {
         const page = await this.pdfDocumento.getPage(numeroPagina);
         
-        // Calcular escala para que quepa en el ancho del contenedor
-        const containerWidth = this.$refs.pdfScrollContainer?.clientWidth || 360;
-        const viewport = page.getViewport({ scale: 1 });
-        const scale = (containerWidth - 32) / viewport.width; // 32px de padding
-        const scaledViewport = page.getViewport({ scale: scale * 1.5 }); // 1.5x para mejor calidad
+        // Escala para buena calidad en móviles
+        const scale = 2; // 2x para retina displays
+        const viewport = page.getViewport({ scale });
         
-        // Obtener canvas
-        const canvas = this.canvasRefs[numeroPagina - 1];
-        if (!canvas) {
-          console.warn(`Canvas no encontrado para página ${numeroPagina}`);
-          return;
-        }
-        
+        // Crear canvas temporal
+        const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        canvas.height = scaledViewport.height;
-        canvas.width = scaledViewport.width;
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
         
-        // Estilo para que se vea del tamaño correcto
-        canvas.style.width = `${(containerWidth - 32)}px`;
-        canvas.style.height = `${(scaledViewport.height / 1.5)}px`;
+        // Fondo blanco
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Renderizar
+        // Renderizar página
         await page.render({
           canvasContext: context,
-          viewport: scaledViewport
+          viewport: viewport
         }).promise;
         
-        // Marcar como renderizada
-        this.paginasPDFRenderizadas[numeroPagina - 1] = true;
+        // Convertir a data URL
+        const dataUrl = canvas.toDataURL('image/png');
+        
+        return dataUrl;
         
       } catch (error) {
         console.error(`Error renderizando página ${numeroPagina}:`, error);
+        return null;
       }
     },
 
@@ -2570,13 +2570,13 @@ export default {
   max-height: 100dvh; /* Dynamic viewport height para móviles */
 }
 
-/* Header del visor */
+/* Header del visor - VERDE FUERTE */
 .pdf-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #15803d 0%, #22c55e 100%);
   flex-shrink: 0;
   gap: 8px;
 }
@@ -2632,7 +2632,7 @@ export default {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   display: flex;
   align-items: center;
@@ -2643,20 +2643,20 @@ export default {
 }
 
 .pdf-modal-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .pdf-modal-btn:active {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.4);
   transform: scale(0.95);
 }
 
-.pdf-modal-btn-success {
-  background: rgba(34, 197, 94, 0.8);
+.pdf-modal-btn-download {
+  background: rgba(59, 130, 246, 0.9);
 }
 
-.pdf-modal-btn-success:hover {
-  background: rgba(34, 197, 94, 1);
+.pdf-modal-btn-download:hover {
+  background: rgba(59, 130, 246, 1);
 }
 
 .pdf-modal-btn-danger {
@@ -2670,7 +2670,7 @@ export default {
 .pdf-modal-separator {
   width: 1px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   margin: 0 4px;
 }
 
@@ -2706,8 +2706,8 @@ export default {
 .pdf-loading-spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid rgba(59, 130, 246, 0.2);
-  border-top-color: #3b82f6;
+  border: 4px solid rgba(34, 197, 94, 0.2);
+  border-top-color: #22c55e;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -2736,8 +2736,10 @@ export default {
   position: relative;
 }
 
-.pdf-page-canvas {
+/* Imagen de página del PDF */
+.pdf-page-image {
   display: block;
+  width: 100%;
   max-width: 100%;
   height: auto;
 }

@@ -458,8 +458,8 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import FirmaDigital from '../components/FirmaDigital.vue';
-import axios from 'axios';
-import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+import { apiService, api } from '../services/apiService.js';
+import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 import superiorImage from '../../images/superior.png';
 
 export default {
@@ -533,15 +533,6 @@ export default {
       this.cargando = true;
       this.error = null;
       
-      // Verificar conexión a internet antes de cargar (como en Historial.vue)
-      this.isOnline = await checkInternetConnection();
-      if (!this.isOnline) {
-        this.error = getOfflineMessage();
-        this.cargando = false;
-        console.warn('⚠️ Sin conexión - mostrando mensaje offline');
-        return;
-      }
-      
       try {
         const usuario = JSON.parse(localStorage.getItem('user'));
         
@@ -552,24 +543,22 @@ export default {
         
         console.log(`📋 Cargando TODAS las actividades para usuario ${usuario.id}`);
         
-        // Usar el endpoint /registros igual que en Historial.vue
-        const response = await axios.get(`${API_URL}/registros?usuario_id=${usuario.id}`, {
-          timeout: 10000,
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+        // Usar apiService que auto-detecta servidor (producción si localhost no disponible)
+        const response = await apiService.getRecords(usuario.id);
 
-        console.log('✅ Respuesta del servidor:', response.data);
+        console.log('✅ Respuesta del servidor:', response);
 
-        if (!response.data || !response.data.registros) {
+        if (!response || !response.registros) {
           throw new Error('No se recibió respuesta del servidor');
         }
 
-        // Procesar las URLs de las fotos para que sean rutas absolutas (como en Historial.vue)
-        this.todasLasActividades = response.data.registros.map(r => ({
+        // Obtener la URL actual del API para las fotos
+        const currentApiUrl = apiService.getCurrentApiUrl();
+        
+        // Procesar las URLs de las fotos para que sean rutas absolutas
+        this.todasLasActividades = response.registros.map(r => ({
           ...r,
-          foto_url: r.foto_url ? `${API_URL}/${r.foto_url}` : null
+          foto_url: r.foto_url ? `${currentApiUrl}/${r.foto_url}` : null
         }));
         
         // Filtrar por mes/año seleccionado
@@ -754,7 +743,7 @@ export default {
 
         // Guardar en la base de datos
         try {
-          await axios.post(`${API_URL}/reportes/guardar`, {
+          await api.post('/reportes/guardar', {
             usuario_id: this.usuarioInfo.id,
             nombre_reporte: nombreReporte,
             mes: this.mesActual,
@@ -816,7 +805,7 @@ export default {
 
         // Guardar en la base de datos
         try {
-          await axios.post(`${API_URL}/reportes/guardar`, {
+          await api.post('/reportes/guardar', {
             usuario_id: this.usuarioInfo.id,
             nombre_reporte: nombreReporte,
             mes: this.mesActual,
@@ -1600,7 +1589,8 @@ export default {
         }
 
         console.log(`🔍 Cargando historial para usuario ID: ${this.usuarioInfo.id}`);
-        const response = await axios.get(`${API_URL}/reportes/historial/${this.usuarioInfo.id}`);
+        // Usar api del apiService que auto-detecta servidor correcto
+        const response = await api.get(`/reportes/historial/${this.usuarioInfo.id}`);
         
         console.log('📦 Respuesta del servidor:', response.data);
         
@@ -1656,17 +1646,8 @@ export default {
       };
     }
 
-    // Verificar conexión a internet primero (como en Historial.vue)
-    this.isOnline = await checkInternetConnection();
-    if (!this.isOnline) {
-      this.error = getOfflineMessage();
-      this.cargando = false;
-      console.warn('⚠️ Sin conexión al servidor - mostrando mensaje offline');
-      return;
-    }
-
-    // Cargar actividades
-    this.cargarActividades();
+    // Cargar actividades (apiService auto-detecta servidor correcto)
+    await this.cargarActividades();
 
     // Cargar historial de reportes desde la base de datos
     await this.cargarHistorialReportes();

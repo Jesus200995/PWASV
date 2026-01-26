@@ -113,12 +113,30 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 
+html, body {
+  min-height: 100vh;
+  background-color: #f5f5f5 !important;
+  color: #333 !important;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #f5f5f5;
 }
 
 #app {
   min-height: 100vh;
+  background-color: #f5f5f5 !important;
+}
+
+/* Evitar pantalla negra durante carga */
+#app:empty::before {
+  content: 'Cargando...';
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: #666;
+  background-color: #f5f5f5;
 }
 </style>

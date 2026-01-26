@@ -411,8 +411,8 @@
                     </div>
                     
                     <div v-if="asistencia.foto_entrada_url" class="flex justify-center">
-                      <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_entrada_url}`)">
-                        <img :src="`${API_URL}/${asistencia.foto_entrada_url}`" class="w-full h-full object-cover" alt="Foto inicio" />
+                      <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${currentApiUrl}/${asistencia.foto_entrada_url}`)">
+                        <img :src="`${currentApiUrl}/${asistencia.foto_entrada_url}`" class="w-full h-full object-cover" alt="Foto inicio" />
                         <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -479,8 +479,8 @@
                     </div>
                     
                     <div v-if="asistencia.foto_salida_url" class="flex justify-center">
-                      <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${API_URL}/${asistencia.foto_salida_url}`)">
-                        <img :src="`${API_URL}/${asistencia.foto_salida_url}`" class="w-full h-full object-cover" alt="Foto término" />
+                      <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden relative cursor-pointer" @click="verImagen(`${currentApiUrl}/${asistencia.foto_salida_url}`)">
+                        <img :src="`${currentApiUrl}/${asistencia.foto_salida_url}`" class="w-full h-full object-cover" alt="Foto término" />
                         <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2 text-white opacity-0 hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -614,10 +614,13 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+import { apiService } from '../services/apiService.js';
+import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+
+// Variable reactiva para la URL de la API
+const currentApiUrl = ref('');
 
 const router = useRouter();
 const registros = ref([]);
@@ -643,6 +646,9 @@ onMounted(async () => {
   }
   
   userInfo.value = JSON.parse(userStr);
+  
+  // Inicializar URL de la API
+  currentApiUrl.value = apiService.getCurrentApiUrl() || '';
   
   // Verificar conexión a internet
   isOnline.value = await checkInternetConnection();
@@ -682,20 +688,18 @@ async function cargarRegistros() {
     try {
     console.log('Cargando registros para usuario:', userInfo.value.id);
     
-    // Obtener registros específicos del usuario actual
-    const response = await axios.get(`${API_URL}/registros?usuario_id=${userInfo.value.id}`, {
-      timeout: 10000, // 10 segundos de timeout
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    // Obtener registros específicos del usuario actual usando apiService
+    const data = await apiService.getRecords(userInfo.value.id);
     
-    console.log('Respuesta del servidor:', response.data);
+    console.log('Respuesta del servidor:', data);
+    
+    // Actualizar la URL de la API actual
+    currentApiUrl.value = apiService.getCurrentApiUrl() || '';
     
     // Procesar las URLs de las fotos para que sean rutas absolutas
-    registros.value = response.data.registros.map(r => ({
+    registros.value = data.registros.map(r => ({
       ...r,
-      foto_url: r.foto_url ? `${API_URL}/${r.foto_url}` : null
+      foto_url: r.foto_url ? `${currentApiUrl.value}/${r.foto_url}` : null
     }));
     
     console.log('Registros procesados:', registros.value.length);
@@ -736,18 +740,16 @@ async function cargarAsistencias() {
     try {
     console.log('Cargando asistencias para usuario:', userInfo.value.id);
     
-    // Obtener asistencias específicas del usuario actual
-    const response = await axios.get(`${API_URL}/asistencias?usuario_id=${userInfo.value.id}`, {
-      timeout: 10000, // 10 segundos de timeout
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    // Obtener asistencias específicas del usuario actual usando apiService
+    const data = await apiService.getAttendances(userInfo.value.id);
     
-    console.log('Respuesta del servidor (asistencias):', response.data);
+    console.log('Respuesta del servidor (asistencias):', data);
+    
+    // Actualizar la URL de la API actual
+    currentApiUrl.value = apiService.getCurrentApiUrl() || '';
     
     // Procesar asistencias y mostrar información de debug para fechas
-    const asistenciasRaw = response.data.asistencias || [];
+    const asistenciasRaw = data.asistencias || [];
     
     asistenciasRaw.forEach((asistencia, index) => {
       console.log(`📅 Asistencia ${index + 1}:`);

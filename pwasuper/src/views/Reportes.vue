@@ -447,6 +447,23 @@
                   ]">
                     {{ reporte.tipo }}
                   </span>
+                  <!-- Botón de ver si tiene PDF -->
+                  <button
+                    v-if="reporte.tiene_pdf"
+                    @click="verReporteHistorial(reporte)"
+                    :disabled="viendoReporte === reporte.id"
+                    class="p-1.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors disabled:opacity-50"
+                    :title="'Ver ' + reporte.nombre"
+                  >
+                    <svg v-if="viendoReporte !== reporte.id" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </button>
                   <!-- Botón de descarga si tiene PDF -->
                   <button
                     v-if="reporte.tiene_pdf"
@@ -529,6 +546,8 @@ export default {
       procesandoDescarga: false,
       // Estado de descarga de reportes del historial
       descargandoReporte: null,
+      // Estado de visualización de reportes del historial
+      viendoReporte: null,
       // Estado de conexión
       isOnline: true,
       error: null
@@ -1935,6 +1954,69 @@ export default {
         });
       } finally {
         this.descargandoReporte = null;
+      }
+    },
+
+    async verReporteHistorial(reporte) {
+      // Ver un reporte previamente generado en una nueva pestaña
+      if (this.viendoReporte) {
+        console.log('⚠️ Ya se está cargando un reporte');
+        return;
+      }
+
+      console.log(`👁️ Visualizando reporte del historial: ${reporte.nombre}`);
+      this.viendoReporte = reporte.id;
+
+      try {
+        // Obtener el PDF desde el servidor
+        const response = await api.get(`/reportes/descargar/${reporte.id}`);
+        
+        if (response.data.success && response.data.reporte.pdf_base64) {
+          const pdfBase64 = response.data.reporte.pdf_base64;
+          
+          // Extraer solo la parte base64 si es un data URI
+          let base64Data = pdfBase64;
+          if (pdfBase64.includes(',')) {
+            base64Data = pdfBase64.split(',')[1];
+          }
+          
+          // Convertir base64 a blob
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+          
+          // Crear URL para abrir en nueva pestaña
+          const url = window.URL.createObjectURL(blob);
+          window.open(url, '_blank');
+          
+          // Liberar la URL después de un momento
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+          }, 1000);
+          
+          console.log('✅ Reporte abierto en nueva pestaña');
+        } else {
+          throw new Error('El PDF no está disponible');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error visualizando reporte:', error);
+        
+        let mensaje = 'Error al abrir el reporte';
+        if (error.response?.status === 404) {
+          mensaje = 'El PDF de este reporte no está disponible';
+        }
+        
+        this.$notify?.({
+          type: 'error',
+          message: mensaje
+        });
+      } finally {
+        this.viendoReporte = null;
       }
     }
   },

@@ -1196,18 +1196,17 @@ export default {
       try {
         console.log('🖼️ Iniciando generación de página de evidencias fotográficas...');
         
-        // Filtrar actividades de los últimos 7 días del período con fotos
-        const finPeriodoFotos = new Date(this.anioSeleccionado, this.mesSeleccionado + 1, 0);
-        const hace7Dias = new Date(finPeriodoFotos);
-        hace7Dias.setDate(hace7Dias.getDate() - 7);
+        // Filtrar actividades del mes seleccionado con fotos
+        const inicioPeriodo = new Date(this.anioSeleccionado, this.mesSeleccionado, 1);
+        const finPeriodo = new Date(this.anioSeleccionado, this.mesSeleccionado + 1, 0);
         
         const actividadesConFoto = this.actividades.filter(actividad => {
           if (!actividad.foto_url) return false;
           const fechaActividad = new Date(actividad.fecha_hora);
-          return fechaActividad >= hace7Dias && fechaActividad <= finPeriodoFotos;
+          return fechaActividad >= inicioPeriodo && fechaActividad <= finPeriodo;
         });
 
-        console.log(`📸 Actividades con foto encontradas: ${actividadesConFoto.length}`);
+        console.log(`📸 Actividades con foto encontradas en ${this.mesActual}: ${actividadesConFoto.length}`);
         console.log('🔍 Actividades con foto:', actividadesConFoto.map(a => ({ 
           foto_url: a.foto_url, 
           fecha: a.fecha_hora,
@@ -1217,38 +1216,99 @@ export default {
         console.log('📊 DEBUG - Total actividades cargadas:', this.actividades.length);
         console.log('📊 DEBUG - Actividades con foto_url:', this.actividades.filter(a => a.foto_url).length);
 
-        if (actividadesConFoto.length > 0) {
-          // Crear nueva página para evidencias fotográficas
-          doc.addPage();
-          currentY = 10;
+        // SIEMPRE crear la página de evidencias fotográficas
+        doc.addPage();
+        currentY = 10;
 
-          // ========== ENCABEZADO DE LA PÁGINA DE EVIDENCIAS ==========
-          // Cargar imagen de logos (reutilizar la misma imagen cargada)
-          if (superiorImageBase64 && imgDimensions) {
-            const realAspectRatio = imgDimensions.height / imgDimensions.width;
-            const imgWidth = contentWidth * 0.95;
-            const imgHeight = imgWidth * realAspectRatio;
-            const imgX = margin + (contentWidth - imgWidth) / 2;
-            
-            doc.addImage(superiorImageBase64, 'PNG', imgX, currentY, imgWidth, imgHeight);
-            currentY += imgHeight + 5;
-          }
+        // ========== ENCABEZADO DE LA PÁGINA DE EVIDENCIAS ==========
+        // Cargar imagen de logos (reutilizar la misma imagen cargada)
+        if (superiorImageBase64 && imgDimensions) {
+          const realAspectRatio = imgDimensions.height / imgDimensions.width;
+          const imgWidth = contentWidth * 0.95;
+          const imgHeight = imgWidth * realAspectRatio;
+          const imgX = margin + (contentWidth - imgWidth) / 2;
           
-          // Título de la sección
-          doc.setDrawColor(0, 0, 0);
+          doc.addImage(superiorImageBase64, 'PNG', imgX, currentY, imgWidth, imgHeight);
+          currentY += imgHeight + 5;
+        }
+        
+        // Título de la sección
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, currentY, contentWidth, 12);
+          
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('EVIDENCIAS FOTOGRÁFICAS DE ACTIVIDADES', pageWidth / 2, currentY + 5, { align: 'center' });
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text(`${this.mesActual} ${this.anioSeleccionado}`, pageWidth / 2, currentY + 10, { align: 'center' });
+        
+        currentY += 15;
+
+        // ========== DATOS DEL USUARIO ==========
+        doc.setFillColor(240, 240, 240);
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, currentY, contentWidth, 18, 'FD');
+        
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+        
+        // Nombre
+        doc.setFont(undefined, 'bold');
+        doc.text('Nombre:', margin + 3, currentY + 5);
+        doc.setFont(undefined, 'normal');
+        doc.text(this.usuarioInfo.nombre || 'Sin nombre', margin + 20, currentY + 5);
+        
+        // CURP
+        doc.setFont(undefined, 'bold');
+        doc.text('CURP:', margin + 95, currentY + 5);
+        doc.setFont(undefined, 'normal');
+        doc.text(this.usuarioInfo.curp || 'No registrado', margin + 107, currentY + 5);
+        
+        // Cargo
+        doc.setFont(undefined, 'bold');
+        doc.text('Cargo:', margin + 3, currentY + 11);
+        doc.setFont(undefined, 'normal');
+        doc.text(this.usuarioInfo.cargo || 'Facilitador Comunitario', margin + 17, currentY + 11);
+        
+        // Territorio
+        doc.setFont(undefined, 'bold');
+        doc.text('Territorio:', margin + 95, currentY + 11);
+        doc.setFont(undefined, 'normal');
+        doc.text(this.usuarioInfo.territorio || 'No asignado', margin + 115, currentY + 11);
+        
+        // Período
+        doc.setFont(undefined, 'bold');
+        doc.text('Período:', margin + 3, currentY + 17);
+        doc.setFont(undefined, 'normal');
+        doc.text(`${this.mesActual} ${this.anioSeleccionado}`, margin + 18, currentY + 17);
+        
+        currentY += 22;
+
+        // ========== VERIFICAR SI HAY IMÁGENES ==========
+        if (actividadesConFoto.length === 0) {
+          // Mostrar mensaje cuando no hay fotos disponibles
+          currentY += 20;
+          doc.setFillColor(255, 243, 205); // Amarillo claro
+          doc.setDrawColor(200, 180, 100);
           doc.setLineWidth(0.5);
-          doc.rect(margin, currentY, contentWidth, 12);
+          doc.rect(margin, currentY, contentWidth, 40, 'FD');
           
-          doc.setFontSize(11);
+          doc.setTextColor(120, 100, 50);
+          doc.setFontSize(12);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(0, 0, 0);
-          doc.text('EVIDENCIAS FOTOGRÁFICAS DE ACTIVIDADES', pageWidth / 2, currentY + 5, { align: 'center' });
+          doc.text('Sin evidencias fotográficas disponibles', pageWidth / 2, currentY + 15, { align: 'center' });
+          
           doc.setFontSize(9);
           doc.setFont(undefined, 'normal');
-          doc.text(`Últimos 7 días del período - ${this.mesActual} ${this.anioSeleccionado}`, pageWidth / 2, currentY + 10, { align: 'center' });
+          doc.text(`No se encontraron actividades con fotos en ${this.mesActual} ${this.anioSeleccionado}.`, pageWidth / 2, currentY + 25, { align: 'center' });
+          doc.text('Las evidencias se generarán cuando se registren actividades con fotografías.', pageWidth / 2, currentY + 32, { align: 'center' });
           
-          currentY += 15;
-
+          currentY += 50;
+        } else {
           // ========== GRID DE IMÁGENES ==========
           const imgGridWidth = 55; // Ancho de cada imagen
           const imgGridHeight = 45; // Alto de cada imagen
@@ -1258,11 +1318,11 @@ export default {
           
           // Cargar imágenes y dibujarlas
           let imgIndex = 0;
-          const maxImagenes = Math.min(actividadesConFoto.length, 12);
+          const totalImagenes = actividadesConFoto.length; // Mostrar todas las imágenes disponibles
           
-          console.log(`📷 Procesando ${maxImagenes} imágenes...`);
+          console.log(`📷 Procesando ${totalImagenes} imágenes...`);
           
-          for (let i = 0; i < maxImagenes; i++) {
+          for (let i = 0; i < totalImagenes; i++) {
             const actividad = actividadesConFoto[i];
             
             // Verificar si necesitamos nueva página
@@ -1276,9 +1336,7 @@ export default {
               doc.setTextColor(0, 0, 0);
               doc.text('EVIDENCIAS FOTOGRÁFICAS (Continuación)', pageWidth / 2, currentY, { align: 'center' });
               currentY += 10;
-            }
-            
-            const col = imgIndex % imgsPerRow;
+            }            const col = imgIndex % imgsPerRow;
             const imgX = margin + (col * (imgGridWidth + imgSpacing));
             
             // Si es primera columna de una fila nueva, ajustar Y
@@ -1290,14 +1348,14 @@ export default {
               // La URL ya viene completa del servidor
               const fotoUrl = actividad.foto_url;
               
-              console.log(`📷 [${i + 1}/${maxImagenes}] Cargando imagen: ${fotoUrl}`);
+              console.log(`📷 [${i + 1}/${totalImagenes}] Cargando imagen: ${fotoUrl}`);
               
               // Cargar imagen como base64 con timeout
               const imgResult = await this.cargarImagenComoBase64(fotoUrl);
               const imgData = imgResult.data;
               
               if (imgData) {
-                console.log(`✅ [${i + 1}/${maxImagenes}] Imagen cargada exitosamente`);
+                console.log(`✅ [${i + 1}/${totalImagenes}] Imagen cargada exitosamente`);
                 
                 // Borde de la imagen
                 doc.setDrawColor(0, 0, 0);
@@ -1308,32 +1366,45 @@ export default {
                 doc.addImage(imgData, 'JPEG', imgX + 1, currentY + 1, imgGridWidth - 2, imgGridHeight - 2);
                 
                 // Etiqueta debajo con información
-                const tipoAct = this.capitalizar(actividad.tipo_actividad || 'Campo');
-                const fechaAct = this.formatearFecha(actividad.fecha_hora);
-                const horaAct = this.formatearHora(actividad.fecha_hora);
+                const tipoAct = actividad.tipo_actividad || 'campo';
+                const tipoTexto = tipoAct.toLowerCase() === 'campo' ? 'CAMPO' : 'GABINETE';
                 
-                // Fondo de etiqueta según tipo
-                if (actividad.tipo_actividad === 'campo') {
-                  doc.setFillColor(34, 197, 94); // Verde
+                // Formato compacto: DD/MM HH:MM
+                const fechaObj = new Date(actividad.fecha_hora);
+                const dia = String(fechaObj.getDate()).padStart(2, '0');
+                const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+                const hora = String(fechaObj.getHours()).padStart(2, '0');
+                const min = String(fechaObj.getMinutes()).padStart(2, '0');
+                const fechaHoraCompacta = `${dia}/${mes} ${hora}:${min}`;
+                
+                // Fondo de etiqueta según tipo - Más grande y visible
+                if (tipoAct.toLowerCase() === 'campo') {
+                  doc.setFillColor(34, 197, 94); // Verde para Campo
                 } else {
-                  doc.setFillColor(147, 51, 234); // Morado
+                  doc.setFillColor(147, 51, 234); // Morado para Gabinete
                 }
                 doc.rect(imgX, currentY + imgGridHeight, imgGridWidth, labelHeight, 'F');
                 
-                // Texto de etiqueta
+                // Borde de la etiqueta
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.2);
+                doc.rect(imgX, currentY + imgGridHeight, imgGridWidth, labelHeight, 'S');
+                
+                // Tipo de actividad - Grande y en negrita
                 doc.setTextColor(255, 255, 255);
-                doc.setFontSize(7);
+                doc.setFontSize(9);
                 doc.setFont(undefined, 'bold');
-                doc.text(tipoAct, imgX + imgGridWidth / 2, currentY + imgGridHeight + 4, { align: 'center' });
+                doc.text(tipoTexto, imgX + imgGridWidth / 2, currentY + imgGridHeight + 5, { align: 'center' });
+                
+                // Fecha y hora compacta en una línea
                 doc.setFont(undefined, 'normal');
-                doc.setFontSize(6);
-                doc.text(`${fechaAct}`, imgX + imgGridWidth / 2, currentY + imgGridHeight + 8, { align: 'center' });
-                doc.text(`${horaAct}`, imgX + imgGridWidth / 2, currentY + imgGridHeight + 11, { align: 'center' });
+                doc.setFontSize(7);
+                doc.text(fechaHoraCompacta, imgX + imgGridWidth / 2, currentY + imgGridHeight + 10, { align: 'center' });
               } else {
                 throw new Error('No se pudo obtener datos de la imagen');
               }
             } catch (imgError) {
-              console.error(`❌ [${i + 1}/${maxImagenes}] Error cargando imagen:`, imgError);
+              console.error(`❌ [${i + 1}/${totalImagenes}] Error cargando imagen:`, imgError);
               
               // Dibujar placeholder si falla la carga
               doc.setFillColor(240, 240, 240);
@@ -1347,23 +1418,36 @@ export default {
               doc.text('disponible', imgX + imgGridWidth / 2, currentY + imgGridHeight / 2 + 3, { align: 'center' });
               
               // Etiqueta de información aunque falle la imagen
-              const tipoAct = this.capitalizar(actividad.tipo_actividad || 'Campo');
-              const fechaAct = this.formatearFecha(actividad.fecha_hora);
+              const tipoAct = actividad.tipo_actividad || 'campo';
+              const tipoTexto = tipoAct.toLowerCase() === 'campo' ? 'CAMPO' : 'GABINETE';
               
-              if (actividad.tipo_actividad === 'campo') {
+              // Formato compacto: DD/MM HH:MM
+              const fechaObj = new Date(actividad.fecha_hora);
+              const dia = String(fechaObj.getDate()).padStart(2, '0');
+              const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+              const hora = String(fechaObj.getHours()).padStart(2, '0');
+              const min = String(fechaObj.getMinutes()).padStart(2, '0');
+              const fechaHoraCompacta = `${dia}/${mes} ${hora}:${min}`;
+              
+              if (tipoAct.toLowerCase() === 'campo') {
                 doc.setFillColor(34, 197, 94);
               } else {
                 doc.setFillColor(147, 51, 234);
               }
               doc.rect(imgX, currentY + imgGridHeight, imgGridWidth, labelHeight, 'F');
               
+              // Borde de la etiqueta
+              doc.setDrawColor(0, 0, 0);
+              doc.setLineWidth(0.2);
+              doc.rect(imgX, currentY + imgGridHeight, imgGridWidth, labelHeight, 'S');
+              
               doc.setTextColor(255, 255, 255);
-              doc.setFontSize(7);
+              doc.setFontSize(9);
               doc.setFont(undefined, 'bold');
-              doc.text(tipoAct, imgX + imgGridWidth / 2, currentY + imgGridHeight + 4, { align: 'center' });
+              doc.text(tipoTexto, imgX + imgGridWidth / 2, currentY + imgGridHeight + 5, { align: 'center' });
               doc.setFont(undefined, 'normal');
-              doc.setFontSize(6);
-              doc.text(`${fechaAct}`, imgX + imgGridWidth / 2, currentY + imgGridHeight + 8, { align: 'center' });
+              doc.setFontSize(7);
+              doc.text(fechaHoraCompacta, imgX + imgGridWidth / 2, currentY + imgGridHeight + 10, { align: 'center' });
             }
             
             imgIndex++;
@@ -1431,12 +1515,68 @@ export default {
             doc.text(this.usuarioInfo.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
           }
           
-          console.log('✅ Página de evidencias fotográficas completada');
-        } else {
-          console.log('ℹ️ No hay actividades con fotos en los últimos 7 días');
-          console.log('📊 DEBUG - Rango de fechas:', { hace7Dias, finPeriodoFotos });
-          console.log('📊 DEBUG - Actividades totales en periodo:', this.actividades.length);
+          console.log('✅ Página de evidencias fotográficas completada con imágenes');
+        } // Fin del else (cuando hay fotos)
+        
+        // ========== FIRMA EN PÁGINA DE EVIDENCIAS (para ambos casos) ==========
+        if (actividadesConFoto.length === 0 && this.$refs.firmaComponent?.hayFirma) {
+          // Agregar firma cuando no hay fotos
+          if (currentY > pageHeight - 70) {
+            doc.addPage();
+            currentY = 30;
+          }
+
+          const firmaWidth = 70;
+          const firmaHeight = 30;
+          const firmaUsuarioX = margin + 5;
+          const firmaResponsableX = pageWidth - margin - firmaWidth - 5;
+          const firmaY = currentY;
+          
+          // Etiquetas
+          doc.setFillColor(255, 218, 185);
+          doc.setDrawColor(0, 0, 0);
+          doc.setLineWidth(0.3);
+          
+          doc.rect(firmaUsuarioX, firmaY - 8, firmaWidth, 7, 'FD');
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bold');
+          doc.text('Elaboró', firmaUsuarioX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
+          
+          doc.setFillColor(255, 218, 185);
+          doc.rect(firmaResponsableX, firmaY - 8, firmaWidth, 7, 'FD');
+          doc.text('Autorizó', firmaResponsableX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
+          
+          // Firma del usuario
+          const firmaBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
+          doc.addImage(firmaBase64, 'PNG', firmaUsuarioX, firmaY, firmaWidth, firmaHeight);
+          
+          // Líneas de firma
+          doc.setLineWidth(0.5);
+          doc.line(firmaUsuarioX, firmaY + firmaHeight + 5, firmaUsuarioX + firmaWidth, firmaY + firmaHeight + 5);
+          doc.line(firmaResponsableX, firmaY + firmaHeight + 5, firmaResponsableX + firmaWidth, firmaY + firmaHeight + 5);
+          
+          // Información del usuario
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'normal');
+          const cargoUsuario = this.usuarioInfo.cargo || 'Facilitador Comunitario';
+          doc.text(cargoUsuario, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+          doc.setFont(undefined, 'bold');
+          doc.text(this.usuarioInfo.nombre || 'Sin nombre', firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 17, { align: 'center' });
+          
+          // Información del responsable
+          doc.setFontSize(7.5);
+          doc.setFont(undefined, 'normal');
+          doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+          doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.text(this.usuarioInfo.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
         }
+        
+        console.log('✅ Página de evidencias fotográficas completada');
+        
       } catch (evidenciasError) {
         console.error('❌ Error CRÍTICO generando página de evidencias:', evidenciasError);
         console.error('Stack trace:', evidenciasError.stack);

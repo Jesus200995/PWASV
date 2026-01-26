@@ -1615,25 +1615,28 @@ def obtener_estadisticas_tipo_actividad(territorio: str = None):
 
 @app.post("/reportes/guardar")
 async def guardar_reporte(datos: dict):
-    """Guardar un reporte generado en la base de datos"""
+    """Guardar un reporte generado en la base de datos, incluyendo el PDF en base64"""
     try:
         usuario_id = datos.get('usuario_id')
         nombre_reporte = datos.get('nombre_reporte')
         mes = datos.get('mes')
         anio = datos.get('anio')
         tipo = datos.get('tipo')  # PDF o CSV
+        pdf_base64 = datos.get('pdf_base64')  # PDF en formato base64
         
         if not all([usuario_id, nombre_reporte, tipo]):
             raise HTTPException(status_code=400, detail="Faltan datos requeridos")
         
         print(f"💾 Guardando reporte: {nombre_reporte} para usuario {usuario_id}")
+        if pdf_base64:
+            print(f"   📄 PDF incluido: {len(pdf_base64)} caracteres")
         
         cursor.execute("""
             INSERT INTO reportes_generados 
-            (usuario_id, nombre_reporte, mes, anio, tipo, fecha_generacion)
-            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+            (usuario_id, nombre_reporte, mes, anio, tipo, fecha_generacion, pdf_base64)
+            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP, %s)
             RETURNING id, fecha_generacion
-        """, (usuario_id, nombre_reporte, mes, anio, tipo))
+        """, (usuario_id, nombre_reporte, mes, anio, tipo, pdf_base64))
         
         resultado = cursor.fetchone()
         conn.commit()
@@ -1666,7 +1669,8 @@ async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
                 mes,
                 anio,
                 tipo,
-                fecha_generacion
+                fecha_generacion,
+                CASE WHEN pdf_base64 IS NOT NULL AND pdf_base64 != '' THEN true ELSE false END as tiene_pdf
             FROM reportes_generados
             WHERE usuario_id = %s
             ORDER BY fecha_generacion DESC
@@ -1683,7 +1687,8 @@ async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
                 "mes": reporte[2],
                 "anio": reporte[3],
                 "tipo": reporte[4],
-                "fecha": reporte[5].isoformat() if reporte[5] else None
+                "fecha": reporte[5].isoformat() if reporte[5] else None,
+                "tiene_pdf": reporte[6] if len(reporte) > 6 else False
             })
         
         print(f"✅ {len(resultado)} reportes encontrados")
@@ -1696,6 +1701,56 @@ async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
         
     except Exception as e:
         print(f"❌ Error obteniendo historial de reportes: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@app.get("/reportes/descargar/{reporte_id}")
+async def descargar_reporte(reporte_id: int):
+    """Obtener el PDF de un reporte guardado"""
+    try:
+        print(f"📥 Descargando reporte ID: {reporte_id}")
+        
+        cursor.execute("""
+            SELECT 
+                id,
+                nombre_reporte,
+                mes,
+                anio,
+                tipo,
+                fecha_generacion,
+                pdf_base64
+            FROM reportes_generados
+            WHERE id = %s
+        """, (reporte_id,))
+        
+        reporte = cursor.fetchone()
+        
+        if not reporte:
+            raise HTTPException(status_code=404, detail="Reporte no encontrado")
+        
+        pdf_base64 = reporte[6]
+        
+        if not pdf_base64:
+            raise HTTPException(status_code=404, detail="El PDF de este reporte no está disponible para descarga")
+        
+        print(f"✅ PDF encontrado: {reporte[1]}")
+        
+        return {
+            "success": True,
+            "reporte": {
+                "id": reporte[0],
+                "nombre": reporte[1],
+                "mes": reporte[2],
+                "anio": reporte[3],
+                "tipo": reporte[4],
+                "fecha": reporte[5].isoformat() if reporte[5] else None,
+                "pdf_base64": pdf_base64
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error descargando reporte: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 # Nuevo endpoint para obtener usuarios (para el panel de administración)

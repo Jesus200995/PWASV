@@ -426,21 +426,54 @@
                 :key="reporte.id"
                 class="flex items-center justify-between p-2.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-xs"
               >
-                <div class="flex items-center gap-2 min-w-0">
+                <div class="flex items-center gap-2 min-w-0 flex-1">
                   <div class="flex-shrink-0 w-7 h-7 bg-orange-100 rounded flex items-center justify-center">
-                    <i class="fas fa-file text-orange-600 text-xs"></i>
+                    <svg v-if="reporte.tipo === 'PDF'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
                   </div>
-                  <div class="min-w-0">
+                  <div class="min-w-0 flex-1">
                     <p class="font-medium text-gray-900 text-xs truncate">{{ reporte.nombre }}</p>
                     <p class="text-xs text-gray-500 truncate">{{ reporte.fecha }}</p>
                   </div>
                 </div>
-                <span :class="[
-                  'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium flex-shrink-0',
-                  reporte.tipo === 'PDF' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                ]">
-                  {{ reporte.tipo }}
-                </span>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <span :class="[
+                    'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
+                    reporte.tipo === 'PDF' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                  ]">
+                    {{ reporte.tipo }}
+                  </span>
+                  <!-- Botón de descarga si tiene PDF -->
+                  <button
+                    v-if="reporte.tiene_pdf"
+                    @click="descargarReporteHistorial(reporte)"
+                    :disabled="descargandoReporte === reporte.id"
+                    class="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors disabled:opacity-50"
+                    :title="'Descargar ' + reporte.nombre"
+                  >
+                    <svg v-if="descargandoReporte !== reporte.id" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </button>
+                  <!-- Indicador de no disponible -->
+                  <span
+                    v-else-if="reporte.tipo === 'PDF'"
+                    class="text-gray-400 text-xs"
+                    title="PDF no disponible para descarga"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                    </svg>
+                  </span>
+                </div>
               </div>
             </div>
             <div v-else class="text-center py-4">
@@ -494,6 +527,8 @@ export default {
       mostrarModalFirma: false,
       confirmarFirma: false,
       procesandoDescarga: false,
+      // Estado de descarga de reportes del historial
+      descargandoReporte: null,
       // Estado de conexión
       isOnline: true,
       error: null
@@ -721,9 +756,10 @@ export default {
       try {
         console.log('📄 Generando reporte...');
         
-        // Generar el reporte
+        // Generar el reporte y obtener el PDF en base64
+        let pdfBase64 = null;
         if (this.formatoSeleccionado === 'pdf') {
-          await this.generarPDF();
+          pdfBase64 = await this.generarPDF();
         } else {
           this.generarCSV();
         }
@@ -738,19 +774,25 @@ export default {
           id: Date.now(),
           nombre: nombreReporte,
           fecha,
-          tipo: this.formatoSeleccionado.toUpperCase()
+          tipo: this.formatoSeleccionado.toUpperCase(),
+          tiene_pdf: !!pdfBase64
         });
 
-        // Guardar en la base de datos
+        // Guardar en la base de datos (incluyendo el PDF)
         try {
-          await api.post('/reportes/guardar', {
+          const response = await api.post('/reportes/guardar', {
             usuario_id: this.usuarioInfo.id,
             nombre_reporte: nombreReporte,
             mes: this.mesActual,
             anio: this.anioSeleccionado,
-            tipo: this.formatoSeleccionado.toUpperCase()
+            tipo: this.formatoSeleccionado.toUpperCase(),
+            pdf_base64: pdfBase64
           });
           console.log('✅ Reporte guardado en la base de datos');
+          // Actualizar el ID del reporte local con el ID real de la BD
+          if (response.data && response.data.reporte_id) {
+            this.reportesGenerados[0].id = response.data.reporte_id;
+          }
         } catch (error) {
           console.error('⚠️ Error guardando reporte en BD:', error);
         }
@@ -1652,8 +1694,15 @@ export default {
 
       // Descargar
       console.log('💾 Descargando PDF...');
+      
+      // Obtener el PDF como base64 para guardarlo en la BD
+      const pdfBase64 = doc.output('datauristring');
+      
       doc.save(`Reporte_${this.mesActual}_${this.anioSeleccionado}.pdf`);
       console.log('✅ PDF generado y descargado exitosamente');
+      
+      // Retornar el base64 para guardarlo
+      return pdfBase64;
       
     } catch (error) {
       console.error('❌ Error crítico generando PDF:', error);
@@ -1814,6 +1863,78 @@ export default {
         } else {
           this.reportesGenerados = [];
         }
+      }
+    },
+
+    async descargarReporteHistorial(reporte) {
+      // Descargar un reporte previamente generado desde el historial
+      if (this.descargandoReporte) {
+        console.log('⚠️ Ya se está descargando un reporte');
+        return;
+      }
+
+      console.log(`📥 Descargando reporte del historial: ${reporte.nombre}`);
+      this.descargandoReporte = reporte.id;
+
+      try {
+        // Obtener el PDF desde el servidor
+        const response = await api.get(`/reportes/descargar/${reporte.id}`);
+        
+        if (response.data.success && response.data.reporte.pdf_base64) {
+          const pdfBase64 = response.data.reporte.pdf_base64;
+          
+          // Crear el archivo para descarga
+          // El base64 viene como data URI (data:application/pdf;base64,...)
+          let base64Data = pdfBase64;
+          
+          // Si es un data URI, extraer solo la parte base64
+          if (pdfBase64.includes(',')) {
+            base64Data = pdfBase64.split(',')[1];
+          }
+          
+          // Convertir base64 a blob
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+          
+          // Crear enlace de descarga
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${reporte.nombre.replace(/\s+/g, '_')}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          
+          console.log('✅ Reporte descargado exitosamente');
+          
+          this.$notify?.({
+            type: 'success',
+            message: `${reporte.nombre} descargado`
+          });
+        } else {
+          throw new Error('El PDF no está disponible');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error descargando reporte:', error);
+        
+        let mensaje = 'Error al descargar el reporte';
+        if (error.response?.status === 404) {
+          mensaje = 'El PDF de este reporte no está disponible';
+        }
+        
+        this.$notify?.({
+          type: 'error',
+          message: mensaje
+        });
+      } finally {
+        this.descargandoReporte = null;
       }
     }
   },

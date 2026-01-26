@@ -240,8 +240,19 @@
               </div>
             </div>
 
+            <!-- Mensaje de error/offline -->
+            <div v-if="error" class="mb-3 bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded" role="alert">
+              <p class="text-xs">{{ error }}</p>
+              <button 
+                @click="cargarActividades" 
+                class="mt-2 text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+              >
+                Reintentar
+              </button>
+            </div>
+
             <!-- Loading -->
-            <div v-if="cargando" class="flex justify-center items-center py-8">
+            <div v-else-if="cargando" class="flex justify-center items-center py-8">
               <div class="text-center">
                 <div class="inline-block">
                   <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -448,7 +459,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import FirmaDigital from '../components/FirmaDigital.vue';
 import axios from 'axios';
-import { API_URL } from '../utils/network.js';
+import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 import superiorImage from '../../images/superior.png';
 
 export default {
@@ -482,7 +493,10 @@ export default {
       // Modal de confirmación de firma
       mostrarModalFirma: false,
       confirmarFirma: false,
-      procesandoDescarga: false
+      procesandoDescarga: false,
+      // Estado de conexión
+      isOnline: true,
+      error: null
     };
   },
   computed: {
@@ -516,8 +530,19 @@ export default {
   },
   methods: {
     async cargarActividades() {
+      this.cargando = true;
+      this.error = null;
+      
+      // Verificar conexión a internet antes de cargar (como en Historial.vue)
+      this.isOnline = await checkInternetConnection();
+      if (!this.isOnline) {
+        this.error = getOfflineMessage();
+        this.cargando = false;
+        console.warn('⚠️ Sin conexión - mostrando mensaje offline');
+        return;
+      }
+      
       try {
-        this.cargando = true;
         const usuario = JSON.parse(localStorage.getItem('user'));
         
         if (!usuario || !usuario.id) {
@@ -553,16 +578,24 @@ export default {
         console.log(`✅ Total de actividades: ${this.todasLasActividades.length}`);
         console.log(`✅ Actividades en período seleccionado: ${this.actividades.length}`);
         
-      } catch (error) {
-        console.error('❌ Error cargando actividades:', error);
+      } catch (err) {
+        console.error('❌ Error cargando actividades:', err);
         this.actividades = [];
         this.todasLasActividades = [];
-        if (error.response) {
-          alert(`Error del servidor: ${error.response.data.detail || error.response.statusText}`);
-        } else if (error.request) {
-          alert('No se pudo conectar con el servidor');
+        
+        if (err.response) {
+          // Error de respuesta del servidor
+          if (err.response.status === 500) {
+            this.error = 'El servidor está experimentando problemas técnicos. Por favor, inténtalo más tarde.';
+          } else {
+            this.error = 'Error del servidor: ' + (err.response.data.detail || err.response.statusText);
+          }
+        } else if (err.request) {
+          // Error de conexión
+          this.error = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
         } else {
-          alert(`Error: ${error.message}`);
+          // Error general
+          this.error = 'Error al cargar las actividades: ' + err.message;
         }
       } finally {
         this.cargando = false;
@@ -1621,6 +1654,15 @@ export default {
         curp: usuario.curp || 'No registrada',
         supervisor: usuario.supervisor || 'No asignado'
       };
+    }
+
+    // Verificar conexión a internet primero (como en Historial.vue)
+    this.isOnline = await checkInternetConnection();
+    if (!this.isOnline) {
+      this.error = getOfflineMessage();
+      this.cargando = false;
+      console.warn('⚠️ Sin conexión al servidor - mostrando mensaje offline');
+      return;
     }
 
     // Cargar actividades

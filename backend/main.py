@@ -2370,8 +2370,8 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         
         print(f"🔐 Intento de login para usuario: {username}")
         
-        # Buscar usuario administrador en la base de datos incluyendo permisos, estado activo, es_territorial y territorio
-        cursor.execute("SELECT id, password, rol, permisos, activo, es_territorial, territorio FROM admin_users WHERE username = %s", (username,))
+        # Buscar usuario administrador en la base de datos incluyendo permisos, estado activo, es_territorial, territorio, nombre_completo, curp y cargo
+        cursor.execute("SELECT id, password, rol, permisos, activo, es_territorial, territorio, nombre_completo, curp, cargo FROM admin_users WHERE username = %s", (username,))
         row = cursor.fetchone()
         
         if not row or not pwd_context.verify(password, row[1]):
@@ -2383,6 +2383,9 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         user_activo = row[4] if row[4] is not None else True  # activo por defecto True
         es_territorial = row[5] if row[5] is not None else False
         territorio = row[6]
+        nombre_completo = row[7] or ''
+        curp = row[8] or ''
+        cargo = row[9] or ''
         
         # Verificar si el usuario está activo
         if not user_activo:
@@ -2423,7 +2426,10 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
                 "permisos": permisos,
                 "activo": user_activo,
                 "es_territorial": es_territorial,
-                "territorio": territorio
+                "territorio": territorio,
+                "nombre_completo": nombre_completo,
+                "curp": curp,
+                "cargo": cargo
             }
         }
         

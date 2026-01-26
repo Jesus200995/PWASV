@@ -115,7 +115,12 @@
               <span class="user-initials">{{ userInitials }}</span>
             </div>
             <div class="user-details">
-              <p class="user-name">{{ userDisplayName }}</p>
+              <!-- Nombre completo como título principal -->
+              <p class="user-fullname">{{ userFullName }}</p>
+              <!-- Username como subtítulo pequeño -->
+              <p class="user-username">@{{ userDisplayName }}</p>
+              <!-- Cargo del usuario -->
+              <p v-if="userCargo" class="user-cargo">{{ userCargo }}</p>
               <!-- Solo mostrar rol si NO es 'user' (usuario normal) -->
               <p v-if="userRole !== 'user'" class="user-role">{{ roleDisplayName }}</p>
               <!-- Línea separadora verde antes del territorio -->
@@ -444,8 +449,30 @@ const userDisplayName = computed(() => {
   return 'Usuario'
 })
 
+// Nombre completo del usuario (campo nombre_completo de la BD)
+const userFullName = computed(() => {
+  if (currentUser.value && currentUser.value.nombre_completo) {
+    return currentUser.value.nombre_completo
+  }
+  // Fallback al username si no hay nombre completo
+  return currentUser.value?.username || 'Usuario'
+})
+
+// Cargo del usuario
+const userCargo = computed(() => {
+  if (currentUser.value && currentUser.value.cargo) {
+    return currentUser.value.cargo
+  }
+  return null
+})
+
 const userInitials = computed(() => {
-  const name = userDisplayName.value
+  // Usar nombre completo para las iniciales si está disponible
+  const name = userFullName.value
+  if (name && name.includes(' ')) {
+    const parts = name.split(' ')
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase()
+  }
   return name ? name.charAt(0).toUpperCase() : 'U'
 })
 
@@ -1277,6 +1304,51 @@ const handleKeydown = (event) => {
     0 0 8px rgba(57, 255, 20, 0.3),
     0 1px 2px rgba(0, 0, 0, 0.5);
   letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+/* Nombre completo como título principal */
+.user-fullname {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #39FF14;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 
+    0 0 4px rgba(57, 255, 20, 0.5),
+    0 0 8px rgba(57, 255, 20, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+}
+
+/* Username como subtítulo pequeño */
+.user-username {
+  margin: 2px 0 0 0;
+  font-size: 9px;
+  color: rgba(57, 255, 20, 0.7);
+  font-weight: 500;
+  font-style: italic;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+}
+
+/* Cargo del usuario */
+.user-cargo {
+  margin: 3px 0 0 0;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(57, 255, 20, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(57, 255, 20, 0.3);
+  display: inline-block;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
 }
 

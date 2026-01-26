@@ -779,6 +779,9 @@ export default {
         let pdfBase64 = null;
         if (this.formatoSeleccionado === 'pdf') {
           pdfBase64 = await this.generarPDF();
+          console.log('📦 PDF generado, tipo:', typeof pdfBase64);
+          console.log('📦 PDF longitud:', pdfBase64 ? pdfBase64.length : 'NULL');
+          console.log('📦 PDF primeros 100 chars:', pdfBase64 ? pdfBase64.substring(0, 100) : 'N/A');
         } else {
           this.generarCSV();
         }
@@ -799,21 +802,30 @@ export default {
 
         // Guardar en la base de datos (incluyendo el PDF)
         try {
-          const response = await api.post('/reportes/guardar', {
+          console.log('💾 Preparando datos para guardar en BD...');
+          console.log('💾 pdf_base64 presente:', !!pdfBase64);
+          console.log('💾 pdf_base64 longitud:', pdfBase64 ? pdfBase64.length : 0);
+          
+          const datosGuardar = {
             usuario_id: this.usuarioInfo.id,
             nombre_reporte: nombreReporte,
             mes: this.mesActual,
             anio: this.anioSeleccionado,
             tipo: this.formatoSeleccionado.toUpperCase(),
             pdf_base64: pdfBase64
-          });
+          };
+          
+          console.log('💾 Enviando a /reportes/guardar...');
+          const response = await api.post('/reportes/guardar', datosGuardar);
           console.log('✅ Reporte guardado en la base de datos');
+          console.log('✅ Respuesta del servidor:', response.data);
           // Actualizar el ID del reporte local con el ID real de la BD
           if (response.data && response.data.reporte_id) {
             this.reportesGenerados[0].id = response.data.reporte_id;
           }
         } catch (error) {
           console.error('⚠️ Error guardando reporte en BD:', error);
+          console.error('⚠️ Detalles del error:', error.response?.data);
         }
 
         this.$notify?.({

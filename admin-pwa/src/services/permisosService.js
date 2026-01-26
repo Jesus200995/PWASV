@@ -102,6 +102,22 @@ const permisosService = {
         console.log('📋 Territorio a guardar:', datosUsuario.territorio)
       }
       
+      // Incluir datos personales (nombre_completo, curp, cargo)
+      if (datosUsuario.nombre_completo !== undefined) {
+        usuarioData.nombre_completo = datosUsuario.nombre_completo
+        console.log('📋 Nombre completo a guardar:', datosUsuario.nombre_completo)
+      }
+      
+      if (datosUsuario.curp !== undefined) {
+        usuarioData.curp = datosUsuario.curp
+        console.log('📋 CURP a guardar:', datosUsuario.curp)
+      }
+      
+      if (datosUsuario.cargo !== undefined) {
+        usuarioData.cargo = datosUsuario.cargo
+        console.log('📋 Cargo a guardar:', datosUsuario.cargo)
+      }
+      
       const response = await api.post('/admin/usuarios', usuarioData)
       
       console.log('✅ Usuario administrativo creado exitosamente:', response.data)
@@ -152,6 +168,22 @@ const permisosService = {
       if (datosUsuario.territorio !== undefined) {
         usuarioData.territorio = datosUsuario.territorio
         console.log('📋 Territorio a actualizar:', datosUsuario.territorio)
+      }
+      
+      // Incluir datos personales (nombre_completo, curp, cargo)
+      if (datosUsuario.nombre_completo !== undefined) {
+        usuarioData.nombre_completo = datosUsuario.nombre_completo
+        console.log('📋 Nombre completo a actualizar:', datosUsuario.nombre_completo)
+      }
+      
+      if (datosUsuario.curp !== undefined) {
+        usuarioData.curp = datosUsuario.curp
+        console.log('📋 CURP a actualizar:', datosUsuario.curp)
+      }
+      
+      if (datosUsuario.cargo !== undefined) {
+        usuarioData.cargo = datosUsuario.cargo
+        console.log('📋 Cargo a actualizar:', datosUsuario.cargo)
       }
       
       const response = await api.put(`/admin/usuarios/${userId}`, usuarioData)

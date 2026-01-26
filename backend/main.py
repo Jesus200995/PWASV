@@ -5318,6 +5318,9 @@ class AdminUserCreate(BaseModel):
     permisos: Optional[dict] = None  # Permisos personalizados
     es_territorial: bool = False  # Si es usuario territorial
     territorio: Optional[str] = None  # Territorio asignado (si es_territorial = True)
+    nombre_completo: Optional[str] = None  # Nombre completo del usuario
+    curp: Optional[str] = None  # CURP del usuario
+    cargo: Optional[str] = None  # Cargo del usuario
 
 class AdminUserUpdate(BaseModel):
     username: Optional[str] = None
@@ -5327,6 +5330,9 @@ class AdminUserUpdate(BaseModel):
     activo: Optional[bool] = None  # Estado activo/inactivo
     es_territorial: Optional[bool] = None  # Si es usuario territorial
     territorio: Optional[str] = None  # Territorio asignado
+    nombre_completo: Optional[str] = None  # Nombre completo del usuario
+    curp: Optional[str] = None  # CURP del usuario
+    cargo: Optional[str] = None  # Cargo del usuario
 
 # ==================== ENDPOINTS PARA GESTIÓN DE USUARIOS ADMINISTRATIVOS ====================
 
@@ -5342,7 +5348,7 @@ async def obtener_usuarios_admin():
         
         # Obtener todos los usuarios administrativos incluyendo permisos, estado activo, es_territorial y territorio
         cursor.execute("""
-            SELECT id, username, rol, permisos, activo, es_territorial, territorio
+            SELECT id, username, rol, permisos, activo, es_territorial, territorio, nombre_completo, curp, cargo
             FROM admin_users 
             ORDER BY id ASC
         """)
@@ -5375,7 +5381,10 @@ async def obtener_usuarios_admin():
                 "permisos": permisos,
                 "activo": activo,
                 "es_territorial": es_territorial,
-                "territorio": territorio
+                "territorio": territorio,
+                "nombre_completo": row[7] or '',
+                "curp": row[8] or '',
+                "cargo": row[9] or ''
             }
             usuarios.append(usuario)
         
@@ -5424,12 +5433,17 @@ async def crear_usuario_admin(usuario: AdminUserCreate):
                 raise HTTPException(status_code=400, detail="Territorio inválido. Debe ser uno de los territorios de Sembrando Vida.")
             territorio_valor = usuario.territorio
         
+        # Preparar los nuevos campos (convertir a mayúsculas)
+        nombre_completo_valor = usuario.nombre_completo.upper() if usuario.nombre_completo else None
+        curp_valor = usuario.curp.upper() if usuario.curp else None
+        cargo_valor = usuario.cargo.upper() if usuario.cargo else None
+        
         # Insertar nuevo usuario con permisos, es_territorial y territorio
         cursor.execute("""
-            INSERT INTO admin_users (username, password, rol, permisos, activo, es_territorial, territorio) 
-            VALUES (%s, %s, %s, %s, TRUE, %s, %s) 
+            INSERT INTO admin_users (username, password, rol, permisos, activo, es_territorial, territorio, nombre_completo, curp, cargo) 
+            VALUES (%s, %s, %s, %s, TRUE, %s, %s, %s, %s, %s) 
             RETURNING id
-        """, (usuario.username, hashed_password, usuario.rol, permisos_json, usuario.es_territorial, territorio_valor))
+        """, (usuario.username, hashed_password, usuario.rol, permisos_json, usuario.es_territorial, territorio_valor, nombre_completo_valor, curp_valor, cargo_valor))
         
         nuevo_id = cursor.fetchone()[0]
         conn.commit()
@@ -5443,7 +5457,10 @@ async def crear_usuario_admin(usuario: AdminUserCreate):
             "permisos": json.loads(permisos_json),
             "activo": True,
             "es_territorial": usuario.es_territorial,
-            "territorio": territorio_valor
+            "territorio": territorio_valor,
+            "nombre_completo": nombre_completo_valor or '',
+            "curp": curp_valor or '',
+            "cargo": cargo_valor or ''
         }
         
     except HTTPException:
@@ -5460,7 +5477,7 @@ async def obtener_usuario_admin(user_id: int):
         print(f"🔄 Obteniendo usuario administrativo ID: {user_id}")
         
         cursor.execute("""
-            SELECT id, username, rol, permisos, activo, es_territorial, territorio
+            SELECT id, username, rol, permisos, activo, es_territorial, territorio, nombre_completo, curp, cargo
             FROM admin_users 
             WHERE id = %s
         """, (user_id,))
@@ -5493,7 +5510,10 @@ async def obtener_usuario_admin(user_id: int):
             "permisos": permisos,
             "activo": activo,
             "es_territorial": es_territorial,
-            "territorio": territorio
+            "territorio": territorio,
+            "nombre_completo": row[7] or '',
+            "curp": row[8] or '',
+            "cargo": row[9] or ''
         }
         
         print(f"✅ Usuario administrativo obtenido: {usuario['username']}")
@@ -5567,6 +5587,21 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
             campos_actualizar.append("territorio = %s")
             valores.append(usuario.territorio if usuario.territorio else None)
         
+        # Campo nombre_completo (convertir a mayúsculas)
+        if usuario.nombre_completo is not None:
+            campos_actualizar.append("nombre_completo = %s")
+            valores.append(usuario.nombre_completo.upper() if usuario.nombre_completo else None)
+        
+        # Campo curp (convertir a mayúsculas)
+        if usuario.curp is not None:
+            campos_actualizar.append("curp = %s")
+            valores.append(usuario.curp.upper() if usuario.curp else None)
+        
+        # Campo cargo (convertir a mayúsculas)
+        if usuario.cargo is not None:
+            campos_actualizar.append("cargo = %s")
+            valores.append(usuario.cargo.upper() if usuario.cargo else None)
+        
         if not campos_actualizar:
             raise HTTPException(status_code=400, detail="No hay campos para actualizar")
         
@@ -5577,7 +5612,7 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
         conn.commit()
         
         # Obtener usuario actualizado
-        cursor.execute("SELECT id, username, rol, permisos, activo, es_territorial, territorio FROM admin_users WHERE id = %s", (user_id,))
+        cursor.execute("SELECT id, username, rol, permisos, activo, es_territorial, territorio, nombre_completo, curp, cargo FROM admin_users WHERE id = %s", (user_id,))
         row = cursor.fetchone()
         
         # Parsear permisos
@@ -5604,7 +5639,10 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
             "permisos": permisos,
             "activo": activo,
             "es_territorial": es_territorial,
-            "territorio": territorio
+            "territorio": territorio,
+            "nombre_completo": row[7] or '',
+            "curp": row[8] or '',
+            "cargo": row[9] or ''
         }
         
         print(f"✅ Usuario administrativo actualizado: {usuario_actualizado['username']} (activo: {activo}, territorial: {es_territorial})")

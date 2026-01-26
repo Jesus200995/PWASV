@@ -211,6 +211,68 @@
                 <h4>Información Básica</h4>
               </div>
               
+              <!-- Nombre Completo -->
+              <div class="form-group">
+                <label for="nombre_completo">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  Nombre Completo
+                </label>
+                <input
+                  id="nombre_completo"
+                  v-model="formularioUsuario.nombre_completo"
+                  type="text"
+                  class="form-input uppercase-input"
+                  placeholder="Ingrese el nombre completo"
+                  @input="convertirMayusculas('nombre_completo')"
+                />
+                <small class="form-help">Se convertirá automáticamente a mayúsculas</small>
+              </div>
+
+              <!-- CURP -->
+              <div class="form-group">
+                <label for="curp">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="16" rx="2"/>
+                    <line x1="7" y1="8" x2="17" y2="8"/>
+                    <line x1="7" y1="12" x2="13" y2="12"/>
+                  </svg>
+                  CURP
+                </label>
+                <input
+                  id="curp"
+                  v-model="formularioUsuario.curp"
+                  type="text"
+                  class="form-input uppercase-input"
+                  placeholder="Ingrese el CURP"
+                  maxlength="18"
+                  @input="convertirMayusculas('curp')"
+                />
+                <small class="form-help">18 caracteres - Se convertirá automáticamente a mayúsculas</small>
+              </div>
+
+              <!-- Cargo -->
+              <div class="form-group">
+                <label for="cargo">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                  </svg>
+                  Cargo
+                </label>
+                <input
+                  id="cargo"
+                  v-model="formularioUsuario.cargo"
+                  type="text"
+                  class="form-input uppercase-input"
+                  placeholder="Ingrese el cargo"
+                  @input="convertirMayusculas('cargo')"
+                />
+                <small class="form-help">Se convertirá automáticamente a mayúsculas</small>
+              </div>
+
               <!-- Username -->
               <div class="form-group">
                 <label for="username">
@@ -1096,6 +1158,9 @@ export default {
         activo: usuario.activo !== false, // Por defecto true si no existe
         es_territorial: usuario.es_territorial || false,
         territorio: usuario.territorio || '',
+        nombre_completo: usuario.nombre_completo || '',
+        curp: usuario.curp || '',
+        cargo: usuario.cargo || '',
         permisos: permisosUsuario
       }
       // Resetear visibilidad de contraseñas
@@ -1150,7 +1215,10 @@ export default {
             permisos: this.formularioUsuario.rol === 'user' ? this.formularioUsuario.permisos : null,
             activo: this.formularioUsuario.activo,
             es_territorial: this.formularioUsuario.es_territorial,
-            territorio: this.formularioUsuario.es_territorial ? this.formularioUsuario.territorio : null
+            territorio: this.formularioUsuario.es_territorial ? this.formularioUsuario.territorio : null,
+            nombre_completo: this.formularioUsuario.nombre_completo,
+            curp: this.formularioUsuario.curp,
+            cargo: this.formularioUsuario.cargo
           }
           
           // Solo incluir password si se proporcionó
@@ -1170,7 +1238,10 @@ export default {
               permisos: datosActualizacion.permisos,
               activo: datosActualizacion.activo,
               es_territorial: datosActualizacion.es_territorial,
-              territorio: datosActualizacion.territorio
+              territorio: datosActualizacion.territorio,
+              nombre_completo: datosActualizacion.nombre_completo,
+              curp: datosActualizacion.curp,
+              cargo: datosActualizacion.cargo
             }
             // Forzar reactividad en Vue
             this.usuariosAdmin = [...this.usuariosAdmin]
@@ -1215,7 +1286,10 @@ export default {
             permisos: datosCreacion.permisos,
             activo: true,
             es_territorial: datosCreacion.es_territorial,
-            territorio: datosCreacion.territorio
+            territorio: datosCreacion.territorio,
+            nombre_completo: datosCreacion.nombre_completo,
+            curp: datosCreacion.curp,
+            cargo: datosCreacion.cargo
           }
           this.usuariosAdmin = [nuevoUsuario, ...this.usuariosAdmin]
           console.log('✅ Nuevo usuario agregado instantáneamente a la lista')
@@ -1252,6 +1326,9 @@ export default {
         activo: true,
         es_territorial: false,
         territorio: '',
+        nombre_completo: '',
+        curp: '',
+        cargo: '',
         permisos: { ...this.permisosDefault }
       }
       // Resetear visibilidad de contraseñas
@@ -1270,6 +1347,13 @@ export default {
       Object.keys(this.formularioUsuario.permisos).forEach(key => {
         this.formularioUsuario.permisos[key] = false
       })
+    },
+
+    // Método para convertir campos a mayúsculas automáticamente
+    convertirMayusculas(campo) {
+      if (this.formularioUsuario[campo]) {
+        this.formularioUsuario[campo] = this.formularioUsuario[campo].toUpperCase()
+      }
     },
 
     // ==================== ELIMINAR USUARIO ADMIN ====================
@@ -2148,6 +2232,15 @@ export default {
 .form-input:disabled {
   background: #f5f5f5;
   color: #999;
+}
+
+/* Input para mayúsculas automáticas */
+.form-input.uppercase-input {
+  text-transform: uppercase;
+}
+
+.form-input.uppercase-input::placeholder {
+  text-transform: none;
 }
 
 .form-help {

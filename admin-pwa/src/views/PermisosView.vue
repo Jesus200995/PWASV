@@ -70,6 +70,7 @@
               <thead>
                 <tr>
                   <th>Usuario</th>
+                  <th>Información Personal</th>
                   <th>Rol</th>
                   <th>Territorio</th>
                   <th>Estado</th>
@@ -86,6 +87,35 @@
                       <div class="user-details">
                         <div class="user-name">{{ usuario.username }}</div>
                         <div class="user-supervisor">ID: {{ usuario.id }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="info-personal-cell">
+                    <div class="info-personal">
+                      <div class="info-item nombre-completo" v-if="usuario.nombre_completo">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>{{ usuario.nombre_completo }}</span>
+                      </div>
+                      <div class="info-item curp" v-if="usuario.curp">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="3" y="4" width="18" height="16" rx="2"/>
+                          <line x1="7" y1="8" x2="17" y2="8"/>
+                          <line x1="7" y1="12" x2="13" y2="12"/>
+                        </svg>
+                        <span class="curp-text">{{ usuario.curp }}</span>
+                      </div>
+                      <div class="info-item cargo" v-if="usuario.cargo">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                        </svg>
+                        <span>{{ usuario.cargo }}</span>
+                      </div>
+                      <div class="info-empty" v-if="!usuario.nombre_completo && !usuario.curp && !usuario.cargo">
+                        <span class="text-muted">Sin información</span>
                       </div>
                     </div>
                   </td>
@@ -1907,6 +1937,62 @@ export default {
   background: rgba(244, 67, 54, 0.1);
   color: #c62828;
   border: 1.5px solid #f44336;
+}
+
+/* Estilos para columna de Información Personal */
+.info-personal-cell {
+  vertical-align: middle;
+  min-width: 200px;
+  max-width: 280px;
+}
+
+.info-personal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #333;
+}
+
+.info-item svg {
+  flex-shrink: 0;
+  color: #666;
+}
+
+.info-item.nombre-completo {
+  font-weight: 600;
+  color: #1a237e;
+  font-size: 12px;
+}
+
+.info-item.curp .curp-text {
+  font-family: 'Courier New', monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+
+.info-item.cargo {
+  color: #00695c;
+  font-style: italic;
+}
+
+.info-empty {
+  text-align: center;
+}
+
+.info-empty .text-muted {
+  color: #999;
+  font-size: 11px;
+  font-style: italic;
 }
 
 /* Estilos para badges territoriales en tabla */

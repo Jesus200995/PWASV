@@ -7,177 +7,6 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s; background-color: rgba(56, 142, 60, 0.3);"></div>
     </div>
 
-    <!-- Modal Visor de PDF (para móviles) - RESPONSIVO COMPLETO -->
-    <Teleport to="body">
-      <Transition name="modal-fade">
-        <div 
-          v-if="mostrarModalVisorPDF" 
-          class="pdf-modal-overlay"
-          @click.self="cerrarVisorPDF"
-        >
-          <!-- Contenedor principal del modal -->
-          <div class="pdf-modal-container">
-            <!-- Header del visor - VERDE FUERTE -->
-            <div class="pdf-modal-header">
-              <div class="pdf-modal-header-left">
-                <div class="pdf-modal-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                </div>
-                <div class="pdf-modal-title-wrap">
-                  <h3 class="pdf-modal-title">{{ nombreReporteVisor }}</h3>
-                  <p class="pdf-modal-subtitle">{{ paginaActualPDF }} de {{ totalPaginasPDF }} páginas</p>
-                </div>
-              </div>
-              <div class="pdf-modal-header-right">
-                <!-- Botón zoom out -->
-                <button 
-                  @click="zoomOutPDF"
-                  class="pdf-modal-btn"
-                  title="Alejar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/>
-                  </svg>
-                </button>
-                <!-- Indicador de zoom -->
-                <span class="pdf-zoom-indicator">{{ Math.round(zoomNivelPDF * 100) }}%</span>
-                <!-- Botón zoom in -->
-                <button 
-                  @click="zoomInPDF"
-                  class="pdf-modal-btn"
-                  title="Acercar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                  </svg>
-                </button>
-                <!-- Separador -->
-                <div class="pdf-modal-separator"></div>
-                <!-- Botón descargar -->
-                <button 
-                  @click="descargarDesdVisor"
-                  class="pdf-modal-btn pdf-modal-btn-download"
-                  title="Descargar PDF"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                  </svg>
-                </button>
-                <!-- Botón cerrar -->
-                <button 
-                  @click="cerrarVisorPDF"
-                  class="pdf-modal-btn pdf-modal-btn-danger"
-                  title="Cerrar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <!-- Contenedor del PDF con scroll -->
-            <div 
-              class="pdf-modal-content"
-              ref="pdfScrollContainer"
-              @scroll="onPdfScroll"
-            >
-              <!-- Loading state -->
-              <div v-if="cargandoPDFVisor" class="pdf-loading-state">
-                <div class="pdf-loading-spinner"></div>
-                <p>Cargando PDF...</p>
-              </div>
-              
-              <!-- Contenedor de páginas del PDF renderizadas como imágenes -->
-              <div 
-                v-else-if="imagenesPDFRenderizadas.length > 0"
-                class="pdf-pages-container"
-                :style="{ transform: `scale(${zoomNivelPDF})`, transformOrigin: 'top center' }"
-              >
-                <div 
-                  v-for="(imagen, index) in imagenesPDFRenderizadas" 
-                  :key="index"
-                  class="pdf-page-wrapper"
-                  :data-page="index + 1"
-                >
-                  <img 
-                    :src="imagen"
-                    class="pdf-page-image"
-                    :alt="'Página ' + (index + 1)"
-                  />
-                  <div class="pdf-page-number">Página {{ index + 1 }}</div>
-                </div>
-              </div>
-              
-              <!-- Error state -->
-              <div v-else-if="errorPDFVisor" class="pdf-error-state">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <p class="text-gray-300 text-center mb-4">{{ errorPDFVisor }}</p>
-                <button 
-                  @click="descargarDesdVisor"
-                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  Descargar PDF directamente
-                </button>
-              </div>
-            </div>
-            
-            <!-- Footer con navegación -->
-            <div class="pdf-modal-footer">
-              <div class="pdf-nav-controls">
-                <button 
-                  @click="irAPaginaPDF(1)"
-                  :disabled="paginaActualPDF <= 1"
-                  class="pdf-nav-btn"
-                  title="Primera página"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                  </svg>
-                </button>
-                <button 
-                  @click="irAPaginaPDF(paginaActualPDF - 1)"
-                  :disabled="paginaActualPDF <= 1"
-                  class="pdf-nav-btn"
-                  title="Página anterior"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                  </svg>
-                </button>
-                <span class="pdf-page-indicator">{{ paginaActualPDF }} / {{ totalPaginasPDF }}</span>
-                <button 
-                  @click="irAPaginaPDF(paginaActualPDF + 1)"
-                  :disabled="paginaActualPDF >= totalPaginasPDF"
-                  class="pdf-nav-btn"
-                  title="Página siguiente"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </button>
-                <button 
-                  @click="irAPaginaPDF(totalPaginasPDF)"
-                  :disabled="paginaActualPDF >= totalPaginasPDF"
-                  class="pdf-nav-btn"
-                  title="Última página"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
-                  </svg>
-                </button>
-              </div>
-              <p class="pdf-footer-hint">Desliza para navegar • Usa los botones +/- para zoom</p>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
-
     <!-- Modal de Confirmación de Firma -->
     <Teleport to="body">
       <Transition name="modal-fade">
@@ -719,17 +548,6 @@ export default {
       descargandoReporte: null,
       // Estado de visualización de reportes del historial
       viendoReporte: null,
-      // Modal visor de PDF - MEJORADO
-      mostrarModalVisorPDF: false,
-      pdfBlobUrl: null,
-      nombreReporteVisor: '',
-      imagenesPDFRenderizadas: [],
-      paginaActualPDF: 1,
-      totalPaginasPDF: 1,
-      zoomNivelPDF: 1,
-      cargandoPDFVisor: false,
-      errorPDFVisor: null,
-      pdfDocumento: null,
       // Estado de conexión
       isOnline: true,
       error: null
@@ -920,201 +738,6 @@ export default {
     cerrarModalFirma() {
       this.mostrarModalFirma = false;
       this.confirmarFirma = false;
-    },
-
-    // Cerrar modal visor de PDF
-    cerrarVisorPDF() {
-      if (this.pdfBlobUrl) {
-        window.URL.revokeObjectURL(this.pdfBlobUrl);
-      }
-      // Limpiar URLs de imágenes
-      this.imagenesPDFRenderizadas.forEach(url => {
-        if (url && url.startsWith('data:')) {
-          // Las data URLs no necesitan revocarse
-        }
-      });
-      this.mostrarModalVisorPDF = false;
-      this.pdfBlobUrl = null;
-      this.nombreReporteVisor = '';
-      this.imagenesPDFRenderizadas = [];
-      this.paginaActualPDF = 1;
-      this.totalPaginasPDF = 1;
-      this.zoomNivelPDF = 1;
-      this.cargandoPDFVisor = false;
-      this.errorPDFVisor = null;
-      this.pdfDocumento = null;
-    },
-
-    // Zoom in del PDF
-    zoomInPDF() {
-      if (this.zoomNivelPDF < 3) {
-        this.zoomNivelPDF = Math.min(3, this.zoomNivelPDF + 0.25);
-      }
-    },
-
-    // Zoom out del PDF
-    zoomOutPDF() {
-      if (this.zoomNivelPDF > 0.5) {
-        this.zoomNivelPDF = Math.max(0.5, this.zoomNivelPDF - 0.25);
-      }
-    },
-
-    // Ir a una página específica del PDF
-    irAPaginaPDF(numeroPagina) {
-      if (numeroPagina < 1 || numeroPagina > this.totalPaginasPDF) return;
-      
-      this.paginaActualPDF = numeroPagina;
-      
-      // Scroll a la página
-      this.$nextTick(() => {
-        const container = this.$refs.pdfScrollContainer;
-        const pageElement = container?.querySelector(`[data-page="${numeroPagina}"]`);
-        if (pageElement && container) {
-          pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-    },
-
-    // Detectar scroll para actualizar página actual
-    onPdfScroll() {
-      const container = this.$refs.pdfScrollContainer;
-      if (!container) return;
-      
-      const pages = container.querySelectorAll('[data-page]');
-      const containerTop = container.scrollTop;
-      const containerHeight = container.clientHeight;
-      
-      for (const page of pages) {
-        const pageTop = page.offsetTop;
-        const pageHeight = page.offsetHeight;
-        
-        // Si la página está visible en más del 50%
-        if (pageTop <= containerTop + containerHeight / 2 && 
-            pageTop + pageHeight > containerTop + containerHeight / 2) {
-          const pageNum = parseInt(page.dataset.page);
-          if (pageNum !== this.paginaActualPDF) {
-            this.paginaActualPDF = pageNum;
-          }
-          break;
-        }
-      }
-    },
-
-    // Renderizar PDF con PDF.js - CORREGIDO para usar imágenes
-    async renderizarPDF(pdfData) {
-      this.cargandoPDFVisor = true;
-      this.errorPDFVisor = null;
-      this.imagenesPDFRenderizadas = [];
-      
-      try {
-        // Cargar PDF.js dinámicamente desde CDN
-        if (!window.pdfjsLib) {
-          await this.cargarPDFJS();
-        }
-        
-        const pdfjsLib = window.pdfjsLib;
-        
-        // Configurar worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        
-        // Cargar el documento PDF
-        console.log('📄 Cargando documento PDF...');
-        const loadingTask = pdfjsLib.getDocument({ data: pdfData });
-        this.pdfDocumento = await loadingTask.promise;
-        
-        this.totalPaginasPDF = this.pdfDocumento.numPages;
-        console.log(`📄 PDF cargado: ${this.totalPaginasPDF} páginas`);
-        
-        // Renderizar todas las páginas como imágenes
-        const imagenes = [];
-        for (let i = 1; i <= this.totalPaginasPDF; i++) {
-          const imagenDataUrl = await this.renderizarPaginaComoImagen(i);
-          imagenes.push(imagenDataUrl);
-          console.log(`✅ Página ${i} renderizada`);
-        }
-        
-        this.imagenesPDFRenderizadas = imagenes;
-        this.cargandoPDFVisor = false;
-        
-      } catch (error) {
-        console.error('❌ Error renderizando PDF:', error);
-        this.errorPDFVisor = 'No se pudo cargar el PDF. Intenta descargarlo directamente.';
-        this.cargandoPDFVisor = false;
-      }
-    },
-
-    // Cargar PDF.js desde CDN
-    async cargarPDFJS() {
-      return new Promise((resolve, reject) => {
-        if (window.pdfjsLib) {
-          resolve();
-          return;
-        }
-        
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-        script.onload = () => {
-          console.log('✅ PDF.js cargado');
-          resolve();
-        };
-        script.onerror = () => {
-          reject(new Error('No se pudo cargar PDF.js'));
-        };
-        document.head.appendChild(script);
-      });
-    },
-
-    // Renderizar una página del PDF como imagen (data URL)
-    async renderizarPaginaComoImagen(numeroPagina) {
-      try {
-        const page = await this.pdfDocumento.getPage(numeroPagina);
-        
-        // Escala para buena calidad en móviles
-        const scale = 2; // 2x para retina displays
-        const viewport = page.getViewport({ scale });
-        
-        // Crear canvas temporal
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        
-        // Fondo blanco
-        context.fillStyle = '#ffffff';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Renderizar página
-        await page.render({
-          canvasContext: context,
-          viewport: viewport
-        }).promise;
-        
-        // Convertir a data URL
-        const dataUrl = canvas.toDataURL('image/png');
-        
-        return dataUrl;
-        
-      } catch (error) {
-        console.error(`Error renderizando página ${numeroPagina}:`, error);
-        return null;
-      }
-    },
-
-    // Descargar PDF desde el visor
-    descargarDesdVisor() {
-      if (this.pdfBlobUrl) {
-        const a = document.createElement('a');
-        a.href = this.pdfBlobUrl;
-        a.download = `${this.nombreReporteVisor.replace(/\s+/g, '_')}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        
-        this.$notify?.({
-          type: 'success',
-          message: 'PDF descargado'
-        });
-      }
     },
 
     // Confirmar y proceder con la descarga - NO CIERRA EL MODAL HASTA TERMINAR
@@ -2347,7 +1970,7 @@ export default {
     },
 
     async verReporteHistorial(reporte) {
-      // Ver un reporte previamente generado
+      // Ver un reporte previamente generado - abre con visor nativo del dispositivo
       if (this.viendoReporte) {
         console.log('⚠️ Ya se está cargando un reporte');
         return;
@@ -2369,34 +1992,46 @@ export default {
             base64Data = pdfBase64.split(',')[1];
           }
           
-          // Convertir base64 a Uint8Array para PDF.js
+          // Convertir base64 a blob
           const byteCharacters = atob(base64Data);
           const byteNumbers = new Array(byteCharacters.length);
           for (let i = 0; i < byteCharacters.length; i++) {
             byteNumbers[i] = byteCharacters.charCodeAt(i);
           }
           const byteArray = new Uint8Array(byteNumbers);
-          
-          // Crear blob para descarga
           const blob = new Blob([byteArray], { type: 'application/pdf' });
-          const url = window.URL.createObjectURL(blob);
+          
+          // Crear nombre del archivo
+          const nombreArchivo = `${reporte.nombre.replace(/\s+/g, '_')}.pdf`;
           
           // Detectar si es dispositivo móvil
           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
           
           if (isMobile) {
-            // En móviles: mostrar en modal responsivo con PDF.js
-            this.pdfBlobUrl = url;
-            this.nombreReporteVisor = reporte.nombre;
-            this.mostrarModalVisorPDF = true;
+            // En móviles: descargar el archivo para que se abra con el visor nativo
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = nombreArchivo;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
             
-            // Renderizar PDF con PDF.js
-            await this.$nextTick();
-            await this.renderizarPDF(byteArray);
+            // Liberar URL después de un momento
+            setTimeout(() => {
+              window.URL.revokeObjectURL(url);
+            }, 2000);
             
-            console.log('✅ Reporte abierto en modal móvil con PDF.js');
+            console.log('✅ PDF descargado - se abrirá con el visor nativo del dispositivo');
+            
+            this.$notify?.({
+              type: 'success',
+              message: 'PDF descargado - se abrirá con tu visor de PDF'
+            });
           } else {
             // En desktop: abrir en nueva pestaña
+            const url = window.URL.createObjectURL(blob);
             window.open(url, '_blank');
             // Liberar la URL después de un momento
             setTimeout(() => {
@@ -2542,329 +2177,6 @@ export default {
   .page-container {
     padding-left: 1rem;
     padding-right: 1rem;
-  }
-}
-
-/* ========================================
-   VISOR DE PDF MÓVIL - ESTILOS COMPLETOS
-   ======================================== */
-
-/* Overlay del modal */
-.pdf-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.95);
-  display: flex;
-  flex-direction: column;
-  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
-}
-
-/* Contenedor principal del modal */
-.pdf-modal-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  max-height: 100vh;
-  max-height: 100dvh; /* Dynamic viewport height para móviles */
-}
-
-/* Header del visor - VERDE FUERTE */
-.pdf-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, #15803d 0%, #22c55e 100%);
-  flex-shrink: 0;
-  gap: 8px;
-}
-
-.pdf-modal-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  flex: 1;
-}
-
-.pdf-modal-icon {
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.pdf-modal-title-wrap {
-  min-width: 0;
-  flex: 1;
-}
-
-.pdf-modal-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
-}
-
-.pdf-modal-subtitle {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0;
-}
-
-.pdf-modal-header-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.pdf-modal-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s;
-  color: white;
-}
-
-.pdf-modal-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.pdf-modal-btn:active {
-  background: rgba(255, 255, 255, 0.4);
-  transform: scale(0.95);
-}
-
-.pdf-modal-btn-download {
-  background: rgba(59, 130, 246, 0.9);
-}
-
-.pdf-modal-btn-download:hover {
-  background: rgba(59, 130, 246, 1);
-}
-
-.pdf-modal-btn-danger {
-  background: rgba(239, 68, 68, 0.8);
-}
-
-.pdf-modal-btn-danger:hover {
-  background: rgba(239, 68, 68, 1);
-}
-
-.pdf-modal-separator {
-  width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.3);
-  margin: 0 4px;
-}
-
-.pdf-zoom-indicator {
-  font-size: 12px;
-  color: white;
-  font-weight: 600;
-  min-width: 45px;
-  text-align: center;
-}
-
-/* Contenido del PDF con scroll */
-.pdf-modal-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: auto;
-  background: #1f2937;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* Loading state */
-.pdf-loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 300px;
-  color: #9ca3af;
-}
-
-.pdf-loading-spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(34, 197, 94, 0.2);
-  border-top-color: #22c55e;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Contenedor de páginas */
-.pdf-pages-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  min-width: min-content;
-}
-
-/* Wrapper de cada página */
-.pdf-page-wrapper {
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  position: relative;
-}
-
-/* Imagen de página del PDF */
-.pdf-page-image {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-}
-
-.pdf-page-number {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-/* Error state */
-.pdf-error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 300px;
-  padding: 24px;
-}
-
-/* Footer con navegación */
-.pdf-modal-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 16px;
-  background: #111827;
-  flex-shrink: 0;
-  gap: 8px;
-}
-
-.pdf-nav-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pdf-nav-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: #374151;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: white;
-}
-
-.pdf-nav-btn:hover:not(:disabled) {
-  background: #4b5563;
-}
-
-.pdf-nav-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pdf-page-indicator {
-  font-size: 14px;
-  color: white;
-  font-weight: 600;
-  min-width: 70px;
-  text-align: center;
-}
-
-.pdf-footer-hint {
-  font-size: 11px;
-  color: #6b7280;
-  margin: 0;
-}
-
-/* Responsive para landscape */
-@media screen and (orientation: landscape) {
-  .pdf-modal-header {
-    padding: 8px 16px;
-  }
-  
-  .pdf-modal-footer {
-    padding: 8px 16px;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-  
-  .pdf-footer-hint {
-    order: -1;
-  }
-}
-
-/* Responsive para pantallas pequeñas */
-@media screen and (max-width: 380px) {
-  .pdf-modal-title {
-    font-size: 12px;
-  }
-  
-  .pdf-modal-btn {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .pdf-zoom-indicator {
-    font-size: 11px;
-    min-width: 40px;
-  }
-  
-  .pdf-modal-separator {
-    display: none;
-  }
-}
-
-/* iOS safe areas adicionales */
-@supports (padding: max(0px)) {
-  .pdf-modal-overlay {
-    padding-top: max(env(safe-area-inset-top), 0px);
-    padding-bottom: max(env(safe-area-inset-bottom), 0px);
-    padding-left: max(env(safe-area-inset-left), 0px);
-    padding-right: max(env(safe-area-inset-right), 0px);
   }
 }
 </style>

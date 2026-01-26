@@ -7,6 +7,94 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s; background-color: rgba(56, 142, 60, 0.3);"></div>
     </div>
 
+    <!-- Modal Visor de PDF (para móviles) -->
+    <Teleport to="body">
+      <Transition name="modal-fade">
+        <div 
+          v-if="mostrarModalVisorPDF" 
+          class="fixed inset-0 z-50 flex flex-col"
+        >
+          <!-- Overlay -->
+          <div 
+            class="absolute inset-0 bg-black/80"
+            @click="cerrarVisorPDF"
+          ></div>
+          
+          <!-- Header del visor -->
+          <div class="relative z-10 bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-3 flex items-center justify-between safe-area-top">
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+              <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-sm font-bold text-white truncate">{{ nombreReporteVisor }}</h3>
+                <p class="text-xs text-white/70">Visor de PDF</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <!-- Botón rotar (para orientación) -->
+              <button 
+                @click="rotarVisorPDF"
+                class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                title="Rotar vista"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+              <!-- Botón descargar -->
+              <button 
+                @click="descargarDesdVisor"
+                class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                title="Descargar PDF"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+              </button>
+              <!-- Botón cerrar -->
+              <button 
+                @click="cerrarVisorPDF"
+                class="w-8 h-8 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Contenedor del PDF -->
+          <div class="relative z-10 flex-1 bg-gray-900 overflow-hidden" :class="orientacionVisor">
+            <iframe 
+              v-if="pdfBlobUrl"
+              :src="pdfBlobUrl"
+              class="w-full h-full border-0"
+              type="application/pdf"
+            ></iframe>
+            <!-- Fallback para iOS que no soporta iframe con PDF -->
+            <div v-if="!pdfBlobUrl" class="flex items-center justify-center h-full">
+              <div class="text-center p-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <p class="text-gray-300 text-sm">Cargando PDF...</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Footer con instrucciones -->
+          <div class="relative z-10 bg-gray-800 px-4 py-2 safe-area-bottom">
+            <p class="text-xs text-gray-400 text-center">
+              Pellizca para hacer zoom • Desliza para navegar
+            </p>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Modal de Confirmación de Firma -->
     <Teleport to="body">
       <Transition name="modal-fade">
@@ -548,6 +636,11 @@ export default {
       descargandoReporte: null,
       // Estado de visualización de reportes del historial
       viendoReporte: null,
+      // Modal visor de PDF
+      mostrarModalVisorPDF: false,
+      pdfBlobUrl: null,
+      nombreReporteVisor: '',
+      orientacionVisor: '',
       // Estado de conexión
       isOnline: true,
       error: null
@@ -738,6 +831,47 @@ export default {
     cerrarModalFirma() {
       this.mostrarModalFirma = false;
       this.confirmarFirma = false;
+    },
+
+    // Cerrar modal visor de PDF
+    cerrarVisorPDF() {
+      if (this.pdfBlobUrl) {
+        window.URL.revokeObjectURL(this.pdfBlobUrl);
+      }
+      this.mostrarModalVisorPDF = false;
+      this.pdfBlobUrl = null;
+      this.nombreReporteVisor = '';
+      this.orientacionVisor = '';
+    },
+
+    // Rotar la vista del PDF (útil para documentos en horizontal)
+    rotarVisorPDF() {
+      if (this.orientacionVisor === '') {
+        this.orientacionVisor = 'rotate-90';
+      } else if (this.orientacionVisor === 'rotate-90') {
+        this.orientacionVisor = 'rotate-180';
+      } else if (this.orientacionVisor === 'rotate-180') {
+        this.orientacionVisor = 'rotate-270';
+      } else {
+        this.orientacionVisor = '';
+      }
+    },
+
+    // Descargar PDF desde el visor
+    descargarDesdVisor() {
+      if (this.pdfBlobUrl) {
+        const a = document.createElement('a');
+        a.href = this.pdfBlobUrl;
+        a.download = `${this.nombreReporteVisor.replace(/\s+/g, '_')}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        this.$notify?.({
+          type: 'success',
+          message: 'PDF descargado'
+        });
+      }
     },
 
     // Confirmar y proceder con la descarga - NO CIERRA EL MODAL HASTA TERMINAR
@@ -1970,7 +2104,7 @@ export default {
     },
 
     async verReporteHistorial(reporte) {
-      // Ver un reporte previamente generado en una nueva pestaña
+      // Ver un reporte previamente generado
       if (this.viendoReporte) {
         console.log('⚠️ Ya se está cargando un reporte');
         return;
@@ -2001,16 +2135,28 @@ export default {
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: 'application/pdf' });
           
-          // Crear URL para abrir en nueva pestaña
+          // Crear URL del blob
           const url = window.URL.createObjectURL(blob);
-          window.open(url, '_blank');
           
-          // Liberar la URL después de un momento
-          setTimeout(() => {
-            window.URL.revokeObjectURL(url);
-          }, 1000);
+          // Detectar si es dispositivo móvil
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
           
-          console.log('✅ Reporte abierto en nueva pestaña');
+          if (isMobile) {
+            // En móviles: mostrar en modal responsivo
+            this.pdfBlobUrl = url;
+            this.nombreReporteVisor = reporte.nombre;
+            this.orientacionVisor = '';
+            this.mostrarModalVisorPDF = true;
+            console.log('✅ Reporte abierto en modal móvil');
+          } else {
+            // En desktop: abrir en nueva pestaña
+            window.open(url, '_blank');
+            // Liberar la URL después de un momento
+            setTimeout(() => {
+              window.URL.revokeObjectURL(url);
+            }, 1000);
+            console.log('✅ Reporte abierto en nueva pestaña');
+          }
         } else {
           throw new Error('El PDF no está disponible');
         }
@@ -2149,6 +2295,54 @@ export default {
   .page-container {
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+}
+
+/* Estilos para el visor de PDF móvil */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Rotaciones para el visor */
+.rotate-90 {
+  transform: rotate(90deg);
+  transform-origin: center center;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+  transform-origin: center center;
+}
+
+.rotate-270 {
+  transform: rotate(270deg);
+  transform-origin: center center;
+}
+
+/* Asegurar que el iframe del PDF sea táctil */
+.pdf-viewer-container {
+  -webkit-overflow-scrolling: touch;
+  overflow: auto;
+}
+
+/* Soporte para orientación landscape en móviles */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .safe-area-top {
+    padding-top: max(env(safe-area-inset-top, 0px), 8px);
+  }
+  .safe-area-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 4px);
+  }
+}
+
+/* iOS specific fixes para PDF viewer */
+@supports (-webkit-touch-callout: none) {
+  iframe[type="application/pdf"] {
+    -webkit-overflow-scrolling: touch;
   }
 }
 </style>

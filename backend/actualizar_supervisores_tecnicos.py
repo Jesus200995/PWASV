@@ -8,7 +8,8 @@ import requests
 import json
 
 # URL del backend (ajustar según entorno)
-BACKEND_URL = "http://31.97.8.51:8080"  # VPS
+BACKEND_URL = "https://apipwa.sembrandodatos.com"  # Producción VPS con HTTPS
+# BACKEND_URL = "http://31.97.8.51:8080"  # VPS IP directa
 # BACKEND_URL = "http://localhost:8000"  # Local
 
 def actualizar_supervisores():

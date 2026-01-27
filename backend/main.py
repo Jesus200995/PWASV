@@ -6885,14 +6885,15 @@ async def actualizar_supervisores_tecnicos_masivo():
 
 # ==================== SUPERVISOR POR TERRITORIO ====================
 
-@app.get("/supervisor-territorio/{territorio}")
+@app.get("/supervisor-territorio/{territorio:path}")
 async def obtener_supervisor_por_territorio(territorio: str):
     """
     Obtiene el nombre del supervisor territorial para un territorio específico.
     Busca en admin_users el usuario territorial asignado a ese territorio.
+    Usa :path para permitir barras (/) en el nombre del territorio.
     """
     try:
-        # Decodificar el territorio (puede venir con %20 en lugar de espacios)
+        # Decodificar el territorio (puede venir con %20 en lugar de espacios y %2F en lugar de /)
         from urllib.parse import unquote
         territorio_decoded = unquote(territorio)
         

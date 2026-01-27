@@ -1437,6 +1437,24 @@ const updateUserInfo = async () => {
         setTimeout(() => {
           loadUserData()
         }, 1000)
+        
+        // Si es técnico y tiene territorio, actualizar supervisor automáticamente en la base de datos
+        const cargoUpper = (cargoFinal || '').toUpperCase()
+        if ((cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') && editForm.value.territorio) {
+          try {
+            console.log('🔄 Actualizando supervisor automático en BD después de guardar...')
+            const respuestaSupervisor = await apiService.obtenerSupervisorAutomatico(storedUser.id)
+            if (respuestaSupervisor.success && respuestaSupervisor.supervisor) {
+              console.log(`✅ Supervisor actualizado en BD: ${respuestaSupervisor.supervisor}`)
+              // Actualizar en memoria también
+              user.value.supervisor = respuestaSupervisor.supervisor
+              updatedUser.supervisor = respuestaSupervisor.supervisor
+              localStorage.setItem('user', JSON.stringify(updatedUser))
+            }
+          } catch (error) {
+            console.error('⚠️ Error actualizando supervisor automático:', error)
+          }
+        }
       }
     } catch (error) {
       console.error('❌ Error completo:', error)

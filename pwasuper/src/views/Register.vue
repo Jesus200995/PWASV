@@ -7,7 +7,7 @@
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
     
-    <div class="page-container w-full max-w-md relative z-10 px-2">
+    <div class="page-container w-full max-w-lg relative z-10 px-4">
       <!-- Back to Login Link - Top Left -->
       <div class="flex justify-start mb-3">
         <router-link to="/login" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
@@ -92,7 +92,7 @@
       </transition>
 
       <!-- Register Form -->
-      <div class="glass-card">
+      <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
 
         <form @submit.prevent="register" @keydown.enter="handleEnterKey">
           <div class="space-y-3">
@@ -185,53 +185,6 @@
             </div>
             
             <div>
-              <label for="cargo" class="block text-xs font-medium text-gray-800 mb-1">Puesto de Trabajo *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.cargo" 
-                  @input="formatCargo"
-                  id="cargo" 
-                  name="cargo" 
-                  type="text" 
-                  required 
-                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
-                  placeholder="Ej. TÉCNICO AGRÍCOLA" 
-                />
-              </div>
-              <p class="mt-1 text-xs text-gray-500">Indica tu posición o rol laboral actual</p>
-            </div>
-            
-            <div>
-              <label for="curp" class="block text-xs font-medium text-gray-800 mb-1">CURP *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.curp" 
-                  @input="formatCurp" 
-                  id="curp" 
-                  name="curp" 
-                  type="text" 
-                  required
-                  maxlength="18" 
-                  placeholder="18 caracteres en mayúsculas"
-                  class="glass-input w-full pl-9 pr-3 py-2 uppercase tracking-wide" 
-                />
-              </div>
-              <p v-if="curpError" class="mt-1 text-xs text-red-600">{{ curpError }}</p>
-              <p class="mt-1 text-xs text-gray-500">La CURP debe contener exactamente 18 caracteres en mayúsculas</p>
-              <p v-if="curpWarning" class="mt-1 text-xs text-green-600">{{ curpWarning }}</p>
-            </div>
-            
-            <div>
               <label for="territorio" class="block text-xs font-medium text-gray-800 mb-1">Territorio *</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -261,6 +214,81 @@
             </div>
             
             <div>
+              <label for="cargo" class="block text-xs font-medium text-gray-800 mb-1">Puesto de Trabajo *</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <select 
+                  v-model="form.cargo" 
+                  id="cargo" 
+                  name="cargo" 
+                  required
+                  class="glass-input w-full pl-9 pr-3 py-2 appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>-- Selecciona tu cargo --</option>
+                  <option v-for="cargo in cargosDisponibles" :key="cargo" :value="cargo">{{ cargo }}</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Selecciona tu posición o rol laboral</p>
+            </div>
+            
+            <!-- Campo para OTRO cargo -->
+            <div v-if="form.cargo === 'OTRO'">
+              <label for="cargoOtro" class="block text-xs font-medium text-gray-800 mb-1">Especifica tu cargo *</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="form.cargoOtro" 
+                  @input="formatCargoOtro"
+                  id="cargoOtro" 
+                  name="cargoOtro" 
+                  type="text" 
+                  required
+                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
+                  placeholder="Ej. COORDINADOR DE PROYECTO" 
+                />
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Escribe tu cargo sin tildes</p>
+            </div>
+            
+            <div>
+              <label for="curp" class="block text-xs font-medium text-gray-800 mb-1">CURP *</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <input 
+                  v-model="form.curp" 
+                  @input="formatCurp" 
+                  id="curp" 
+                  name="curp" 
+                  type="text" 
+                  required
+                  maxlength="18" 
+                  placeholder="18 caracteres en mayúsculas"
+                  class="glass-input w-full pl-9 pr-3 py-2 uppercase tracking-wide" 
+                />
+              </div>
+              <p v-if="curpError" class="mt-1 text-xs text-red-600">{{ curpError }}</p>
+              <p class="mt-1 text-xs text-gray-500">La CURP debe contener exactamente 18 caracteres en mayúsculas</p>
+              <p v-if="curpWarning" class="mt-1 text-xs text-green-600">{{ curpWarning }}</p>
+            </div>
+            
+            <div>
               <label for="supervisor" class="block text-xs font-medium text-gray-800 mb-1">Supervisor Inmediato *</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -275,11 +303,16 @@
                   name="supervisor" 
                   type="text" 
                   required
+                  :readonly="esTecnico"
                   class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
-                  placeholder="Ej. MARÍA GARCÍA LÓPEZ" 
+                  :style="esTecnico ? 'background-color: #d1d5db !important; color: #1f2937; border-color: #9ca3af; cursor: not-allowed;' : ''"
+                  :placeholder="esTecnico && buscandoSupervisor ? 'Buscando supervisor...' : 'Ej. MARÍA GARCÍA LÓPEZ'" 
                 />
               </div>
-              <p class="mt-1 text-xs text-gray-500">Nombre completo de tu jefe directo o coordinador</p>
+              <p v-if="esTecnico" class="mt-1 text-xs text-green-600">
+                ✅ Supervisor asignado automáticamente según tu territorio
+              </p>
+              <p v-else class="mt-1 text-xs text-gray-500">Nombre completo de tu jefe directo o coordinador</p>
             </div>
             
             <div>
@@ -500,7 +533,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, computed } from 'vue';
+import { reactive, ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { apiService } from '../services/apiService.js';
 import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
@@ -525,6 +558,7 @@ const form = reactive({
   primerApellido: '',
   segundoApellido: '',
   cargo: '',
+  cargoOtro: '',
   curp: '',
   territorio: '',
   supervisor: '',
@@ -532,6 +566,28 @@ const form = reactive({
   telefono: '', // Solo los dígitos del teléfono
   password: '',
   confirmPassword: ''
+});
+
+// Lista de cargos disponibles (sin tildes)
+const cargosDisponibles = [
+  'TECNICO PRODUCTIVO',
+  'TECNICO SOCIAL',
+  'FACILITADOR COMUNITARIO',
+  'COORDINACION TERRITORIAL C',
+  'COORDINACION TERRITORIAL B',
+  'COORDINACION TERRITORIAL A',
+  'ESPECIALISTAS PRODUCTIVOS Y SOCIALES',
+  'SEMBRADOR',
+  'OTRO'
+];
+
+// Estados para supervisor automático
+const buscandoSupervisor = ref(false);
+
+// Computed para verificar si es técnico
+const esTecnico = computed(() => {
+  const cargoUpper = (form.cargo || '').toUpperCase();
+  return cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO';
 });
 
 // Lista de los 30 territorios de Sembrando Vida
@@ -598,6 +654,35 @@ const filteredCountries = computed(() => {
   );
 });
 
+// Watch para actualizar supervisor cuando cambie el territorio (solo para técnicos)
+watch(() => form.territorio, async (nuevoTerritorio, viejoTerritorio) => {
+  if (nuevoTerritorio && nuevoTerritorio !== viejoTerritorio && esTecnico.value) {
+    console.log('🔄 Territorio cambió, buscando supervisor...');
+    await buscarSupervisorPorTerritorio(nuevoTerritorio);
+  }
+});
+
+// Watch para cuando cambie el cargo
+watch(() => form.cargo, async (nuevoCargo, viejoCargo) => {
+  if (nuevoCargo !== viejoCargo) {
+    const cargoUpper = (nuevoCargo || '').toUpperCase();
+    const esNuevoTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO';
+    
+    // Limpiar cargoOtro si el usuario cambia de OTRO a otro cargo
+    if (viejoCargo === 'OTRO' && nuevoCargo !== 'OTRO') {
+      form.cargoOtro = '';
+    }
+    
+    if (esNuevoTecnico && form.territorio) {
+      // Si ahora es técnico y tiene territorio, buscar supervisor automático
+      await buscarSupervisorPorTerritorio(form.territorio);
+    } else if (!esNuevoTecnico) {
+      // Si ya no es técnico, limpiar supervisor para que pueda escribir manualmente
+      form.supervisor = '';
+    }
+  }
+});
+
 onMounted(async () => {
   isOnline.value = await checkInternetConnection();
   if (!isOnline.value) {
@@ -645,10 +730,13 @@ async function register() {
     // Construir nombre completo a partir de los campos separados
     const nombreCompleto = `${form.nombre.trim()} ${form.primerApellido.trim()} ${form.segundoApellido.trim()}`.toUpperCase();
     
+    // Determinar cargo final: si es OTRO, usar cargoOtro; si no, usar cargo
+    const cargoFinal = form.cargo === 'OTRO' ? form.cargoOtro.trim().toUpperCase() : form.cargo.toUpperCase();
+    
     const payload = {
       correo: form.email.trim(),
       nombre_completo: nombreCompleto,
-      cargo: form.cargo.trim().toUpperCase(),
+      cargo: cargoFinal,
       supervisor: form.supervisor.trim().toUpperCase(),
       contrasena: form.password,
       curp: form.curp.toUpperCase().trim(),
@@ -760,11 +848,20 @@ function validateForm() {
     return false;
   }
 
-  // Validación de supervisor obligatorio
-  if (!form.supervisor || !form.supervisor.trim()) {
-    message.text = 'El supervisor inmediato es obligatorio. Debes ingresar el nombre de tu jefe directo';
+  // Si el cargo es OTRO, validar que cargoOtro tenga valor
+  if (form.cargo === 'OTRO' && (!form.cargoOtro || !form.cargoOtro.trim())) {
+    message.text = 'Debes especificar el puesto de trabajo';
     message.type = 'error';
     return false;
+  }
+
+  // Validación de supervisor obligatorio (solo si NO es técnico)
+  if (!esTecnico.value) {
+    if (!form.supervisor || !form.supervisor.trim()) {
+      message.text = 'El supervisor inmediato es obligatorio. Debes ingresar el nombre de tu jefe directo';
+      message.type = 'error';
+      return false;
+    }
   }
   
   // Validación de CURP obligatoria
@@ -868,11 +965,48 @@ function formatSegundoApellido() {
 }
 
 function formatSupervisor() {
-  form.supervisor = form.supervisor.toUpperCase();
+  // Solo formatear si no es técnico (los técnicos tienen supervisor automático)
+  if (!esTecnico.value) {
+    form.supervisor = form.supervisor
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
 }
 
 function formatCargo() {
-  form.cargo = form.cargo.toUpperCase();
+  // Ya no se usa porque ahora es un select
+}
+
+function formatCargoOtro() {
+  form.cargoOtro = form.cargoOtro
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+// Función para buscar supervisor por territorio
+async function buscarSupervisorPorTerritorio(territorio) {
+  if (!territorio || !esTecnico.value) return;
+  
+  buscandoSupervisor.value = true;
+  try {
+    console.log('🔍 Buscando supervisor territorial para:', territorio);
+    const response = await apiService.obtenerSupervisorTerritorio(territorio);
+    
+    if (response.success && response.supervisor) {
+      form.supervisor = response.supervisor;
+      console.log('✅ Supervisor encontrado:', response.supervisor);
+    } else {
+      console.log('⚠️ No se encontró supervisor para:', territorio);
+      form.supervisor = '';
+    }
+  } catch (error) {
+    console.error('❌ Error buscando supervisor:', error);
+    form.supervisor = '';
+  } finally {
+    buscandoSupervisor.value = false;
+  }
 }
 
 function validatePhone() {

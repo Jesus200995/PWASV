@@ -190,6 +190,23 @@ const checkUserDataFromServer = async () => {
         console.log('🔄 [Server Check] Territorio actualizado por admin:', serverTerritorio);
         userData.value = { ...userData.value, territorio: serverTerritorio };
         localStorage.setItem('user', JSON.stringify(userData.value));
+        
+        // Si es técnico, actualizar supervisor automáticamente
+        const cargoUpper = (userData.value.cargo || '').toUpperCase();
+        if (cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') {
+          console.log('🔄 Territorio cambió, actualizando supervisor automático...');
+          await actualizarSupervisorAutomatico(userData.value);
+        }
+      }
+      
+      // Verificar si el supervisor cambió (solo comparar si es diferente)
+      const localSupervisor = userData.value.supervisor;
+      const serverSupervisor = serverUserData.supervisor;
+      
+      if (localSupervisor !== serverSupervisor) {
+        console.log('🔄 [Server Check] Supervisor actualizado:', serverSupervisor);
+        userData.value = { ...userData.value, supervisor: serverSupervisor };
+        localStorage.setItem('user', JSON.stringify(userData.value));
       }
     }
   } catch (error) {

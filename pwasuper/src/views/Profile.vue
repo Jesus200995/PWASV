@@ -424,7 +424,7 @@
                   class="edit-input-small w-full"
                   :class="{ 'border-red-500': editErrors.nombre_completo }"
                   placeholder="Ingresa tu nombre completo"
-                  @input="editForm.nombre_completo = editForm.nombre_completo.toUpperCase()"
+                  @input="editForm.nombre_completo = editForm.nombre_completo.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
                   required
                 />
                 <p v-if="editErrors.nombre_completo" class="text-red-500 text-xs mt-1">{{ editErrors.nombre_completo }}</p>
@@ -509,13 +509,11 @@
                     v-model="editForm.supervisor"
                     type="text"
                     class="edit-input-small w-full pr-8"
-                    :class="{ 
-                      'bg-gray-300 text-gray-800 cursor-not-allowed border-gray-400 font-medium': esTecnico && !buscandoSupervisor,
-                      'bg-orange-50 border-orange-300': buscandoSupervisor
-                    }"
+                    :style="esTecnico && !buscandoSupervisor ? 'background-color: #d1d5db !important; color: #1f2937; border-color: #9ca3af;' : (buscandoSupervisor ? 'background-color: #fff7ed; border-color: #fdba74;' : '')"
+                    :class="{ 'cursor-not-allowed font-medium': esTecnico && !buscandoSupervisor }"
                     :placeholder="esTecnico ? 'Se asigna según territorio' : 'Ingresa el nombre de tu supervisor'"
                     :readonly="esTecnico"
-                    @input="!esTecnico && (editForm.supervisor = editForm.supervisor.toUpperCase())"
+                    @input="!esTecnico && (editForm.supervisor = editForm.supervisor.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))"
                   />
                   <!-- Icono de candado para técnicos -->
                   <div v-if="esTecnico && !buscandoSupervisor" class="absolute right-2 top-1/2 -translate-y-1/2">
@@ -548,7 +546,7 @@
                   :class="{ 'border-red-500': editErrors.curp }"
                   placeholder="Ingresa tu CURP"
                   maxlength="18"
-                  @input="editForm.curp = editForm.curp.toUpperCase()"
+                  @input="editForm.curp = editForm.curp.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
                 />
                 <p v-if="editErrors.curp" class="text-red-500 text-xs mt-1">{{ editErrors.curp }}</p>
               </div>

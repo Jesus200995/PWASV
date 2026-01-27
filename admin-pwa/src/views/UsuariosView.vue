@@ -685,12 +685,14 @@
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                   Cargo
                 </label>
-                <input 
+                <select 
                   id="edit-cargo"
-                  v-model="datosEdicion.cargo" 
-                  type="text" 
-                  placeholder="Cargo o puesto"
-                />
+                  v-model="datosEdicion.cargo"
+                  style="cursor: pointer;"
+                >
+                  <option value="">-- Selecciona un cargo --</option>
+                  <option v-for="cargo in cargosDisponibles" :key="cargo" :value="cargo">{{ cargo }}</option>
+                </select>
               </div>
               <div class="edit-form-field">
                 <label for="edit-supervisor">
@@ -701,8 +703,36 @@
                   id="edit-supervisor"
                   v-model="datosEdicion.supervisor" 
                   type="text" 
-                  placeholder="Nombre del supervisor"
+                  :placeholder="esTecnicoEdicion && buscandoSupervisor ? 'Buscando supervisor...' : 'Nombre del supervisor'"
+                  :readonly="esTecnicoEdicion"
+                  :style="esTecnicoEdicion ? 'background-color: #e5e7eb; cursor: not-allowed; color: #1f2937;' : ''"
                 />
+                <p v-if="esTecnicoEdicion" style="margin-top: 0.25rem; font-size: 0.75rem; color: #10b981;">
+                  ✅ Supervisor asignado automáticamente según territorio
+                </p>
+              </div>
+            </div>
+
+            <!-- Campo para especificar cargo OTRO -->
+            <div v-if="datosEdicion.cargo === 'OTRO'" class="edit-form-row">
+              <div class="edit-form-field" style="grid-column: 1 / -1;">
+                <label for="edit-cargo-otro">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  Especifica el cargo
+                </label>
+                <input 
+                  id="edit-cargo-otro"
+                  v-model="datosEdicion.cargoOtro" 
+                  type="text" 
+                  placeholder="Escribe el cargo personalizado"
+                  style="text-transform: uppercase;"
+                />
+                <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #6b7280;">
+                  Escribe el nombre del cargo sin tildes
+                </p>
               </div>
             </div>
 
@@ -886,6 +916,19 @@ const territoriosSembrandoVida = [
   "Oficinas Centrales"
 ]
 
+// Lista de cargos disponibles (sin tildes)
+const cargosDisponibles = [
+  'TECNICO PRODUCTIVO',
+  'TECNICO SOCIAL',
+  'FACILITADOR COMUNITARIO',
+  'COORDINACION TERRITORIAL C',
+  'COORDINACION TERRITORIAL B',
+  'COORDINACION TERRITORIAL A',
+  'ESPECIALISTAS PRODUCTIVOS Y SOCIALES',
+  'SEMBRADOR',
+  'OTRO'
+]
+
 const API_URL = 'https://apipwa.sembrandodatos.com'
 const usuarios = ref([])
 const usuariosFiltrados = ref([])
@@ -925,6 +968,7 @@ const datosEdicion = ref({
   correo: '',
   nombre_completo: '',
   cargo: '',
+  cargoOtro: '', // Campo para cargo personalizado cuando se selecciona OTRO
   supervisor: '',
   contrasena: '',
   curp: '',
@@ -934,6 +978,72 @@ const datosEdicion = ref({
 
 // Variables para modal de éxito
 const showSuccessModal = ref(false)
+
+// Variables para supervisor automático de técnicos
+const buscandoSupervisor = ref(false)
+
+// Computed: detectar si el usuario editado es técnico
+const esTecnicoEdicion = computed(() => {
+  const cargo = (datosEdicion.value.cargo || '').toUpperCase()
+  return cargo === 'TECNICO SOCIAL' || cargo === 'TECNICO PRODUCTIVO'
+})
+
+// Función para buscar supervisor automático por territorio
+const buscarSupervisorAutomatico = async (territorio) => {
+  if (!territorio) {
+    datosEdicion.value.supervisor = ''
+    return
+  }
+  
+  try {
+    buscandoSupervisor.value = true
+    console.log('🔍 Buscando supervisor para territorio:', territorio)
+    
+    const response = await fetch(`${API_URL}/supervisor-territorio/${encodeURIComponent(territorio)}`)
+    const data = await response.json()
+    
+    if (data.success && data.supervisor) {
+      datosEdicion.value.supervisor = data.supervisor
+      console.log('✅ Supervisor encontrado:', data.supervisor)
+    } else {
+      datosEdicion.value.supervisor = ''
+      console.log('⚠️ No hay supervisor territorial para:', territorio)
+    }
+  } catch (error) {
+    console.error('❌ Error buscando supervisor:', error)
+    datosEdicion.value.supervisor = ''
+  } finally {
+    buscandoSupervisor.value = false
+  }
+}
+
+// Watcher: cuando cambie el territorio en el modal de edición
+watch(() => datosEdicion.value.territorio, async (nuevoTerritorio, viejoTerritorio) => {
+  if (nuevoTerritorio !== viejoTerritorio && esTecnicoEdicion.value) {
+    await buscarSupervisorAutomatico(nuevoTerritorio)
+  }
+})
+
+// Watcher: cuando cambie el cargo en el modal de edición
+watch(() => datosEdicion.value.cargo, async (nuevoCargo, viejoCargo) => {
+  if (nuevoCargo !== viejoCargo) {
+    const cargoUpper = (nuevoCargo || '').toUpperCase()
+    const esNuevoTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO'
+    
+    // Limpiar cargoOtro si el usuario cambia de OTRO a otro cargo
+    if (viejoCargo === 'OTRO' && nuevoCargo !== 'OTRO') {
+      datosEdicion.value.cargoOtro = ''
+    }
+    
+    if (esNuevoTecnico && datosEdicion.value.territorio) {
+      // Si ahora es técnico y tiene territorio, buscar supervisor automático
+      await buscarSupervisorAutomatico(datosEdicion.value.territorio)
+    } else if (!esNuevoTecnico) {
+      // Si ya no es técnico, limpiar supervisor para que pueda escribir manualmente
+      datosEdicion.value.supervisor = ''
+    }
+  }
+})
 
 onMounted(() => {
   cargarUsuarios()
@@ -1487,14 +1597,20 @@ const eliminarUsuario = async () => {
 }
 
 // Funciones para edición de usuarios
-const editarUsuario = (usuario) => {
+const editarUsuario = async (usuario) => {
   usuarioAEditar.value = usuario
   showEditPassword.value = false // Resetear visibilidad de contraseña
+  
+  // Detectar si el cargo está en la lista de cargos predefinidos
+  const cargoUsuario = usuario.cargo || ''
+  const cargoEstaEnLista = cargosDisponibles.includes(cargoUsuario.toUpperCase())
+  
   // Llenar el formulario con los datos del usuario
   datosEdicion.value = {
     correo: usuario.correo || '',
     nombre_completo: usuario.nombre_completo || '',
-    cargo: usuario.cargo || '',
+    cargo: cargoEstaEnLista ? cargoUsuario.toUpperCase() : 'OTRO',
+    cargoOtro: cargoEstaEnLista ? '' : cargoUsuario.toUpperCase(),
     supervisor: usuario.supervisor || '',
     contrasena: usuario.contrasena || '',
     curp: usuario.curp || '',
@@ -1502,6 +1618,13 @@ const editarUsuario = (usuario) => {
     territorio: usuario.territorio || ''
   }
   showEditModal.value = true
+  
+  // Si es técnico y tiene territorio, buscar supervisor automático
+  const cargoUpper = (usuario.cargo || '').toUpperCase()
+  const esTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO'
+  if (esTecnico && usuario.territorio) {
+    await buscarSupervisorAutomatico(usuario.territorio)
+  }
 }
 
 const cancelarEdicion = () => {
@@ -1514,6 +1637,7 @@ const cancelarEdicion = () => {
     correo: '',
     nombre_completo: '',
     cargo: '',
+    cargoOtro: '',
     supervisor: '',
     contrasena: '',
     curp: '',
@@ -1530,11 +1654,16 @@ const guardarEdicion = async () => {
   try {
     console.log('✏️ Editando usuario:', usuarioAEditar.value.id, datosEdicion.value)
     
+    // Determinar el cargo final: si es OTRO, usar cargoOtro; si no, usar cargo
+    const cargoFinal = datosEdicion.value.cargo === 'OTRO' 
+      ? datosEdicion.value.cargoOtro.trim().toUpperCase() 
+      : datosEdicion.value.cargo.toUpperCase()
+    
     // Preparar datos para el backend con el formato correcto
     const datosParaEnviar = {
       correo: datosEdicion.value.correo,
       nombre_completo: datosEdicion.value.nombre_completo,
-      cargo: datosEdicion.value.cargo,
+      cargo: cargoFinal,
       supervisor: datosEdicion.value.supervisor,
       curp: datosEdicion.value.curp,
       telefono: datosEdicion.value.telefono,

@@ -16,69 +16,57 @@
         class="fixed inset-0 flex items-center justify-center z-[1001] pointer-events-none p-4"
       >
         <div 
-          class="relative bg-white rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 sm:p-8 pointer-events-auto transform transition-all"
+          class="relative bg-white rounded-2xl shadow-2xl w-full max-w-xs p-5 pointer-events-auto transform transition-all"
           @click.stop
         >
           <!-- Contenedor principal con gradiente verde manzana -->
           <div class="relative">
-            <!-- Gradiente de fondo decorativo -->
-            <div class="absolute -top-12 -right-12 w-40 h-40 bg-gradient-to-br from-apple-green/20 to-transparent rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-gradient-to-tr from-apple-green/15 to-transparent rounded-full blur-3xl"></div>
+            <!-- Gradiente de fondo decorativo (más sutil) -->
+            <div class="absolute -top-8 -right-8 w-28 h-28 bg-gradient-to-br from-apple-green/15 to-transparent rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-8 -left-8 w-28 h-28 bg-gradient-to-tr from-apple-green/10 to-transparent rounded-full blur-2xl"></div>
 
             <!-- Contenido -->
             <div class="relative z-10 text-center">
-              <!-- Icono decorativo de bienvenida -->
-              <div class="mx-auto mb-6 w-16 h-16 bg-gradient-to-br from-apple-green to-apple-green-dark rounded-full flex items-center justify-center shadow-xl transform animate-bounce-subtle">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2 1m2-1L12 3m2 1v2.5M12 14l-2 1m2-1l-2-1m2 1v2.5" />
+              <!-- Icono decorativo de bienvenida - más pequeño y mejor -->
+              <div class="mx-auto mb-4 w-14 h-14 bg-gradient-to-br from-apple-green to-apple-green-dark rounded-full flex items-center justify-center shadow-lg transform animate-bounce-subtle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
 
               <!-- Texto de bienvenida -->
-              <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-apple-green to-apple-green-dark bg-clip-text text-transparent mb-2">
+              <h1 class="text-xl font-bold bg-gradient-to-r from-apple-green to-apple-green-dark bg-clip-text text-transparent mb-1">
                 ¡Bienvenido!
               </h1>
               
-              <p class="text-gray-700 font-medium mb-1 text-sm sm:text-base">
+              <p class="text-gray-700 font-medium mb-0.5 text-sm">
                 {{ userName }}
               </p>
               
-              <p class="text-gray-500 text-xs sm:text-sm mb-6">
-                Tu sesión inició correctamente
+              <p class="text-gray-500 text-xs mb-4">
+                Sesión iniciada correctamente
               </p>
 
-              <!-- Mensaje motivacional -->
-              <div class="bg-gradient-to-r from-apple-green/10 to-apple-green-dark/10 rounded-2xl p-3 sm:p-4 mb-6 border border-apple-green/20">
-                <p class="text-apple-green-dark text-xs sm:text-sm font-medium">
-                  ✨ Estás listo para comenzar tu jornada
-                </p>
-              </div>
-
               <!-- Barra de progreso con tiempo -->
-              <div class="mb-4">
-                <div class="relative h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div class="mb-3">
+                <div class="relative h-1 bg-gray-200 rounded-full overflow-hidden">
                   <!-- Barra de progreso animada -->
                   <div 
                     class="h-full bg-gradient-to-r from-apple-green to-apple-green-dark rounded-full transition-all"
                     :style="{ width: progressPercentage + '%' }"
                   ></div>
                 </div>
-                
-                <!-- Tiempo restante -->
-                <p class="text-xs text-gray-500 mt-2">
-                  Cerrándose en {{ Math.ceil(remainingTime / 1000) }}s
-                </p>
               </div>
 
               <!-- Botón para cerrar manualmente -->
               <button
                 @click="closeModal"
-                class="w-full bg-gradient-to-r from-apple-green to-apple-green-dark text-white font-semibold py-3 rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base"
+                class="w-full bg-gradient-to-r from-apple-green to-apple-green-dark text-white font-semibold py-2.5 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 text-sm"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                Continuar
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                Continuar
               </button>
             </div>
           </div>

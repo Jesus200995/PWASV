@@ -10,6 +10,7 @@ import TerritorioModal from './components/TerritorioModal.vue';
 import CargoModal from './components/CargoModal.vue';
 import { useNotifications } from './composables/useNotifications.js';
 import { API_URL } from './utils/network.js';
+import { apiService } from './services/apiService.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -208,6 +209,10 @@ onMounted(() => {
         console.log('⚠️ Usuario sin territorio asignado, mostrando modal obligatorio');
         showTerritorioModal.value = true;
       }
+      // Si tiene cargo y territorio, verificar supervisor automático para técnicos
+      else {
+        actualizarSupervisorAutomatico(userData.value);
+      }
       
       // Mostrar mensaje de bienvenida solo si recién inició sesión
       const justLoggedIn = sessionStorage.getItem('justLoggedIn');
@@ -344,6 +349,38 @@ const handleTerritorioSaved = (territorio) => {
   // Actualizar userData con el nuevo territorio
   if (userData.value) {
     userData.value.territorio = territorio;
+    localStorage.setItem('user', JSON.stringify(userData.value));
+    
+    // Ahora que tiene territorio, buscar supervisor automático si es técnico
+    actualizarSupervisorAutomatico(userData.value);
+  }
+}
+
+// Función para actualizar el supervisor automáticamente para técnicos
+const actualizarSupervisorAutomatico = async (usuario) => {
+  if (!usuario || !usuario.id) return;
+  
+  const cargoUpper = (usuario.cargo || '').toUpperCase();
+  const cargosTecnicos = ['TECNICO SOCIAL', 'TECNICO PRODUCTIVO'];
+  
+  if (cargosTecnicos.includes(cargoUpper)) {
+    try {
+      console.log('🔍 Buscando supervisor automático para técnico...');
+      const respuesta = await apiService.obtenerSupervisorAutomatico(usuario.id);
+      
+      if (respuesta.success && respuesta.supervisor) {
+        // Actualizar en memoria y localStorage
+        usuario.supervisor = respuesta.supervisor;
+        userData.value.supervisor = respuesta.supervisor;
+        localStorage.setItem('user', JSON.stringify(usuario));
+        
+        console.log(`✅ Supervisor automático actualizado: ${respuesta.supervisor}`);
+      } else {
+        console.log(`ℹ️ No se encontró supervisor automático: ${respuesta.mensaje}`);
+      }
+    } catch (error) {
+      console.error('❌ Error obteniendo supervisor automático:', error);
+    }
   }
 }
 

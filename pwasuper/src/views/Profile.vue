@@ -475,14 +475,25 @@
               </div>
 
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Supervisor</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  Supervisor
+                  <span v-if="esTecnico" class="text-green-600 text-xs font-normal ml-1">(Automático según territorio)</span>
+                </label>
                 <input
                   v-model="editForm.supervisor"
                   type="text"
                   class="edit-input-small w-full"
-                  placeholder="Ingresa el nombre de tu supervisor"
-                  @input="editForm.supervisor = editForm.supervisor.toUpperCase()"
+                  :class="{ 'bg-gray-100 cursor-not-allowed': esTecnico }"
+                  :placeholder="esTecnico ? 'Se asigna automáticamente' : 'Ingresa el nombre de tu supervisor'"
+                  :readonly="esTecnico"
+                  @input="!esTecnico && (editForm.supervisor = editForm.supervisor.toUpperCase())"
                 />
+                <p v-if="esTecnico" class="text-xs text-green-600 mt-1">
+                  <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  El supervisor se asigna automáticamente según tu territorio
+                </p>
               </div>
 
               <div>
@@ -628,9 +639,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { API_URL, checkInternetConnection, getOfflineMessage } from '../utils/network.js'
+import { apiService } from '../services/apiService.js'
 
 const user = ref({})
 const passwordForm = ref({
@@ -720,6 +732,55 @@ const territoriosSembrandoVida = [
   'Xpujil',
   'Oficinas Centrales'
 ]
+
+// Computed para saber si el usuario es técnico (su supervisor es automático)
+const esTecnico = computed(() => {
+  const cargo = (editForm.value.cargo || '').toUpperCase()
+  return cargo === 'TECNICO SOCIAL' || cargo === 'TECNICO PRODUCTIVO'
+})
+
+// Watch para actualizar el supervisor automáticamente cuando cambie el territorio (solo para técnicos)
+watch(() => editForm.value.territorio, async (nuevoTerritorio, viejoTerritorio) => {
+  // Solo si cambió el territorio y es técnico
+  if (nuevoTerritorio && nuevoTerritorio !== viejoTerritorio && esTecnico.value && user.value.id) {
+    console.log('🔄 Territorio cambió, buscando nuevo supervisor...')
+    try {
+      // Primero actualizar el territorio en la base de datos para que el endpoint pueda buscarlo
+      const storedUser = JSON.parse(localStorage.getItem('user'))
+      
+      // Buscar supervisor para el nuevo territorio
+      const respuesta = await apiService.obtenerSupervisorAutomatico(storedUser.id)
+      
+      if (respuesta.success && respuesta.supervisor) {
+        editForm.value.supervisor = respuesta.supervisor
+        console.log(`✅ Supervisor actualizado reactivamente: ${respuesta.supervisor}`)
+      }
+    } catch (error) {
+      console.error('❌ Error actualizando supervisor:', error)
+    }
+  }
+})
+
+// Watch para cuando cambie el cargo
+watch(() => editForm.value.cargo, async (nuevoCargo, viejoCargo) => {
+  if (nuevoCargo !== viejoCargo) {
+    const cargoUpper = (nuevoCargo || '').toUpperCase()
+    const esNuevoTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO'
+    
+    if (esNuevoTecnico && editForm.value.territorio && user.value.id) {
+      // Si ahora es técnico, buscar supervisor automático
+      try {
+        const respuesta = await apiService.obtenerSupervisorAutomatico(user.value.id)
+        if (respuesta.success && respuesta.supervisor) {
+          editForm.value.supervisor = respuesta.supervisor
+          console.log(`✅ Supervisor asignado al cambiar a técnico: ${respuesta.supervisor}`)
+        }
+      } catch (error) {
+        console.error('❌ Error buscando supervisor:', error)
+      }
+    }
+  }
+})
 
 // Variables para selector de país
 const showCountrySelector = ref(false)

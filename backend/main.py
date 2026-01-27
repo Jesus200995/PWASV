@@ -6725,12 +6725,20 @@ async def obtener_supervisor_automatico(user_id: int):
         
         if admin_territorial and admin_territorial[0]:
             supervisor_nombre = admin_territorial[0]
-            print(f"   ✅ Supervisor encontrado: {supervisor_nombre}")
+            
+            # ACTUALIZAR el supervisor en la base de datos del usuario
+            cursor.execute("""
+                UPDATE usuarios SET supervisor = %s WHERE id = %s
+            """, (supervisor_nombre, user_id))
+            conn.commit()
+            
+            print(f"   ✅ Supervisor actualizado en BD: {supervisor_nombre}")
             return {
                 "success": True,
                 "supervisor": supervisor_nombre,
                 "territorio": territorio,
-                "mensaje": "Supervisor automático asignado"
+                "actualizado_en_bd": True,
+                "mensaje": "Supervisor automático asignado y guardado en base de datos"
             }
         else:
             print(f"   ⚠️ No hay administrador territorial para: {territorio}")
@@ -6738,6 +6746,7 @@ async def obtener_supervisor_automatico(user_id: int):
                 "success": True,
                 "supervisor": None,
                 "territorio": territorio,
+                "actualizado_en_bd": False,
                 "mensaje": f"No hay administrador territorial asignado para {territorio}"
             }
         

@@ -2087,7 +2087,12 @@ export default {
           const respuesta = await apiService.obtenerSupervisorAutomatico(usuario.id);
           if (respuesta.success && respuesta.supervisor) {
             this.usuarioInfo.supervisor = respuesta.supervisor;
-            console.log(`✅ Supervisor automático asignado: ${respuesta.supervisor}`);
+            
+            // Actualizar también el localStorage para que Profile.vue lo muestre
+            usuario.supervisor = respuesta.supervisor;
+            localStorage.setItem('user', JSON.stringify(usuario));
+            
+            console.log(`✅ Supervisor automático asignado y guardado: ${respuesta.supervisor}`);
           } else {
             console.log(`ℹ️ No se encontró supervisor automático: ${respuesta.mensaje}`);
           }

@@ -27,8 +27,8 @@
 
             <!-- Contenido -->
             <div class="relative z-10 text-center">
-              <!-- Icono decorativo de bienvenida - más pequeño y mejor -->
-              <div class="mx-auto mb-4 w-14 h-14 bg-gradient-to-br from-apple-green to-apple-green-dark rounded-full flex items-center justify-center shadow-lg transform animate-bounce-subtle">
+              <!-- Icono decorativo de bienvenida - estático y elegante -->
+              <div class="mx-auto mb-4 w-14 h-14 bg-gradient-to-br from-apple-green to-apple-green-dark rounded-full flex items-center justify-center shadow-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>

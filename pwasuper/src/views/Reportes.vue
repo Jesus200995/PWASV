@@ -713,14 +713,14 @@ export default {
         return fechaActividad >= inicioDeMes && fechaActividad <= finDelMes;
       });
       
-      // Ordenar de más reciente a más antigua
+      // Ordenar de más antigua a más reciente (inicio del mes primero)
       this.actividades.sort((a, b) => {
         const fechaA = new Date(a.fecha_hora);
         const fechaB = new Date(b.fecha_hora);
-        return fechaB - fechaA; // Orden descendente (más reciente primero)
+        return fechaA - fechaB; // Orden ascendente (más antigua primero)
       });
       
-      console.log(`🔍 Filtrado y ordenado: ${this.actividades.length} actividades (más reciente primero)`);
+      console.log(`🔍 Filtrado y ordenado: ${this.actividades.length} actividades (inicio del mes primero)`);
     },
 
     cambiarPeriodo() {

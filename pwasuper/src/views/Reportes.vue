@@ -2078,6 +2078,24 @@ export default {
         curp: usuario.curp || 'No registrada',
         supervisor: usuario.supervisor || 'No asignado'
       };
+      
+      // Si es técnico, obtener supervisor automático basado en territorio
+      const cargoUpper = (usuario.cargo || '').toUpperCase();
+      if (cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') {
+        try {
+          console.log('🔍 Buscando supervisor automático para técnico...');
+          const respuesta = await apiService.obtenerSupervisorAutomatico(usuario.id);
+          if (respuesta.success && respuesta.supervisor) {
+            this.usuarioInfo.supervisor = respuesta.supervisor;
+            console.log(`✅ Supervisor automático asignado: ${respuesta.supervisor}`);
+          } else {
+            console.log(`ℹ️ No se encontró supervisor automático: ${respuesta.mensaje}`);
+          }
+        } catch (error) {
+          console.error('❌ Error obteniendo supervisor automático:', error);
+          // Mantener el supervisor actual si hay error
+        }
+      }
     }
 
     // Cargar actividades (apiService auto-detecta servidor correcto)

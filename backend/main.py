@@ -6669,6 +6669,86 @@ async def transferir_actividades(datos: TransferenciaActividades):
 
 # ==================== FIN TRANSFERIR ACTIVIDADES ====================
 
+# ==================== SUPERVISOR AUTOMÁTICO POR TERRITORIO ====================
+
+@app.get("/usuarios/{user_id}/supervisor-automatico")
+async def obtener_supervisor_automatico(user_id: int):
+    """
+    Obtiene el supervisor automático para un usuario técnico.
+    Si el usuario es TECNICO SOCIAL o TECNICO PRODUCTIVO, 
+    busca el nombre_completo del admin territorial asignado a su territorio.
+    """
+    try:
+        print(f"🔍 Buscando supervisor automático para usuario ID: {user_id}")
+        
+        # Obtener datos del usuario
+        cursor.execute("""
+            SELECT cargo, territorio FROM usuarios WHERE id = %s
+        """, (user_id,))
+        
+        usuario = cursor.fetchone()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        cargo = usuario[0] or ''
+        territorio = usuario[1]
+        
+        print(f"   Cargo: {cargo}, Territorio: {territorio}")
+        
+        # Verificar si es técnico
+        cargos_tecnicos = ['TECNICO SOCIAL', 'TECNICO PRODUCTIVO']
+        if cargo.upper() not in cargos_tecnicos:
+            return {
+                "success": True,
+                "supervisor": None,
+                "mensaje": "El cargo no requiere supervisor automático"
+            }
+        
+        # Si no tiene territorio asignado
+        if not territorio:
+            return {
+                "success": True,
+                "supervisor": None,
+                "mensaje": "El usuario no tiene territorio asignado"
+            }
+        
+        # Buscar el administrador territorial de ese territorio
+        cursor.execute("""
+            SELECT nombre_completo FROM admin_users 
+            WHERE es_territorial = TRUE 
+            AND territorio = %s 
+            AND activo = TRUE
+            LIMIT 1
+        """, (territorio,))
+        
+        admin_territorial = cursor.fetchone()
+        
+        if admin_territorial and admin_territorial[0]:
+            supervisor_nombre = admin_territorial[0]
+            print(f"   ✅ Supervisor encontrado: {supervisor_nombre}")
+            return {
+                "success": True,
+                "supervisor": supervisor_nombre,
+                "territorio": territorio,
+                "mensaje": "Supervisor automático asignado"
+            }
+        else:
+            print(f"   ⚠️ No hay administrador territorial para: {territorio}")
+            return {
+                "success": True,
+                "supervisor": None,
+                "territorio": territorio,
+                "mensaje": f"No hay administrador territorial asignado para {territorio}"
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo supervisor automático: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener supervisor: {str(e)}")
+
+# ==================== FIN SUPERVISOR AUTOMÁTICO ====================
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

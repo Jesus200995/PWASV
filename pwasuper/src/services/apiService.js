@@ -110,6 +110,12 @@ export const apiService = {
     return response.data;
   },
 
+  // Obtener supervisor automático (para técnicos)
+  async obtenerSupervisorAutomatico(userId) {
+    const response = await api.get(`/usuarios/${userId}/supervisor-automatico`);
+    return response.data;
+  },
+
   // Registros
   async createRecord(formData) {
     const response = await api.post('/registro', formData, {

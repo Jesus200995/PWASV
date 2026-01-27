@@ -6758,6 +6758,56 @@ async def obtener_supervisor_automatico(user_id: int):
 
 # ==================== FIN SUPERVISOR AUTOMÁTICO ====================
 
+# ==================== SUPERVISOR POR TERRITORIO ====================
+
+@app.get("/supervisor-territorio/{territorio}")
+async def obtener_supervisor_por_territorio(territorio: str):
+    """
+    Obtiene el nombre del supervisor territorial para un territorio específico.
+    Busca en admin_users el usuario territorial asignado a ese territorio.
+    """
+    try:
+        # Decodificar el territorio (puede venir con %20 en lugar de espacios)
+        from urllib.parse import unquote
+        territorio_decoded = unquote(territorio)
+        
+        print(f"🔍 Buscando supervisor para territorio: {territorio_decoded}")
+        
+        # Buscar el administrador territorial de ese territorio
+        cursor.execute("""
+            SELECT nombre_completo FROM admin_users 
+            WHERE es_territorial = TRUE 
+            AND territorio = %s 
+            AND activo = TRUE
+            LIMIT 1
+        """, (territorio_decoded,))
+        
+        admin_territorial = cursor.fetchone()
+        
+        if admin_territorial and admin_territorial[0]:
+            supervisor_nombre = admin_territorial[0]
+            print(f"   ✅ Supervisor encontrado: {supervisor_nombre}")
+            return {
+                "success": True,
+                "supervisor": supervisor_nombre,
+                "territorio": territorio_decoded,
+                "mensaje": "Supervisor territorial encontrado"
+            }
+        else:
+            print(f"   ⚠️ No hay administrador territorial para: {territorio_decoded}")
+            return {
+                "success": True,
+                "supervisor": None,
+                "territorio": territorio_decoded,
+                "mensaje": f"No hay administrador territorial asignado para {territorio_decoded}"
+            }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo supervisor por territorio: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener supervisor: {str(e)}")
+
+# ==================== FIN SUPERVISOR POR TERRITORIO ====================
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

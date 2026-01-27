@@ -116,6 +116,12 @@ export const apiService = {
     return response.data;
   },
 
+  // Obtener supervisor por territorio directamente
+  async obtenerSupervisorTerritorio(territorio) {
+    const response = await api.get(`/supervisor-territorio/${encodeURIComponent(territorio)}`);
+    return response.data;
+  },
+
   // Registros
   async createRecord(formData) {
     const response = await api.post('/registro', formData, {

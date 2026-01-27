@@ -474,25 +474,68 @@
                 <p v-if="editErrors.cargoOtro" class="text-red-500 text-xs mt-1">{{ editErrors.cargoOtro }}</p>
               </div>
 
+              <!-- Territorio (arriba de supervisor para técnicos) -->
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  Territorio de Sembrando Vida
+                  <span v-if="esTecnico" class="text-blue-600 text-xs font-normal ml-1">(Define tu supervisor)</span>
+                </label>
+                <select
+                  v-model="editForm.territorio"
+                  class="edit-input-small w-full"
+                  :class="{ 'border-blue-400 ring-1 ring-blue-200': esTecnico }"
+                >
+                  <option value="">-- Selecciona un territorio --</option>
+                  <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">{{ territorio }}</option>
+                </select>
+                <p v-if="esTecnico" class="text-xs text-blue-600 mt-1">
+                  <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  Al cambiar territorio, tu supervisor se actualizará automáticamente
+                </p>
+              </div>
+
+              <!-- Supervisor (para técnicos es automático y readonly) -->
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">
                   Supervisor
-                  <span v-if="esTecnico" class="text-green-600 text-xs font-normal ml-1">(Automático según territorio)</span>
+                  <span v-if="esTecnico && !buscandoSupervisor" class="text-green-600 text-xs font-normal ml-1">(Automático)</span>
+                  <span v-if="buscandoSupervisor" class="text-orange-500 text-xs font-normal ml-1 animate-pulse">(Buscando...)</span>
                 </label>
-                <input
-                  v-model="editForm.supervisor"
-                  type="text"
-                  class="edit-input-small w-full"
-                  :class="{ 'bg-gray-100 cursor-not-allowed': esTecnico }"
-                  :placeholder="esTecnico ? 'Se asigna automáticamente' : 'Ingresa el nombre de tu supervisor'"
-                  :readonly="esTecnico"
-                  @input="!esTecnico && (editForm.supervisor = editForm.supervisor.toUpperCase())"
-                />
-                <p v-if="esTecnico" class="text-xs text-green-600 mt-1">
+                <div class="relative">
+                  <input
+                    v-model="editForm.supervisor"
+                    type="text"
+                    class="edit-input-small w-full pr-8"
+                    :class="{ 
+                      'bg-gray-300 text-gray-800 cursor-not-allowed border-gray-400 font-medium': esTecnico && !buscandoSupervisor,
+                      'bg-orange-50 border-orange-300': buscandoSupervisor
+                    }"
+                    :placeholder="esTecnico ? 'Se asigna según territorio' : 'Ingresa el nombre de tu supervisor'"
+                    :readonly="esTecnico"
+                    @input="!esTecnico && (editForm.supervisor = editForm.supervisor.toUpperCase())"
+                  />
+                  <!-- Icono de candado para técnicos -->
+                  <div v-if="esTecnico && !buscandoSupervisor" class="absolute right-2 top-1/2 -translate-y-1/2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                  </div>
+                  <!-- Spinner de carga -->
+                  <div v-if="buscandoSupervisor" class="absolute right-2 top-1/2 -translate-y-1/2">
+                    <svg class="animate-spin w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                </div>
+                <p v-if="esTecnico && !buscandoSupervisor" class="text-xs text-gray-500 mt-1">
                   <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
-                  El supervisor se asigna automáticamente según tu territorio
+                  El supervisor territorial se asigna automáticamente
                 </p>
               </div>
 
@@ -578,17 +621,6 @@
                 <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
               </div>
 
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Territorio de Sembrando Vida</label>
-                <select
-                  v-model="editForm.territorio"
-                  class="edit-input-small w-full"
-                >
-                  <option value="">-- Selecciona un territorio --</option>
-                  <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">{{ territorio }}</option>
-                </select>
-              </div>
-
               <div class="flex space-x-2 pt-3">
                 <button
                   type="button"
@@ -671,6 +703,7 @@ const showConfirmPassword = ref(false)
 const showEditModal = ref(false)
 const showEditSuccessModal = ref(false)
 const isUpdatingUser = ref(false)
+const buscandoSupervisor = ref(false)
 const editErrors = ref({})
 const editForm = ref({
   nombre_completo: '',
@@ -739,25 +772,51 @@ const esTecnico = computed(() => {
   return cargo === 'TECNICO SOCIAL' || cargo === 'TECNICO PRODUCTIVO'
 })
 
+// Función para buscar supervisor territorial por territorio
+const buscarSupervisorPorTerritorio = async (territorio) => {
+  if (!territorio || !user.value.id) return null
+  
+  buscandoSupervisor.value = true
+  editForm.value.supervisor = 'Buscando...'
+  
+  try {
+    // Necesitamos un endpoint que busque por territorio directamente
+    // Mientras tanto, usamos el endpoint existente pero primero actualizamos el territorio temporalmente
+    const respuesta = await apiService.obtenerSupervisorTerritorio(territorio)
+    
+    if (respuesta.success && respuesta.supervisor) {
+      editForm.value.supervisor = respuesta.supervisor
+      
+      // Actualizar también el user.value para que se refleje en Profile
+      user.value.supervisor = respuesta.supervisor
+      
+      // Actualizar localStorage
+      const storedUser = JSON.parse(localStorage.getItem('user'))
+      storedUser.supervisor = respuesta.supervisor
+      localStorage.setItem('user', JSON.stringify(storedUser))
+      
+      console.log(`✅ Supervisor actualizado: ${respuesta.supervisor}`)
+      return respuesta.supervisor
+    } else {
+      editForm.value.supervisor = 'No hay supervisor asignado'
+      console.log(`ℹ️ No se encontró supervisor para: ${territorio}`)
+      return null
+    }
+  } catch (error) {
+    console.error('❌ Error buscando supervisor:', error)
+    editForm.value.supervisor = 'Error al buscar'
+    return null
+  } finally {
+    buscandoSupervisor.value = false
+  }
+}
+
 // Watch para actualizar el supervisor automáticamente cuando cambie el territorio (solo para técnicos)
 watch(() => editForm.value.territorio, async (nuevoTerritorio, viejoTerritorio) => {
   // Solo si cambió el territorio y es técnico
-  if (nuevoTerritorio && nuevoTerritorio !== viejoTerritorio && esTecnico.value && user.value.id) {
+  if (nuevoTerritorio && nuevoTerritorio !== viejoTerritorio && esTecnico.value) {
     console.log('🔄 Territorio cambió, buscando nuevo supervisor...')
-    try {
-      // Primero actualizar el territorio en la base de datos para que el endpoint pueda buscarlo
-      const storedUser = JSON.parse(localStorage.getItem('user'))
-      
-      // Buscar supervisor para el nuevo territorio
-      const respuesta = await apiService.obtenerSupervisorAutomatico(storedUser.id)
-      
-      if (respuesta.success && respuesta.supervisor) {
-        editForm.value.supervisor = respuesta.supervisor
-        console.log(`✅ Supervisor actualizado reactivamente: ${respuesta.supervisor}`)
-      }
-    } catch (error) {
-      console.error('❌ Error actualizando supervisor:', error)
-    }
+    await buscarSupervisorPorTerritorio(nuevoTerritorio)
   }
 })
 
@@ -767,17 +826,9 @@ watch(() => editForm.value.cargo, async (nuevoCargo, viejoCargo) => {
     const cargoUpper = (nuevoCargo || '').toUpperCase()
     const esNuevoTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO'
     
-    if (esNuevoTecnico && editForm.value.territorio && user.value.id) {
+    if (esNuevoTecnico && editForm.value.territorio) {
       // Si ahora es técnico, buscar supervisor automático
-      try {
-        const respuesta = await apiService.obtenerSupervisorAutomatico(user.value.id)
-        if (respuesta.success && respuesta.supervisor) {
-          editForm.value.supervisor = respuesta.supervisor
-          console.log(`✅ Supervisor asignado al cambiar a técnico: ${respuesta.supervisor}`)
-        }
-      } catch (error) {
-        console.error('❌ Error buscando supervisor:', error)
-      }
+      await buscarSupervisorPorTerritorio(editForm.value.territorio)
     }
   }
 })

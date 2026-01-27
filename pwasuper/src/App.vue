@@ -7,6 +7,7 @@ import SupportBubble from './components/SupportBubble.vue';
 import WelcomeModalNew from './components/WelcomeModalNew.vue';
 import PoinsettiaFlower from './components/PoinsettiaFlower.vue';
 import TerritorioModal from './components/TerritorioModal.vue';
+import CargoModal from './components/CargoModal.vue';
 import { useNotifications } from './composables/useNotifications.js';
 import { API_URL } from './utils/network.js';
 
@@ -17,6 +18,7 @@ const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
 const showTerritorioModal = ref(false);
+const showCargoModal = ref(false);
 const activeIcon = ref(null);
 let userCheckIntervalId = null;
 
@@ -49,16 +51,24 @@ watch(() => route.path, () => {
     userData.value = null;
   }
   
-  // Verificar territorio en cada cambio de ruta (solo si está logueado)
-  if (userData.value && !userData.value.territorio && route.name !== 'Login' && route.name !== 'Register') {
+  // Verificar cargo en cada cambio de ruta (solo si está logueado) - PRIORIDAD SOBRE TERRITORIO
+  if (userData.value && (!userData.value.cargo || userData.value.cargo.trim() === '') && route.name !== 'Login' && route.name !== 'Register') {
+    console.log('⚠️ [Route Change] Usuario sin cargo, mostrando modal obligatorio');
+    showCargoModal.value = true;
+  }
+  // Verificar territorio en cada cambio de ruta (solo si ya tiene cargo)
+  else if (userData.value && !userData.value.territorio && route.name !== 'Login' && route.name !== 'Register') {
     console.log('⚠️ [Route Change] Usuario sin territorio, mostrando modal obligatorio');
     showTerritorioModal.value = true;
   }
 });
 
-// Watcher reactivo para userData - verifica territorio cuando cambian los datos del usuario
+// Watcher reactivo para userData - verifica cargo y territorio cuando cambian los datos del usuario
 watch(userData, (newUserData) => {
-  if (newUserData && !newUserData.territorio) {
+  if (newUserData && (!newUserData.cargo || newUserData.cargo.trim() === '')) {
+    console.log('⚠️ [Watch userData] Usuario sin cargo asignado, mostrando modal obligatorio');
+    showCargoModal.value = true;
+  } else if (newUserData && !newUserData.territorio) {
     console.log('⚠️ [Watch userData] Usuario sin territorio asignado, mostrando modal obligatorio');
     showTerritorioModal.value = true;
   }
@@ -175,8 +185,13 @@ onMounted(() => {
       // Inicializar sistema de notificaciones una vez que el usuario está identificado
       notificationPollingId = startPolling();
       
-      // Verificar si el usuario tiene territorio asignado
-      if (!userData.value.territorio) {
+      // Verificar si el usuario tiene cargo asignado (PRIORIDAD)
+      if (!userData.value.cargo || userData.value.cargo.trim() === '') {
+        console.log('⚠️ Usuario sin cargo asignado, mostrando modal obligatorio');
+        showCargoModal.value = true;
+      }
+      // Verificar si el usuario tiene territorio asignado (solo si ya tiene cargo)
+      else if (!userData.value.territorio) {
         console.log('⚠️ Usuario sin territorio asignado, mostrando modal obligatorio');
         showTerritorioModal.value = true;
       }
@@ -319,6 +334,24 @@ const handleTerritorioSaved = (territorio) => {
   }
 }
 
+// Función para manejar cuando se guarda el cargo
+const handleCargoSaved = (cargo) => {
+  console.log('✅ Cargo guardado:', cargo);
+  showCargoModal.value = false;
+  
+  // Actualizar userData con el nuevo cargo
+  if (userData.value) {
+    userData.value.cargo = cargo;
+    localStorage.setItem('user', JSON.stringify(userData.value));
+    
+    // Ahora verificar si tiene territorio
+    if (!userData.value.territorio) {
+      console.log('⚠️ Usuario ya tiene cargo, ahora verificar territorio');
+      showTerritorioModal.value = true;
+    }
+  }
+}
+
 // Computed para obtener el ID del usuario actual
 const currentUserId = computed(() => {
   return userData.value?.id || null;
@@ -352,9 +385,15 @@ const currentUserId = computed(() => {
       <div class="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-green-200/40 to-transparent animate-pulse-gentle"></div>
     </div>
 
+    <!-- Modal obligatorio de selección de cargo -->
+    <CargoModal 
+      :visible="showCargoModal && isLoggedIn"
+      @cargo-guardado="handleCargoSaved"
+    />
+
     <!-- Modal obligatorio de selección de territorio -->
     <TerritorioModal 
-      :isVisible="showTerritorioModal && isLoggedIn"
+      :isVisible="showTerritorioModal && isLoggedIn && !showCargoModal"
       :userId="currentUserId"
       @territorio-saved="handleTerritorioSaved"
     />

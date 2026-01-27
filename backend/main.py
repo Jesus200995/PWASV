@@ -5133,6 +5133,48 @@ async def cambiar_contrasena_usuario(user_id: int, password_data: UsuarioPasswor
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al cambiar contraseña: {str(e)}")
 
+# Modelo para actualizar cargo
+class CargoUpdate(BaseModel):
+    cargo: str
+
+@app.put("/usuarios/{user_id}/cargo")
+async def actualizar_cargo_usuario(user_id: int, cargo_data: CargoUpdate):
+    """Actualizar el cargo de un usuario"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🔄 Actualizando cargo del usuario {user_id}")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, nombre_completo FROM usuarios WHERE id = %s", (user_id,))
+        usuario = cursor.fetchone()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Validar que el cargo no esté vacío
+        cargo = cargo_data.cargo.strip().upper()
+        if not cargo:
+            raise HTTPException(status_code=400, detail="El cargo no puede estar vacío")
+        
+        # Actualizar cargo
+        cursor.execute("UPDATE usuarios SET cargo = %s WHERE id = %s", (cargo, user_id))
+        conn.commit()
+        
+        print(f"✅ Cargo del usuario {usuario[1]} actualizado a: {cargo}")
+        return {"success": True, "mensaje": "Cargo actualizado exitosamente", "usuario_id": user_id, "cargo": cargo}
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al actualizar cargo: {str(e)}")
+
 @app.get("/usuarios/estadisticas")
 async def obtener_estadisticas_usuarios():
     """Obtener estadísticas de usuarios del sistema"""

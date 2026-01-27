@@ -104,6 +104,12 @@ export const apiService = {
     return response.data;
   },
 
+  // Actualizar cargo del usuario
+  async actualizarCargo(userId, cargo) {
+    const response = await api.put(`/usuarios/${userId}/cargo`, { cargo });
+    return response.data;
+  },
+
   // Registros
   async createRecord(formData) {
     const response = await api.post('/registro', formData, {

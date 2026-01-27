@@ -445,16 +445,33 @@
 
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">Cargo</label>
-                <input
+                <select
                   v-model="editForm.cargo"
-                  type="text"
                   class="edit-input-small w-full"
                   :class="{ 'border-red-500': editErrors.cargo }"
-                  placeholder="Ingresa tu cargo"
-                  @input="editForm.cargo = editForm.cargo.toUpperCase()"
+                  required
+                >
+                  <option value="" disabled>-- Selecciona tu cargo --</option>
+                  <option v-for="cargo in cargosDisponibles" :key="cargo" :value="cargo">
+                    {{ cargo }}
+                  </option>
+                </select>
+                <p v-if="editErrors.cargo" class="text-red-500 text-xs mt-1">{{ editErrors.cargo }}</p>
+              </div>
+
+              <!-- Campo para cargo personalizado si selecciona OTRO -->
+              <div v-if="editForm.cargo === 'OTRO'">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Especifica tu cargo</label>
+                <input
+                  v-model="editForm.cargoOtro"
+                  type="text"
+                  class="edit-input-small w-full"
+                  :class="{ 'border-red-500': editErrors.cargoOtro }"
+                  placeholder="Escribe tu cargo"
+                  @input="editForm.cargoOtro = editForm.cargoOtro.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
                   required
                 />
-                <p v-if="editErrors.cargo" class="text-red-500 text-xs mt-1">{{ editErrors.cargo }}</p>
+                <p v-if="editErrors.cargoOtro" class="text-red-500 text-xs mt-1">{{ editErrors.cargoOtro }}</p>
               </div>
 
               <div>
@@ -647,6 +664,7 @@ const editForm = ref({
   nombre_completo: '',
   correo: '',
   cargo: '',
+  cargoOtro: '',
   supervisor: '',
   curp: '',
   telefono: '',
@@ -654,6 +672,19 @@ const editForm = ref({
   telefonoDigitos: '',
   territorio: ''
 })
+
+// Lista de cargos disponibles
+const cargosDisponibles = [
+  'TECNICO PRODUCTIVO',
+  'TECNICO SOCIAL',
+  'FACILITADOR COMUNITARIO',
+  'COORDINACION TERRITORIAL C',
+  'COORDINACION TERRITORIAL B',
+  'COORDINACION TERRITORIAL A',
+  'ESPECIALISTAS PRODUCTIVOS Y SOCIALES',
+  'SEMBRADOR',
+  'OTRO'
+]
 
 // Lista de territorios de Sembrando Vida para el selector
 const territoriosSembrandoVida = [
@@ -1171,6 +1202,12 @@ const updateUserInfo = async () => {
       return
     }
     
+    // Validar cargoOtro si seleccionó OTRO
+    if (editForm.value.cargo === 'OTRO' && !editForm.value.cargoOtro?.trim()) {
+      editErrors.value.cargoOtro = 'Debes especificar tu cargo'
+      return
+    }
+    
     // Validar CURP si se proporciona
     if (editForm.value.curp && editForm.value.curp.trim().length > 0) {
       const curpTrimmed = editForm.value.curp.trim().toUpperCase()
@@ -1228,12 +1265,17 @@ const updateUserInfo = async () => {
     try {
       console.log('📡 Enviando solicitud PATCH a:', `${API_URL}/usuarios/${storedUser.id}/info`)
       
+      // Determinar el cargo final (si es OTRO, usar cargoOtro)
+      const cargoFinal = editForm.value.cargo === 'OTRO' 
+        ? editForm.value.cargoOtro.trim() 
+        : editForm.value.cargo.trim()
+      
       const response = await axios.patch(
         `${API_URL}/usuarios/${storedUser.id}/info`,
         {
           nombre_completo: editForm.value.nombre_completo.trim(),
           correo: editForm.value.correo.trim(),
-          cargo: editForm.value.cargo.trim(),
+          cargo: cargoFinal,
           supervisor: editForm.value.supervisor?.trim() || null,
           curp: editForm.value.curp?.trim() || null,
           telefono: telefonoCompleto,
@@ -1255,7 +1297,7 @@ const updateUserInfo = async () => {
           ...user.value,
           nombre_completo: editForm.value.nombre_completo,
           correo: editForm.value.correo,
-          cargo: editForm.value.cargo,
+          cargo: cargoFinal,
           supervisor: editForm.value.supervisor,
           curp: editForm.value.curp,
           telefono: telefonoCompleto,
@@ -1267,7 +1309,7 @@ const updateUserInfo = async () => {
           ...storedUser, 
           nombre_completo: editForm.value.nombre_completo,
           correo: editForm.value.correo,
-          cargo: editForm.value.cargo,
+          cargo: cargoFinal,
           supervisor: editForm.value.supervisor,
           curp: editForm.value.curp,
           telefono: telefonoCompleto,

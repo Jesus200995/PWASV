@@ -72,7 +72,20 @@ watch(userData, (newUserData) => {
     console.log('⚠️ [Watch userData] Usuario sin territorio asignado, mostrando modal obligatorio');
     showTerritorioModal.value = true;
   }
-}, { deep: true, immediate: false });
+}, { deep: true, immediate: true });
+
+// Computed para verificar si el usuario necesita seleccionar cargo
+const necesitaCargo = computed(() => {
+  return userData.value && (!userData.value.cargo || userData.value.cargo.trim() === '');
+});
+
+// Watcher adicional para forzar el modal inmediatamente
+watch(necesitaCargo, (necesita) => {
+  if (necesita) {
+    console.log('⚠️ [Computed necesitaCargo] Forzando modal de cargo');
+    showCargoModal.value = true;
+  }
+}, { immediate: true });
 
 // Listener para cambios en localStorage (útil para logout desde otras pestañas)
 const handleStorageChange = (e) => {

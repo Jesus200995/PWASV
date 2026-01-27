@@ -1703,6 +1703,37 @@ async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
         print(f"❌ Error obteniendo historial de reportes: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+@app.delete("/reportes/eliminar/{reporte_id}")
+async def eliminar_reporte(reporte_id: int):
+    """Eliminar un reporte de la base de datos"""
+    try:
+        print(f"🗑️ Eliminando reporte ID: {reporte_id}")
+        
+        # Verificar que el reporte existe
+        cursor.execute("SELECT id, nombre_reporte FROM reportes_generados WHERE id = %s", (reporte_id,))
+        reporte = cursor.fetchone()
+        
+        if not reporte:
+            raise HTTPException(status_code=404, detail="Reporte no encontrado")
+        
+        # Eliminar el reporte
+        cursor.execute("DELETE FROM reportes_generados WHERE id = %s", (reporte_id,))
+        conn.commit()
+        
+        print(f"✅ Reporte eliminado: {reporte[1]}")
+        
+        return {
+            "success": True,
+            "message": f"Reporte '{reporte[1]}' eliminado correctamente"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error eliminando reporte: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 @app.get("/reportes/descargar/{reporte_id}")
 async def descargar_reporte(reporte_id: int):
     """Obtener el PDF de un reporte guardado"""

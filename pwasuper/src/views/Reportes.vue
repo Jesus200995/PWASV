@@ -490,6 +490,21 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                     </svg>
                   </span>
+                  <!-- Botón de eliminar -->
+                  <button
+                    @click="eliminarReporteHistorial(reporte)"
+                    :disabled="eliminandoReporte === reporte.id"
+                    class="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+                    :title="'Eliminar ' + reporte.nombre"
+                  >
+                    <svg v-if="eliminandoReporte !== reporte.id" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -548,6 +563,8 @@ export default {
       descargandoReporte: null,
       // Estado de visualización de reportes del historial
       viendoReporte: null,
+      // Estado de eliminación de reportes del historial
+      eliminandoReporte: null,
       // Estado de conexión
       isOnline: true,
       error: null
@@ -657,7 +674,14 @@ export default {
         return fechaActividad >= inicioDeMes && fechaActividad <= finDelMes;
       });
       
-      console.log(`🔍 Filtrado: ${this.actividades.length} actividades entre ${inicioDeMes.toLocaleDateString()} y ${finDelMes.toLocaleDateString()}`);
+      // Ordenar de más reciente a más antigua
+      this.actividades.sort((a, b) => {
+        const fechaA = new Date(a.fecha_hora);
+        const fechaB = new Date(b.fecha_hora);
+        return fechaB - fechaA; // Orden descendente (más reciente primero)
+      });
+      
+      console.log(`🔍 Filtrado y ordenado: ${this.actividades.length} actividades (más reciente primero)`);
     },
 
     cambiarPeriodo() {
@@ -1399,34 +1423,45 @@ export default {
           
           currentY += 50;
         } else {
-          // ========== SELECCIÓN DE 7 IMÁGENES VARIADAS ==========
-          // Separar por tipo para obtener variedad
-          const actividadesCampo = actividadesConFoto.filter(a => (a.tipo_actividad || 'campo').toLowerCase() === 'campo');
-          const actividadesGabinete = actividadesConFoto.filter(a => (a.tipo_actividad || '').toLowerCase() === 'gabinete');
+          // ========== SELECCIÓN DE 6 IMÁGENES: PRIMERO CAMPO, LUEGO GABINETE ==========
+          // Separar por tipo
+          const actividadesCampo = actividadesConFoto
+            .filter(a => (a.tipo_actividad || 'campo').toLowerCase() === 'campo')
+            .sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora)); // Más recientes primero
           
-          // Seleccionar imágenes variadas (alternar entre campo y gabinete si hay de ambos)
+          const actividadesGabinete = actividadesConFoto
+            .filter(a => (a.tipo_actividad || '').toLowerCase() === 'gabinete')
+            .sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora)); // Más recientes primero
+          
+          // Seleccionar imágenes: primero todas las de campo, luego todas las de gabinete
           let imagenesSeleccionadas = [];
           const maxImagenes = 6;
           
-          if (actividadesCampo.length > 0 && actividadesGabinete.length > 0) {
-            // Hay de ambos tipos - alternar
-            let indexCampo = 0;
-            let indexGabinete = 0;
-            while (imagenesSeleccionadas.length < maxImagenes) {
-              if (indexCampo < actividadesCampo.length) {
-                imagenesSeleccionadas.push(actividadesCampo[indexCampo]);
-                indexCampo++;
-              }
-              if (imagenesSeleccionadas.length >= maxImagenes) break;
-              if (indexGabinete < actividadesGabinete.length) {
-                imagenesSeleccionadas.push(actividadesGabinete[indexGabinete]);
-                indexGabinete++;
-              }
-              if (indexCampo >= actividadesCampo.length && indexGabinete >= actividadesGabinete.length) break;
-            }
+          // Calcular cuántas de cada tipo (máximo 3 de campo y 3 de gabinete si hay de ambos)
+          let maxCampo = Math.min(actividadesCampo.length, 3);
+          let maxGabinete = Math.min(actividadesGabinete.length, 3);
+          
+          // Si solo hay de un tipo, usar hasta 6 de ese tipo
+          if (actividadesCampo.length === 0) {
+            maxGabinete = Math.min(actividadesGabinete.length, maxImagenes);
+          } else if (actividadesGabinete.length === 0) {
+            maxCampo = Math.min(actividadesCampo.length, maxImagenes);
           } else {
-            // Solo hay de un tipo
-            imagenesSeleccionadas = actividadesConFoto.slice(0, maxImagenes);
+            // Hay de ambos - distribuir el espacio restante
+            const espacioRestanteCampo = maxImagenes - maxGabinete;
+            const espacioRestanteGabinete = maxImagenes - maxCampo;
+            maxCampo = Math.min(actividadesCampo.length, espacioRestanteCampo);
+            maxGabinete = Math.min(actividadesGabinete.length, maxImagenes - maxCampo);
+          }
+          
+          // Agregar primero las de campo
+          for (let i = 0; i < maxCampo; i++) {
+            imagenesSeleccionadas.push(actividadesCampo[i]);
+          }
+          
+          // Luego las de gabinete
+          for (let i = 0; i < maxGabinete; i++) {
+            imagenesSeleccionadas.push(actividadesGabinete[i]);
           }
           
           console.log(`📷 Seleccionadas ${imagenesSeleccionadas.length} imágenes variadas (Campo: ${actividadesCampo.length}, Gabinete: ${actividadesGabinete.length})`);
@@ -2057,6 +2092,59 @@ export default {
         });
       } finally {
         this.viendoReporte = null;
+      }
+    },
+
+    async eliminarReporteHistorial(reporte) {
+      // Confirmar antes de eliminar
+      const confirmar = window.confirm(`¿Estás seguro de que deseas eliminar el reporte "${reporte.nombre}"?\n\nEsta acción no se puede deshacer.`);
+      
+      if (!confirmar) {
+        return;
+      }
+
+      if (this.eliminandoReporte) {
+        console.log('⚠️ Ya se está eliminando un reporte');
+        return;
+      }
+
+      this.eliminandoReporte = reporte.id;
+      console.log(`🗑️ Eliminando reporte: ${reporte.nombre}`);
+
+      try {
+        const response = await api.delete(`/reportes/eliminar/${reporte.id}`);
+        
+        if (response.data.success) {
+          console.log('✅ Reporte eliminado correctamente');
+          
+          // Eliminar del array local
+          const index = this.reportesGenerados.findIndex(r => r.id === reporte.id);
+          if (index !== -1) {
+            this.reportesGenerados.splice(index, 1);
+          }
+          
+          this.$notify?.({
+            type: 'success',
+            message: 'Reporte eliminado correctamente'
+          });
+        } else {
+          throw new Error('Error al eliminar el reporte');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error eliminando reporte:', error);
+        
+        let mensaje = 'Error al eliminar el reporte';
+        if (error.response?.status === 404) {
+          mensaje = 'El reporte no fue encontrado';
+        }
+        
+        this.$notify?.({
+          type: 'error',
+          message: mensaje
+        });
+      } finally {
+        this.eliminandoReporte = null;
       }
     }
   },

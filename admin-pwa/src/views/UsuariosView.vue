@@ -943,6 +943,7 @@ const totalUsuarios = ref('-')
 const paginaActual = ref(1)
 const usuariosPorPagina = ref(50)
 const paginaSalto = ref('')
+const recargaCompleta = ref(false) // Control para saber si es recarga completa
 
 // Variables para ordenamiento
 const campoOrdenamiento = ref('fecha') // Por defecto ordenar por fecha
@@ -1069,6 +1070,7 @@ onUnmounted(() => {
 const cargarUsuarios = async () => {
   loading.value = true
   error.value = ''
+  recargaCompleta.value = true // Marcar que es recarga completa
   
   try {
     // Usar el servicio de usuarios con datos reales de la base de datos
@@ -1424,7 +1426,7 @@ const exportarExcel = () => {
   }
 }
 
-const filtrarUsuarios = () => {
+const filtrarUsuarios = (resetPaginacion = true) => {
   if (!searchTerm.value.trim()) {
     usuariosFiltrados.value = usuarios.value
   } else {
@@ -1438,7 +1440,9 @@ const filtrarUsuarios = () => {
       (usuario.territorio && usuario.territorio.toLowerCase().includes(termino))
     )
   }
-  resetearPaginacion()
+  if (resetPaginacion) {
+    resetearPaginacion()
+  }
   aplicarOrdenamiento()
 }
 
@@ -1579,8 +1583,13 @@ const eliminarUsuario = async () => {
       usuarios.value.splice(index, 1)
     }
     
-    // Actualizar usuarios filtrados
-    filtrarUsuarios()
+    // Actualizar usuarios filtrados sin resetear paginación
+    filtrarUsuarios(false)
+    
+    // Ajustar página actual si la página quedó vacía
+    if (usuariosPaginados.value.length === 0 && paginaActual.value > 1) {
+      paginaActual.value = Math.min(paginaActual.value - 1, totalPaginas.value)
+    }
     
     console.log('✅ Usuario eliminado exitosamente')
     
@@ -1690,8 +1699,8 @@ const guardarEdicion = async () => {
       usuarios.value[index] = resultado.usuario
     }
     
-    // Actualizar usuarios filtrados
-    filtrarUsuarios()
+    // Actualizar usuarios filtrados SIN resetear la paginación
+    filtrarUsuarios(false)
     
     console.log('✅ Usuario editado exitosamente en la base de datos')
     
@@ -1799,11 +1808,14 @@ const resetearPaginacion = () => {
 
 // Watchers para mejor funcionalidad
 watch(searchTerm, () => {
-  filtrarUsuarios()
+  filtrarUsuarios() // Sí resetear paginación al buscar
 })
 
 watch(usuarios, () => {
-  filtrarUsuarios()
+  // Solo resetear paginación si es recarga completa
+  const debeResetear = recargaCompleta.value
+  filtrarUsuarios(debeResetear)
+  recargaCompleta.value = false // Resetear el flag
 })
 
 // Validar que la página actual no exceda el total de páginas

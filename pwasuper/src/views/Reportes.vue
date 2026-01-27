@@ -516,6 +516,42 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de confirmación para eliminar reporte -->
+    <div
+      v-if="mostrarModalEliminar"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style="background-color: rgba(0, 0, 0, 0.5);"
+      @click.self="cancelarEliminar"
+    >
+      <div class="bg-white rounded-xl shadow-xl max-w-xs w-full p-4 transform transition-all" style="animation: modalIn 0.15s ease-out;">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-900">¿Eliminar reporte?</h3>
+            <p class="text-xs text-gray-500 mt-0.5">{{ reporteAEliminar?.nombre }}</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button
+            @click="cancelarEliminar"
+            class="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="confirmarEliminarReporte"
+            class="flex-1 px-3 py-2 text-xs font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -565,6 +601,9 @@ export default {
       viendoReporte: null,
       // Estado de eliminación de reportes del historial
       eliminandoReporte: null,
+      // Modal de confirmación para eliminar
+      mostrarModalEliminar: false,
+      reporteAEliminar: null,
       // Estado de conexión
       isOnline: true,
       error: null
@@ -2096,15 +2135,21 @@ export default {
     },
 
     async eliminarReporteHistorial(reporte) {
-      // Confirmar antes de eliminar
-      const confirmar = window.confirm(`¿Estás seguro de que deseas eliminar el reporte "${reporte.nombre}"?\n\nEsta acción no se puede deshacer.`);
-      
-      if (!confirmar) {
-        return;
-      }
+      // Mostrar modal de confirmación
+      this.reporteAEliminar = reporte;
+      this.mostrarModalEliminar = true;
+    },
 
-      if (this.eliminandoReporte) {
-        console.log('⚠️ Ya se está eliminando un reporte');
+    cancelarEliminar() {
+      this.mostrarModalEliminar = false;
+      this.reporteAEliminar = null;
+    },
+
+    async confirmarEliminarReporte() {
+      const reporte = this.reporteAEliminar;
+      this.mostrarModalEliminar = false;
+
+      if (!reporte || this.eliminandoReporte) {
         return;
       }
 
@@ -2250,6 +2295,18 @@ export default {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Animación rápida para modal de eliminar */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

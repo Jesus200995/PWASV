@@ -6789,6 +6789,100 @@ async def obtener_supervisor_automatico(user_id: int):
 
 # ==================== FIN SUPERVISOR AUTOMÁTICO ====================
 
+# ==================== ACTUALIZACIÓN MASIVA SUPERVISORES ====================
+
+@app.post("/actualizar-supervisores-tecnicos")
+async def actualizar_supervisores_tecnicos_masivo():
+    """
+    Actualiza automáticamente el supervisor de TODOS los técnicos existentes en la base de datos.
+    Útil para migración o corrección masiva de supervisores.
+    """
+    try:
+        print("🔄 Iniciando actualización masiva de supervisores técnicos...")
+        
+        # Obtener todos los técnicos
+        cursor.execute("""
+            SELECT id, cargo, territorio, nombre_completo 
+            FROM usuarios 
+            WHERE UPPER(cargo) IN ('TECNICO SOCIAL', 'TECNICO PRODUCTIVO')
+            AND territorio IS NOT NULL
+        """)
+        
+        tecnicos = cursor.fetchall()
+        total_tecnicos = len(tecnicos)
+        actualizados = 0
+        sin_supervisor = 0
+        errores = []
+        
+        print(f"📊 Total de técnicos encontrados: {total_tecnicos}")
+        
+        for tecnico in tecnicos:
+            user_id, cargo, territorio, nombre = tecnico
+            
+            try:
+                # Buscar supervisor territorial
+                cursor.execute("""
+                    SELECT nombre_completo FROM admin_users 
+                    WHERE es_territorial = TRUE 
+                    AND territorio = %s 
+                    AND activo = TRUE
+                    LIMIT 1
+                """, (territorio,))
+                
+                admin_territorial = cursor.fetchone()
+                
+                if admin_territorial and admin_territorial[0]:
+                    supervisor_nombre = admin_territorial[0]
+                    
+                    # Actualizar supervisor en BD
+                    cursor.execute("""
+                        UPDATE usuarios SET supervisor = %s WHERE id = %s
+                    """, (supervisor_nombre, user_id))
+                    
+                    actualizados += 1
+                    print(f"   ✅ {nombre} ({territorio}) → Supervisor: {supervisor_nombre}")
+                else:
+                    sin_supervisor += 1
+                    print(f"   ⚠️ {nombre} ({territorio}) → Sin admin territorial")
+                    errores.append({
+                        "id": user_id,
+                        "nombre": nombre,
+                        "territorio": territorio,
+                        "razon": "No hay administrador territorial"
+                    })
+                    
+            except Exception as e:
+                errores.append({
+                    "id": user_id,
+                    "nombre": nombre,
+                    "error": str(e)
+                })
+                print(f"   ❌ Error procesando {nombre}: {e}")
+        
+        # Commit de todos los cambios
+        conn.commit()
+        
+        print(f"✅ Actualización masiva completada:")
+        print(f"   - Actualizados: {actualizados}")
+        print(f"   - Sin supervisor: {sin_supervisor}")
+        print(f"   - Errores: {len(errores)}")
+        
+        return {
+            "success": True,
+            "total_tecnicos": total_tecnicos,
+            "actualizados": actualizados,
+            "sin_supervisor": sin_supervisor,
+            "errores": errores,
+            "mensaje": f"Se actualizaron {actualizados} de {total_tecnicos} técnicos"
+        }
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error en actualización masiva: {e}")
+        raise HTTPException(status_code=500, detail=f"Error en actualización masiva: {str(e)}")
+
+# ==================== FIN ACTUALIZACIÓN MASIVA ====================
+
 # ==================== SUPERVISOR POR TERRITORIO ====================
 
 @app.get("/supervisor-territorio/{territorio}")

@@ -1,29 +1,84 @@
 /**
  * Utilidad para registrar el service worker y manejar actualizaciones
+ * Sistema de actualización reactiva e inmediata
  */
 
+// Callback para notificar actualizaciones
+let onUpdateCallback = null;
+
 // Registrar el service worker
-export async function registerServiceWorker() {
+export async function registerServiceWorker(onUpdate) {
+  // Guardar callback para notificar actualizaciones
+  if (onUpdate) {
+    onUpdateCallback = onUpdate;
+  }
+
   if ('serviceWorker' in navigator) {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('Service Worker registrado con éxito:', registration.scope);
+      console.log('📦 Service Worker registrado con éxito:', registration.scope);
       
       // Verificar actualizaciones inmediatamente
       checkForUpdates(registration);
       
-      // Verificar actualizaciones periódicamente
+      // Verificar actualizaciones cada 15 segundos (para actualización inmediata)
       setInterval(() => {
         checkForUpdates(registration);
-      }, 60 * 60 * 1000); // Verificar cada hora
+      }, 15 * 1000); // Cada 15 segundos
+      
+      // Escuchar mensajes del Service Worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        console.log('📩 Mensaje del SW:', event.data);
+        
+        if (event.data && event.data.type === 'SW_UPDATED') {
+          console.log('🚀 SW actualizado a versión:', event.data.version);
+          if (onUpdateCallback) {
+            onUpdateCallback(event.data.version);
+          }
+        }
+      });
+
+      // Detectar cuando hay un nuevo SW instalado y esperando
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        console.log('🔄 Nuevo Service Worker encontrado...');
+        
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed') {
+            if (navigator.serviceWorker.controller) {
+              // Hay una actualización disponible
+              console.log('⬆️ Actualización del SW lista para aplicar');
+              // Activar el nuevo SW inmediatamente
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          }
+        });
+      });
+
+      // Recargar automáticamente cuando el SW toma el control
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          console.log('⚡ Nuevo SW tomando control, recargando...');
+          // Notificar antes de recargar
+          if (onUpdateCallback) {
+            onUpdateCallback('auto-reload');
+          }
+          // Recargar después de mostrar notificación
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        }
+      });
       
       return registration;
     } catch (error) {
-      console.error('Error al registrar el Service Worker:', error);
+      console.error('❌ Error al registrar el Service Worker:', error);
       return null;
     }
   } else {
-    console.warn('El navegador no soporta Service Workers');
+    console.warn('⚠️ El navegador no soporta Service Workers');
     return null;
   }
 }
@@ -32,7 +87,9 @@ export async function registerServiceWorker() {
 function checkForUpdates(registration) {
   if (!registration) return;
   
-  registration.update().catch(err => {
+  registration.update().then(() => {
+    console.log('🔍 Verificando actualizaciones del SW...');
+  }).catch(err => {
     console.error('Error al buscar actualizaciones del SW:', err);
   });
 }

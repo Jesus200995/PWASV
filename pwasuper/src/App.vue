@@ -132,7 +132,7 @@ const handleStorageChange = (e) => {
 };
 
 // Función para verificar periódicamente los datos del usuario desde el servidor
-// Esto detecta cambios realizados por el admin (ej: eliminar territorio)
+// Esto detecta cambios realizados por el admin (ej: eliminar territorio o cargo)
 const checkUserDataFromServer = async () => {
   if (!userData.value || !userData.value.id) return;
   
@@ -141,7 +141,33 @@ const checkUserDataFromServer = async () => {
     if (response.ok) {
       const serverUserData = await response.json();
       
-      // Verificar si el territorio cambió
+      // Verificar si el cargo cambió (PRIORIDAD)
+      const localCargo = userData.value.cargo;
+      const serverCargo = serverUserData.cargo;
+      
+      // Si el servidor indica que ya no tiene cargo, actualizar local y mostrar modal
+      if (localCargo && (!serverCargo || serverCargo.trim() === '')) {
+        console.log('⚠️ [Server Check] Admin removió el cargo del usuario, actualizando...');
+        userData.value = { ...userData.value, cargo: null };
+        localStorage.setItem('user', JSON.stringify(userData.value));
+        showCargoModal.value = true;
+        return; // No continuar, prioridad en cargo
+      }
+      // Si el servidor tiene cargo pero local no, actualizar local
+      else if ((!localCargo || localCargo.trim() === '') && serverCargo && serverCargo.trim() !== '') {
+        console.log('✅ [Server Check] Admin asignó cargo al usuario:', serverCargo);
+        userData.value = { ...userData.value, cargo: serverCargo };
+        localStorage.setItem('user', JSON.stringify(userData.value));
+        showCargoModal.value = false;
+      }
+      // Si el cargo cambió a uno diferente, actualizar
+      else if (localCargo !== serverCargo && serverCargo) {
+        console.log('🔄 [Server Check] Cargo actualizado por admin:', serverCargo);
+        userData.value = { ...userData.value, cargo: serverCargo };
+        localStorage.setItem('user', JSON.stringify(userData.value));
+      }
+      
+      // Verificar si el territorio cambió (solo si ya tiene cargo)
       const localTerritorio = userData.value.territorio;
       const serverTerritorio = serverUserData.territorio;
       
@@ -171,13 +197,13 @@ const checkUserDataFromServer = async () => {
   }
 };
 
-// Iniciar verificación periódica cada 30 segundos
+// Iniciar verificación periódica cada 15 segundos (reactivo)
 const startUserDataCheck = () => {
   // Verificar inmediatamente al iniciar
   checkUserDataFromServer();
   
-  // Luego cada 30 segundos
-  userCheckIntervalId = setInterval(checkUserDataFromServer, 30000);
+  // Luego cada 15 segundos para ser más reactivo
+  userCheckIntervalId = setInterval(checkUserDataFromServer, 15000);
 };
 
 // Detener verificación periódica

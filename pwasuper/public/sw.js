@@ -5,7 +5,7 @@
 
 // Incrementar la versión del cache cuando hay cambios importantes
 // Esto forzará a que se muestre la notificación de actualización
-const CACHE_NAME = 'pwa-super-v1.0.1';
+const CACHE_NAME = 'pwa-super-v1.0.2';
 const OFFLINE_URL = '/offline.html';
 
 // Archivos a cachear para funcionamiento offline
@@ -53,6 +53,16 @@ self.addEventListener('activate', (event) => {
       console.log('✅ Service Worker activado');
       // Tomar control de todas las ventanas inmediatamente
       return self.clients.claim();
+    }).then(() => {
+      // Notificar a todos los clientes que hay una actualización
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'SW_UPDATED',
+            version: CACHE_NAME
+          });
+        });
+      });
     })
   );
 });

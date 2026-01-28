@@ -1784,6 +1784,200 @@ async def descargar_reporte(reporte_id: int):
         print(f"❌ Error descargando reporte: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+@app.get("/reportes/admin/todos")
+async def obtener_todos_reportes_admin(
+    limite: int = 100,
+    offset: int = 0,
+    mes: str = None,
+    anio: int = None,
+    territorio: str = None,
+    usuario_id: int = None
+):
+    """
+    Obtener todos los reportes de todos los usuarios (para admin-pwa)
+    Incluye información del usuario que generó cada reporte
+    """
+    try:
+        print(f"📋 [ADMIN] Obteniendo todos los reportes...")
+        print(f"   Filtros: mes={mes}, anio={anio}, territorio={territorio}, usuario_id={usuario_id}")
+        
+        # Construir query con JOINs para obtener info del usuario
+        query = """
+            SELECT 
+                r.id,
+                r.usuario_id,
+                r.nombre_reporte,
+                r.mes,
+                r.anio,
+                r.tipo,
+                r.fecha_generacion,
+                CASE WHEN r.pdf_base64 IS NOT NULL AND r.pdf_base64 != '' THEN true ELSE false END as tiene_pdf,
+                u.nombre_completo,
+                u.correo,
+                u.territorio,
+                u.cargo
+            FROM reportes_generados r
+            LEFT JOIN usuarios u ON r.usuario_id = u.id
+            WHERE 1=1
+        """
+        params = []
+        
+        # Filtros opcionales
+        if mes:
+            query += " AND r.mes = %s"
+            params.append(mes)
+        
+        if anio:
+            query += " AND r.anio = %s"
+            params.append(anio)
+            
+        if territorio:
+            query += " AND u.territorio = %s"
+            params.append(territorio)
+            
+        if usuario_id:
+            query += " AND r.usuario_id = %s"
+            params.append(usuario_id)
+        
+        # Ordenar por fecha más reciente
+        query += " ORDER BY r.fecha_generacion DESC"
+        
+        # Primero obtener el total
+        count_query = query.replace(
+            """SELECT 
+                r.id,
+                r.usuario_id,
+                r.nombre_reporte,
+                r.mes,
+                r.anio,
+                r.tipo,
+                r.fecha_generacion,
+                CASE WHEN r.pdf_base64 IS NOT NULL AND r.pdf_base64 != '' THEN true ELSE false END as tiene_pdf,
+                u.nombre_completo,
+                u.correo,
+                u.territorio,
+                u.cargo""",
+            "SELECT COUNT(*)"
+        ).replace(" ORDER BY r.fecha_generacion DESC", "")
+        
+        cursor.execute(count_query, params)
+        total = cursor.fetchone()[0]
+        
+        # Ahora con paginación
+        query += " LIMIT %s OFFSET %s"
+        params.extend([limite, offset])
+        
+        cursor.execute(query, params)
+        reportes = cursor.fetchall()
+        
+        resultado = []
+        for r in reportes:
+            resultado.append({
+                "id": r[0],
+                "usuario_id": r[1],
+                "nombre_reporte": r[2],
+                "mes": r[3],
+                "anio": r[4],
+                "tipo": r[5],
+                "fecha_generacion": r[6].isoformat() if r[6] else None,
+                "tiene_pdf": r[7],
+                "usuario": {
+                    "nombre_completo": r[8],
+                    "correo": r[9],
+                    "territorio": r[10],
+                    "cargo": r[11]
+                }
+            })
+        
+        print(f"✅ [ADMIN] {len(resultado)} reportes encontrados de {total} totales")
+        
+        return {
+            "success": True,
+            "reportes": resultado,
+            "total": total,
+            "pagina_actual": offset // limite + 1 if limite > 0 else 1,
+            "total_paginas": (total + limite - 1) // limite if limite > 0 else 1
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo reportes admin: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@app.get("/reportes/admin/estadisticas")
+async def obtener_estadisticas_reportes_admin():
+    """
+    Obtener estadísticas de reportes para el dashboard admin
+    """
+    try:
+        print(f"📊 [ADMIN] Obteniendo estadísticas de reportes...")
+        
+        # Total de reportes
+        cursor.execute("SELECT COUNT(*) FROM reportes_generados")
+        total_reportes = cursor.fetchone()[0]
+        
+        # Reportes este mes
+        cursor.execute("""
+            SELECT COUNT(*) FROM reportes_generados 
+            WHERE EXTRACT(MONTH FROM fecha_generacion) = EXTRACT(MONTH FROM CURRENT_DATE)
+            AND EXTRACT(YEAR FROM fecha_generacion) = EXTRACT(YEAR FROM CURRENT_DATE)
+        """)
+        reportes_mes = cursor.fetchone()[0]
+        
+        # Reportes por tipo
+        cursor.execute("""
+            SELECT tipo, COUNT(*) 
+            FROM reportes_generados 
+            GROUP BY tipo
+        """)
+        por_tipo = {r[0]: r[1] for r in cursor.fetchall()}
+        
+        # Usuarios con reportes
+        cursor.execute("SELECT COUNT(DISTINCT usuario_id) FROM reportes_generados")
+        usuarios_con_reportes = cursor.fetchone()[0]
+        
+        # Reportes por territorio
+        cursor.execute("""
+            SELECT u.territorio, COUNT(r.id)
+            FROM reportes_generados r
+            LEFT JOIN usuarios u ON r.usuario_id = u.id
+            WHERE u.territorio IS NOT NULL
+            GROUP BY u.territorio
+            ORDER BY COUNT(r.id) DESC
+        """)
+        por_territorio = {r[0]: r[1] for r in cursor.fetchall()}
+        
+        # Reportes por mes (últimos 6 meses)
+        cursor.execute("""
+            SELECT 
+                TO_CHAR(fecha_generacion, 'YYYY-MM') as mes,
+                COUNT(*)
+            FROM reportes_generados
+            WHERE fecha_generacion >= CURRENT_DATE - INTERVAL '6 months'
+            GROUP BY TO_CHAR(fecha_generacion, 'YYYY-MM')
+            ORDER BY mes DESC
+        """)
+        por_mes = {r[0]: r[1] for r in cursor.fetchall()}
+        
+        print(f"✅ [ADMIN] Estadísticas obtenidas")
+        
+        return {
+            "success": True,
+            "estadisticas": {
+                "total_reportes": total_reportes,
+                "reportes_mes_actual": reportes_mes,
+                "por_tipo": por_tipo,
+                "usuarios_con_reportes": usuarios_con_reportes,
+                "por_territorio": por_territorio,
+                "por_mes": por_mes
+            }
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo estadísticas: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 # Nuevo endpoint para obtener usuarios (para el panel de administración)
 @app.get("/usuarios")
 async def obtener_usuarios(territorio: str = None):

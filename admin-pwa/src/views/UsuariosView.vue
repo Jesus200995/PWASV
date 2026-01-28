@@ -94,6 +94,14 @@
 
               <!-- Botones de exportación -->
               <div class="export-actions">
+                <button @click="sincronizarSupervisores" class="export-btn sync" :disabled="sincronizando" title="Sincronizar supervisores de técnicos">
+                  <svg :class="{ spinning: sincronizando }" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                  </svg>
+                  {{ sincronizando ? 'Sincronizando...' : 'Sincronizar' }}
+                </button>
                 <button @click="exportarExcel" class="export-btn excel">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -935,6 +943,7 @@ const usuariosFiltrados = ref([])
 const loading = ref(false)
 const error = ref('')
 const searchTerm = ref('')
+const supervisoresPorTerritorio = ref({}) // Mapa de territorio -> supervisor
 
 // Variable para contador de usuarios
 const totalUsuarios = ref('-')
@@ -979,6 +988,9 @@ const datosEdicion = ref({
 
 // Variables para modal de éxito
 const showSuccessModal = ref(false)
+
+// Variable para sincronización de supervisores
+const sincronizando = ref(false)
 
 // Variables para supervisor automático de técnicos
 const buscandoSupervisor = ref(false)
@@ -1067,14 +1079,65 @@ onUnmounted(() => {
   window.removeEventListener('user-session-updated', actualizarPermisosUsuario)
 })
 
+// Función para cargar supervisores territoriales actuales
+const cargarSupervisoresTerritoriales = async () => {
+  try {
+    console.log('🔄 Cargando supervisores territoriales...')
+    const response = await fetch(`${API_URL}/admin/usuarios`)
+    if (!response.ok) throw new Error('Error al cargar admins')
+    
+    const data = await response.json()
+    const admins = data.usuarios || data
+    
+    // Crear mapa de territorio -> supervisor
+    const mapa = {}
+    admins.forEach(admin => {
+      if (admin.es_territorial && admin.territorio && admin.nombre_completo) {
+        mapa[admin.territorio] = admin.nombre_completo
+      }
+    })
+    
+    supervisoresPorTerritorio.value = mapa
+    console.log('✅ Supervisores territoriales cargados:', Object.keys(mapa).length)
+    
+    return mapa
+  } catch (error) {
+    console.error('❌ Error al cargar supervisores territoriales:', error)
+    return {}
+  }
+}
+
+// Función para actualizar supervisor de un técnico según su territorio
+const actualizarSupervisorTecnico = (usuario) => {
+  const esTecnico = usuario.cargo && (
+    usuario.cargo.toUpperCase().includes('TECNICO SOCIAL') ||
+    usuario.cargo.toUpperCase().includes('TECNICO PRODUCTIVO')
+  )
+  
+  if (esTecnico && usuario.territorio) {
+    const supervisorActual = supervisoresPorTerritorio.value[usuario.territorio]
+    if (supervisorActual) {
+      usuario.supervisor = supervisorActual
+    }
+  }
+  
+  return usuario
+}
+
 const cargarUsuarios = async () => {
   loading.value = true
   error.value = ''
   recargaCompleta.value = true // Marcar que es recarga completa
   
   try {
+    // Primero cargar los supervisores territoriales
+    await cargarSupervisoresTerritoriales()
+    
     // Usar el servicio de usuarios con datos reales de la base de datos
-    usuarios.value = await usuariosService.obtenerUsuarios()
+    let usuariosDB = await usuariosService.obtenerUsuarios()
+    
+    // Actualizar supervisores de técnicos con los datos actuales de territoriales
+    usuarios.value = usuariosDB.map(usuario => actualizarSupervisorTecnico({...usuario}))
     usuariosFiltrados.value = usuarios.value
     
     // Actualizar contador de usuarios
@@ -1092,6 +1155,46 @@ const cargarUsuarios = async () => {
     totalUsuarios.value = '0'
   } finally {
     loading.value = false
+  }
+}
+
+// Función para sincronizar supervisores de todos los técnicos
+const sincronizarSupervisores = async () => {
+  if (sincronizando.value) return
+  
+  sincronizando.value = true
+  
+  try {
+    console.log('🔄 Sincronizando supervisores de técnicos...')
+    
+    // Recargar supervisores territoriales
+    await cargarSupervisoresTerritoriales()
+    
+    // Actualizar supervisores de todos los técnicos en el array local
+    let actualizados = 0
+    usuarios.value = usuarios.value.map(usuario => {
+      const usuarioOriginal = {...usuario}
+      const usuarioActualizado = actualizarSupervisorTecnico({...usuario})
+      
+      if (usuarioOriginal.supervisor !== usuarioActualizado.supervisor) {
+        actualizados++
+      }
+      
+      return usuarioActualizado
+    })
+    
+    // Actualizar filtrados
+    filtrarUsuarios(false)
+    
+    console.log(`✅ Sincronización completada: ${actualizados} técnicos actualizados`)
+    
+    alert(`Supervisores sincronizados correctamente.\n${actualizados} técnicos actualizados.`)
+    
+  } catch (error) {
+    console.error('❌ Error al sincronizar supervisores:', error)
+    alert('Error al sincronizar supervisores. Por favor, intenta de nuevo.')
+  } finally {
+    sincronizando.value = false
   }
 }
 
@@ -1696,7 +1799,9 @@ const guardarEdicion = async () => {
     // Actualizar el usuario en el array local con los datos devueltos por el servidor
     const index = usuarios.value.findIndex(u => u.id === usuarioAEditar.value.id)
     if (index !== -1) {
-      usuarios.value[index] = resultado.usuario
+      // Actualizar supervisor si es técnico (reactivo)
+      const usuarioActualizado = actualizarSupervisorTecnico({...resultado.usuario})
+      usuarios.value[index] = usuarioActualizado
     }
     
     // Actualizar usuarios filtrados SIN resetear la paginación
@@ -2245,6 +2350,20 @@ const logout = () => {
 
 .export-btn.print:hover {
   background: rgba(156, 39, 176, 0.2);
+}
+
+.export-btn.sync {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+}
+
+.export-btn.sync:hover:not(:disabled) {
+  background: rgba(33, 150, 243, 0.2);
+}
+
+.export-btn.sync:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .sort-btn svg {

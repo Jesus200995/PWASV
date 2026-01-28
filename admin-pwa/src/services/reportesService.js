@@ -69,6 +69,29 @@ const reportesService = {
   },
 
   /**
+   * Limpiar y normalizar el base64
+   * @param {string} base64String - String base64 que puede contener prefijos o espacios
+   * @returns {string} - Base64 limpio
+   */
+  _limpiarBase64(base64String) {
+    if (!base64String) return ''
+    
+    // Remover el prefijo data:application/pdf;base64, si existe
+    let limpio = base64String
+    if (limpio.includes('data:application/pdf;base64,')) {
+      limpio = limpio.split('data:application/pdf;base64,')[1]
+    } else if (limpio.includes('base64,')) {
+      limpio = limpio.split('base64,')[1]
+    }
+    
+    // Remover espacios, saltos de línea y otros caracteres no base64
+    limpio = limpio.replace(/\s/g, '')
+    limpio = limpio.replace(/[^A-Za-z0-9+/=]/g, '')
+    
+    return limpio
+  },
+
+  /**
    * Descargar un reporte específico
    * @param {number} reporteId - ID del reporte
    */
@@ -86,8 +109,15 @@ const reportesService = {
       const data = await response.json()
       
       if (data.success && data.reporte?.pdf_base64) {
+        // Limpiar el base64
+        const base64Limpio = this._limpiarBase64(data.reporte.pdf_base64)
+        
+        if (!base64Limpio) {
+          throw new Error('El PDF está vacío o mal formado')
+        }
+        
         // Convertir base64 a blob y descargar
-        const byteCharacters = atob(data.reporte.pdf_base64)
+        const byteCharacters = atob(base64Limpio)
         const byteNumbers = new Array(byteCharacters.length)
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i)
@@ -134,8 +164,15 @@ const reportesService = {
       const data = await response.json()
       
       if (data.success && data.reporte?.pdf_base64) {
+        // Limpiar el base64
+        const base64Limpio = this._limpiarBase64(data.reporte.pdf_base64)
+        
+        if (!base64Limpio) {
+          throw new Error('El PDF está vacío o mal formado')
+        }
+        
         // Abrir en nueva pestaña
-        const byteCharacters = atob(data.reporte.pdf_base64)
+        const byteCharacters = atob(base64Limpio)
         const byteNumbers = new Array(byteCharacters.length)
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i)

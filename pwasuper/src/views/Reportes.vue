@@ -397,8 +397,8 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
                 <div class="flex-1 min-w-0">
-                  <p class="text-xs font-semibold text-amber-800">Ya existe un reporte para este mes</p>
-                  <p class="text-xs text-amber-700 mt-0.5">Solo puedes generar un reporte por mes. Selecciona otro período si necesitas crear uno nuevo.</p>
+                  <p class="text-xs font-semibold text-amber-800">Ya existe un reporte para {{ mesActual }} {{ anioSeleccionado }}</p>
+                  <p class="text-xs text-amber-700 mt-0.5">Para generar uno nuevo, primero elimina el existente desde el historial de abajo.</p>
                 </div>
               </div>
             </div>
@@ -2333,7 +2333,7 @@ export default {
       }
 
       this.eliminandoReporte = reporte.id;
-      console.log(`🗑️ Eliminando reporte: ${reporte.nombre}`);
+      console.log(`🗑️ Eliminando reporte: ${reporte.nombre} (mes: ${reporte.mes}, año: ${reporte.anio})`);
 
       try {
         const response = await api.delete(`/reportes/eliminar/${reporte.id}`);
@@ -2341,7 +2341,7 @@ export default {
         if (response.data.success) {
           console.log('✅ Reporte eliminado correctamente');
           
-          // Eliminar del array local
+          // Eliminar del array local INMEDIATAMENTE
           const index = this.reportesGenerados.findIndex(r => r.id === reporte.id);
           if (index !== -1) {
             this.reportesGenerados.splice(index, 1);
@@ -2350,18 +2350,25 @@ export default {
           // Actualizar localStorage
           localStorage.setItem('reportesGenerados', JSON.stringify(this.reportesGenerados));
           
-          // Verificar si el reporte eliminado era del mes/año actual
-          if (reporte.mes === this.mesActual && reporte.anio === this.anioSeleccionado) {
-            // Limpiar el estado de reporte existente ya que lo acabamos de eliminar
-            this.reporteExistente = null;
-          }
+          // REACTIVO: Verificar si el reporte eliminado era del mes/año actualmente seleccionado
+          // Convertir a string para comparación segura (el mes viene como string, el año puede ser number)
+          const mesReporte = String(reporte.mes);
+          const anioReporte = Number(reporte.anio);
+          const mesActualStr = String(this.mesActual);
+          const anioActualNum = Number(this.anioSeleccionado);
           
-          // Re-verificar el estado del reporte existente
-          await this.verificarReporteExistente();
+          console.log(`📊 Comparando: Reporte(${mesReporte}/${anioReporte}) vs Actual(${mesActualStr}/${anioActualNum})`);
+          
+          if (mesReporte === mesActualStr && anioReporte === anioActualNum) {
+            // Limpiar INMEDIATAMENTE el estado de reporte existente
+            // Esto habilitará el botón de generar reporte al instante
+            this.reporteExistente = null;
+            console.log('🔓 Botón de generar reporte habilitado - El reporte del mes actual fue eliminado');
+          }
           
           this.$notify?.({
             type: 'success',
-            message: 'Reporte eliminado correctamente'
+            message: 'Reporte eliminado - Ya puedes generar uno nuevo para este mes'
           });
         } else {
           throw new Error('Error al eliminar el reporte');
@@ -2381,6 +2388,7 @@ export default {
         });
       } finally {
         this.eliminandoReporte = null;
+        this.reporteAEliminar = null;
       }
     }
   },

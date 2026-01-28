@@ -694,7 +694,10 @@ export default {
       verificandoReporte: false,
       // Estado de carga del historial
       cargandoHistorial: false,
-      errorHistorial: null
+      errorHistorial: null,
+      // Referencias temporales para PDF generado (para descarga después de guardar en BD)
+      _pdfDocumentoGenerado: null,
+      _pdfNombreArchivo: null
     };
   },
   computed: {
@@ -991,7 +994,7 @@ export default {
       try {
         console.log('📄 Generando reporte...');
         
-        // Generar el reporte y obtener el PDF en base64
+        // Generar el reporte y obtener el PDF en base64 (SIN DESCARGAR aún)
         let pdfBase64 = null;
         if (this.formatoSeleccionado === 'pdf') {
           pdfBase64 = await this.generarPDF();
@@ -1002,7 +1005,7 @@ export default {
           this.generarCSV();
         }
 
-        console.log('✅ Reporte generado exitosamente');
+        console.log('✅ Reporte generado exitosamente (aún no descargado)');
 
         // Agregar a historial local con TODOS los campos necesarios
         const fecha = new Date().toLocaleString('es-MX');
@@ -1059,6 +1062,27 @@ export default {
           
           console.log('🔒 reporteExistente establecido - botón se deshabilitará');
           
+          // ✅ AHORA QUE YA SE GUARDÓ EN BD, proceder a descargar el PDF
+          if (this.formatoSeleccionado === 'pdf' && this._pdfDocumentoGenerado) {
+            console.log('📥 Iniciando descarga del PDF (guardado en BD exitoso)...');
+            const descargaExitosa = await this.descargarPDFSeguro(
+              this._pdfDocumentoGenerado, 
+              this._pdfNombreArchivo
+            );
+            
+            if (!descargaExitosa) {
+              console.warn('⚠️ La descarga del PDF pudo tener problemas, pero el reporte YA está guardado en la base de datos');
+              this.$notify?.({
+                type: 'warning',
+                message: 'El reporte se guardó correctamente. Si no se descargó, puede obtenerlo desde el historial.'
+              });
+            }
+            
+            // Limpiar referencias
+            this._pdfDocumentoGenerado = null;
+            this._pdfNombreArchivo = null;
+          }
+          
         } catch (error) {
           console.error('⚠️ Error guardando reporte en BD:', error);
           console.error('⚠️ Detalles del error:', error.response?.data);
@@ -1072,7 +1096,17 @@ export default {
             return; // No continuar si hay duplicado
           }
           
-          // Para otros errores, aún agregamos al historial local pero sin ID de BD
+          // Para otros errores de BD, aún intentamos descargar y guardar localmente
+          console.log('⚠️ Error en BD, pero intentando descargar PDF localmente...');
+          
+          // Intentar descargar aunque la BD haya fallado
+          if (this.formatoSeleccionado === 'pdf' && this._pdfDocumentoGenerado) {
+            await this.descargarPDFSeguro(this._pdfDocumentoGenerado, this._pdfNombreArchivo);
+            this._pdfDocumentoGenerado = null;
+            this._pdfNombreArchivo = null;
+          }
+          
+          // Agregar al historial local como fallback
           this.reportesGenerados.unshift(nuevoReporte);
         }
 
@@ -1108,7 +1142,13 @@ export default {
         this.generandoReporte = true;
 
         if (this.formatoSeleccionado === 'pdf') {
-          await this.generarPDF();
+          const pdfBase64 = await this.generarPDF();
+          // Descargar después de generar
+          if (this._pdfDocumentoGenerado) {
+            await this.descargarPDFSeguro(this._pdfDocumentoGenerado, this._pdfNombreArchivo);
+            this._pdfDocumentoGenerado = null;
+            this._pdfNombreArchivo = null;
+          }
         } else {
           this.generarCSV();
         }
@@ -1982,16 +2022,18 @@ export default {
         doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: 'center' });
       }
 
-      // Descargar
-      console.log('💾 Descargando PDF...');
-      
-      // Obtener el PDF como base64 para guardarlo en la BD
+      // Obtener el PDF como base64 PRIMERO (antes de intentar descargar)
+      console.log('📦 Obteniendo PDF como base64...');
       const pdfBase64 = doc.output('datauristring');
+      console.log('📦 Base64 obtenido, longitud:', pdfBase64 ? pdfBase64.length : 'NULL');
       
-      doc.save(`Reporte_${this.mesActual}_${this.anioSeleccionado}.pdf`);
-      console.log('✅ PDF generado y descargado exitosamente');
+      // Guardar referencia al documento para descarga posterior
+      this._pdfDocumentoGenerado = doc;
+      this._pdfNombreArchivo = `Reporte_${this.mesActual}_${this.anioSeleccionado}.pdf`;
       
-      // Retornar el base64 para guardarlo
+      console.log('✅ PDF generado exitosamente (descarga pendiente)');
+      
+      // Retornar el base64 para guardarlo en BD
       return pdfBase64;
       
     } catch (error) {
@@ -2000,6 +2042,91 @@ export default {
       throw error;
     }
   },
+
+    /**
+     * Método para descargar el PDF de forma segura en todos los dispositivos (incluyendo móviles)
+     * Compatible con iOS Safari, Android Chrome y navegadores de escritorio
+     */
+    async descargarPDFSeguro(pdfDoc, nombreArchivo) {
+      try {
+        console.log('💾 Iniciando descarga segura del PDF...');
+        console.log('📱 Detectando plataforma...');
+        
+        // Detectar si es móvil
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+        const isAndroid = /android/i.test(userAgent);
+        const isMobile = isIOS || isAndroid || /mobile/i.test(userAgent);
+        
+        console.log(`📱 Plataforma: iOS=${isIOS}, Android=${isAndroid}, Mobile=${isMobile}`);
+        
+        if (isMobile) {
+          // En móviles, usar Blob URL con un link temporal
+          console.log('📱 Usando método de descarga para móviles...');
+          
+          // Obtener el PDF como Blob
+          const pdfBlob = pdfDoc.output('blob');
+          
+          // Crear URL del Blob
+          const blobUrl = URL.createObjectURL(pdfBlob);
+          
+          // Crear link temporal
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = nombreArchivo;
+          link.style.display = 'none';
+          
+          // En iOS Safari, abrir en nueva ventana puede ser más confiable
+          if (isIOS) {
+            console.log('🍎 iOS detectado - abriendo PDF en nueva ventana...');
+            // En iOS, intentar primero abrir en nueva ventana
+            const newWindow = window.open(blobUrl, '_blank');
+            if (!newWindow) {
+              // Si el popup fue bloqueado, intentar con click en link
+              console.log('🍎 Popup bloqueado, usando link click...');
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          } else {
+            // En Android y otros móviles
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          
+          // Limpiar URL del Blob después de un delay
+          setTimeout(() => {
+            URL.revokeObjectURL(blobUrl);
+            console.log('🧹 Blob URL limpiado');
+          }, 5000);
+          
+        } else {
+          // En escritorio, usar el método estándar de jsPDF
+          console.log('💻 Usando método de descarga estándar para escritorio...');
+          pdfDoc.save(nombreArchivo);
+        }
+        
+        console.log('✅ PDF descargado exitosamente');
+        return true;
+        
+      } catch (error) {
+        console.error('⚠️ Error en descarga de PDF:', error);
+        // Intentar método alternativo
+        try {
+          console.log('🔄 Intentando método de descarga alternativo...');
+          const pdfBlob = pdfDoc.output('blob');
+          const blobUrl = URL.createObjectURL(pdfBlob);
+          window.open(blobUrl, '_blank');
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+          console.log('✅ PDF abierto en nueva ventana');
+          return true;
+        } catch (altError) {
+          console.error('❌ Error en método alternativo:', altError);
+          return false;
+        }
+      }
+    },
 
     // Método auxiliar para cargar imagen como Base64
     async cargarImagenComoBase64(url) {

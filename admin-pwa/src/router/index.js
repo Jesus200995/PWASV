@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import UsuariosView from '../views/UsuariosView.vue'
 import HistorialesView from '../views/HistorialesView.vue'
+import ReportesView from '../views/ReportesView.vue'
 import RegistrosView from '../views/RegistrosView.vue'
 import ConfiguracionView from '../views/ConfiguracionView.vue'
 import AsistenciaView from '../views/AsistenciaView.vue'
@@ -38,6 +39,12 @@ const routes = [
     name: 'Historiales',
     component: HistorialesView,
     meta: { requiresAuth: true, requiredPermission: 'historiales' }
+  },
+  {
+    path: '/reportes',
+    name: 'Reportes',
+    component: ReportesView,
+    meta: { requiresAuth: true, requiredPermission: 'reportes' }
   },
   {
     path: '/asistencia',

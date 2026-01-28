@@ -258,6 +258,21 @@
           <div class="nav-indicator"></div>
         </li>
 
+        <!-- Reportes -->
+        <li class="nav-item" :class="{ active: $route.name === 'Reportes' }" v-if="tienePermiso('reportes')">
+          <router-link to="/reportes" class="nav-link">
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <span class="nav-text">Reportes</span>
+          </router-link>
+          <div class="nav-indicator"></div>
+        </li>
+
         <!-- Notificaciones -->
         <li class="nav-item" :class="{ active: $route.name === 'Notificaciones' }" v-if="tienePermiso('notificaciones')">
           <router-link to="/notificaciones" class="nav-link">

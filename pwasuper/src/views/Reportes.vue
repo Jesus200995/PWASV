@@ -1657,8 +1657,8 @@ export default {
           
           doc.setFontSize(9);
           doc.setFont(undefined, 'normal');
-          doc.text(`No se encontraron actividades con fotos en ${this.mesActual} ${this.anioSeleccionado}.`, pageWidth / 2, currentY + 25, { align: 'center' });
-          doc.text('Las evidencias se generarán cuando se registren actividades con fotografías.', pageWidth / 2, currentY + 32, { align: 'center' });
+          doc.text('El reporte fotográfico solo está disponible para el mes en curso;', pageWidth / 2, currentY + 25, { align: 'center' });
+          doc.text('al descargar información de meses anteriores, las fotografías no se mostrarán.', pageWidth / 2, currentY + 32, { align: 'center' });
           
           currentY += 50;
         } else {
@@ -2197,7 +2197,10 @@ export default {
 
       const csv = [
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+        '',
+        '',
+        '"NOTA: El reporte fotográfico solo está disponible para el mes en curso; al descargar información de meses anteriores, las fotografías no se mostrarán."'
       ].join('\n');
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

@@ -682,6 +682,7 @@
                   v-model="datosEdicion.nombre_completo" 
                   type="text" 
                   placeholder="Nombre completo"
+                  @input="datosEdicion.nombre_completo = normalizarTexto($event.target.value)"
                 />
               </div>
             </div>
@@ -781,7 +782,7 @@
                   type="text" 
                   placeholder="CURP de 18 caracteres"
                   maxlength="18"
-                  style="text-transform: uppercase;"
+                  @input="datosEdicion.curp = normalizarTexto($event.target.value)"
                 />
               </div>
             </div>
@@ -991,6 +992,15 @@ const showSuccessModal = ref(false)
 
 // Variable para sincronización de supervisores
 const sincronizando = ref(false)
+
+// Función para normalizar texto: mayúsculas sin tildes
+const normalizarTexto = (texto) => {
+  if (!texto) return ''
+  return texto
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Eliminar tildes
+}
 
 // Variables para supervisor automático de técnicos
 const buscandoSupervisor = ref(false)

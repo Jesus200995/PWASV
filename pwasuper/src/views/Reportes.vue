@@ -390,10 +390,26 @@
               </label>
             </div>
 
+            <!-- Mensaje de reporte ya existente -->
+            <div v-if="reporteDelMesExiste" class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+              <div class="flex items-start gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <div class="flex-1">
+                  <p class="text-xs font-semibold text-amber-800">Ya existe un reporte firmado</p>
+                  <p class="text-xs text-amber-700 mt-1">
+                    Ya generaste un reporte para {{ mesActual }} {{ anioSeleccionado }}. Solo puedes generar un reporte por mes.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <!-- Botón de Descarga -->
             <button
               @click="iniciarDescarga"
-              :disabled="cargando || generandoReporte || actividades.length === 0"
+              :disabled="descargarDeshabilitado"
+              :title="reporteDelMesExiste ? 'Ya existe un reporte para este mes' : ''"
               class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm"
             >
               <svg v-if="!generandoReporte" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -637,6 +653,26 @@ export default {
         return (partes[0][0] + partes[1][0]).toUpperCase();
       }
       return partes[0].substring(0, 2).toUpperCase();
+    },
+    // Verificar si ya existe un reporte para el mes/año seleccionado
+    reporteDelMesExiste() {
+      if (!this.reportesGenerados || this.reportesGenerados.length === 0) {
+        return null;
+      }
+      
+      const mesActual = this.mesActual;
+      const anioActual = this.anioSeleccionado;
+      
+      return this.reportesGenerados.find(reporte => 
+        reporte.mes === mesActual && reporte.anio === anioActual
+      );
+    },
+    // Verificar si el botón de descarga debe estar deshabilitado
+    descargarDeshabilitado() {
+      return this.cargando || 
+             this.generandoReporte || 
+             this.actividades.length === 0 || 
+             !!this.reporteDelMesExiste;
     }
   },
   methods: {
@@ -781,9 +817,23 @@ export default {
         return;
       }
 
-      // PRIMERO: Verificar si ya existe un reporte para este mes y año
+      // PRIMERO: Verificar en el historial local (más rápido)
+      if (this.reporteDelMesExiste) {
+        const reporte = this.reporteDelMesExiste;
+        alert(
+          `⚠️ Ya existe un reporte firmado para ${this.mesActual} ${this.anioSeleccionado}\n\n` +
+          `📄 ${reporte.nombre_reporte || reporte.nombre}\n` +
+          `📅 Generado el: ${reporte.fecha}\n` +
+          `📋 Tipo: ${reporte.tipo}\n\n` +
+          `Solo puedes generar un reporte por mes. Si necesitas modificarlo, contacta al administrador.`
+        );
+        console.log('⚠️ Reporte ya existe en historial local, descarga cancelada');
+        return;
+      }
+
+      // SEGUNDO: Verificar en la base de datos (por si el historial local no está sincronizado)
       try {
-        console.log('🔍 Verificando si ya existe reporte...');
+        console.log('🔍 Verificando en base de datos si ya existe reporte...');
         const verificacion = await reportesService.verificarReporteExistente(
           this.usuarioInfo.id,
           this.mesActual,
@@ -808,7 +858,9 @@ export default {
             `Solo puedes generar un reporte por mes. Si necesitas modificarlo, contacta al administrador.`
           );
           
-          console.log('⚠️ Reporte ya existe, descarga cancelada');
+          console.log('⚠️ Reporte ya existe en BD, descarga cancelada');
+          // Recargar historial para sincronizar
+          await this.cargarHistorialReportes();
           return;
         }
         
@@ -925,6 +977,9 @@ export default {
           if (response.data && response.data.reporte_id) {
             this.reportesGenerados[0].id = response.data.reporte_id;
           }
+          // Recargar historial desde la BD para asegurar sincronización
+          console.log('🔄 Recargando historial después de guardar...');
+          await this.cargarHistorialReportes();
         } catch (error) {
           console.error('⚠️ Error guardando reporte en BD:', error);
           console.error('⚠️ Detalles del error:', error.response?.data);

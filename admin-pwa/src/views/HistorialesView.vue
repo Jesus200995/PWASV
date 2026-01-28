@@ -1875,13 +1875,31 @@ export default {
   right: 0;
   background: white;
   border: 2px solid rgba(76, 175, 80, 0.4);
-  border-radius: clamp(6px, 1.2vw, 8px);
+  border-radius: clamp(8px, 1.5vw, 12px);
   box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
-  max-height: 220px;
+  max-height: min(calc(100vh - 280px), 600px);
   overflow-y: auto;
   z-index: 1000;
   animation: slideDown 0.2s ease-out;
   backdrop-filter: blur(8px);
+}
+
+@media (max-width: 768px) {
+  .search-results-dropdown {
+    max-height: calc(100vh - 320px);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1366px) {
+  .search-results-dropdown {
+    max-height: calc(100vh - 300px);
+  }
+}
+
+@media (min-width: 1367px) {
+  .search-results-dropdown {
+    max-height: 600px;
+  }
 }
 
 @keyframes slideDown {

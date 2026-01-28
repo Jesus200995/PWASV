@@ -58,6 +58,12 @@
                   @focus="mostrarResultados = true"
                   @blur="setTimeout(() => mostrarResultados = false, 150)"
                 >
+                <button v-if="terminoBusqueda" @click="limpiarBusqueda" class="clear-search-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               </div>
             </div>
             
@@ -995,6 +1001,15 @@ export default {
       }, 300)
     }
 
+    const limpiarBusqueda = () => {
+      terminoBusqueda.value = ''
+      usuariosFiltrados.value = []
+      mostrarResultados.value = false
+      if (timeoutBusqueda.value) {
+        clearTimeout(timeoutBusqueda.value)
+      }
+    }
+
     const seleccionarUsuario = (usuario) => {
       console.log('👤 Usuario seleccionado:', usuario)
       usuarioSeleccionado.value = usuario.id.toString()
@@ -1007,15 +1022,6 @@ export default {
       // Cargar historial del usuario seleccionado
       cargarResumen()
       cargarHistorial()
-    }
-
-    const limpiarBusqueda = () => {
-      terminoBusqueda.value = ''
-      usuariosFiltrados.value = []
-      mostrarResultados.value = false
-      if (timeoutBusqueda.value) {
-        clearTimeout(timeoutBusqueda.value)
-      }
     }
 
     const limpiarSeleccion = () => {
@@ -1775,47 +1781,96 @@ export default {
   position: relative;
   width: 100%;
   overflow: visible;
+  z-index: 1;
 }
 
 .search-input-wrapper {
   position: relative;
   width: 100%;
+  z-index: 2;
 }
 
 .search-icon {
   position: absolute;
-  left: clamp(8px, 1.5vw, 10px);
+  left: clamp(14px, 1.8vw, 16px);
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
-  width: clamp(12px, 2vw, 14px);
-  height: clamp(12px, 2vw, 14px);
+  color: rgba(76, 175, 80, 0.6);
+  width: clamp(14px, 2.2vw, 16px);
+  height: clamp(14px, 2.2vw, 16px);
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
 }
 
 .search-input {
   width: 100%;
-  padding: clamp(0.25rem, 0.6vw, 0.35rem) clamp(0.4rem, 1vw, 0.5rem) clamp(0.25rem, 0.6vw, 0.35rem) clamp(2rem, 4vw, 2.5rem);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: clamp(4px, 1vw, 6px);
-  background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(11px, 2vw, 12px);
-  color: #495057;
-  transition: all 0.3s ease;
+  padding: clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px) clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px);
+  border: 1.5px solid rgba(76, 175, 80, 0.2);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: clamp(12px, 2vw, 13px);
+  color: #2d3748;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  position: relative;
+  z-index: 1;
+}
+
+.search-input:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.9);
 }
 
 .search-input:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.18), 0 0 0 3px rgba(76, 175, 80, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.search-input::placeholder {
+  color: rgba(107, 114, 128, 0.6);
+  font-size: clamp(11px, 1.9vw, 12px);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: clamp(12px, 1.5vw, 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(239, 68, 68, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: clamp(20px, 2.5vw, 24px);
+  height: clamp(20px, 2.5vw, 24px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  z-index: 3;
+}
+
+.clear-search-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.clear-search-btn svg {
+  width: clamp(10px, 1.5vw, 12px);
+  height: clamp(10px, 1.5vw, 12px);
+  color: #ef4444;
 }
 
 /* Resultados de búsqueda - Dropdown flotante independiente */
 .search-results-dropdown {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
   background: white;
@@ -1824,7 +1879,7 @@ export default {
   box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
   max-height: 220px;
   overflow-y: auto;
-  z-index: 10000;
+  z-index: 1000;
   animation: slideDown 0.2s ease-out;
   backdrop-filter: blur(8px);
 }
@@ -1907,8 +1962,8 @@ export default {
 .result-item {
   display: flex;
   align-items: center;
-  gap: clamp(6px, 1.2vw, 8px);
-  padding: clamp(6px, 1.2vw, 8px);
+  gap: clamp(8px, 1.4vw, 10px);
+  padding: clamp(8px, 1.4vw, 10px);
   cursor: pointer;
   transition: all 0.2s ease;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
@@ -1928,8 +1983,8 @@ export default {
 }
 
 .user-avatar {
-  width: clamp(22px, 4vw, 26px);
-  height: clamp(22px, 4vw, 26px);
+  width: clamp(28px, 4.5vw, 32px);
+  height: clamp(28px, 4.5vw, 32px);
   background: linear-gradient(135deg, #4CAF50, #45a049);
   border-radius: 50%;
   display: flex;
@@ -1946,9 +2001,9 @@ export default {
 
 .user-name {
   font-weight: 600;
-  font-size: clamp(9px, 1.6vw, 10px);
+  font-size: clamp(11px, 1.8vw, 13px);
   color: #2c5530;
-  margin-bottom: clamp(1px, 0.3vw, 2px);
+  margin-bottom: clamp(2px, 0.4vw, 3px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1957,12 +2012,12 @@ export default {
 .user-details {
   display: flex;
   align-items: center;
-  gap: clamp(3px, 0.6vw, 4px);
-  margin-bottom: clamp(1px, 0.3vw, 2px);
+  gap: clamp(4px, 0.8vw, 6px);
+  margin-bottom: clamp(2px, 0.4vw, 3px);
 }
 
 .user-email {
-  font-size: clamp(8px, 1.4vw, 9px);
+  font-size: clamp(10px, 1.6vw, 11px);
   color: #6c757d;
   white-space: nowrap;
   overflow: hidden;
@@ -1971,13 +2026,13 @@ export default {
 }
 
 .user-curp {
-  font-size: clamp(8px, 1.4vw, 9px);
+  font-size: clamp(10px, 1.6vw, 11px);
   color: #6c757d;
   white-space: nowrap;
 }
 
 .user-cargo {
-  font-size: clamp(8px, 1.4vw, 9px);
+  font-size: clamp(10px, 1.6vw, 11px);
   color: #4CAF50;
   font-weight: 500;
   white-space: nowrap;

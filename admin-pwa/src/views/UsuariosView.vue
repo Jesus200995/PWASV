@@ -50,6 +50,12 @@
                   class="search-input"
                   @input="filtrarUsuarios"
                 >
+                <button v-if="searchTerm" @click="limpiarBusquedaUsuarios" class="clear-search-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               </div>
 
               <!-- Ordenamiento -->
@@ -1562,6 +1568,11 @@ const filtrarUsuarios = (resetPaginacion = true) => {
   aplicarOrdenamiento()
 }
 
+const limpiarBusquedaUsuarios = () => {
+  searchTerm.value = ''
+  filtrarUsuarios()
+}
+
 // Funciones de ordenamiento
 const ordenarPor = (campo) => {
   if (campoOrdenamiento.value === campo) {
@@ -2394,45 +2405,85 @@ const logout = () => {
   100% { transform: translateX(0); opacity: 1; }
 }
 
+.search-group {
+  position: relative;
+}
+
 .search-input {
   width: 100%;
-  padding: clamp(4px, 1vw, 5px) clamp(8px, 1.5vw, 10px) clamp(4px, 1vw, 5px) clamp(24px, 3vw, 28px);
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  border-radius: clamp(12px, 2vw, 14px);
-  font-size: clamp(10px, 1.2vw, 11px);
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 4px rgba(76, 175, 80, 0.1);
-  font-weight: 500;
+  padding: clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px) clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px);
+  border: 1.5px solid rgba(76, 175, 80, 0.2);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: clamp(11px, 1.3vw, 12px);
+  color: #2d3748;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
-  color: #333;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  font-weight: 500;
 }
 
 .search-input::placeholder {
-  color: #999;
+  color: rgba(107, 114, 128, 0.6);
   font-weight: 400;
-  font-size: clamp(9px, 1.1vw, 10px);
+  font-size: clamp(10px, 1.2vw, 11px);
 }
 
 .search-input:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.18), 0 0 0 3px rgba(76, 175, 80, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.9);
   transform: translateY(-1px);
 }
 
 .search-input:hover {
-  border-color: rgba(76, 175, 80, 0.5);
-  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.15);
+  border-color: rgba(76, 175, 80, 0.4);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.9);
 }
 
 .search-icon {
   position: absolute;
-  left: clamp(6px, 1.2vw, 7px);
+  left: clamp(14px, 1.8vw, 16px);
   top: 50%;
   transform: translateY(-50%);
-  color: #4CAF50;
+  color: rgba(76, 175, 80, 0.6);
   z-index: 1;
+  width: clamp(14px, 2.2vw, 16px);
+  height: clamp(14px, 2.2vw, 16px);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: clamp(12px, 1.5vw, 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(239, 68, 68, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: clamp(20px, 2.5vw, 24px);
+  height: clamp(20px, 2.5vw, 24px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  z-index: 2;
+}
+
+.clear-search-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.clear-search-btn svg {
+  width: clamp(10px, 1.5vw, 12px);
+  height: clamp(10px, 1.5vw, 12px);
+  color: #ef4444;
 }
 
 .usuarios-section {

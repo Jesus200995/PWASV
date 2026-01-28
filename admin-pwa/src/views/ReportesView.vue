@@ -131,6 +131,12 @@
                     class="search-input"
                     @input="filtrarReportes"
                   >
+                  <button v-if="filtros.busqueda" @click="limpiarBusquedaReportes" class="clear-search-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
                 </div>
               </div>
 
@@ -436,6 +442,10 @@ const reportesFiltrados = computed(() => {
   return resultado
 })
 
+const limpiarBusquedaReportes = () => {
+  filtros.value.busqueda = ''
+}
+
 const reportesPaginados = computed(() => {
   const inicio = (paginaActual.value - 1) * porPagina.value
   return reportesFiltrados.value.slice(inicio, inicio + porPagina.value)
@@ -689,11 +699,79 @@ onMounted(() => {
 
 .search-input-wrapper { position: relative; }
 
-.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+.search-icon { 
+  position: absolute; 
+  left: 14px; 
+  top: 50%; 
+  transform: translateY(-50%); 
+  color: rgba(76, 175, 80, 0.6);
+  width: 16px;
+  height: 16px;
+}
 
-.search-input { width: 100%; padding: clamp(8px, 1vw, 10px) clamp(10px, 1.2vw, 12px) clamp(8px, 1vw, 10px) 40px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: clamp(0.75rem, 1.1vw, 0.85rem); font-family: 'Inter', sans-serif; transition: all 0.2s; box-sizing: border-box; }
+.search-input { 
+  width: 100%; 
+  padding: clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px) clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px);
+  border: 1.5px solid rgba(76, 175, 80, 0.2);
+  border-radius: 50px; 
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: clamp(0.75rem, 1.1vw, 0.85rem); 
+  font-family: 'Inter', sans-serif; 
+  color: #2d3748;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
 
-.search-input:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1); }
+.search-input:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.search-input:focus { 
+  outline: none; 
+  border-color: #4CAF50; 
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.18), 0 0 0 3px rgba(76, 175, 80, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+.search-input::placeholder {
+  color: rgba(107, 114, 128, 0.6);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(239, 68, 68, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  z-index: 2;
+}
+
+.clear-search-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.clear-search-btn svg {
+  width: 11px;
+  height: 11px;
+  color: #ef4444;
+}
 
 .filter-actions { display: flex; align-items: flex-end; }
 

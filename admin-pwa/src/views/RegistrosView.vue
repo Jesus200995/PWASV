@@ -3253,50 +3253,75 @@ const logout = () => {
   left: clamp(0.5rem, 1.2vw, 0.7rem);
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
-  width: clamp(12px, 1.5vw, 14px);
-  height: clamp(12px, 1.5vw, 14px);
+  color: rgba(76, 175, 80, 0.6);
+  width: clamp(14px, 2.2vw, 16px);
+  height: clamp(14px, 2.2vw, 16px);
+  pointer-events: none;
+  z-index: 2;
 }
 
 .search-input {
   width: 100%;
-  padding: clamp(0.3rem, 0.8vw, 0.4rem) clamp(0.5rem, 1.2vw, 0.7rem) clamp(0.3rem, 0.8vw, 0.4rem) clamp(2rem, 4vw, 2.4rem);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: clamp(4px, 1vw, 6px);
-  background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.65rem, 1.3vw, 0.75rem);
-  transition: all 0.3s ease;
+  padding: clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px) clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px);
+  border: 1.5px solid rgba(76, 175, 80, 0.2);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: clamp(12px, 1.3vw, 13px);
+  color: #2d3748;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.search-input:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.9);
 }
 
 .search-input:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.18), 0 0 0 3px rgba(76, 175, 80, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+.search-input::placeholder {
+  color: rgba(107, 114, 128, 0.6);
+  font-size: clamp(11px, 1.2vw, 12px);
 }
 
 .clear-search-btn {
   position: absolute;
-  right: clamp(0.5rem, 1.2vw, 0.7rem);
+  right: clamp(12px, 1.5vw, 14px);
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: rgba(239, 68, 68, 0.1);
   border: none;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: clamp(0.15rem, 0.3vw, 0.2rem);
   border-radius: 50%;
+  width: clamp(20px, 2.5vw, 24px);
+  height: clamp(20px, 2.5vw, 24px);
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   transition: all 0.2s ease;
-  width: clamp(16px, 2.5vw, 20px);
-  height: clamp(16px, 2.5vw, 20px);
+  padding: 0;
+  z-index: 2;
 }
 
 .clear-search-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #4b5563;
+  background: rgba(239, 68, 68, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.clear-search-btn svg {
+  width: clamp(10px, 1.5vw, 12px);
+  height: clamp(10px, 1.5vw, 12px);
+  color: #ef4444;
 }
 
 .date-range-filter {

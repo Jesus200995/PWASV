@@ -32,6 +32,15 @@
       </header>
 
       <div class="page-content">
+        <!-- Título del territorio (solo para admins territoriales) -->
+        <div v-if="territorioUsuario" class="territorio-banner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span>Reportes de {{ territorioUsuario }}</span>
+        </div>
+
         <!-- Estadísticas Rápidas -->
         <div class="stats-section">
           <div class="stats-grid">
@@ -141,7 +150,7 @@
                 </select>
               </div>
 
-              <div class="filter-group">
+              <div class="filter-group" v-if="!territorioUsuario">
                 <label>Territorio:</label>
                 <select v-model="filtros.territorio" @change="cargarReportes" class="filter-select">
                   <option value="">Todos los territorios</option>
@@ -350,8 +359,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '../components/Sidebar.vue'
 import reportesService from '../services/reportesService'
+import authService from '../services/authService'
 
 const router = useRouter()
+
+// Obtener territorio del usuario admin actual (si es territorial)
+const territorioUsuario = ref(authService.getTerritorioFilter())
 
 const loading = ref(false)
 const reportes = ref([])
@@ -440,7 +453,15 @@ async function cargarReportes() {
     const params = { limite: 500 }
     if (filtros.value.mes) params.mes = filtros.value.mes
     if (filtros.value.anio) params.anio = filtros.value.anio
-    if (filtros.value.territorio) params.territorio = filtros.value.territorio
+    
+    // Si el usuario es territorial, filtrar automáticamente por su territorio
+    if (territorioUsuario.value) {
+      params.territorio = territorioUsuario.value
+      console.log(`🌎 Filtrando reportes por territorio: ${territorioUsuario.value}`)
+    } else if (filtros.value.territorio) {
+      // Si es admin global, permitir filtro manual
+      params.territorio = filtros.value.territorio
+    }
     
     const response = await reportesService.obtenerTodosReportes(params)
     if (response.success) {
@@ -595,6 +616,31 @@ onMounted(() => {
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .page-content { padding: clamp(12px, 2vw, 24px); max-width: 1600px; margin: 0 auto; }
+
+/* Banner de territorio (solo para admins territoriales) */
+.territorio-banner {
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(14px, 2vw, 16px);
+  font-weight: 600;
+  text-align: center;
+}
+
+.territorio-banner svg {
+  width: 18px;
+  height: 18px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
 
 .stats-section { margin-bottom: clamp(16px, 2vw, 24px); }
 

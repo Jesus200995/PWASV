@@ -880,17 +880,6 @@ export default {
       return texto.charAt(0).toUpperCase() + texto.slice(1);
     },
 
-    calcularHoraTermino(fechaHora) {
-      if (!fechaHora) return '-';
-      const date = new Date(fechaHora);
-      date.setHours(date.getHours() + 1); // Suma 1 hora
-      return date.toLocaleTimeString('es-MX', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      });
-    },
-
     // Verificar si hay firma válida (método en lugar de computed para reactividad con refs)
     esFirmaValida() {
       return this.$refs.firmaComponent?.hayFirma || false;
@@ -1339,7 +1328,7 @@ export default {
       // Definir columnas de la tabla
       const tableWidth = contentWidth;
       const tableX = margin;
-      const colWidths = [15, 32, 18, 22, 22, 61]; // No., Fecha, Tipo, Inicio, Término, Actividad
+      const colWidths = [15, 32, 18, 22, 83]; // No., Fecha, Tipo, Hora, Actividad
       
       // Header de la tabla
       doc.setDrawColor(0, 0, 0);
@@ -1364,15 +1353,11 @@ export default {
       doc.line(colX + colWidths[2], currentY, colX + colWidths[2], currentY + 8);
       
       colX += colWidths[2];
-      doc.text('Hora Inicio', colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+      doc.text('Hora', colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
       doc.line(colX + colWidths[3], currentY, colX + colWidths[3], currentY + 8);
       
       colX += colWidths[3];
-      doc.text('Hora Término', colX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
-      doc.line(colX + colWidths[4], currentY, colX + colWidths[4], currentY + 8);
-      
-      colX += colWidths[4];
-      doc.text('Actividad desarrollada', colX + colWidths[5]/2, currentY + 5.5, { align: 'center' });
+      doc.text('Actividad desarrollada', colX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
 
       currentY += 8;
       
@@ -1389,7 +1374,7 @@ export default {
         const activDesc = actividad.descripcion || actividad.categoria_actividad || 'Actividad de ' + (actividad.tipo_actividad || 'campo');
         
         // Calcular cuántas líneas necesita la descripción
-        const maxTextWidth = colWidths[5] - 4; // Ancho disponible para texto con margen
+        const maxTextWidth = colWidths[4] - 4; // Ancho disponible para texto con margen
         const textLines = doc.splitTextToSize(activDesc, maxTextWidth);
         const numLines = textLines.length;
         
@@ -1424,15 +1409,11 @@ export default {
           doc.line(headerX + colWidths[2], currentY, headerX + colWidths[2], currentY + 8);
           
           headerX += colWidths[2];
-          doc.text('Hora Inicio', headerX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+          doc.text('Hora', headerX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
           doc.line(headerX + colWidths[3], currentY, headerX + colWidths[3], currentY + 8);
           
           headerX += colWidths[3];
-          doc.text('Hora Término', headerX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
-          doc.line(headerX + colWidths[4], currentY, headerX + colWidths[4], currentY + 8);
-          
-          headerX += colWidths[4];
-          doc.text('Actividad desarrollada', headerX + colWidths[5]/2, currentY + 5.5, { align: 'center' });
+          doc.text('Actividad desarrollada', headerX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
           
           currentY += 8;
           doc.setTextColor(0, 0, 0);
@@ -1468,19 +1449,13 @@ export default {
         doc.text(tipo, colX + colWidths[2]/2, textYCenter, { align: 'center' });
         doc.line(colX + colWidths[2], currentY, colX + colWidths[2], currentY + rowHeight);
         
-        // Hora Inicio
+        // Hora de registro de la actividad
         colX += colWidths[2];
         doc.text(hora, colX + colWidths[3]/2, textYCenter, { align: 'center' });
         doc.line(colX + colWidths[3], currentY, colX + colWidths[3], currentY + rowHeight);
         
-        // Hora Término (estimado +1 hora)
-        colX += colWidths[3];
-        const horaTermino = this.calcularHoraTermino(actividad.fecha_hora);
-        doc.text(horaTermino, colX + colWidths[4]/2, textYCenter, { align: 'center' });
-        doc.line(colX + colWidths[4], currentY, colX + colWidths[4], currentY + rowHeight);
-        
         // Actividad - Descripción completa con múltiples líneas
-        colX += colWidths[4];
+        colX += colWidths[3];
         // Dibujar cada línea de texto
         textLines.forEach((line, lineIndex) => {
           doc.text(line, colX + 2, currentY + 4 + (lineIndex * lineHeight));

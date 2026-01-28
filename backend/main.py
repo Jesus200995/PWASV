@@ -1734,7 +1734,10 @@ async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
                 anio,
                 tipo,
                 fecha_generacion,
-                CASE WHEN pdf_base64 IS NOT NULL AND pdf_base64 != '' THEN true ELSE false END as tiene_pdf
+                CASE WHEN pdf_base64 IS NOT NULL AND pdf_base64 != '' THEN true ELSE false END as tiene_pdf,
+                COALESCE(firmado_supervisor, false) as firmado_supervisor,
+                fecha_firma_supervisor,
+                nombre_supervisor
             FROM reportes_generados
             WHERE usuario_id = %s
             ORDER BY fecha_generacion DESC
@@ -1752,7 +1755,10 @@ async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
                 "anio": reporte[3],
                 "tipo": reporte[4],
                 "fecha": reporte[5].isoformat() if reporte[5] else None,
-                "tiene_pdf": reporte[6] if len(reporte) > 6 else False
+                "tiene_pdf": reporte[6] if len(reporte) > 6 else False,
+                "firmado_supervisor": reporte[7] if len(reporte) > 7 else False,
+                "fecha_firma_supervisor": reporte[8].isoformat() if len(reporte) > 8 and reporte[8] else None,
+                "nombre_supervisor": reporte[9] if len(reporte) > 9 else None
             })
         
         print(f"✅ {len(resultado)} reportes encontrados para usuario {usuario_id}")
@@ -1777,12 +1783,22 @@ async def eliminar_reporte(reporte_id: int):
     try:
         print(f"🗑️ Eliminando reporte ID: {reporte_id}")
         
-        # Verificar que el reporte existe
-        cursor.execute("SELECT id, nombre_reporte FROM reportes_generados WHERE id = %s", (reporte_id,))
+        # Verificar que el reporte existe y si está firmado
+        cursor.execute("""
+            SELECT id, nombre_reporte, COALESCE(firmado_supervisor, false) as firmado
+            FROM reportes_generados WHERE id = %s
+        """, (reporte_id,))
         reporte = cursor.fetchone()
         
         if not reporte:
             raise HTTPException(status_code=404, detail="Reporte no encontrado")
+        
+        # Verificar si está firmado por el supervisor
+        if reporte[2]:  # firmado_supervisor es True
+            raise HTTPException(
+                status_code=403, 
+                detail="No se puede eliminar un reporte que ya ha sido firmado por el supervisor"
+            )
         
         # Eliminar el reporte
         cursor.execute("DELETE FROM reportes_generados WHERE id = %s", (reporte_id,))
@@ -1850,6 +1866,148 @@ async def descargar_reporte(reporte_id: int):
         raise
     except Exception as e:
         print(f"❌ Error descargando reporte: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+# ============================================
+# ENDPOINT PARA FIRMAR REPORTES (SUPERVISOR)
+# ============================================
+
+class FirmaReporteRequest(BaseModel):
+    supervisor_id: int
+    nombre_supervisor: str
+    firma_base64: Optional[str] = None  # Firma digital opcional
+
+@app.post("/reportes/firmar/{reporte_id}")
+async def firmar_reporte_supervisor(reporte_id: int, firma_data: FirmaReporteRequest):
+    """
+    Permite a un supervisor firmar un reporte.
+    Una vez firmado, el reporte no puede ser eliminado por el usuario.
+    Actualiza el PDF agregando la firma del supervisor en la sección 'Autorizó'.
+    """
+    try:
+        print(f"✍️ [FIRMA] Firmando reporte ID: {reporte_id}")
+        print(f"   Supervisor: {firma_data.nombre_supervisor} (ID: {firma_data.supervisor_id})")
+        
+        # Verificar que el reporte existe y obtener datos actuales
+        cursor.execute("""
+            SELECT 
+                id,
+                nombre_reporte,
+                pdf_base64,
+                firmado_supervisor,
+                usuario_id
+            FROM reportes_generados
+            WHERE id = %s
+        """, (reporte_id,))
+        
+        reporte = cursor.fetchone()
+        
+        if not reporte:
+            raise HTTPException(status_code=404, detail="Reporte no encontrado")
+        
+        # Verificar si ya está firmado
+        if reporte[3]:
+            raise HTTPException(status_code=400, detail="Este reporte ya ha sido firmado por un supervisor")
+        
+        # Obtener zona horaria de CDMX
+        from zoneinfo import ZoneInfo
+        cdmx_tz = ZoneInfo("America/Mexico_City")
+        fecha_firma = datetime.now(cdmx_tz)
+        
+        # Actualizar el reporte con la firma
+        cursor.execute("""
+            UPDATE reportes_generados
+            SET 
+                firmado_supervisor = TRUE,
+                fecha_firma_supervisor = %s,
+                firma_supervisor_base64 = %s,
+                nombre_supervisor = %s,
+                supervisor_id = %s
+            WHERE id = %s
+        """, (
+            fecha_firma,
+            firma_data.firma_base64,
+            firma_data.nombre_supervisor,
+            firma_data.supervisor_id,
+            reporte_id
+        ))
+        
+        conn.commit()
+        
+        print(f"✅ Reporte firmado exitosamente por {firma_data.nombre_supervisor}")
+        
+        return {
+            "success": True,
+            "message": f"Reporte firmado exitosamente por {firma_data.nombre_supervisor}",
+            "data": {
+                "reporte_id": reporte_id,
+                "firmado_supervisor": True,
+                "fecha_firma": fecha_firma.isoformat(),
+                "nombre_supervisor": firma_data.nombre_supervisor,
+                "supervisor_id": firma_data.supervisor_id
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error firmando reporte: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al firmar el reporte: {str(e)}")
+
+@app.delete("/reportes/quitar-firma/{reporte_id}")
+async def quitar_firma_reporte(reporte_id: int, supervisor_id: int):
+    """
+    Permite quitar la firma de un reporte (solo el mismo supervisor que firmó o un admin).
+    """
+    try:
+        print(f"🔓 [FIRMA] Quitando firma del reporte ID: {reporte_id}")
+        
+        # Verificar que el reporte existe y está firmado
+        cursor.execute("""
+            SELECT 
+                id,
+                nombre_reporte,
+                firmado_supervisor,
+                supervisor_id
+            FROM reportes_generados
+            WHERE id = %s
+        """, (reporte_id,))
+        
+        reporte = cursor.fetchone()
+        
+        if not reporte:
+            raise HTTPException(status_code=404, detail="Reporte no encontrado")
+        
+        if not reporte[2]:
+            raise HTTPException(status_code=400, detail="Este reporte no tiene firma de supervisor")
+        
+        # Quitar la firma
+        cursor.execute("""
+            UPDATE reportes_generados
+            SET 
+                firmado_supervisor = FALSE,
+                fecha_firma_supervisor = NULL,
+                firma_supervisor_base64 = NULL,
+                nombre_supervisor = NULL,
+                supervisor_id = NULL
+            WHERE id = %s
+        """, (reporte_id,))
+        
+        conn.commit()
+        
+        print(f"✅ Firma del reporte removida exitosamente")
+        
+        return {
+            "success": True,
+            "message": "Firma del reporte removida exitosamente"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error quitando firma: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 @app.get("/reportes/admin/todos")

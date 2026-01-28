@@ -15,7 +15,7 @@
             </div>
             <div class="header-text">
               <h1 class="header-title">Gestión de Reportes</h1>
-              <p class="header-subtitle">Consulta los reportes firmados por los usuarios</p>
+              <p class="header-subtitle">Firma y gestiona los reportes de los usuarios</p>
             </div>
           </div>
           <div class="header-actions">
@@ -57,33 +57,29 @@
               </div>
             </div>
             
-            <div class="stat-card mes">
+            <div class="stat-card firmados">
               <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
+                  <path d="M9 12l2 2 4-4"/>
+                  <circle cx="12" cy="12" r="10"/>
                 </svg>
               </div>
               <div class="stat-info">
-                <span class="stat-value">{{ estadisticas.reportesMes }}</span>
-                <span class="stat-label">Este Mes</span>
+                <span class="stat-value">{{ reportesFirmados.length }}</span>
+                <span class="stat-label">Firmados</span>
               </div>
             </div>
             
-            <div class="stat-card pdf">
+            <div class="stat-card pendientes">
               <div class="stat-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
                 </svg>
               </div>
               <div class="stat-info">
-                <span class="stat-value">{{ estadisticas.porTipo?.PDF || 0 }}</span>
-                <span class="stat-label">Reportes PDF</span>
+                <span class="stat-value">{{ reportesPendientes.length }}</span>
+                <span class="stat-label">Pendientes</span>
               </div>
             </div>
             
@@ -104,6 +100,33 @@
           </div>
         </div>
 
+        <!-- Barra de acciones para firma masiva -->
+        <div v-if="reportesSeleccionados.length > 0" class="firma-actions-bar">
+          <div class="firma-actions-info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4"/>
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+            </svg>
+            <span><strong>{{ reportesSeleccionados.length }}</strong> reportes seleccionados</span>
+          </div>
+          <div class="firma-actions-buttons">
+            <button @click="deseleccionarTodos" class="btn-deselect">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Deseleccionar
+            </button>
+            <button @click="abrirModalFirma" class="btn-firmar-seleccionados">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                <path d="M2 2l7.586 7.586"/>
+              </svg>
+              Firmar Seleccionados ({{ reportesSeleccionados.length }})
+            </button>
+          </div>
+        </div>
+
         <!-- Filtros -->
         <div class="filters-section">
           <div class="filters-card">
@@ -114,6 +137,18 @@
                 </svg>
                 Filtros de Búsqueda
               </h3>
+              <!-- Botón firmar todos los pendientes del período seleccionado -->
+              <button 
+                v-if="reportesPendientesFiltrados.length > 0" 
+                @click="seleccionarTodosPendientes" 
+                class="btn-firmar-todos"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                </svg>
+                Seleccionar Todos Pendientes ({{ reportesPendientesFiltrados.length }})
+              </button>
             </div>
             
             <div class="filters-grid">
@@ -165,11 +200,11 @@
               </div>
 
               <div class="filter-group">
-                <label>Tipo:</label>
-                <select v-model="filtros.tipo" @change="filtrarReportes" class="filter-select">
+                <label>Estado:</label>
+                <select v-model="filtros.estadoFirma" @change="filtrarReportes" class="filter-select">
                   <option value="">Todos</option>
-                  <option value="PDF">PDF</option>
-                  <option value="CSV">CSV</option>
+                  <option value="pendiente">⏳ Pendientes</option>
+                  <option value="firmado">✓ Firmados</option>
                 </select>
               </div>
 
@@ -219,17 +254,55 @@
               <table class="reportes-table">
                 <thead>
                   <tr>
+                    <th class="th-checkbox">
+                      <input 
+                        type="checkbox" 
+                        :checked="todosSeleccionados && reportesPendientesFiltrados.length > 0"
+                        :indeterminate="algunosSeleccionados"
+                        @change="toggleSeleccionarTodos"
+                        :disabled="reportesPendientesFiltrados.length === 0"
+                        class="checkbox-header"
+                        title="Seleccionar todos los pendientes"
+                      >
+                    </th>
+                    <th class="th-estado">Estado</th>
                     <th class="th-usuario">Usuario</th>
                     <th class="th-territorio">Territorio</th>
                     <th class="th-reporte">Reporte</th>
                     <th class="th-periodo">Período</th>
-                    <th class="th-tipo">Tipo</th>
                     <th class="th-fecha">Fecha</th>
                     <th class="th-acciones">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="reporte in reportesPaginados" :key="reporte.id">
+                  <tr v-for="reporte in reportesPaginados" :key="reporte.id" 
+                      :class="{ 'row-firmado': reporte.firmado_supervisor, 'row-seleccionado': reportesSeleccionados.includes(reporte.id) }">
+                    <td class="td-checkbox">
+                      <input 
+                        type="checkbox"
+                        :checked="reportesSeleccionados.includes(reporte.id)"
+                        @change="toggleSeleccion(reporte)"
+                        :disabled="reporte.firmado_supervisor"
+                        class="checkbox-row"
+                        :title="reporte.firmado_supervisor ? 'Ya está firmado' : 'Seleccionar para firmar'"
+                      >
+                    </td>
+                    <td class="td-estado">
+                      <div v-if="reporte.firmado_supervisor" class="estado-badge firmado" :title="'Firmado por ' + reporte.nombre_supervisor">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <path d="M9 12l2 2 4-4"/>
+                          <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                        <span>Firmado</span>
+                      </div>
+                      <div v-else class="estado-badge pendiente">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="12" cy="12" r="10"/>
+                          <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span>Pendiente</span>
+                      </div>
+                    </td>
                     <td class="td-usuario">
                       <div class="usuario-cell">
                         <div class="usuario-avatar">{{ obtenerIniciales(reporte.usuario?.nombre_completo) }}</div>
@@ -244,26 +317,33 @@
                     </td>
                     <td class="td-reporte">
                       <span class="reporte-nombre">{{ reporte.nombre_reporte }}</span>
+                      <span v-if="reporte.firmado_supervisor" class="firma-info">
+                        Firmado por {{ reporte.nombre_supervisor }}
+                      </span>
                     </td>
                     <td class="td-periodo">
                       <span class="periodo-badge">{{ reporte.mes }} {{ reporte.anio }}</span>
                     </td>
-                    <td class="td-tipo">
-                      <span :class="['tipo-badge', reporte.tipo?.toLowerCase()]">
-                        <svg v-if="reporte.tipo === 'PDF'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-                        </svg>
-                        <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-                        </svg>
-                        {{ reporte.tipo }}
-                      </span>
-                    </td>
                     <td class="td-fecha">
                       <span class="fecha-text">{{ formatearFecha(reporte.fecha_generacion) }}</span>
+                      <span v-if="reporte.firmado_supervisor && reporte.fecha_firma_supervisor" class="fecha-firma">
+                        Firmado: {{ formatearFecha(reporte.fecha_firma_supervisor) }}
+                      </span>
                     </td>
                     <td class="td-acciones">
                       <div class="acciones-buttons">
+                        <!-- Botón firmar individual (solo si no está firmado) -->
+                        <button 
+                          v-if="!reporte.firmado_supervisor" 
+                          @click="abrirModalFirmaIndividual(reporte)" 
+                          class="btn-action btn-sign" 
+                          title="Firmar reporte"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                          </svg>
+                        </button>
                         <button v-if="reporte.tiene_pdf" @click="verReporte(reporte)" :disabled="viendoReporte === reporte.id" class="btn-action btn-view" title="Ver reporte">
                           <svg v-if="viendoReporte !== reporte.id" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -281,12 +361,26 @@
                             <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
                           </svg>
                         </span>
-                        <button @click="confirmarEliminacion(reporte)" :disabled="eliminandoReporte === reporte.id" class="btn-action btn-delete" title="Eliminar">
+                        <!-- Botón eliminar - deshabilitado si está firmado -->
+                        <button 
+                          v-if="!reporte.firmado_supervisor"
+                          @click="confirmarEliminacion(reporte)" 
+                          :disabled="eliminandoReporte === reporte.id" 
+                          class="btn-action btn-delete" 
+                          title="Eliminar"
+                        >
                           <svg v-if="eliminandoReporte !== reporte.id" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                           </svg>
                           <div v-else class="spinner-mini"></div>
                         </button>
+                        <!-- Icono de protegido si está firmado -->
+                        <span v-else class="btn-action btn-protected" title="Protegido - No se puede eliminar">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                          </svg>
+                        </span>
                       </div>
                     </td>
                   </tr>
@@ -317,6 +411,111 @@
           </div>
         </div>
       </div>
+
+      <!-- Modal de Firma de Supervisor -->
+      <Teleport to="body">
+        <Transition name="modal-fade">
+          <div v-if="mostrarModalFirma" class="modal-overlay" @click.self="cancelarFirma">
+            <div class="modal-container modal-firma">
+              <div class="modal-header firma-header">
+                <div class="modal-icon firma-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                    <path d="M2 2l7.586 7.586"/>
+                  </svg>
+                </div>
+                <div class="modal-title-container">
+                  <h3>Firmar Reportes</h3>
+                  <p>{{ reportesAFirmar.length }} reporte(s) seleccionado(s)</p>
+                </div>
+                <button @click="cancelarFirma" class="modal-close-btn">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <div class="modal-body">
+                <!-- Lista de reportes a firmar -->
+                <div class="reportes-a-firmar">
+                  <h4>Reportes a firmar:</h4>
+                  <div class="reportes-list-scroll">
+                    <div v-for="reporte in reportesAFirmar" :key="reporte.id" class="reporte-item">
+                      <div class="reporte-item-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                          <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                      </div>
+                      <div class="reporte-item-info">
+                        <span class="reporte-item-nombre">{{ reporte.nombre_reporte }}</span>
+                        <span class="reporte-item-usuario">{{ reporte.usuario?.nombre_completo }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Componente de firma -->
+                <div class="firma-container">
+                  <FirmaDigitalAdmin 
+                    ref="firmaComponentRef" 
+                    label="Firma del Supervisor"
+                  />
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button @click="cancelarFirma" class="btn-cancel">
+                  Cancelar
+                </button>
+                <button 
+                  @click="confirmarFirma" 
+                  class="btn-firmar-confirm"
+                  :disabled="firmandoReportes || !firmaValida"
+                >
+                  <svg v-if="!firmandoReportes" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                  </svg>
+                  <div v-else class="spinner-mini white"></div>
+                  {{ firmandoReportes ? 'Firmando...' : 'Firmar Reportes' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
+
+      <!-- Modal de Confirmación de Firma Exitosa -->
+      <Teleport to="body">
+        <Transition name="modal-fade">
+          <div v-if="mostrarModalExito" class="modal-overlay" @click.self="cerrarModalExito">
+            <div class="modal-container modal-exito">
+              <div class="modal-header exito-header">
+                <div class="modal-icon exito-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4"/>
+                    <circle cx="12" cy="12" r="10"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="modal-body text-center">
+                <h3 class="exito-title">¡Reportes Firmados!</h3>
+                <p class="exito-message">Se firmaron {{ resultadoFirma.exitosos }} reporte(s) exitosamente.</p>
+                <p v-if="resultadoFirma.fallidos > 0" class="exito-warning">
+                  {{ resultadoFirma.fallidos }} reporte(s) no pudieron ser firmados.
+                </p>
+              </div>
+              <div class="modal-footer centered">
+                <button @click="cerrarModalExito" class="btn-exito-ok">
+                  Aceptar
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
 
       <!-- Modal de Confirmación de Eliminación -->
       <Teleport to="body">
@@ -361,9 +560,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '../components/Sidebar.vue'
+import FirmaDigitalAdmin from '../components/FirmaDigitalAdmin.vue'
 import reportesService from '../services/reportesService'
 import authService from '../services/authService'
 
@@ -384,6 +584,18 @@ const eliminandoReporte = ref(null)
 const mostrarModalEliminar = ref(false)
 const reporteAEliminar = ref(null)
 
+// Estados para firma
+const reportesSeleccionados = ref([])
+const mostrarModalFirma = ref(false)
+const reportesAFirmar = ref([])
+const firmandoReportes = ref(false)
+const firmaComponentRef = ref(null)
+const firmaValida = ref(false)
+
+// Modal de éxito
+const mostrarModalExito = ref(false)
+const resultadoFirma = ref({ exitosos: 0, fallidos: 0 })
+
 const estadisticas = ref({
   totalReportes: 0,
   reportesMes: 0,
@@ -397,7 +609,8 @@ const filtros = ref({
   mes: '',
   anio: '',
   territorio: '',
-  tipo: ''
+  tipo: '',
+  estadoFirma: ''
 })
 
 const paginaActual = ref(1)
@@ -439,7 +652,30 @@ const reportesFiltrados = computed(() => {
   if (filtros.value.tipo) {
     resultado = resultado.filter(r => r.tipo === filtros.value.tipo)
   }
+  // Filtrar por estado de firma
+  if (filtros.value.estadoFirma === 'pendiente') {
+    resultado = resultado.filter(r => !r.firmado_supervisor)
+  } else if (filtros.value.estadoFirma === 'firmado') {
+    resultado = resultado.filter(r => r.firmado_supervisor)
+  }
   return resultado
+})
+
+// Computed para reportes firmados y pendientes
+const reportesFirmados = computed(() => reportes.value.filter(r => r.firmado_supervisor))
+const reportesPendientes = computed(() => reportes.value.filter(r => !r.firmado_supervisor))
+const reportesPendientesFiltrados = computed(() => reportesFiltrados.value.filter(r => !r.firmado_supervisor))
+
+// Computed para selección
+const todosSeleccionados = computed(() => {
+  const pendientes = reportesPendientesFiltrados.value
+  return pendientes.length > 0 && pendientes.every(r => reportesSeleccionados.value.includes(r.id))
+})
+
+const algunosSeleccionados = computed(() => {
+  const pendientes = reportesPendientesFiltrados.value
+  const seleccionados = pendientes.filter(r => reportesSeleccionados.value.includes(r.id))
+  return seleccionados.length > 0 && seleccionados.length < pendientes.length
 })
 
 const limpiarBusquedaReportes = () => {
@@ -560,8 +796,166 @@ async function ejecutarEliminacion() {
 function filtrarReportes() { paginaActual.value = 1 }
 
 function limpiarFiltros() {
-  filtros.value = { busqueda: '', mes: '', anio: '', territorio: '', tipo: '' }
+  filtros.value = { busqueda: '', mes: '', anio: '', territorio: '', tipo: '', estadoFirma: '' }
+  reportesSeleccionados.value = []
   cargarReportes()
+}
+
+// ========== FUNCIONES DE SELECCIÓN ==========
+
+function toggleSeleccion(reporte) {
+  if (reporte.firmado_supervisor) return
+  
+  const index = reportesSeleccionados.value.indexOf(reporte.id)
+  if (index > -1) {
+    reportesSeleccionados.value.splice(index, 1)
+  } else {
+    reportesSeleccionados.value.push(reporte.id)
+  }
+}
+
+function toggleSeleccionarTodos() {
+  const pendientes = reportesPendientesFiltrados.value
+  if (todosSeleccionados.value) {
+    // Deseleccionar todos
+    reportesSeleccionados.value = reportesSeleccionados.value.filter(
+      id => !pendientes.some(r => r.id === id)
+    )
+  } else {
+    // Seleccionar todos los pendientes
+    const nuevoSet = new Set(reportesSeleccionados.value)
+    pendientes.forEach(r => nuevoSet.add(r.id))
+    reportesSeleccionados.value = Array.from(nuevoSet)
+  }
+}
+
+function seleccionarTodosPendientes() {
+  const pendientes = reportesPendientesFiltrados.value
+  reportesSeleccionados.value = pendientes.map(r => r.id)
+}
+
+function deseleccionarTodos() {
+  reportesSeleccionados.value = []
+}
+
+// ========== FUNCIONES DE FIRMA ==========
+
+function abrirModalFirma() {
+  if (reportesSeleccionados.value.length === 0) return
+  
+  // Obtener los objetos de reportes seleccionados
+  reportesAFirmar.value = reportes.value.filter(r => 
+    reportesSeleccionados.value.includes(r.id) && !r.firmado_supervisor
+  )
+  
+  if (reportesAFirmar.value.length === 0) {
+    alert('No hay reportes pendientes seleccionados para firmar.')
+    return
+  }
+  
+  mostrarModalFirma.value = true
+  firmaValida.value = false
+  
+  // Reinicializar el componente de firma
+  nextTick(() => {
+    if (firmaComponentRef.value) {
+      firmaComponentRef.value.reinicializar()
+    }
+  })
+}
+
+function abrirModalFirmaIndividual(reporte) {
+  reportesSeleccionados.value = [reporte.id]
+  reportesAFirmar.value = [reporte]
+  mostrarModalFirma.value = true
+  firmaValida.value = false
+  
+  nextTick(() => {
+    if (firmaComponentRef.value) {
+      firmaComponentRef.value.reinicializar()
+    }
+  })
+}
+
+function cancelarFirma() {
+  mostrarModalFirma.value = false
+  reportesAFirmar.value = []
+  firmaValida.value = false
+}
+
+async function confirmarFirma() {
+  // Verificar firma
+  if (!firmaComponentRef.value || !firmaComponentRef.value.tieneFirma()) {
+    alert('Por favor, dibuje su firma antes de continuar.')
+    return
+  }
+  
+  firmandoReportes.value = true
+  
+  try {
+    // Obtener datos del supervisor actual
+    const adminData = authService.getAdminData()
+    const firmaBase64 = firmaComponentRef.value.obtenerFirmaBase64()
+    
+    const firmaData = {
+      supervisor_id: adminData?.id || 1,
+      nombre_supervisor: adminData?.nombre_completo || adminData?.username || 'Supervisor',
+      firma_base64: firmaBase64
+    }
+    
+    console.log('✍️ Firmando reportes:', reportesAFirmar.value.map(r => r.id))
+    
+    // Firmar cada reporte
+    const resultados = await reportesService.firmarMultiplesReportes(
+      reportesAFirmar.value.map(r => r.id),
+      firmaData
+    )
+    
+    resultadoFirma.value = {
+      exitosos: resultados.exitosos.length,
+      fallidos: resultados.fallidos.length
+    }
+    
+    // Actualizar estado local de los reportes firmados
+    resultados.exitosos.forEach(id => {
+      const reporte = reportes.value.find(r => r.id === id)
+      if (reporte) {
+        reporte.firmado_supervisor = true
+        reporte.nombre_supervisor = firmaData.nombre_supervisor
+        reporte.fecha_firma_supervisor = new Date().toISOString()
+      }
+    })
+    
+    // Limpiar selección
+    reportesSeleccionados.value = reportesSeleccionados.value.filter(
+      id => !resultados.exitosos.includes(id)
+    )
+    
+    // Cerrar modal de firma y mostrar modal de éxito
+    mostrarModalFirma.value = false
+    mostrarModalExito.value = true
+    
+    // Recargar estadísticas
+    await cargarEstadisticas()
+    
+  } catch (error) {
+    console.error('Error firmando reportes:', error)
+    alert('Error al firmar los reportes: ' + error.message)
+  } finally {
+    firmandoReportes.value = false
+  }
+}
+
+function cerrarModalExito() {
+  mostrarModalExito.value = false
+  resultadoFirma.value = { exitosos: 0, fallidos: 0 }
+}
+
+// Watcher para verificar si la firma es válida
+function verificarFirma() {
+  if (firmaComponentRef.value) {
+    firmaValida.value = firmaComponentRef.value.tieneFirma()
+  }
 }
 
 function formatearFecha(fechaISO) {
@@ -668,6 +1062,8 @@ onMounted(() => {
 .stat-card.mes .stat-icon { background: linear-gradient(135deg, #2196F3, #1565C0); }
 .stat-card.pdf .stat-icon { background: linear-gradient(135deg, #F44336, #C62828); }
 .stat-card.usuarios .stat-icon { background: linear-gradient(135deg, #9C27B0, #6A1B9A); }
+.stat-card.firmados .stat-icon { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.stat-card.pendientes .stat-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
 
 .stat-info { display: flex; flex-direction: column; }
 
@@ -679,7 +1075,16 @@ onMounted(() => {
 
 .filters-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0, 0, 0, 0.05); overflow: hidden; }
 
-.filters-header { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: clamp(12px, 1.5vw, 16px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+.filters-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  gap: 16px; 
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); 
+  padding: 16px 20px; 
+  border-bottom: 1px solid rgba(34, 197, 94, 0.15); 
+}
 
 .filters-header h3 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: clamp(0.9rem, 1.3vw, 1rem); font-weight: 600; color: #15803d; font-family: 'Inter', sans-serif; }
 
@@ -946,4 +1351,777 @@ onMounted(() => {
 @media (max-width: 480px) { .main-content { margin-left: 60px; width: calc(100vw - 60px); } .page-content { padding: 8px; } .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; } .stat-card { padding: 8px 10px; } .stat-icon { width: 32px; height: 32px; min-width: 32px; } .stat-icon svg { width: 16px; height: 16px; max-width: 16px; max-height: 16px; } .stat-value { font-size: 1rem; } .stat-label { font-size: 0.65rem; } .pagination-container { flex-direction: column; text-align: center; } .th-territorio, .td-territorio { display: none; } .btn-action { width: 28px; height: 28px; } .modal-overlay { padding: 12px; } .modal-container { max-width: 95%; } .modal-header { padding: 12px; gap: 10px; flex-wrap: wrap; } .modal-icon { width: 36px; height: 36px; min-width: 36px; } .modal-icon svg { width: 16px; height: 16px; } .modal-body { padding: 12px; } .modal-body p { font-size: 0.8rem; } .modal-footer { padding: 12px; flex-direction: column; gap: 8px; } .btn-cancel, .btn-delete-confirm { width: 100%; padding: 11px 16px; font-size: 0.85rem; } .modal-title-container h3 { font-size: 0.95rem; } .modal-title-container p { font-size: 0.7rem; } .reporte-eliminar-info { padding: 10px; } .reporte-eliminar-info strong { font-size: 0.85rem; } }
 
 @media (max-width: 360px) { .main-content { margin-left: 60px; width: calc(100vw - 60px); } .header-title { font-size: 1rem !important; } .stats-grid { grid-template-columns: 1fr; } }
+
+/* ==========================================
+   ESTILOS PARA SISTEMA DE FIRMAS
+   ========================================== */
+
+/* Checkbox column styles */
+.th-checkbox, .td-checkbox {
+  width: 40px;
+  text-align: center;
+  padding: 8px !important;
+}
+
+.th-checkbox input[type="checkbox"],
+.td-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #4CAF50;
+  border-radius: 4px;
+}
+
+.th-checkbox input[type="checkbox"]:disabled,
+.td-checkbox input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Estado column styles */
+.th-estado, .td-estado {
+  width: 100px;
+  text-align: center;
+}
+
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-badge.firmado {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  color: #15803d;
+}
+
+.estado-badge.pendiente {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #b45309;
+}
+
+.estado-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Row states */
+.row-firmado {
+  background: rgba(220, 252, 231, 0.3) !important;
+}
+
+.row-seleccionado {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+.reportes-table tbody tr.row-firmado:hover {
+  background: rgba(220, 252, 231, 0.5) !important;
+}
+
+.reportes-table tbody tr.row-seleccionado:hover {
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Action buttons for firma */
+.btn-sign {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #16a34a;
+}
+
+.btn-sign:hover:not(:disabled) {
+  background: #dcfce7;
+  transform: translateY(-1px);
+}
+
+.btn-protected {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed !important;
+}
+
+/* Firma info tooltip */
+.firma-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.firma-info .nombre-supervisor {
+  font-weight: 600;
+  color: #15803d;
+  font-size: 0.75rem;
+}
+
+.fecha-firma {
+  font-size: 0.65rem;
+  color: #6b7280;
+}
+
+/* ==========================================
+   BARRA DE ACCIONES DE FIRMA FLOTANTE
+   ========================================== */
+
+.firma-actions-bar {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(135deg, #15803d 0%, #22c55e 50%, #16a34a 100%);
+  padding: 16px 24px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: 0 6px 24px rgba(34, 197, 94, 0.35), 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  animation: slideDown 0.3s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.firma-actions-bar .firma-actions-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.firma-actions-bar .firma-actions-info svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.firma-actions-bar .firma-actions-info span {
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+.firma-actions-bar .firma-actions-info strong {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-right: 2px;
+}
+
+.firma-actions-bar .firma-actions-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-firmar-seleccionados {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: white;
+  border: none;
+  border-radius: 10px;
+  color: #15803d;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-firmar-seleccionados:hover {
+  background: #f0fdf4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-firmar-seleccionados svg {
+  width: 18px;
+  height: 18px;
+  color: #16a34a;
+}
+
+.btn-deselect {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-deselect:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
+  transform: translateY(-1px);
+}
+
+.btn-deselect svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ==========================================
+   BOTONES SELECCIONAR TODOS EN HEADER
+   ========================================== */
+
+.btn-firmar-todos {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  color: white;
+  box-shadow: 0 3px 10px rgba(34, 197, 94, 0.25);
+  white-space: nowrap;
+}
+
+.btn-firmar-todos:hover:not(:disabled) {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+}
+
+.btn-firmar-todos:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.btn-firmar-todos:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-firmar-todos svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ==========================================
+   MODAL DE FIRMA
+   ========================================== */
+
+.modal-firma {
+  max-width: 520px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.firma-header {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-bottom: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.firma-icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.modal-firma .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.reportes-a-firmar {
+  margin-bottom: 16px;
+}
+
+.reportes-a-firmar h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reportes-list-scroll {
+  max-height: 150px;
+  overflow-y: auto;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+}
+
+.reporte-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: white;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.8rem;
+}
+
+.reporte-item:last-child {
+  margin-bottom: 0;
+}
+
+.reporte-item svg {
+  width: 16px;
+  height: 16px;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.reporte-item .reporte-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.reporte-item .reporte-nombre {
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reporte-item .reporte-usuario {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+/* Firma container */
+.firma-container {
+  margin-top: 12px;
+}
+
+.firma-container h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Botón cerrar modal */
+.modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+}
+
+.modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #374151;
+}
+
+/* Items de reporte en el modal */
+.reporte-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reporte-item-icon svg {
+  color: #16a34a;
+}
+
+.reporte-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reporte-item-nombre {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reporte-item-usuario {
+  font-size: 0.7rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Header del modal firma con posición relativa para el botón de cerrar */
+.modal-firma .firma-header {
+  position: relative;
+  padding-right: 50px;
+}
+
+/* Modal footer para firma */
+.modal-firma .modal-footer {
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 14px 16px;
+}
+
+.btn-firmar-confirm {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-firmar-confirm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+}
+
+.btn-firmar-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-firmar-confirm svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ==========================================
+   MODAL DE ÉXITO
+   ========================================== */
+
+.modal-exito {
+  max-width: 400px;
+  text-align: center;
+}
+
+.exito-header {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-bottom: 1px solid rgba(22, 163, 74, 0.2);
+  flex-direction: column;
+  padding: 24px 18px 16px;
+}
+
+.exito-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  animation: successPop 0.4s ease-out;
+}
+
+.exito-icon svg {
+  width: 32px;
+  height: 32px;
+  color: white;
+}
+
+@keyframes successPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-exito .modal-title-container {
+  text-align: center;
+}
+
+.modal-exito .modal-title-container h3 {
+  color: #15803d;
+  font-size: 1.2rem;
+}
+
+.modal-exito .modal-body {
+  padding: 20px;
+}
+
+.resultado-firma {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resultado-stat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f0fdf4;
+  border-radius: 10px;
+  border: 1px solid #dcfce7;
+}
+
+.resultado-stat svg {
+  width: 24px;
+  height: 24px;
+  color: #16a34a;
+}
+
+.resultado-stat span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #15803d;
+}
+
+.modal-exito .modal-footer {
+  justify-content: center;
+  padding: 16px 20px 20px;
+  background: white;
+  border-top: none;
+}
+
+.modal-exito .modal-footer.centered {
+  justify-content: center;
+}
+
+.modal-exito .modal-body.text-center {
+  text-align: center;
+}
+
+.exito-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #15803d;
+  margin: 0 0 12px;
+  font-family: 'Inter', sans-serif;
+}
+
+.exito-message {
+  font-size: 0.95rem;
+  color: #374151;
+  margin: 0 0 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+.exito-warning {
+  font-size: 0.85rem;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 12px 0 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-exito-ok {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 40px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-exito-ok:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+}
+
+.btn-cerrar-exito {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-cerrar-exito:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+}
+
+.btn-cerrar-exito svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ==========================================
+   RESPONSIVE PARA FIRMA
+   ========================================== */
+
+@media (max-width: 768px) {
+  .firma-actions-bar {
+    flex-direction: column;
+    text-align: center;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  
+  .firma-actions-bar .firma-actions-info {
+    font-size: 0.9rem;
+    justify-content: center;
+  }
+  
+  .firma-actions-bar .firma-actions-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .modal-firma {
+    max-width: 95%;
+  }
+  
+  .reportes-list-scroll {
+    max-height: 120px;
+  }
+  
+  .th-estado, .td-estado {
+    display: none;
+  }
+  
+  .btn-firmar-todos {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+  }
+  
+  .filters-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .filters-header .btn-firmar-todos {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .th-checkbox, .td-checkbox {
+    width: 32px;
+    padding: 6px !important;
+  }
+  
+  .th-checkbox input[type="checkbox"],
+  .td-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .firma-actions-bar {
+    position: fixed;
+    bottom: 0;
+    left: 60px;
+    right: 0;
+    top: auto;
+    border-radius: 16px 16px 0 0;
+    margin-bottom: 0;
+    z-index: 100;
+    padding: 16px;
+  }
+  
+  .btn-firmar-seleccionados {
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
+  
+  .btn-deselect {
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+  
+  .exito-icon {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .exito-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+}
 </style>

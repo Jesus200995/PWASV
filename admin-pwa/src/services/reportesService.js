@@ -237,6 +237,92 @@ const reportesService = {
       console.error('❌ Error obteniendo territorios:', error)
       return []
     }
+  },
+
+  /**
+   * Firmar un reporte como supervisor
+   * @param {number} reporteId - ID del reporte
+   * @param {Object} firmaData - Datos de la firma
+   * @param {number} firmaData.supervisor_id - ID del supervisor
+   * @param {string} firmaData.nombre_supervisor - Nombre del supervisor
+   * @param {string} firmaData.firma_base64 - Firma en base64 (opcional)
+   */
+  async firmarReporte(reporteId, firmaData) {
+    try {
+      const url = `${API_URL}/reportes/firmar/${reporteId}`
+      console.log('✍️ [ReportesService] Firmando reporte:', reporteId)
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(firmaData)
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      console.log('✅ [ReportesService] Reporte firmado:', data)
+      
+      return data
+    } catch (error) {
+      console.error('❌ [ReportesService] Error firmando reporte:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Firmar múltiples reportes
+   * @param {Array} reporteIds - Array de IDs de reportes a firmar
+   * @param {Object} firmaData - Datos de la firma
+   */
+  async firmarMultiplesReportes(reporteIds, firmaData) {
+    const resultados = {
+      exitosos: [],
+      fallidos: []
+    }
+
+    for (const reporteId of reporteIds) {
+      try {
+        await this.firmarReporte(reporteId, firmaData)
+        resultados.exitosos.push(reporteId)
+      } catch (error) {
+        resultados.fallidos.push({ id: reporteId, error: error.message })
+      }
+    }
+
+    return resultados
+  },
+
+  /**
+   * Quitar firma de un reporte
+   * @param {number} reporteId - ID del reporte
+   * @param {number} supervisorId - ID del supervisor
+   */
+  async quitarFirmaReporte(reporteId, supervisorId) {
+    try {
+      const url = `${API_URL}/reportes/quitar-firma/${reporteId}?supervisor_id=${supervisorId}`
+      console.log('🔓 [ReportesService] Quitando firma del reporte:', reporteId)
+      
+      const response = await fetch(url, { method: 'DELETE' })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || `Error ${response.status}`)
+      }
+      
+      const data = await response.json()
+      console.log('✅ [ReportesService] Firma removida')
+      
+      return data
+    } catch (error) {
+      console.error('❌ [ReportesService] Error quitando firma:', error)
+      throw error
+    }
   }
 }
 

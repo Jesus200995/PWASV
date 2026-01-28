@@ -682,6 +682,7 @@
                   v-model="datosEdicion.nombre_completo" 
                   type="text" 
                   placeholder="Nombre completo"
+                  style="text-transform: uppercase;"
                   @input="datosEdicion.nombre_completo = normalizarTexto($event.target.value)"
                 />
               </div>
@@ -714,7 +715,8 @@
                   type="text" 
                   :placeholder="esTecnicoEdicion && buscandoSupervisor ? 'Buscando supervisor...' : 'Nombre del supervisor'"
                   :readonly="esTecnicoEdicion"
-                  :style="esTecnicoEdicion ? 'background-color: #e5e7eb; cursor: not-allowed; color: #1f2937;' : ''"
+                  :style="esTecnicoEdicion ? 'background-color: #e5e7eb; cursor: not-allowed; color: #1f2937;' : 'text-transform: uppercase;'"
+                  @input="!esTecnicoEdicion && (datosEdicion.supervisor = normalizarTexto($event.target.value))"
                 />
                 <p v-if="esTecnicoEdicion" style="margin-top: 0.25rem; font-size: 0.75rem; color: #10b981;">
                   ✅ Supervisor asignado automáticamente según territorio
@@ -782,6 +784,7 @@
                   type="text" 
                   placeholder="CURP de 18 caracteres"
                   maxlength="18"
+                  style="text-transform: uppercase;"
                   @input="datosEdicion.curp = normalizarTexto($event.target.value)"
                 />
               </div>
@@ -1781,13 +1784,18 @@ const guardarEdicion = async () => {
       ? datosEdicion.value.cargoOtro.trim().toUpperCase() 
       : datosEdicion.value.cargo.toUpperCase()
     
+    // Normalizar nombre_completo, curp y supervisor (mayúsculas sin tildes)
+    const nombreNormalizado = normalizarTexto(datosEdicion.value.nombre_completo)
+    const curpNormalizado = normalizarTexto(datosEdicion.value.curp)
+    const supervisorNormalizado = normalizarTexto(datosEdicion.value.supervisor)
+    
     // Preparar datos para el backend con el formato correcto
     const datosParaEnviar = {
       correo: datosEdicion.value.correo,
-      nombre_completo: datosEdicion.value.nombre_completo,
+      nombre_completo: nombreNormalizado,
       cargo: cargoFinal,
-      supervisor: datosEdicion.value.supervisor,
-      curp: datosEdicion.value.curp,
+      supervisor: supervisorNormalizado,
+      curp: curpNormalizado,
       telefono: datosEdicion.value.telefono,
       territorio: datosEdicion.value.territorio || null,
       rol: 'user' // Por defecto, los usuarios editados desde admin son 'user'

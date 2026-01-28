@@ -1613,40 +1613,6 @@ def obtener_estadisticas_tipo_actividad(territorio: str = None):
 
 # ==================== ENDPOINTS PARA REPORTES GENERADOS ====================
 
-@app.get("/reportes/verificar/{usuario_id}/{mes}/{anio}")
-async def verificar_reporte_existente(usuario_id: int, mes: str, anio: int):
-    """Verificar si ya existe un reporte para el usuario, mes y año especificados"""
-    try:
-        print(f"🔍 Verificando reporte existente: Usuario {usuario_id}, {mes} {anio}")
-        
-        cursor.execute("""
-            SELECT id, nombre_reporte, fecha_generacion, tipo
-            FROM reportes_generados
-            WHERE usuario_id = %s AND mes = %s AND anio = %s
-            LIMIT 1
-        """, (usuario_id, mes, anio))
-        
-        reporte = cursor.fetchone()
-        
-        if reporte:
-            print(f"⚠️ Reporte ya existe: ID {reporte[0]}")
-            return {
-                "existe": True,
-                "reporte": {
-                    "id": reporte[0],
-                    "nombre": reporte[1],
-                    "fecha": reporte[2].isoformat() if reporte[2] else None,
-                    "tipo": reporte[3]
-                }
-            }
-        else:
-            print(f"✅ No existe reporte previo para {mes} {anio}")
-            return {"existe": False}
-            
-    except Exception as e:
-        print(f"❌ Error verificando reporte: {e}")
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
-
 @app.post("/reportes/guardar")
 async def guardar_reporte(datos: dict):
     """Guardar un reporte generado en la base de datos, incluyendo el PDF en base64"""
@@ -1660,6 +1626,21 @@ async def guardar_reporte(datos: dict):
         
         if not all([usuario_id, nombre_reporte, tipo]):
             raise HTTPException(status_code=400, detail="Faltan datos requeridos")
+        
+        # Verificar si ya existe un reporte para este mes/año
+        if mes and anio:
+            cursor.execute("""
+                SELECT id, nombre_reporte, fecha_generacion 
+                FROM reportes_generados 
+                WHERE usuario_id = %s AND mes = %s AND anio = %s
+            """, (usuario_id, mes, anio))
+            existente = cursor.fetchone()
+            if existente:
+                print(f"⚠️ Ya existe reporte para {mes} {anio}: ID {existente[0]}")
+                raise HTTPException(
+                    status_code=409, 
+                    detail=f"Ya existe un reporte firmado para {mes} {anio}. Solo puedes generar un reporte por mes."
+                )
         
         print(f"💾 Guardando reporte: {nombre_reporte} para usuario {usuario_id}")
         if pdf_base64:
@@ -1689,6 +1670,44 @@ async def guardar_reporte(datos: dict):
         conn.rollback()
         print(f"❌ Error guardando reporte: {e}")
         raise HTTPException(status_code=500, detail=f"Error al guardar reporte: {str(e)}")
+
+
+@app.get("/reportes/verificar/{usuario_id}")
+async def verificar_reporte_existente(usuario_id: int, mes: str, anio: int):
+    """Verificar si ya existe un reporte para el mes/año especificado"""
+    try:
+        print(f"🔍 Verificando reporte existente para usuario {usuario_id}: {mes} {anio}")
+        
+        cursor.execute("""
+            SELECT id, nombre_reporte, fecha_generacion 
+            FROM reportes_generados 
+            WHERE usuario_id = %s AND mes = %s AND anio = %s
+        """, (usuario_id, mes, anio))
+        
+        existente = cursor.fetchone()
+        
+        if existente:
+            print(f"✅ Reporte encontrado: ID {existente[0]}")
+            return {
+                "success": True,
+                "existe": True,
+                "reporte": {
+                    "id": existente[0],
+                    "nombre": existente[1],
+                    "fecha_generacion": existente[2].isoformat() if existente[2] else None
+                }
+            }
+        else:
+            print(f"ℹ️ No existe reporte para {mes} {anio}")
+            return {
+                "success": True,
+                "existe": False
+            }
+            
+    except Exception as e:
+        print(f"❌ Error verificando reporte: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 
 @app.get("/reportes/historial/{usuario_id}")
 async def obtener_historial_reportes(usuario_id: int, limite: int = 50):

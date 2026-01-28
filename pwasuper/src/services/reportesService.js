@@ -84,29 +84,6 @@ class ReportesService {
   }
 
   /**
-   * Verifica si ya existe un reporte para el usuario, mes y año
-   * @param {number} usuarioId - ID del usuario
-   * @param {string} mes - Nombre del mes (ej: "Enero", "Febrero")
-   * @param {number} anio - Año
-   * @returns {Promise<Object>} Objeto con {existe: boolean, reporte?: Object}
-   */
-  async verificarReporteExistente(usuarioId, mes, anio) {
-    try {
-      console.log(`🔍 Verificando reporte existente: Usuario ${usuarioId}, ${mes} ${anio}`);
-      
-      const response = await axios.get(`${API_URL}/reportes/verificar/${usuarioId}/${mes}/${anio}`, {
-        timeout: 5000
-      });
-      
-      console.log('✅ Verificación completada:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error verificando reporte existente:', error);
-      throw this._procesarError(error);
-    }
-  }
-
-  /**
    * Procesa errores para proporcionar mensajes claros
    * @private
    * @param {Error} error - Error capturado

@@ -1617,12 +1617,22 @@ def obtener_estadisticas_tipo_actividad(territorio: str = None):
 async def guardar_reporte(datos: dict):
     """Guardar un reporte generado en la base de datos, incluyendo el PDF en base64"""
     try:
+        # Verificar conexión a la base de datos
+        verificar_conexion_db()
+        
         usuario_id = datos.get('usuario_id')
         nombre_reporte = datos.get('nombre_reporte')
         mes = datos.get('mes')
         anio = datos.get('anio')
         tipo = datos.get('tipo')  # PDF o CSV
         pdf_base64 = datos.get('pdf_base64')  # PDF en formato base64
+        
+        print(f"📥 Recibiendo reporte para guardar:")
+        print(f"   - usuario_id: {usuario_id}")
+        print(f"   - nombre_reporte: {nombre_reporte}")
+        print(f"   - mes: {mes}, anio: {anio}")
+        print(f"   - tipo: {tipo}")
+        print(f"   - pdf_base64: {'Sí (' + str(len(pdf_base64)) + ' chars)' if pdf_base64 else 'No'}")
         
         if not all([usuario_id, nombre_reporte, tipo]):
             raise HTTPException(status_code=400, detail="Faltan datos requeridos")
@@ -1643,8 +1653,6 @@ async def guardar_reporte(datos: dict):
                 )
         
         print(f"💾 Guardando reporte: {nombre_reporte} para usuario {usuario_id}")
-        if pdf_base64:
-            print(f"   📄 PDF incluido: {len(pdf_base64)} caracteres")
         
         cursor.execute("""
             INSERT INTO reportes_generados 
@@ -1656,7 +1664,7 @@ async def guardar_reporte(datos: dict):
         resultado = cursor.fetchone()
         conn.commit()
         
-        print(f"✅ Reporte guardado con ID: {resultado[0]}")
+        print(f"✅ Reporte guardado exitosamente con ID: {resultado[0]}")
         
         return {
             "success": True,

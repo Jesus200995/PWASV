@@ -1004,17 +1004,20 @@ export default {
 
         console.log('✅ Reporte generado exitosamente');
 
-        // Agregar a historial local
+        // Agregar a historial local con TODOS los campos necesarios
         const fecha = new Date().toLocaleString('es-MX');
         const nombreReporte = `Reporte ${this.mesActual} ${this.anioSeleccionado}`;
         
-        this.reportesGenerados.unshift({
-          id: Date.now(),
+        // Crear el objeto del reporte con todos los campos
+        const nuevoReporte = {
+          id: Date.now(), // ID temporal, se actualizará con el de BD
           nombre: nombreReporte,
+          mes: this.mesActual,
+          anio: this.anioSeleccionado,
           fecha,
           tipo: this.formatoSeleccionado.toUpperCase(),
           tiene_pdf: !!pdfBase64
-        });
+        };
 
         // Guardar en la base de datos (incluyendo el PDF)
         try {
@@ -1035,13 +1038,42 @@ export default {
           const response = await api.post('/reportes/guardar', datosGuardar);
           console.log('✅ Reporte guardado en la base de datos');
           console.log('✅ Respuesta del servidor:', response.data);
+          
           // Actualizar el ID del reporte local con el ID real de la BD
           if (response.data && response.data.reporte_id) {
-            this.reportesGenerados[0].id = response.data.reporte_id;
+            nuevoReporte.id = response.data.reporte_id;
           }
+          
+          // Agregar al historial local DESPUÉS de confirmar guardado en BD
+          this.reportesGenerados.unshift(nuevoReporte);
+          
+          // Actualizar localStorage
+          localStorage.setItem('reportesGenerados', JSON.stringify(this.reportesGenerados));
+          
+          // Marcar que ya existe un reporte para este mes (REACTIVO)
+          this.reporteExistente = {
+            id: nuevoReporte.id,
+            nombre: nombreReporte,
+            fecha_generacion: new Date().toISOString()
+          };
+          
+          console.log('🔒 reporteExistente establecido - botón se deshabilitará');
+          
         } catch (error) {
           console.error('⚠️ Error guardando reporte en BD:', error);
           console.error('⚠️ Detalles del error:', error.response?.data);
+          
+          // Si hay error 409 (duplicado), mostrar mensaje y no agregar al historial local
+          if (error.response?.status === 409) {
+            this.$notify?.({
+              type: 'warning',
+              message: error.response.data.detail || 'Ya existe un reporte para este mes'
+            });
+            return; // No continuar si hay duplicado
+          }
+          
+          // Para otros errores, aún agregamos al historial local pero sin ID de BD
+          this.reportesGenerados.unshift(nuevoReporte);
         }
 
         this.$notify?.({

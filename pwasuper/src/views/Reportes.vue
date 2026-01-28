@@ -561,6 +561,7 @@ import html2canvas from 'html2canvas';
 import FirmaDigital from '../components/FirmaDigital.vue';
 import { apiService, api } from '../services/apiService.js';
 import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+import reportesService from '../services/reportesService.js';
 import superiorImage from '../../images/superior.png';
 
 export default {
@@ -773,10 +774,48 @@ export default {
       return this.$refs.firmaComponent?.hayFirma || false;
     },
 
-    // Iniciar proceso de descarga - verificar firma primero
-    iniciarDescarga() {
+    // Iniciar proceso de descarga - verificar reporte existente y firma primero
+    async iniciarDescarga() {
       if (this.actividades.length === 0) {
         alert('No hay actividades para generar el reporte');
+        return;
+      }
+
+      // PRIMERO: Verificar si ya existe un reporte para este mes y año
+      try {
+        console.log('🔍 Verificando si ya existe reporte...');
+        const verificacion = await reportesService.verificarReporteExistente(
+          this.usuarioInfo.id,
+          this.mesActual,
+          this.anioSeleccionado
+        );
+
+        if (verificacion.existe) {
+          const reporte = verificacion.reporte;
+          const fechaGeneracion = new Date(reporte.fecha).toLocaleDateString('es-MX', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
+          alert(
+            `⚠️ Ya existe un reporte firmado para ${this.mesActual} ${this.anioSeleccionado}\n\n` +
+            `📄 ${reporte.nombre}\n` +
+            `📅 Generado el: ${fechaGeneracion}\n` +
+            `📋 Tipo: ${reporte.tipo}\n\n` +
+            `Solo puedes generar un reporte por mes. Si necesitas modificarlo, contacta al administrador.`
+          );
+          
+          console.log('⚠️ Reporte ya existe, descarga cancelada');
+          return;
+        }
+        
+        console.log('✅ No existe reporte previo, continuando...');
+      } catch (error) {
+        console.error('❌ Error verificando reporte existente:', error);
+        alert('Error al verificar reportes existentes. Por favor, intenta nuevamente.');
         return;
       }
 

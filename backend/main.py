@@ -1613,6 +1613,40 @@ def obtener_estadisticas_tipo_actividad(territorio: str = None):
 
 # ==================== ENDPOINTS PARA REPORTES GENERADOS ====================
 
+@app.get("/reportes/verificar/{usuario_id}/{mes}/{anio}")
+async def verificar_reporte_existente(usuario_id: int, mes: str, anio: int):
+    """Verificar si ya existe un reporte para el usuario, mes y año especificados"""
+    try:
+        print(f"🔍 Verificando reporte existente: Usuario {usuario_id}, {mes} {anio}")
+        
+        cursor.execute("""
+            SELECT id, nombre_reporte, fecha_generacion, tipo
+            FROM reportes_generados
+            WHERE usuario_id = %s AND mes = %s AND anio = %s
+            LIMIT 1
+        """, (usuario_id, mes, anio))
+        
+        reporte = cursor.fetchone()
+        
+        if reporte:
+            print(f"⚠️ Reporte ya existe: ID {reporte[0]}")
+            return {
+                "existe": True,
+                "reporte": {
+                    "id": reporte[0],
+                    "nombre": reporte[1],
+                    "fecha": reporte[2].isoformat() if reporte[2] else None,
+                    "tipo": reporte[3]
+                }
+            }
+        else:
+            print(f"✅ No existe reporte previo para {mes} {anio}")
+            return {"existe": False}
+            
+    except Exception as e:
+        print(f"❌ Error verificando reporte: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 @app.post("/reportes/guardar")
 async def guardar_reporte(datos: dict):
     """Guardar un reporte generado en la base de datos, incluyendo el PDF en base64"""

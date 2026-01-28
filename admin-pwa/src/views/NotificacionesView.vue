@@ -494,10 +494,26 @@
             </p>
             <div class="stats-meta">
               <span class="stats-audience">
-                {{ estadisticasNotificacion.enviada_a_todos ? '👥 Enviada a todos los usuarios' : '👤 Enviada a usuarios específicos' }}
+                <svg v-if="estadisticasNotificacion.enviada_a_todos" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                {{ estadisticasNotificacion.enviada_a_todos ? 'Enviada a todos los usuarios' : 'Enviada a usuarios específicos' }}
               </span>
               <span class="stats-date">
-                📅 {{ formatearFecha(estadisticasNotificacion.fecha_envio) }}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                {{ formatearFecha(estadisticasNotificacion.fecha_envio) }}
               </span>
             </div>
           </div>
@@ -506,20 +522,36 @@
           <div class="stats-summary">
             <div class="stats-grid">
               <div class="stat-card stat-total">
-                <div class="stat-icon">👥</div>
+                <div class="stat-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
                 <div class="stat-value">{{ estadisticasNotificacion.resumen.total_usuarios_objetivo }}</div>
                 <div class="stat-label">Total Destinatarios</div>
               </div>
               
               <div class="stat-card stat-read">
-                <div class="stat-icon">✅</div>
+                <div class="stat-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
                 <div class="stat-value">{{ estadisticasNotificacion.resumen.usuarios_leido }}</div>
                 <div class="stat-label">Han Leído</div>
                 <div class="stat-percentage">{{ estadisticasNotificacion.resumen.porcentaje_leido }}%</div>
               </div>
               
               <div class="stat-card stat-unread">
-                <div class="stat-icon">⏳</div>
+                <div class="stat-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                </div>
                 <div class="stat-value">{{ estadisticasNotificacion.resumen.usuarios_no_leido }}</div>
                 <div class="stat-label">No Han Leído</div>
                 <div class="stat-percentage">{{ estadisticasNotificacion.resumen.porcentaje_no_leido }}%</div>
@@ -549,14 +581,21 @@
                 :class="{ 'active': tabActiva === 'leidos' }"
                 @click="tabActiva = 'leidos'"
               >
-                ✅ Han Leído ({{ estadisticasNotificacion.resumen.usuarios_leido }})
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Han Leído ({{ estadisticasNotificacion.resumen.usuarios_leido }})
               </button>
               <button 
                 class="tab-button" 
                 :class="{ 'active': tabActiva === 'no_leidos' }"
                 @click="tabActiva = 'no_leidos'"
               >
-                ⏳ No Han Leído ({{ estadisticasNotificacion.resumen.usuarios_no_leido }})
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                No Han Leído ({{ estadisticasNotificacion.resumen.usuarios_no_leido }})
               </button>
             </div>
 
@@ -564,7 +603,11 @@
               <!-- Tab Usuarios que han leído -->
               <div v-if="tabActiva === 'leidos'" class="users-list-stats">
                 <div v-if="estadisticasNotificacion.usuarios_que_leyeron.length === 0" class="empty-users">
-                  <div class="empty-icon">📭</div>
+                  <div class="empty-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M22 17H2a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3h20a3 3 0 0 0-3 3v6a3 3 0 0 0 3 3zm0 0v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2"/>
+                    </svg>
+                  </div>
                   <p>Ningún usuario ha leído esta notificación aún</p>
                 </div>
                 <div v-else>
@@ -580,13 +623,24 @@
                         <div v-if="usuario.curp" class="user-curp">{{ usuario.curp }}</div>
                       </div>
                       <div class="user-read-date">
-                        <span class="read-icon">✅</span>
+                        <span class="read-icon">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        </span>
                         <span class="read-time">{{ formatearFecha(usuario.leida_en) }}</span>
                       </div>
                     </div>
                   </div>
                   <div v-if="estadisticasNotificacion.usuarios_que_leyeron.length >= 20" class="more-users-note">
-                    📝 Mostrando los primeros 20 usuarios
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                      <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    Mostrando los primeros 20 usuarios
                   </div>
                 </div>
               </div>
@@ -594,7 +648,13 @@
               <!-- Tab Usuarios que no han leído -->
               <div v-if="tabActiva === 'no_leidos'" class="users-list-stats">
                 <div v-if="estadisticasNotificacion.usuarios_que_no_leyeron.length === 0" class="empty-users">
-                  <div class="empty-icon">🎉</div>
+                  <div class="empty-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="8 12 12 16 16 12"/>
+                      <line x1="12" y1="8" x2="12" y2="16"/>
+                    </svg>
+                  </div>
                   <p>¡Todos los usuarios han leído esta notificación!</p>
                 </div>
                 <div v-else>
@@ -610,13 +670,25 @@
                         <div v-if="usuario.curp" class="user-curp">{{ usuario.curp }}</div>
                       </div>
                       <div class="user-unread-status">
-                        <span class="unread-icon">⏳</span>
+                        <span class="unread-icon">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                        </span>
                         <span class="unread-text">Sin leer</span>
                       </div>
                     </div>
                   </div>
                   <div v-if="estadisticasNotificacion.usuarios_que_no_leyeron.length >= 20" class="more-users-note">
-                    📝 Mostrando los primeros 20 usuarios
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                      <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    Mostrando los primeros 20 usuarios
                   </div>
                 </div>
               </div>

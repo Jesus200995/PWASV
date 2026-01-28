@@ -426,18 +426,51 @@
 
           <!-- Historial de Reportes -->
           <div class="glass-card">
-            <div class="flex items-center mb-3">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: #F59E0B;">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: #F59E0B;">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-base font-semibold text-gray-800">Historial</h2>
+                  <p class="text-xs text-gray-500">Reportes generados</p>
+                </div>
+              </div>
+              <!-- Botón de recargar historial -->
+              <button 
+                @click="cargarHistorialReportes" 
+                :disabled="cargandoHistorial"
+                class="p-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                title="Recargar historial"
+              >
+                <svg :class="['h-4 w-4', cargandoHistorial ? 'animate-spin' : '']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
-              </div>
-              <div>
-                <h2 class="text-base font-semibold text-gray-800">Historial</h2>
-                <p class="text-xs text-gray-500">Reportes generados</p>
-              </div>
+              </button>
             </div>
-            <div v-if="reportesGenerados.length > 0" class="space-y-2">
+            
+            <!-- Estado de carga -->
+            <div v-if="cargandoHistorial" class="text-center py-4">
+              <svg class="animate-spin h-6 w-6 mx-auto text-orange-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p class="text-xs text-gray-500">Cargando historial...</p>
+            </div>
+            
+            <!-- Error de carga -->
+            <div v-else-if="errorHistorial" class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto text-red-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              <p class="text-xs text-red-600">{{ errorHistorial }}</p>
+              <button @click="cargarHistorialReportes" class="mt-2 text-xs text-red-700 underline">Reintentar</button>
+            </div>
+            
+            <!-- Lista de reportes -->
+            <div v-else-if="reportesGenerados.length > 0" class="space-y-2">
               <div
                 v-for="reporte in reportesGenerados"
                 :key="reporte.id"
@@ -580,6 +613,38 @@ import { apiService, api } from '../services/apiService.js';
 import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 import superiorImage from '../../images/superior.png';
 
+/**
+ * Función para limpiar strings base64 que pueden tener prefijos o caracteres inválidos
+ */
+function limpiarBase64(base64String) {
+  if (!base64String) return null;
+  
+  let base64 = base64String;
+  
+  // Remover prefijo data URI si existe (ej: data:application/pdf;base64,)
+  if (base64.includes(',')) {
+    base64 = base64.split(',')[1];
+  }
+  
+  // Remover prefijo específico que puede aparecer
+  if (base64.startsWith('data:application/pdf;base64,')) {
+    base64 = base64.replace('data:application/pdf;base64,', '');
+  }
+  
+  // Remover espacios en blanco y saltos de línea
+  base64 = base64.replace(/\s/g, '');
+  
+  // Asegurar que solo contiene caracteres válidos de base64
+  base64 = base64.replace(/[^A-Za-z0-9+/=]/g, '');
+  
+  // Agregar padding si es necesario
+  while (base64.length % 4 !== 0) {
+    base64 += '=';
+  }
+  
+  return base64;
+}
+
 export default {
   name: 'Reportes',
   components: {
@@ -626,7 +691,10 @@ export default {
       error: null,
       // Reporte ya existente para el mes/año seleccionado
       reporteExistente: null,
-      verificandoReporte: false
+      verificandoReporte: false,
+      // Estado de carga del historial
+      cargandoHistorial: false,
+      errorHistorial: null
     };
   },
   computed: {
@@ -2012,9 +2080,14 @@ export default {
     },
 
     async cargarHistorialReportes() {
+      this.cargandoHistorial = true;
+      this.errorHistorial = null;
+      
       try {
         if (!this.usuarioInfo.id) {
           console.log('⚠️ No hay ID de usuario para cargar historial');
+          console.log('📋 Usuario info actual:', JSON.stringify(this.usuarioInfo));
+          this.errorHistorial = 'No se pudo identificar al usuario';
           return;
         }
 
@@ -2022,37 +2095,63 @@ export default {
         // Usar api del apiService que auto-detecta servidor correcto
         const response = await api.get(`/reportes/historial/${this.usuarioInfo.id}`);
         
-        console.log('📦 Respuesta del servidor:', response.data);
+        console.log('📦 Respuesta del servidor (raw):', JSON.stringify(response.data));
         
         if (response.data.success && response.data.reportes) {
-          // Formatear fechas para mostrar en formato legible
-          this.reportesGenerados = response.data.reportes.map(reporte => ({
-            ...reporte,
-            fecha: reporte.fecha ? new Date(reporte.fecha).toLocaleString('es-MX', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            }) : 'Sin fecha'
-          }));
-          console.log(`✅ Historial de reportes cargado: ${response.data.total} reportes`);
-          console.log('📋 Reportes formateados:', this.reportesGenerados);
+          // Formatear fechas y asegurar que tiene_pdf se preserve
+          this.reportesGenerados = response.data.reportes.map(reporte => {
+            const reporteFormateado = {
+              id: reporte.id,
+              nombre: reporte.nombre,
+              mes: reporte.mes,
+              anio: reporte.anio,
+              tipo: reporte.tipo,
+              tiene_pdf: reporte.tiene_pdf === true, // Asegurar que sea booleano
+              fecha: reporte.fecha ? new Date(reporte.fecha).toLocaleString('es-MX', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : 'Sin fecha'
+            };
+            console.log(`   📄 Reporte: ${reporteFormateado.nombre}, tiene_pdf: ${reporteFormateado.tiene_pdf}`);
+            return reporteFormateado;
+          });
+          console.log(`✅ Historial de reportes cargado: ${this.reportesGenerados.length} reportes`);
+          
+          // Guardar en localStorage como backup
+          localStorage.setItem('reportesGenerados', JSON.stringify(this.reportesGenerados));
         } else {
           console.log('⚠️ No se encontraron reportes en la respuesta');
+          console.log('   Response success:', response.data.success);
+          console.log('   Response reportes:', response.data.reportes);
           this.reportesGenerados = [];
         }
       } catch (error) {
         console.error('❌ Error cargando historial de reportes:', error);
-        console.error('Detalles del error:', error.response?.data || error.message);
+        console.error('   Status:', error.response?.status);
+        console.error('   Data:', error.response?.data);
+        console.error('   Message:', error.message);
+        
+        this.errorHistorial = error.response?.data?.detail || error.message || 'Error al cargar historial';
+        
         // Si hay error, intentar cargar desde localStorage como fallback
         const reportesGuardados = localStorage.getItem('reportesGenerados');
         if (reportesGuardados) {
-          this.reportesGenerados = JSON.parse(reportesGuardados);
-          console.log('📋 Reportes cargados desde localStorage');
+          try {
+            this.reportesGenerados = JSON.parse(reportesGuardados);
+            console.log('📋 Reportes cargados desde localStorage:', this.reportesGenerados.length);
+            this.errorHistorial = null; // Limpiar error si cargamos desde cache
+          } catch (e) {
+            console.error('❌ Error parseando localStorage:', e);
+            this.reportesGenerados = [];
+          }
         } else {
           this.reportesGenerados = [];
         }
+      } finally {
+        this.cargandoHistorial = false;
       }
     },
 
@@ -2071,15 +2170,11 @@ export default {
         const response = await api.get(`/reportes/descargar/${reporte.id}`);
         
         if (response.data.success && response.data.reporte.pdf_base64) {
-          const pdfBase64 = response.data.reporte.pdf_base64;
+          // Limpiar y validar el base64
+          const base64Data = limpiarBase64(response.data.reporte.pdf_base64);
           
-          // Crear el archivo para descarga
-          // El base64 viene como data URI (data:application/pdf;base64,...)
-          let base64Data = pdfBase64;
-          
-          // Si es un data URI, extraer solo la parte base64
-          if (pdfBase64.includes(',')) {
-            base64Data = pdfBase64.split(',')[1];
+          if (!base64Data) {
+            throw new Error('El PDF tiene formato inválido');
           }
           
           // Convertir base64 a blob
@@ -2143,12 +2238,11 @@ export default {
         const response = await api.get(`/reportes/descargar/${reporte.id}`);
         
         if (response.data.success && response.data.reporte.pdf_base64) {
-          const pdfBase64 = response.data.reporte.pdf_base64;
+          // Limpiar y validar el base64
+          const base64Data = limpiarBase64(response.data.reporte.pdf_base64);
           
-          // Extraer solo la parte base64 si es un data URI
-          let base64Data = pdfBase64;
-          if (pdfBase64.includes(',')) {
-            base64Data = pdfBase64.split(',')[1];
+          if (!base64Data) {
+            throw new Error('El PDF tiene formato inválido');
           }
           
           // Convertir base64 a blob
@@ -2253,6 +2347,18 @@ export default {
             this.reportesGenerados.splice(index, 1);
           }
           
+          // Actualizar localStorage
+          localStorage.setItem('reportesGenerados', JSON.stringify(this.reportesGenerados));
+          
+          // Verificar si el reporte eliminado era del mes/año actual
+          if (reporte.mes === this.mesActual && reporte.anio === this.anioSeleccionado) {
+            // Limpiar el estado de reporte existente ya que lo acabamos de eliminar
+            this.reporteExistente = null;
+          }
+          
+          // Re-verificar el estado del reporte existente
+          await this.verificarReporteExistente();
+          
           this.$notify?.({
             type: 'success',
             message: 'Reporte eliminado correctamente'
@@ -2280,12 +2386,16 @@ export default {
   },
 
   async mounted() {
+    console.log('🚀 Reportes.vue montado');
+    
     // Generar años disponibles (años pasados y futuros)
     const currentYear = new Date().getFullYear();
     this.anos = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
     // Cargar información del usuario
     const usuario = JSON.parse(localStorage.getItem('user'));
+    console.log('👤 Usuario desde localStorage:', usuario ? `ID: ${usuario.id}` : 'No encontrado');
+    
     if (usuario) {
       this.usuarioInfo = {
         id: usuario.id || null,
@@ -2296,6 +2406,8 @@ export default {
         curp: usuario.curp || 'No registrada',
         supervisor: usuario.supervisor || 'No asignado'
       };
+      
+      console.log('✅ Usuario info establecido:', JSON.stringify(this.usuarioInfo));
       
       // Si es técnico, obtener supervisor automático basado en territorio
       const cargoUpper = (usuario.cargo || '').toUpperCase();
@@ -2319,16 +2431,30 @@ export default {
           // Mantener el supervisor actual si hay error
         }
       }
+      
+      // Cargar actividades (apiService auto-detecta servidor correcto)
+      try {
+        await this.cargarActividades();
+      } catch (error) {
+        console.error('❌ Error cargando actividades:', error);
+      }
+
+      // Cargar historial de reportes desde la base de datos
+      try {
+        await this.cargarHistorialReportes();
+      } catch (error) {
+        console.error('❌ Error cargando historial:', error);
+      }
+      
+      // Verificar si ya existe un reporte para el mes/año actual
+      try {
+        await this.verificarReporteExistente();
+      } catch (error) {
+        console.error('❌ Error verificando reporte existente:', error);
+      }
+    } else {
+      console.warn('⚠️ No hay usuario en localStorage');
     }
-
-    // Cargar actividades (apiService auto-detecta servidor correcto)
-    await this.cargarActividades();
-
-    // Cargar historial de reportes desde la base de datos
-    await this.cargarHistorialReportes();
-    
-    // Verificar si ya existe un reporte para el mes/año actual
-    await this.verificarReporteExistente();
   }
 };
 </script>

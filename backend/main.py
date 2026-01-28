@@ -1713,6 +1713,9 @@ async def verificar_reporte_existente(usuario_id: int, mes: str, anio: int):
 async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
     """Obtener el historial de reportes generados por un usuario"""
     try:
+        # Verificar conexión a la base de datos
+        verificar_conexion_db()
+        
         print(f"📋 Obteniendo historial de reportes para usuario {usuario_id}")
         
         cursor.execute("""
@@ -1744,7 +1747,9 @@ async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
                 "tiene_pdf": reporte[6] if len(reporte) > 6 else False
             })
         
-        print(f"✅ {len(resultado)} reportes encontrados")
+        print(f"✅ {len(resultado)} reportes encontrados para usuario {usuario_id}")
+        if resultado:
+            print(f"   📄 Primer reporte: {resultado[0].get('nombre')}, tiene_pdf: {resultado[0].get('tiene_pdf')}")
         
         return {
             "success": True,
@@ -1754,6 +1759,8 @@ async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
         
     except Exception as e:
         print(f"❌ Error obteniendo historial de reportes: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 @app.delete("/reportes/eliminar/{reporte_id}")

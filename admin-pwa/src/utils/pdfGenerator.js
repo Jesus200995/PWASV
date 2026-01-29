@@ -464,11 +464,11 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
       console.log(`📷 Procesando ${imagenesSeleccionadas.length} imágenes para el PDF`)
       
       // Grid de imágenes
-      const imgGridWidth = 52
-      const imgGridHeight = 40
+      const imgGridWidth = 55
+      const imgGridHeight = 45
       const imgsPerRow = 3
-      const imgSpacing = 4
-      const labelHeight = 12
+      const imgSpacing = 5
+      const labelHeight = 14
       
       for (let i = 0; i < imagenesSeleccionadas.length; i++) {
         const actividad = imagenesSeleccionadas[i]
@@ -591,7 +591,7 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
       
       // Calcular currentY después del grid de imágenes
       const numRows = Math.ceil(imagenesSeleccionadas.length / imgsPerRow)
-      currentY += (numRows * (imgGridHeight + labelHeight + 3)) + 10
+      currentY += (numRows * (imgGridHeight + labelHeight + 3)) + 20
     }
     
     // ========== FIRMAS EN PÁGINA DE EVIDENCIAS ==========

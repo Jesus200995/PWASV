@@ -1055,40 +1055,22 @@ export default {
         // NUEVO FLUJO: Guardar datos estructurados, NO generar PDF
         const firmaUsuarioBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
         
-        // Convertir fotos a base64 para guardar en datos_reporte
-        console.log('📸 Convirtiendo fotos a base64 para guardar en datos_reporte...');
-        const actividadesConFotosBase64 = await Promise.all(
-          this.actividades.map(async (act) => {
-            const actividadData = {
-              id: act.id,
-              fecha_hora: act.fecha_hora,
-              fecha: act.fecha_hora, // También como "fecha" para compatibilidad
-              tipo_actividad: act.tipo_actividad,
-              tipo: act.tipo_actividad, // También como "tipo" para compatibilidad
-              categoria_actividad: act.categoria_actividad,
-              descripcion: act.descripcion,
-              foto_url: act.foto_url,
-              latitud: act.latitud,
-              longitud: act.longitud,
-              foto_base64: null
-            };
-            
-            // Si tiene foto, convertirla a base64
-            if (act.foto_url) {
-              try {
-                const imgResult = await this.cargarImagenComoBase64(act.foto_url);
-                actividadData.foto_base64 = imgResult.data;
-                console.log(`  ✅ Foto convertida para actividad ${act.id}`);
-              } catch (err) {
-                console.warn(`  ⚠️ Error convirtiendo foto de actividad ${act.id}:`, err);
-              }
-            }
-            
-            return actividadData;
-          })
-        );
+        // NO convertir fotos a base64 para guardar - solo guardar las actividades con foto_url
+        console.log('📸 Preparando actividades sin convertir fotos a base64...');
+        const actividadesParaGuardar = this.actividades.map(act => ({
+          id: act.id,
+          fecha_hora: act.fecha_hora,
+          fecha: act.fecha_hora, // También como "fecha" para compatibilidad
+          tipo_actividad: act.tipo_actividad,
+          tipo: act.tipo_actividad, // También como "tipo" para compatibilidad
+          categoria_actividad: act.categoria_actividad,
+          descripcion: act.descripcion,
+          foto_url: act.foto_url, // Solo guardamos la URL, no el base64
+          latitud: act.latitud,
+          longitud: act.longitud
+        }));
         
-        console.log(`📸 ${actividadesConFotosBase64.filter(a => a.foto_base64).length} fotos convertidas a base64`);
+        console.log(`📋 ${actividadesParaGuardar.length} actividades preparadas`);
         
         // Construir objeto con los datos del reporte
         const datosReporte = {
@@ -1110,14 +1092,14 @@ export default {
             fechaInicio: new Date(this.anioSeleccionado, this.mesSeleccionado, 1).toISOString(),
             fechaFin: new Date(this.anioSeleccionado, this.mesSeleccionado + 1, 0).toISOString()
           },
-          // Actividades del período CON FOTOS EN BASE64
-          actividades: actividadesConFotosBase64,
+          // Actividades del período (solo con foto_url, no base64)
+          actividades: actividadesParaGuardar,
           // Estadísticas
           estadisticas: {
-            totalActividades: actividadesConFotosBase64.length,
-            actividadesCampo: actividadesConFotosBase64.filter(a => (a.tipo_actividad || '').toLowerCase() === 'campo').length,
-            actividadesGabinete: actividadesConFotosBase64.filter(a => (a.tipo_actividad || '').toLowerCase() === 'gabinete').length,
-            actividadesConFoto: actividadesConFotosBase64.filter(a => a.foto_base64).length
+            totalActividades: actividadesParaGuardar.length,
+            actividadesCampo: actividadesParaGuardar.filter(a => (a.tipo_actividad || '').toLowerCase() === 'campo').length,
+            actividadesGabinete: actividadesParaGuardar.filter(a => (a.tipo_actividad || '').toLowerCase() === 'gabinete').length,
+            actividadesConFoto: actividadesParaGuardar.filter(a => a.foto_url).length
           },
           // Fecha de generación
           fechaGeneracion: new Date().toISOString()

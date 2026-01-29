@@ -351,13 +351,13 @@
                           </svg>
                           <div v-else class="spinner-mini"></div>
                         </button>
-                        <button v-if="reporte.tiene_pdf" @click="descargarReporte(reporte)" :disabled="descargandoReporte === reporte.id" class="btn-action btn-download" title="Descargar">
+                        <button v-if="reporte.tiene_pdf || reporte.datos_reporte" @click="descargarReporte(reporte)" :disabled="descargandoReporte === reporte.id" class="btn-action btn-download" title="Descargar">
                           <svg v-if="descargandoReporte !== reporte.id" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                           </svg>
                           <div v-else class="spinner-mini"></div>
                         </button>
-                        <span v-if="!reporte.tiene_pdf && reporte.tipo === 'PDF'" class="no-pdf-badge" title="PDF no disponible">
+                        <span v-if="!reporte.tiene_pdf && !reporte.datos_reporte && reporte.tipo === 'PDF'" class="no-pdf-badge" title="PDF no disponible">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
                           </svg>

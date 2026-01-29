@@ -1801,6 +1801,9 @@ async def obtener_historial_reportes(usuario_id: int, limite: int = 50):
 async def eliminar_reporte(reporte_id: int):
     """Eliminar un reporte de la base de datos"""
     try:
+        # Verificar conexión a la base de datos
+        verificar_conexion_db()
+        
         print(f"🗑️ Eliminando reporte ID: {reporte_id}")
         
         # Verificar que el reporte existe y si está firmado
@@ -1937,6 +1940,9 @@ async def firmar_reporte_supervisor(reporte_id: int, firma_data: FirmaReporteReq
     Actualiza el PDF agregando la firma del supervisor en la sección 'Autorizó'.
     """
     try:
+        # Verificar conexión a la base de datos
+        verificar_conexion_db()
+        
         print(f"✍️ [FIRMA] Firmando reporte ID: {reporte_id}")
         print(f"   Supervisor: {firma_data.nombre_supervisor} (ID: {firma_data.supervisor_id})")
         

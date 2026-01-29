@@ -937,6 +937,9 @@ async function confirmarFirma() {
     mostrarModalFirma.value = false
     mostrarModalExito.value = true
     
+    // Recargar reportes desde el backend para actualizar la vista
+    await cargarReportes()
+    
     // Recargar estadísticas
     await cargarEstadisticas()
     

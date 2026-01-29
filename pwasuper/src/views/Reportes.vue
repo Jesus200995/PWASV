@@ -2731,8 +2731,8 @@ export default {
         currentY = 30;
       }
 
-      let firmaWidth = 70;
-      const firmaHeight = 30;
+      let firmaWidth = 65;
+      const firmaHeight = 25;
       const firmaUsuarioX = margin + 5;
       const firmaResponsableX = pageWidth - margin - firmaWidth - 5;
       const firmaY = currentY;
@@ -2908,11 +2908,11 @@ export default {
           console.log(`📷 Procesando ${imagenesSeleccionadas.length} imágenes para el PDF`);
           
           // Grid de imágenes
-          const imgGridWidth = 55;
-          const imgGridHeight = 45;
-          const imgsPerRow = 3;
-          const imgSpacing = 5;
-          const labelHeight = 14;
+const imgGridWidth = 52;
+        const imgGridHeight = 40;
+        const imgsPerRow = 3;
+        const imgSpacing = 4;
+        const labelHeight = 12;
           
           for (let i = 0; i < imagenesSeleccionadas.length; i++) {
             const actividad = imagenesSeleccionadas[i];

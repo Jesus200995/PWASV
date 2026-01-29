@@ -461,6 +461,7 @@
                   <FirmaDigitalAdmin 
                     ref="firmaComponentRef" 
                     label="Firma del Supervisor"
+                    @firma-cambiada="onFirmaCambiada"
                   />
                 </div>
               </div>
@@ -949,6 +950,12 @@ async function confirmarFirma() {
 function cerrarModalExito() {
   mostrarModalExito.value = false
   resultadoFirma.value = { exitosos: 0, fallidos: 0 }
+}
+
+// Callback cuando cambia el estado de la firma
+function onFirmaCambiada(tieneFirma) {
+  console.log('📝 Firma cambiada:', tieneFirma)
+  firmaValida.value = tieneFirma
 }
 
 // Watcher para verificar si la firma es válida

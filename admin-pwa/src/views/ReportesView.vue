@@ -905,7 +905,6 @@ async function confirmarFirma() {
     }
     
     console.log('✍️ Firmando reportes:', reportesAFirmar.value.map(r => r.id))
-    console.log('👤 Datos del supervisor:', firmaData)
     
     // Firmar cada reporte
     const resultados = await reportesService.firmarMultiplesReportes(

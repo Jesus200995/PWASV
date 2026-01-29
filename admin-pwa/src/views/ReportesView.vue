@@ -895,7 +895,7 @@ async function confirmarFirma() {
   
   try {
     // Obtener datos del supervisor actual
-    const adminData = authService.getAdminData()
+    const adminData = authService.getCurrentUser()
     const firmaBase64 = firmaComponentRef.value.obtenerFirmaBase64()
     
     const firmaData = {
@@ -905,6 +905,7 @@ async function confirmarFirma() {
     }
     
     console.log('✍️ Firmando reportes:', reportesAFirmar.value.map(r => r.id))
+    console.log('👤 Datos del supervisor:', firmaData)
     
     // Firmar cada reporte
     const resultados = await reportesService.firmarMultiplesReportes(

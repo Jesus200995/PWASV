@@ -560,6 +560,7 @@ import Sidebar from '../components/Sidebar.vue'
 import FirmaDigitalAdmin from '../components/FirmaDigitalAdmin.vue'
 import reportesService from '../services/reportesService'
 import authService from '../services/authService'
+import { generarPDFDesdesDatos } from '../utils/pdfGenerator'
 
 const router = useRouter()
 
@@ -749,15 +750,79 @@ async function verReporte(reporte) {
 }
 
 async function descargarReporte(reporte) {
+  if (descargandoReporte.value) {
+    console.log('⚠️ Ya se está descargando un reporte')
+    return
+  }
+
+  console.log(`📥 Descargando reporte: ${reporte.nombre_reporte}`)
   descargandoReporte.value = reporte.id
+
   try {
-    await reportesService.descargarReporte(reporte.id)
+    // Obtener datos del reporte desde el servidor
+    const response = await reportesService.obtenerReporte(reporte.id)
+    
+    if (!response.success) {
+      throw new Error('No se pudo obtener el reporte')
+    }
+    
+    const reporteData = response.reporte
+    
+    // Generar PDF desde datos estructurados
+    if (reporteData.datos_reporte) {
+      console.log('📄 Generando PDF desde datos estructurados...')
+      
+      // Generar PDF con las firmas disponibles
+      const pdfBase64 = await generarPDFDesdesDatos(
+        reporteData.datos_reporte,
+        reporteData.firma_usuario_base64,
+        reporteData.firmado_supervisor ? reporteData.firma_supervisor_base64 : null,
+        reporteData.nombre_supervisor
+      )
+      
+      // Descargar el PDF
+      descargarPDFBase64(pdfBase64, reporte.nombre_reporte)
+      
+      console.log('✅ Reporte generado y descargado exitosamente')
+      
+      alert(reporteData.firmado_supervisor 
+        ? `${reporte.nombre_reporte} descargado (firmado por supervisor)` 
+        : `${reporte.nombre_reporte} descargado (pendiente de autorización)`)
+    } else {
+      throw new Error('El reporte no tiene datos disponibles para generar el PDF')
+    }
+    
   } catch (error) {
-    console.error('Error al descargar reporte:', error)
-    alert('No se pudo descargar el reporte: ' + error.message)
+    console.error('❌ Error descargando reporte:', error)
+    
+    let mensaje = 'Error al descargar el reporte'
+    if (error.response?.status === 404) {
+      mensaje = 'El reporte no está disponible'
+    }
+    
+    alert(mensaje)
   } finally {
     descargandoReporte.value = null
   }
+}
+
+function descargarPDFBase64(base64Data, nombreReporte) {
+  const byteCharacters = atob(base64Data)
+  const byteNumbers = new Array(byteCharacters.length)
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i)
+  }
+  const byteArray = new Uint8Array(byteNumbers)
+  const blob = new Blob([byteArray], { type: 'application/pdf' })
+  
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${nombreReporte.replace(/\s+/g, '_')}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
 }
 
 function confirmarEliminacion(reporte) {

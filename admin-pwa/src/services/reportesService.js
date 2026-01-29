@@ -93,6 +93,32 @@ const reportesService = {
   },
 
   /**
+   * Obtener datos de un reporte específico
+   * @param {number} reporteId - ID del reporte
+   * @returns {Object} - Datos del reporte
+   */
+  async obtenerReporte(reporteId) {
+    try {
+      const url = `${API_URL}/reportes/descargar/${reporteId}`
+      console.log('📊 [ReportesService] Obteniendo reporte:', reporteId)
+      
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      console.log('✅ [ReportesService] Reporte obtenido:', data)
+      
+      return data
+    } catch (error) {
+      console.error('❌ [ReportesService] Error obteniendo reporte:', error)
+      throw error
+    }
+  },
+
+  /**
    * Descargar un reporte específico
    * @param {number} reporteId - ID del reporte
    */

@@ -2920,19 +2920,7 @@ export default {
             const row = Math.floor(i / imgsPerRow);
             
             const imgX = margin + (col * (imgGridWidth + imgSpacing));
-            const imgY = currentY + (row * (imgGridHeight + labelHeight + 10));
-            
-            // Verificar si necesitamos nueva página
-            if (imgY + imgGridHeight + labelHeight + 15 > pageHeight - 40) {
-              doc.addPage();
-              currentY = 20;
-              
-              doc.setFontSize(9);
-              doc.setFont(undefined, 'bold');
-              doc.setTextColor(0, 0, 0);
-              doc.text('EVIDENCIAS FOTOGRÁFICAS (Continuación)', pageWidth / 2, currentY, { align: 'center' });
-              currentY += 10;
-            }
+          const imgY = currentY + (row * (imgGridHeight + labelHeight + 5));
             
             // Borde de la imagen
             doc.setDrawColor(0, 0, 0);

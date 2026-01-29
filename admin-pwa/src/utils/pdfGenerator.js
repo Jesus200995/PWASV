@@ -476,7 +476,7 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
         const row = Math.floor(i / imgsPerRow)
         
         const imgX = margin + (col * (imgGridWidth + imgSpacing))
-        const imgY = currentY + (row * (imgGridHeight + labelHeight + 10))
+        const imgY = currentY + (row * (imgGridHeight + labelHeight + 5))
         
         // Verificar si necesitamos nueva página
         if (imgY + imgGridHeight + labelHeight + 15 > pageHeight - 40) {

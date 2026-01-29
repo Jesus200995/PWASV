@@ -520,7 +520,7 @@
                     <!-- Texto de estatus -->
                     <div class="flex-1">
                       <p v-if="reporte.firmado_supervisor" class="text-xs font-semibold text-green-800">
-                        ✓ Firmado por supervisor
+                        Firmado por supervisor
                       </p>
                       <p v-else class="text-xs font-semibold text-amber-800">
                         ⏳ Pendiente de firma
@@ -2340,13 +2340,7 @@ export default {
               firmado_supervisor: reporte.firmado_supervisor === true, // Estado de firma
               fecha_firma_supervisor: reporte.fecha_firma_supervisor, // Fecha de firma
               nombre_supervisor: reporte.nombre_supervisor, // Nombre del supervisor
-              fecha: reporte.fecha ? new Date(reporte.fecha).toLocaleString('es-MX', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-              }) : 'Sin fecha'
+              fecha: reporte.fecha || null // Guardar fecha original sin formatear
             };
             console.log(`   📄 Reporte: ${reporteFormateado.nombre}, tiene_pdf: ${reporteFormateado.tiene_pdf}, firmado: ${reporteFormateado.firmado_supervisor}`);
             return reporteFormateado;

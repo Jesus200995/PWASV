@@ -499,14 +499,32 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
         
         // Intentar agregar imagen
         try {
+          let imgData = null
+          
+          // Primero intentar con foto_base64
           if (actividad.foto_base64) {
-            // Asegurar que el base64 tiene el formato correcto
             let imgBase64 = actividad.foto_base64
             if (!imgBase64.startsWith('data:')) {
               imgBase64 = 'data:image/jpeg;base64,' + imgBase64
             }
-            
-            doc.addImage(imgBase64, 'JPEG', imgX + 1, imgY + 1, imgGridWidth - 2, imgGridHeight - 2)
+            imgData = imgBase64
+            console.log(`✅ Usando foto_base64 para imagen ${i + 1}`)
+          }
+          // Si no tiene foto_base64, intentar cargar desde foto_url
+          else if (actividad.foto_url) {
+            console.log(`📥 Cargando imagen ${i + 1} desde URL: ${actividad.foto_url}`)
+            try {
+              const result = await cargarImagenComoBase64(actividad.foto_url)
+              imgData = result.data
+              console.log(`✅ Imagen ${i + 1} cargada desde URL`)
+            } catch (loadError) {
+              console.warn(`⚠️ No se pudo cargar imagen ${i + 1} desde URL:`, loadError)
+            }
+          }
+          
+          // Si tenemos imagen, agregarla
+          if (imgData) {
+            doc.addImage(imgData, 'JPEG', imgX + 1, imgY + 1, imgGridWidth - 2, imgGridHeight - 2)
             console.log(`✅ Imagen ${i + 1} agregada al PDF`)
           } else {
             // Placeholder gris
@@ -519,7 +537,7 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
             doc.setFontSize(8)
             doc.text('Imagen no', imgX + imgGridWidth / 2, imgY + imgGridHeight / 2 - 3, { align: 'center' })
             doc.text('disponible', imgX + imgGridWidth / 2, imgY + imgGridHeight / 2 + 3, { align: 'center' })
-            console.log(`⚠️ Imagen ${i + 1} sin datos base64`)
+            console.log(`⚠️ Imagen ${i + 1} sin datos`)
           }
         } catch (imgError) {
           console.warn(`❌ Error agregando imagen ${i + 1}:`, imgError)

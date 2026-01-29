@@ -2,6 +2,7 @@
  * Servicio para gestionar reportes en admin-pwa
  */
 import { API_URL } from '../config/api'
+import { generarPDFDesdesDatos } from '../utils/pdfGenerator'
 
 const reportesService = {
   /**
@@ -171,15 +172,35 @@ const reportesService = {
       const reporte = data.reporte
       let pdfBlob = null
       
-      // NUEVO FLUJO: Si hay datos_reporte, avisar al usuario que debe usar pwasuper
-      // (El admin no tiene la capacidad de generar PDFs con jsPDF como el pwasuper)
-      if (reporte.datos_reporte && !reporte.pdf_base64) {
-        alert('Este reporte fue generado con el nuevo sistema. El PDF se genera automáticamente al descargarlo desde la aplicación del usuario (pwasuper).')
-        return { success: false, message: 'PDF solo disponible en pwasuper' }
+      // NUEVO FLUJO: Si hay datos_reporte, generar PDF desde datos estructurados
+      if (reporte.datos_reporte) {
+        console.log('📄 Generando PDF desde datos_reporte...')
+        
+        try {
+          const pdfBase64 = await generarPDFDesdesDatos(
+            reporte.datos_reporte,
+            reporte.firma_usuario_base64,
+            reporte.firma_supervisor_base64,
+            reporte.nombre_supervisor
+          )
+          
+          // Convertir base64 a blob
+          const byteCharacters = atob(pdfBase64)
+          const byteNumbers = new Array(byteCharacters.length)
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i)
+          }
+          const byteArray = new Uint8Array(byteNumbers)
+          pdfBlob = new Blob([byteArray], { type: 'application/pdf' })
+          
+          console.log('✅ PDF generado desde datos_reporte')
+        } catch (error) {
+          console.error('❌ Error generando PDF desde datos:', error)
+          throw new Error('No se pudo generar el PDF: ' + error.message)
+        }
       }
-      
       // COMPATIBILIDAD: Si hay PDF guardado (reportes antiguos o con pdf_base64)
-      if (reporte.pdf_base64) {
+      else if (reporte.pdf_base64) {
         const base64Limpio = this._limpiarBase64(reporte.pdf_base64)
         
         if (!base64Limpio) {

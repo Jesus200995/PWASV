@@ -1056,27 +1056,60 @@ export default {
         return;
       }
 
-      console.log('🚀 Iniciando proceso de descarga...');
+      console.log('🚀 Iniciando proceso de guardado de reporte...');
       
       // Activar estado de procesamiento - EL MODAL SE MANTIENE ABIERTO
       this.procesandoDescarga = true;
       this.generandoReporte = true;
       
       try {
-        console.log('📄 Generando reporte...');
+        console.log('📄 Preparando datos del reporte...');
         
-        // Generar el reporte y obtener el PDF en base64 (SIN DESCARGAR aún)
-        let pdfBase64 = null;
-        if (this.formatoSeleccionado === 'pdf') {
-          pdfBase64 = await this.generarPDF();
-          console.log('📦 PDF generado, tipo:', typeof pdfBase64);
-          console.log('📦 PDF longitud:', pdfBase64 ? pdfBase64.length : 'NULL');
-          console.log('📦 PDF primeros 100 chars:', pdfBase64 ? pdfBase64.substring(0, 100) : 'N/A');
-        } else {
-          this.generarCSV();
-        }
+        // NUEVO FLUJO: Guardar datos estructurados, NO generar PDF
+        const firmaUsuarioBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
+        
+        // Construir objeto con los datos del reporte
+        const datosReporte = {
+          // Información del usuario
+          usuario: {
+            id: this.usuarioInfo.id,
+            nombre: this.usuarioInfo.nombre,
+            cargo: this.usuarioInfo.cargo,
+            curp: this.usuarioInfo.curp,
+            territorio: this.usuarioInfo.territorio,
+            supervisor: this.usuarioInfo.supervisor,
+            correo: this.usuarioInfo.correo
+          },
+          // Período del reporte
+          periodo: {
+            mes: this.mesSeleccionado,
+            mesNombre: this.mesActual,
+            anio: this.anioSeleccionado,
+            fechaInicio: new Date(this.anioSeleccionado, this.mesSeleccionado, 1).toISOString(),
+            fechaFin: new Date(this.anioSeleccionado, this.mesSeleccionado + 1, 0).toISOString()
+          },
+          // Actividades del período
+          actividades: this.actividades.map(act => ({
+            id: act.id,
+            fecha_hora: act.fecha_hora,
+            tipo_actividad: act.tipo_actividad,
+            categoria_actividad: act.categoria_actividad,
+            descripcion: act.descripcion,
+            foto_url: act.foto_url,
+            latitud: act.latitud,
+            longitud: act.longitud
+          })),
+          // Estadísticas
+          estadisticas: {
+            totalActividades: this.actividades.length,
+            actividadesCampo: this.actividades.filter(a => (a.tipo_actividad || '').toLowerCase() === 'campo').length,
+            actividadesGabinete: this.actividades.filter(a => (a.tipo_actividad || '').toLowerCase() === 'gabinete').length
+          },
+          // Fecha de generación
+          fechaGeneracion: new Date().toISOString()
+        };
 
-        console.log('✅ Reporte generado exitosamente (aún no descargado)');
+        console.log('✅ Datos del reporte preparados:', datosReporte.estadisticas);
 
         // Agregar a historial local con TODOS los campos necesarios
         const fecha = new Date().toLocaleString('es-MX');
@@ -1089,23 +1122,25 @@ export default {
           mes: this.mesActual,
           anio: this.anioSeleccionado,
           fecha,
-          tipo: this.formatoSeleccionado.toUpperCase(),
-          tiene_pdf: !!pdfBase64
+          tipo: 'PDF',
+          tiene_pdf: false, // No se genera PDF todavía
+          firmado_supervisor: false
         };
 
-        // Guardar en la base de datos (incluyendo el PDF)
+        // Guardar en la base de datos (datos estructurados + firma usuario)
         try {
-          console.log('💾 Preparando datos para guardar en BD...');
-          console.log('💾 pdf_base64 presente:', !!pdfBase64);
-          console.log('💾 pdf_base64 longitud:', pdfBase64 ? pdfBase64.length : 0);
+          console.log('💾 Guardando reporte en BD (datos estructurados)...');
           
           const datosGuardar = {
             usuario_id: this.usuarioInfo.id,
             nombre_reporte: nombreReporte,
             mes: this.mesActual,
             anio: this.anioSeleccionado,
-            tipo: this.formatoSeleccionado.toUpperCase(),
-            pdf_base64: pdfBase64
+            tipo: 'PDF',
+            // NUEVO: Datos estructurados y firma del usuario
+            datos_reporte: datosReporte,
+            firma_usuario_base64: firmaUsuarioBase64
+            // NO enviamos pdf_base64 - se generará cuando se descargue
           };
           
           console.log('💾 Enviando a /reportes/guardar...');
@@ -1133,26 +1168,11 @@ export default {
           
           console.log('🔒 reporteExistente establecido - botón se deshabilitará');
           
-          // ✅ AHORA QUE YA SE GUARDÓ EN BD, proceder a descargar el PDF
-          if (this.formatoSeleccionado === 'pdf' && this._pdfDocumentoGenerado) {
-            console.log('📥 Iniciando descarga del PDF (guardado en BD exitoso)...');
-            const descargaExitosa = await this.descargarPDFSeguro(
-              this._pdfDocumentoGenerado, 
-              this._pdfNombreArchivo
-            );
-            
-            if (!descargaExitosa) {
-              console.warn('⚠️ La descarga del PDF pudo tener problemas, pero el reporte YA está guardado en la base de datos');
-              this.$notify?.({
-                type: 'warning',
-                message: 'El reporte se guardó correctamente. Si no se descargó, puede obtenerlo desde el historial.'
-              });
-            }
-            
-            // Limpiar referencias
-            this._pdfDocumentoGenerado = null;
-            this._pdfNombreArchivo = null;
-          }
+          // Mostrar mensaje de éxito
+          this.$notify?.({
+            type: 'success',
+            message: 'Reporte firmado y guardado. Tu supervisor podrá revisarlo y autorizarlo.'
+          });
           
         } catch (error) {
           console.error('⚠️ Error guardando reporte en BD:', error);
@@ -1167,30 +1187,15 @@ export default {
             return; // No continuar si hay duplicado
           }
           
-          // Para otros errores de BD, aún intentamos descargar y guardar localmente
-          console.log('⚠️ Error en BD, pero intentando descargar PDF localmente...');
-          
-          // Intentar descargar aunque la BD haya fallado
-          if (this.formatoSeleccionado === 'pdf' && this._pdfDocumentoGenerado) {
-            await this.descargarPDFSeguro(this._pdfDocumentoGenerado, this._pdfNombreArchivo);
-            this._pdfDocumentoGenerado = null;
-            this._pdfNombreArchivo = null;
-          }
-          
-          // Agregar al historial local como fallback
-          this.reportesGenerados.unshift(nuevoReporte);
+          // Para otros errores de BD
+          throw error;
         }
-
-        this.$notify?.({
-          type: 'success',
-          message: 'Reporte generado correctamente'
-        });
         
       } catch (error) {
         console.error('❌ Error generando reporte:', error);
         this.$notify?.({
           type: 'error',
-          message: 'Error al generar el reporte'
+          message: 'Error al guardar el reporte'
         });
       } finally {
         // AHORA sí cerramos el modal, DESPUÉS de terminar todo
@@ -1198,7 +1203,7 @@ export default {
         this.generandoReporte = false;
         this.mostrarModalFirma = false;
         this.confirmarFirma = false;
-        console.log('🏁 Proceso de descarga finalizado');
+        console.log('🏁 Proceso de guardado finalizado');
       }
     },
 
@@ -2376,6 +2381,7 @@ export default {
 
     async descargarReporteHistorial(reporte) {
       // Descargar un reporte previamente generado desde el historial
+      // NUEVO FLUJO: Genera el PDF con las firmas disponibles (usuario + supervisor si existe)
       if (this.descargandoReporte) {
         console.log('⚠️ Ya se está descargando un reporte');
         return;
@@ -2385,51 +2391,63 @@ export default {
       this.descargandoReporte = reporte.id;
 
       try {
-        // Obtener el PDF desde el servidor
+        // Obtener datos del reporte desde el servidor
         const response = await api.get(`/reportes/descargar/${reporte.id}`);
         
-        if (response.data.success && response.data.reporte.pdf_base64) {
-          // Limpiar y validar el base64
-          let base64Data = limpiarBase64(response.data.reporte.pdf_base64);
+        if (!response.data.success) {
+          throw new Error('No se pudo obtener el reporte');
+        }
+        
+        const reporteData = response.data.reporte;
+        
+        // NUEVO FLUJO: Si hay datos_reporte, generar PDF desde los datos
+        if (reporteData.datos_reporte) {
+          console.log('📄 Generando PDF desde datos estructurados...');
+          
+          // Generar PDF con las firmas disponibles
+          const pdfBase64 = await this.generarPDFDesdesDatos(
+            reporteData.datos_reporte,
+            reporteData.firma_usuario_base64,
+            reporteData.firmado_supervisor ? reporteData.firma_supervisor_base64 : null,
+            reporteData.nombre_supervisor
+          );
+          
+          // Descargar el PDF
+          await this.descargarPDFBase64(pdfBase64, reporte.nombre);
+          
+          console.log('✅ Reporte generado y descargado exitosamente');
+          
+          this.$notify?.({
+            type: 'success',
+            message: reporteData.firmado_supervisor 
+              ? `${reporte.nombre} descargado (firmado por supervisor)` 
+              : `${reporte.nombre} descargado (pendiente de autorización)`
+          });
+          
+        } else if (reporteData.pdf_base64) {
+          // COMPATIBILIDAD: Si hay PDF guardado (reportes antiguos)
+          console.log('📄 Usando PDF guardado (compatibilidad)...');
+          
+          let base64Data = limpiarBase64(reporteData.pdf_base64);
           
           if (!base64Data) {
             throw new Error('El PDF tiene formato inválido');
           }
           
           // Si el reporte tiene firma del supervisor, agregarla al PDF
-          const reporteData = response.data.reporte;
           if (reporteData.firmado_supervisor && reporteData.firma_supervisor_base64) {
             console.log('✍️ Agregando firma del supervisor al PDF...');
             base64Data = await this.agregarFirmaSupervisorPDF(base64Data, reporteData.firma_supervisor_base64);
           }
           
-          // Convertir base64 a blob
-          const byteCharacters = atob(base64Data);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: 'application/pdf' });
-          
-          // Crear enlace de descarga
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `${reporte.nombre.replace(/\s+/g, '_')}.pdf`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-          
-          console.log('✅ Reporte descargado exitosamente');
+          await this.descargarPDFBase64(base64Data, reporte.nombre);
           
           this.$notify?.({
             type: 'success',
             message: `${reporte.nombre} descargado`
           });
         } else {
-          throw new Error('El PDF no está disponible');
+          throw new Error('El reporte no tiene datos disponibles para generar el PDF');
         }
         
       } catch (error) {
@@ -2437,7 +2455,7 @@ export default {
         
         let mensaje = 'Error al descargar el reporte';
         if (error.response?.status === 404) {
-          mensaje = 'El PDF de este reporte no está disponible';
+          mensaje = 'El reporte no está disponible';
         }
         
         this.$notify?.({
@@ -2447,6 +2465,318 @@ export default {
       } finally {
         this.descargandoReporte = null;
       }
+    },
+    
+    /**
+     * Descarga un PDF desde base64
+     */
+    async descargarPDFBase64(base64Data, nombreReporte) {
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${nombreReporte.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    },
+    
+    /**
+     * Genera un PDF desde los datos estructurados del reporte
+     * @param {Object} datos - Datos estructurados del reporte
+     * @param {string} firmaUsuario - Firma del usuario en base64
+     * @param {string} firmaSupervisor - Firma del supervisor en base64 (opcional)
+     * @param {string} nombreSupervisor - Nombre del supervisor que firmó
+     * @returns {string} - PDF en base64 (sin prefijo data:)
+     */
+    async generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor, nombreSupervisor) {
+      console.log('📄 Generando PDF desde datos estructurados...');
+      console.log('   - Actividades:', datos.actividades?.length || 0);
+      console.log('   - Firma usuario:', firmaUsuario ? 'Sí' : 'No');
+      console.log('   - Firma supervisor:', firmaSupervisor ? 'Sí' : 'No');
+      
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 15;
+      const contentWidth = pageWidth - (margin * 2);
+      let currentY = 10;
+
+      // ========== ENCABEZADO CON IMAGEN DE LOGOS ==========
+      let superiorImageBase64 = null;
+      let imgDimensions = null;
+      
+      try {
+        const result = await this.cargarImagenComoBase64(superiorImage);
+        superiorImageBase64 = result.data;
+        imgDimensions = result.dimensions;
+      } catch (error) {
+        console.warn('⚠️ No se pudo cargar imagen de encabezado');
+      }
+      
+      if (superiorImageBase64 && imgDimensions) {
+        const realAspectRatio = imgDimensions.height / imgDimensions.width;
+        const imgWidth = contentWidth * 0.95;
+        const imgHeight = imgWidth * realAspectRatio;
+        const imgX = margin + (contentWidth - imgWidth) / 2;
+        doc.addImage(superiorImageBase64, 'PNG', imgX, currentY, imgWidth, imgHeight);
+        currentY += imgHeight + 5;
+      }
+    
+      // Recuadro principal con títulos
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, currentY, contentWidth, 25);
+      
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('SECRETARÍA DE BIENESTAR', pageWidth / 2, currentY + 6, { align: 'center' });
+      doc.text('SUBSECRETARÍA DE INCLUSIÓN PRODUCTIVA Y DESARROLLO RURAL', pageWidth / 2, currentY + 11, { align: 'center' });
+      doc.text('FORMATO DE SEGUIMIENTO A ACTIVIDADES PROGRAMADAS', pageWidth / 2, currentY + 16, { align: 'center' });
+      
+      // Fecha en la esquina
+      const fechaActual = new Date(datos.fechaGeneracion || new Date()).toLocaleDateString('es-MX', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text('Fecha:', pageWidth - margin - 35, currentY + 21);
+      doc.rect(pageWidth - margin - 25, currentY + 18, 25, 5);
+      doc.text(fechaActual, pageWidth - margin - 12.5, currentY + 21.5, { align: 'center' });
+      
+      currentY += 30;
+      
+      // ========== TABLA DE INFORMACIÓN DEL PRESTADOR ==========
+      const usuario = datos.usuario || {};
+      const periodo = datos.periodo || {};
+      const col1Width = contentWidth * 0.5;
+      const col2Width = contentWidth * 0.5;
+      
+      // Fila 1: Nombre
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.text('Nombre del prestador de Servicios', margin + 2, currentY + 4);
+      doc.setFont(undefined, 'normal');
+      doc.text(usuario.nombre || 'Sin nombre', margin + col1Width + 2, currentY + 4);
+      currentY += 6;
+      
+      // Fila 2: CURP
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      doc.setFont(undefined, 'bold');
+      doc.text('CURP', margin + 2, currentY + 4);
+      doc.setFont(undefined, 'normal');
+      doc.text(usuario.curp || 'No registrado', margin + col1Width + 2, currentY + 4);
+      currentY += 6;
+      
+      // Fila 3: Periodo
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      doc.setFont(undefined, 'bold');
+      doc.text('Periodo', margin + 2, currentY + 4);
+      doc.setFont(undefined, 'normal');
+      const mesNombre = periodo.mesNombre || 'N/A';
+      const anio = periodo.anio || 'N/A';
+      doc.text(`${mesNombre} ${anio}`, margin + col1Width + 2, currentY + 4);
+      currentY += 8;
+      
+      // Fila 4: Programa
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      doc.setFont(undefined, 'bold');
+      doc.text('Programa Social del Apoyo', margin + 2, currentY + 4);
+      doc.setFont(undefined, 'normal');
+      doc.text('SEMBRANDO VIDA', margin + col1Width + 2, currentY + 4);
+      currentY += 8;
+      
+      // Fila 5: Territorio
+      doc.rect(margin, currentY, col1Width, 6);
+      doc.rect(margin + col1Width, currentY, col2Width, 6);
+      doc.setFont(undefined, 'bold');
+      doc.text('Territorio y entidad donde presta sus servicios', margin + 2, currentY + 4);
+      doc.setFont(undefined, 'normal');
+      doc.text(usuario.territorio || 'No asignado', margin + col1Width + 2, currentY + 4);
+      currentY += 10;
+      
+      // ========== TABLA DE ACTIVIDADES ==========
+      const actividades = datos.actividades || [];
+      const tableWidth = contentWidth;
+      const tableX = margin;
+      const colWidths = [15, 32, 18, 22, 83];
+      
+      // Header
+      doc.setFillColor(255, 255, 255);
+      doc.rect(tableX, currentY, tableWidth, 8, 'FD');
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      
+      let colX = tableX + 2;
+      doc.text('No.', colX + colWidths[0]/2, currentY + 5.5, { align: 'center' });
+      doc.line(colX + colWidths[0], currentY, colX + colWidths[0], currentY + 8);
+      colX += colWidths[0];
+      doc.text('Fecha', colX + colWidths[1]/2, currentY + 5.5, { align: 'center' });
+      doc.line(colX + colWidths[1], currentY, colX + colWidths[1], currentY + 8);
+      colX += colWidths[1];
+      doc.text('Tipo', colX + colWidths[2]/2, currentY + 5.5, { align: 'center' });
+      doc.line(colX + colWidths[2], currentY, colX + colWidths[2], currentY + 8);
+      colX += colWidths[2];
+      doc.text('Hora', colX + colWidths[3]/2, currentY + 5.5, { align: 'center' });
+      doc.line(colX + colWidths[3], currentY, colX + colWidths[3], currentY + 8);
+      colX += colWidths[3];
+      doc.text('Actividad desarrollada', colX + colWidths[4]/2, currentY + 5.5, { align: 'center' });
+      currentY += 8;
+      
+      // Filas de datos
+      doc.setFontSize(7);
+      doc.setFont(undefined, 'normal');
+      const baseRowHeight = 8;
+      const lineHeight = 3;
+
+      actividades.forEach((actividad, index) => {
+        const activDesc = actividad.descripcion || actividad.categoria_actividad || 'Actividad de campo';
+        const maxTextWidth = colWidths[4] - 4;
+        const textLines = doc.splitTextToSize(activDesc, maxTextWidth);
+        const rowHeight = Math.max(baseRowHeight, textLines.length * lineHeight + 3);
+        
+        if (currentY > pageHeight - 50) {
+          doc.addPage();
+          currentY = 20;
+        }
+
+        doc.rect(tableX, currentY, tableWidth, rowHeight, 'S');
+
+        const fecha = actividad.fecha_hora ? new Date(actividad.fecha_hora).toLocaleDateString('es-MX', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : '-';
+        const hora = actividad.fecha_hora ? new Date(actividad.fecha_hora).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false }) : '-';
+        const tipo = (actividad.tipo_actividad || 'Campo').charAt(0).toUpperCase() + (actividad.tipo_actividad || 'campo').slice(1);
+
+        colX = tableX + 2;
+        const textYCenter = currentY + (rowHeight / 2) + 1.5;
+        
+        doc.text(String(index + 1), colX + colWidths[0]/2, textYCenter, { align: 'center' });
+        doc.line(colX + colWidths[0], currentY, colX + colWidths[0], currentY + rowHeight);
+        
+        colX += colWidths[0];
+        doc.text(fecha, colX + 2, textYCenter);
+        doc.line(colX + colWidths[1], currentY, colX + colWidths[1], currentY + rowHeight);
+        
+        colX += colWidths[1];
+        doc.text(tipo, colX + colWidths[2]/2, textYCenter, { align: 'center' });
+        doc.line(colX + colWidths[2], currentY, colX + colWidths[2], currentY + rowHeight);
+        
+        colX += colWidths[2];
+        doc.text(hora, colX + colWidths[3]/2, textYCenter, { align: 'center' });
+        doc.line(colX + colWidths[3], currentY, colX + colWidths[3], currentY + rowHeight);
+        
+        colX += colWidths[3];
+        textLines.forEach((line, lineIndex) => {
+          doc.text(line, colX + 2, currentY + 4 + (lineIndex * lineHeight));
+        });
+
+        currentY += rowHeight;
+      });
+
+      currentY += 15;
+
+      // ========== SECCIÓN DE FIRMAS ==========
+      if (currentY > pageHeight - 70) {
+        doc.addPage();
+        currentY = 30;
+      }
+
+      const firmaWidth = 70;
+      const firmaHeight = 30;
+      const firmaUsuarioX = margin + 5;
+      const firmaResponsableX = pageWidth - margin - firmaWidth - 5;
+      const firmaY = currentY;
+      
+      // Etiquetas
+      doc.setFillColor(255, 218, 185);
+      doc.setLineWidth(0.3);
+      
+      doc.rect(firmaUsuarioX, firmaY - 8, firmaWidth, 7, 'FD');
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text('Elaboró', firmaUsuarioX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
+      
+      doc.setFillColor(255, 218, 185);
+      doc.rect(firmaResponsableX, firmaY - 8, firmaWidth, 7, 'FD');
+      doc.text('Autorizó', firmaResponsableX + firmaWidth / 2, firmaY - 3.5, { align: 'center' });
+      
+      // FIRMA DEL USUARIO (Izquierda)
+      if (firmaUsuario) {
+        try {
+          doc.addImage(firmaUsuario, 'PNG', firmaUsuarioX, firmaY, firmaWidth, firmaHeight);
+        } catch (e) {
+          console.warn('No se pudo agregar firma del usuario');
+        }
+      }
+      
+      doc.setLineWidth(0.5);
+      doc.line(firmaUsuarioX, firmaY + firmaHeight + 5, firmaUsuarioX + firmaWidth, firmaY + firmaHeight + 5);
+      
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text(usuario.cargo || 'Facilitador Comunitario', firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+      doc.setFont(undefined, 'bold');
+      doc.text(usuario.nombre || 'Sin nombre', firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 17, { align: 'center' });
+      
+      // FIRMA DEL SUPERVISOR (Derecha) - Solo si existe
+      if (firmaSupervisor) {
+        try {
+          doc.addImage(firmaSupervisor, 'PNG', firmaResponsableX, firmaY, firmaWidth, firmaHeight);
+          console.log('✅ Firma del supervisor agregada al PDF');
+        } catch (e) {
+          console.warn('No se pudo agregar firma del supervisor');
+        }
+      }
+      
+      doc.setLineWidth(0.5);
+      doc.line(firmaResponsableX, firmaY + firmaHeight + 5, firmaResponsableX + firmaWidth, firmaY + firmaHeight + 5);
+      
+      doc.setFontSize(7.5);
+      doc.setFont(undefined, 'normal');
+      doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+      doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+      
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.text(nombreSupervisor || usuario.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
+
+      // ========== PIE DE PÁGINA ==========
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setTextColor(128, 0, 32);
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'normal');
+        const footerText = 'Paseo de la Reforma # 116, Piso 16, Col. Juárez, Alc. Cuauhtémoc, CDMX C.P. 06600 Tel.: (55) 5328 5000 www.gob.mx/bienestar';
+        doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: 'center' });
+      }
+
+      // Obtener PDF como base64 (sin prefijo data:)
+      const pdfOutput = doc.output('datauristring');
+      const base64 = pdfOutput.split(',')[1];
+      
+      console.log('✅ PDF generado desde datos estructurados');
+      return base64;
     },
     
     /**
@@ -2534,7 +2864,8 @@ export default {
     },
 
     async verReporteHistorial(reporte) {
-      // Ver un reporte previamente generado - abre con visor nativo del dispositivo
+      // Ver un reporte previamente generado - genera PDF y lo abre
+      // NUEVO FLUJO: Genera PDF desde datos estructurados con las firmas disponibles
       if (this.viendoReporte) {
         console.log('⚠️ Ya se está cargando un reporte');
         return;
@@ -2544,86 +2875,87 @@ export default {
       this.viendoReporte = reporte.id;
 
       try {
-        // Obtener el PDF desde el servidor
+        // Obtener datos del reporte desde el servidor
         const response = await api.get(`/reportes/descargar/${reporte.id}`);
         
-        if (response.data.success && response.data.reporte.pdf_base64) {
-          // Limpiar y validar el base64
-          let base64Data = limpiarBase64(response.data.reporte.pdf_base64);
+        if (!response.data.success) {
+          throw new Error('No se pudo obtener el reporte');
+        }
+        
+        const reporteData = response.data.reporte;
+        let base64Data = null;
+        
+        // NUEVO FLUJO: Si hay datos_reporte, generar PDF desde los datos
+        if (reporteData.datos_reporte) {
+          console.log('📄 Generando PDF desde datos estructurados...');
           
-          if (!base64Data) {
-            throw new Error('El PDF tiene formato inválido');
-          }
+          base64Data = await this.generarPDFDesdesDatos(
+            reporteData.datos_reporte,
+            reporteData.firma_usuario_base64,
+            reporteData.firmado_supervisor ? reporteData.firma_supervisor_base64 : null,
+            reporteData.nombre_supervisor
+          );
           
-          // Si el reporte tiene firma del supervisor, agregarla al PDF
-          const reporteData = response.data.reporte;
+        } else if (reporteData.pdf_base64) {
+          // COMPATIBILIDAD: Si hay PDF guardado (reportes antiguos)
+          console.log('📄 Usando PDF guardado (compatibilidad)...');
+          
+          base64Data = limpiarBase64(reporteData.pdf_base64);
+          
           if (reporteData.firmado_supervisor && reporteData.firma_supervisor_base64) {
             console.log('✍️ Agregando firma del supervisor al PDF...');
             base64Data = await this.agregarFirmaSupervisorPDF(base64Data, reporteData.firma_supervisor_base64);
           }
-          
-          // Convertir base64 a blob
-          const byteCharacters = atob(base64Data);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: 'application/pdf' });
-          
-          // Crear nombre del archivo
-          const nombreArchivo = `${reporte.nombre.replace(/\s+/g, '_')}.pdf`;
-          
-          // Detectar si es dispositivo móvil
-          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-          
-          if (isMobile) {
-            // En móviles: descargar el archivo para que se abra con el visor nativo
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = nombreArchivo;
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Liberar URL después de un momento
-            setTimeout(() => {
-              window.URL.revokeObjectURL(url);
-            }, 2000);
-            
-            console.log('✅ PDF descargado - se abrirá con el visor nativo del dispositivo');
-            
-            this.$notify?.({
-              type: 'success',
-              message: 'PDF descargado - se abrirá con tu visor de PDF'
-            });
-          } else {
-            // En desktop: abrir en nueva pestaña
-            const url = window.URL.createObjectURL(blob);
-            window.open(url, '_blank');
-            // Liberar la URL después de un momento
-            setTimeout(() => {
-              window.URL.revokeObjectURL(url);
-            }, 1000);
-            console.log('✅ Reporte abierto en nueva pestaña');
-          }
         } else {
-          throw new Error('El PDF no está disponible');
+          throw new Error('El reporte no tiene datos para generar el PDF');
+        }
+        
+        if (!base64Data) {
+          throw new Error('Error generando el PDF');
+        }
+        
+        // Convertir base64 a blob
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        
+        const nombreArchivo = `${reporte.nombre.replace(/\s+/g, '_')}.pdf`;
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = nombreArchivo;
+          link.target = '_blank';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+          
+          this.$notify?.({
+            type: 'success',
+            message: reporteData.firmado_supervisor 
+              ? 'PDF generado con firma de supervisor' 
+              : 'PDF generado (pendiente de autorización)'
+          });
+        } else {
+          const url = window.URL.createObjectURL(blob);
+          window.open(url, '_blank');
+          setTimeout(() => window.URL.revokeObjectURL(url), 1000);
         }
         
       } catch (error) {
         console.error('❌ Error visualizando reporte:', error);
         
-        let mensaje = 'Error al abrir el reporte';
-        if (error.response?.status === 404) {
-          mensaje = 'El PDF de este reporte no está disponible';
-        }
-        
         this.$notify?.({
           type: 'error',
-          message: mensaje
+          message: 'Error al abrir el reporte'
         });
       } finally {
         this.viendoReporte = null;

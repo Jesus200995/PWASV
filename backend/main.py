@@ -1615,7 +1615,15 @@ def obtener_estadisticas_tipo_actividad(territorio: str = None):
 
 @app.post("/reportes/guardar")
 async def guardar_reporte(datos: dict):
-    """Guardar un reporte generado en la base de datos, incluyendo el PDF en base64"""
+    """
+    Guardar un reporte generado en la base de datos.
+    
+    NUEVO FLUJO:
+    - Se guardan los DATOS del reporte (JSON) + firma del usuario
+    - NO se genera el PDF aquí, se genera al descargar
+    - El supervisor puede firmar después
+    - El PDF final se genera con ambas firmas cuando se descarga
+    """
     try:
         # Verificar conexión a la base de datos
         verificar_conexion_db()
@@ -1625,13 +1633,21 @@ async def guardar_reporte(datos: dict):
         mes = datos.get('mes')
         anio = datos.get('anio')
         tipo = datos.get('tipo')  # PDF o CSV
-        pdf_base64 = datos.get('pdf_base64')  # PDF en formato base64
+        
+        # NUEVO: Datos estructurados del reporte
+        datos_reporte = datos.get('datos_reporte')  # JSON con actividades, info usuario, etc.
+        firma_usuario_base64 = datos.get('firma_usuario_base64')  # Firma del usuario
+        
+        # Mantener compatibilidad con el flujo anterior
+        pdf_base64 = datos.get('pdf_base64')  # PDF en formato base64 (opcional ahora)
         
         print(f"📥 Recibiendo reporte para guardar:")
         print(f"   - usuario_id: {usuario_id}")
         print(f"   - nombre_reporte: {nombre_reporte}")
         print(f"   - mes: {mes}, anio: {anio}")
         print(f"   - tipo: {tipo}")
+        print(f"   - datos_reporte: {'Sí' if datos_reporte else 'No'}")
+        print(f"   - firma_usuario_base64: {'Sí (' + str(len(firma_usuario_base64)) + ' chars)' if firma_usuario_base64 else 'No'}")
         print(f"   - pdf_base64: {'Sí (' + str(len(pdf_base64)) + ' chars)' if pdf_base64 else 'No'}")
         
         if not all([usuario_id, nombre_reporte, tipo]):
@@ -1654,12 +1670,16 @@ async def guardar_reporte(datos: dict):
         
         print(f"💾 Guardando reporte: {nombre_reporte} para usuario {usuario_id}")
         
+        # Convertir datos_reporte a JSON si es dict
+        import json as json_module
+        datos_reporte_json = json_module.dumps(datos_reporte) if datos_reporte else None
+        
         cursor.execute("""
             INSERT INTO reportes_generados 
-            (usuario_id, nombre_reporte, mes, anio, tipo, fecha_generacion, pdf_base64)
-            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP, %s)
+            (usuario_id, nombre_reporte, mes, anio, tipo, fecha_generacion, pdf_base64, datos_reporte, firma_usuario_base64)
+            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP, %s, %s, %s)
             RETURNING id, fecha_generacion
-        """, (usuario_id, nombre_reporte, mes, anio, tipo, pdf_base64))
+        """, (usuario_id, nombre_reporte, mes, anio, tipo, pdf_base64, datos_reporte_json, firma_usuario_base64))
         
         resultado = cursor.fetchone()
         conn.commit()
@@ -1820,7 +1840,16 @@ async def eliminar_reporte(reporte_id: int):
 
 @app.get("/reportes/descargar/{reporte_id}")
 async def descargar_reporte(reporte_id: int):
-    """Obtener el PDF de un reporte guardado, incluyendo datos de firma del supervisor"""
+    """
+    Obtener los datos de un reporte guardado para generar el PDF en el frontend.
+    
+    NUEVO FLUJO:
+    - Devuelve los datos estructurados del reporte (datos_reporte JSON)
+    - Incluye la firma del usuario (firma_usuario_base64)
+    - Incluye la firma del supervisor si existe (firma_supervisor_base64)
+    - El frontend genera el PDF con las firmas disponibles
+    - Si hay pdf_base64 guardado (compatibilidad), también lo devuelve
+    """
     try:
         print(f"📥 Descargando reporte ID: {reporte_id}")
         
@@ -1837,7 +1866,9 @@ async def descargar_reporte(reporte_id: int):
                 fecha_firma_supervisor,
                 firma_supervisor_base64,
                 nombre_supervisor,
-                supervisor_id
+                supervisor_id,
+                datos_reporte,
+                firma_usuario_base64
             FROM reportes_generados
             WHERE id = %s
         """, (reporte_id,))
@@ -1848,12 +1879,18 @@ async def descargar_reporte(reporte_id: int):
             raise HTTPException(status_code=404, detail="Reporte no encontrado")
         
         pdf_base64 = reporte[6]
+        datos_reporte = reporte[12]  # JSONB - puede ser dict o string
+        firma_usuario_base64 = reporte[13]
         
-        if not pdf_base64:
-            raise HTTPException(status_code=404, detail="El PDF de este reporte no está disponible para descarga")
+        # Si no hay datos_reporte ni pdf_base64, no hay nada que descargar
+        if not pdf_base64 and not datos_reporte:
+            raise HTTPException(status_code=404, detail="El reporte no tiene datos disponibles para descarga")
         
-        print(f"✅ PDF encontrado: {reporte[1]}")
+        print(f"✅ Reporte encontrado: {reporte[1]}")
         print(f"   Firmado por supervisor: {reporte[7]}")
+        print(f"   Tiene datos_reporte: {'Sí' if datos_reporte else 'No'}")
+        print(f"   Tiene pdf_base64: {'Sí' if pdf_base64 else 'No'}")
+        print(f"   Tiene firma_usuario: {'Sí' if firma_usuario_base64 else 'No'}")
         
         return {
             "success": True,
@@ -1864,7 +1901,10 @@ async def descargar_reporte(reporte_id: int):
                 "anio": reporte[3],
                 "tipo": reporte[4],
                 "fecha": reporte[5].isoformat() if reporte[5] else None,
-                "pdf_base64": pdf_base64,
+                "pdf_base64": pdf_base64,  # Para compatibilidad con reportes antiguos
+                # Datos estructurados del reporte (NUEVO)
+                "datos_reporte": datos_reporte,
+                "firma_usuario_base64": firma_usuario_base64,
                 # Datos de firma del supervisor
                 "firmado_supervisor": reporte[7] or False,
                 "fecha_firma_supervisor": reporte[8].isoformat() if reporte[8] else None,

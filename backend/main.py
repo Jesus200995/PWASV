@@ -1816,14 +1816,7 @@ async def eliminar_reporte(reporte_id: int):
         if not reporte:
             raise HTTPException(status_code=404, detail="Reporte no encontrado")
         
-        # Verificar si está firmado por el supervisor
-        if reporte[2]:  # firmado_supervisor es True
-            raise HTTPException(
-                status_code=403, 
-                detail="No se puede eliminar un reporte que ya ha sido firmado por el supervisor"
-            )
-        
-        # Eliminar el reporte
+        # Eliminar el reporte (permitido incluso si está firmado)
         cursor.execute("DELETE FROM reportes_generados WHERE id = %s", (reporte_id,))
         conn.commit()
         
@@ -1865,7 +1858,7 @@ async def descargar_reporte(reporte_id: int):
                 tipo,
                 fecha_generacion,
                 pdf_base64,
-                firmado_supervisor,
+                COALESCE(firmado_supervisor, false) as firmado_supervisor,
                 fecha_firma_supervisor,
                 firma_supervisor_base64,
                 nombre_supervisor,
@@ -1952,7 +1945,7 @@ async def firmar_reporte_supervisor(reporte_id: int, firma_data: FirmaReporteReq
                 id,
                 nombre_reporte,
                 pdf_base64,
-                firmado_supervisor,
+                COALESCE(firmado_supervisor, false) as firmado_supervisor,
                 usuario_id
             FROM reportes_generados
             WHERE id = %s
@@ -1973,7 +1966,7 @@ async def firmar_reporte_supervisor(reporte_id: int, firma_data: FirmaReporteReq
         fecha_firma = datetime.now(cdmx_tz)
         
         # Actualizar el reporte con la firma
-        cursor.execute("""
+        update_query = """
             UPDATE reportes_generados
             SET 
                 firmado_supervisor = TRUE,
@@ -1982,7 +1975,9 @@ async def firmar_reporte_supervisor(reporte_id: int, firma_data: FirmaReporteReq
                 nombre_supervisor = %s,
                 supervisor_id = %s
             WHERE id = %s
-        """, (
+        """
+        
+        cursor.execute(update_query, (
             fecha_firma,
             firma_data.firma_base64,
             firma_data.nombre_supervisor,
@@ -1990,7 +1985,11 @@ async def firmar_reporte_supervisor(reporte_id: int, firma_data: FirmaReporteReq
             reporte_id
         ))
         
+        rows_affected = cursor.rowcount
         conn.commit()
+        
+        if rows_affected == 0:
+            raise HTTPException(status_code=500, detail="No se pudo actualizar el reporte")
         
         print(f"✅ Reporte firmado exitosamente por {firma_data.nombre_supervisor}")
         
@@ -2099,7 +2098,11 @@ async def obtener_todos_reportes_admin(
                 u.nombre_completo,
                 u.correo,
                 u.territorio,
-                u.cargo
+                u.cargo,
+                COALESCE(r.firmado_supervisor, false) as firmado_supervisor,
+                r.fecha_firma_supervisor,
+                r.nombre_supervisor,
+                r.supervisor_id
             FROM reportes_generados r
             LEFT JOIN usuarios u ON r.usuario_id = u.id
             WHERE 1=1
@@ -2140,7 +2143,11 @@ async def obtener_todos_reportes_admin(
                 u.nombre_completo,
                 u.correo,
                 u.territorio,
-                u.cargo""",
+                u.cargo,
+                COALESCE(r.firmado_supervisor, false) as firmado_supervisor,
+                r.fecha_firma_supervisor,
+                r.nombre_supervisor,
+                r.supervisor_id""",
             "SELECT COUNT(*)"
         ).replace(" ORDER BY r.fecha_generacion DESC", "")
         
@@ -2170,7 +2177,11 @@ async def obtener_todos_reportes_admin(
                     "correo": r[9],
                     "territorio": r[10],
                     "cargo": r[11]
-                }
+                },
+                "firmado_supervisor": r[12],
+                "fecha_firma_supervisor": r[13].isoformat() if r[13] else None,
+                "nombre_supervisor": r[14],
+                "supervisor_id": r[15]
             })
         
         print(f"✅ [ADMIN] {len(resultado)} reportes encontrados de {total} totales")

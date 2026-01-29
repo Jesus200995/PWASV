@@ -22,7 +22,14 @@ app = FastAPI()
 # Permitir requests desde el frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3003", "http://127.0.0.1:3003", "*"],
+    allow_origins=[
+        "http://localhost:3003", 
+        "http://127.0.0.1:3003",
+        "https://app.sembrandodatos.com",
+        "https://apipwa.sembrandodatos.com",
+        "https://admin.sembrandodatos.com",
+        "*"
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],

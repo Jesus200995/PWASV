@@ -2102,7 +2102,8 @@ async def obtener_todos_reportes_admin(
                 COALESCE(r.firmado_supervisor, false) as firmado_supervisor,
                 r.fecha_firma_supervisor,
                 r.nombre_supervisor,
-                r.supervisor_id
+                r.supervisor_id,
+                CASE WHEN r.datos_reporte IS NOT NULL THEN true ELSE false END as tiene_datos_reporte
             FROM reportes_generados r
             LEFT JOIN usuarios u ON r.usuario_id = u.id
             WHERE 1=1
@@ -2147,7 +2148,8 @@ async def obtener_todos_reportes_admin(
                 COALESCE(r.firmado_supervisor, false) as firmado_supervisor,
                 r.fecha_firma_supervisor,
                 r.nombre_supervisor,
-                r.supervisor_id""",
+                r.supervisor_id,
+                CASE WHEN r.datos_reporte IS NOT NULL THEN true ELSE false END as tiene_datos_reporte""",
             "SELECT COUNT(*)"
         ).replace(" ORDER BY r.fecha_generacion DESC", "")
         
@@ -2181,7 +2183,8 @@ async def obtener_todos_reportes_admin(
                 "firmado_supervisor": r[12],
                 "fecha_firma_supervisor": r[13].isoformat() if r[13] else None,
                 "nombre_supervisor": r[14],
-                "supervisor_id": r[15]
+                "supervisor_id": r[15],
+                "datos_reporte": r[16]  # true/false si tiene datos_reporte
             })
         
         print(f"✅ [ADMIN] {len(resultado)} reportes encontrados de {total} totales")

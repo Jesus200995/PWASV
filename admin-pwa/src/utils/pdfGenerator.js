@@ -500,18 +500,40 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
         // Intentar agregar imagen
         try {
           if (actividad.foto_base64) {
-            doc.addImage(actividad.foto_base64, 'JPEG', imgX + 1, imgY + 1, imgGridWidth - 2, imgGridHeight - 2)
+            // Asegurar que el base64 tiene el formato correcto
+            let imgBase64 = actividad.foto_base64
+            if (!imgBase64.startsWith('data:')) {
+              imgBase64 = 'data:image/jpeg;base64,' + imgBase64
+            }
+            
+            doc.addImage(imgBase64, 'JPEG', imgX + 1, imgY + 1, imgGridWidth - 2, imgGridHeight - 2)
             console.log(`✅ Imagen ${i + 1} agregada al PDF`)
           } else {
             // Placeholder gris
             doc.setFillColor(220, 220, 220)
             doc.rect(imgX + 1, imgY + 1, imgGridWidth - 2, imgGridHeight - 2, 'F')
+            doc.setDrawColor(200, 200, 200)
+            doc.rect(imgX, imgY, imgGridWidth, imgGridHeight, 'S')
+            
+            doc.setTextColor(150, 150, 150)
+            doc.setFontSize(8)
+            doc.text('Imagen no', imgX + imgGridWidth / 2, imgY + imgGridHeight / 2 - 3, { align: 'center' })
+            doc.text('disponible', imgX + imgGridWidth / 2, imgY + imgGridHeight / 2 + 3, { align: 'center' })
             console.log(`⚠️ Imagen ${i + 1} sin datos base64`)
           }
         } catch (imgError) {
           console.warn(`❌ Error agregando imagen ${i + 1}:`, imgError)
+          
+          // Placeholder en caso de error
           doc.setFillColor(240, 240, 240)
-          doc.rect(imgX + 1, imgY + 1, imgGridWidth - 2, imgGridHeight - 2, 'F')
+          doc.rect(imgX, imgY, imgGridWidth, imgGridHeight, 'F')
+          doc.setDrawColor(200, 200, 200)
+          doc.rect(imgX, imgY, imgGridWidth, imgGridHeight, 'S')
+          
+          doc.setTextColor(150, 150, 150)
+          doc.setFontSize(8)
+          doc.text('Imagen no', imgX + imgGridWidth / 2, imgY + imgGridHeight / 2 - 3, { align: 'center' })
+          doc.text('disponible', imgX + imgGridWidth / 2, imgY + imgGridHeight / 2 + 3, { align: 'center' })
         }
         
         // Etiqueta con tipo y fecha
@@ -550,7 +572,82 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
           doc.text(fechaCompacta, imgX + imgGridWidth / 2, imgY + imgGridHeight + 11, { align: 'center' })
         }
       }
+      
+      // Calcular currentY después del grid de imágenes
+      const numRows = Math.ceil(imagenesSeleccionadas.length / imgsPerRow)
+      currentY += (numRows * (imgGridHeight + labelHeight + 10)) + 15
     }
+    
+    // ========== FIRMAS EN PÁGINA DE EVIDENCIAS ==========
+    if (firmaUsuario) {
+      // Verificar si hay espacio para firmas
+      if (currentY > pageHeight - 70) {
+        doc.addPage()
+        currentY = 30
+      }
+
+      const firmaWidth = 70
+      const firmaHeight = 30
+      const firmaUsuarioX = margin + 5
+      const firmaResponsableX = pageWidth - margin - firmaWidth - 5
+      const firmaY = currentY
+      
+      // Etiquetas "Elaboró" y "Autorizó"
+      doc.setFillColor(255, 218, 185)
+      doc.setDrawColor(0, 0, 0)
+      doc.setLineWidth(0.3)
+      
+      doc.rect(firmaUsuarioX, firmaY - 8, firmaWidth, 7, 'FD')
+      doc.setTextColor(0, 0, 0)
+      doc.setFontSize(9)
+      doc.setFont(undefined, 'bold')
+      doc.text('Elaboró', firmaUsuarioX + firmaWidth / 2, firmaY - 3.5, { align: 'center' })
+      
+      doc.setFillColor(255, 218, 185)
+      doc.rect(firmaResponsableX, firmaY - 8, firmaWidth, 7, 'FD')
+      doc.text('Autorizó', firmaResponsableX + firmaWidth / 2, firmaY - 3.5, { align: 'center' })
+      
+      // FIRMA DEL USUARIO (Izquierda)
+      try {
+        doc.addImage(firmaUsuario, 'PNG', firmaUsuarioX, firmaY, firmaWidth, firmaHeight)
+      } catch (e) {
+        console.warn('No se pudo agregar firma del usuario en página de evidencias')
+      }
+      
+      // Líneas de firma
+      doc.setLineWidth(0.5)
+      doc.line(firmaUsuarioX, firmaY + firmaHeight + 5, firmaUsuarioX + firmaWidth, firmaY + firmaHeight + 5)
+      doc.line(firmaResponsableX, firmaY + firmaHeight + 5, firmaResponsableX + firmaWidth, firmaY + firmaHeight + 5)
+      
+      // Información del usuario
+      doc.setTextColor(0, 0, 0)
+      doc.setFontSize(8)
+      doc.setFont(undefined, 'normal')
+      const cargoUsuario = usuario.cargo || 'Facilitador Comunitario'
+      doc.text(cargoUsuario, firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
+      doc.setFont(undefined, 'bold')
+      doc.text(usuario.nombre || 'Sin nombre', firmaUsuarioX + firmaWidth / 2, firmaY + firmaHeight + 17, { align: 'center' })
+      
+      // FIRMA DEL SUPERVISOR (Derecha) - Si existe
+      if (firmaSupervisor) {
+        try {
+          doc.addImage(firmaSupervisor, 'PNG', firmaResponsableX, firmaY, firmaWidth, firmaHeight)
+        } catch (e) {
+          console.warn('No se pudo agregar firma del supervisor en página de evidencias')
+        }
+      }
+      
+      // Información del responsable
+      doc.setFontSize(7.5)
+      doc.setFont(undefined, 'normal')
+      doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
+      doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' })
+      doc.setFontSize(8)
+      doc.setFont(undefined, 'bold')
+      const nombreSupervisorFinal = nombreSupervisor || usuario.supervisor || 'Sin asignar'
+      doc.text(nombreSupervisorFinal, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' })
+    }
+    
   } catch (evidenciasError) {
     console.error('❌ Error generando página de evidencias:', evidenciasError)
   }

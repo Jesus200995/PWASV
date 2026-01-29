@@ -258,6 +258,171 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
   doc.setFont(undefined, 'bold')
   doc.text(nombreSupervisor || usuario.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' })
 
+  // ========== SEGUNDA PÁGINA: EVIDENCIAS FOTOGRÁFICAS ==========
+  try {
+    console.log('🖼️ Generando página de evidencias fotográficas...')
+    
+    // Filtrar actividades con fotos
+    const actividadesConFoto = (datos.actividades || []).filter(act => act.foto_url)
+    console.log(`📸 Actividades con foto: ${actividadesConFoto.length}`)
+    
+    // SIEMPRE crear la página de evidencias
+    doc.addPage()
+    currentY = 10
+    
+    // Título de la sección
+    doc.setDrawColor(0, 0, 0)
+    doc.setLineWidth(0.5)
+    doc.rect(margin, currentY, contentWidth, 12)
+    
+    doc.setFontSize(11)
+    doc.setFont(undefined, 'bold')
+    doc.setTextColor(0, 0, 0)
+    doc.text('EVIDENCIAS FOTOGRÁFICAS DE ACTIVIDADES', pageWidth / 2, currentY + 5, { align: 'center' })
+    doc.setFontSize(9)
+    doc.setFont(undefined, 'normal')
+    doc.text(`${periodo.mesNombre || ''} ${periodo.anio || ''}`, pageWidth / 2, currentY + 10, { align: 'center' })
+    
+    currentY += 15
+    
+    // Datos del usuario
+    doc.setFillColor(240, 240, 240)
+    doc.setDrawColor(0, 0, 0)
+    doc.setLineWidth(0.3)
+    doc.rect(margin, currentY, contentWidth, 18, 'FD')
+    
+    doc.setFontSize(8)
+    doc.setTextColor(0, 0, 0)
+    
+    doc.setFont(undefined, 'bold')
+    doc.text('Nombre:', margin + 3, currentY + 5)
+    doc.setFont(undefined, 'normal')
+    doc.text(usuario.nombre || 'Sin nombre', margin + 20, currentY + 5)
+    
+    doc.setFont(undefined, 'bold')
+    doc.text('CURP:', margin + 95, currentY + 5)
+    doc.setFont(undefined, 'normal')
+    doc.text(usuario.curp || 'No registrado', margin + 107, currentY + 5)
+    
+    doc.setFont(undefined, 'bold')
+    doc.text('Cargo:', margin + 3, currentY + 11)
+    doc.setFont(undefined, 'normal')
+    doc.text(usuario.cargo || 'Facilitador Comunitario', margin + 17, currentY + 11)
+    
+    doc.setFont(undefined, 'bold')
+    doc.text('Territorio:', margin + 95, currentY + 11)
+    doc.setFont(undefined, 'normal')
+    doc.text(usuario.territorio || 'No asignado', margin + 115, currentY + 11)
+    
+    doc.setFont(undefined, 'bold')
+    doc.text('Período:', margin + 3, currentY + 17)
+    doc.setFont(undefined, 'normal')
+    doc.text(`${periodo.mesNombre || ''} ${periodo.anio || ''}`, margin + 18, currentY + 17)
+    
+    currentY += 22
+    
+    if (actividadesConFoto.length === 0) {
+      // Mensaje cuando no hay fotos
+      currentY += 20
+      doc.setFillColor(255, 243, 205)
+      doc.setDrawColor(200, 180, 100)
+      doc.setLineWidth(0.5)
+      doc.rect(margin, currentY, contentWidth, 40, 'FD')
+      
+      doc.setTextColor(120, 100, 50)
+      doc.setFontSize(12)
+      doc.setFont(undefined, 'bold')
+      doc.text('Sin evidencias fotográficas disponibles', pageWidth / 2, currentY + 15, { align: 'center' })
+      
+      doc.setFontSize(9)
+      doc.setFont(undefined, 'normal')
+      doc.text('No se encontraron fotografías adjuntas a las actividades de este reporte.', pageWidth / 2, currentY + 25, { align: 'center' })
+    } else {
+      // Seleccionar hasta 6 imágenes (3 campo, 3 gabinete)
+      const actividadesCampo = actividadesConFoto.filter(a => (a.tipo || 'campo').toLowerCase() === 'campo').slice(0, 3)
+      const actividadesGabinete = actividadesConFoto.filter(a => (a.tipo || '').toLowerCase() === 'gabinete').slice(0, 3)
+      
+      const imagenesSeleccionadas = [...actividadesCampo, ...actividadesGabinete].slice(0, 6)
+      console.log(`📷 Procesando ${imagenesSeleccionadas.length} imágenes para el PDF`)
+      
+      // Grid de imágenes
+      const imgGridWidth = 55
+      const imgGridHeight = 45
+      const imgsPerRow = 3
+      const imgSpacing = 5
+      const labelHeight = 14
+      
+      for (let i = 0; i < imagenesSeleccionadas.length; i++) {
+        const actividad = imagenesSeleccionadas[i]
+        const col = i % imgsPerRow
+        const row = Math.floor(i / imgsPerRow)
+        
+        const imgX = margin + (col * (imgGridWidth + imgSpacing))
+        const imgY = currentY + (row * (imgGridHeight + labelHeight + 10))
+        
+        // Borde de la imagen
+        doc.setDrawColor(0, 0, 0)
+        doc.setLineWidth(0.3)
+        doc.rect(imgX, imgY, imgGridWidth, imgGridHeight)
+        
+        // Intentar cargar y agregar imagen
+        try {
+          if (actividad.foto_base64) {
+            doc.addImage(actividad.foto_base64, 'JPEG', imgX + 1, imgY + 1, imgGridWidth - 2, imgGridHeight - 2)
+            console.log(`✅ Imagen ${i + 1} agregada al PDF`)
+          } else {
+            // Placeholder gris si no hay imagen
+            doc.setFillColor(220, 220, 220)
+            doc.rect(imgX + 1, imgY + 1, imgGridWidth - 2, imgGridHeight - 2, 'F')
+            console.log(`⚠️ Imagen ${i + 1} sin datos base64, usando placeholder`)
+          }
+        } catch (imgError) {
+          console.warn(`❌ Error agregando imagen ${i + 1}:`, imgError)
+          doc.setFillColor(240, 240, 240)
+          doc.rect(imgX + 1, imgY + 1, imgGridWidth - 2, imgGridHeight - 2, 'F')
+        }
+        
+        // Etiqueta con tipo y fecha
+        const tipoAct = actividad.tipo || 'campo'
+        const tipoTexto = tipoAct.toLowerCase() === 'campo' ? 'CAMPO' : 'GABINETE'
+        
+        // Fondo de etiqueta según tipo
+        if (tipoAct.toLowerCase() === 'campo') {
+          doc.setFillColor(34, 197, 94) // Verde
+        } else {
+          doc.setFillColor(147, 51, 234) // Morado
+        }
+        doc.rect(imgX, imgY + imgGridHeight, imgGridWidth, labelHeight, 'F')
+        doc.setDrawColor(0, 0, 0)
+        doc.setLineWidth(0.2)
+        doc.rect(imgX, imgY + imgGridHeight, imgGridWidth, labelHeight, 'S')
+        
+        // Texto del tipo
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(10)
+        doc.setFont(undefined, 'bold')
+        doc.text(tipoTexto, imgX + imgGridWidth / 2, imgY + imgGridHeight + 6, { align: 'center' })
+        
+        // Fecha
+        if (actividad.fecha) {
+          const fechaObj = new Date(actividad.fecha)
+          const dia = String(fechaObj.getDate()).padStart(2, '0')
+          const mes = String(fechaObj.getMonth() + 1).padStart(2, '0')
+          const anio = String(fechaObj.getFullYear()).slice(-2)
+          const hora = String(fechaObj.getHours()).padStart(2, '0')
+          const min = String(fechaObj.getMinutes()).padStart(2, '0')
+          const fechaCompacta = `${dia}/${mes}/${anio} ${hora}:${min}`
+          
+          doc.setFont(undefined, 'normal')
+          doc.setFontSize(6)
+          doc.text(fechaCompacta, imgX + imgGridWidth / 2, imgY + imgGridHeight + 11, { align: 'center' })
+        }
+      }
+    }
+  } catch (evidenciasError) {
+    console.error('❌ Error generando página de evidencias:', evidenciasError)
+  }
+
   // ========== PIE DE PÁGINA ==========
   const totalPages = doc.internal.getNumberOfPages()
   for (let i = 1; i <= totalPages; i++) {

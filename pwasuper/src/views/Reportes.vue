@@ -2337,6 +2337,9 @@ export default {
               anio: reporte.anio,
               tipo: reporte.tipo,
               tiene_pdf: reporte.tiene_pdf === true, // Asegurar que sea booleano
+              firmado_supervisor: reporte.firmado_supervisor === true, // Estado de firma
+              fecha_firma_supervisor: reporte.fecha_firma_supervisor, // Fecha de firma
+              nombre_supervisor: reporte.nombre_supervisor, // Nombre del supervisor
               fecha: reporte.fecha ? new Date(reporte.fecha).toLocaleString('es-MX', {
                 year: 'numeric',
                 month: '2-digit',
@@ -2345,7 +2348,7 @@ export default {
                 minute: '2-digit'
               }) : 'Sin fecha'
             };
-            console.log(`   📄 Reporte: ${reporteFormateado.nombre}, tiene_pdf: ${reporteFormateado.tiene_pdf}`);
+            console.log(`   📄 Reporte: ${reporteFormateado.nombre}, tiene_pdf: ${reporteFormateado.tiene_pdf}, firmado: ${reporteFormateado.firmado_supervisor}`);
             return reporteFormateado;
           });
           console.log(`✅ Historial de reportes cargado: ${this.reportesGenerados.length} reportes`);

@@ -1820,7 +1820,7 @@ async def eliminar_reporte(reporte_id: int):
 
 @app.get("/reportes/descargar/{reporte_id}")
 async def descargar_reporte(reporte_id: int):
-    """Obtener el PDF de un reporte guardado"""
+    """Obtener el PDF de un reporte guardado, incluyendo datos de firma del supervisor"""
     try:
         print(f"📥 Descargando reporte ID: {reporte_id}")
         
@@ -1832,7 +1832,12 @@ async def descargar_reporte(reporte_id: int):
                 anio,
                 tipo,
                 fecha_generacion,
-                pdf_base64
+                pdf_base64,
+                firmado_supervisor,
+                fecha_firma_supervisor,
+                firma_supervisor_base64,
+                nombre_supervisor,
+                supervisor_id
             FROM reportes_generados
             WHERE id = %s
         """, (reporte_id,))
@@ -1848,6 +1853,7 @@ async def descargar_reporte(reporte_id: int):
             raise HTTPException(status_code=404, detail="El PDF de este reporte no está disponible para descarga")
         
         print(f"✅ PDF encontrado: {reporte[1]}")
+        print(f"   Firmado por supervisor: {reporte[7]}")
         
         return {
             "success": True,
@@ -1858,7 +1864,13 @@ async def descargar_reporte(reporte_id: int):
                 "anio": reporte[3],
                 "tipo": reporte[4],
                 "fecha": reporte[5].isoformat() if reporte[5] else None,
-                "pdf_base64": pdf_base64
+                "pdf_base64": pdf_base64,
+                # Datos de firma del supervisor
+                "firmado_supervisor": reporte[7] or False,
+                "fecha_firma_supervisor": reporte[8].isoformat() if reporte[8] else None,
+                "firma_supervisor_base64": reporte[9],
+                "nombre_supervisor": reporte[10],
+                "supervisor_id": reporte[11]
             }
         }
         

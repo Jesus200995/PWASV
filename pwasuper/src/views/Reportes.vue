@@ -664,6 +664,7 @@
 <script>
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { PDFDocument } from 'pdf-lib';
 import FirmaDigital from '../components/FirmaDigital.vue';
 import { apiService, api } from '../services/apiService.js';
 import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
@@ -2389,10 +2390,17 @@ export default {
         
         if (response.data.success && response.data.reporte.pdf_base64) {
           // Limpiar y validar el base64
-          const base64Data = limpiarBase64(response.data.reporte.pdf_base64);
+          let base64Data = limpiarBase64(response.data.reporte.pdf_base64);
           
           if (!base64Data) {
             throw new Error('El PDF tiene formato inválido');
+          }
+          
+          // Si el reporte tiene firma del supervisor, agregarla al PDF
+          const reporteData = response.data.reporte;
+          if (reporteData.firmado_supervisor && reporteData.firma_supervisor_base64) {
+            console.log('✍️ Agregando firma del supervisor al PDF...');
+            base64Data = await this.agregarFirmaSupervisorPDF(base64Data, reporteData.firma_supervisor_base64);
           }
           
           // Convertir base64 a blob
@@ -2440,6 +2448,90 @@ export default {
         this.descargandoReporte = null;
       }
     },
+    
+    /**
+     * Agrega la firma del supervisor a un PDF existente
+     * @param {string} pdfBase64 - El PDF original en base64
+     * @param {string} firmaBase64 - La firma del supervisor en base64
+     * @returns {string} - El PDF modificado en base64
+     */
+    async agregarFirmaSupervisorPDF(pdfBase64, firmaBase64) {
+      try {
+        // Convertir base64 del PDF a bytes
+        const pdfBytes = Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0));
+        
+        // Cargar el PDF existente
+        const pdfDoc = await PDFDocument.load(pdfBytes);
+        
+        // Obtener la primera página (donde están las firmas)
+        const pages = pdfDoc.getPages();
+        const firstPage = pages[0];
+        const { width, height } = firstPage.getSize();
+        
+        // Preparar la imagen de la firma
+        let firmaClean = firmaBase64;
+        if (firmaClean.includes(',')) {
+          firmaClean = firmaClean.split(',')[1];
+        }
+        
+        // Convertir la firma base64 a bytes
+        const firmaBytes = Uint8Array.from(atob(firmaClean), c => c.charCodeAt(0));
+        
+        // Intentar como PNG primero
+        let firmaImage;
+        try {
+          firmaImage = await pdfDoc.embedPng(firmaBytes);
+        } catch (e) {
+          // Si falla, intentar como JPEG
+          try {
+            firmaImage = await pdfDoc.embedJpg(firmaBytes);
+          } catch (e2) {
+            console.warn('⚠️ No se pudo insertar la imagen de firma:', e2);
+            // Retornar el PDF original sin modificar
+            return pdfBase64;
+          }
+        }
+        
+        // Calcular posición de la firma del supervisor (sección "Autorizó" - lado derecho)
+        // Estos valores corresponden a la posición en el PDF generado por jsPDF
+        // El PDF usa tamaño carta (215.9 x 279.4 mm)
+        const pageWidth = width; // ~612 puntos para carta
+        const margin = 15 * 2.83465; // 15mm en puntos
+        const firmaWidth = 65 * 2.83465; // 65mm en puntos
+        const firmaHeight = 20 * 2.83465; // 20mm en puntos
+        
+        // Posición X: lado derecho (después del centro)
+        const firmaX = pageWidth - margin - firmaWidth;
+        // Posición Y: desde abajo (las firmas están cerca del final de la primera página)
+        // Ajustamos basándonos en el layout típico del reporte
+        const firmaY = 50; // Cerca del fondo de la página
+        
+        // Dibujar la firma del supervisor
+        firstPage.drawImage(firmaImage, {
+          x: firmaX,
+          y: firmaY,
+          width: firmaWidth,
+          height: firmaHeight,
+        });
+        
+        console.log('✅ Firma del supervisor agregada al PDF');
+        
+        // Guardar el PDF modificado
+        const modifiedPdfBytes = await pdfDoc.save();
+        
+        // Convertir a base64
+        const modifiedBase64 = btoa(
+          modifiedPdfBytes.reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+        
+        return modifiedBase64;
+        
+      } catch (error) {
+        console.error('❌ Error agregando firma al PDF:', error);
+        // En caso de error, retornar el PDF original
+        return pdfBase64;
+      }
+    },
 
     async verReporteHistorial(reporte) {
       // Ver un reporte previamente generado - abre con visor nativo del dispositivo
@@ -2457,10 +2549,17 @@ export default {
         
         if (response.data.success && response.data.reporte.pdf_base64) {
           // Limpiar y validar el base64
-          const base64Data = limpiarBase64(response.data.reporte.pdf_base64);
+          let base64Data = limpiarBase64(response.data.reporte.pdf_base64);
           
           if (!base64Data) {
             throw new Error('El PDF tiene formato inválido');
+          }
+          
+          // Si el reporte tiene firma del supervisor, agregarla al PDF
+          const reporteData = response.data.reporte;
+          if (reporteData.firmado_supervisor && reporteData.firma_supervisor_base64) {
+            console.log('✍️ Agregando firma del supervisor al PDF...');
+            base64Data = await this.agregarFirmaSupervisorPDF(base64Data, reporteData.firma_supervisor_base64);
           }
           
           // Convertir base64 a blob

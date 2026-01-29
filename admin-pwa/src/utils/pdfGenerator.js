@@ -449,16 +449,45 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
       doc.text('El reporte fotográfico solo está disponible para el mes en curso;', pageWidth / 2, currentY + 25, { align: 'center' })
       doc.text('al descargar información de meses anteriores, las fotografías no se mostrarán.', pageWidth / 2, currentY + 32, { align: 'center' })
     } else {
-      // Seleccionar hasta 6 imágenes (3 campo, 3 gabinete)
-      const actividadesCampo = actividadesConFoto
-        .filter(a => (a.tipo_actividad || 'campo').toLowerCase() === 'campo')
-        .sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora))
-        .slice(0, 3)
+      // Función para seleccionar imágenes de diferentes días
+      const seleccionarImagenesDiversas = (actividades, maxImagenes) => {
+        const imagenesSeleccionadas = []
+        const diasUsados = new Set()
+        
+        // Ordenar por fecha más reciente
+        const actividadesOrdenadas = [...actividades].sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora))
+        
+        // Primera pasada: una imagen por día
+        for (const act of actividadesOrdenadas) {
+          if (imagenesSeleccionadas.length >= maxImagenes) break
+          const dia = new Date(act.fecha_hora).toISOString().split('T')[0]
+          if (!diasUsados.has(dia)) {
+            imagenesSeleccionadas.push(act)
+            diasUsados.add(dia)
+          }
+        }
+        
+        // Segunda pasada: si no hay suficientes, agregar las restantes
+        if (imagenesSeleccionadas.length < maxImagenes) {
+          for (const act of actividadesOrdenadas) {
+            if (imagenesSeleccionadas.length >= maxImagenes) break
+            if (!imagenesSeleccionadas.includes(act)) {
+              imagenesSeleccionadas.push(act)
+            }
+          }
+        }
+        
+        return imagenesSeleccionadas
+      }
       
-      const actividadesGabinete = actividadesConFoto
+      // Seleccionar hasta 6 imágenes (3 campo, 3 gabinete) priorizando diferentes días
+      const actividadesCampoDisponibles = actividadesConFoto
+        .filter(a => (a.tipo_actividad || 'campo').toLowerCase() === 'campo')
+      const actividadesGabineteDisponibles = actividadesConFoto
         .filter(a => (a.tipo_actividad || '').toLowerCase() === 'gabinete')
-        .sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora))
-        .slice(0, 3)
+      
+      const actividadesCampo = seleccionarImagenesDiversas(actividadesCampoDisponibles, 3)
+      const actividadesGabinete = seleccionarImagenesDiversas(actividadesGabineteDisponibles, 3)
       
       const imagenesSeleccionadas = [...actividadesCampo, ...actividadesGabinete].slice(0, 6)
       console.log(`📷 Procesando ${imagenesSeleccionadas.length} imágenes para el PDF`)

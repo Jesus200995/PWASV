@@ -537,9 +537,8 @@
 
                 <!-- Botones de acción -->
                 <div class="flex items-center justify-end gap-2">
-                  <!-- Botón de ver si tiene PDF -->
+                  <!-- Botón de ver (SIEMPRE VISIBLE) -->
                   <button
-                    v-if="reporte.tiene_pdf"
                     @click="verReporteHistorial(reporte)"
                     :disabled="viendoReporte === reporte.id"
                     class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors disabled:opacity-50 text-xs font-medium"
@@ -555,9 +554,8 @@
                     </svg>
                     Ver
                   </button>
-                  <!-- Botón de descarga si tiene PDF -->
+                  <!-- Botón de descarga (SIEMPRE VISIBLE) -->
                   <button
-                    v-if="reporte.tiene_pdf"
                     @click="descargarReporteHistorial(reporte)"
                     :disabled="descargandoReporte === reporte.id"
                     class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors disabled:opacity-50 text-xs font-medium"
@@ -572,17 +570,6 @@
                     </svg>
                     Descargar
                   </button>
-                  <!-- Indicador de no disponible -->
-                  <span
-                    v-else-if="reporte.tipo === 'PDF'"
-                    class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-400 text-xs"
-                    title="PDF no disponible para descarga"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                    </svg>
-                    No disponible
-                  </span>
                   <!-- Botón de eliminar - solo si NO está firmado -->
                   <button
                     v-if="!reporte.firmado_supervisor"
@@ -1123,7 +1110,7 @@ export default {
           anio: this.anioSeleccionado,
           fecha,
           tipo: 'PDF',
-          tiene_pdf: false, // No se genera PDF todavía
+          tiene_pdf: true, // Se puede generar PDF desde datos
           firmado_supervisor: false
         };
 
@@ -1167,6 +1154,25 @@ export default {
           };
           
           console.log('🔒 reporteExistente establecido - botón se deshabilitará');
+          
+          // GENERAR Y DESCARGAR EL PDF INMEDIATAMENTE PARA EL USUARIO
+          console.log('📄 Generando PDF para descarga inmediata...');
+          try {
+            const pdfBase64 = await this.generarPDFDesdesDatos(
+              datosReporte,
+              firmaUsuarioBase64,
+              null, // Sin firma de supervisor todavía
+              null
+            );
+            
+            // Descargar el PDF
+            await this.descargarPDFBase64(pdfBase64, nombreReporte);
+            
+            console.log('✅ PDF generado y descargado para el usuario');
+          } catch (pdfError) {
+            console.error('⚠️ Error generando PDF para descarga:', pdfError);
+            // No bloquear el flujo si falla la descarga, el usuario puede verlo después en historial
+          }
           
           // Mostrar mensaje de éxito
           this.$notify?.({

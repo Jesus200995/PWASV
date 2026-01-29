@@ -148,6 +148,7 @@ const reportesService = {
 
   /**
    * Ver reporte en nueva pestaña
+   * NUEVO FLUJO: Genera PDF desde datos estructurados si existen
    * @param {number} reporteId - ID del reporte
    */
   async verReporte(reporteId) {
@@ -163,30 +164,49 @@ const reportesService = {
       
       const data = await response.json()
       
-      if (data.success && data.reporte?.pdf_base64) {
-        // Limpiar el base64
-        const base64Limpio = this._limpiarBase64(data.reporte.pdf_base64)
+      if (!data.success || !data.reporte) {
+        throw new Error('Reporte no encontrado')
+      }
+      
+      const reporte = data.reporte
+      let pdfBlob = null
+      
+      // NUEVO FLUJO: Si hay datos_reporte, avisar al usuario que debe usar pwasuper
+      // (El admin no tiene la capacidad de generar PDFs con jsPDF como el pwasuper)
+      if (reporte.datos_reporte && !reporte.pdf_base64) {
+        alert('Este reporte fue generado con el nuevo sistema. El PDF se genera automáticamente al descargarlo desde la aplicación del usuario (pwasuper).')
+        return { success: false, message: 'PDF solo disponible en pwasuper' }
+      }
+      
+      // COMPATIBILIDAD: Si hay PDF guardado (reportes antiguos o con pdf_base64)
+      if (reporte.pdf_base64) {
+        const base64Limpio = this._limpiarBase64(reporte.pdf_base64)
         
         if (!base64Limpio) {
           throw new Error('El PDF está vacío o mal formado')
         }
         
-        // Abrir en nueva pestaña
+        // Convertir a blob
         const byteCharacters = atob(base64Limpio)
         const byteNumbers = new Array(byteCharacters.length)
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i)
         }
         const byteArray = new Uint8Array(byteNumbers)
-        const blob = new Blob([byteArray], { type: 'application/pdf' })
-        
-        const urlBlob = window.URL.createObjectURL(blob)
+        pdfBlob = new Blob([byteArray], { type: 'application/pdf' })
+      } else {
+        throw new Error('PDF no disponible')
+      }
+      
+      if (pdfBlob) {
+        // Abrir en nueva pestaña
+        const urlBlob = window.URL.createObjectURL(pdfBlob)
         window.open(urlBlob, '_blank')
         
         console.log('✅ [ReportesService] Reporte abierto en nueva pestaña')
         return { success: true }
       } else {
-        throw new Error('PDF no disponible')
+        throw new Error('No se pudo generar el PDF')
       }
     } catch (error) {
       console.error('❌ [ReportesService] Error visualizando reporte:', error)

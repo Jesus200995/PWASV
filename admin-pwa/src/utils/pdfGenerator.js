@@ -3,9 +3,7 @@
  * Compatible con admin-pwa - Formato idéntico a pwasuper
  */
 import jsPDF from 'jspdf'
-
-// Imagen de encabezado superior (base64) - igual que pwasuper
-const superiorImage = '/img/encabezado-superior.png'
+import superiorImage from '../assets/images/superior.png'
 
 /**
  * Genera un PDF desde los datos estructurados del reporte

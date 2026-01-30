@@ -33,8 +33,8 @@
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-lg font-bold text-white">Firma Requerida</h3>
-                    <p class="text-xs text-white/80">Autenticación del reporte</p>
+                    <h3 class="text-lg font-bold text-white">Generar y Enviar Reporte</h3>
+                    <p class="text-xs text-white/80">Firma para validar tu reporte</p>
                   </div>
                 </div>
                 <button 
@@ -142,7 +142,7 @@
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {{ procesandoDescarga ? 'Generando...' : 'Firmar y Descargar' }}
+                {{ procesandoDescarga ? 'Generando...' : 'Generar y Enviar' }}
               </button>
             </div>
           </div>
@@ -397,8 +397,8 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
                 <div class="flex-1 min-w-0">
-                  <p class="text-xs font-semibold text-amber-800">Ya existe un reporte para {{ mesActual }} {{ anioSeleccionado }}</p>
-                  <p class="text-xs text-amber-700 mt-0.5">Para generar uno nuevo, primero elimina el existente desde el historial de abajo.</p>
+                  <p class="text-xs font-semibold text-amber-800">El reporte de {{ mesActual }} {{ anioSeleccionado }} ya está generado</p>
+                  <p class="text-xs text-amber-700 mt-0.5">Solo se puede generar un reporte por mes. Si necesitas generarlo nuevamente, primero elimina el existente desde el historial. Si tu reporte ya fue firmado por tu supervisor, deberás contactarlo para solicitar su eliminación.</p>
                 </div>
               </div>
             </div>
@@ -420,7 +420,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span class="truncate">{{ verificandoReporte ? 'Verificando...' : (generandoReporte ? 'Generando...' : (reporteExistente ? 'Reporte ya generado' : 'Descargar Reporte')) }}</span>
+              <span class="truncate">{{ verificandoReporte ? 'Verificando...' : (generandoReporte ? 'Generando...' : (reporteExistente ? 'Reporte ya generado' : 'Generar Reporte')) }}</span>
             </button>
           </div>
 

@@ -1019,44 +1019,50 @@ export default {
 
     // Confirmar y proceder con la descarga - NO CIERRA EL MODAL HASTA TERMINAR
     async confirmarYDescargar() {
+      console.log('🔵 [INICIO] confirmarYDescargar() llamado');
+      
       // Prevenir doble clic
       if (this.procesandoDescarga) {
         console.log('⚠️ Ya se está procesando una descarga');
         return;
       }
       
+      console.log('🔵 [PASO 1] Verificando confirmarFirma:', this.confirmarFirma);
       if (!this.confirmarFirma) {
         console.log('⚠️ No se ha confirmado la firma');
         return;
       }
       
       // Verificar firma
+      console.log('🔵 [PASO 2] Verificando componente firma:', this.$refs.firmaComponent);
       const firmaValida = this.$refs.firmaComponent?.hayFirma || false;
+      console.log('🔵 [PASO 2.1] Firma válida:', firmaValida);
       if (!firmaValida) {
         alert('La firma no es válida. Por favor, vuelve a firmar.');
         return;
       }
       
       // Verificar actividades
+      console.log('🔵 [PASO 3] Total actividades:', this.actividades.length);
       if (this.actividades.length === 0) {
         alert('No hay actividades para generar el reporte');
         return;
       }
 
-      console.log('🚀 Iniciando proceso de guardado de reporte...');
+      console.log('🚀 [PASO 4] Iniciando proceso de guardado de reporte...');
       
       // Activar estado de procesamiento - EL MODAL SE MANTIENE ABIERTO
       this.procesandoDescarga = true;
       this.generandoReporte = true;
       
       try {
-        console.log('📄 Preparando datos del reporte...');
+        console.log('📄 [PASO 5] Preparando datos del reporte...');
         
         // NUEVO FLUJO: Guardar datos estructurados, NO generar PDF
         const firmaUsuarioBase64 = this.$refs.firmaComponent.obtenerFirmaBase64();
         
         // NO convertir fotos a base64 para guardar - solo guardar las actividades con foto_url
-        console.log('📸 Preparando actividades sin convertir fotos a base64...');
+        console.log('📸 [PASO 6] Preparando actividades sin convertir fotos a base64...');
         const actividadesParaGuardar = this.actividades.map(act => ({
           id: act.id,
           fecha_hora: act.fecha_hora,
@@ -1070,9 +1076,11 @@ export default {
           longitud: act.longitud
         }));
         
-        console.log(`📋 ${actividadesParaGuardar.length} actividades preparadas`);
+        console.log(`📋 [PASO 7] ${actividadesParaGuardar.length} actividades preparadas`);
+        console.log(`📸 [PASO 7.1] Actividades con foto: ${actividadesParaGuardar.filter(a => a.foto_url).length}`);
         
         // Construir objeto con los datos del reporte
+        console.log('🔵 [PASO 8] Construyendo datos del reporte...');
         const datosReporte = {
           // Información del usuario
           usuario: {
@@ -1105,7 +1113,9 @@ export default {
           fechaGeneracion: new Date().toISOString()
         };
 
-        console.log('✅ Datos del reporte preparados:', datosReporte.estadisticas);
+        console.log('✅ [PASO 9] Datos del reporte preparados:', datosReporte.estadisticas);
+        const jsonSize = JSON.stringify(datosReporte).length;
+        console.log(`📦 [PASO 9.1] Tamaño del JSON: ${(jsonSize / 1024).toFixed(2)} KB`);
 
         // Agregar a historial local con TODOS los campos necesarios
         const fecha = new Date().toLocaleString('es-MX');
@@ -1125,7 +1135,7 @@ export default {
 
         // Guardar en la base de datos (datos estructurados + firma usuario)
         try {
-          console.log('💾 Guardando reporte en BD (datos estructurados)...');
+          console.log('💾 [PASO 10] Guardando reporte en BD (datos estructurados)...');
           
           const datosGuardar = {
             usuario_id: this.usuarioInfo.id,
@@ -1139,10 +1149,20 @@ export default {
             // NO enviamos pdf_base64 - se generará cuando se descargue
           };
           
-          console.log('💾 Enviando a /reportes/guardar...');
+          console.log('💾 [PASO 11] Enviando a /reportes/guardar...');
+          console.log('💾 [PASO 11.1] Payload:', {
+            usuario_id: datosGuardar.usuario_id,
+            nombre_reporte: datosGuardar.nombre_reporte,
+            mes: datosGuardar.mes,
+            anio: datosGuardar.anio,
+            tipo: datosGuardar.tipo,
+            actividades_count: datosGuardar.datos_reporte.actividades.length,
+            firma_length: datosGuardar.firma_usuario_base64?.length || 0
+          });
+          
           const response = await api.post('/reportes/guardar', datosGuardar);
-          console.log('✅ Reporte guardado en la base de datos');
-          console.log('✅ Respuesta del servidor:', response.data);
+          console.log('✅ [PASO 12] Reporte guardado en la base de datos');
+          console.log('✅ [PASO 12.1] Respuesta del servidor:', response.data);
           
           // Actualizar el ID del reporte local con el ID real de la BD
           if (response.data && response.data.reporte_id) {
@@ -1195,6 +1215,7 @@ export default {
           
           // Si hay error 409 (duplicado), mostrar mensaje y no agregar al historial local
           if (error.response?.status === 409) {
+            console.log('⚠️ [ERROR 409] Reporte duplicado detectado');
             this.$notify?.({
               type: 'warning',
               message: error.response.data.detail || 'Ya existe un reporte para este mes'
@@ -1203,22 +1224,26 @@ export default {
           }
           
           // Para otros errores de BD
+          console.error('❌ [ERROR BD] Error guardando en base de datos:', error);
           throw error;
         }
         
       } catch (error) {
-        console.error('❌ Error generando reporte:', error);
+        console.error('❌ [ERROR GENERAL] Error generando reporte:', error);
+        console.error('❌ [ERROR STACK]', error.stack);
+        console.error('❌ [ERROR RESPONSE]', error.response);
         this.$notify?.({
           type: 'error',
-          message: 'Error al guardar el reporte'
+          message: 'Error al guardar el reporte: ' + (error.message || 'Error desconocido')
         });
       } finally {
+        console.log('🔵 [FINALLY] Limpiando estados...');
         // AHORA sí cerramos el modal, DESPUÉS de terminar todo
         this.procesandoDescarga = false;
         this.generandoReporte = false;
         this.mostrarModalFirma = false;
         this.confirmarFirma = false;
-        console.log('🏁 Proceso de guardado finalizado');
+        console.log('🏁 [FIN] Proceso de guardado finalizado');
       }
     },
 

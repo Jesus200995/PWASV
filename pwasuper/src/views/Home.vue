@@ -4,7 +4,7 @@
       <!-- Botones de selección de sección -->
       <div v-if="!modoAsistencia" class="glass-card">
         <div class="text-center mb-3">
-          <h1 class="text-xl font-medium text-yellow-600 mb-0 title-shine" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.05em;">
+          <h1 class="text-xl font-medium text-yellow-600 title-shine" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.05em; margin-bottom: -2px;">
             <span style="--char-index: 0">P</span><span style="--char-index: 1">a</span><span style="--char-index: 2">n</span><span style="--char-index: 3">e</span><span style="--char-index: 4">l</span><span class="space-char" style="--char-index: 5"> </span><span style="--char-index: 6">d</span><span style="--char-index: 7">e</span><span class="space-char" style="--char-index: 8"> </span><span style="--char-index: 9">R</span><span style="--char-index: 10">e</span><span style="--char-index: 11">g</span><span style="--char-index: 12">i</span><span style="--char-index: 13">s</span><span style="--char-index: 14">t</span><span style="--char-index: 15">r</span><span style="--char-index: 16">o</span>
           </h1>
           <p class="text-[10px] font-semibold tracking-widest uppercase mb-2" style="color: #EAB308;">Herramienta de apoyo</p>

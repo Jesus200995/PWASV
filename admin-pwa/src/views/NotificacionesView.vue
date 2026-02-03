@@ -2113,14 +2113,17 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 10000;
   backdrop-filter: blur(4px);
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .modal-content {
@@ -2128,12 +2131,14 @@ export default {
   border-radius: 16px;
   width: 90%;
   max-width: 600px;
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: 
-    0 24px 48px rgba(0, 0, 0, 0.2),
-    0 12px 24px rgba(0, 0, 0, 0.1);
+    0 24px 48px rgba(0, 0, 0, 0.3),
+    0 12px 24px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
+  margin: auto;
+  position: relative;
 }
 
 /* Modal expandido para dos columnas */
@@ -2144,15 +2149,17 @@ export default {
 
 .modal-compact {
   max-width: 480px;
-  width: 95%;
+  width: 90%;
 }
 
 .modal-detail {
   max-width: 700px;
+  width: 90%;
 }
 
 .modal-confirm {
   max-width: 400px;
+  width: 90%;
 }
 
 /* Layout de dos columnas para el modal */
@@ -3130,7 +3137,7 @@ export default {
   padding: 16px 20px;
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  z-index: 2000;
+  z-index: 20000;
   min-width: 300px;
   max-width: 500px;
 }
@@ -3162,34 +3169,99 @@ export default {
 }
 
 /* === RESPONSIVE DESIGN === */
+
+/* Desktop grande */
+@media (min-width: 1200px) {
+  .modal-content {
+    max-height: 80vh;
+  }
+  
+  .modal-expanded {
+    max-width: 1100px;
+  }
+}
+
+/* Tablets y Laptops pequeñas */
 @media (max-width: 992px) {
   .main-content {
     margin-left: 200px;
     width: calc(100vw - 200px);
+  }
+  
+  .modal-overlay {
+    padding: 12px;
+  }
+  
+  .modal-expanded {
+    max-width: 900px;
+  }
+  
+  .modal-body-two-columns {
+    gap: 20px;
   }
 }
 
 /* Tablet portrait - 481px a 768px */
 @media (min-width: 481px) and (max-width: 768px) {
   .main-content {
-    margin-left: 250px;
-    width: calc(100vw - 250px);
+    margin-left: 0;
+    width: 100vw;
+  }
+  
+  .modal-overlay {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+  
+  .modal-content {
+    width: 100%;
+    max-width: 680px;
+    max-height: calc(100vh - 80px);
+  }
+  
+  .modal-expanded {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .modal-compact {
+    width: 100%;
+    max-width: 500px;
+  }
+  
+  /* Cambiar a layout vertical */
+  .modal-body-two-columns {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .users-column {
+    order: 2;
+    max-height: 350px;
+  }
+  
+  .form-column {
+    order: 1;
   }
 }
 
+/* Móviles y tablets pequeñas */
 @media (max-width: 768px) {
   .main-content {
-    margin-left: 240px;
-    width: calc(100vw - 240px);
+    margin-left: 0;
+    width: 100vw;
   }
   
   .page-header {
-    padding: 16px 20px;
+    padding: 12px 16px;
   }
   
   .header-content {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: flex-start;
   }
   
@@ -3197,45 +3269,71 @@ export default {
     flex-direction: row;
     gap: 12px;
     align-items: center;
+    width: 100%;
   }
   
   .header-actions {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
   
   .page-content {
-    padding: 16px 20px;
+    padding: 12px 16px;
+  }
+  
+  /* Modales en móviles */
+  .modal-overlay {
+    padding: 0;
+    align-items: stretch;
   }
   
   .modal-content {
-    width: 95%;
-    max-height: 85vh;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
   }
   
   .modal-compact {
-    width: 98%;
-    max-width: none;
-    max-height: 90vh;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
   }
   
   .modal-expanded {
-    width: 98%;
-    max-width: none;
-    max-height: 90vh;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
   }
   
-  /* Cambiar a layout vertical en tablets */
+  .modal-detail {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+  }
+  
+  .modal-confirm {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Cambiar a layout vertical en móviles */
   .modal-body-two-columns {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
     gap: 16px;
     padding: 16px;
+    height: 100%;
   }
   
   .users-column {
     order: 2;
-    max-height: 300px;
+    max-height: 50vh;
     padding: 16px;
   }
   
@@ -3244,34 +3342,44 @@ export default {
   }
   
   .modal-body {
-    padding: 20px 16px;
+    padding: 16px;
+    flex: 1;
   }
   
   .modal-compact .modal-body {
-    padding: 16px 12px;
+    padding: 16px;
+  }
+  
+  .modal-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    padding: 16px;
+    border-bottom: 1px solid #e0e0e0;
   }
   
   .notifications-table {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .notifications-table th,
   .notifications-table td {
-    padding: 8px;
+    padding: 6px;
   }
   
   .title-cell {
-    min-width: 150px;
+    min-width: 120px;
   }
   
   .action-buttons {
-    flex-direction: column;
-    gap: 4px;
+    flex-wrap: wrap;
+    gap: 6px;
   }
   
   .btn-action {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
   }
   
   .toast {
@@ -3279,131 +3387,326 @@ export default {
     right: 16px;
     left: 16px;
     min-width: auto;
+    max-width: calc(100vw - 32px);
   }
 }
 
+/* Móviles pequeños - Menos de 480px */
 @media (max-width: 480px) {
   .page-header {
-    padding: 12px;
+    padding: 10px 12px;
+  }
+  
+  .header-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .header-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .header-title {
+    font-size: 14px;
+  }
+  
+  .header-subtitle {
+    font-size: 10px;
+  }
+  
+  .btn-primary {
+    padding: 8px 12px;
+    font-size: 11px;
   }
   
   .notifications-table-container {
-    overflow-x: scroll;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   .notifications-table {
-    min-width: 600px;
+    min-width: 650px;
+    font-size: 10px;
   }
   
-  .modal-content {
-    width: 98%;
-    margin: 1%;
+  /* Modales pantalla completa en móviles pequeños */
+  .modal-overlay {
+    padding: 0;
   }
   
-  .modal-compact {
-    width: 96%;
-    margin: 2%;
-    max-height: 95vh;
+  .modal-content,
+  .modal-compact,
+  .modal-expanded,
+  .modal-detail,
+  .modal-confirm {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
   }
   
-  .modal-expanded {
-    width: 96%;
-    margin: 2%;
-    max-height: 95vh;
+  .modal-header {
+    padding: 14px 16px;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+  }
+  
+  .btn-close {
+    width: 32px;
+    height: 32px;
+    font-size: 24px;
+  }
+  
+  .modal-body {
+    padding: 16px 12px;
   }
   
   .modal-body-two-columns {
     padding: 12px;
     gap: 12px;
+    min-height: calc(100vh - 100px);
   }
   
   .users-column {
     padding: 12px;
-    max-height: 250px;
-  }
-  
-  .users-column-header {
-    margin-bottom: 12px;
-    padding-bottom: 8px;
+    max-height: 40vh;
   }
   
   .users-column-header h4 {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .selected-count-badge {
-    font-size: 11px;
+    font-size: 10px;
     padding: 3px 8px;
   }
   
   .user-option-column {
-    padding: 8px;
+    padding: 10px;
   }
   
   .user-name-column {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .user-email-column {
-    font-size: 10px;
-  }
-  
-  .user-curp-column {
     font-size: 9px;
   }
   
-  .modal-compact .modal-body {
-    padding: 12px 8px;
+  .user-curp-column {
+    font-size: 8px;
   }
   
   .form-group-compact {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+  }
+  
+  .form-group-compact label {
+    font-size: 12px;
+  }
+  
+  .form-input-compact,
+  .form-textarea-compact {
+    font-size: 13px;
+    padding: 10px;
   }
   
   .radio-group-compact {
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
   
-  .users-list-compact {
-    max-height: 120px;
+  .file-input-label-compact {
+    padding: 10px 12px;
   }
   
-  .user-name-compact {
-    font-size: 10px;
-  }
-  
-  .user-email-compact {
-    font-size: 9px;
-  }
-  
-  .users-list-header {
-    font-size: 10px;
-  }
-  
-  .attachment-preview {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
-  
-  .attachment-actions {
-    justify-content: center;
+  .file-text {
+    font-size: 11px;
+    max-width: 180px;
   }
   
   .modal-actions-compact {
     flex-direction: column-reverse;
-    gap: 8px;
+    gap: 10px;
   }
   
   .btn-secondary-compact,
   .btn-primary-compact {
     width: 100%;
-    justify-content: center;
+    padding: 12px;
+    font-size: 13px;
   }
   
-  .file-text {
-    max-width: 150px;
+  .attachment-preview {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .attachment-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .attachment-actions button {
+    width: 100%;
+  }
+  
+  .confirm-content {
+    padding: 16px;
+  }
+  
+  .confirm-icon {
+    font-size: 40px;
+  }
+  
+  .confirm-content h4 {
+    font-size: 16px;
+  }
+  
+  .confirm-content p {
+    font-size: 13px;
+  }
+  
+  .modal-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+    padding: 16px;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+/* Orientación horizontal en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+  .modal-overlay {
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+    margin: 2.5vh auto;
+  }
+  
+  .modal-body-two-columns {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 16px;
+    max-height: calc(95vh - 80px);
+  }
+  
+  .users-column {
+    order: 2;
+    max-height: calc(95vh - 120px);
+  }
+  
+  .form-column {
+    order: 1;
+    max-height: calc(95vh - 120px);
+    overflow-y: auto;
+  }
+}
+
+/* iPhone SE y dispositivos muy pequeños */
+@media (max-width: 375px) {
+  .header-title {
+    font-size: 13px;
+  }
+  
+  .header-subtitle {
+    font-size: 9px;
+  }
+  
+  .btn-primary {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+  
+  .btn-primary svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .modal-header h3 {
+    font-size: 15px;
+  }
+  
+  .form-input-compact,
+  .form-textarea-compact {
+    font-size: 12px;
+  }
+  
+  .user-name-column {
+    font-size: 10px;
+  }
+  
+  .user-email-column {
+    font-size: 8px;
+  }
+}
+
+/* Estadísticas modal responsivo */
+@media (max-width: 768px) {
+  .modal-stats {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .stat-card {
+    max-width: 100%;
+  }
+  
+  .stats-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .tabs-header {
+    flex-direction: row;
+  }
+  
+  .tab-button {
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+  
+  .user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .user-read-date,
+  .user-unread-status {
+    align-self: flex-end;
+  }
+}
+
+/* Prevenir zoom en inputs en iOS */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="url"],
+  input[type="email"],
+  textarea,
+  select {
+    font-size: 16px !important;
   }
 }
 
@@ -3725,61 +4028,5 @@ export default {
   width: 40px;
   height: 40px;
   margin: 0 auto 16px;
-}
-
-/* Responsive para estadísticas */
-@media (max-width: 768px) {
-  .modal-stats {
-    width: 98%;
-    height: 95vh;
-    overflow-y: auto;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  
-  .stats-meta {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .tabs-header {
-    flex-direction: column;
-  }
-  
-  .user-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .user-read-date,
-  .user-unread-status {
-    align-self: flex-end;
-  }
-}
-
-/* Tablet landscape */
-@media (max-width: 768px) and (orientation: landscape) {
-  .main-content {
-    margin-left: 160px;
-    width: calc(100vw - 160px);
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    margin-left: 200px;
-    width: calc(100vw - 200px);
-  }
-}
-
-@media (max-width: 375px) {
-  .main-content {
-    margin-left: 180px;
-    width: calc(100vw - 180px);
-  }
 }
 </style>

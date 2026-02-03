@@ -5216,44 +5216,37 @@ async def actualizar_notificacion(
                 raise HTTPException(status_code=400, detail="Formato de usuario_ids inválido")
         
         # Procesar archivo si se subió uno nuevo
-        archivo_nombre = notificacion_existente[1]
-        archivo_ruta = None
+        archivo_bytes = None
         archivo_tipo = None
+        archivo_nombre = notificacion_existente[1]  # Mantener el archivo anterior por defecto
         
-        if archivo:
-            # Validar tamaño del archivo (máximo 50MB)
-            archivo.file.seek(0, 2)
-            file_size = archivo.file.tell()
-            archivo.file.seek(0)
-            
-            if file_size > 50 * 1024 * 1024:
-                raise HTTPException(status_code=400, detail="El archivo no debe exceder 50MB")
+        if archivo and archivo.filename:
+            print(f"📎 Procesando nuevo archivo: {archivo.filename}")
             
             # Validar tipo de archivo
-            extensiones_permitidas = {'.jpg', '.jpeg', '.png', '.gif', '.pdf', '.mp4', '.avi', '.mov', '.wmv'}
-            extension = os.path.splitext(archivo.filename)[1].lower()
+            ext = os.path.splitext(archivo.filename)[1].lower()
+            tipos_permitidos = {
+                '.jpg': 'imagen', '.jpeg': 'imagen', '.png': 'imagen', '.gif': 'imagen',
+                '.pdf': 'pdf',
+                '.mp4': 'video', '.avi': 'video', '.mov': 'video', '.wmv': 'video'
+            }
             
-            if extension not in extensiones_permitidas:
-                raise HTTPException(status_code=400, detail="Tipo de archivo no permitido")
+            if ext not in tipos_permitidos:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Tipo de archivo no permitido. Formatos válidos: {', '.join(tipos_permitidos.keys())}"
+                )
             
-            # Guardar archivo
+            # Leer archivo
+            archivo_bytes = await archivo.read()
+            archivo_tipo = tipos_permitidos[ext]
             archivo_nombre = archivo.filename
-            archivo_ruta = f"fotos/{archivo.filename}"
             
-            # Determinar tipo de archivo
-            if extension in {'.jpg', '.jpeg', '.png', '.gif'}:
-                archivo_tipo = 'imagen'
-            elif extension == '.pdf':
-                archivo_tipo = 'pdf'
-            elif extension in {'.mp4', '.avi', '.mov', '.wmv'}:
-                archivo_tipo = 'video'
+            # Validar tamaño (50MB máximo)
+            if len(archivo_bytes) > 50 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="El archivo no debe exceder 50MB")
             
-            # Guardar archivo físico
-            with open(archivo_ruta, "wb") as f:
-                content = await archivo.read()
-                f.write(content)
-            
-            print(f"📎 Nuevo archivo guardado: {archivo_ruta}")
+            print(f"📎 Nuevo archivo procesado: {archivo_nombre} ({archivo_tipo}, {len(archivo_bytes)} bytes)")
         
         # Actualizar notificación en la base de datos
         update_query = """
@@ -5264,9 +5257,9 @@ async def actualizar_notificacion(
         update_params = [titulo, subtitulo, descripcion, enlace_url, enviada_a_todos]
         
         # Agregar campos de archivo si hay nuevo archivo
-        if archivo:
-            update_query += ", archivo_nombre = %s, archivo_ruta = %s, archivo_tipo = %s"
-            update_params.extend([archivo_nombre, archivo_ruta, archivo_tipo])
+        if archivo and archivo.filename:
+            update_query += ", archivo = %s, archivo_tipo = %s, archivo_nombre = %s"
+            update_params.extend([archivo_bytes, archivo_tipo, archivo_nombre])
         
         update_query += " WHERE id = %s"
         update_params.append(notificacion_id)
@@ -5276,21 +5269,18 @@ async def actualizar_notificacion(
         # Actualizar destinatarios si cambió la configuración
         if not enviada_a_todos:
             # Eliminar destinatarios anteriores
-            cursor.execute("DELETE FROM notificacion_usuario WHERE notificacion_id = %s", (notificacion_id,))
+            cursor.execute("DELETE FROM notificacion_usuarios WHERE notificacion_id = %s", (notificacion_id,))
             
             # Insertar nuevos destinatarios
             for usuario_id in usuarios_seleccionados:
                 cursor.execute(
-                    """
-                    INSERT INTO notificacion_usuario (notificacion_id, usuario_id, leida, fecha_lectura)
-                    VALUES (%s, %s, FALSE, NULL)
-                    ON CONFLICT (notificacion_id, usuario_id) DO NOTHING
-                    """,
+                    "INSERT INTO notificacion_usuarios (notificacion_id, usuario_id) VALUES (%s, %s)",
                     (notificacion_id, usuario_id)
                 )
+            print(f"👥 Notificación actualizada para {len(usuarios_seleccionados)} usuarios específicos")
         else:
             # Si ahora es para todos, eliminar registros específicos
-            cursor.execute("DELETE FROM notificacion_usuario WHERE notificacion_id = %s", (notificacion_id,))
+            cursor.execute("DELETE FROM notificacion_usuarios WHERE notificacion_id = %s", (notificacion_id,))
         
         conn.commit()
         

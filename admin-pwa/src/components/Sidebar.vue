@@ -922,26 +922,24 @@ const handleKeydown = (event) => {
   padding: 4px;
   border-radius: 6px;
   transition: all 0.3s ease;
-  flex: 1 1 100%;
-  min-width: 0;
+  width: 45%;
+  max-width: 70px;
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* Cuando hay dos botones en la fila, cada uno ocupa ~48% */
-.quick-link.geoportal,
-.quick-link:not(.resumen-ejecutivo):nth-last-child(n+3) {
-  flex: 1 1 48%;
-  max-width: 48%;
+/* Cuando App Móvil es el primer elemento (no hay Geoportal), ocupa todo el ancho */
+.quick-link.app-movil:first-child {
+  width: 100%;
+  max-width: none;
 }
 
 /* Tercer botón ocupa toda la fila inferior */
 .quick-link.resumen-ejecutivo {
   width: 100%;
   max-width: none;
-  flex: 0 0 100%;
   margin-top: 4px;
 }
 

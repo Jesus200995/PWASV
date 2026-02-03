@@ -120,9 +120,6 @@
             <div v-if="isTerritorial && territorioAsignado" class="territorio-separator"></div>
             <!-- Fila: Avatar + Nombre -->
             <div class="user-header-row">
-              <div class="user-avatar">
-                <span class="user-initials">{{ userInitials }}</span>
-              </div>
               <p class="user-fullname">{{ userFullName }}</p>
             </div>
             <!-- 2. Cargo del usuario -->
@@ -1278,30 +1275,6 @@ const handleKeydown = (event) => {
   box-shadow: 0 0 4px rgba(57, 255, 20, 0.2);
 }
 
-.user-avatar {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border: 1.5px solid rgba(57, 255, 20, 0.6);
-}
-
-.user-initials {
-  font-size: 11px;
-  font-weight: 600;
-  color: #39FF14;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  line-height: 1;
-}
-
 .user-details {
   flex: 1;
   min-width: 0;
@@ -1335,7 +1308,7 @@ const handleKeydown = (event) => {
   font-size: 10px;
   font-weight: 700;
   color: #39FF14;
-  text-align: left;
+  text-align: center;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
@@ -1345,8 +1318,7 @@ const handleKeydown = (event) => {
     0 1px 2px rgba(0, 0, 0, 0.5);
   letter-spacing: 0.2px;
   line-height: 1.3;
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 /* Username como subtítulo pequeño */
@@ -2318,15 +2290,6 @@ const handleKeydown = (event) => {
     gap: 6px;
   }
   
-  .user-avatar {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .user-initials {
-    font-size: 9px;
-  }
-  
   .user-name {
     font-size: 10px;
   }
@@ -2584,15 +2547,6 @@ const handleKeydown = (event) => {
   .user-info {
     padding: 3px;
     gap: 4px;
-  }
-  
-  .user-avatar {
-    width: 22px;
-    height: 22px;
-  }
-  
-  .user-initials {
-    font-size: 8px;
   }
   
   .user-name {

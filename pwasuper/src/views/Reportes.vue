@@ -655,7 +655,7 @@ import { PDFDocument } from 'pdf-lib';
 import FirmaDigital from '../components/FirmaDigital.vue';
 import { apiService, api } from '../services/apiService.js';
 import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
-import superiorImage from '../../images/superior.png';
+import superiorImage from '../../images/superior2.png';
 
 /**
  * Función para limpiar strings base64 que pueden tener prefijos o caracteres inválidos

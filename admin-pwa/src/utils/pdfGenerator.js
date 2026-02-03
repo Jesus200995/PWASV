@@ -3,7 +3,7 @@
  * Compatible con admin-pwa - Formato idéntico a pwasuper
  */
 import jsPDF from 'jspdf'
-import superiorImage from '../assets/images/superior.png'
+import superiorImage from '../assets/images/superior2.png'
 
 /**
  * Genera un PDF desde los datos estructurados del reporte

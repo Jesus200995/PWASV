@@ -4,13 +4,19 @@ Esto permite invalidar sesiones cuando se cambia la contraseña
 """
 import psycopg2
 from psycopg2 import Error
+import sys
+import io
+
+# Configurar stdout para UTF-8
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Configuración de la base de datos
 DB_CONFIG = {
     'host': 'localhost',
     'database': 'pwa_db',
     'user': 'postgres',
-    'password': 'admin'
+    'password': 'admin',
+    'client_encoding': 'utf8'
 }
 
 def agregar_columna_session_version():

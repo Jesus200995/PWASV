@@ -1068,7 +1068,7 @@ export default {
   
   beforeUnmount() {
     // Remover listener de permisos
-    window.removeEventListener('user-updated', this.actualizarPermisosUsuario)
+    window.removeEventListener('user-session-updated', this.actualizarPermisosUsuario)
   },
   
   methods: {
@@ -1084,7 +1084,7 @@ export default {
     
     // Configurar eventos para actualización reactiva de permisos
     configurarEventosPermisos() {
-      window.addEventListener('user-updated', this.actualizarPermisosUsuario)
+      window.addEventListener('user-session-updated', this.actualizarPermisosUsuario)
     },
     
     // Función para actualizar permisos cuando el evento es disparado

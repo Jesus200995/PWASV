@@ -135,7 +135,7 @@
 
     <!-- Enlaces rápidos: Geoportal y App Móvil -->
     <div class="quick-links">
-      <a href="https://geoportal.sembrandodatos.com/" target="_blank" class="quick-link geoportal">
+      <a v-if="isAdmin" href="https://geoportal.sembrandodatos.com/" target="_blank" class="quick-link geoportal">
         <div class="link-icon-container">
           <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>

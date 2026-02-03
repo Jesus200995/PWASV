@@ -870,6 +870,28 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Notificación Toast -->
+    <Teleport to="body">
+      <Transition name="toast">
+        <div v-if="showToast" :class="['toast-notification', `toast-${toastType}`]">
+          <svg v-if="toastType === 'success'" class="toast-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+          <svg v-else-if="toastType === 'error'" class="toast-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <svg v-else class="toast-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span class="toast-message">{{ toastMessage }}</span>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -986,6 +1008,9 @@ const showLightbox = ref(false)
 const lightboxImageUrl = ref('')
 const showConfirmDelete = ref(false)
 const registroAEliminar = ref(null)
+const showToast = ref(false)
+const toastMessage = ref('')
+const toastType = ref('success') // 'success' | 'error' | 'info'
 
 let map = null
 
@@ -2544,13 +2569,23 @@ const cancelarEliminar = () => {
   registroAEliminar.value = null
 }
 
+const mostrarToast = (mensaje, tipo = 'success') => {
+  toastMessage.value = mensaje
+  toastType.value = tipo
+  showToast.value = true
+  
+  setTimeout(() => {
+    showToast.value = false
+  }, 3500)
+}
+
 const eliminarRegistro = async () => {
   if (!registroAEliminar.value) return
   
   try {
     const token = localStorage.getItem('admin_token')
     if (!token) {
-      alert('No hay sesión activa')
+      mostrarToast('No hay sesión activa', 'error')
       router.push('/login')
       return
     }
@@ -2569,11 +2604,12 @@ const eliminarRegistro = async () => {
     const data = await response.json()
     console.log('Registro eliminado:', data)
     
-    // Mostrar mensaje de éxito
-    alert(`Registro #${registroAEliminar.value.id} eliminado exitosamente`)
-    
     // Cerrar modal de confirmación
     showConfirmDelete.value = false
+    
+    // Mostrar mensaje de éxito
+    mostrarToast(`Registro #${registroAEliminar.value.id} eliminado exitosamente`, 'success')
+    
     registroAEliminar.value = null
     
     // Recargar registros
@@ -2581,7 +2617,7 @@ const eliminarRegistro = async () => {
     
   } catch (error) {
     console.error('Error al eliminar registro:', error)
-    alert('Error al eliminar el registro. Por favor, intenta de nuevo.')
+    mostrarToast('Error al eliminar el registro. Por favor, intenta de nuevo.', 'error')
   }
 }
 
@@ -6470,6 +6506,113 @@ const logout = () => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ========================================
+   NOTIFICACIONES TOAST
+   ======================================== */
+
+.toast-notification {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  min-width: 300px;
+  max-width: 420px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-notification.toast-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toast-notification.toast-error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toast-notification.toast-info {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.toast-message {
+  flex: 1;
+  line-height: 1.5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Animación de entrada/salida del toast */
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateX(100%) scale(0.8);
+}
+
+.toast-enter-to {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.toast-leave-from {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(100%) scale(0.8);
+}
+
+/* Responsive para toast en móviles */
+@media (max-width: 768px) {
+  .toast-notification {
+    top: 70px;
+    right: 12px;
+    left: 12px;
+    min-width: auto;
+    max-width: none;
+    padding: 14px 18px;
+    font-size: 13px;
+  }
+  
+  .toast-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toast-notification {
+    top: 60px;
+    right: 8px;
+    left: 8px;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    gap: 10px;
   }
 }
 </style>

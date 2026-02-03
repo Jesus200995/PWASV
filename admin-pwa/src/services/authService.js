@@ -118,7 +118,8 @@ class AuthService {
             id: meResponse.data.id,
             username: meResponse.data.username,
             rol: meResponse.data.rol || 'admin',
-            tipo: 'admin_user'
+            tipo: 'admin_user',
+            session_version: meResponse.data.session_version || 1
           }
         }
       } catch (meError) {
@@ -129,7 +130,8 @@ class AuthService {
       return {
         username,
         rol: 'admin', // Por defecto admin para usuarios que acceden al panel admin
-        tipo: 'admin_user'
+        tipo: 'admin_user',
+        session_version: 1 // Versión por defecto para compatibilidad
       }
     } catch (error) {
       console.error('Error obteniendo info del usuario:', error)

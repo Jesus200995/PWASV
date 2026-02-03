@@ -805,51 +805,65 @@
 
     <!-- Modal de confirmación para eliminar registro -->
     <Teleport to="body" v-if="showConfirmDelete">
-      <div class="modal-overlay" @click="cancelarEliminar">
-        <div class="modal-content confirm-delete-modal" @click.stop>
-          <div class="modal-header delete-header">
-            <div class="modal-header-content">
-              <div class="modal-icon delete-icon">
-                <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                </svg>
-              </div>
-              <h3 class="modal-title">Confirmar Eliminación</h3>
-            </div>
-            <button @click="cancelarEliminar" class="btn-close">
-              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
-                <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
+      <div class="modal-overlay-delete" @click="cancelarEliminar">
+        <div class="modal-delete-container" @click.stop>
+          <!-- Header -->
+          <div class="modal-delete-header">
+            <svg class="warning-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3>Confirmar Eliminación</h3>
+            <button @click="cancelarEliminar" class="btn-close-delete">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
             </button>
           </div>
-          
-          <div class="modal-body">
-            <div class="confirm-delete-content">
-              <p class="confirm-message">¿Estás seguro que deseas eliminar este registro?</p>
-              <div class="registro-info" v-if="registroAEliminar">
-                <div class="info-row">
-                  <span class="info-label">ID:</span>
-                  <span class="info-value">#{{ registroAEliminar.id }}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">Usuario:</span>
-                  <span class="info-value">{{ registroAEliminar.usuario?.nombre_completo || `Usuario ${registroAEliminar.usuario_id}` }}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">Fecha:</span>
-                  <span class="info-value">{{ formatFecha(registroAEliminar.fecha_hora) }}</span>
-                </div>
+
+          <!-- Body -->
+          <div class="modal-delete-body">
+            <p class="delete-question">¿Estás seguro que deseas eliminar este registro?</p>
+            
+            <div class="registro-info-box" v-if="registroAEliminar">
+              <div class="info-item">
+                <span class="info-label-delete">ID:</span>
+                <span class="info-value-delete">#{{ registroAEliminar.id }}</span>
               </div>
-              <p class="warning-text">⚠️ Esta acción no se puede deshacer</p>
+              <div class="info-item">
+                <span class="info-label-delete">USUARIO:</span>
+                <span class="info-value-delete">{{ registroAEliminar.usuario?.nombre_completo || `Usuario ${registroAEliminar.usuario_id}` }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label-delete">FECHA:</span>
+                <span class="info-value-delete">{{ formatFecha(registroAEliminar.fecha_hora) }}</span>
+              </div>
+            </div>
+
+            <div class="warning-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+              </svg>
+              <span>Esta acción no se puede deshacer</span>
             </div>
           </div>
-          
-          <div class="modal-footer">
-            <button @click="cancelarEliminar" class="btn-cancel">
+
+          <!-- Footer con botones -->
+          <div class="modal-delete-footer">
+            <button @click="cancelarEliminar" class="btn-cancel-delete">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
               Cancelar
             </button>
-            <button @click="eliminarRegistro" class="btn-delete-confirm">
+            <button @click="eliminarRegistro" class="btn-confirm-delete">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+              </svg>
               Eliminar Registro
             </button>
           </div>
@@ -4991,144 +5005,211 @@ const logout = () => {
   backdrop-filter: blur(10px);
 }
 
-/* ========== ESTILOS DEL MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ========== */
-.confirm-delete-modal {
+/* ========== MODAL DE CONFIRMACIÓN DE ELIMINACIÓN - REDISEÑADO ========== */
+.modal-overlay-delete {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-delete-container {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
   max-width: 480px;
-  animation: modalSlideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
 }
 
-.delete-header {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-  border-bottom: 2px solid rgba(211, 47, 47, 0.3);
+.modal-delete-header {
+  background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
 }
 
-.delete-icon {
-  background: rgba(255, 255, 255, 0.2);
-  animation: pulseWarning 2s infinite;
+.warning-icon {
+  color: white;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
 }
 
-.confirm-delete-content {
-  padding: 24px;
-  text-align: center;
-}
-
-.confirm-message {
+.modal-delete-header h3 {
+  color: white;
   font-size: 18px;
   font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.btn-close-delete {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-close-delete:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.modal-delete-body {
+  padding: 24px;
+}
+
+.delete-question {
+  font-size: 16px;
+  font-weight: 500;
   color: #333;
   margin: 0 0 20px 0;
+  text-align: center;
   line-height: 1.5;
 }
 
-.registro-info {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+.registro-info-box {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  border: 2px solid #ffc107;
   border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
-  border: 2px solid #ffb74d;
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.1);
+  padding: 16px;
+  margin-bottom: 16px;
 }
 
-.info-row {
+.info-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 152, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 193, 7, 0.2);
 }
 
-.info-row:last-child {
+.info-item:last-child {
   border-bottom: none;
+  padding-bottom: 0;
 }
 
-.info-label {
-  font-weight: 600;
+.info-label-delete {
+  font-size: 11px;
+  font-weight: 700;
   color: #f57c00;
-  font-size: 13px;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.info-value {
-  font-weight: 500;
-  color: #333;
+.info-value-delete {
   font-size: 14px;
-  max-width: 60%;
+  font-weight: 600;
+  color: #333;
   text-align: right;
+  max-width: 65%;
   word-break: break-word;
 }
 
-.warning-text {
-  font-size: 14px;
-  font-weight: 600;
-  color: #f44336;
-  margin: 16px 0 0 0;
-  padding: 12px;
+.warning-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
   background: #ffebee;
-  border-radius: 8px;
   border-left: 4px solid #f44336;
+  border-radius: 8px;
 }
 
-.btn-cancel {
-  padding: 12px 28px;
-  background: linear-gradient(135deg, #9e9e9e, #757575);
-  color: white;
+.warning-box svg {
+  color: #f44336;
+  flex-shrink: 0;
+}
+
+.warning-box span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.modal-delete-footer {
+  padding: 16px 24px;
+  background: #f5f5f5;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid #e0e0e0;
+}
+
+.btn-cancel-delete {
+  padding: 10px 20px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-cancel-delete:hover {
+  background: #f5f5f5;
+  border-color: #bdbdbd;
+  transform: translateY(-1px);
+}
+
+.btn-confirm-delete {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
   border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.btn-cancel:hover {
-  background: linear-gradient(135deg, #757575, #616161);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.btn-delete-confirm {
-  padding: 12px 28px;
-  background: linear-gradient(135deg, #f44336, #d32f2f);
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-.btn-delete-confirm:hover {
-  background: linear-gradient(135deg, #d32f2f, #c62828);
+.btn-confirm-delete:hover {
+  background: linear-gradient(135deg, #e53935 0%, #d32f2f 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(244, 67, 54, 0.4);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
 }
 
-.btn-delete-confirm:active {
+.btn-confirm-delete:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
 }
 
-@keyframes pulseWarning {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes modalSlideUp {
+@keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(30px) scale(0.95);
+    transform: translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
@@ -5136,49 +5217,57 @@ const logout = () => {
   }
 }
 
-/* Responsive para modal de confirmación */
-@media (max-width: 768px) {
-  .confirm-delete-modal {
-    max-width: 90%;
-    margin: 20px;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
   }
-  
-  .confirm-message {
-    font-size: 16px;
-  }
-  
-  .registro-info {
-    padding: 16px;
-  }
-  
-  .info-label {
-    font-size: 11px;
-  }
-  
-  .info-value {
-    font-size: 12px;
-    max-width: 55%;
-  }
-  
-  .btn-cancel,
-  .btn-delete-confirm {
-    padding: 10px 20px;
-    font-size: 13px;
-  }
-  
-  .modal-footer {
-    gap: 10px;
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
   }
 }
 
-@media (max-width: 480px) {
-  .modal-footer {
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .modal-delete-container {
+    width: 95%;
+    max-width: 420px;
+  }
+
+  .modal-delete-header {
+    padding: 16px 20px;
+  }
+
+  .modal-delete-header h3 {
+    font-size: 16px;
+  }
+
+  .modal-delete-body {
+    padding: 20px;
+  }
+
+  .delete-question {
+    font-size: 15px;
+  }
+
+  .info-label-delete {
+    font-size: 10px;
+  }
+
+  .info-value-delete {
+    font-size: 13px;
+  }
+
+  .modal-delete-footer {
+    padding: 12px 16px;
     flex-direction: column-reverse;
   }
-  
-  .btn-cancel,
-  .btn-delete-confirm {
+
+  .btn-cancel-delete,
+  .btn-confirm-delete {
     width: 100%;
+    justify-content: center;
   }
 }
 

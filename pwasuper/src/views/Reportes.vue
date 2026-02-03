@@ -1770,24 +1770,7 @@ export default {
 
         // ========== VERIFICAR SI HAY IMÁGENES ==========
         if (actividadesConFoto.length === 0) {
-          // Mostrar mensaje cuando no hay fotos disponibles
-          currentY += 20;
-          doc.setFillColor(255, 243, 205); // Amarillo claro
-          doc.setDrawColor(200, 180, 100);
-          doc.setLineWidth(0.5);
-          doc.rect(margin, currentY, contentWidth, 40, 'FD');
-          
-          doc.setTextColor(120, 100, 50);
-          doc.setFontSize(12);
-          doc.setFont(undefined, 'bold');
-          doc.text('Sin evidencias fotográficas disponibles', pageWidth / 2, currentY + 15, { align: 'center' });
-          
-          doc.setFontSize(9);
-          doc.setFont(undefined, 'normal');
-          doc.text('El reporte fotográfico solo está disponible para el mes en curso;', pageWidth / 2, currentY + 25, { align: 'center' });
-          doc.text('al descargar información de meses anteriores, las fotografías no se mostrarán.', pageWidth / 2, currentY + 32, { align: 'center' });
-          
-          currentY += 50;
+          // Se mostrará mensaje después de las firmas
         } else {
           // ========== SELECCIÓN DE 6 IMÁGENES: PRIMERO CAMPO, LUEGO GABINETE ==========
           // Separar por tipo
@@ -2881,24 +2864,7 @@ export default {
 
         // ========== VERIFICAR SI HAY IMÁGENES ==========
         if (actividadesConFoto.length === 0) {
-          // Mostrar mensaje cuando no hay fotos disponibles
-          currentY += 20;
-          doc.setFillColor(255, 243, 205);
-          doc.setDrawColor(200, 180, 100);
-          doc.setLineWidth(0.5);
-          doc.rect(margin, currentY, contentWidth, 40, 'FD');
-          
-          doc.setTextColor(120, 100, 50);
-          doc.setFontSize(12);
-          doc.setFont(undefined, 'bold');
-          doc.text('Sin evidencias fotográficas disponibles', pageWidth / 2, currentY + 15, { align: 'center' });
-          
-          doc.setFontSize(9);
-          doc.setFont(undefined, 'normal');
-          doc.text('El reporte fotográfico solo está disponible para el mes en curso;', pageWidth / 2, currentY + 25, { align: 'center' });
-          doc.text('al descargar información de meses anteriores, las fotografías no se mostrarán.', pageWidth / 2, currentY + 32, { align: 'center' });
-          
-          currentY += 50;
+          // Se mostrará mensaje después de las firmas
         } else {
           // Función para seleccionar imágenes de diferentes días
           const seleccionarImagenesDiversas = (actividades, maxImagenes) => {

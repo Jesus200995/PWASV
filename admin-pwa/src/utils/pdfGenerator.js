@@ -448,6 +448,8 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
       doc.setFont(undefined, 'normal')
       doc.text('El reporte fotográfico solo está disponible para el mes en curso;', pageWidth / 2, currentY + 25, { align: 'center' })
       doc.text('al descargar información de meses anteriores, las fotografías no se mostrarán.', pageWidth / 2, currentY + 32, { align: 'center' })
+      
+      currentY += 50
     } else {
       // Función para seleccionar imágenes de diferentes días
       const seleccionarImagenesDiversas = (actividades, maxImagenes) => {

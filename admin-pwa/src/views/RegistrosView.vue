@@ -928,18 +928,23 @@ const userRol = ref(authService.getCurrentUser()?.rol || '')
 const puedeEliminarRegistros = computed(() => {
   // Admin siempre puede eliminar
   if (userRol.value === 'admin' || authService.isAdmin()) {
+    console.log('✅ RegistrosView: Usuario es admin - puede eliminar')
     return true
   }
   // Verificar permiso específico usando la variable reactiva
-  return userPermisos.value?.registros_acciones === true
+  const tienePermiso = userPermisos.value?.registros_acciones === true
+  console.log('🔍 RegistrosView: Verificando permiso registros_acciones:', tienePermiso, userPermisos.value)
+  return tienePermiso
 })
 
 // Función para actualizar permisos cuando el evento es disparado
 const actualizarPermisosUsuario = (event) => {
   const userData = event.detail
-  console.log('🔄 RegistrosView: Permisos actualizados en tiempo real', userData.permisos)
+  console.log('🔄 RegistrosView: Permisos actualizados en tiempo real', userData)
+  console.log('📋 RegistrosView: Nuevos permisos recibidos:', userData.permisos)
   userPermisos.value = userData.permisos || {}
   userRol.value = userData.rol || ''
+  console.log('✅ RegistrosView: Variables reactivas actualizadas. registros_acciones =', userPermisos.value?.registros_acciones)
 }
 
 // Variables para ordenamiento
@@ -1090,7 +1095,7 @@ onMounted(() => {
   })
   
   // Escuchar actualización de permisos en tiempo real
-  window.addEventListener('permisosActualizados', actualizarPermisosUsuario)
+  window.addEventListener('user-session-updated', actualizarPermisosUsuario)
   
   // Cargar Leaflet desde CDN
   if (!window.L) {
@@ -1118,7 +1123,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
-  window.removeEventListener('permisosActualizados', actualizarPermisosUsuario)
+  window.removeEventListener('user-session-updated', actualizarPermisosUsuario)
 })
 
 const cargarRegistros = async () => {

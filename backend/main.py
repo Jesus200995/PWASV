@@ -6053,24 +6053,30 @@ PERMISOS_ADMIN_DEFAULT = {
     "visor": True,
     "asistencia": True,
     "registros": True,
+    "registros_acciones": True,
     "usuarios": True,
     "usuarios_acciones": True,
     "historiales": True,
     "notificaciones": True,
+    "notificaciones_acciones": True,
     "permisos": True,
-    "configuracion": True
+    "configuracion": True,
+    "reportes": True
 }
 
 PERMISOS_USER_DEFAULT = {
     "visor": False,
     "asistencia": False,
     "registros": False,
+    "registros_acciones": False,
     "usuarios": False,
     "usuarios_acciones": False,
     "historiales": False,
     "notificaciones": False,
+    "notificaciones_acciones": False,
     "permisos": False,
-    "configuracion": False
+    "configuracion": False,
+    "reportes": False
 }
 
 class AdminUserCreate(BaseModel):

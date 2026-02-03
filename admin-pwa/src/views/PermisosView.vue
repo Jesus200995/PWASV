@@ -1410,11 +1410,16 @@ export default {
             }
             // Actualizar localStorage
             localStorage.setItem('admin_user_data', JSON.stringify(newUserData))
+            console.log('💾 PermisosView: Actualizando localStorage con nuevos permisos:', newUserData.permisos)
+            
             // Disparar evento para actualizar todas las vistas
             window.dispatchEvent(new CustomEvent('user-session-updated', { 
               detail: newUserData 
             }))
-            console.log('🔄 Permisos del usuario actual actualizados inmediatamente')
+            console.log('📢 PermisosView: Evento user-session-updated disparado con datos:', newUserData)
+            console.log('🔔 PermisosView: registros_acciones =', newUserData.permisos?.registros_acciones)
+          } else {
+            console.log('ℹ️ PermisosView: Usuario editado no es el usuario actual. No se dispara evento.')
           }
         } else {
           // Crear nuevo usuario (siempre activo)

@@ -716,24 +716,45 @@
                   </div>
                 </label>
 
-                <!-- Registros -->
-                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.registros }">
-                  <input type="checkbox" v-model="formularioUsuario.permisos.registros" />
-                  <div class="permiso-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="16" y1="13" x2="8" y2="13"/>
-                      <line x1="16" y1="17" x2="8" y2="17"/>
-                    </svg>
-                  </div>
-                  <span class="permiso-card-name">Registros</span>
-                  <div class="permiso-toggle">
-                    <div class="toggle-track">
-                      <div class="toggle-thumb"></div>
+                <!-- Registros (con sub-permiso integrado) -->
+                <div class="permiso-card-wrapper" :class="{ 'expanded': formularioUsuario.permisos.registros }">
+                  <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.registros }">
+                    <input type="checkbox" v-model="formularioUsuario.permisos.registros" @change="onRegistrosChange" />
+                    <div class="permiso-card-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                      </svg>
                     </div>
+                    <span class="permiso-card-name">Registros</span>
+                    <div class="permiso-toggle">
+                      <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                      </div>
+                    </div>
+                  </label>
+                  
+                  <!-- Sub-permiso: Acciones de Registros (dentro del mismo recuadro) -->
+                  <div v-if="formularioUsuario.permisos.registros" class="sub-permiso-container">
+                    <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.registros_acciones }">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.registros_acciones" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                      </svg>
+                      <span class="sub-permiso-text">Permitir eliminar</span>
+                      <div class="sub-toggle">
+                        <div class="sub-toggle-track">
+                          <div class="sub-toggle-thumb"></div>
+                        </div>
+                      </div>
+                    </label>
                   </div>
-                </label>
+                </div>
 
                 <!-- Usuarios (con sub-permiso integrado) -->
                 <div class="permiso-card-wrapper" :class="{ 'expanded': formularioUsuario.permisos.usuarios }">
@@ -1061,6 +1082,7 @@ export default {
           visor_filtrador_territorio: false,
           asistencia: false,
           registros: false,
+          registros_acciones: false,
           usuarios: false,
           usuarios_acciones: false,
           historiales: false,
@@ -1113,6 +1135,7 @@ export default {
         visor_filtrador_territorio: false,
         asistencia: false,
         registros: false,
+        registros_acciones: false,
         usuarios: false,
         usuarios_acciones: false,
         historiales: false,
@@ -1195,6 +1218,14 @@ export default {
       // Si se desactiva usuarios, también desactivar usuarios_acciones
       if (!this.formularioUsuario.permisos.usuarios) {
         this.formularioUsuario.permisos.usuarios_acciones = false
+      }
+    },
+
+    // Handler cuando se cambia el permiso de registros
+    onRegistrosChange() {
+      // Si se desactiva registros, también desactivar registros_acciones
+      if (!this.formularioUsuario.permisos.registros) {
+        this.formularioUsuario.permisos.registros_acciones = false
       }
     },
 

@@ -19,7 +19,7 @@
               <p class="header-subtitle">Gestiona todas las notificaciones y alertas del sistema</p>
             </div>
           </div>
-          <div class="header-actions">
+          <div v-if="puedeCrearNotificaciones" class="header-actions">
             <button class="btn-primary" @click="mostrarModalCrear = true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 5v14"/>
@@ -1014,6 +1014,19 @@ export default {
   },
   
   computed: {
+    // Permiso para crear notificaciones - REACTIVO
+    puedeCrearNotificaciones() {
+      // Admin siempre puede crear
+      if (this.userRol === 'admin' || authService.isAdmin()) {
+        console.log('✅ NotificacionesView: Usuario es admin - puede crear notificaciones')
+        return true
+      }
+      // Verificar permiso específico
+      const tienePermiso = this.userPermisos?.notificaciones_crear === true
+      console.log('🔍 NotificacionesView: Verificando permiso notificaciones_crear:', tienePermiso, this.userPermisos)
+      return tienePermiso
+    },
+    
     // Permiso para ver acciones (editar/eliminar) - REACTIVO
     puedeVerAcciones() {
       // Admin siempre puede ver acciones
@@ -1090,9 +1103,13 @@ export default {
     // Función para actualizar permisos cuando el evento es disparado
     actualizarPermisosUsuario(event) {
       const userData = event.detail
-      console.log('🔄 NotificacionesView: Permisos actualizados en tiempo real', userData.permisos)
+      console.log('🔄 NotificacionesView: Permisos actualizados en tiempo real', userData)
+      console.log('📋 NotificacionesView: Nuevos permisos recibidos:', userData.permisos)
       this.userPermisos = userData.permisos || {}
       this.userRol = userData.rol || ''
+      console.log('✅ NotificacionesView: Variables reactivas actualizadas')
+      console.log('🔔 NotificacionesView: notificaciones_crear =', this.userPermisos?.notificaciones_crear)
+      console.log('🔔 NotificacionesView: notificaciones_acciones =', this.userPermisos?.notificaciones_acciones)
     },
 
     // ==================== GESTIÓN DE NOTIFICACIONES ====================

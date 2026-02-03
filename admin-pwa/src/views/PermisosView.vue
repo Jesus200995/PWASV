@@ -829,8 +829,21 @@
                     </div>
                   </label>
                   
-                  <!-- Sub-permiso: Acciones de Notificaciones (dentro del mismo recuadro) -->
+                  <!-- Sub-permisos de Notificaciones (dentro del mismo recuadro) -->
                   <div v-if="formularioUsuario.permisos.notificaciones" class="sub-permiso-container">
+                    <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.notificaciones_crear }">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.notificaciones_crear" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14"/>
+                        <path d="M5 12h14"/>
+                      </svg>
+                      <span class="sub-permiso-text">Permitir crear nuevas</span>
+                      <div class="sub-toggle">
+                        <div class="sub-toggle-track">
+                          <div class="sub-toggle-thumb"></div>
+                        </div>
+                      </div>
+                    </label>
                     <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.notificaciones_acciones }">
                       <input type="checkbox" v-model="formularioUsuario.permisos.notificaciones_acciones" />
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1087,6 +1100,7 @@ export default {
           usuarios_acciones: false,
           historiales: false,
           notificaciones: false,
+          notificaciones_crear: false,
           notificaciones_acciones: false,
           permisos: false,
           configuracion: false,
@@ -1140,6 +1154,7 @@ export default {
         usuarios_acciones: false,
         historiales: false,
         notificaciones: false,
+        notificaciones_crear: false,
         notificaciones_acciones: false,
         permisos: false,
         configuracion: false,
@@ -1231,8 +1246,9 @@ export default {
 
     // Handler cuando se cambia el permiso de notificaciones
     onNotificacionesChange() {
-      // Si se desactiva notificaciones, también desactivar notificaciones_acciones
+      // Si se desactiva notificaciones, también desactivar los subpermisos
       if (!this.formularioUsuario.permisos.notificaciones) {
+        this.formularioUsuario.permisos.notificaciones_crear = false
         this.formularioUsuario.permisos.notificaciones_acciones = false
       }
     },

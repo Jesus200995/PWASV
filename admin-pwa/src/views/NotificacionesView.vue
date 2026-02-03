@@ -112,6 +112,7 @@
                         </svg>
                       </button>
                       <button 
+                        v-if="puedeVerAcciones"
                         class="btn-action btn-edit" 
                         @click="editarNotificacion(notificacion)"
                         title="Editar notificación"
@@ -134,6 +135,7 @@
                         </svg>
                       </button>
                       <button 
+                        v-if="puedeVerAcciones"
                         class="btn-action btn-delete" 
                         @click="confirmarEliminar(notificacion)"
                         title="Eliminar notificación"
@@ -932,6 +934,7 @@
 import Sidebar from '../components/Sidebar.vue'
 import notificacionesService from '../services/notificacionesService.js'
 import usuariosService from '../services/usuariosService.js'
+import authService from '../services/authService.js'
 
 export default {
   name: 'NotificacionesView',
@@ -1002,11 +1005,25 @@ export default {
         show: false,
         type: 'success',
         message: ''
-      }
+      },
+      
+      // Permisos del usuario actual (reactivo)
+      userPermisos: authService.getCurrentUser()?.permisos || {},
+      userRol: authService.getCurrentUser()?.rol || ''
     }
   },
   
   computed: {
+    // Permiso para ver acciones (editar/eliminar) - REACTIVO
+    puedeVerAcciones() {
+      // Admin siempre puede ver acciones
+      if (this.userRol === 'admin' || authService.isAdmin()) {
+        return true
+      }
+      // Verificar permiso específico
+      return this.userPermisos?.notificaciones_acciones === true
+    },
+    
     usuariosFiltrados() {
       if (!this.busquedaUsuarios.trim()) return this.usuarios
       
@@ -1045,7 +1062,13 @@ export default {
   
   mounted() {
     this.configurarEventosConexion()
+    this.configurarEventosPermisos()
     this.cargarNotificaciones()
+  },
+  
+  beforeUnmount() {
+    // Remover listener de permisos
+    window.removeEventListener('user-updated', this.actualizarPermisosUsuario)
   },
   
   methods: {
@@ -1057,6 +1080,19 @@ export default {
       window.addEventListener('offline', () => {
         this.isOnline = false
       })
+    },
+    
+    // Configurar eventos para actualización reactiva de permisos
+    configurarEventosPermisos() {
+      window.addEventListener('user-updated', this.actualizarPermisosUsuario)
+    },
+    
+    // Función para actualizar permisos cuando el evento es disparado
+    actualizarPermisosUsuario(event) {
+      const userData = event.detail
+      console.log('🔄 NotificacionesView: Permisos actualizados en tiempo real', userData.permisos)
+      this.userPermisos = userData.permisos || {}
+      this.userRol = userData.rol || ''
     },
 
     // ==================== GESTIÓN DE NOTIFICACIONES ====================

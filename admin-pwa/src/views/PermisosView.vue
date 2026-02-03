@@ -790,22 +790,41 @@
                   </div>
                 </label>
 
-                <!-- Notificaciones -->
-                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.notificaciones }">
-                  <input type="checkbox" v-model="formularioUsuario.permisos.notificaciones" />
-                  <div class="permiso-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                    </svg>
-                  </div>
-                  <span class="permiso-card-name">Notificaciones</span>
-                  <div class="permiso-toggle">
-                    <div class="toggle-track">
-                      <div class="toggle-thumb"></div>
+                <!-- Notificaciones (con sub-permiso integrado) -->
+                <div class="permiso-card-wrapper" :class="{ 'expanded': formularioUsuario.permisos.notificaciones }">
+                  <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.notificaciones }">
+                    <input type="checkbox" v-model="formularioUsuario.permisos.notificaciones" @change="onNotificacionesChange" />
+                    <div class="permiso-card-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                      </svg>
                     </div>
+                    <span class="permiso-card-name">Notificaciones</span>
+                    <div class="permiso-toggle">
+                      <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                      </div>
+                    </div>
+                  </label>
+                  
+                  <!-- Sub-permiso: Acciones de Notificaciones (dentro del mismo recuadro) -->
+                  <div v-if="formularioUsuario.permisos.notificaciones" class="sub-permiso-container">
+                    <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.notificaciones_acciones }">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.notificaciones_acciones" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                      <span class="sub-permiso-text">Permitir editar/eliminar</span>
+                      <div class="sub-toggle">
+                        <div class="sub-toggle-track">
+                          <div class="sub-toggle-thumb"></div>
+                        </div>
+                      </div>
+                    </label>
                   </div>
-                </label>
+                </div>
 
                 <!-- Permisos -->
                 <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.permisos }">
@@ -1046,6 +1065,7 @@ export default {
           usuarios_acciones: false,
           historiales: false,
           notificaciones: false,
+          notificaciones_acciones: false,
           permisos: false,
           configuracion: false,
           reportes: false
@@ -1097,6 +1117,7 @@ export default {
         usuarios_acciones: false,
         historiales: false,
         notificaciones: false,
+        notificaciones_acciones: false,
         permisos: false,
         configuracion: false,
         reportes: false
@@ -1174,6 +1195,14 @@ export default {
       // Si se desactiva usuarios, también desactivar usuarios_acciones
       if (!this.formularioUsuario.permisos.usuarios) {
         this.formularioUsuario.permisos.usuarios_acciones = false
+      }
+    },
+
+    // Handler cuando se cambia el permiso de notificaciones
+    onNotificacionesChange() {
+      // Si se desactiva notificaciones, también desactivar notificaciones_acciones
+      if (!this.formularioUsuario.permisos.notificaciones) {
+        this.formularioUsuario.permisos.notificaciones_acciones = false
       }
     },
 

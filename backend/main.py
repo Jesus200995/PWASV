@@ -3842,6 +3842,57 @@ async def eliminar_todos_usuarios():
         print(f"❌ Error general al eliminar usuarios: {e}")
         raise HTTPException(status_code=500, detail=f"Error al eliminar usuarios: {str(e)}")
 
+@app.delete("/admin/registros/{registro_id}")
+async def eliminar_registro(registro_id: int):
+    """Elimina un registro específico por su ID"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Verificar si el registro existe
+        cursor.execute("SELECT id, foto_url FROM registros WHERE id = %s", (registro_id,))
+        registro = cursor.fetchone()
+        
+        if not registro:
+            raise HTTPException(status_code=404, detail=f"Registro con ID {registro_id} no encontrado")
+        
+        foto_url = registro[1]
+        
+        # Eliminar el archivo de foto si existe
+        if foto_url:
+            try:
+                # La ruta de la foto es relativa, construir ruta absoluta
+                foto_path = os.path.join("fotos", os.path.basename(foto_url))
+                if os.path.exists(foto_path):
+                    os.remove(foto_path)
+                    print(f"📷 Foto eliminada: {foto_path}")
+            except Exception as foto_error:
+                print(f"⚠️ Error al eliminar foto: {foto_error}")
+                # Continuar aunque falle la eliminación de la foto
+        
+        # Eliminar el registro de la base de datos
+        cursor.execute("DELETE FROM registros WHERE id = %s", (registro_id,))
+        conn.commit()
+        
+        print(f"🗑️ Registro #{registro_id} eliminado exitosamente")
+        
+        return {
+            "status": "success",
+            "message": f"Registro #{registro_id} eliminado exitosamente",
+            "registro_id": registro_id
+        }
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL al eliminar registro: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general al eliminar registro: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar registro: {str(e)}")
+
 @app.delete("/admin/registros/all")
 async def eliminar_todos_registros():
     """Elimina TODOS los registros de la base de datos. ¡USO EXTREMO!"""

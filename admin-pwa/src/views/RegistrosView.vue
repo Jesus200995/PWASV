@@ -454,14 +454,24 @@
                     </div>
                   </td>
                   <td class="col-acciones">
-                    <div class="action-container">
-                      <button @click="verDetalles(registro)" class="btn-ver" title="Ver detalles del registro">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </button>
-                      <span class="btn-label">Detalles</span>
+                    <div class="actions-container">
+                      <div class="action-container">
+                        <button @click="verDetalles(registro)" class="btn-ver" title="Ver detalles del registro">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </button>
+                        <span class="btn-label">Detalles</span>
+                      </div>
+                      <div class="action-container">
+                        <button @click="confirmarEliminarRegistro(registro)" class="btn-eliminar" title="Eliminar registro">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                          </svg>
+                        </button>
+                        <span class="btn-label-eliminar">Eliminar</span>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -792,6 +802,60 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Modal de confirmación para eliminar registro -->
+    <Teleport to="body" v-if="showConfirmDelete">
+      <div class="modal-overlay" @click="cancelarEliminar">
+        <div class="modal-content confirm-delete-modal" @click.stop>
+          <div class="modal-header delete-header">
+            <div class="modal-header-content">
+              <div class="modal-icon delete-icon">
+                <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              </div>
+              <h3 class="modal-title">Confirmar Eliminación</h3>
+            </div>
+            <button @click="cancelarEliminar" class="btn-close">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
+                <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="modal-body">
+            <div class="confirm-delete-content">
+              <p class="confirm-message">¿Estás seguro que deseas eliminar este registro?</p>
+              <div class="registro-info" v-if="registroAEliminar">
+                <div class="info-row">
+                  <span class="info-label">ID:</span>
+                  <span class="info-value">#{{ registroAEliminar.id }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Usuario:</span>
+                  <span class="info-value">{{ registroAEliminar.usuario?.nombre_completo || `Usuario ${registroAEliminar.usuario_id}` }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Fecha:</span>
+                  <span class="info-value">{{ formatFecha(registroAEliminar.fecha_hora) }}</span>
+                </div>
+              </div>
+              <p class="warning-text">⚠️ Esta acción no se puede deshacer</p>
+            </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button @click="cancelarEliminar" class="btn-cancel">
+              Cancelar
+            </button>
+            <button @click="eliminarRegistro" class="btn-delete-confirm">
+              Eliminar Registro
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -906,6 +970,8 @@ const modalType = ref('')
 const selectedRegistro = ref(null)
 const showLightbox = ref(false)
 const lightboxImageUrl = ref('')
+const showConfirmDelete = ref(false)
+const registroAEliminar = ref(null)
 
 let map = null
 
@@ -2451,6 +2517,57 @@ const cerrarModal = () => {
   if (map) {
     map.remove()
     map = null
+  }
+}
+
+const confirmarEliminarRegistro = (registro) => {
+  registroAEliminar.value = registro
+  showConfirmDelete.value = true
+}
+
+const cancelarEliminar = () => {
+  showConfirmDelete.value = false
+  registroAEliminar.value = null
+}
+
+const eliminarRegistro = async () => {
+  if (!registroAEliminar.value) return
+  
+  try {
+    const token = localStorage.getItem('admin_token')
+    if (!token) {
+      alert('No hay sesión activa')
+      router.push('/login')
+      return
+    }
+    
+    const response = await fetch(`${API_URL}/admin/registros/${registroAEliminar.value.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error('Error al eliminar el registro')
+    }
+    
+    const data = await response.json()
+    console.log('Registro eliminado:', data)
+    
+    // Mostrar mensaje de éxito
+    alert(`Registro #${registroAEliminar.value.id} eliminado exitosamente`)
+    
+    // Cerrar modal de confirmación
+    showConfirmDelete.value = false
+    registroAEliminar.value = null
+    
+    // Recargar registros
+    await cargarRegistros()
+    
+  } catch (error) {
+    console.error('Error al eliminar registro:', error)
+    alert('Error al eliminar el registro. Por favor, intenta de nuevo.')
   }
 }
 
@@ -4136,17 +4253,224 @@ const logout = () => {
   transform: scale(1.1);
 }
 
-/* Contenedor de acción centrado */
+.btn-eliminar {
+  width: clamp(24px, 4vw, 28px);
+  height: clamp(24px, 4vw, 28px);
+  padding: 0;
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-eliminar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-eliminar:hover::before {
+  left: 100%;
+}
+
+.btn-eliminar:hover {
+  background: linear-gradient(135deg, #d32f2f, #c62828);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(244, 67, 54, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-eliminar:active {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
+}
+
+.btn-eliminar svg {
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
+  transition: all 0.3s ease;
+}
+
+.btn-eliminar:hover svg {
+  transform: scale(1.1);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
+.btn-eliminar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-eliminar:hover::before {
+  left: 100%;
+}
+
+.btn-eliminar:hover {
+  background: linear-gradient(135deg, #d32f2f, #c62828);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(244, 67, 54, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-eliminar:active {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
+}
+
+.btn-eliminar svg {
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
+  transition: all 0.3s ease;
+}
+
+.btn-eliminar:hover svg {
+  transform: scale(1.1);
+}
+
+.confirm-delete-modal {
+  max-width: 500px;
+}
+
+.delete-header {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.delete-icon {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.confirm-delete-content {
+  padding: 20px;
+  text-align: center;
+}
+
+.confirm-message {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.registro-info {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.info-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.warning-text {
+  color: #ff9800;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 15px;
+}
+
+.btn-cancel {
+  padding: 10px 24px;
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background: #d5d5d5;
+  transform: translateY(-2px);
+}
+
+.btn-delete-confirm {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.btn-delete-confirm:hover {
+  background: linear-gradient(135deg, #d32f2f, #c62828);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+/* Contenedor principal de acciones (horizontal) */
+.actions-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+/* Contenedor de acción individual (vertical con botón y label) */
 .action-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 8px 0;
 }
 
-/* Label pequeño debajo del botón */
+/* Label para botón ver/detalles (verde) */
 .btn-label {
   font-size: 10px;
   color: #4CAF50;
@@ -4160,6 +4484,22 @@ const logout = () => {
 .action-container:hover .btn-label {
   opacity: 1;
   color: #43A047;
+}
+
+/* Label para botón eliminar (rojo) */
+.btn-label-eliminar {
+  font-size: 10px;
+  color: #f44336;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.action-container:hover .btn-label-eliminar {
+  opacity: 1;
+  color: #d32f2f;
 }
 
 /* Estilos para columnas específicas de la tabla */
@@ -4649,6 +4989,197 @@ const logout = () => {
   background: rgba(0, 0, 0, 0.5);
   border-radius: 20px;
   backdrop-filter: blur(10px);
+}
+
+/* ========== ESTILOS DEL MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ========== */
+.confirm-delete-modal {
+  max-width: 480px;
+  animation: modalSlideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.delete-header {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  border-bottom: 2px solid rgba(211, 47, 47, 0.3);
+}
+
+.delete-icon {
+  background: rgba(255, 255, 255, 0.2);
+  animation: pulseWarning 2s infinite;
+}
+
+.confirm-delete-content {
+  padding: 24px;
+  text-align: center;
+}
+
+.confirm-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.registro-info {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 2px solid #ffb74d;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.1);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 152, 0, 0.1);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #f57c00;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+  max-width: 60%;
+  text-align: right;
+  word-break: break-word;
+}
+
+.warning-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f44336;
+  margin: 16px 0 0 0;
+  padding: 12px;
+  background: #ffebee;
+  border-radius: 8px;
+  border-left: 4px solid #f44336;
+}
+
+.btn-cancel {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #9e9e9e, #757575);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-cancel:hover {
+  background: linear-gradient(135deg, #757575, #616161);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-delete-confirm {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-delete-confirm:hover {
+  background: linear-gradient(135deg, #d32f2f, #c62828);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(244, 67, 54, 0.4);
+}
+
+.btn-delete-confirm:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+@keyframes pulseWarning {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive para modal de confirmación */
+@media (max-width: 768px) {
+  .confirm-delete-modal {
+    max-width: 90%;
+    margin: 20px;
+  }
+  
+  .confirm-message {
+    font-size: 16px;
+  }
+  
+  .registro-info {
+    padding: 16px;
+  }
+  
+  .info-label {
+    font-size: 11px;
+  }
+  
+  .info-value {
+    font-size: 12px;
+    max-width: 55%;
+  }
+  
+  .btn-cancel,
+  .btn-delete-confirm {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
+  .modal-footer {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+  
+  .btn-cancel,
+  .btn-delete-confirm {
+    width: 100%;
+  }
 }
 
 @keyframes lightboxFadeIn {

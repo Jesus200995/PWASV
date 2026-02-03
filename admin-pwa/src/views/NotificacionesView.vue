@@ -112,6 +112,16 @@
                         </svg>
                       </button>
                       <button 
+                        class="btn-action btn-edit" 
+                        @click="editarNotificacion(notificacion)"
+                        title="Editar notificación"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button 
                         class="btn-action btn-stats" 
                         @click="verEstadisticas(notificacion)"
                         title="Ver estadísticas de lectura"
@@ -337,6 +347,206 @@
               </div>
               
               <div v-show="!busquedaUsuarios && usuarios.length === 0" class="no-users-loaded-column">
+                📝 No hay usuarios disponibles
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Editar Notificación -->
+    <div v-if="mostrarModalEditar" class="modal-overlay" @click="cerrarModalEditar">
+      <div 
+        class="modal-content" 
+        :class="{ 'modal-compact': formEdicion.enviada_a_todos, 'modal-expanded': !formEdicion.enviada_a_todos }"
+        @click.stop
+      >
+        <div class="modal-header">
+          <h3>Editar Notificación</h3>
+          <button class="btn-close" @click="cerrarModalEditar">×</button>
+        </div>
+        
+        <div class="modal-body" :class="{ 'modal-body-two-columns': !formEdicion.enviada_a_todos }">
+          <!-- Columna principal del formulario -->
+          <div class="form-column">
+            <form @submit.prevent="guardarEdicion">
+              <!-- Título -->
+              <div class="form-group-compact">
+                <label for="titulo-edit">Título *</label>
+                <input
+                  id="titulo-edit"
+                  v-model="formEdicion.titulo"
+                  type="text"
+                  class="form-input-compact"
+                  placeholder="Título de la notificación"
+                  maxlength="150"
+                  required
+                />
+                <small class="char-count">{{ formEdicion.titulo.length }}/150</small>
+              </div>
+
+              <!-- Subtítulo -->
+              <div class="form-group-compact">
+                <label for="subtitulo-edit">Subtítulo</label>
+                <input
+                  id="subtitulo-edit"
+                  v-model="formEdicion.subtitulo"
+                  type="text"
+                  class="form-input-compact"
+                  placeholder="Subtítulo opcional"
+                  maxlength="200"
+                />
+                <small class="char-count">{{ formEdicion.subtitulo.length }}/200</small>
+              </div>
+
+              <!-- Descripción -->
+              <div class="form-group-compact">
+                <label for="descripcion-edit">Descripción</label>
+                <textarea
+                  id="descripcion-edit"
+                  v-model="formEdicion.descripcion"
+                  class="form-textarea-compact"
+                  placeholder="Descripción detallada"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <!-- Enlace URL -->
+              <div class="form-group-compact">
+                <label for="enlace_url-edit">Enlace URL (opcional)</label>
+                <input
+                  id="enlace_url-edit"
+                  v-model="formEdicion.enlace_url"
+                  type="url"
+                  class="form-input-compact"
+                  placeholder="https://ejemplo.com"
+                />
+              </div>
+
+              <!-- Destinatarios -->
+              <div class="form-group-compact">
+                <label>Destinatarios</label>
+                <div class="radio-group-compact">
+                  <label class="radio-option-compact">
+                    <input
+                      v-model="formEdicion.enviada_a_todos"
+                      type="radio"
+                      :value="true"
+                      @change="limpiarUsuariosSeleccionadosEdicion"
+                    />
+                    <span class="radio-text">Todos</span>
+                  </label>
+                  <label class="radio-option-compact">
+                    <input
+                      v-model="formEdicion.enviada_a_todos"
+                      type="radio"
+                      :value="false"
+                      @change="cargarUsuarios"
+                    />
+                    <span class="radio-text">Específicos</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Archivo adjunto actual -->
+              <div v-if="archivoActual" class="form-group-compact">
+                <label>Archivo actual</label>
+                <div class="current-file-display">
+                  <span class="file-name">📎 {{ archivoActual }}</span>
+                  <span class="file-note">(Se mantendrá si no seleccionas uno nuevo)</span>
+                </div>
+              </div>
+
+              <!-- Archivo adjunto nuevo -->
+              <div class="form-group-compact">
+                <label for="archivo-edit">{{ archivoActual ? 'Reemplazar archivo' : 'Archivo adjunto' }}</label>
+                <div class="file-input-container-compact">
+                  <input
+                    id="archivo-edit"
+                    ref="archivoInputEdit"
+                    type="file"
+                    class="file-input"
+                    accept=".jpg,.jpeg,.png,.gif,.pdf,.mp4,.avi,.mov,.wmv"
+                    @change="manejarArchivoSeleccionadoEdicion"
+                  />
+                  <label for="archivo-edit" class="file-input-label-compact">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14,2 14,8 20,8"/>
+                    </svg>
+                    <span class="file-text">{{ archivoSeleccionadoEdicion ? archivoSeleccionadoEdicion.name : 'Seleccionar nuevo archivo' }}</span>
+                  </label>
+                </div>
+                <small class="file-help-compact">JPG, PNG, PDF, MP4 (máx. 50MB)</small>
+              </div>
+
+              <!-- Botones -->
+              <div class="modal-actions-compact">
+                <button type="button" class="btn-secondary-compact" @click="cerrarModalEditar">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-primary-compact" :disabled="guardandoEdicion">
+                  <span v-if="guardandoEdicion" class="loading-spinner-small"></span>
+                  {{ guardandoEdicion ? 'Guardando...' : 'Guardar Cambios' }}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Columna del selector de usuarios (solo visible cuando "Específicos" está seleccionado) -->
+          <div v-if="!formEdicion.enviada_a_todos" class="users-column">
+            <div class="users-column-header">
+              <h4>Seleccionar Usuarios</h4>
+              <div class="selected-count-badge">
+                {{ formEdicion.usuario_ids.length }} seleccionados
+              </div>
+            </div>
+            
+            <div v-if="cargandoUsuarios" class="loading-users-compact">
+              <div class="loading-spinner-small"></div>
+              <span>Cargando usuarios...</span>
+            </div>
+            
+            <div v-else class="users-selector-column">
+              <div class="search-input-wrapper">
+                <input
+                  v-model="busquedaUsuariosEdicion"
+                  type="text"
+                  class="form-input-compact search-users-column"
+                  placeholder="🔍 Buscar por nombre, correo o CURP..."
+                  autocomplete="off"
+                />
+              </div>
+              
+              <div class="users-list-column" v-show="usuariosFiltradosEdicion.length > 0">
+                <div class="users-list-header" v-if="busquedaUsuariosEdicion">
+                  {{ usuariosFiltradosEdicion.length }} resultado(s) encontrado(s)
+                </div>
+                <label
+                  v-for="usuario in usuariosFiltradosEdicion"
+                  :key="usuario.id"
+                  class="user-option-column"
+                  :class="{ 'selected': formEdicion.usuario_ids.includes(usuario.id) }"
+                >
+                  <input
+                    v-model="formEdicion.usuario_ids"
+                    :value="usuario.id"
+                    type="checkbox"
+                  />
+                  <div class="user-info-column">
+                    <span class="user-name-column">{{ usuario.nombre_completo || usuario.nombre || 'Sin nombre' }}</span>
+                    <span class="user-email-column">{{ usuario.correo || usuario.email || 'Sin email' }}</span>
+                    <span v-if="usuario.curp" class="user-curp-column">CURP: {{ usuario.curp }}</span>
+                  </div>
+                </label>
+              </div>
+              
+              <div v-show="busquedaUsuariosEdicion && usuariosFiltradosEdicion.length === 0" class="no-users-found-column">
+                ❌ No se encontraron usuarios que coincidan con "{{ busquedaUsuariosEdicion }}"
+              </div>
+              
+              <div v-show="!busquedaUsuariosEdicion && usuarios.length === 0" class="no-users-loaded-column">
                 📝 No hay usuarios disponibles
               </div>
             </div>
@@ -750,6 +960,22 @@ export default {
         usuario_ids: []
       },
       
+      // Modal editar notificación
+      mostrarModalEditar: false,
+      guardandoEdicion: false,
+      archivoSeleccionadoEdicion: null,
+      archivoActual: null,
+      notificacionEditandoId: null,
+      formEdicion: {
+        titulo: '',
+        subtitulo: '',
+        descripcion: '',
+        enlace_url: '',
+        enviada_a_todos: true,
+        usuario_ids: []
+      },
+      busquedaUsuariosEdicion: '',
+      
       // Usuarios para selector
       usuarios: [],
       cargandoUsuarios: false,
@@ -787,6 +1013,23 @@ export default {
       const busqueda = this.busquedaUsuarios.toLowerCase().trim()
       return this.usuarios.filter(usuario => {
         // Buscar en nombre completo, nombre, correo, email, CURP y cargo
+        const nombre = (usuario.nombre_completo || usuario.nombre || '').toLowerCase()
+        const email = (usuario.correo || usuario.email || '').toLowerCase()
+        const curp = (usuario.curp || '').toLowerCase()
+        const cargo = (usuario.cargo || '').toLowerCase()
+        
+        return nombre.includes(busqueda) || 
+               email.includes(busqueda) || 
+               curp.includes(busqueda) ||
+               cargo.includes(busqueda)
+      })
+    },
+    
+    usuariosFiltradosEdicion() {
+      if (!this.busquedaUsuariosEdicion.trim()) return this.usuarios
+      
+      const busqueda = this.busquedaUsuariosEdicion.toLowerCase().trim()
+      return this.usuarios.filter(usuario => {
         const nombre = (usuario.nombre_completo || usuario.nombre || '').toLowerCase()
         const email = (usuario.correo || usuario.email || '').toLowerCase()
         const curp = (usuario.curp || '').toLowerCase()
@@ -975,6 +1218,127 @@ export default {
     cerrarModalDetalle() {
       this.mostrarModalDetalle = false
       this.notificacionDetalle = null
+    },
+
+    // ==================== EDITAR NOTIFICACIÓN ====================
+    
+    async editarNotificacion(notificacion) {
+      try {
+        // Cargar datos completos de la notificación
+        const notificacionCompleta = await notificacionesService.obtenerNotificacion(notificacion.id)
+        
+        // Cargar usuarios si es necesario
+        if (!notificacionCompleta.enviada_a_todos) {
+          await this.cargarUsuarios()
+        }
+        
+        // Llenar formulario de edición
+        this.notificacionEditandoId = notificacionCompleta.id
+        this.formEdicion = {
+          titulo: notificacionCompleta.titulo || '',
+          subtitulo: notificacionCompleta.subtitulo || '',
+          descripcion: notificacionCompleta.descripcion || '',
+          enlace_url: notificacionCompleta.enlace_url || '',
+          enviada_a_todos: notificacionCompleta.enviada_a_todos,
+          usuario_ids: notificacionCompleta.enviada_a_todos ? [] : 
+            (notificacionCompleta.destinatarios || []).map(u => u.id)
+        }
+        
+        // Guardar nombre del archivo actual
+        this.archivoActual = notificacionCompleta.archivo_nombre || null
+        this.archivoSeleccionadoEdicion = null
+        this.busquedaUsuariosEdicion = ''
+        
+        // Mostrar modal
+        this.mostrarModalEditar = true
+        
+        console.log('✏️ Editando notificación:', notificacionCompleta)
+        
+      } catch (error) {
+        console.error('❌ Error cargando notificación para editar:', error)
+        this.mostrarToast(error.message, 'error')
+      }
+    },
+
+    limpiarUsuariosSeleccionadosEdicion() {
+      this.formEdicion.usuario_ids = []
+      this.busquedaUsuariosEdicion = ''
+    },
+
+    manejarArchivoSeleccionadoEdicion(evento) {
+      const archivo = evento.target.files[0]
+      if (archivo) {
+        // Validar tamaño (50MB)
+        if (archivo.size > 50 * 1024 * 1024) {
+          this.mostrarToast('El archivo no debe exceder 50MB', 'error')
+          this.$refs.archivoInputEdit.value = ''
+          return
+        }
+        
+        this.archivoSeleccionadoEdicion = archivo
+        console.log('📎 Nuevo archivo seleccionado:', archivo.name, archivo.size, 'bytes')
+      } else {
+        this.archivoSeleccionadoEdicion = null
+      }
+    },
+
+    async guardarEdicion() {
+      // Validaciones
+      if (!this.formEdicion.titulo.trim()) {
+        this.mostrarToast('El título es obligatorio', 'error')
+        return
+      }
+      
+      if (!this.formEdicion.enviada_a_todos && this.formEdicion.usuario_ids.length === 0) {
+        this.mostrarToast('Debe seleccionar al menos un usuario', 'error')
+        return
+      }
+      
+      this.guardandoEdicion = true
+      
+      try {
+        const respuesta = await notificacionesService.actualizarNotificacion(
+          this.notificacionEditandoId,
+          this.formEdicion,
+          this.archivoSeleccionadoEdicion
+        )
+        
+        console.log('✅ Notificación actualizada:', respuesta)
+        this.mostrarToast('Notificación actualizada exitosamente', 'success')
+        
+        // Recargar lista y cerrar modal
+        this.cargarNotificaciones()
+        this.cerrarModalEditar()
+        
+      } catch (error) {
+        console.error('❌ Error actualizando notificación:', error)
+        this.mostrarToast(error.message, 'error')
+      } finally {
+        this.guardandoEdicion = false
+      }
+    },
+
+    cerrarModalEditar() {
+      this.mostrarModalEditar = false
+      this.limpiarFormularioEdicion()
+    },
+
+    limpiarFormularioEdicion() {
+      this.formEdicion = {
+        titulo: '',
+        subtitulo: '',
+        descripcion: '',
+        enlace_url: '',
+        enviada_a_todos: true,
+        usuario_ids: []
+      }
+      this.archivoSeleccionadoEdicion = null
+      this.archivoActual = null
+      this.notificacionEditandoId = null
+      if (this.$refs.archivoInputEdit) {
+        this.$refs.archivoInputEdit.value = ''
+      }
+      this.busquedaUsuariosEdicion = ''
     },
 
     // ==================== ARCHIVOS ====================
@@ -1664,6 +2028,16 @@ export default {
   box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
 }
 
+.btn-edit {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  color: #f57c00;
+}
+
+.btn-edit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
+}
+
 .btn-delete {
   background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
   color: #d32f2f;
@@ -1682,6 +2056,29 @@ export default {
 .btn-stats:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+}
+
+/* === ARCHIVO ACTUAL === */
+.current-file-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: rgba(76, 175, 80, 0.05);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  border-radius: 8px;
+}
+
+.current-file-display .file-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2E7D32;
+}
+
+.current-file-display .file-note {
+  font-size: 11px;
+  color: #666;
+  font-style: italic;
 }
 
 /* === EMPTY STATE === */

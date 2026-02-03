@@ -5167,6 +5167,149 @@ async def pagina_carga_archivo_mobile(notificacion_id: int):
         print(f"❌ Error generando página de carga móvil: {e}")
         raise HTTPException(status_code=500, detail=f"Error al procesar solicitud: {str(e)}")
 
+@app.put("/notificaciones/{notificacion_id}")
+async def actualizar_notificacion(
+    notificacion_id: int,
+    titulo: str = Form(...),
+    subtitulo: str = Form(None),
+    descripcion: str = Form(None),
+    enlace_url: str = Form(None),
+    enviada_a_todos: bool = Form(True),
+    usuario_ids: str = Form(None),
+    archivo: UploadFile = File(None)
+):
+    """Actualizar una notificación existente"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"✏️ Actualizando notificación {notificacion_id}")
+        
+        # Verificar que la notificación existe
+        cursor.execute("SELECT id, archivo_nombre FROM notificaciones WHERE id = %s", (notificacion_id,))
+        notificacion_existente = cursor.fetchone()
+        
+        if not notificacion_existente:
+            raise HTTPException(status_code=404, detail="Notificación no encontrada")
+        
+        # Validaciones básicas
+        if len(titulo.strip()) == 0:
+            raise HTTPException(status_code=400, detail="El título es obligatorio")
+        
+        if len(titulo) > 150:
+            raise HTTPException(status_code=400, detail="El título no puede exceder 150 caracteres")
+        
+        if subtitulo and len(subtitulo) > 200:
+            raise HTTPException(status_code=400, detail="El subtítulo no puede exceder 200 caracteres")
+        
+        # Validar usuarios si no es para todos
+        usuarios_seleccionados = []
+        if not enviada_a_todos:
+            if not usuario_ids:
+                raise HTTPException(status_code=400, detail="Debe especificar usuarios si no se envía a todos")
+            
+            try:
+                usuarios_seleccionados = json.loads(usuario_ids)
+                if not isinstance(usuarios_seleccionados, list) or len(usuarios_seleccionados) == 0:
+                    raise HTTPException(status_code=400, detail="Debe seleccionar al menos un usuario")
+            except json.JSONDecodeError:
+                raise HTTPException(status_code=400, detail="Formato de usuario_ids inválido")
+        
+        # Procesar archivo si se subió uno nuevo
+        archivo_nombre = notificacion_existente[1]
+        archivo_ruta = None
+        archivo_tipo = None
+        
+        if archivo:
+            # Validar tamaño del archivo (máximo 50MB)
+            archivo.file.seek(0, 2)
+            file_size = archivo.file.tell()
+            archivo.file.seek(0)
+            
+            if file_size > 50 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="El archivo no debe exceder 50MB")
+            
+            # Validar tipo de archivo
+            extensiones_permitidas = {'.jpg', '.jpeg', '.png', '.gif', '.pdf', '.mp4', '.avi', '.mov', '.wmv'}
+            extension = os.path.splitext(archivo.filename)[1].lower()
+            
+            if extension not in extensiones_permitidas:
+                raise HTTPException(status_code=400, detail="Tipo de archivo no permitido")
+            
+            # Guardar archivo
+            archivo_nombre = archivo.filename
+            archivo_ruta = f"fotos/{archivo.filename}"
+            
+            # Determinar tipo de archivo
+            if extension in {'.jpg', '.jpeg', '.png', '.gif'}:
+                archivo_tipo = 'imagen'
+            elif extension == '.pdf':
+                archivo_tipo = 'pdf'
+            elif extension in {'.mp4', '.avi', '.mov', '.wmv'}:
+                archivo_tipo = 'video'
+            
+            # Guardar archivo físico
+            with open(archivo_ruta, "wb") as f:
+                content = await archivo.read()
+                f.write(content)
+            
+            print(f"📎 Nuevo archivo guardado: {archivo_ruta}")
+        
+        # Actualizar notificación en la base de datos
+        update_query = """
+            UPDATE notificaciones 
+            SET titulo = %s, subtitulo = %s, descripcion = %s, 
+                enlace_url = %s, enviada_a_todos = %s
+        """
+        update_params = [titulo, subtitulo, descripcion, enlace_url, enviada_a_todos]
+        
+        # Agregar campos de archivo si hay nuevo archivo
+        if archivo:
+            update_query += ", archivo_nombre = %s, archivo_ruta = %s, archivo_tipo = %s"
+            update_params.extend([archivo_nombre, archivo_ruta, archivo_tipo])
+        
+        update_query += " WHERE id = %s"
+        update_params.append(notificacion_id)
+        
+        cursor.execute(update_query, update_params)
+        
+        # Actualizar destinatarios si cambió la configuración
+        if not enviada_a_todos:
+            # Eliminar destinatarios anteriores
+            cursor.execute("DELETE FROM notificacion_usuario WHERE notificacion_id = %s", (notificacion_id,))
+            
+            # Insertar nuevos destinatarios
+            for usuario_id in usuarios_seleccionados:
+                cursor.execute(
+                    """
+                    INSERT INTO notificacion_usuario (notificacion_id, usuario_id, leida, fecha_lectura)
+                    VALUES (%s, %s, FALSE, NULL)
+                    ON CONFLICT (notificacion_id, usuario_id) DO NOTHING
+                    """,
+                    (notificacion_id, usuario_id)
+                )
+        else:
+            # Si ahora es para todos, eliminar registros específicos
+            cursor.execute("DELETE FROM notificacion_usuario WHERE notificacion_id = %s", (notificacion_id,))
+        
+        conn.commit()
+        
+        print(f"✅ Notificación {notificacion_id} actualizada exitosamente")
+        
+        return {
+            "status": "success",
+            "message": "Notificación actualizada exitosamente",
+            "id": notificacion_id,
+            "titulo": titulo
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error actualizando notificación: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al actualizar la notificación: {str(e)}")
+
 @app.delete("/notificaciones/{notificacion_id}")
 async def eliminar_notificacion(notificacion_id: int):
     """Eliminar una notificación"""

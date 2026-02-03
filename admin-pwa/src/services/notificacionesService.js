@@ -121,6 +121,61 @@ export const notificacionesService = {
   },
 
   /**
+   * Actualizar una notificación existente
+   * @param {number} id - ID de la notificación a actualizar
+   * @param {Object} notificacion - Datos de la notificación
+   * @param {File} archivo - Archivo adjunto opcional
+   * @returns {Promise} Respuesta de la API
+   */
+  async actualizarNotificacion(id, notificacion, archivo = null) {
+    try {
+      console.log(`✏️ Actualizando notificación ${id}:`, notificacion)
+      
+      // Crear FormData para enviar datos y archivo
+      const formData = new FormData()
+      formData.append('titulo', notificacion.titulo)
+      
+      if (notificacion.subtitulo) {
+        formData.append('subtitulo', notificacion.subtitulo)
+      }
+      
+      if (notificacion.descripcion) {
+        formData.append('descripcion', notificacion.descripcion)
+      }
+      
+      if (notificacion.enlace_url) {
+        formData.append('enlace_url', notificacion.enlace_url)
+      }
+      
+      formData.append('enviada_a_todos', notificacion.enviada_a_todos)
+      
+      // Si no es para todos, incluir usuarios seleccionados
+      if (!notificacion.enviada_a_todos && notificacion.usuario_ids && notificacion.usuario_ids.length > 0) {
+        formData.append('usuario_ids', JSON.stringify(notificacion.usuario_ids))
+      }
+      
+      // Agregar archivo si existe
+      if (archivo) {
+        formData.append('archivo', archivo)
+      }
+      
+      const response = await createFormDataApi().put(`/notificaciones/${id}`, formData)
+      
+      console.log('✅ Notificación actualizada:', response.data)
+      return response.data
+      
+    } catch (error) {
+      console.error(`❌ Error actualizando notificación ${id}:`, error)
+      
+      if (error.response?.data?.detail) {
+        throw new Error(error.response.data.detail)
+      }
+      
+      throw new Error('Error al actualizar la notificación. Verifica tu conexión e intenta de nuevo.')
+    }
+  },
+
+  /**
    * Eliminar una notificación
    * @param {number} id - ID de la notificación
    * @returns {Promise} Confirmación de eliminación

@@ -629,8 +629,11 @@ async def preflight(path: str):
 
 @app.post("/login")
 async def login(usuario: UserLogin):
-    # Buscar usuario por correo incluyendo territorio, curp y supervisor
-    cursor.execute("SELECT id, correo, nombre_completo, cargo, contrasena, territorio, curp, supervisor FROM usuarios WHERE correo = %s", (usuario.correo,))
+    # Buscar usuario por correo incluyendo territorio, curp, supervisor y session_version
+    cursor.execute(
+        "SELECT id, correo, nombre_completo, cargo, contrasena, territorio, curp, supervisor, session_version FROM usuarios WHERE correo = %s", 
+        (usuario.correo,)
+    )
     user = cursor.fetchone()
     
     if not user:
@@ -639,7 +642,7 @@ async def login(usuario: UserLogin):
     # Verificar contraseña (comparación directa sin encriptación)
     if usuario.contrasena != user[4]:
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
-      # Devolver datos del usuario (sin la contraseña)
+      # Devolver datos del usuario (sin la contraseña) incluyendo session_version
     return {
         "id": user[0],
         "correo": user[1],
@@ -647,7 +650,8 @@ async def login(usuario: UserLogin):
         "cargo": user[3],
         "territorio": user[5] if len(user) > 5 else None,
         "curp": user[6] if len(user) > 6 else None,
-        "supervisor": user[7] if len(user) > 7 else None
+        "supervisor": user[7] if len(user) > 7 else None,
+        "session_version": user[8] if len(user) > 8 else 1
     }
 
 # ==================== ENDPOINT PARA VERIFICAR CONTRASEÑA ====================
@@ -2900,8 +2904,8 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         
         print(f"🔐 Intento de login para usuario: {username}")
         
-        # Buscar usuario administrador en la base de datos incluyendo permisos, estado activo, es_territorial, territorio, nombre_completo, curp y cargo
-        cursor.execute("SELECT id, password, rol, permisos, activo, es_territorial, territorio, nombre_completo, curp, cargo FROM admin_users WHERE username = %s", (username,))
+        # Buscar usuario administrador en la base de datos incluyendo permisos, estado activo, es_territorial, territorio, nombre_completo, curp, cargo y session_version
+        cursor.execute("SELECT id, password, rol, permisos, activo, es_territorial, territorio, nombre_completo, curp, cargo, session_version FROM admin_users WHERE username = %s", (username,))
         row = cursor.fetchone()
         
         if not row or not pwd_context.verify(password, row[1]):
@@ -2916,6 +2920,7 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         nombre_completo = row[7] or ''
         curp = row[8] or ''
         cargo = row[9] or ''
+        session_version = row[10] if row[10] is not None else 1
         
         # Verificar si el usuario está activo
         if not user_activo:
@@ -2959,7 +2964,8 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
                 "territorio": territorio,
                 "nombre_completo": nombre_completo,
                 "curp": curp,
-                "cargo": cargo
+                "cargo": cargo,
+                "session_version": session_version
             }
         }
         
@@ -5765,7 +5771,7 @@ async def cambiar_rol_usuario(user_id: int, rol_data: UsuarioRolUpdate):
 
 @app.put("/usuarios/{user_id}/password")
 async def cambiar_contrasena_usuario(user_id: int, password_data: UsuarioPasswordUpdate):
-    """Cambiar la contraseña de un usuario"""
+    """Cambiar la contraseña de un usuario e invalidar sesiones activas"""
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
@@ -5773,17 +5779,27 @@ async def cambiar_contrasena_usuario(user_id: int, password_data: UsuarioPasswor
         print(f"🔄 Cambiando contraseña del usuario {user_id}")
         
         # Verificar que el usuario existe
-        cursor.execute("SELECT id, nombre_completo FROM usuarios WHERE id = %s", (user_id,))
+        cursor.execute("SELECT id, nombre_completo, session_version FROM usuarios WHERE id = %s", (user_id,))
         usuario = cursor.fetchone()
         if not usuario:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         
-        # Actualizar contraseña (sin encriptar, como en el resto del sistema)
-        cursor.execute("UPDATE usuarios SET contrasena = %s WHERE id = %s", (password_data.nueva_contrasena, user_id))
+        # Incrementar session_version para invalidar sesiones activas
+        nueva_version = (usuario[2] or 0) + 1
+        
+        # Actualizar contraseña y versión de sesión
+        cursor.execute(
+            "UPDATE usuarios SET contrasena = %s, session_version = %s WHERE id = %s", 
+            (password_data.nueva_contrasena, nueva_version, user_id)
+        )
         conn.commit()
         
-        print(f"✅ Contraseña del usuario {usuario[1]} actualizada")
-        return {"mensaje": "Contraseña actualizada exitosamente", "usuario_id": user_id}
+        print(f"✅ Contraseña del usuario {usuario[1]} actualizada - Nueva versión de sesión: {nueva_version}")
+        return {
+            "mensaje": "Contraseña actualizada exitosamente. Todas las sesiones activas han sido invalidadas.",
+            "usuario_id": user_id,
+            "session_version": nueva_version
+        }
         
     except HTTPException:
         raise
@@ -5795,6 +5811,72 @@ async def cambiar_contrasena_usuario(user_id: int, password_data: UsuarioPasswor
         conn.rollback()
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al cambiar contraseña: {str(e)}")
+
+@app.get("/usuarios/{user_id}/session-check")
+async def verificar_session_usuario(user_id: int, session_version: int = 0):
+    """Verificar si la sesión del usuario sigue siendo válida"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Obtener la versión actual de sesión del usuario
+        cursor.execute("SELECT session_version FROM usuarios WHERE id = %s", (user_id,))
+        usuario = cursor.fetchone()
+        
+        if not usuario:
+            return {"valid": False, "reason": "user_not_found"}
+        
+        version_actual = usuario[0] or 1
+        
+        # Si la versión enviada es menor a la actual, la sesión fue invalidada
+        if session_version < version_actual:
+            return {
+                "valid": False, 
+                "reason": "password_changed",
+                "current_version": version_actual
+            }
+        
+        return {
+            "valid": True,
+            "current_version": version_actual
+        }
+        
+    except Exception as e:
+        print(f"❌ Error verificando sesión: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al verificar sesión: {str(e)}")
+
+@app.get("/admin/usuarios/{user_id}/session-check")
+async def verificar_session_admin(user_id: int, session_version: int = 0):
+    """Verificar si la sesión del usuario administrador sigue siendo válida"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Obtener la versión actual de sesión del usuario admin
+        cursor.execute("SELECT session_version FROM admin_users WHERE id = %s", (user_id,))
+        usuario = cursor.fetchone()
+        
+        if not usuario:
+            return {"valid": False, "reason": "user_not_found"}
+        
+        version_actual = usuario[0] or 1
+        
+        # Si la versión enviada es menor a la actual, la sesión fue invalidada
+        if session_version < version_actual:
+            return {
+                "valid": False, 
+                "reason": "password_changed",
+                "current_version": version_actual
+            }
+        
+        return {
+            "valid": True,
+            "current_version": version_actual
+        }
+        
+    except Exception as e:
+        print(f"❌ Error verificando sesión admin: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al verificar sesión: {str(e)}")
 
 # Modelo para actualizar cargo
 class CargoUpdate(BaseModel):
@@ -6457,11 +6539,16 @@ async def resetear_password_usuario_admin(user_id: int, datos: dict):
         # Hashear nueva contraseña
         hashed_password = pwd_context.hash(password)
         
-        # Actualizar contraseña
-        cursor.execute("UPDATE admin_users SET password = %s WHERE id = %s", (hashed_password, user_id))
+        # Actualizar contraseña e incrementar session_version para invalidar sesiones activas
+        cursor.execute("""
+            UPDATE admin_users 
+            SET password = %s, 
+                session_version = COALESCE(session_version, 0) + 1 
+            WHERE id = %s
+        """, (hashed_password, user_id))
         conn.commit()
         
-        print(f"✅ Contraseña reseteada para usuario: {username}")
+        print(f"✅ Contraseña reseteada y sesión invalidada para usuario: {username}")
         return {
             "message": "Contraseña reseteada exitosamente",
             "username": username

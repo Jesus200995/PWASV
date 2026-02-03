@@ -922,8 +922,9 @@ const handleKeydown = (event) => {
   padding: 4px;
   border-radius: 6px;
   transition: all 0.3s ease;
-  width: 45%;
-  max-width: 70px;
+  flex: 1;
+  min-width: 0;
+  max-width: 48%;
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(10px);
@@ -934,6 +935,7 @@ const handleKeydown = (event) => {
 .quick-link.resumen-ejecutivo {
   width: 100%;
   max-width: none;
+  flex: 0 0 100%;
   margin-top: 4px;
 }
 

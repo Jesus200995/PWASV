@@ -922,13 +922,19 @@ const handleKeydown = (event) => {
   padding: 4px;
   border-radius: 6px;
   transition: all 0.3s ease;
-  flex: 1;
+  flex: 1 1 100%;
   min-width: 0;
-  max-width: 48%;
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+}
+
+/* Cuando hay dos botones en la fila, cada uno ocupa ~48% */
+.quick-link.geoportal,
+.quick-link:not(.resumen-ejecutivo):nth-last-child(n+3) {
+  flex: 1 1 48%;
+  max-width: 48%;
 }
 
 /* Tercer botón ocupa toda la fila inferior */

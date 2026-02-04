@@ -762,10 +762,21 @@
                   </svg>
                   <p>No hay reportes disponibles con los filtros seleccionados</p>
                 </div>
+
+                <!-- Barra de progreso -->
+                <div class="descarga-progreso" v-if="descargandoZip && progresoDescarga.total > 0">
+                  <div class="progreso-header">
+                    <span class="progreso-texto">{{ progresoDescarga.mensaje }}</span>
+                    <span class="progreso-contador">{{ progresoDescarga.actual }}/{{ progresoDescarga.total }}</span>
+                  </div>
+                  <div class="progreso-barra">
+                    <div class="progreso-fill" :style="{ width: (progresoDescarga.actual / progresoDescarga.total * 100) + '%' }"></div>
+                  </div>
+                </div>
               </div>
               
               <div class="modal-footer descarga-footer">
-                <button @click="cerrarModalDescarga" class="btn-cancel">
+                <button @click="cerrarModalDescarga" class="btn-cancel" :disabled="descargandoZip">
                   Cancelar
                 </button>
                 <button 
@@ -779,7 +790,7 @@
                     <line x1="12" y1="15" x2="12" y2="3"/>
                   </svg>
                   <div v-else class="spinner-mini white"></div>
-                  {{ descargandoZip ? 'Generando ZIP...' : 'Descargar ZIP' }}
+                  {{ descargandoZip ? (progresoDescarga.actual > 0 ? `${progresoDescarga.actual}/${progresoDescarga.total}` : 'Preparando...') : 'Descargar ZIP' }}
                 </button>
               </div>
             </div>
@@ -798,6 +809,8 @@ import FirmaDigitalAdmin from '../components/FirmaDigitalAdmin.vue'
 import reportesService from '../services/reportesService'
 import authService from '../services/authService'
 import { generarPDFDesdesDatos } from '../utils/pdfGenerator'
+import JSZip from 'jszip'
+import { saveAs } from 'file-saver'
 
 const router = useRouter()
 
@@ -836,6 +849,7 @@ const descargaFiltros = ref({
   mes: '',
   anio: ''
 })
+const progresoDescarga = ref({ actual: 0, total: 0, mensaje: '' })
 
 const estadisticas = ref({
   totalReportes: 0,
@@ -1315,33 +1329,152 @@ function cerrarModalDescarga() {
 async function descargarReportesZip() {
   try {
     descargandoZip.value = true
+    progresoDescarga.value = { actual: 0, total: 0, mensaje: 'Obteniendo reportes...' }
     
-    const params = new URLSearchParams()
-    // Usar los filtros del modal de descarga
-    if (descargaFiltros.value.mes) params.append('mes', descargaFiltros.value.mes)
-    if (descargaFiltros.value.anio) params.append('anio', descargaFiltros.value.anio)
-    params.append('tipo_descarga', tipoDescarga.value)
-    
-    console.log('📦 Descargando ZIP:', { 
+    console.log('📦 Iniciando descarga ZIP:', { 
       mes: descargaFiltros.value.mes, 
       anio: descargaFiltros.value.anio, 
       tipo: tipoDescarga.value 
     })
     
-    const response = await reportesService.descargarReportesZip(params)
+    // Filtrar reportes según los criterios del modal
+    let reportesADescargar = [...reportes.value]
     
-    if (response.success) {
-      console.log('✅ ZIP descargado exitosamente')
-      cerrarModalDescarga()
-    } else {
-      throw new Error(response.message || 'Error al descargar reportes')
+    // Filtrar por mes
+    if (descargaFiltros.value.mes) {
+      reportesADescargar = reportesADescargar.filter(r => {
+        const mesReporte = r.mes || r.nombre_reporte?.match(/Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre/)?.[0]
+        return mesReporte === descargaFiltros.value.mes
+      })
     }
+    
+    // Filtrar por año
+    if (descargaFiltros.value.anio) {
+      reportesADescargar = reportesADescargar.filter(r => {
+        const anioReporte = r.anio || r.nombre_reporte?.match(/\d{4}/)?.[0]
+        return anioReporte == descargaFiltros.value.anio
+      })
+    }
+    
+    // Filtrar por tipo de descarga
+    if (tipoDescarga.value === 'firmados') {
+      reportesADescargar = reportesADescargar.filter(r => r.firmado_supervisor)
+    } else if (tipoDescarga.value === 'pendientes') {
+      reportesADescargar = reportesADescargar.filter(r => !r.firmado_supervisor)
+    }
+    
+    if (reportesADescargar.length === 0) {
+      throw new Error('No hay reportes para descargar con los filtros seleccionados')
+    }
+    
+    progresoDescarga.value.total = reportesADescargar.length
+    console.log(`📄 Procesando ${reportesADescargar.length} reportes...`)
+    
+    // Crear ZIP
+    const zip = new JSZip()
+    let pdfsGenerados = 0
+    let errores = 0
+    
+    // Procesar cada reporte
+    for (let i = 0; i < reportesADescargar.length; i++) {
+      const reporte = reportesADescargar[i]
+      progresoDescarga.value.actual = i + 1
+      progresoDescarga.value.mensaje = `Generando PDF ${i + 1} de ${reportesADescargar.length}...`
+      
+      try {
+        // Obtener datos completos del reporte
+        const datosCompletos = await reportesService.obtenerReporte(reporte.id)
+        
+        if (!datosCompletos.success || !datosCompletos.reporte) {
+          console.warn(`⚠️ No se pudieron obtener datos del reporte ${reporte.id}`)
+          errores++
+          continue
+        }
+        
+        const reporteData = datosCompletos.reporte
+        let pdfBase64 = null
+        
+        // Generar PDF desde datos_reporte (igual que la visualización)
+        if (reporteData.datos_reporte) {
+          console.log(`📄 Generando PDF para reporte ${reporte.id}...`)
+          pdfBase64 = await generarPDFDesdesDatos(
+            reporteData.datos_reporte,
+            reporteData.firma_usuario_base64,
+            reporteData.firma_supervisor_base64,
+            reporteData.nombre_supervisor
+          )
+        } else if (reporteData.pdf_base64) {
+          // Si hay PDF guardado, usar ese
+          pdfBase64 = reporteData.pdf_base64
+          // Limpiar prefijo si existe
+          if (pdfBase64.includes('base64,')) {
+            pdfBase64 = pdfBase64.split('base64,')[1]
+          }
+        }
+        
+        if (!pdfBase64) {
+          console.warn(`⚠️ No se pudo generar PDF para reporte ${reporte.id}`)
+          errores++
+          continue
+        }
+        
+        // Convertir base64 a bytes
+        const pdfBytes = Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))
+        
+        // Sanitizar nombres para el archivo
+        const territorio = (reporte.usuario?.territorio || 'Sin_Territorio').replace(/[<>:"/\\|?*]/g, '_')
+        const nombreUsuario = (reporte.usuario?.nombre_completo || 'Usuario').replace(/[<>:"/\\|?*]/g, '_')
+        const mesReporte = reporte.mes || descargaFiltros.value.mes
+        const anioReporte = reporte.anio || descargaFiltros.value.anio
+        
+        // Nombre del archivo: Territorio/Mes_Año/NombreUsuario_Reporte.pdf
+        const fileName = `${territorio}/${mesReporte}_${anioReporte}/${nombreUsuario}_Reporte_${mesReporte}_${anioReporte}.pdf`
+        
+        // Agregar al ZIP
+        zip.file(fileName, pdfBytes, { binary: true })
+        pdfsGenerados++
+        console.log(`✅ Agregado: ${fileName}`)
+        
+      } catch (error) {
+        console.error(`❌ Error procesando reporte ${reporte.id}:`, error)
+        errores++
+      }
+    }
+    
+    if (pdfsGenerados === 0) {
+      throw new Error('No se pudo generar ningún PDF. Verifica que los reportes tengan datos.')
+    }
+    
+    progresoDescarga.value.mensaje = 'Comprimiendo archivos...'
+    
+    // Generar el ZIP
+    const zipBlob = await zip.generateAsync({ 
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    })
+    
+    // Nombre del archivo ZIP
+    const tipoLabel = tipoDescarga.value === 'todos' ? 'Todos' : tipoDescarga.value === 'firmados' ? 'Firmados' : 'Pendientes'
+    const nombreZip = `Reportes_${tipoLabel}_${descargaFiltros.value.mes}_${descargaFiltros.value.anio}.zip`
+    
+    // Descargar
+    saveAs(zipBlob, nombreZip)
+    
+    console.log(`✅ ZIP generado: ${nombreZip} (${pdfsGenerados} PDFs, ${errores} errores)`)
+    
+    if (errores > 0) {
+      alert(`ZIP descargado con ${pdfsGenerados} reportes. ${errores} reportes no pudieron procesarse.`)
+    }
+    
+    cerrarModalDescarga()
     
   } catch (error) {
     console.error('❌ Error descargando ZIP:', error)
     alert(error.message || 'Error al descargar los reportes. Por favor intenta de nuevo.')
   } finally {
     descargandoZip.value = false
+    progresoDescarga.value = { actual: 0, total: 0, mensaje: '' }
   }
 }
 
@@ -2961,6 +3094,54 @@ onMounted(() => {
   font-size: 0.85rem;
   color: #991b1b;
   font-family: 'Inter', sans-serif;
+}
+
+/* Barra de progreso de descarga */
+.descarga-progreso {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 4px;
+}
+
+.progreso-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progreso-texto {
+  font-size: 0.8rem;
+  color: #1e40af;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+
+.progreso-contador {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #3b82f6;
+  background: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+}
+
+.progreso-barra {
+  width: 100%;
+  height: 8px;
+  background: #e0e7ff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progreso-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  border-radius: 4px;
+  transition: width 0.3s ease;
 }
 
 /* Footer del modal de descarga */

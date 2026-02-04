@@ -20,6 +20,14 @@ import zipfile
 import base64
 from io import BytesIO
 
+# ReportLab para generación de PDFs
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
+
 app = FastAPI()
 
 # Permitir requests desde el frontend
@@ -2213,6 +2221,197 @@ async def obtener_todos_reportes_admin(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+
+def generar_pdf_desde_datos(datos_reporte, firma_usuario_base64=None, firma_supervisor_base64=None, nombre_supervisor=None):
+    """
+    Genera un PDF desde los datos estructurados del reporte usando ReportLab
+    """
+    try:
+        # Parsear datos si es string
+        if isinstance(datos_reporte, str):
+            datos = json.loads(datos_reporte)
+        else:
+            datos = datos_reporte
+        
+        buffer = BytesIO()
+        c = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
+        
+        margin = 15 * mm
+        current_y = height - 20 * mm
+        
+        # ========== ENCABEZADO ==========
+        c.setFont("Helvetica-Bold", 10)
+        c.drawCentredString(width / 2, current_y, "SECRETARÍA DE BIENESTAR")
+        current_y -= 5 * mm
+        c.setFont("Helvetica-Bold", 8)
+        c.drawCentredString(width / 2, current_y, "SUBSECRETARÍA DE INCLUSIÓN PRODUCTIVA Y DESARROLLO RURAL")
+        current_y -= 5 * mm
+        c.drawCentredString(width / 2, current_y, "FORMATO DE SEGUIMIENTO A ACTIVIDADES PROGRAMADAS")
+        current_y -= 10 * mm
+        
+        # Fecha
+        fecha_gen = datos.get('fechaGeneracion', datetime.now().strftime('%Y-%m-%d'))
+        if isinstance(fecha_gen, str) and 'T' in fecha_gen:
+            fecha_gen = fecha_gen.split('T')[0]
+        c.setFont("Helvetica", 8)
+        c.drawRightString(width - margin, current_y, f"Fecha: {fecha_gen}")
+        current_y -= 8 * mm
+        
+        # ========== INFORMACIÓN DEL USUARIO ==========
+        usuario = datos.get('usuario', {})
+        periodo = datos.get('periodo', {})
+        
+        # Recuadro de información
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(margin, current_y, "Nombre del prestador de Servicios:")
+        c.setFont("Helvetica", 8)
+        c.drawString(margin + 55 * mm, current_y, usuario.get('nombre', 'N/A'))
+        current_y -= 5 * mm
+        
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(margin, current_y, "CURP:")
+        c.setFont("Helvetica", 8)
+        c.drawString(margin + 15 * mm, current_y, usuario.get('curp', 'N/A'))
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(width / 2, current_y, "Cargo:")
+        c.setFont("Helvetica", 8)
+        c.drawString(width / 2 + 15 * mm, current_y, usuario.get('cargo', 'N/A'))
+        current_y -= 5 * mm
+        
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(margin, current_y, "Territorio:")
+        c.setFont("Helvetica", 8)
+        c.drawString(margin + 20 * mm, current_y, usuario.get('territorio', 'N/A'))
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(width / 2, current_y, "Período:")
+        c.setFont("Helvetica", 8)
+        c.drawString(width / 2 + 18 * mm, current_y, f"{periodo.get('mes', 'N/A')} {periodo.get('anio', 'N/A')}")
+        current_y -= 10 * mm
+        
+        # ========== TABLA DE ACTIVIDADES ==========
+        actividades = datos.get('actividades', [])
+        
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(margin, current_y, "ACTIVIDADES REALIZADAS:")
+        current_y -= 6 * mm
+        
+        # Encabezados de tabla
+        headers = ["No.", "Fecha", "Tipo", "Descripción", "Evidencia"]
+        col_widths = [8 * mm, 22 * mm, 30 * mm, 85 * mm, 20 * mm]
+        
+        # Dibujar encabezados
+        c.setFont("Helvetica-Bold", 7)
+        x_pos = margin
+        for i, header in enumerate(headers):
+            c.drawString(x_pos + 1 * mm, current_y, header)
+            x_pos += col_widths[i]
+        current_y -= 5 * mm
+        
+        # Línea separadora
+        c.line(margin, current_y + 3 * mm, width - margin, current_y + 3 * mm)
+        
+        # Dibujar actividades
+        c.setFont("Helvetica", 6)
+        for idx, act in enumerate(actividades, 1):
+            if current_y < 40 * mm:
+                c.showPage()
+                current_y = height - 20 * mm
+                c.setFont("Helvetica", 6)
+            
+            x_pos = margin
+            
+            # Número
+            c.drawString(x_pos + 1 * mm, current_y, str(idx))
+            x_pos += col_widths[0]
+            
+            # Fecha
+            fecha = act.get('fecha', 'N/A')
+            if isinstance(fecha, str) and 'T' in fecha:
+                fecha = fecha.split('T')[0]
+            c.drawString(x_pos + 1 * mm, current_y, str(fecha)[:10])
+            x_pos += col_widths[1]
+            
+            # Tipo
+            tipo = act.get('tipo', act.get('tipo_actividad', 'N/A'))
+            c.drawString(x_pos + 1 * mm, current_y, str(tipo)[:20])
+            x_pos += col_widths[2]
+            
+            # Descripción (truncada)
+            descripcion = act.get('descripcion', 'N/A')
+            desc_truncada = str(descripcion)[:80] + ('...' if len(str(descripcion)) > 80 else '')
+            c.drawString(x_pos + 1 * mm, current_y, desc_truncada)
+            x_pos += col_widths[3]
+            
+            # Evidencia
+            tiene_foto = 'Sí' if act.get('foto') or act.get('tiene_foto') else 'No'
+            c.drawString(x_pos + 1 * mm, current_y, tiene_foto)
+            
+            current_y -= 4 * mm
+        
+        current_y -= 5 * mm
+        
+        # ========== FIRMAS ==========
+        if current_y < 50 * mm:
+            c.showPage()
+            current_y = height - 30 * mm
+        
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(margin, current_y, "FIRMAS:")
+        current_y -= 15 * mm
+        
+        # Firma del usuario
+        firma_x = margin + 20 * mm
+        c.line(firma_x, current_y, firma_x + 50 * mm, current_y)
+        c.setFont("Helvetica", 7)
+        c.drawCentredString(firma_x + 25 * mm, current_y - 4 * mm, "Firma del Prestador de Servicios")
+        c.drawCentredString(firma_x + 25 * mm, current_y - 8 * mm, usuario.get('nombre', ''))
+        
+        # Si hay imagen de firma del usuario, agregarla
+        if firma_usuario_base64:
+            try:
+                firma_data = base64.b64decode(firma_usuario_base64)
+                from PIL import Image
+                firma_img = Image.open(BytesIO(firma_data))
+                firma_path = BytesIO()
+                firma_img.save(firma_path, format='PNG')
+                firma_path.seek(0)
+                c.drawImage(firma_path, firma_x + 5 * mm, current_y + 2 * mm, width=40 * mm, height=15 * mm, preserveAspectRatio=True, mask='auto')
+            except Exception as e:
+                print(f"⚠️ Error agregando firma usuario: {e}")
+        
+        # Firma del supervisor
+        firma_sup_x = width / 2 + 10 * mm
+        c.line(firma_sup_x, current_y, firma_sup_x + 50 * mm, current_y)
+        c.setFont("Helvetica", 7)
+        c.drawCentredString(firma_sup_x + 25 * mm, current_y - 4 * mm, "Firma del Supervisor")
+        if nombre_supervisor:
+            c.drawCentredString(firma_sup_x + 25 * mm, current_y - 8 * mm, nombre_supervisor)
+        
+        # Si hay imagen de firma del supervisor, agregarla
+        if firma_supervisor_base64:
+            try:
+                firma_sup_data = base64.b64decode(firma_supervisor_base64)
+                from PIL import Image
+                firma_sup_img = Image.open(BytesIO(firma_sup_data))
+                firma_sup_path = BytesIO()
+                firma_sup_img.save(firma_sup_path, format='PNG')
+                firma_sup_path.seek(0)
+                c.drawImage(firma_sup_path, firma_sup_x + 5 * mm, current_y + 2 * mm, width=40 * mm, height=15 * mm, preserveAspectRatio=True, mask='auto')
+            except Exception as e:
+                print(f"⚠️ Error agregando firma supervisor: {e}")
+        
+        c.save()
+        buffer.seek(0)
+        return buffer.getvalue()
+        
+    except Exception as e:
+        print(f"❌ Error generando PDF: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
 @app.get("/reportes/admin/descargar-zip")
 async def descargar_reportes_zip(
     mes: str = None,
@@ -2222,12 +2421,13 @@ async def descargar_reportes_zip(
     """
     Descargar múltiples reportes en formato ZIP
     Tipos de descarga: todos, firmados, pendientes
+    Genera PDFs desde datos_reporte si no hay pdf_base64
     """
     try:
         print(f"📦 Generando ZIP de reportes...")
         print(f"   Mes: {mes}, Año: {anio}, Tipo: {tipo_descarga}")
         
-        # Construir query según filtros
+        # Construir query según filtros - incluir datos_reporte y firmas
         query = """
             SELECT 
                 r.id,
@@ -2237,7 +2437,11 @@ async def descargar_reportes_zip(
                 r.mes,
                 r.anio,
                 u.nombre_completo,
-                u.territorio
+                u.territorio,
+                r.datos_reporte,
+                r.firma_usuario_base64,
+                r.firma_supervisor_base64,
+                r.nombre_supervisor
             FROM reportes_generados r
             LEFT JOIN usuarios u ON r.usuario_id = u.id
             WHERE 1=1
@@ -2271,6 +2475,8 @@ async def descargar_reportes_zip(
         
         # Crear ZIP en memoria
         zip_buffer = BytesIO()
+        pdfs_agregados = 0
+        pdfs_omitidos = 0
         
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             for reporte in reportes:
@@ -2281,16 +2487,45 @@ async def descargar_reportes_zip(
                 anio_rep = reporte[5]
                 usuario = reporte[6] or "Usuario"
                 territorio = reporte[7] or "Sin_Territorio"
+                datos_reporte = reporte[8]
+                firma_usuario = reporte[9]
+                firma_supervisor = reporte[10]
+                nombre_supervisor = reporte[11]
                 
-                # Si no hay PDF, intentar generarlo o saltar
-                if not pdf_base64:
-                    print(f"   ⚠️  Reporte {reporte_id} sin PDF, omitiendo...")
+                pdf_bytes = None
+                
+                # Intentar obtener PDF de diferentes fuentes
+                if pdf_base64:
+                    # Si hay PDF guardado, usarlo directamente
+                    try:
+                        pdf_bytes = base64.b64decode(pdf_base64)
+                        print(f"   ✅ PDF de BD para reporte {reporte_id}")
+                    except Exception as e:
+                        print(f"   ⚠️ Error decodificando PDF base64 del reporte {reporte_id}: {e}")
+                
+                # Si no hay PDF pero hay datos_reporte, generar PDF
+                if not pdf_bytes and datos_reporte:
+                    try:
+                        print(f"   🔄 Generando PDF desde datos_reporte para reporte {reporte_id}...")
+                        pdf_bytes = generar_pdf_desde_datos(
+                            datos_reporte, 
+                            firma_usuario, 
+                            firma_supervisor, 
+                            nombre_supervisor
+                        )
+                        if pdf_bytes:
+                            print(f"   ✅ PDF generado para reporte {reporte_id}")
+                        else:
+                            print(f"   ❌ No se pudo generar PDF para reporte {reporte_id}")
+                    except Exception as e:
+                        print(f"   ❌ Error generando PDF para reporte {reporte_id}: {e}")
+                
+                if not pdf_bytes:
+                    print(f"   ⚠️ Reporte {reporte_id} sin PDF ni datos, omitiendo...")
+                    pdfs_omitidos += 1
                     continue
                 
                 try:
-                    # Decodificar PDF de base64
-                    pdf_bytes = base64.b64decode(pdf_base64)
-                    
                     # Sanitizar nombre de archivo
                     usuario_safe = re.sub(r'[<>:"/\\|?*]', '_', usuario)
                     territorio_safe = re.sub(r'[<>:"/\\|?*]', '_', territorio)
@@ -2301,11 +2536,18 @@ async def descargar_reportes_zip(
                     
                     # Agregar al ZIP
                     zip_file.writestr(filename, pdf_bytes)
+                    pdfs_agregados += 1
                     print(f"   ✅ Agregado: {filename}")
                     
                 except Exception as e:
                     print(f"   ❌ Error procesando reporte {reporte_id}: {e}")
+                    pdfs_omitidos += 1
                     continue
+        
+        print(f"📊 Resumen: {pdfs_agregados} PDFs agregados, {pdfs_omitidos} omitidos")
+        
+        if pdfs_agregados == 0:
+            raise HTTPException(status_code=404, detail="No se pudo generar ningún PDF para los reportes seleccionados")
         
         # Preparar respuesta
         zip_buffer.seek(0)
@@ -2324,7 +2566,7 @@ async def descargar_reportes_zip(
             filename_zip += f"_{anio}"
         filename_zip += ".zip"
         
-        print(f"✅ ZIP generado: {filename_zip}")
+        print(f"✅ ZIP generado: {filename_zip} ({pdfs_agregados} archivos)")
         
         return StreamingResponse(
             zip_buffer,

@@ -152,68 +152,111 @@
             </div>
             
             <div class="filters-grid">
-              <div class="filter-group search-group">
-                <label>Buscar:</label>
+              <div class="filter-group search-group full-width">
+                <label for="search-input" class="filter-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                  Búsqueda General
+                </label>
                 <div class="search-input-wrapper">
                   <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.35-4.35"></path>
                   </svg>
                   <input 
+                    id="search-input"
                     v-model="filtros.busqueda" 
                     type="text" 
-                    placeholder="Buscar por nombre, correo, territorio..." 
+                    placeholder="Nombre de usuario, correo electrónico, CURP o territorio" 
                     class="search-input"
-                    @input="filtrarReportes"
                   >
-                  <button v-if="filtros.busqueda" @click="limpiarBusquedaReportes" class="clear-search-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
+                  <transition name="fade-quick">
+                    <button v-if="filtros.busqueda" @click="limpiarBusquedaReportes" class="clear-search-btn" title="Limpiar búsqueda">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </transition>
+                  <span v-if="filtros.busqueda && reportesFiltrados.length > 0" class="search-results-count">
+                    {{ reportesFiltrados.length }} {{ reportesFiltrados.length === 1 ? 'resultado' : 'resultados' }}
+                  </span>
                 </div>
               </div>
 
               <div class="filter-group">
-                <label>Mes:</label>
-                <select v-model="filtros.mes" @change="cargarReportes" class="filter-select">
+                <label for="filter-mes" class="filter-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  Mes
+                </label>
+                <select id="filter-mes" v-model="filtros.mes" @change="cargarReportes" class="filter-select">
                   <option value="">Todos los meses</option>
                   <option v-for="mes in meses" :key="mes.value" :value="mes.value">{{ mes.label }}</option>
                 </select>
               </div>
 
               <div class="filter-group">
-                <label>Año:</label>
-                <select v-model="filtros.anio" @change="cargarReportes" class="filter-select">
+                <label for="filter-anio" class="filter-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                  </svg>
+                  Año
+                </label>
+                <select id="filter-anio" v-model="filtros.anio" @change="cargarReportes" class="filter-select">
                   <option value="">Todos los años</option>
                   <option v-for="anio in anios" :key="anio" :value="anio">{{ anio }}</option>
                 </select>
               </div>
 
               <div class="filter-group" v-if="!territorioUsuario">
-                <label>Territorio:</label>
-                <select v-model="filtros.territorio" @change="cargarReportes" class="filter-select">
+                <label for="filter-territorio" class="filter-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  Territorio
+                </label>
+                <select id="filter-territorio" v-model="filtros.territorio" @change="cargarReportes" class="filter-select">
                   <option value="">Todos los territorios</option>
                   <option v-for="territorio in territorios" :key="territorio" :value="territorio">{{ territorio }}</option>
                 </select>
               </div>
 
               <div class="filter-group">
-                <label>Estado:</label>
-                <select v-model="filtros.estadoFirma" @change="filtrarReportes" class="filter-select">
-                  <option value="">Todos</option>
-                  <option value="pendiente">⏳ Pendientes</option>
-                  <option value="firmado">✓ Firmados</option>
+                <label for="filter-estado" class="filter-label">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                  Estado de Firma
+                </label>
+                <select id="filter-estado" v-model="filtros.estadoFirma" class="filter-select">
+                  <option value="">Todos los estados</option>
+                  <option value="pendiente">Pendientes de firma</option>
+                  <option value="firmado">Firmados</option>
                 </select>
               </div>
 
               <div class="filter-group filter-actions">
-                <button @click="limpiarFiltros" class="clear-filters-btn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                <label class="filter-label-invisible">Acciones</label>
+                <button @click="limpiarFiltros" class="clear-filters-btn" title="Limpiar todos los filtros">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/>
+                    <line x1="14" y1="11" x2="14" y2="17"/>
                   </svg>
-                  Limpiar
+                  Limpiar Filtros
                 </button>
               </div>
             </div>
@@ -635,24 +678,37 @@ const anios = computed(() => {
 
 const reportesFiltrados = computed(() => {
   let resultado = [...reportes.value]
+  
+  // Filtro de búsqueda en tiempo real (nombre, correo, CURP, territorio)
   if (filtros.value.busqueda) {
-    const busqueda = filtros.value.busqueda.toLowerCase()
-    resultado = resultado.filter(r => 
-      r.nombre_reporte?.toLowerCase().includes(busqueda) ||
-      r.usuario?.nombre_completo?.toLowerCase().includes(busqueda) ||
-      r.usuario?.correo?.toLowerCase().includes(busqueda) ||
-      r.usuario?.territorio?.toLowerCase().includes(busqueda)
-    )
+    const busqueda = filtros.value.busqueda.toLowerCase().trim()
+    resultado = resultado.filter(r => {
+      const nombreReporte = r.nombre_reporte?.toLowerCase() || ''
+      const nombreCompleto = r.usuario?.nombre_completo?.toLowerCase() || ''
+      const correo = r.usuario?.correo?.toLowerCase() || ''
+      const curp = r.usuario?.curp?.toLowerCase() || ''
+      const territorio = r.usuario?.territorio?.toLowerCase() || ''
+      
+      return nombreReporte.includes(busqueda) ||
+             nombreCompleto.includes(busqueda) ||
+             correo.includes(busqueda) ||
+             curp.includes(busqueda) ||
+             territorio.includes(busqueda)
+    })
   }
+  
+  // Filtro por tipo de reporte
   if (filtros.value.tipo) {
     resultado = resultado.filter(r => r.tipo === filtros.value.tipo)
   }
-  // Filtrar por estado de firma
+  
+  // Filtro por estado de firma
   if (filtros.value.estadoFirma === 'pendiente') {
     resultado = resultado.filter(r => !r.firmado_supervisor)
   } else if (filtros.value.estadoFirma === 'firmado') {
     resultado = resultado.filter(r => r.firmado_supervisor)
   }
+  
   return resultado
 })
 
@@ -1158,15 +1214,78 @@ onMounted(() => {
 
 .filters-header svg { color: #16a34a; }
 
-.filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: clamp(12px, 1.5vw, 16px); padding: clamp(12px, 1.5vw, 16px); }
+.filters-grid { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr 1fr 1fr auto; 
+  gap: clamp(10px, 1.3vw, 14px); 
+  padding: clamp(12px, 1.5vw, 16px);
+  align-items: end;
+}
 
-.filter-group { display: flex; flex-direction: column; gap: 6px; }
+.filter-group { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
+}
 
-.filter-group label { font-size: clamp(0.7rem, 1.1vw, 0.8rem); font-weight: 600; color: #374151; font-family: 'Inter', sans-serif; }
+.filter-group.full-width {
+  grid-column: 1 / -1;
+  margin-bottom: 6px;
+}
 
-.filter-select { padding: clamp(8px, 1vw, 10px) clamp(10px, 1.2vw, 12px); border: 1.5px solid #d1d5db; border-radius: 8px; font-size: clamp(0.75rem, 1.1vw, 0.85rem); font-family: 'Inter', sans-serif; background: white; cursor: pointer; transition: all 0.2s; }
+.filter-group.filter-actions {
+  display: flex;
+  align-items: flex-end;
+}
 
-.filter-select:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1); }
+.filter-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: clamp(0.68rem, 0.95vw, 0.75rem); 
+  font-weight: 600; 
+  color: #374151; 
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.filter-label-invisible {
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  font-size: clamp(0.68rem, 0.95vw, 0.75rem);
+  margin-bottom: 6px;
+}
+
+.filter-label svg {
+  color: #16a34a;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.filter-select { 
+  padding: clamp(7px, 0.9vw, 9px) clamp(10px, 1.2vw, 12px); 
+  border: 1.5px solid #e5e7eb; 
+  border-radius: 8px; 
+  font-size: clamp(0.7rem, 1vw, 0.78rem); 
+  font-family: 'Inter', sans-serif; 
+  background: white; 
+  cursor: pointer; 
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #374151;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.filter-select:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.12);
+}
+
+.filter-select:focus { 
+  outline: none; 
+  border-color: #4CAF50; 
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
 
 .search-group { grid-column: span 2; }
 
@@ -1174,17 +1293,19 @@ onMounted(() => {
 
 .search-icon { 
   position: absolute; 
-  left: 14px; 
+  left: 16px; 
   top: 50%; 
   transform: translateY(-50%); 
-  color: rgba(76, 175, 80, 0.6);
-  width: 16px;
-  height: 16px;
+  color: #16a34a;
+  width: 18px;
+  height: 18px;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .search-input { 
   width: 100%; 
-  padding: clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px) clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px);
+  padding: clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px) clamp(10px, 1.2vw, 12px) clamp(48px, 5.5vw, 52px);
   border: 1.5px solid rgba(76, 175, 80, 0.2);
   border-radius: 50px; 
   background: rgba(255, 255, 255, 0.85);
@@ -1224,13 +1345,13 @@ onMounted(() => {
   background: rgba(239, 68, 68, 0.1);
   border: none;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
   z-index: 2;
 }
@@ -1240,17 +1361,82 @@ onMounted(() => {
   transform: translateY(-50%) scale(1.1);
 }
 
+.clear-search-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
 .clear-search-btn svg {
   width: 11px;
   height: 11px;
   color: #ef4444;
 }
 
+.search-results-count {
+  position: absolute;
+  right: 50px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: clamp(0.7rem, 1vw, 0.78rem);
+  color: #16a34a;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  background: rgba(220, 252, 231, 0.8);
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.fade-quick-enter-active, .fade-quick-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-quick-enter-from, .fade-quick-leave-to {
+  opacity: 0;
+}
+
 .filter-actions { display: flex; align-items: flex-end; }
 
-.clear-filters-btn { display: flex; align-items: center; gap: 6px; padding: clamp(8px, 1vw, 10px) clamp(12px, 1.5vw, 16px); background: #f3f4f6; color: #374151; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: clamp(0.7rem, 1.1vw, 0.8rem); font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+.clear-filters-btn { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  gap: 7px; 
+  padding: clamp(7px, 0.9vw, 9px) clamp(16px, 1.8vw, 20px); 
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: #dc2626; 
+  border: 1.5px solid #fecaca; 
+  border-radius: 8px; 
+  font-size: clamp(0.7rem, 1vw, 0.78rem); 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.08);
+  white-space: nowrap;
+  min-width: 150px;
+}
 
-.clear-filters-btn:hover { background: #e5e7eb; border-color: #9ca3af; }
+.clear-filters-btn:hover { 
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-color: #dc2626; 
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.18);
+}
+
+.clear-filters-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.12);
+}
+
+.clear-filters-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clear-filters-btn:hover svg {
+  transform: scale(1.1) rotate(-5deg);
+}
 
 .reportes-section { margin-bottom: 24px; }
 
@@ -1406,7 +1592,7 @@ onMounted(() => {
 
 @media (max-width: 1200px) { .main-content { margin-left: min(200px, 16vw); width: calc(100vw - min(200px, 16vw)); } }
 
-@media (max-width: 1024px) { .main-content { margin-left: 200px; width: calc(100vw - 200px); } .stats-grid { grid-template-columns: repeat(2, 1fr); } .filters-grid { grid-template-columns: repeat(2, 1fr); } .search-group { grid-column: span 2; } }
+@media (max-width: 1024px) { .main-content { margin-left: 200px; width: calc(100vw - 200px); } .stats-grid { grid-template-columns: repeat(2, 1fr); } .filters-grid { grid-template-columns: 1fr 1fr 1fr; } .search-group { grid-column: span 3; } .full-width { grid-column: span 3; } .filter-actions { grid-column: span 3; } .clear-filters-btn { width: 100%; } }
 
 @media (max-width: 768px) and (orientation: landscape) { .main-content { margin-left: 160px; width: calc(100vw - 160px); } }
 
@@ -1414,9 +1600,9 @@ onMounted(() => {
 
 @media (min-width: 481px) and (max-width: 768px) { .main-content { margin-left: 250px; width: calc(100vw - 250px); } }
 
-@media (max-width: 768px) { .main-content { margin-left: 240px; width: calc(100vw - 240px); } .header-content { flex-direction: column; align-items: flex-start; gap: 12px; } .header-main { width: 100%; } .header-actions { width: 100%; justify-content: flex-end; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .filters-grid { grid-template-columns: 1fr; } .search-group { grid-column: span 1; } .reportes-table th, .reportes-table td { padding: 8px 6px; font-size: 0.7rem; } .usuario-avatar { width: 28px; height: 28px; font-size: 0.6rem; } .modal-container { max-width: 90%; } .modal-header { padding: 14px; gap: 12px; } .modal-icon { width: 38px; height: 38px; min-width: 38px; } .modal-icon svg { width: 18px; height: 18px; max-width: 18px; max-height: 18px; } .modal-body { padding: 14px; } .modal-footer { padding: 12px 14px; } .modal-title-container h3 { font-size: 1rem; } .modal-title-container p { font-size: 0.75rem; } }
+@media (max-width: 768px) { .main-content { margin-left: 240px; width: calc(100vw - 240px); } .header-content { flex-direction: column; align-items: flex-start; gap: 12px; } .header-main { width: 100%; } .header-actions { width: 100%; justify-content: flex-end; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .filters-grid { grid-template-columns: 1fr 1fr; } .search-group { grid-column: span 2; } .full-width { grid-column: 1 / -1; } .filter-actions { grid-column: span 2; } .clear-filters-btn { width: 100%; } .reportes-table th, .reportes-table td { padding: 8px 6px; font-size: 0.7rem; } .usuario-avatar { width: 28px; height: 28px; font-size: 0.6rem; } .modal-container { max-width: 90%; } .modal-header { padding: 14px; gap: 12px; } .modal-icon { width: 38px; height: 38px; min-width: 38px; } .modal-icon svg { width: 18px; height: 18px; max-width: 18px; max-height: 18px; } .modal-body { padding: 14px; } .modal-footer { padding: 12px 14px; } .modal-title-container h3 { font-size: 1rem; } .modal-title-container p { font-size: 0.75rem; } .search-results-count { font-size: 0.68rem; right: 44px; padding: 3px 8px; } }
 
-@media (max-width: 480px) { .main-content { margin-left: 60px; width: calc(100vw - 60px); } .page-content { padding: 8px; } .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; } .stat-card { padding: 8px 10px; } .stat-icon { width: 32px; height: 32px; min-width: 32px; } .stat-icon svg { width: 16px; height: 16px; max-width: 16px; max-height: 16px; } .stat-value { font-size: 1rem; } .stat-label { font-size: 0.65rem; } .pagination-container { flex-direction: column; text-align: center; } .th-territorio, .td-territorio { display: none; } .btn-action { width: 28px; height: 28px; } .modal-overlay { padding: 12px; } .modal-container { max-width: 95%; } .modal-header { padding: 12px; gap: 10px; flex-wrap: wrap; } .modal-icon { width: 36px; height: 36px; min-width: 36px; } .modal-icon svg { width: 16px; height: 16px; } .modal-body { padding: 12px; } .modal-body p { font-size: 0.8rem; } .modal-footer { padding: 12px; flex-direction: column; gap: 8px; } .btn-cancel, .btn-delete-confirm { width: 100%; padding: 11px 16px; font-size: 0.85rem; } .modal-title-container h3 { font-size: 0.95rem; } .modal-title-container p { font-size: 0.7rem; } .reporte-eliminar-info { padding: 10px; } .reporte-eliminar-info strong { font-size: 0.85rem; } }
+@media (max-width: 480px) { .main-content { margin-left: 60px; width: calc(100vw - 60px); } .page-content { padding: 8px; } .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; } .stat-card { padding: 8px 10px; } .stat-icon { width: 32px; height: 32px; min-width: 32px; } .stat-icon svg { width: 16px; height: 16px; max-width: 16px; max-height: 16px; } .stat-value { font-size: 1rem; } .stat-label { font-size: 0.65rem; } .pagination-container { flex-direction: column; text-align: center; } .filters-grid { grid-template-columns: 1fr; gap: 10px; } .filter-actions { grid-column: span 1; } .clear-filters-btn { width: 100%; min-width: unset; } .th-territorio, .td-territorio { display: none; } .btn-action { width: 28px; height: 28px; } .modal-overlay { padding: 12px; } .modal-container { max-width: 95%; } .modal-header { padding: 12px; gap: 10px; flex-wrap: wrap; } .modal-icon { width: 36px; height: 36px; min-width: 36px; } .modal-icon svg { width: 16px; height: 16px; } .modal-body { padding: 12px; } .modal-body p { font-size: 0.8rem; } .modal-footer { padding: 12px; flex-direction: column; gap: 8px; } .btn-cancel, .btn-delete-confirm { width: 100%; padding: 11px 16px; font-size: 0.85rem; } .modal-title-container h3 { font-size: 0.95rem; } .modal-title-container p { font-size: 0.7rem; } .reporte-eliminar-info { padding: 10px; } .reporte-eliminar-info strong { font-size: 0.85rem; } }
 
 @media (max-width: 360px) { .main-content { margin-left: 60px; width: calc(100vw - 60px); } .header-title { font-size: 1rem !important; } .stats-grid { grid-template-columns: 1fr; } }
 

@@ -322,12 +322,12 @@
                       :class="{ 'row-firmado': reporte.firmado_supervisor, 'row-seleccionado': reportesSeleccionados.includes(reporte.id) }">
                     <td class="td-checkbox">
                       <input 
+                        v-if="!reporte.firmado_supervisor"
                         type="checkbox"
                         :checked="reportesSeleccionados.includes(reporte.id)"
                         @change="toggleSeleccion(reporte)"
-                        :disabled="reporte.firmado_supervisor"
                         class="checkbox-row"
-                        :title="reporte.firmado_supervisor ? 'Ya está firmado' : 'Seleccionar para firmar'"
+                        title="Seleccionar para firmar"
                       >
                     </td>
                     <td class="td-estado">
@@ -1726,15 +1726,15 @@ onMounted(() => {
   position: sticky;
   top: 0;
   background: linear-gradient(135deg, #15803d 0%, #22c55e 50%, #16a34a 100%);
-  padding: 16px 24px;
-  border-radius: 14px;
-  margin-bottom: 20px;
+  padding: clamp(10px, 1.2vw, 14px) clamp(16px, 2vw, 20px);
+  border-radius: 12px;
+  margin-bottom: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
-  box-shadow: 0 6px 24px rgba(34, 197, 94, 0.35), 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 14px;
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3), 0 2px 6px rgba(0, 0, 0, 0.08);
   z-index: 10;
   animation: slideDown 0.3s ease-out;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1754,15 +1754,15 @@ onMounted(() => {
 .firma-actions-bar .firma-actions-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: white;
-  font-size: 0.95rem;
+  font-size: clamp(0.75rem, 1vw, 0.85rem);
   font-weight: 500;
 }
 
 .firma-actions-bar .firma-actions-info svg {
-  width: 24px;
-  height: 24px;
+  width: clamp(18px, 2vw, 20px);
+  height: clamp(18px, 2vw, 20px);
   flex-shrink: 0;
 }
 
@@ -1773,13 +1773,13 @@ onMounted(() => {
 
 .firma-actions-bar .firma-actions-info strong {
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
   margin-right: 2px;
 }
 
 .firma-actions-bar .firma-actions-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -1787,42 +1787,42 @@ onMounted(() => {
 .btn-firmar-seleccionados {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
+  gap: 7px;
+  padding: clamp(8px, 1vw, 10px) clamp(14px, 1.8vw, 18px);
   background: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   color: #15803d;
-  font-size: 0.85rem;
+  font-size: clamp(0.72rem, 1vw, 0.8rem);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   font-family: 'Inter', sans-serif;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .btn-firmar-seleccionados:hover {
   background: #f0fdf4;
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }
 
 .btn-firmar-seleccionados svg {
-  width: 18px;
-  height: 18px;
+  width: clamp(15px, 1.8vw, 17px);
+  height: clamp(15px, 1.8vw, 17px);
   color: #16a34a;
 }
 
 .btn-deselect {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
+  gap: 6px;
+  padding: clamp(8px, 1vw, 10px) clamp(12px, 1.6vw, 16px);
   background: rgba(255, 255, 255, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.5);
-  border-radius: 10px;
+  border-radius: 8px;
   color: white;
-  font-size: 0.85rem;
+  font-size: clamp(0.72rem, 1vw, 0.8rem);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -1836,8 +1836,8 @@ onMounted(() => {
 }
 
 .btn-deselect svg {
-  width: 16px;
-  height: 16px;
+  width: clamp(14px, 1.6vw, 15px);
+  height: clamp(14px, 1.6vw, 15px);
 }
 
 /* ==========================================
@@ -1849,7 +1849,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border-radius: 10px;
+  border-radius: 50px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -2291,18 +2291,33 @@ onMounted(() => {
   .firma-actions-bar {
     flex-direction: column;
     text-align: center;
-    padding: 14px 16px;
-    gap: 12px;
+    padding: clamp(10px, 2vw, 12px) clamp(12px, 2.5vw, 14px);
+    gap: 10px;
   }
   
   .firma-actions-bar .firma-actions-info {
-    font-size: 0.9rem;
+    font-size: clamp(0.72rem, 1.5vw, 0.8rem);
     justify-content: center;
+  }
+
+  .firma-actions-bar .firma-actions-info svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .firma-actions-bar .firma-actions-info strong {
+    font-size: clamp(0.8rem, 1.7vw, 0.88rem);
   }
   
   .firma-actions-bar .firma-actions-buttons {
     width: 100%;
     justify-content: center;
+  }
+
+  .btn-firmar-seleccionados,
+  .btn-deselect {
+    font-size: 0.75rem;
+    padding: 8px 14px;
   }
   
   .modal-firma {

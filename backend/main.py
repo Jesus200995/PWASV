@@ -16,6 +16,9 @@ import pytz
 import json
 from typing import List, Optional
 import io
+import zipfile
+import base64
+from io import BytesIO
 
 app = FastAPI()
 
@@ -2209,6 +2212,135 @@ async def obtener_todos_reportes_admin(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@app.get("/reportes/admin/descargar-zip")
+async def descargar_reportes_zip(
+    mes: str = None,
+    anio: int = None,
+    tipo_descarga: str = "todos"  # "todos", "firmados", "pendientes"
+):
+    """
+    Descargar múltiples reportes en formato ZIP
+    Tipos de descarga: todos, firmados, pendientes
+    """
+    try:
+        print(f"📦 Generando ZIP de reportes...")
+        print(f"   Mes: {mes}, Año: {anio}, Tipo: {tipo_descarga}")
+        
+        # Construir query según filtros
+        query = """
+            SELECT 
+                r.id,
+                r.nombre_reporte,
+                r.pdf_base64,
+                r.firmado_supervisor,
+                r.mes,
+                r.anio,
+                u.nombre_completo,
+                u.territorio
+            FROM reportes_generados r
+            LEFT JOIN usuarios u ON r.usuario_id = u.id
+            WHERE 1=1
+        """
+        params = []
+        
+        # Filtros
+        if mes:
+            query += " AND r.mes = %s"
+            params.append(mes)
+        
+        if anio:
+            query += " AND r.anio = %s"
+            params.append(anio)
+        
+        # Filtro por tipo de descarga
+        if tipo_descarga == "firmados":
+            query += " AND r.firmado_supervisor = true"
+        elif tipo_descarga == "pendientes":
+            query += " AND (r.firmado_supervisor = false OR r.firmado_supervisor IS NULL)"
+        
+        query += " ORDER BY r.fecha_generacion DESC"
+        
+        cursor.execute(query, params)
+        reportes = cursor.fetchall()
+        
+        if not reportes:
+            raise HTTPException(status_code=404, detail="No se encontraron reportes con los filtros seleccionados")
+        
+        print(f"   📄 Encontrados {len(reportes)} reportes")
+        
+        # Crear ZIP en memoria
+        zip_buffer = BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for reporte in reportes:
+                reporte_id = reporte[0]
+                nombre_reporte = reporte[1]
+                pdf_base64 = reporte[2]
+                mes_rep = reporte[4]
+                anio_rep = reporte[5]
+                usuario = reporte[6] or "Usuario"
+                territorio = reporte[7] or "Sin_Territorio"
+                
+                # Si no hay PDF, intentar generarlo o saltar
+                if not pdf_base64:
+                    print(f"   ⚠️  Reporte {reporte_id} sin PDF, omitiendo...")
+                    continue
+                
+                try:
+                    # Decodificar PDF de base64
+                    pdf_bytes = base64.b64decode(pdf_base64)
+                    
+                    # Sanitizar nombre de archivo
+                    usuario_safe = re.sub(r'[<>:"/\\|?*]', '_', usuario)
+                    territorio_safe = re.sub(r'[<>:"/\\|?*]', '_', territorio)
+                    nombre_safe = re.sub(r'[<>:"/\\|?*]', '_', nombre_reporte)
+                    
+                    # Nombre de archivo descriptivo
+                    filename = f"{territorio_safe}/{mes_rep}_{anio_rep}/{nombre_safe}.pdf"
+                    
+                    # Agregar al ZIP
+                    zip_file.writestr(filename, pdf_bytes)
+                    print(f"   ✅ Agregado: {filename}")
+                    
+                except Exception as e:
+                    print(f"   ❌ Error procesando reporte {reporte_id}: {e}")
+                    continue
+        
+        # Preparar respuesta
+        zip_buffer.seek(0)
+        
+        # Nombre del archivo ZIP
+        tipo_label = {
+            "todos": "Todos",
+            "firmados": "Firmados",
+            "pendientes": "Pendientes"
+        }.get(tipo_descarga, "Reportes")
+        
+        filename_zip = f"Reportes_{tipo_label}"
+        if mes:
+            filename_zip += f"_{mes}"
+        if anio:
+            filename_zip += f"_{anio}"
+        filename_zip += ".zip"
+        
+        print(f"✅ ZIP generado: {filename_zip}")
+        
+        return StreamingResponse(
+            zip_buffer,
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename_zip}"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error generando ZIP: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generando ZIP: {str(e)}")
 
 @app.get("/reportes/admin/estadisticas")
 async def obtener_estadisticas_reportes_admin():

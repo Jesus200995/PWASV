@@ -390,6 +390,54 @@ const reportesService = {
       console.error('❌ [ReportesService] Error quitando firma:', error)
       throw error
     }
+  },
+
+  /**
+   * Descargar múltiples reportes en formato ZIP
+   * @param {URLSearchParams} params - Parámetros de filtro (mes, anio, tipo_descarga)
+   */
+  async descargarReportesZip(params) {
+    try {
+      const url = `${API_URL}/reportes/admin/descargar-zip?${params.toString()}`
+      console.log('📦 [ReportesService] Descargando ZIP:', url)
+      
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`)
+      }
+      
+      // Obtener el blob del ZIP
+      const blob = await response.blob()
+      
+      // Obtener nombre del archivo desde headers o usar uno por defecto
+      const contentDisposition = response.headers.get('Content-Disposition')
+      let filename = 'Reportes.zip'
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/)
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1]
+        }
+      }
+      
+      // Crear enlace de descarga
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(downloadUrl)
+      
+      console.log('✅ [ReportesService] ZIP descargado:', filename)
+      
+      return { success: true, filename }
+    } catch (error) {
+      console.error('❌ [ReportesService] Error descargando ZIP:', error)
+      throw error
+    }
   }
 }
 

@@ -137,18 +137,35 @@
                 </svg>
                 Filtros de Búsqueda
               </h3>
-              <!-- Botón firmar todos los pendientes del período seleccionado -->
-              <button 
-                v-if="reportesPendientesFiltrados.length > 0" 
-                @click="seleccionarTodosPendientes" 
-                class="btn-firmar-todos"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 19l7-7 3 3-7 7-3-3z"/>
-                  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
-                </svg>
-                Seleccionar Todos Pendientes ({{ reportesPendientesFiltrados.length }})
-              </button>
+              <!-- Botones de acciones masivas -->
+              <div class="header-actions-buttons">
+                <!-- Botón firmar todos los pendientes del período seleccionado -->
+                <button 
+                  v-if="reportesPendientesFiltrados.length > 0" 
+                  @click="seleccionarTodosPendientes" 
+                  class="btn-firmar-todos"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                  </svg>
+                  Seleccionar Todos Pendientes ({{ reportesPendientesFiltrados.length }})
+                </button>
+
+                <!-- Botón descargar reportes -->
+                <button 
+                  @click="abrirModalDescarga" 
+                  class="btn-descargar-reportes"
+                  title="Descargar reportes en ZIP"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Descargar Reportes
+                </button>
+              </div>
             </div>
             
             <div class="filters-grid">
@@ -592,6 +609,106 @@
           </div>
         </Transition>
       </Teleport>
+
+      <!-- Modal de Descarga de Reportes -->
+      <Teleport to="body">
+        <Transition name="modal-fade">
+          <div v-if="mostrarModalDescarga" class="modal-overlay" @click.self="cerrarModalDescarga">
+            <div class="modal-container modal-descarga">
+              <div class="modal-header descarga-header">
+                <div class="modal-icon descarga-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </div>
+                <div class="modal-title-container">
+                  <h3>Descargar Reportes en ZIP</h3>
+                  <p>Selecciona los filtros para descargar</p>
+                </div>
+                <button @click="cerrarModalDescarga" class="btn-close-modal">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <div class="modal-body descarga-body">
+                <div class="descarga-info-box">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                  <p>Los reportes se descargarán en formato PDF organizados en carpetas por territorio y período.</p>
+                </div>
+
+                <div class="descarga-opciones">
+                  <div class="opcion-group">
+                    <label class="opcion-label">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                      </svg>
+                      Tipo de Reportes
+                    </label>
+                    <div class="radio-group">
+                      <label class="radio-option">
+                        <input type="radio" v-model="tipoDescarga" value="todos" name="tipo">
+                        <span class="radio-label">Todos los reportes</span>
+                        <span class="radio-count" v-if="reportesFiltrados.length > 0">({{ reportesFiltrados.length }})</span>
+                      </label>
+                      <label class="radio-option">
+                        <input type="radio" v-model="tipoDescarga" value="firmados" name="tipo">
+                        <span class="radio-label">Solo firmados</span>
+                        <span class="radio-count" v-if="reportesFirmados.length > 0">({{ reportesFirmados.length }})</span>
+                      </label>
+                      <label class="radio-option">
+                        <input type="radio" v-model="tipoDescarga" value="pendientes" name="tipo">
+                        <span class="radio-label">Solo pendientes</span>
+                        <span class="radio-count" v-if="reportesPendientesFiltrados.length > 0">({{ reportesPendientesFiltrados.length }})</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="filtros-actuales" v-if="filtros.mes || filtros.anio">
+                    <p class="filtros-label">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                      </svg>
+                      Filtros aplicados:
+                    </p>
+                    <div class="filtros-tags">
+                      <span v-if="filtros.mes" class="filtro-tag">{{ filtros.mes }}</span>
+                      <span v-if="filtros.anio" class="filtro-tag">{{ filtros.anio }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button @click="cerrarModalDescarga" class="btn-cancel">
+                  Cancelar
+                </button>
+                <button 
+                  @click="descargarReportesZip" 
+                  class="btn-descargar-confirm"
+                  :disabled="descargandoZip"
+                >
+                  <svg v-if="!descargandoZip" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  <div v-else class="spinner-mini white"></div>
+                  {{ descargandoZip ? 'Descargando...' : 'Descargar ZIP' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
     </main>
   </div>
 </template>
@@ -633,6 +750,11 @@ const firmaValida = ref(false)
 // Modal de éxito
 const mostrarModalExito = ref(false)
 const resultadoFirma = ref({ exitosos: 0, fallidos: 0 })
+
+// Modal de descarga
+const mostrarModalDescarga = ref(false)
+const tipoDescarga = ref('todos')
+const descargandoZip = ref(false)
 
 const estadisticas = ref({
   totalReportes: 0,
@@ -1067,6 +1189,49 @@ async function confirmarFirma() {
 function cerrarModalExito() {
   mostrarModalExito.value = false
   resultadoFirma.value = { exitosos: 0, fallidos: 0 }
+}
+
+// Funciones para descarga de reportes
+function abrirModalDescarga() {
+  mostrarModalDescarga.value = true
+  tipoDescarga.value = 'todos'
+}
+
+function cerrarModalDescarga() {
+  mostrarModalDescarga.value = false
+  descargandoZip.value = false
+}
+
+async function descargarReportesZip() {
+  try {
+    descargandoZip.value = true
+    
+    const params = new URLSearchParams()
+    if (filtros.value.mes) params.append('mes', filtros.value.mes)
+    if (filtros.value.anio) params.append('anio', filtros.value.anio)
+    params.append('tipo_descarga', tipoDescarga.value)
+    
+    console.log('📦 Descargando ZIP:', { 
+      mes: filtros.value.mes, 
+      anio: filtros.value.anio, 
+      tipo: tipoDescarga.value 
+    })
+    
+    const response = await reportesService.descargarReportesZip(params)
+    
+    if (response.success) {
+      console.log('✅ ZIP descargado exitosamente')
+      cerrarModalDescarga()
+    } else {
+      throw new Error(response.message || 'Error al descargar reportes')
+    }
+    
+  } catch (error) {
+    console.error('❌ Error descargando ZIP:', error)
+    alert(error.message || 'Error al descargar los reportes. Por favor intenta de nuevo.')
+  } finally {
+    descargandoZip.value = false
+  }
 }
 
 // Callback cuando cambia el estado de la firma
@@ -1844,6 +2009,13 @@ onMounted(() => {
    BOTONES SELECCIONAR TODOS EN HEADER
    ========================================== */
 
+.header-actions-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .btn-firmar-todos {
   display: inline-flex;
   align-items: center;
@@ -1879,6 +2051,41 @@ onMounted(() => {
 }
 
 .btn-firmar-todos svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.btn-descargar-reportes {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  color: white;
+  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.25);
+  white-space: nowrap;
+}
+
+.btn-descargar-reportes:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-descargar-reportes:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-descargar-reportes svg {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
@@ -2284,6 +2491,210 @@ onMounted(() => {
 }
 
 /* ==========================================
+   MODAL DE DESCARGA
+   ========================================== */
+
+.modal-descarga {
+  max-width: 540px;
+  width: 95%;
+}
+
+.descarga-header {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.descarga-icon {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.descarga-body {
+  padding: 24px;
+}
+
+.descarga-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.descarga-info-box svg {
+  flex-shrink: 0;
+  color: #2563eb;
+  margin-top: 2px;
+}
+
+.descarga-info-box p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #374151;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+.descarga-opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.opcion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.opcion-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.opcion-label svg {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.radio-option:hover {
+  background: #f3f4f6;
+  border-color: #3b82f6;
+}
+
+.radio-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.radio-label {
+  flex: 1;
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.radio-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #e5e7eb;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.filtros-actuales {
+  background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+  border: 1px solid #fde047;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.filtros-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #78350f;
+  margin: 0 0 10px;
+  font-family: 'Inter', sans-serif;
+}
+
+.filtros-label svg {
+  color: #ca8a04;
+  flex-shrink: 0;
+}
+
+.filtros-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #92400e;
+  background: #fef9c3;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #fde047;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-descargar-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 24px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+.btn-descargar-confirm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.btn-descargar-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-descargar-confirm svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ==========================================
    RESPONSIVE PARA FIRMA
    ========================================== */
 
@@ -2392,5 +2803,72 @@ onMounted(() => {
     width: 26px;
     height: 26px;
   }
+
+  .header-actions-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-firmar-todos,
+  .btn-descargar-reportes {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.75rem;
+    padding: 9px 14px;
+  }
+
+  .modal-descarga {
+    max-width: 95%;
+  }
+
+  .descarga-body {
+    padding: 18px;
+  }
+
+  .radio-option {
+    padding: 10px 12px;
+  }
+
+  .filtros-actuales {
+    padding: 12px 14px;
+  }
 }
+
+@media (max-width: 480px) {
+  .header-actions-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .btn-firmar-todos,
+  .btn-descargar-reportes {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.72rem;
+    padding: 10px;
+  }
+
+  .descarga-info-box {
+    padding: 12px;
+  }
+
+  .descarga-info-box p {
+    font-size: 0.8rem;
+  }
+
+  .radio-group {
+    gap: 8px;
+  }
+
+  .radio-option {
+    padding: 10px;
+    font-size: 0.82rem;
+  }
+
+  .radio-count {
+    font-size: 0.7rem;
+  }
+}
+
 </style>

@@ -615,6 +615,13 @@
         <Transition name="modal-fade">
           <div v-if="mostrarModalDescarga" class="modal-overlay" @click.self="cerrarModalDescarga">
             <div class="modal-container modal-descarga">
+              <!-- Botón cerrar circular en esquina superior derecha -->
+              <button @click="cerrarModalDescarga" class="btn-close-corner">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+              
               <div class="modal-header descarga-header">
                 <div class="modal-icon descarga-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -624,77 +631,147 @@
                   </svg>
                 </div>
                 <div class="modal-title-container">
-                  <h3>Descargar Reportes en ZIP</h3>
-                  <p>Selecciona los filtros para descargar</p>
+                  <h3>Descargar Reportes</h3>
+                  <p>Selecciona el período y tipo de reportes</p>
                 </div>
-                <button @click="cerrarModalDescarga" class="btn-close-modal">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
               </div>
               
               <div class="modal-body descarga-body">
-                <div class="descarga-info-box">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="16" x2="12" y2="12"/>
-                    <line x1="12" y1="8" x2="12.01" y2="8"/>
-                  </svg>
-                  <p>Los reportes se descargarán en formato PDF organizados en carpetas por territorio y período.</p>
+                <!-- Selectores de Período -->
+                <div class="periodo-selectors">
+                  <div class="periodo-grupo">
+                    <label class="periodo-label">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                      Mes
+                    </label>
+                    <select v-model="descargaFiltros.mes" class="periodo-select" :class="{ 'select-required': !descargaFiltros.mes }">
+                      <option value="" disabled>Selecciona mes</option>
+                      <option v-for="mes in meses" :key="mes.value" :value="mes.value">{{ mes.label }}</option>
+                    </select>
+                  </div>
+                  
+                  <div class="periodo-grupo">
+                    <label class="periodo-label">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                      </svg>
+                      Año
+                    </label>
+                    <select v-model="descargaFiltros.anio" class="periodo-select" :class="{ 'select-required': !descargaFiltros.anio }">
+                      <option value="" disabled>Selecciona año</option>
+                      <option v-for="anio in anios" :key="anio" :value="anio">{{ anio }}</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div class="descarga-opciones">
-                  <div class="opcion-group">
-                    <label class="opcion-label">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 12l2 2 4-4"/>
-                        <circle cx="12" cy="12" r="10"/>
-                      </svg>
-                      Tipo de Reportes
+                <!-- Tipo de Reportes -->
+                <div class="tipo-reportes-section">
+                  <label class="section-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    Tipo de Reportes
+                  </label>
+                  <div class="tipo-reportes-grid">
+                    <label class="tipo-card" :class="{ 'active': tipoDescarga === 'todos' }">
+                      <input type="radio" v-model="tipoDescarga" value="todos" name="tipo-descarga">
+                      <div class="tipo-card-content">
+                        <div class="tipo-icon todos">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                          </svg>
+                        </div>
+                        <span class="tipo-name">Todos</span>
+                        <span class="tipo-count">{{ conteoReportesDescarga.todos }}</span>
+                      </div>
                     </label>
-                    <div class="radio-group">
-                      <label class="radio-option">
-                        <input type="radio" v-model="tipoDescarga" value="todos" name="tipo">
-                        <span class="radio-label">Todos los reportes</span>
-                        <span class="radio-count" v-if="reportesFiltrados.length > 0">({{ reportesFiltrados.length }})</span>
-                      </label>
-                      <label class="radio-option">
-                        <input type="radio" v-model="tipoDescarga" value="firmados" name="tipo">
-                        <span class="radio-label">Solo firmados</span>
-                        <span class="radio-count" v-if="reportesFirmados.length > 0">({{ reportesFirmados.length }})</span>
-                      </label>
-                      <label class="radio-option">
-                        <input type="radio" v-model="tipoDescarga" value="pendientes" name="tipo">
-                        <span class="radio-label">Solo pendientes</span>
-                        <span class="radio-count" v-if="reportesPendientesFiltrados.length > 0">({{ reportesPendientesFiltrados.length }})</span>
-                      </label>
-                    </div>
+                    
+                    <label class="tipo-card" :class="{ 'active': tipoDescarga === 'firmados' }">
+                      <input type="radio" v-model="tipoDescarga" value="firmados" name="tipo-descarga">
+                      <div class="tipo-card-content">
+                        <div class="tipo-icon firmados">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <circle cx="12" cy="12" r="10"/>
+                          </svg>
+                        </div>
+                        <span class="tipo-name">Firmados</span>
+                        <span class="tipo-count">{{ conteoReportesDescarga.firmados }}</span>
+                      </div>
+                    </label>
+                    
+                    <label class="tipo-card" :class="{ 'active': tipoDescarga === 'pendientes' }">
+                      <input type="radio" v-model="tipoDescarga" value="pendientes" name="tipo-descarga">
+                      <div class="tipo-card-content">
+                        <div class="tipo-icon pendientes">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                        </div>
+                        <span class="tipo-name">Pendientes</span>
+                        <span class="tipo-count">{{ conteoReportesDescarga.pendientes }}</span>
+                      </div>
+                    </label>
                   </div>
+                </div>
 
-                  <div class="filtros-actuales" v-if="filtros.mes || filtros.anio">
-                    <p class="filtros-label">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                      </svg>
-                      Filtros aplicados:
-                    </p>
-                    <div class="filtros-tags">
-                      <span v-if="filtros.mes" class="filtro-tag">{{ filtros.mes }}</span>
-                      <span v-if="filtros.anio" class="filtro-tag">{{ filtros.anio }}</span>
-                    </div>
+                <!-- Aviso de campos obligatorios -->
+                <div class="campos-obligatorios" v-if="!descargaFiltros.mes || !descargaFiltros.anio">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <span>Selecciona mes y año para continuar</span>
+                </div>
+
+                <!-- Resumen de descarga -->
+                <div class="descarga-resumen" v-else-if="conteoReportesDescarga[tipoDescarga] > 0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  <div class="resumen-texto">
+                    <span class="resumen-cantidad">{{ conteoReportesDescarga[tipoDescarga] }}</span>
+                    <span class="resumen-descripcion">
+                      {{ tipoDescarga === 'todos' ? 'reportes' : tipoDescarga === 'firmados' ? 'reportes firmados' : 'reportes pendientes' }}
+                      {{ descargaFiltros.mes ? 'de ' + descargaFiltros.mes : '' }}
+                      {{ descargaFiltros.anio ? descargaFiltros.anio : '' }}
+                    </span>
                   </div>
+                </div>
+
+                <div class="descarga-vacio" v-else>
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <p>No hay reportes disponibles con los filtros seleccionados</p>
                 </div>
               </div>
               
-              <div class="modal-footer">
+              <div class="modal-footer descarga-footer">
                 <button @click="cerrarModalDescarga" class="btn-cancel">
                   Cancelar
                 </button>
                 <button 
                   @click="descargarReportesZip" 
                   class="btn-descargar-confirm"
-                  :disabled="descargandoZip"
+                  :disabled="descargandoZip || conteoReportesDescarga[tipoDescarga] === 0 || !descargaFiltros.mes || !descargaFiltros.anio"
                 >
                   <svg v-if="!descargandoZip" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -702,7 +779,7 @@
                     <line x1="12" y1="15" x2="12" y2="3"/>
                   </svg>
                   <div v-else class="spinner-mini white"></div>
-                  {{ descargandoZip ? 'Descargando...' : 'Descargar ZIP' }}
+                  {{ descargandoZip ? 'Generando ZIP...' : 'Descargar ZIP' }}
                 </button>
               </div>
             </div>
@@ -714,7 +791,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '../components/Sidebar.vue'
 import FirmaDigitalAdmin from '../components/FirmaDigitalAdmin.vue'
@@ -755,6 +832,10 @@ const resultadoFirma = ref({ exitosos: 0, fallidos: 0 })
 const mostrarModalDescarga = ref(false)
 const tipoDescarga = ref('todos')
 const descargandoZip = ref(false)
+const descargaFiltros = ref({
+  mes: '',
+  anio: ''
+})
 
 const estadisticas = ref({
   totalReportes: 0,
@@ -838,6 +919,33 @@ const reportesFiltrados = computed(() => {
 const reportesFirmados = computed(() => reportes.value.filter(r => r.firmado_supervisor))
 const reportesPendientes = computed(() => reportes.value.filter(r => !r.firmado_supervisor))
 const reportesPendientesFiltrados = computed(() => reportesFiltrados.value.filter(r => !r.firmado_supervisor))
+
+// Computed para conteo de reportes según filtros de descarga
+const conteoReportesDescarga = computed(() => {
+  let reportesFiltradosDescarga = [...reportes.value]
+  
+  // Filtrar por mes seleccionado en el modal
+  if (descargaFiltros.value.mes) {
+    reportesFiltradosDescarga = reportesFiltradosDescarga.filter(r => {
+      const mesReporte = r.mes || r.nombre_reporte?.match(/Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre/)?.[0]
+      return mesReporte === descargaFiltros.value.mes
+    })
+  }
+  
+  // Filtrar por año seleccionado en el modal
+  if (descargaFiltros.value.anio) {
+    reportesFiltradosDescarga = reportesFiltradosDescarga.filter(r => {
+      const anioReporte = r.anio || r.nombre_reporte?.match(/\d{4}/)?.[0]
+      return anioReporte == descargaFiltros.value.anio
+    })
+  }
+  
+  return {
+    todos: reportesFiltradosDescarga.length,
+    firmados: reportesFiltradosDescarga.filter(r => r.firmado_supervisor).length,
+    pendientes: reportesFiltradosDescarga.filter(r => !r.firmado_supervisor).length
+  }
+})
 
 // Computed para selección
 const todosSeleccionados = computed(() => {
@@ -1193,8 +1301,10 @@ function cerrarModalExito() {
 
 // Funciones para descarga de reportes
 function abrirModalDescarga() {
-  mostrarModalDescarga.value = true
+  // Reiniciar filtros del modal de descarga
+  descargaFiltros.value = { mes: '', anio: '' }
   tipoDescarga.value = 'todos'
+  mostrarModalDescarga.value = true
 }
 
 function cerrarModalDescarga() {
@@ -1207,13 +1317,14 @@ async function descargarReportesZip() {
     descargandoZip.value = true
     
     const params = new URLSearchParams()
-    if (filtros.value.mes) params.append('mes', filtros.value.mes)
-    if (filtros.value.anio) params.append('anio', filtros.value.anio)
+    // Usar los filtros del modal de descarga
+    if (descargaFiltros.value.mes) params.append('mes', descargaFiltros.value.mes)
+    if (descargaFiltros.value.anio) params.append('anio', descargaFiltros.value.anio)
     params.append('tipo_descarga', tipoDescarga.value)
     
     console.log('📦 Descargando ZIP:', { 
-      mes: filtros.value.mes, 
-      anio: filtros.value.anio, 
+      mes: descargaFiltros.value.mes, 
+      anio: descargaFiltros.value.anio, 
       tipo: tipoDescarga.value 
     })
     
@@ -2491,173 +2602,373 @@ onMounted(() => {
 }
 
 /* ==========================================
-   MODAL DE DESCARGA
+   MODAL DE DESCARGA - NUEVO DISEÑO
    ========================================== */
 
 .modal-descarga {
-  max-width: 540px;
+  max-width: 480px;
   width: 95%;
+  border-radius: 20px;
+  overflow: visible;
+  position: relative;
+}
+
+/* Botón cerrar circular en esquina superior derecha */
+.btn-close-corner {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  transition: all 0.2s;
+}
+
+.btn-close-corner:hover {
+  background: #f3f4f6;
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.btn-close-corner svg {
+  color: #6b7280;
+}
+
+.btn-close-corner:hover svg {
+  color: #ef4444;
 }
 
 .descarga-header {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  border-bottom: none;
+  padding: 20px 24px;
+  border-radius: 20px 20px 0 0;
+}
+
+.descarga-header .modal-title-container h3 {
+  color: white;
+  font-size: 1.1rem;
+  text-shadow: none;
+}
+
+.descarga-header .modal-title-container p {
+  color: rgba(255,255,255,0.8);
 }
 
 .descarga-icon {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  background: rgba(255,255,255,0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.descarga-icon svg {
+  color: white;
+}
+
+.descarga-header .btn-close-modal {
+  color: white;
+  background: rgba(255,255,255,0.15);
+}
+
+.descarga-header .btn-close-modal:hover {
+  background: rgba(255,255,255,0.25);
 }
 
 .descarga-body {
-  padding: 24px;
-}
-
-.descarga-info-box {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border: 1px solid #bfdbfe;
-  border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 24px;
-}
-
-.descarga-info-box svg {
-  flex-shrink: 0;
-  color: #2563eb;
-  margin-top: 2px;
-}
-
-.descarga-info-box p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #374151;
-  line-height: 1.5;
-  font-family: 'Inter', sans-serif;
-}
-
-.descarga-opciones {
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.opcion-group {
+/* Selectores de Período */
+.periodo-selectors {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.periodo-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.periodo-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+}
+
+.periodo-label svg {
+  color: #3b82f6;
+}
+
+.periodo-select {
+  padding: 11px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+  color: #374151;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 10px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+}
+
+.periodo-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.periodo-select:hover {
+  border-color: #3b82f6;
+}
+
+.periodo-select.select-required {
+  border-color: #fca5a5;
+  background-color: #fef2f2;
+}
+
+.periodo-select.select-required:hover {
+  border-color: #f87171;
+}
+
+/* Aviso campos obligatorios */
+.campos-obligatorios {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.campos-obligatorios svg {
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.campos-obligatorios span {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #92400e;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Tipo de Reportes Section */
+.tipo-reportes-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.opcion-label {
+.section-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
+  gap: 6px;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #374151;
   font-family: 'Inter', sans-serif;
 }
 
-.opcion-label svg {
+.section-label svg {
   color: #3b82f6;
-  flex-shrink: 0;
 }
 
-.radio-group {
+.tipo-reportes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.tipo-card {
+  position: relative;
+  cursor: pointer;
+}
+
+.tipo-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.tipo-card-content {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.radio-option {
-  display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 8px;
+  padding: 14px 10px;
   background: #f9fafb;
   border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  cursor: pointer;
+  border-radius: 12px;
   transition: all 0.2s;
+}
+
+.tipo-card:hover .tipo-card-content {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+}
+
+.tipo-card.active .tipo-card-content {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.tipo-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.tipo-icon.todos {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #2563eb;
+}
+
+.tipo-icon.firmados {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #16a34a;
+}
+
+.tipo-icon.pendientes {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #ca8a04;
+}
+
+.tipo-card.active .tipo-icon.todos {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.tipo-card.active .tipo-icon.firmados {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.tipo-card.active .tipo-icon.pendientes {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.tipo-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
   font-family: 'Inter', sans-serif;
 }
 
-.radio-option:hover {
-  background: #f3f4f6;
-  border-color: #3b82f6;
+.tipo-card.active .tipo-name {
+  color: #1f2937;
 }
 
-.radio-option input[type="radio"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: #3b82f6;
-}
-
-.radio-option input[type="radio"]:checked + .radio-label {
-  color: #2563eb;
-  font-weight: 600;
-}
-
-.radio-label {
-  flex: 1;
-  font-size: 0.875rem;
-  color: #374151;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.radio-count {
-  font-size: 0.75rem;
-  font-weight: 600;
+.tipo-count {
+  font-size: 0.85rem;
+  font-weight: 700;
   color: #6b7280;
-  background: #e5e7eb;
-  padding: 3px 10px;
-  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
 }
 
-.filtros-actuales {
-  background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
-  border: 1px solid #fde047;
-  border-radius: 10px;
+.tipo-card.active .tipo-count {
+  color: #1e40af;
+}
+
+/* Resumen de descarga */
+.descarga-resumen {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
   padding: 14px 16px;
 }
 
-.filtros-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #78350f;
-  margin: 0 0 10px;
-  font-family: 'Inter', sans-serif;
-}
-
-.filtros-label svg {
-  color: #ca8a04;
+.descarga-resumen svg {
   flex-shrink: 0;
+  color: #2563eb;
 }
 
-.filtros-tags {
+.resumen-texto {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: baseline;
+  gap: 4px;
 }
 
-.filtro-tag {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #92400e;
-  background: #fef9c3;
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px solid #fde047;
+.resumen-cantidad {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e40af;
   font-family: 'Inter', sans-serif;
+}
+
+.resumen-descripcion {
+  font-size: 0.85rem;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+}
+
+.descarga-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.descarga-vacio svg {
+  color: #dc2626;
+  opacity: 0.6;
+}
+
+.descarga-vacio p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #991b1b;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Footer del modal de descarga */
+.descarga-footer {
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 16px 20px;
+  gap: 12px;
 }
 
 .btn-descargar-confirm {
@@ -2665,10 +2976,10 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 11px 24px;
+  padding: 12px 24px;
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 0.875rem;
   font-weight: 600;
   color: white;
@@ -2676,6 +2987,7 @@ onMounted(() => {
   transition: all 0.2s;
   font-family: 'Inter', sans-serif;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+  flex: 1;
 }
 
 .btn-descargar-confirm:hover:not(:disabled) {
@@ -2685,8 +2997,9 @@ onMounted(() => {
 }
 
 .btn-descargar-confirm:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-descargar-confirm svg {
@@ -2819,18 +3132,71 @@ onMounted(() => {
 
   .modal-descarga {
     max-width: 95%;
+    margin: 10px;
   }
 
   .descarga-body {
-    padding: 18px;
+    padding: 16px;
+    gap: 16px;
   }
 
-  .radio-option {
+  .periodo-selectors {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .periodo-select {
     padding: 10px 12px;
+    font-size: 0.82rem;
   }
 
-  .filtros-actuales {
-    padding: 12px 14px;
+  .tipo-reportes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .tipo-card-content {
+    padding: 12px 8px;
+    gap: 6px;
+  }
+
+  .tipo-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .tipo-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .tipo-name {
+    font-size: 0.7rem;
+  }
+
+  .tipo-count {
+    font-size: 0.8rem;
+  }
+
+  .descarga-resumen {
+    padding: 12px;
+  }
+
+  .resumen-cantidad {
+    font-size: 1rem;
+  }
+
+  .resumen-descripcion {
+    font-size: 0.8rem;
+  }
+
+  .descarga-footer {
+    padding: 14px 16px;
+  }
+
+  .btn-descargar-confirm {
+    padding: 11px 20px;
+    font-size: 0.82rem;
   }
 }
 
@@ -2849,25 +3215,110 @@ onMounted(() => {
     padding: 10px;
   }
 
-  .descarga-info-box {
-    padding: 12px;
+  .modal-descarga {
+    max-width: 98%;
+    margin: 6px;
   }
 
-  .descarga-info-box p {
+  .descarga-header {
+    padding: 16px;
+  }
+
+  .descarga-header .modal-title-container h3 {
+    font-size: 1rem;
+  }
+
+  .descarga-body {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .periodo-selectors {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .periodo-label {
+    font-size: 0.75rem;
+  }
+
+  .periodo-select {
+    padding: 10px;
     font-size: 0.8rem;
   }
 
-  .radio-group {
+  .tipo-reportes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .tipo-card-content {
+    padding: 10px 6px;
+    gap: 4px;
+    border-radius: 10px;
+  }
+
+  .tipo-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .tipo-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .tipo-name {
+    font-size: 0.65rem;
+  }
+
+  .tipo-count {
+    font-size: 0.72rem;
+  }
+
+  .descarga-resumen {
+    padding: 10px 12px;
+    flex-direction: column;
+    text-align: center;
     gap: 8px;
   }
 
-  .radio-option {
-    padding: 10px;
-    font-size: 0.82rem;
+  .resumen-cantidad {
+    font-size: 1.1rem;
   }
 
-  .radio-count {
-    font-size: 0.7rem;
+  .resumen-descripcion {
+    font-size: 0.78rem;
+  }
+
+  .descarga-vacio {
+    padding: 18px;
+  }
+
+  .descarga-vacio svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .descarga-vacio p {
+    font-size: 0.8rem;
+  }
+
+  .descarga-footer {
+    padding: 12px 14px;
+    flex-direction: column;
+  }
+
+  .btn-cancel {
+    order: 2;
+  }
+
+  .btn-descargar-confirm {
+    order: 1;
+    width: 100%;
+    padding: 12px;
+    font-size: 0.85rem;
   }
 }
 

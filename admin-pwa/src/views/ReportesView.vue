@@ -41,65 +41,6 @@
           <span>Reportes de {{ territorioUsuario }}</span>
         </div>
 
-        <!-- Estadísticas Rápidas -->
-        <div class="stats-section">
-          <div class="stats-grid">
-            <div class="stat-card total">
-              <div class="stat-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                </svg>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">{{ estadisticas.totalReportes }}</span>
-                <span class="stat-label">Total Reportes</span>
-              </div>
-            </div>
-            
-            <div class="stat-card firmados">
-              <div class="stat-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 12l2 2 4-4"/>
-                  <circle cx="12" cy="12" r="10"/>
-                </svg>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">{{ reportesFirmados.length }}</span>
-                <span class="stat-label">Firmados</span>
-              </div>
-            </div>
-            
-            <div class="stat-card pendientes">
-              <div class="stat-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">{{ reportesPendientes.length }}</span>
-                <span class="stat-label">Pendientes</span>
-              </div>
-            </div>
-            
-            <div class="stat-card usuarios">
-              <div class="stat-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">{{ estadisticas.usuariosConReportes }}</span>
-                <span class="stat-label">Usuarios Activos</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Barra de acciones para firma masiva -->
         <div v-if="reportesSeleccionados.length > 0" class="firma-actions-bar">
           <div class="firma-actions-info">
@@ -275,6 +216,55 @@
                   </svg>
                   Limpiar Filtros
                 </button>
+              </div>
+            </div>
+
+            <!-- Estadísticas Compactas -->
+            <div class="stats-compact">
+              <div class="stat-compact total">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <div class="stat-compact-info">
+                  <span class="stat-compact-value">{{ estadisticas.totalReportes }}</span>
+                  <span class="stat-compact-label">Total Reportes</span>
+                </div>
+              </div>
+              
+              <div class="stat-compact firmados">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12l2 2 4-4"/>
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <div class="stat-compact-info">
+                  <span class="stat-compact-value">{{ reportesFirmados.length }}</span>
+                  <span class="stat-compact-label">Firmados</span>
+                </div>
+              </div>
+              
+              <div class="stat-compact pendientes">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <div class="stat-compact-info">
+                  <span class="stat-compact-value">{{ reportesPendientes.length }}</span>
+                  <span class="stat-compact-label">Pendientes</span>
+                </div>
+              </div>
+              
+              <div class="stat-compact usuarios">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <div class="stat-compact-info">
+                  <span class="stat-compact-value">{{ estadisticas.usuariosConReportes }}</span>
+                  <span class="stat-compact-label">Usuarios Activos</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1579,30 +1569,113 @@ onMounted(() => {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
-.stats-section { margin-bottom: clamp(16px, 2vw, 24px); }
+/* Compact stats dentro de filtros */
+.stats-compact {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(8px, 1vw, 12px);
+  padding: clamp(10px, 1.2vw, 14px) clamp(12px, 1.5vw, 16px);
+  margin-top: clamp(10px, 1.2vw, 14px);
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
 
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: clamp(12px, 1.5vw, 16px); }
+.stat-compact {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1vw, 12px);
+  padding: clamp(10px, 1.2vw, 12px) clamp(12px, 1.4vw, 14px);
+  background: white;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
 
-.stat-card { background: white; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.05); transition: all 0.2s; }
+.stat-compact::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
 
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+.stat-compact:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: currentColor;
+}
 
-.stat-icon { width: 40px; height: 40px; min-width: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stat-compact:hover::before {
+  opacity: 1;
+}
 
-.stat-icon svg { width: 20px; height: 20px; max-width: 20px; max-height: 20px; color: white; flex-shrink: 0; }
+.stat-compact.total { color: #4CAF50; }
+.stat-compact.firmados { color: #22c55e; }
+.stat-compact.pendientes { color: #f59e0b; }
+.stat-compact.usuarios { color: #9C27B0; }
 
-.stat-card.total .stat-icon { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
-.stat-card.mes .stat-icon { background: linear-gradient(135deg, #2196F3, #1565C0); }
-.stat-card.pdf .stat-icon { background: linear-gradient(135deg, #F44336, #C62828); }
-.stat-card.usuarios .stat-icon { background: linear-gradient(135deg, #9C27B0, #6A1B9A); }
-.stat-card.firmados .stat-icon { background: linear-gradient(135deg, #22c55e, #16a34a); }
-.stat-card.pendientes .stat-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.stat-compact svg {
+  width: clamp(18px, 2vw, 22px);
+  height: clamp(18px, 2vw, 22px);
+  flex-shrink: 0;
+  stroke-width: 2.2;
+  color: currentColor;
+  transition: all 0.25s ease;
+  opacity: 0.9;
+}
 
-.stat-info { display: flex; flex-direction: column; }
+.stat-compact:hover svg {
+  transform: scale(1.15);
+  opacity: 1;
+}
 
-.stat-value { font-size: 1.25rem; font-weight: 700; color: #1a1a1a; font-family: 'Inter', sans-serif; line-height: 1; }
+.stat-compact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  text-align: center;
+}
 
-.stat-label { font-size: 0.7rem; color: #666; font-family: 'Inter', sans-serif; margin-top: 2px; }
+.stat-compact-value {
+  font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+  font-weight: 700;
+  color: #1a1a1a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.stat-compact-label {
+  font-size: clamp(0.68rem, 0.85vw, 0.72rem);
+  font-weight: 500;
+  color: #6b7280;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .stats-compact {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-compact {
+    grid-template-columns: 1fr;
+  }
+}
 
 .filters-section { margin-bottom: clamp(16px, 2vw, 24px); }
 

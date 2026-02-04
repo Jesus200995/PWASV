@@ -145,9 +145,9 @@
                   @click="seleccionarTodosPendientes" 
                   class="btn-firmar-todos"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 19l7-7 3 3-7 7-3-3z"/>
-                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4"/>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
                   </svg>
                   Seleccionar Todos Pendientes ({{ reportesPendientesFiltrados.length }})
                 </button>
@@ -158,7 +158,7 @@
                   class="btn-descargar-reportes"
                   title="Descargar reportes en ZIP"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
                     <line x1="12" y1="15" x2="12" y2="3"/>
@@ -2263,19 +2263,20 @@ onMounted(() => {
 .btn-firmar-todos {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
+  gap: 10px;
+  padding: 11px 20px;
   border-radius: 50px;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
-  font-family: 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   background: linear-gradient(135deg, #22c55e, #16a34a);
   border: none;
   color: white;
   box-shadow: 0 3px 10px rgba(34, 197, 94, 0.25);
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .btn-firmar-todos:hover:not(:disabled) {
@@ -2295,27 +2296,32 @@ onMounted(() => {
 }
 
 .btn-firmar-todos svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+  stroke: rgba(230, 240, 255, 0.95);
+  color: rgba(230, 240, 255, 0.95);
 }
 
 .btn-descargar-reportes {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
+  gap: 10px;
+  padding: 11px 20px;
   border-radius: 50px;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
-  font-family: 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   border: none;
   color: white;
   box-shadow: 0 3px 10px rgba(59, 130, 246, 0.25);
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .btn-descargar-reportes:hover {
@@ -2330,9 +2336,13 @@ onMounted(() => {
 }
 
 .btn-descargar-reportes svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+  stroke: rgba(219, 234, 254, 0.95);
+  color: rgba(219, 234, 254, 0.95);
 }
 
 /* ==========================================

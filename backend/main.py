@@ -2673,9 +2673,9 @@ async def obtener_usuarios(territorio: str = None):
         
         # Construir query base
         if tiene_columna_rol:
-            base_query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, rol, territorio FROM usuarios"
+            base_query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, rol, territorio, activo FROM usuarios"
         else:
-            base_query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, territorio FROM usuarios"
+            base_query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, territorio, activo FROM usuarios"
         
         # Agregar filtro de territorio si se proporciona
         if territorio:
@@ -2703,7 +2703,8 @@ async def obtener_usuarios(territorio: str = None):
                 "contrasena": row[6],
                 "telefono": row[7] if len(row) > 7 else None,
                 "rol": row[8] if tiene_columna_rol and len(row) > 8 else 'user',
-                "territorio": row[9] if tiene_columna_rol and len(row) > 9 else (row[8] if not tiene_columna_rol and len(row) > 8 else None)
+                "territorio": row[9] if tiene_columna_rol and len(row) > 9 else (row[8] if not tiene_columna_rol and len(row) > 8 else None),
+                "activo": row[10] if tiene_columna_rol and len(row) > 10 else (row[9] if not tiene_columna_rol and len(row) > 9 else True)
             }
             usuarios.append(usuario)
         

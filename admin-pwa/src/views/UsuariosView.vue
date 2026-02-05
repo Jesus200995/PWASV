@@ -189,30 +189,35 @@
               <thead>
                 <tr>
                   <th class="col-id">ID</th>
-                  <th class="col-nombre" style="text-align: center;">Nombre</th>
+                  <th class="col-nombre">Nombre</th>
                   <th class="col-correo">Correo</th>
                   <th class="col-cargo">Cargo</th>
                   <th class="col-supervisor">Supervisor</th>
-                  <th class="col-fecha">Fecha</th>
                   <th class="col-curp">CURP</th>
                   <th class="col-territorio">Territorio</th>
+                  <th class="col-estado">Estado</th>
                   <th v-if="puedeVerAcciones" class="col-acciones">Acciones</th>
                 </tr>
               </thead>
-              <tbody>                <tr v-for="usuario in usuariosPaginados" :key="usuario.id">
+              <tbody>                <tr v-for="usuario in usuariosPaginados" :key="usuario.id" :class="{ 'fila-inactiva': usuario.activo === false }">
                   <td class="col-id">#{{ usuario.id }}</td>
                   <td class="col-nombre">
                     <span class="nombre-normal">{{ usuario.nombre_completo || 'Sin nombre' }}</span>
                   </td>
-                  <td>{{ usuario.correo }}</td>
-                  <td>{{ usuario.cargo }}</td>
-                  <td>{{ usuario.supervisor }}</td>
-                  <td>{{ formatFecha(usuario.created_at || new Date()) }}</td>
+                  <td class="col-correo">{{ usuario.correo }}</td>
+                  <td class="col-cargo">{{ usuario.cargo }}</td>
+                  <td class="col-supervisor">{{ usuario.supervisor }}</td>
                   <td class="col-curp">
                     <span class="curp-text">{{ (usuario.curp || 'N/A').toUpperCase() }}</span>
                   </td>
                   <td class="col-territorio">
                     <span :class="usuario.territorio ? 'territorio-text' : 'territorio-empty'">{{ usuario.territorio || 'Sin asignar' }}</span>
+                  </td>
+                  <td class="col-estado">
+                    <span :class="['estado-badge-cell', usuario.activo === false ? 'estado-inactivo' : 'estado-activo']">
+                      <span class="estado-dot"></span>
+                      {{ usuario.activo === false ? 'Inactivo' : 'Activo' }}
+                    </span>
                   </td>
                   <td v-if="puedeVerAcciones" class="col-acciones">
                     <div class="actions-container">
@@ -1382,6 +1387,7 @@ const imprimirUsuarios = () => {
       .col-supervisor { width: 140px; }
       .col-curp { width: 120px; text-align: center; }
       .col-territorio { width: 100px; text-align: center; }
+      .col-estado { width: 70px; text-align: center; font-size: 8px; }
       .col-telefono { width: 120px; font-family: monospace; font-size: 8px; }
       
       .estado-activo { 
@@ -1497,12 +1503,13 @@ const imprimirUsuarios = () => {
             <th class="col-supervisor">Supervisor</th>
             <th class="col-curp">CURP</th>
             <th class="col-territorio">Territorio</th>
+            <th class="col-estado">Estado</th>
           </tr>
         </thead>
         <tbody>
           ${usuariosFiltrados.value.map(usuario => {
             return `
-            <tr>
+            <tr style="${usuario.activo === false ? 'opacity:0.45;background:#f0f0f0;color:#999;' : ''}">
               <td class="col-id">${usuario.id}</td>
               <td class="col-correo">${usuario.correo || 'No especificado'}</td>
               <td class="col-nombre">${usuario.nombre_completo || 'Sin nombre'}</td>
@@ -1510,6 +1517,7 @@ const imprimirUsuarios = () => {
               <td class="col-supervisor">${usuario.supervisor || 'Sin supervisor'}</td>
               <td class="col-curp">${(usuario.curp || 'Sin CURP').toUpperCase()}</td>
               <td class="col-territorio">${usuario.territorio || ''}</td>
+              <td class="col-estado" style="color:${usuario.activo === false ? '#999' : '#2e7d32'};font-weight:700;">${usuario.activo === false ? 'Inactivo' : 'Activo'}</td>
             </tr>
             `
           }).join('')}
@@ -2836,14 +2844,14 @@ const logout = () => {
 }
 
 /* Anchos FIJOS específicos para cada columna */
-.usuarios-table th.col-id { width: 60px; }
-.usuarios-table th.col-nombre { width: 140px; }
-.usuarios-table th.col-correo { width: 180px; }
-.usuarios-table th.col-cargo { width: 120px; }
-.usuarios-table th.col-supervisor { width: 140px; }
-.usuarios-table th.col-fecha { width: 100px; }
-.usuarios-table th.col-curp { width: 120px; }
-.usuarios-table th.col-territorio { width: 110px; }
+.usuarios-table th.col-id { width: 55px; min-width: 55px; }
+.usuarios-table th.col-nombre { width: 160px; min-width: 160px; }
+.usuarios-table th.col-correo { width: 200px; min-width: 200px; }
+.usuarios-table th.col-cargo { width: 140px; min-width: 140px; }
+.usuarios-table th.col-supervisor { width: 150px; min-width: 150px; }
+.usuarios-table th.col-curp { width: 145px; min-width: 145px; }
+.usuarios-table th.col-territorio { width: 150px; min-width: 150px; }
+.usuarios-table th.col-estado { width: 90px; min-width: 90px; }
 .usuarios-table th.col-acciones { 
   width: 200px !important; 
   min-width: 200px !important;
@@ -2867,33 +2875,49 @@ const logout = () => {
 }
 
 /* Anchos mínimos simplificados para celdas */
-.usuarios-table td:nth-child(1) { min-width: 50px; }  /* ID */
-.usuarios-table td:nth-child(2) { 
-  min-width: 150px; 
+.usuarios-table td.col-id { min-width: 55px; max-width: 55px; overflow: hidden; }  /* ID */
+.usuarios-table td.col-nombre { 
+  min-width: 160px; 
+  max-width: 160px;
   text-align: left; 
   padding-left: clamp(8px, 2vw, 12px); 
-  white-space: normal !important;
-  word-wrap: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 } /* Nombre */
-.usuarios-table td:nth-child(3) { 
-  min-width: 150px; 
-  white-space: normal !important;
-  word-wrap: break-word;
+.usuarios-table td.col-correo { 
+  min-width: 200px; 
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 } /* Correo */
-.usuarios-table td:nth-child(4) { 
-  min-width: 100px; 
-  white-space: normal !important;
-  word-wrap: break-word;
+.usuarios-table td.col-cargo { 
+  min-width: 140px; 
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 } /* Cargo */
-.usuarios-table td:nth-child(5) { 
-  min-width: 100px; 
+.usuarios-table td.col-supervisor { 
+  min-width: 150px; 
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} /* Supervisor */
+.usuarios-table td.col-curp { min-width: 145px; max-width: 145px; } /* CURP */
+.usuarios-table td.col-territorio { 
+  min-width: 150px; 
+  max-width: 180px;
   white-space: normal !important;
   word-wrap: break-word;
-} /* Supervisor */
-.usuarios-table td:nth-child(6) { min-width: 90px; } /* Fecha */
-.usuarios-table td:nth-child(7) { min-width: 110px; } /* CURP */
-.usuarios-table td:nth-child(8) { min-width: 100px; } /* Territorio */
-.usuarios-table td:nth-child(9) { min-width: 140px; } /* Acciones */
+  word-break: break-word;
+  line-height: 1.3;
+  vertical-align: middle;
+} /* Territorio */
+.usuarios-table td.col-estado { min-width: 90px; max-width: 90px; white-space: nowrap !important; } /* Estado */
+.usuarios-table td.col-acciones { min-width: 200px; } /* Acciones */
 
 /* Estilos para columna CURP */
 .col-curp {
@@ -2916,8 +2940,14 @@ const logout = () => {
 
 /* Estilos para columna Territorio */
 .col-territorio {
-  width: 110px;
+  width: 150px;
+  min-width: 150px;
+  max-width: 180px;
   text-align: center;
+  white-space: normal !important;
+  word-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.4;
 }
 
 .territorio-text {
@@ -2926,12 +2956,118 @@ const logout = () => {
   font-weight: 600;
   color: #1565C0;
   background: rgba(21, 101, 192, 0.1);
-  padding: 2px 8px;
+  padding: 4px 8px;
   border-radius: 4px;
+  white-space: normal !important;
+  word-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.3;
+  max-width: 100%;
+}
+
+/* ===== Columna Estado ===== */
+.col-estado {
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
+  text-align: center;
+  white-space: nowrap !important;
+  overflow: visible;
+}
+
+.estado-badge-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: capitalize;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.estado-badge-cell .estado-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.85; }
+}
+
+.estado-activo {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #2e7d32;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+.estado-activo .estado-dot {
+  background: linear-gradient(135deg, #66bb6a, #43a047);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.7), inset 0 1px 2px rgba(255,255,255,0.4);
+}
+.estado-activo:hover {
+  background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.25);
+}
+
+.estado-inactivo {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #c62828;
+  border: 1px solid rgba(244, 67, 54, 0.25);
+}
+.estado-inactivo .estado-dot {
+  background: linear-gradient(135deg, #ef5350, #d32f2f);
+  box-shadow: 0 0 8px rgba(244, 67, 54, 0.5), inset 0 1px 2px rgba(255,255,255,0.3);
+  animation: none;
+}
+.estado-inactivo:hover {
+  background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+  box-shadow: 0 3px 10px rgba(244, 67, 54, 0.2);
+}
+
+/* ===== Fila de usuario inactivo (apagado) ===== */
+.fila-inactiva {
+  background: linear-gradient(90deg, #e8e8e8 0%, #f0f0f0 50%, #e8e8e8 100%) !important;
+  transition: all 0.3s ease;
+}
+.fila-inactiva:hover {
+  background: linear-gradient(90deg, #ddd 0%, #e5e5e5 50%, #ddd 100%) !important;
+}
+.fila-inactiva td {
+  color: #888 !important;
+  border-bottom-color: #ccc !important;
+  opacity: 0.7;
+}
+.fila-inactiva .nombre-normal,
+.fila-inactiva .curp-text,
+.fila-inactiva .territorio-text,
+.fila-inactiva .territorio-empty {
+  color: #888 !important;
+  background: rgba(150, 150, 150, 0.15) !important;
+}
+.fila-inactiva .estado-badge-cell {
+  background: rgba(120, 120, 120, 0.2) !important;
+  color: #777 !important;
+}
+.fila-inactiva .estado-dot {
+  background: #999 !important;
+  box-shadow: none !important;
+}
+.fila-inactiva .btn-ver,
+.fila-inactiva .btn-editar,
+.fila-inactiva .btn-eliminar {
+  opacity: 0.5;
+}
+.fila-inactiva .btn-activar {
+  opacity: 1 !important;
 }
 
 /* Estilo para territorio vacío */

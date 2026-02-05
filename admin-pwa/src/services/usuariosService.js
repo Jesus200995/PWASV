@@ -353,7 +353,7 @@ class UsuariosService {
   async cambiarEstadoUsuario(id, activo) {
     try {
       console.log(`🔄 Cambiando estado de usuario ${id} a ${activo ? 'activo' : 'inactivo'}...`);
-      const response = await fetch(`${API_URL}/admin/usuarios/${id}/estado`, {
+      const response = await fetch(`${API_URL}/usuarios/${id}/estado`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

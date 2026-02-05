@@ -655,117 +655,65 @@
     </div>
 
     <!-- Modal de Cambio de Estado (Activar/Desactivar) -->
-    <div v-if="showEstadoModal" class="modal-overlay-modern" @click="cancelarCambioEstado">
-      <div class="modal-content-modern estado-modal" @click.stop>
-        <div class="modal-header-modern" :class="usuarioACambiarEstado?.activo === false ? 'activate-header' : 'deactivate-header'">
-          <div class="modal-title-section">
-            <div class="modal-icon" :class="usuarioACambiarEstado?.activo === false ? 'activate-icon' : 'deactivate-icon'">
-              <svg v-if="usuarioACambiarEstado?.activo === false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-              </svg>
-            </div>
-            <h3 class="modal-title">
-              {{ usuarioACambiarEstado?.activo === false ? 'Activar Cuenta' : 'Desactivar Cuenta' }}
-            </h3>
-          </div>
-          <button @click="cancelarCambioEstado" class="btn-close-modern">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-        
-        <div class="modal-body-modern">
-          <div v-if="usuarioACambiarEstado" class="estado-confirmation">
-            <div class="info-icon" :class="usuarioACambiarEstado.activo === false ? 'activate-bg' : 'deactivate-bg'">
-              <svg v-if="usuarioACambiarEstado.activo === false" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <svg v-else width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-              </svg>
-            </div>
-            
-            <h4 class="estado-question">
-              {{ usuarioACambiarEstado.activo === false 
-                ? '¿Deseas activar esta cuenta?' 
-                : '¿Deseas desactivar esta cuenta?' 
-              }}
-            </h4>
-            
-            <div class="user-info-estado">
-              <div class="info-row">
-                <span class="info-label">Nombre:</span>
-                <span class="info-value">{{ usuarioACambiarEstado.nombre_completo || 'Sin nombre' }}</span>
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="showEstadoModal" class="estado-overlay" @click="cancelarCambioEstado">
+          <Transition name="pop">
+            <div v-if="showEstadoModal" class="estado-box" @click.stop>
+              <!-- Icono superior -->
+              <div class="estado-icon-circle" :class="usuarioACambiarEstado?.activo === false ? 'icon-green' : 'icon-orange'">
+                <svg v-if="usuarioACambiarEstado?.activo === false" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <svg v-else width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                </svg>
               </div>
-              <div class="info-row">
-                <span class="info-label">Correo:</span>
-                <span class="info-value">{{ usuarioACambiarEstado.correo }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Cargo:</span>
-                <span class="info-value">{{ usuarioACambiarEstado.cargo || 'No especificado' }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Estado actual:</span>
-                <span class="info-value">
-                  <span :class="['status-badge', usuarioACambiarEstado.activo === false ? 'inactive' : 'active']">
-                    {{ usuarioACambiarEstado.activo === false ? 'Inactivo' : 'Activo' }}
-                  </span>
+
+              <!-- Título -->
+              <h3 class="estado-titulo">
+                {{ usuarioACambiarEstado?.activo === false ? 'Activar Cuenta' : 'Desactivar Cuenta' }}
+              </h3>
+
+              <!-- Info usuario -->
+              <div class="estado-user-card" v-if="usuarioACambiarEstado">
+                <p class="estado-user-name">{{ usuarioACambiarEstado.nombre_completo || 'Sin nombre' }}</p>
+                <p class="estado-user-email">{{ usuarioACambiarEstado.correo }}</p>
+                <span :class="['estado-badge', usuarioACambiarEstado.activo === false ? 'badge-inactive' : 'badge-active']">
+                  {{ usuarioACambiarEstado.activo === false ? 'Inactivo' : 'Activo' }}
                 </span>
               </div>
+
+              <!-- Mensaje -->
+              <p class="estado-msg" :class="usuarioACambiarEstado?.activo === false ? 'msg-green' : 'msg-orange'">
+                {{ usuarioACambiarEstado?.activo === false 
+                  ? 'El usuario podrá iniciar sesión nuevamente.' 
+                  : 'El usuario no podrá iniciar sesión.' 
+                }}
+              </p>
+
+              <!-- Botones -->
+              <div class="estado-actions">
+                <button @click="cancelarCambioEstado" class="estado-btn-cancel">Cancelar</button>
+                <button 
+                  @click="confirmarCambioEstado" 
+                  :class="['estado-btn-confirm', usuarioACambiarEstado?.activo === false ? 'btn-green' : 'btn-orange']"
+                  :disabled="cambiandoEstado"
+                >
+                  <svg v-if="cambiandoEstado" class="spinner-small" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                  {{ cambiandoEstado 
+                    ? (usuarioACambiarEstado?.activo === false ? 'Activando...' : 'Desactivando...') 
+                    : (usuarioACambiarEstado?.activo === false ? 'Sí, activar' : 'Sí, desactivar') 
+                  }}
+                </button>
+              </div>
             </div>
-            
-            <p class="info-text" :class="usuarioACambiarEstado.activo === false ? 'activate-text' : 'deactivate-text'">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
-              {{ usuarioACambiarEstado.activo === false 
-                ? 'Al activar esta cuenta, el usuario podrá iniciar sesión y usar la aplicación normalmente.' 
-                : 'Al desactivar esta cuenta, el usuario no podrá iniciar sesión hasta que sea activado nuevamente.' 
-              }}
-            </p>
-          </div>
+          </Transition>
         </div>
-        
-        <div class="modal-footer-estado">
-          <button @click="cancelarCambioEstado" class="btn-cancel-estado">
-            Cancelar
-          </button>
-          <button 
-            @click="confirmarCambioEstado" 
-            :class="['btn-confirm-estado', usuarioACambiarEstado?.activo === false ? 'btn-activate' : 'btn-deactivate']"
-            :disabled="cambiandoEstado"
-          >
-            <svg v-if="cambiandoEstado" class="spinner-small" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12a9 9 0 11-6.219-8.56"/>
-            </svg>
-            <svg v-else-if="usuarioACambiarEstado?.activo === false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-            </svg>
-            {{ cambiandoEstado 
-              ? (usuarioACambiarEstado?.activo === false ? 'Activando...' : 'Desactivando...') 
-              : (usuarioACambiarEstado?.activo === false ? 'Activar Cuenta' : 'Desactivar Cuenta') 
-            }}
-          </button>
-        </div>
-      </div>
-    </div>
+      </Transition>
+    </Teleport>
 
     <!-- Modal de edición de usuario - REDISEÑO COMPLETO -->
     <Teleport to="body">
@@ -3567,290 +3515,215 @@ const logout = () => {
   to { transform: rotate(360deg); }
 }
 
-/* Estilos para el modal de cambio de estado (Activar/Desactivar) */
-.estado-modal {
-  max-width: 540px !important;
-  animation: slideIn 0.3s ease-out;
+/* Estilos para el modal compacto de cambio de estado */
+.estado-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.activate-header {
-  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-  border-bottom: 2px solid #4CAF50;
-}
-
-.deactivate-header {
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-  border-bottom: 2px solid #ff9800;
-}
-
-.activate-icon {
-  background: linear-gradient(135deg, #4CAF50, #388E3C);
-  color: white;
-}
-
-.deactivate-icon {
-  background: linear-gradient(135deg, #ff9800, #f57c00);
-  color: white;
-}
-
-.estado-confirmation {
+.estado-box {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 380px;
+  padding: 32px 28px 24px;
   text-align: center;
-  padding: 24px 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
-.info-icon {
-  margin: 0 auto 24px;
-  width: 80px;
-  height: 80px;
+.estado-icon-circle {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: pulse 2s ease-in-out infinite;
+  margin: 0 auto 16px;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.9;
-  }
+.icon-green {
+  background: linear-gradient(135deg, #4CAF50, #2e7d32);
+  box-shadow: 0 4px 14px rgba(76, 175, 80, 0.35);
 }
 
-.activate-bg {
-  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.2);
+.icon-orange {
+  background: linear-gradient(135deg, #ff9800, #e65100);
+  box-shadow: 0 4px 14px rgba(255, 152, 0, 0.35);
 }
 
-.deactivate-bg {
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-  box-shadow: 0 4px 20px rgba(255, 152, 0, 0.2);
-}
-
-.estado-question {
-  color: #1a1a1a;
-  margin-bottom: 24px;
-  font-size: 1.25rem;
+.estado-titulo {
+  font-size: 1.15rem;
   font-weight: 700;
-  line-height: 1.4;
+  color: #1a1a1a;
+  margin: 0 0 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.user-info-estado {
-  background: linear-gradient(135deg, #f8f9fa, #ffffff);
-  border: 1.5px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 20px;
-  margin: 24px 0;
-  text-align: left;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+.estado-user-card {
+  background: #f8f9fb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
 }
 
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.info-row:last-child {
-  border-bottom: none;
-}
-
-.info-label {
-  font-size: 0.875rem;
-  color: #6b7280;
+.estado-user-name {
+  font-size: 0.95rem;
   font-weight: 600;
-}
-
-.info-value {
-  font-size: 0.9375rem;
   color: #1f2937;
-  font-weight: 500;
-  text-align: right;
-  max-width: 60%;
-  word-break: break-word;
+  margin: 0 0 4px;
 }
 
-.status-badge {
-  padding: 4px 12px;
+.estado-user-email {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0 0 10px;
+}
+
+.estado-badge {
+  display: inline-block;
+  padding: 3px 12px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  display: inline-block;
 }
 
-.status-badge.active {
-  background: linear-gradient(135deg, #4CAF50, #66BB6A);
-  color: white;
-  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+.badge-active {
+  background: #dcfce7;
+  color: #16a34a;
 }
 
-.status-badge.inactive {
-  background: linear-gradient(135deg, #9e9e9e, #bdbdbd);
-  color: white;
-  box-shadow: 0 2px 6px rgba(158, 158, 158, 0.3);
+.badge-inactive {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
-.info-text {
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  margin-top: 20px;
-  padding: 16px;
-  border-radius: 10px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  text-align: left;
-}
-
-.info-text svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.activate-text {
-  color: #2e7d32;
-  background: linear-gradient(135deg, #e8f5e9, #f1f8f4);
-  border-left: 4px solid #4CAF50;
-}
-
-.deactivate-text {
-  color: #e65100;
-  background: linear-gradient(135deg, #fff3e0, #fff8f0);
-  border-left: 4px solid #ff9800;
-}
-
-.modal-footer-estado {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  padding: 20px 24px;
-  border-top: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #f8f9fa, #ffffff);
-}
-
-.btn-cancel-estado {
-  background: linear-gradient(135deg, #6c757d, #5a6268);
-  color: white;
-  border: none;
-  padding: 12px 24px;
+.estado-msg {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0 0 20px;
+  padding: 10px 14px;
   border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(108, 117, 125, 0.2);
 }
 
-.btn-cancel-estado:hover {
-  background: linear-gradient(135deg, #5a6268, #495057);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+.msg-green {
+  background: #f0fdf4;
+  color: #15803d;
+  border-left: 3px solid #4CAF50;
 }
 
-.btn-confirm-estado {
-  border: none;
-  padding: 12px 24px;
+.msg-orange {
+  background: #fff7ed;
+  color: #c2410c;
+  border-left: 3px solid #ff9800;
+}
+
+.estado-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.estado-btn-cancel {
+  flex: 1;
+  padding: 10px;
+  border: 1.5px solid #d1d5db;
+  background: white;
   border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.estado-btn-cancel:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.estado-btn-confirm {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: white;
+  justify-content: center;
+  gap: 6px;
 }
 
-.btn-activate {
-  background: linear-gradient(135deg, #4CAF50, #388E3C);
+.btn-green {
+  background: linear-gradient(135deg, #4CAF50, #2e7d32);
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
-.btn-activate:hover:not(:disabled) {
-  background: linear-gradient(135deg, #388E3C, #2e7d32);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
+.btn-green:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(76, 175, 80, 0.45);
+  transform: translateY(-1px);
 }
 
-.btn-deactivate {
-  background: linear-gradient(135deg, #ff9800, #f57c00);
+.btn-orange {
+  background: linear-gradient(135deg, #ff9800, #e65100);
   box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
 }
 
-.btn-deactivate:hover:not(:disabled) {
-  background: linear-gradient(135deg, #f57c00, #e65100);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.4);
+.btn-orange:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(255, 152, 0, 0.45);
+  transform: translateY(-1px);
 }
 
-.btn-confirm-estado:disabled {
+.estado-btn-confirm:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
 
-/* Responsive para modal de estado */
-@media (max-width: 640px) {
-  .estado-modal {
-    max-width: 95vw !important;
-    margin: 10px;
+/* Transiciones del modal estado */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+.pop-enter-active {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.pop-leave-active {
+  transition: all 0.2s ease-in;
+}
+.pop-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.pop-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+@media (max-width: 480px) {
+  .estado-box {
+    max-width: 95vw;
+    padding: 24px 20px 20px;
   }
   
-  .estado-question {
-    font-size: 1.125rem;
-  }
-  
-  .info-icon {
-    width: 64px;
-    height: 64px;
-  }
-  
-  .info-icon svg {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .user-info-estado {
-    padding: 16px;
-  }
-  
-  .info-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-  
-  .info-value {
-    max-width: 100%;
-    text-align: left;
-  }
-  
-  .modal-footer-estado {
+  .estado-actions {
     flex-direction: column-reverse;
-  }
-  
-  .btn-cancel-estado,
-  .btn-confirm-estado {
-    width: 100%;
-    justify-content: center;
   }
 }
 

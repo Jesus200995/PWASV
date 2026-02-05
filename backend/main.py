@@ -3032,6 +3032,46 @@ TERRITORIOS_SEMBRANDO_VIDA = [
     "Oficinas Centrales"
 ]
 
+@app.patch("/usuarios/{user_id}/estado")
+async def cambiar_estado_usuario_regular(user_id: int, datos: dict):
+    """Activar o desactivar una cuenta de usuario de la tabla usuarios"""
+    try:
+        print(f"🔄 Cambiando estado de usuario ID: {user_id}")
+        
+        activo = datos.get("activo")
+        if activo is None:
+            raise HTTPException(status_code=400, detail="El campo 'activo' es requerido")
+        
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id, nombre_completo, correo FROM usuarios WHERE id = %s", (user_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail=f"Usuario {user_id} no encontrado")
+        
+        nombre = row[1] or row[2]
+        
+        # Actualizar estado
+        cursor.execute("UPDATE usuarios SET activo = %s WHERE id = %s", (activo, user_id))
+        conn.commit()
+        
+        estado_texto = "activado" if activo else "desactivado"
+        print(f"✅ Usuario {nombre} (ID: {user_id}) {estado_texto}")
+        return {
+            "message": f"Usuario {estado_texto} exitosamente",
+            "id": user_id,
+            "activo": activo
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error cambiando estado de usuario: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al cambiar estado: {str(e)}")
+
 class TerritorioUpdate(BaseModel):
     territorio: str
 

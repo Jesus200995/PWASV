@@ -58,15 +58,58 @@
                 </button>
               </div>
 
+              <!-- Filtro de Estado -->
+              <div class="filter-estado-group">
+                <div class="filter-estado-buttons">
+                  <button 
+                    @click="filtroEstado = 'todos'"
+                    :class="['filter-estado-btn', { active: filtroEstado === 'todos' }]"
+                    title="Ver todos los usuarios"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Todos
+                  </button>
+                  <button 
+                    @click="filtroEstado = 'activos'"
+                    :class="['filter-estado-btn activo', { active: filtroEstado === 'activos' }]"
+                    title="Ver solo usuarios activos"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    Activos
+                  </button>
+                  <button 
+                    @click="filtroEstado = 'inactivos'"
+                    :class="['filter-estado-btn inactivo', { active: filtroEstado === 'inactivos' }]"
+                    title="Ver solo usuarios inactivos"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                    </svg>
+                    Inactivos
+                  </button>
+                </div>
+              </div>
+
               <!-- Ordenamiento -->
               <div class="sort-group">
-                <label>Ordenar:</label>
                 <div class="sort-buttons">
                   <button 
                     @click="ordenarPor('id')"
                     :class="['sort-btn', { active: campoOrdenamiento === 'id' }]"
                     title="Ordenar por ID"
                   >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/>
+                    </svg>
                     ID
                     <svg v-if="campoOrdenamiento === 'id'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
@@ -78,6 +121,10 @@
                     :class="['sort-btn', { active: campoOrdenamiento === 'nombre' }]"
                     title="Ordenar por Nombre"
                   >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
                     Nombre
                     <svg v-if="campoOrdenamiento === 'nombre'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
@@ -89,6 +136,12 @@
                     :class="['sort-btn', { active: campoOrdenamiento === 'fecha' }]"
                     title="Ordenar por Fecha de Registro"
                   >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
                     Fecha
                     <svg v-if="campoOrdenamiento === 'fecha'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
@@ -1048,6 +1101,7 @@ const usuariosFiltrados = ref([])
 const loading = ref(false)
 const error = ref('')
 const searchTerm = ref('')
+const filtroEstado = ref('todos') // 'todos', 'activos', 'inactivos'
 const supervisoresPorTerritorio = ref({}) // Mapa de territorio -> supervisor
 
 // Variable para contador de usuarios
@@ -1564,7 +1618,7 @@ const imprimirUsuarios = () => {
 }
 
 const exportarExcel = () => {
-  // Headers completos con todos los campos (sin contraseña, fecha ni estado)
+  // Headers completos con todos los campos incluyendo Estado
   const headers = [
     'ID Usuario',
     'Correo Electrónico', 
@@ -1573,16 +1627,12 @@ const exportarExcel = () => {
     'Supervisor', 
     'CURP',
     'Territorio',
-    'Teléfono'
+    'Teléfono',
+    'Estado'
   ]
   
   const obtenerEstadoUsuario = (usuario) => {
-    const tieneCorreo = usuario.correo && usuario.correo.trim() !== ''
-    const tieneNombre = usuario.nombre_completo && usuario.nombre_completo.trim() !== ''
-    const tieneCargo = usuario.cargo && usuario.cargo.trim() !== ''
-    const tieneCurp = usuario.curp && usuario.curp.trim() !== ''
-    
-    return (tieneCorreo && tieneNombre && tieneCargo && tieneCurp) ? 'Activo' : 'Incompleto'
+    return usuario.activo === false ? 'Inactivo' : 'Activo'
   }
   
   const obtenerFechaRegistro = (usuario) => {
@@ -1607,7 +1657,8 @@ const exportarExcel = () => {
     usuario.supervisor || 'Sin supervisor',
     (usuario.curp || 'Sin CURP').toUpperCase(),
     usuario.territorio || '',
-    usuario.telefono || 'Sin teléfono'
+    usuario.telefono || 'Sin teléfono',
+    obtenerEstadoUsuario(usuario)
   ])
   
   // Crear contenido CSV con información adicional
@@ -1652,11 +1703,19 @@ const exportarExcel = () => {
 }
 
 const filtrarUsuarios = (resetPaginacion = true) => {
-  if (!searchTerm.value.trim()) {
-    usuariosFiltrados.value = usuarios.value
-  } else {
+  let resultado = usuarios.value
+  
+  // Filtrar por estado (activo/inactivo)
+  if (filtroEstado.value === 'activos') {
+    resultado = resultado.filter(usuario => usuario.activo === true || usuario.activo === undefined || usuario.activo === null)
+  } else if (filtroEstado.value === 'inactivos') {
+    resultado = resultado.filter(usuario => usuario.activo === false)
+  }
+  
+  // Filtrar por término de búsqueda
+  if (searchTerm.value.trim()) {
     const termino = searchTerm.value.toLowerCase()
-    usuariosFiltrados.value = usuarios.value.filter(usuario => 
+    resultado = resultado.filter(usuario => 
       usuario.correo.toLowerCase().includes(termino) ||
       (usuario.nombre_completo && usuario.nombre_completo.toLowerCase().includes(termino)) ||
       (usuario.cargo && usuario.cargo.toLowerCase().includes(termino)) ||
@@ -1665,6 +1724,9 @@ const filtrarUsuarios = (resetPaginacion = true) => {
       (usuario.territorio && usuario.territorio.toLowerCase().includes(termino))
     )
   }
+  
+  usuariosFiltrados.value = resultado
+  
   if (resetPaginacion) {
     resetearPaginacion()
   }
@@ -1818,6 +1880,9 @@ const confirmarCambioEstado = async () => {
     usuarioACambiarEstado.value.activo = nuevoEstado
     
     console.log(`✅ Usuario ${accion === 'activar' ? 'activado' : 'desactivado'} exitosamente`)
+    
+    // Actualizar la lista filtrada en tiempo real
+    filtrarUsuarios(false)
     
     // Cerrar modal
     cancelarCambioEstado()
@@ -2087,6 +2152,10 @@ const resetearPaginacion = () => {
 // Watchers para mejor funcionalidad
 watch(searchTerm, () => {
   filtrarUsuarios() // Sí resetear paginación al buscar
+})
+
+watch(filtroEstado, () => {
+  filtrarUsuarios() // Filtrar en tiempo real cuando cambia el estado
 })
 
 watch(usuarios, () => {
@@ -2410,7 +2479,7 @@ const logout = () => {
   gap: clamp(0.3rem, 0.8vw, 0.4rem);
 }
 
-.search-group, .sort-group, .export-actions {
+.search-group, .sort-group, .export-actions, .filter-estado-group {
   display: flex;
   align-items: center;
   gap: clamp(4px, 1vw, 6px);
@@ -2422,59 +2491,156 @@ const logout = () => {
   min-width: clamp(150px, 20vw, 180px);
 }
 
-.sort-group label {
-  font-weight: 600;
-  color: #4CAF50;
-  white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+/* ========== FILTRO DE ESTADO MEJORADO ========== */
+.filter-estado-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-estado-buttons {
+  display: flex;
+  gap: 4px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 255, 244, 0.95) 100%);
+  padding: 4px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(76, 175, 80, 0.2);
+  box-shadow: 
+    0 2px 8px rgba(76, 175, 80, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.filter-estado-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #6b7280;
   font-size: 11px;
-  min-width: fit-content;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  text-transform: capitalize;
+  letter-spacing: 0.2px;
+}
+
+.filter-estado-btn:hover {
+  background: rgba(156, 163, 175, 0.15);
+  color: #4b5563;
+  transform: translateY(-1px);
+}
+
+.filter-estado-btn.active {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.35);
+  transform: translateY(-1px);
+}
+
+.filter-estado-btn.activo {
+  color: #22c55e;
+}
+
+.filter-estado-btn.activo:hover {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+.filter-estado-btn.activo.active {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+}
+
+.filter-estado-btn.inactivo {
+  color: #ef4444;
+}
+
+.filter-estado-btn.inactivo:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+.filter-estado-btn.inactivo.active {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.filter-estado-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.filter-estado-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.filter-estado-btn.active svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .sort-buttons {
   display: flex;
-  gap: 6px;
+  gap: 4px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 255, 244, 0.95) 100%);
+  padding: 4px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(76, 175, 80, 0.2);
+  box-shadow: 
+    0 2px 8px rgba(76, 175, 80, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
 }
 
 .sort-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border: 1px solid rgba(76, 175, 80, 0.3);
+  gap: 5px;
+  padding: 6px 12px;
+  border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  background: transparent;
   color: #4CAF50;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(76, 175, 80, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  min-width: fit-content;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 
 .sort-btn:hover {
-  border-color: rgba(76, 175, 80, 0.5);
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.02) 100%);
+  background: rgba(76, 175, 80, 0.12);
+  color: #388E3C;
   transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
 }
 
 .sort-btn.active {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
   color: white;
-  border-color: #4CAF50;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
   transform: translateY(-1px);
 }
 
 .sort-btn.active:hover {
-  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%);
   transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.5);
+}
+
+.sort-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+}
+
+.sort-btn.active svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 /* Estilos para botones de exportación */
@@ -5013,6 +5179,40 @@ const logout = () => {
   .usuarios-table {
     min-width: 900px; /* Forzar scroll en tablets */
   }
+  
+  /* Responsive filtro estado */
+  .filter-estado-buttons {
+    padding: 3px;
+    border-radius: 14px;
+  }
+  
+  .filter-estado-btn {
+    padding: 5px 10px;
+    font-size: 10px;
+    gap: 4px;
+  }
+  
+  .filter-estado-btn svg {
+    width: 10px;
+    height: 10px;
+  }
+  
+  /* Responsive ordenar */
+  .sort-buttons {
+    padding: 3px;
+    border-radius: 14px;
+  }
+  
+  .sort-btn {
+    padding: 5px 10px;
+    font-size: 10px;
+    gap: 4px;
+  }
+  
+  .sort-btn svg {
+    width: 10px;
+    height: 10px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -5248,6 +5448,60 @@ const logout = () => {
     width: 100%;
     max-width: 100%;
     border-radius: clamp(4px, 1vw, 8px);
+  }
+  
+  /* Responsive filtro estado móvil */
+  .filter-estado-group {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .filter-estado-buttons {
+    width: 100%;
+    justify-content: center;
+    padding: 3px;
+    gap: 3px;
+  }
+  
+  .filter-estado-btn {
+    padding: 5px 8px;
+    font-size: 9px;
+    gap: 3px;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .filter-estado-btn svg {
+    width: 10px;
+    height: 10px;
+  }
+  
+  /* Responsive ordenar móvil */
+  .sort-group {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .sort-buttons {
+    width: 100%;
+    justify-content: center;
+    padding: 3px;
+    gap: 3px;
+  }
+  
+  .sort-btn {
+    padding: 5px 8px;
+    font-size: 9px;
+    gap: 3px;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .sort-btn svg {
+    width: 9px;
+    height: 9px;
   }
   
   .modal-content {

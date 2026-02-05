@@ -235,6 +235,25 @@
                         <span class="btn-label-editar">Editar</span>
                       </div>
                       <div class="action-container">
+                        <button 
+                          @click="toggleEstadoUsuario(usuario)" 
+                          :class="['btn-toggle', usuario.activo === false ? 'btn-activar' : 'btn-desactivar']" 
+                          :title="usuario.activo === false ? 'Activar cuenta' : 'Desactivar cuenta'"
+                        >
+                          <svg v-if="usuario.activo === false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                          </svg>
+                        </button>
+                        <span :class="usuario.activo === false ? 'btn-label-activar' : 'btn-label-desactivar'">
+                          {{ usuario.activo === false ? 'Activar' : 'Desactivar' }}
+                        </span>
+                      </div>
+                      <div class="action-container">
                         <button @click="confirmarEliminarUsuario(usuario)" class="btn-eliminar" title="Eliminar usuario">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3,6 5,6 21,6"></polyline>
@@ -1687,6 +1706,33 @@ const confirmarEliminarUsuario = (usuario) => {
   showDeleteModal.value = true
 }
 
+const toggleEstadoUsuario = async (usuario) => {
+  const nuevoEstado = !usuario.activo
+  const accion = nuevoEstado ? 'activar' : 'desactivar'
+  
+  if (!confirm(`¿Está seguro que desea ${accion} la cuenta de ${usuario.nombre_completo || usuario.correo}?`)) {
+    return
+  }
+  
+  try {
+    console.log(`🔄 ${accion === 'activar' ? 'Activando' : 'Desactivando'} usuario:`, usuario.username)
+    
+    // Llamar al servicio para cambiar el estado
+    await usuariosService.cambiarEstadoUsuario(usuario.id, nuevoEstado)
+    
+    // Actualizar el estado local
+    usuario.activo = nuevoEstado
+    
+    console.log(`✅ Usuario ${accion === 'activar' ? 'activado' : 'desactivado'} exitosamente`)
+    alert(`Cuenta ${accion === 'activar' ? 'activada' : 'desactivada'} exitosamente`)
+    
+  } catch (error) {
+    console.error(`❌ Error al ${accion} usuario:`, error)
+    alert(`Error al ${accion} la cuenta. Por favor, inténtalo de nuevo.`)
+  }
+}
+
+
 const cancelarEliminar = () => {
   showDeleteModal.value = false
   usuarioAEliminar.value = null
@@ -3050,6 +3096,83 @@ const logout = () => {
   transform: scale(1.1);
 }
 
+/* Estilos para el botón de toggle (activar/desactivar) */
+.btn-toggle {
+  width: clamp(24px, 4.5vw, 28px) !important;
+  height: clamp(24px, 4.5vw, 28px) !important;
+  min-width: clamp(24px, 4.5vw, 28px) !important;
+  min-height: clamp(24px, 4.5vw, 28px) !important;
+  padding: 0;
+  color: white;
+  border: none;
+  border-radius: 50% !important;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0 !important;
+  white-space: normal !important;
+}
+
+.btn-desactivar {
+  background: linear-gradient(135deg, #9e9e9e, #757575);
+  box-shadow: 0 2px 8px rgba(158, 158, 158, 0.25);
+}
+
+.btn-desactivar:hover {
+  background: linear-gradient(135deg, #757575, #616161);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(158, 158, 158, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-activar {
+  background: linear-gradient(135deg, #4CAF50, #388E3C);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
+}
+
+.btn-activar:hover {
+  background: linear-gradient(135deg, #388E3C, #2E7D32);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(76, 175, 80, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-toggle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-toggle:hover::before {
+  left: 100%;
+}
+
+.btn-toggle:active {
+  transform: translateY(-1px) scale(1.05);
+}
+
+.btn-toggle svg {
+  width: clamp(12px, 2.5vw, 14px);
+  height: clamp(12px, 2.5vw, 14px);
+  transition: all 0.3s ease;
+}
+
+.btn-toggle:hover svg {
+  transform: scale(1.1);
+}
+
+
 /* Estilos para el botón de editar */
 .btn-editar {
   width: clamp(24px, 4.5vw, 28px) !important;
@@ -3155,6 +3278,42 @@ const logout = () => {
 }
 
 .action-container:hover .btn-label-editar {
+  opacity: 1;
+  color: #f57c00;
+}
+
+/* Label para botón desactivar (gris) */
+.btn-label-desactivar {
+  font-size: 10px;
+  color: #9e9e9e;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.action-container:hover .btn-label-desactivar {
+  opacity: 1;
+  color: #757575;
+}
+
+/* Label para botón activar (verde) */
+.btn-label-activar {
+  font-size: 10px;
+  color: #4CAF50;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.action-container:hover .btn-label-activar {
+  opacity: 1;
+  color: #388E3C;
+}
+
   opacity: 1;
   color: #f57c00;
 }

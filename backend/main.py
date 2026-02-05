@@ -6869,6 +6869,44 @@ async def cambiar_rol_usuario_admin(user_id: int, datos: dict):
         print(f"❌ Error cambiando rol: {e}")
         raise HTTPException(status_code=500, detail=f"Error al cambiar rol: {str(e)}")
 
+@app.patch("/admin/usuarios/{user_id}/estado")
+async def cambiar_estado_usuario(user_id: int, datos: dict):
+    """Activar o desactivar un usuario administrativo"""
+    try:
+        print(f"🔄 Cambiando estado de usuario administrativo ID: {user_id}")
+        
+        activo = datos.get("activo")
+        if activo is None:
+            raise HTTPException(status_code=400, detail="El campo 'activo' es requerido")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT username FROM admin_users WHERE id = %s", (user_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Usuario administrativo no encontrado")
+        
+        username = row[0]
+        
+        # Actualizar estado
+        cursor.execute("UPDATE admin_users SET activo = %s WHERE id = %s", (activo, user_id))
+        conn.commit()
+        
+        estado_texto = "activado" if activo else "desactivado"
+        print(f"✅ Usuario {username} {estado_texto}")
+        return {
+            "message": f"Usuario {estado_texto} exitosamente",
+            "username": username,
+            "activo": activo
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error cambiando estado de usuario: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al cambiar estado: {str(e)}")
+
+
 @app.put("/admin/usuarios/{user_id}/password")
 async def resetear_password_usuario_admin(user_id: int, datos: dict):
     """Resetear la contraseña de un usuario administrativo"""

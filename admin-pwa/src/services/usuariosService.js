@@ -349,6 +349,44 @@ class UsuariosService {
       throw error; // Propagar el error para manejo en las vistas
     }
   }
+
+  async cambiarEstadoUsuario(id, activo) {
+    try {
+      console.log(`🔄 Cambiando estado de usuario ${id} a ${activo ? 'activo' : 'inactivo'}...`);
+      const response = await fetch(`${API_URL}/admin/usuarios/${id}/estado`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ activo })
+      });
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.warn(`⚠️ Usuario ${id} no encontrado`);
+          throw new Error(`Usuario ${id} no encontrado`);
+        }
+        console.error(`❌ Error HTTP: ${response.status} - ${response.statusText}`);
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      
+      const resultado = await response.json();
+      
+      // Actualizar cache si existe
+      if (this.cache.has(id)) {
+        const usuario = this.cache.get(id);
+        usuario.activo = activo;
+        this.cache.set(id, usuario);
+      }
+      
+      console.log(`✅ Estado del usuario ${id} actualizado a ${activo ? 'activo' : 'inactivo'}`);
+      return resultado;
+      
+    } catch (error) {
+      console.error(`❌ Error al cambiar estado del usuario ${id}:`, error);
+      throw error;
+    }
+  }
 }
 
 // Exportar una instancia única del servicio (singleton)

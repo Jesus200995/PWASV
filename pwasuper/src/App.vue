@@ -8,6 +8,7 @@ import WelcomeModalNew from './components/WelcomeModalNew.vue';
 import PoinsettiaFlower from './components/PoinsettiaFlower.vue';
 import TerritorioModal from './components/TerritorioModal.vue';
 import CargoModal from './components/CargoModal.vue';
+import AccountDeactivatedModal from './components/AccountDeactivatedModal.vue';
 import { useNotifications } from './composables/useNotifications.js';
 import { API_URL } from './utils/network.js';
 import { apiService } from './services/apiService.js';
@@ -18,6 +19,7 @@ const isLoggingOut = ref(false);
 const showWelcome = ref(false);
 const userData = ref(null);
 const showMobileMenu = ref(false);
+const showAccountDeactivatedModal = ref(false);
 const showTerritorioModal = ref(false);
 const showCargoModal = ref(false);
 const activeIcon = ref(null);
@@ -132,7 +134,7 @@ const handleStorageChange = (e) => {
 };
 
 // Función para verificar periódicamente los datos del usuario desde el servidor
-// Esto detecta cambios realizados por el admin (ej: eliminar territorio o cargo)
+// Esto detecta cambios realizados por el admin (ej: eliminar territorio, cargo o desactivar cuenta)
 const checkUserDataFromServer = async () => {
   if (!userData.value || !userData.value.id) return;
   
@@ -140,6 +142,13 @@ const checkUserDataFromServer = async () => {
     const response = await fetch(`${API_URL}/usuarios/${userData.value.id}`);
     if (response.ok) {
       const serverUserData = await response.json();
+      
+      // ===== VERIFICAR SI LA CUENTA FUE DESACTIVADA (PRIORIDAD MÁXIMA) =====
+      if (serverUserData.activo === false) {
+        console.log('🚫 [Server Check] ¡Cuenta desactivada por el administrador!');
+        showAccountDeactivatedModal.value = true;
+        return; // No continuar con otras verificaciones
+      }
       
       // Verificar si el cargo cambió (PRIORIDAD)
       const localCargo = userData.value.cargo;
@@ -214,13 +223,13 @@ const checkUserDataFromServer = async () => {
   }
 };
 
-// Iniciar verificación periódica cada 15 segundos (reactivo)
+// Iniciar verificación periódica cada 8 segundos (muy reactivo para detectar desactivaciones)
 const startUserDataCheck = () => {
   // Verificar inmediatamente al iniciar
   checkUserDataFromServer();
   
-  // Luego cada 15 segundos para ser más reactivo
-  userCheckIntervalId = setInterval(checkUserDataFromServer, 15000);
+  // Luego cada 8 segundos para ser muy reactivo (detectar desactivación rápido)
+  userCheckIntervalId = setInterval(checkUserDataFromServer, 8000);
 };
 
 // Detener verificación periódica
@@ -326,6 +335,13 @@ const getUserInitials = computed(() => {
 // Función para cerrar el menú móvil cuando se navega
 const closeMobileMenu = () => {
   showMobileMenu.value = false;
+};
+
+// Función para cerrar sesión cuando la cuenta es desactivada
+const handleAccountDeactivatedLogout = () => {
+  console.log('🚫 Cerrando sesión por cuenta desactivada...');
+  showAccountDeactivatedModal.value = false;
+  logout();
 };
 
 function logout() {
@@ -478,15 +494,21 @@ const currentUserId = computed(() => {
       <div class="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-green-200/40 to-transparent animate-pulse-gentle"></div>
     </div>
 
+    <!-- Modal de cuenta desactivada -->
+    <AccountDeactivatedModal 
+      :show="showAccountDeactivatedModal"
+      @logout="handleAccountDeactivatedLogout"
+    />
+
     <!-- Modal obligatorio de selección de cargo -->
     <CargoModal 
-      :visible="showCargoModal && isLoggedIn"
+      :visible="showCargoModal && isLoggedIn && !showAccountDeactivatedModal"
       @cargo-guardado="handleCargoSaved"
     />
 
     <!-- Modal obligatorio de selección de territorio -->
     <TerritorioModal 
-      :isVisible="showTerritorioModal && isLoggedIn && !showCargoModal"
+      :isVisible="showTerritorioModal && isLoggedIn && !showCargoModal && !showAccountDeactivatedModal"
       :userId="currentUserId"
       @territorio-saved="handleTerritorioSaved"
     />

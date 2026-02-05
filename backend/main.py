@@ -640,8 +640,8 @@ async def preflight(path: str):
 
 @app.post("/login")
 async def login(usuario: UserLogin):
-    # Buscar usuario por correo incluyendo territorio, curp y supervisor
-    cursor.execute("SELECT id, correo, nombre_completo, cargo, contrasena, territorio, curp, supervisor FROM usuarios WHERE correo = %s", (usuario.correo,))
+    # Buscar usuario por correo incluyendo territorio, curp, supervisor y activo
+    cursor.execute("SELECT id, correo, nombre_completo, cargo, contrasena, territorio, curp, supervisor, activo FROM usuarios WHERE correo = %s", (usuario.correo,))
     user = cursor.fetchone()
     
     if not user:
@@ -650,7 +650,13 @@ async def login(usuario: UserLogin):
     # Verificar contraseña (comparación directa sin encriptación)
     if usuario.contrasena != user[4]:
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
-      # Devolver datos del usuario (sin la contraseña)
+    
+    # Verificar si el usuario está activo
+    activo = user[8] if len(user) > 8 else True
+    if activo is False:
+        raise HTTPException(status_code=403, detail="Tu cuenta ha sido desactivada. Contacta al administrador para más información.")
+    
+    # Devolver datos del usuario (sin la contraseña)
     return {
         "id": user[0],
         "correo": user[1],
@@ -658,7 +664,8 @@ async def login(usuario: UserLogin):
         "cargo": user[3],
         "territorio": user[5] if len(user) > 5 else None,
         "curp": user[6] if len(user) > 6 else None,
-        "supervisor": user[7] if len(user) > 7 else None
+        "supervisor": user[7] if len(user) > 7 else None,
+        "activo": activo if activo is not None else True
     }
 
 # ==================== ENDPOINT PARA VERIFICAR CONTRASEÑA ====================
@@ -2768,9 +2775,9 @@ async def obtener_usuario(user_id: int):
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Buscar usuario por ID con CURP, teléfono, contraseña y territorio
+        # Buscar usuario por ID con CURP, teléfono, contraseña, territorio y activo
         cursor.execute(
-            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, territorio FROM usuarios WHERE id = %s",
+            "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, territorio, activo FROM usuarios WHERE id = %s",
             (user_id,)
         )
         
@@ -2787,7 +2794,8 @@ async def obtener_usuario(user_id: int):
             "curp": resultado[5],
             "contrasena": resultado[6],  # Incluir contraseña
             "telefono": resultado[7] if len(resultado) > 7 else None,  # Incluir teléfono si existe
-            "territorio": resultado[8] if len(resultado) > 8 else None  # Incluir territorio si existe
+            "territorio": resultado[8] if len(resultado) > 8 else None,  # Incluir territorio si existe
+            "activo": resultado[9] if len(resultado) > 9 else True  # Incluir estado activo
         }
         
         print(f"✅ Usuario {user_id} obtenido correctamente")

@@ -228,6 +228,9 @@ async function login() {
       const status = error.response.status;
       if (status === 401) {
         errorMessage.value = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+      } else if (status === 403) {
+        // Cuenta desactivada
+        errorMessage.value = error.response.data.detail || 'Tu cuenta ha sido desactivada. Contacta al administrador.';
       } else if (status === 500) {
         errorMessage.value = 'Error del servidor. Inténtalo de nuevo en unos minutos.';
       } else {

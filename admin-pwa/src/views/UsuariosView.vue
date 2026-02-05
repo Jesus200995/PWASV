@@ -239,7 +239,7 @@
                         </button>
                         <span class="btn-label-editar">Editar</span>
                       </div>
-                      <div class="action-container">
+                      <div v-if="puedeActivarDesactivar" class="action-container">
                         <button 
                           @click="toggleEstadoUsuario(usuario)" 
                           :class="['btn-toggle', usuario.activo === false ? 'btn-activar' : 'btn-desactivar']" 
@@ -971,6 +971,16 @@ const puedeVerAcciones = computed(() => {
   }
   // Verificar permiso específico usando la variable reactiva
   return userPermisos.value?.usuarios_acciones === true
+})
+
+// Permiso para activar/desactivar usuarios - REACTIVO
+const puedeActivarDesactivar = computed(() => {
+  // Admin siempre puede activar/desactivar
+  if (userRol.value === 'admin' || authService.isAdmin()) {
+    return true
+  }
+  // Verificar permiso específico usando la variable reactiva
+  return userPermisos.value?.usuarios_estado === true
 })
 
 // Función para actualizar permisos cuando el evento es disparado

@@ -791,6 +791,19 @@
                         </div>
                       </div>
                     </label>
+                    <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.usuarios_estado }">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.usuarios_estado" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                      </svg>
+                      <span class="sub-permiso-text">Permitir activar/desactivar</span>
+                      <div class="sub-toggle">
+                        <div class="sub-toggle-track">
+                          <div class="sub-toggle-thumb"></div>
+                        </div>
+                      </div>
+                    </label>
                   </div>
                 </div>
 
@@ -1098,6 +1111,7 @@ export default {
           registros_acciones: false,
           usuarios: false,
           usuarios_acciones: false,
+          usuarios_estado: false,
           historiales: false,
           notificaciones: false,
           notificaciones_crear: false,
@@ -1152,6 +1166,7 @@ export default {
         registros_acciones: false,
         usuarios: false,
         usuarios_acciones: false,
+        usuarios_estado: false,
         historiales: false,
         notificaciones: false,
         notificaciones_crear: false,
@@ -1230,9 +1245,10 @@ export default {
 
     // Handler cuando se cambia el permiso de usuarios
     onUsuariosChange() {
-      // Si se desactiva usuarios, también desactivar usuarios_acciones
+      // Si se desactiva usuarios, también desactivar usuarios_acciones y usuarios_estado
       if (!this.formularioUsuario.permisos.usuarios) {
         this.formularioUsuario.permisos.usuarios_acciones = false
+        this.formularioUsuario.permisos.usuarios_estado = false
       }
     },
 
@@ -1312,6 +1328,11 @@ export default {
       // Asegurar que el nuevo permiso existe en el objeto
       if (permisosUsuario.visor_filtrador_territorio === undefined) {
         permisosUsuario.visor_filtrador_territorio = false
+      }
+      
+      // Asegurar que el nuevo permiso de activar/desactivar usuarios existe
+      if (permisosUsuario.usuarios_estado === undefined) {
+        permisosUsuario.usuarios_estado = false
       }
       
       this.formularioUsuario = {

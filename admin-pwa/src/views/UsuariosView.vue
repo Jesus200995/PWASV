@@ -284,13 +284,24 @@
                         <span class="btn-label">Detalles</span>
                       </div>
                       <div class="action-container">
-                        <button @click="editarUsuario(usuario)" class="btn-editar" title="Editar usuario">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <button 
+                          @click="usuario.activo !== false && editarUsuario(usuario)" 
+                          :class="['btn-editar', { 'btn-bloqueado': usuario.activo === false }]" 
+                          :title="usuario.activo === false ? '🔒 Usuario inactivo - Actívalo primero para editar' : 'Editar usuario'"
+                          :disabled="usuario.activo === false"
+                        >
+                          <svg v-if="usuario.activo === false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                          </svg>
+                          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                           </svg>
                         </button>
-                        <span class="btn-label-editar">Editar</span>
+                        <span :class="['btn-label-editar', { 'label-bloqueado': usuario.activo === false }]">
+                          {{ usuario.activo === false ? 'Bloqueado' : 'Editar' }}
+                        </span>
                       </div>
                       <div v-if="puedeActivarDesactivar" class="action-container">
                         <button 
@@ -312,15 +323,26 @@
                         </span>
                       </div>
                       <div class="action-container">
-                        <button @click="confirmarEliminarUsuario(usuario)" class="btn-eliminar" title="Eliminar usuario">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <button 
+                          @click="usuario.activo !== false && confirmarEliminarUsuario(usuario)" 
+                          :class="['btn-eliminar', { 'btn-bloqueado': usuario.activo === false }]" 
+                          :title="usuario.activo === false ? '🔒 Usuario inactivo - Actívalo primero para eliminar' : 'Eliminar usuario'"
+                          :disabled="usuario.activo === false"
+                        >
+                          <svg v-if="usuario.activo === false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                          </svg>
+                          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3,6 5,6 21,6"></polyline>
                             <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
                             <line x1="10" y1="11" x2="10" y2="17"></line>
                             <line x1="14" y1="11" x2="14" y2="17"></line>
                           </svg>
                         </button>
-                        <span class="btn-label-eliminar">Eliminar</span>
+                        <span :class="['btn-label-eliminar', { 'label-bloqueado': usuario.activo === false }]">
+                          {{ usuario.activo === false ? 'Bloqueado' : 'Eliminar' }}
+                        </span>
                       </div>
                     </div>
                   </td>
@@ -3704,6 +3726,52 @@ const logout = () => {
 .action-container:hover .btn-label-activar {
   opacity: 1;
   color: #388E3C;
+}
+
+/* ========== ESTILOS PARA BOTONES BLOQUEADOS ========== */
+.btn-bloqueado {
+  background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%) !important;
+  border: 2px solid #9e9e9e !important;
+  color: #757575 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  box-shadow: none !important;
+  transform: none !important;
+  position: relative;
+}
+
+.btn-bloqueado::before {
+  display: none !important;
+}
+
+.btn-bloqueado:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%) !important;
+}
+
+.btn-bloqueado:active {
+  transform: none !important;
+}
+
+.btn-bloqueado svg {
+  color: #757575 !important;
+  stroke: #757575 !important;
+  filter: none !important;
+}
+
+.btn-bloqueado:hover svg {
+  transform: none !important;
+}
+
+/* Label bloqueado */
+.label-bloqueado {
+  color: #9e9e9e !important;
+  font-style: italic;
+}
+
+.action-container:hover .label-bloqueado {
+  color: #757575 !important;
 }
 
 /* Estilos para el modal de eliminación */

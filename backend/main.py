@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import StreamingResponse, HTMLResponse
+from urllib.parse import quote
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
@@ -8531,7 +8532,7 @@ async def descargar_archivo_manual(manual_id: int):
             raise HTTPException(status_code=404, detail="Archivo no encontrado")
         
         archivo_bytes = bytes(row[0])
-        archivo_nombre = row[1]
+        archivo_nombre = row[1] or "documento"
         archivo_tipo = row[2]
         
         # Determinar content type
@@ -8544,12 +8545,17 @@ async def descargar_archivo_manual(manual_id: int):
         
         content_type = content_types.get(archivo_tipo, 'application/octet-stream')
         
+        # Sanitizar nombre de archivo para headers HTTP (solo ASCII)
+        archivo_nombre_safe = archivo_nombre.encode('ascii', 'ignore').decode('ascii') or "documento"
+        archivo_nombre_encoded = quote(archivo_nombre, safe='')
+        
         return Response(
             content=archivo_bytes,
             media_type=content_type,
             headers={
-                "Content-Disposition": f'inline; filename="{archivo_nombre}"',
-                "Access-Control-Allow-Origin": "*"
+                "Content-Disposition": f"inline; filename=\"{archivo_nombre_safe}\"; filename*=UTF-8''{archivo_nombre_encoded}",
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=3600"
             }
         )
         

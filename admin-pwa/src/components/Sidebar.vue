@@ -285,6 +285,22 @@
           <div class="nav-indicator"></div>
         </li>
 
+        <!-- Manuales -->
+        <li class="nav-item" :class="{ active: $route.name === 'Manuales' }" v-if="tienePermiso('manuales')">
+          <router-link to="/manuales" class="nav-link">
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                <circle cx="12" cy="10" r="2"/>
+                <path d="M12 14v3"/>
+              </svg>
+            </div>
+            <span class="nav-text">Manuales</span>
+          </router-link>
+          <div class="nav-indicator"></div>
+        </li>
+
         <!-- Permisos Administrativos -->
         <li class="nav-item" :class="{ active: $route.name === 'Permisos' }" v-if="tienePermiso('permisos')">
           <router-link to="/permisos" class="nav-link">

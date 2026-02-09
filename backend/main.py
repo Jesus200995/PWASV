@@ -8086,6 +8086,706 @@ async def obtener_supervisor_por_territorio(territorio: str):
 
 # ==================== FIN SUPERVISOR POR TERRITORIO ====================
 
+# ==================== SISTEMA DE MANUALES ====================
+
+# Modelos para Manuales
+class ManualCreate(BaseModel):
+    titulo: str
+    subtitulo: Optional[str] = None
+    descripcion: Optional[str] = None
+    enlace_url: Optional[str] = None
+    enviado_a_todos: bool = True
+    usuario_ids: Optional[List[int]] = None
+
+class ManualResponse(BaseModel):
+    id: int
+    titulo: str
+    subtitulo: Optional[str] = None
+    descripcion: Optional[str] = None
+    enlace_url: Optional[str] = None
+    archivo_nombre: Optional[str] = None
+    archivo_tipo: Optional[str] = None
+    imagen_nombre: Optional[str] = None
+    enviado_a_todos: bool
+    fecha_creacion: datetime
+    total_lecturas: int = 0
+    destinatarios: Optional[List[dict]] = None
+
+# Crear tablas de manuales al inicio
+def crear_tablas_manuales():
+    """Crear las tablas necesarias para el sistema de manuales"""
+    try:
+        if not conn:
+            print("❌ No hay conexión a BD para crear tablas de manuales")
+            return
+        
+        # Tabla principal de manuales
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS manuales (
+                id SERIAL PRIMARY KEY,
+                titulo VARCHAR(200) NOT NULL,
+                subtitulo VARCHAR(300),
+                descripcion TEXT,
+                enlace_url TEXT,
+                archivo BYTEA,
+                archivo_tipo VARCHAR(50),
+                archivo_nombre VARCHAR(255),
+                imagen BYTEA,
+                imagen_nombre VARCHAR(255),
+                enviado_a_todos BOOLEAN DEFAULT TRUE,
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                activo BOOLEAN DEFAULT TRUE
+            )
+        """)
+        
+        # Tabla de relación manuales-usuarios (para envíos específicos)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS manual_usuarios (
+                id SERIAL PRIMARY KEY,
+                manual_id INTEGER REFERENCES manuales(id) ON DELETE CASCADE,
+                usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+                UNIQUE(manual_id, usuario_id)
+            )
+        """)
+        
+        # Tabla de lecturas de manuales
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS manual_leidos (
+                id SERIAL PRIMARY KEY,
+                manual_id INTEGER REFERENCES manuales(id) ON DELETE CASCADE,
+                usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+                fecha_lectura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(manual_id, usuario_id)
+            )
+        """)
+        
+        conn.commit()
+        print("✅ Tablas de manuales creadas/verificadas correctamente")
+        
+    except Exception as e:
+        print(f"❌ Error creando tablas de manuales: {e}")
+        conn.rollback()
+
+# Llamar para crear las tablas
+crear_tablas_manuales()
+
+@app.post("/manuales")
+async def crear_manual(
+    titulo: str = Form(...),
+    subtitulo: str = Form(None),
+    descripcion: str = Form(None),
+    enlace_url: str = Form(None),
+    enviado_a_todos: bool = Form(True),
+    usuario_ids: str = Form(None),
+    archivo: UploadFile = File(None),
+    imagen: UploadFile = File(None)
+):
+    """Crear un nuevo manual"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📚 Creando manual: {titulo}")
+        
+        # Validaciones
+        if len(titulo.strip()) == 0:
+            raise HTTPException(status_code=400, detail="El título es obligatorio")
+        
+        if len(titulo) > 200:
+            raise HTTPException(status_code=400, detail="El título no puede exceder 200 caracteres")
+        
+        # Validar usuarios si no es para todos
+        usuarios_seleccionados = []
+        if not enviado_a_todos:
+            if not usuario_ids:
+                raise HTTPException(status_code=400, detail="Debe especificar usuarios si no se envía a todos")
+            
+            try:
+                usuarios_seleccionados = json.loads(usuario_ids)
+                if not isinstance(usuarios_seleccionados, list) or len(usuarios_seleccionados) == 0:
+                    raise HTTPException(status_code=400, detail="Debe seleccionar al menos un usuario")
+                
+                cursor.execute("SELECT id FROM usuarios WHERE id = ANY(%s)", (usuarios_seleccionados,))
+                usuarios_existentes = [row[0] for row in cursor.fetchall()]
+                
+                usuarios_inexistentes = set(usuarios_seleccionados) - set(usuarios_existentes)
+                if usuarios_inexistentes:
+                    raise HTTPException(status_code=400, detail=f"Usuarios no encontrados: {list(usuarios_inexistentes)}")
+                
+            except json.JSONDecodeError:
+                raise HTTPException(status_code=400, detail="Formato de usuarios inválido")
+        
+        # Procesar archivo PDF/documento
+        archivo_bytes = None
+        archivo_tipo = None
+        archivo_nombre = None
+        
+        if archivo and archivo.filename:
+            print(f"📎 Procesando archivo: {archivo.filename}")
+            
+            ext = os.path.splitext(archivo.filename)[1].lower()
+            tipos_permitidos = {
+                '.pdf': 'pdf',
+                '.doc': 'documento', '.docx': 'documento',
+                '.xls': 'excel', '.xlsx': 'excel',
+                '.ppt': 'presentacion', '.pptx': 'presentacion'
+            }
+            
+            if ext not in tipos_permitidos:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Tipo de archivo no permitido. Formatos válidos: {', '.join(tipos_permitidos.keys())}"
+                )
+            
+            archivo_bytes = await archivo.read()
+            archivo_tipo = tipos_permitidos[ext]
+            archivo_nombre = archivo.filename
+            
+            if len(archivo_bytes) > 50 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="El archivo no debe exceder 50MB")
+            
+            print(f"📎 Archivo procesado: {archivo_nombre} ({archivo_tipo}, {len(archivo_bytes)} bytes)")
+        
+        # Procesar imagen
+        imagen_bytes = None
+        imagen_nombre = None
+        
+        if imagen and imagen.filename:
+            print(f"🖼️ Procesando imagen: {imagen.filename}")
+            
+            ext = os.path.splitext(imagen.filename)[1].lower()
+            if ext not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+                raise HTTPException(status_code=400, detail="Formato de imagen no válido")
+            
+            imagen_bytes = await imagen.read()
+            imagen_nombre = imagen.filename
+            
+            if len(imagen_bytes) > 10 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="La imagen no debe exceder 10MB")
+            
+            print(f"🖼️ Imagen procesada: {imagen_nombre} ({len(imagen_bytes)} bytes)")
+        
+        fecha_creacion = obtener_fecha_hora_cdmx_notificaciones()
+        
+        # Insertar manual
+        cursor.execute("""
+            INSERT INTO manuales (
+                titulo, subtitulo, descripcion, enlace_url,
+                archivo, archivo_tipo, archivo_nombre,
+                imagen, imagen_nombre,
+                enviado_a_todos, fecha_creacion
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (
+            titulo, subtitulo, descripcion, enlace_url,
+            archivo_bytes, archivo_tipo, archivo_nombre,
+            imagen_bytes, imagen_nombre,
+            enviado_a_todos, fecha_creacion
+        ))
+        
+        manual_id = cursor.fetchone()[0]
+        
+        # Si no es para todos, insertar relaciones con usuarios
+        if not enviado_a_todos and usuarios_seleccionados:
+            for usuario_id in usuarios_seleccionados:
+                cursor.execute(
+                    "INSERT INTO manual_usuarios (manual_id, usuario_id) VALUES (%s, %s)",
+                    (manual_id, usuario_id)
+                )
+            print(f"👥 Manual asignado a {len(usuarios_seleccionados)} usuarios específicos")
+        
+        conn.commit()
+        
+        print(f"✅ Manual creado exitosamente con ID: {manual_id}")
+        
+        return {
+            "id": manual_id,
+            "status": "success",
+            "message": "Manual creado exitosamente",
+            "titulo": titulo,
+            "enviado_a_todos": enviado_a_todos,
+            "usuarios_destinatarios": len(usuarios_seleccionados) if not enviado_a_todos else "todos",
+            "tiene_archivo": archivo_nombre is not None,
+            "tiene_imagen": imagen_nombre is not None,
+            "fecha_creacion": fecha_creacion.isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error creando manual: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al crear manual: {str(e)}")
+
+@app.get("/manuales")
+async def listar_manuales(limit: int = 50, offset: int = 0):
+    """Listar todos los manuales (para admin)"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📚 Listando manuales (limit: {limit}, offset: {offset})")
+        
+        cursor.execute("""
+            SELECT 
+                m.id, m.titulo, m.subtitulo, m.descripcion, m.enlace_url,
+                m.archivo_nombre, m.archivo_tipo, m.imagen_nombre,
+                m.enviado_a_todos, m.fecha_creacion, m.activo,
+                (SELECT COUNT(*) FROM manual_leidos WHERE manual_id = m.id) as total_lecturas,
+                (SELECT COUNT(*) FROM manual_usuarios WHERE manual_id = m.id) as total_destinatarios
+            FROM manuales m
+            WHERE m.activo = TRUE
+            ORDER BY m.fecha_creacion DESC
+            LIMIT %s OFFSET %s
+        """, (limit, offset))
+        
+        rows = cursor.fetchall()
+        
+        cursor.execute("SELECT COUNT(*) FROM manuales WHERE activo = TRUE")
+        total = cursor.fetchone()[0]
+        
+        manuales = []
+        for row in rows:
+            manual = {
+                "id": row[0],
+                "titulo": row[1],
+                "subtitulo": row[2],
+                "descripcion": row[3],
+                "enlace_url": row[4],
+                "archivo_nombre": row[5],
+                "archivo_tipo": row[6],
+                "imagen_nombre": row[7],
+                "enviado_a_todos": row[8],
+                "fecha_creacion": row[9].isoformat() if row[9] else None,
+                "activo": row[10],
+                "total_lecturas": row[11],
+                "total_destinatarios": row[12] if not row[8] else "todos",
+                "destinatarios_texto": "Todos los usuarios" if row[8] else f"{row[12]} usuarios específicos"
+            }
+            manuales.append(manual)
+        
+        print(f"📚 {len(manuales)} manuales listados de {total} totales")
+        
+        return {
+            "manuales": manuales,
+            "total": total,
+            "limit": limit,
+            "offset": offset
+        }
+        
+    except Exception as e:
+        print(f"❌ Error listando manuales: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al listar manuales: {str(e)}")
+
+@app.get("/manuales/usuario/{usuario_id}")
+async def obtener_manuales_usuario(usuario_id: int):
+    """Obtener manuales para un usuario específico (para pwasuper)"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📚 Obteniendo manuales para usuario {usuario_id}")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (usuario_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Obtener manuales (enviados a todos O específicamente a este usuario)
+        cursor.execute("""
+            SELECT 
+                m.id, m.titulo, m.subtitulo, m.descripcion, m.enlace_url,
+                m.archivo_nombre, m.archivo_tipo, m.imagen_nombre,
+                m.enviado_a_todos, m.fecha_creacion,
+                EXISTS(SELECT 1 FROM manual_leidos WHERE manual_id = m.id AND usuario_id = %s) as leido
+            FROM manuales m
+            WHERE m.activo = TRUE
+            AND (
+                m.enviado_a_todos = TRUE
+                OR EXISTS(SELECT 1 FROM manual_usuarios WHERE manual_id = m.id AND usuario_id = %s)
+            )
+            ORDER BY m.fecha_creacion DESC
+        """, (usuario_id, usuario_id))
+        
+        rows = cursor.fetchall()
+        
+        manuales = []
+        no_leidos = 0
+        
+        for row in rows:
+            leido = row[10]
+            if not leido:
+                no_leidos += 1
+            
+            manual = {
+                "id": row[0],
+                "titulo": row[1],
+                "subtitulo": row[2],
+                "descripcion": row[3],
+                "enlace_url": row[4],
+                "archivo_nombre": row[5],
+                "archivo_tipo": row[6],
+                "imagen_nombre": row[7],
+                "enviado_a_todos": row[8],
+                "fecha_creacion": row[9].isoformat() if row[9] else None,
+                "leido": leido
+            }
+            manuales.append(manual)
+        
+        print(f"📚 {len(manuales)} manuales encontrados para usuario {usuario_id} ({no_leidos} no leídos)")
+        
+        return {
+            "manuales": manuales,
+            "total": len(manuales),
+            "no_leidos": no_leidos
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo manuales para usuario: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener manuales: {str(e)}")
+
+@app.get("/manuales/{manual_id}")
+async def obtener_manual(manual_id: int):
+    """Obtener detalle de un manual"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        cursor.execute("""
+            SELECT 
+                id, titulo, subtitulo, descripcion, enlace_url,
+                archivo_nombre, archivo_tipo, imagen_nombre,
+                enviado_a_todos, fecha_creacion, activo
+            FROM manuales
+            WHERE id = %s
+        """, (manual_id,))
+        
+        row = cursor.fetchone()
+        
+        if not row:
+            raise HTTPException(status_code=404, detail="Manual no encontrado")
+        
+        # Obtener estadísticas
+        cursor.execute("SELECT COUNT(*) FROM manual_leidos WHERE manual_id = %s", (manual_id,))
+        total_lecturas = cursor.fetchone()[0]
+        
+        # Obtener destinatarios específicos si aplica
+        destinatarios = []
+        if not row[8]:  # No enviado a todos
+            cursor.execute("""
+                SELECT u.id, u.nombre_completo, u.correo,
+                       EXISTS(SELECT 1 FROM manual_leidos WHERE manual_id = %s AND usuario_id = u.id) as leido
+                FROM usuarios u
+                JOIN manual_usuarios mu ON u.id = mu.usuario_id
+                WHERE mu.manual_id = %s
+            """, (manual_id, manual_id))
+            
+            for d_row in cursor.fetchall():
+                destinatarios.append({
+                    "id": d_row[0],
+                    "nombre": d_row[1],
+                    "correo": d_row[2],
+                    "leido": d_row[3]
+                })
+        
+        manual = {
+            "id": row[0],
+            "titulo": row[1],
+            "subtitulo": row[2],
+            "descripcion": row[3],
+            "enlace_url": row[4],
+            "archivo_nombre": row[5],
+            "archivo_tipo": row[6],
+            "imagen_nombre": row[7],
+            "enviado_a_todos": row[8],
+            "fecha_creacion": row[9].isoformat() if row[9] else None,
+            "activo": row[10],
+            "total_lecturas": total_lecturas,
+            "destinatarios": destinatarios
+        }
+        
+        return manual
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo manual: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener manual: {str(e)}")
+
+@app.get("/manuales/{manual_id}/archivo")
+async def descargar_archivo_manual(manual_id: int):
+    """Descargar archivo de un manual"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        cursor.execute(
+            "SELECT archivo, archivo_nombre, archivo_tipo FROM manuales WHERE id = %s",
+            (manual_id,)
+        )
+        row = cursor.fetchone()
+        
+        if not row or not row[0]:
+            raise HTTPException(status_code=404, detail="Archivo no encontrado")
+        
+        archivo_bytes = bytes(row[0])
+        archivo_nombre = row[1]
+        archivo_tipo = row[2]
+        
+        # Determinar content type
+        content_types = {
+            'pdf': 'application/pdf',
+            'documento': 'application/msword',
+            'excel': 'application/vnd.ms-excel',
+            'presentacion': 'application/vnd.ms-powerpoint'
+        }
+        
+        content_type = content_types.get(archivo_tipo, 'application/octet-stream')
+        
+        return Response(
+            content=archivo_bytes,
+            media_type=content_type,
+            headers={"Content-Disposition": f'attachment; filename="{archivo_nombre}"'}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error descargando archivo: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al descargar archivo: {str(e)}")
+
+@app.get("/manuales/{manual_id}/imagen")
+async def obtener_imagen_manual(manual_id: int):
+    """Obtener imagen de un manual"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        cursor.execute(
+            "SELECT imagen, imagen_nombre FROM manuales WHERE id = %s",
+            (manual_id,)
+        )
+        row = cursor.fetchone()
+        
+        if not row or not row[0]:
+            raise HTTPException(status_code=404, detail="Imagen no encontrada")
+        
+        imagen_bytes = bytes(row[0])
+        imagen_nombre = row[1]
+        
+        # Determinar content type por extensión
+        ext = os.path.splitext(imagen_nombre)[1].lower()
+        content_types = {
+            '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+            '.png': 'image/png', '.gif': 'image/gif',
+            '.webp': 'image/webp'
+        }
+        
+        content_type = content_types.get(ext, 'image/jpeg')
+        
+        return Response(
+            content=imagen_bytes,
+            media_type=content_type
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo imagen: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener imagen: {str(e)}")
+
+@app.post("/manuales/{manual_id}/leer")
+async def marcar_manual_leido(manual_id: int, usuario_id: int):
+    """Marcar un manual como leído por un usuario"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📖 Marcando manual {manual_id} como leído por usuario {usuario_id}")
+        
+        # Verificar que el manual existe
+        cursor.execute("SELECT id FROM manuales WHERE id = %s AND activo = TRUE", (manual_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Manual no encontrado")
+        
+        # Verificar que el usuario existe
+        cursor.execute("SELECT id FROM usuarios WHERE id = %s", (usuario_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Insertar o ignorar si ya existe
+        fecha_lectura = obtener_fecha_hora_cdmx_notificaciones()
+        cursor.execute("""
+            INSERT INTO manual_leidos (manual_id, usuario_id, fecha_lectura)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (manual_id, usuario_id) DO NOTHING
+        """, (manual_id, usuario_id, fecha_lectura))
+        
+        conn.commit()
+        
+        print(f"✅ Manual {manual_id} marcado como leído por usuario {usuario_id}")
+        
+        return {
+            "status": "success",
+            "message": "Manual marcado como leído",
+            "manual_id": manual_id,
+            "usuario_id": usuario_id,
+            "fecha_lectura": fecha_lectura.isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error marcando manual como leído: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al marcar como leído: {str(e)}")
+
+@app.get("/manuales/{manual_id}/estadisticas")
+async def obtener_estadisticas_manual(manual_id: int):
+    """Obtener estadísticas de lectura de un manual"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Verificar que el manual existe
+        cursor.execute(
+            "SELECT id, titulo, enviado_a_todos FROM manuales WHERE id = %s",
+            (manual_id,)
+        )
+        manual = cursor.fetchone()
+        
+        if not manual:
+            raise HTTPException(status_code=404, detail="Manual no encontrado")
+        
+        enviado_a_todos = manual[2]
+        
+        # Obtener usuarios que leyeron
+        cursor.execute("""
+            SELECT u.id, u.nombre_completo, u.correo, ml.fecha_lectura
+            FROM manual_leidos ml
+            JOIN usuarios u ON ml.usuario_id = u.id
+            WHERE ml.manual_id = %s
+            ORDER BY ml.fecha_lectura DESC
+        """, (manual_id,))
+        
+        lecturas = []
+        for row in cursor.fetchall():
+            lecturas.append({
+                "usuario_id": row[0],
+                "nombre": row[1],
+                "correo": row[2],
+                "fecha_lectura": row[3].isoformat() if row[3] else None
+            })
+        
+        # Calcular total de destinatarios
+        if enviado_a_todos:
+            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE activo = TRUE OR activo IS NULL")
+            total_destinatarios = cursor.fetchone()[0]
+        else:
+            cursor.execute("SELECT COUNT(*) FROM manual_usuarios WHERE manual_id = %s", (manual_id,))
+            total_destinatarios = cursor.fetchone()[0]
+        
+        # Usuarios que no han leído (si no es enviado a todos)
+        no_leidos = []
+        if not enviado_a_todos:
+            cursor.execute("""
+                SELECT u.id, u.nombre_completo, u.correo
+                FROM usuarios u
+                JOIN manual_usuarios mu ON u.id = mu.usuario_id
+                WHERE mu.manual_id = %s
+                AND NOT EXISTS(SELECT 1 FROM manual_leidos WHERE manual_id = %s AND usuario_id = u.id)
+            """, (manual_id, manual_id))
+            
+            for row in cursor.fetchall():
+                no_leidos.append({
+                    "usuario_id": row[0],
+                    "nombre": row[1],
+                    "correo": row[2]
+                })
+        
+        porcentaje_lectura = (len(lecturas) / total_destinatarios * 100) if total_destinatarios > 0 else 0
+        
+        return {
+            "manual_id": manual_id,
+            "titulo": manual[1],
+            "enviado_a_todos": enviado_a_todos,
+            "total_destinatarios": total_destinatarios,
+            "total_lecturas": len(lecturas),
+            "porcentaje_lectura": round(porcentaje_lectura, 1),
+            "lecturas": lecturas,
+            "no_leidos": no_leidos
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo estadísticas: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
+
+@app.delete("/manuales/{manual_id}")
+async def eliminar_manual(manual_id: int):
+    """Eliminar un manual (soft delete)"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"🗑️ Eliminando manual {manual_id}")
+        
+        cursor.execute(
+            "UPDATE manuales SET activo = FALSE WHERE id = %s RETURNING id",
+            (manual_id,)
+        )
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Manual no encontrado")
+        
+        conn.commit()
+        
+        print(f"✅ Manual {manual_id} eliminado")
+        
+        return {
+            "status": "success",
+            "message": "Manual eliminado exitosamente",
+            "manual_id": manual_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error eliminando manual: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar manual: {str(e)}")
+
+@app.get("/manuales/usuario/{usuario_id}/no-leidos")
+async def contar_manuales_no_leidos(usuario_id: int):
+    """Contar manuales no leídos por un usuario (para badge en pwasuper)"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM manuales m
+            WHERE m.activo = TRUE
+            AND (
+                m.enviado_a_todos = TRUE
+                OR EXISTS(SELECT 1 FROM manual_usuarios WHERE manual_id = m.id AND usuario_id = %s)
+            )
+            AND NOT EXISTS(SELECT 1 FROM manual_leidos WHERE manual_id = m.id AND usuario_id = %s)
+        """, (usuario_id, usuario_id))
+        
+        no_leidos = cursor.fetchone()[0]
+        
+        return {"no_leidos": no_leidos}
+        
+    except Exception as e:
+        print(f"❌ Error contando manuales no leídos: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+# ==================== FIN SISTEMA DE MANUALES ====================
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

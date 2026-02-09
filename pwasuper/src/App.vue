@@ -12,6 +12,7 @@ import AccountDeactivatedModal from './components/AccountDeactivatedModal.vue';
 import { useNotifications } from './composables/useNotifications.js';
 import { API_URL } from './utils/network.js';
 import { apiService } from './services/apiService.js';
+import { manualesService } from './services/manualesService.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -37,6 +38,26 @@ const toggleMobileMenu = () => {
 // Sistema de notificaciones en tiempo real
 const { unreadCount, startPolling, stopPolling } = useNotifications();
 let notificationPollingId = null;
+
+// Contador de manuales no leídos
+const unreadManualesCount = ref(0);
+let manualesPollingId = null;
+
+// Función para cargar conteo de manuales no leídos
+const cargarConteoManuales = async () => {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      const userId = user.id || user.usuario_id;
+      if (userId) {
+        unreadManualesCount.value = await manualesService.obtenerConteoNoLeidos(userId);
+      }
+    } catch (error) {
+      console.error('Error cargando conteo manuales:', error);
+    }
+  }
+};
 
 // Watcher para detectar cambios de ruta y actualizar el estado
 watch(() => route.path, () => {
@@ -251,6 +272,11 @@ onMounted(() => {
       // Inicializar sistema de notificaciones una vez que el usuario está identificado
       notificationPollingId = startPolling();
       
+      // Cargar conteo de manuales no leídos
+      cargarConteoManuales();
+      // Polling para manuales cada 60 segundos
+      manualesPollingId = setInterval(cargarConteoManuales, 60000);
+      
       // Verificar si el usuario tiene cargo asignado (PRIORIDAD)
       if (!userData.value.cargo || userData.value.cargo.trim() === '') {
         console.log('⚠️ Usuario sin cargo asignado, mostrando modal obligatorio');
@@ -305,6 +331,8 @@ onUnmounted(() => {
   window.removeEventListener('storage', handleStorageChange);
   // Detener el polling de notificaciones
   stopPolling(notificationPollingId);
+  // Detener polling de manuales
+  if (manualesPollingId) clearInterval(manualesPollingId);
   // Detener verificación de datos del usuario
   stopUserDataCheck();
 });
@@ -616,6 +644,21 @@ const currentUserId = computed(() => {
               <span>Notificaciones</span>
               <span v-if="unreadCount > 0" class="ml-auto h-4 w-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
                 {{ unreadCount > 9 ? '9+' : unreadCount }}
+              </span>
+            </router-link>
+
+            <router-link
+              to="/manuales"
+              @click="closeMobileMenu"
+              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors relative"
+              :class="{ 'bg-green-600': route.name === 'Manuales' }"
+            >
+              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+              </svg>
+              <span>Manuales</span>
+              <span v-if="unreadManualesCount > 0" class="ml-auto h-4 w-4 bg-indigo-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
+                {{ unreadManualesCount > 9 ? '9+' : unreadManualesCount }}
               </span>
             </router-link>
 

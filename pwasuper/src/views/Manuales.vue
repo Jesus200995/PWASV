@@ -261,19 +261,19 @@
             <!-- Botón cerrar (fuera del modal) -->
             <button 
               @click="cerrarModal" 
-              class="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 z-10 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all shadow-lg border border-white/30"
+              class="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 z-10 w-7 h-7 sm:w-8 sm:h-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all shadow-lg border border-white/30"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
               </svg>
             </button>
             
             <!-- Modal Content -->
-            <div class="relative w-full max-w-sm sm:max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all max-h-[85vh] flex flex-col">
+            <div class="relative w-full max-w-sm sm:max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
               <!-- Header con fondo decorativo de plantas -->
-              <div class="relative flex-shrink-0">
+              <div class="relative flex-shrink-0 overflow-hidden">
                 <!-- Fondo decorativo con burbujas animadas (siempre) -->
-                <div class="modal-placeholder-bg">
+                <div class="absolute inset-0 modal-placeholder-bg-fixed">
                   <div class="bubbles-container">
                     <div class="bubble bubble-1"></div>
                     <div class="bubble bubble-2"></div>
@@ -285,9 +285,10 @@
                     <div class="bubble bubble-8"></div>
                   </div>
                 </div>
-                <div class="absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-4 sm:pb-5 text-white">
-                  <h2 class="text-sm sm:text-base font-semibold break-words leading-snug">{{ manualSeleccionado?.titulo }}</h2>
-                  <p v-if="manualSeleccionado?.subtitulo" class="text-xs opacity-90 mt-1 break-words leading-snug">{{ manualSeleccionado?.subtitulo }}</p>
+                <!-- Título y subtítulo con padding superior e inferior -->
+                <div class="relative py-3 sm:py-4 px-3 sm:px-4 pt-6 sm:pt-7 text-white">
+                  <h2 class="text-sm sm:text-base font-semibold break-words leading-tight">{{ manualSeleccionado?.titulo }}</h2>
+                  <p v-if="manualSeleccionado?.subtitulo" class="text-xs opacity-90 mt-1.5 break-words leading-tight">{{ manualSeleccionado?.subtitulo }}</p>
                 </div>
               </div>
             
@@ -700,16 +701,21 @@ onMounted(() => {
 }
 
 /* ===== MODAL PLACEHOLDER CON BURBUJAS ===== */
+.modal-placeholder-bg-fixed {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+}
+
 .modal-placeholder-bg {
   position: relative;
-  height: 100px;
+  min-height: 100px;
+  height: auto;
   background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
   overflow: hidden;
 }
 
 @media (min-width: 640px) {
   .modal-placeholder-bg {
-    height: 110px;
+    min-height: 110px;
   }
 }
 

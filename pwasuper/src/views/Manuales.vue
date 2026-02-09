@@ -96,12 +96,13 @@
                  :key="manual.id"
                  class="relative manual-container">
               
-              <!-- Badge de no leído -->
-              <div v-if="!manual.leido" class="absolute -top-1 -right-1 z-50">
-                <div class="manual-badge bg-rose-500 rounded-full w-6 h-6 flex items-center justify-center shadow-lg border-2 border-white animate-pulse">
-                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+              <!-- Badge NUEVO en esquina superior izquierda -->
+              <div v-if="!manual.leido" class="absolute -top-2 -left-2 z-50">
+                <div class="nuevo-badge bg-gradient-to-r from-rose-700 to-rose-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg border-2 border-white flex items-center gap-1">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                   </svg>
+                  NUEVO
                 </div>
               </div>
 
@@ -110,7 +111,7 @@
                 'manual-card group cursor-pointer transition-all duration-300 ease-out rounded-2xl overflow-hidden',
                 manual.leido 
                   ? 'manual-read' 
-                  : 'manual-unread'
+                  : 'manual-unread manual-nuevo-animation'
               ]"
               @click="abrirManual(manual)"
               >
@@ -551,6 +552,51 @@ onMounted(() => {
 
 .manual-unread {
   background: linear-gradient(135deg, rgba(238, 242, 255, 0.9), rgba(255, 255, 255, 0.9));
+}
+
+.manual-nuevo-animation {
+  position: relative;
+  overflow: hidden;
+}
+
+.manual-nuevo-animation::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(185, 28, 28, 0.4), transparent);
+  animation: shine-slide 2.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes shine-slide {
+  0% {
+    left: -150%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
+}
+
+.nuevo-badge {
+  animation: badge-bounce-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes badge-bounce-in {
+  0% {
+    transform: scale(0) translateY(-20px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1) translateY(0);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
 
 .manual-read {

@@ -257,9 +257,9 @@
                 <img 
                   :src="getImagenUrl(manualSeleccionado.id)" 
                   :alt="manualSeleccionado.titulo"
-                  class="w-full h-32 sm:h-40 object-cover"
+                  class="w-full h-36 sm:h-44 object-cover"
                 />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
               </div>
               <!-- Fondo decorativo si no hay imagen -->
               <div v-else class="modal-placeholder-bg">
@@ -277,10 +277,10 @@
               </div>
               <div :class="[
                 'modal-header-content',
-                manualSeleccionado?.imagen_nombre ? 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 text-white' : 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 text-white'
+                manualSeleccionado?.imagen_nombre ? 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-4 sm:pb-5 text-white' : 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-4 sm:pb-5 text-white'
               ]">
-                <h2 class="text-lg sm:text-xl font-bold line-clamp-2">{{ manualSeleccionado?.titulo }}</h2>
-                <p v-if="manualSeleccionado?.subtitulo" class="text-xs sm:text-sm opacity-90 line-clamp-1 mt-0.5">{{ manualSeleccionado?.subtitulo }}</p>
+                <h2 class="text-sm sm:text-base font-semibold break-words leading-snug">{{ manualSeleccionado?.titulo }}</h2>
+                <p v-if="manualSeleccionado?.subtitulo" class="text-xs opacity-90 mt-1 break-words leading-snug">{{ manualSeleccionado?.subtitulo }}</p>
               </div>
               
               <!-- Botón cerrar -->

@@ -125,6 +125,37 @@
                   <div class="manual-image-overlay"></div>
                 </div>
                 
+                <!-- Fondo decorativo con plantas si NO hay imagen -->
+                <div v-else class="manual-placeholder-bg">
+                  <div class="plants-pattern">
+                    <!-- Planta 1 -->
+                    <svg class="plant-icon plant-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 22V12m0 0c0-3-2.5-6-6-7 3.5 1 6 4 6 7zm0 0c0-3 2.5-6 6-7-3.5 1-6 4-6 7z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 12c0-4 3-8 8-9-5 1-8 5-8 9z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 12c0-4-3-8-8-9 5 1 8 5 8 9z"/>
+                    </svg>
+                    <!-- Planta 2 -->
+                    <svg class="plant-icon plant-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 22v-8m0 0c-2 0-4-2-4-5 0 3-2 5-4 5m8 0c2 0 4-2 4-5 0 3 2 5 4 5"/>
+                      <circle cx="12" cy="6" r="3" stroke-width="1"/>
+                    </svg>
+                    <!-- Planta 3 -->
+                    <svg class="plant-icon plant-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 22V10m0 0c-3 0-5-3-5-6 2 3 5 6 5 6s3-3 5-6c0 3-2 6-5 6z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 14c-2 0-4-1.5-4-4 1 2 3 4 4 4zm8 0c2 0 4-1.5 4-4-1 2-3 4-4 4z"/>
+                    </svg>
+                    <!-- Planta 4 -->
+                    <svg class="plant-icon plant-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 22v-6m-4-4c0-4 4-8 4-8s4 4 4 8c0 2-1.5 4-4 4s-4-2-4-4z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8c0-3 2-6 5-7-2 3-5 7-5 7zm0 0c0-3-2-6-5-7 2 3 5 7 5 7z"/>
+                    </svg>
+                    <!-- Hoja decorativa -->
+                    <svg class="plant-icon plant-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 21c3-3 6-9 6-15 0 6 3 12 6 15M12 6c0 0 3 3 3 9m-6-9c0 0-3 3-3 9"/>
+                    </svg>
+                  </div>
+                </div>
+                
                 <!-- Contenido del manual -->
                 <div class="manual-content p-4">
                   <!-- Header -->
@@ -219,29 +250,43 @@
           <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="cerrarModal"></div>
           
           <!-- Modal Content -->
-          <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
-            <!-- Header con imagen -->
-            <div class="relative">
+          <div class="relative w-full max-w-sm sm:max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all max-h-[85vh] flex flex-col">
+            <!-- Header con imagen o fondo decorativo -->
+            <div class="relative flex-shrink-0">
               <div v-if="manualSeleccionado?.imagen_nombre" class="modal-header-image">
                 <img 
                   :src="getImagenUrl(manualSeleccionado.id)" 
                   :alt="manualSeleccionado.titulo"
-                  class="w-full h-40 object-cover"
+                  class="w-full h-32 sm:h-40 object-cover"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               </div>
+              <!-- Fondo decorativo si no hay imagen -->
+              <div v-else class="modal-placeholder-bg">
+                <div class="modal-plants-pattern">
+                  <svg class="modal-plant modal-plant-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 22V12m0 0c0-3-2.5-6-6-7 3.5 1 6 4 6 7zm0 0c0-3 2.5-6 6-7-3.5 1-6 4-6 7z"/>
+                  </svg>
+                  <svg class="modal-plant modal-plant-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 22v-8m0 0c-2 0-4-2-4-5 0 3-2 5-4 5m8 0c2 0 4-2 4-5 0 3 2 5 4 5"/>
+                  </svg>
+                  <svg class="modal-plant modal-plant-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 21c3-3 6-9 6-15 0 6 3 12 6 15"/>
+                  </svg>
+                </div>
+              </div>
               <div :class="[
                 'modal-header-content',
-                manualSeleccionado?.imagen_nombre ? 'absolute bottom-0 left-0 right-0 p-4 text-white' : 'bg-gradient-to-r from-indigo-500 to-purple-600 p-4 text-white'
+                manualSeleccionado?.imagen_nombre ? 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 text-white' : 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 text-white'
               ]">
-                <h2 class="text-xl font-bold">{{ manualSeleccionado?.titulo }}</h2>
-                <p v-if="manualSeleccionado?.subtitulo" class="text-sm opacity-90">{{ manualSeleccionado?.subtitulo }}</p>
+                <h2 class="text-lg sm:text-xl font-bold line-clamp-2">{{ manualSeleccionado?.titulo }}</h2>
+                <p v-if="manualSeleccionado?.subtitulo" class="text-xs sm:text-sm opacity-90 line-clamp-1 mt-0.5">{{ manualSeleccionado?.subtitulo }}</p>
               </div>
               
               <!-- Botón cerrar -->
               <button 
                 @click="cerrarModal" 
-                class="absolute top-3 right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                class="absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -250,20 +295,20 @@
             </div>
             
             <!-- Body -->
-            <div class="flex-1 overflow-y-auto p-4">
+            <div class="flex-1 overflow-y-auto p-3 sm:p-4 overscroll-contain">
               <!-- Descripción -->
-              <div v-if="manualSeleccionado?.descripcion" class="mb-4">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">Descripción</h3>
-                <p class="text-sm text-gray-600 leading-relaxed">{{ manualSeleccionado.descripcion }}</p>
+              <div v-if="manualSeleccionado?.descripcion" class="mb-3 sm:mb-4">
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">Descripción</h3>
+                <p class="text-xs sm:text-sm text-gray-600 leading-relaxed whitespace-pre-wrap break-words">{{ manualSeleccionado.descripcion }}</p>
               </div>
               
               <!-- Información -->
-              <div class="bg-gray-50 rounded-xl p-3 space-y-2">
-                <div class="flex items-center justify-between text-sm">
+              <div class="bg-gray-50 rounded-xl p-2.5 sm:p-3 space-y-1.5 sm:space-y-2">
+                <div class="flex items-center justify-between text-xs sm:text-sm">
                   <span class="text-gray-500">Fecha de publicación</span>
                   <span class="text-gray-700 font-medium">{{ formatearFecha(manualSeleccionado?.fecha_creacion) }}</span>
                 </div>
-                <div v-if="manualSeleccionado?.leido" class="flex items-center justify-between text-sm">
+                <div v-if="manualSeleccionado?.leido" class="flex items-center justify-between text-xs sm:text-sm">
                   <span class="text-gray-500">Leído el</span>
                   <span class="text-green-600 font-medium">{{ formatearFecha(manualSeleccionado?.fecha_lectura) }}</span>
                 </div>
@@ -271,15 +316,15 @@
             </div>
             
             <!-- Footer con acciones -->
-            <div class="p-4 border-t border-gray-100 bg-gray-50 space-y-2">
+            <div class="p-3 sm:p-4 border-t border-gray-100 bg-gray-50 space-y-2 flex-shrink-0">
               <!-- Abrir archivo -->
               <a 
                 v-if="manualSeleccionado?.archivo_nombre"
                 :href="getArchivoUrl(manualSeleccionado.id)"
                 target="_blank"
-                class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl font-medium hover:from-rose-600 hover:to-pink-600 transition-all shadow-lg"
+                class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-sm rounded-full font-medium hover:from-rose-600 hover:to-pink-600 active:scale-[0.98] transition-all shadow-md"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Abrir Documento
@@ -290,9 +335,9 @@
                 v-if="manualSeleccionado?.enlace_url"
                 :href="manualSeleccionado.enlace_url"
                 target="_blank"
-                class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg"
+                class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-sm rounded-full font-medium hover:from-indigo-600 hover:to-blue-600 active:scale-[0.98] transition-all shadow-md"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
                 Abrir Enlace
@@ -301,7 +346,7 @@
               <!-- Botón cerrar -->
               <button 
                 @click="cerrarModal"
-                class="w-full py-2.5 px-4 text-gray-600 font-medium rounded-xl hover:bg-gray-100 transition-colors"
+                class="w-full py-2 px-4 text-gray-500 text-sm font-medium rounded-full hover:bg-gray-100 active:scale-[0.98] transition-all"
               >
                 Cerrar
               </button>
@@ -558,5 +603,118 @@ onMounted(() => {
   .manual-image-container {
     height: 100px;
   }
+  
+  .manual-placeholder-bg {
+    height: 80px;
+  }
+}
+
+/* ===== FONDO DECORATIVO CON PLANTAS (sin imagen) ===== */
+.manual-placeholder-bg {
+  position: relative;
+  height: 100px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 50%, #ddd6fe 100%);
+  overflow: hidden;
+}
+
+.plants-pattern {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  opacity: 0.25;
+}
+
+.plant-icon {
+  color: #4f46e5;
+  transition: transform 0.3s ease;
+}
+
+.plant-1 {
+  width: 32px;
+  height: 32px;
+  transform: rotate(-15deg);
+}
+
+.plant-2 {
+  width: 28px;
+  height: 28px;
+  transform: rotate(10deg) translateY(-5px);
+}
+
+.plant-3 {
+  width: 36px;
+  height: 36px;
+  transform: rotate(-5deg);
+}
+
+.plant-4 {
+  width: 30px;
+  height: 30px;
+  transform: rotate(15deg) translateY(5px);
+}
+
+.plant-5 {
+  width: 26px;
+  height: 26px;
+  transform: rotate(-10deg);
+}
+
+.manual-card:hover .plant-icon {
+  transform: scale(1.1);
+}
+
+/* ===== MODAL PLACEHOLDER CON PLANTAS ===== */
+.modal-placeholder-bg {
+  position: relative;
+  height: 120px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .modal-placeholder-bg {
+    height: 140px;
+  }
+}
+
+.modal-plants-pattern {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 20px;
+  opacity: 0.2;
+}
+
+.modal-plant {
+  color: white;
+}
+
+.modal-plant-1 {
+  width: 48px;
+  height: 48px;
+  transform: rotate(-10deg);
+}
+
+.modal-plant-2 {
+  width: 40px;
+  height: 40px;
+  transform: rotate(15deg) translateY(-10px);
+}
+
+.modal-plant-3 {
+  width: 44px;
+  height: 44px;
+  transform: rotate(-5deg) translateY(5px);
+}
+
+/* ===== MODAL RESPONSIVO MEJORADO ===== */
+.modal-fade-enter-from .relative,
+.modal-fade-leave-to .relative {
+  transform: scale(0.95);
+  opacity: 0;
 }
 </style>

@@ -702,14 +702,14 @@ onMounted(() => {
 /* ===== MODAL PLACEHOLDER CON BURBUJAS ===== */
 .modal-placeholder-bg {
   position: relative;
-  height: 120px;
+  height: 100px;
   background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
   overflow: hidden;
 }
 
 @media (min-width: 640px) {
   .modal-placeholder-bg {
-    height: 140px;
+    height: 110px;
   }
 }
 

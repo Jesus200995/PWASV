@@ -249,57 +249,57 @@
           <!-- Overlay -->
           <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="cerrarModal"></div>
           
-          <!-- Modal Content -->
-          <div class="relative w-full max-w-sm sm:max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all max-h-[85vh] flex flex-col">
-            <!-- Header con imagen o fondo decorativo -->
-            <div class="relative flex-shrink-0">
-              <div v-if="manualSeleccionado?.imagen_nombre" class="modal-header-image">
-                <img 
-                  :src="getImagenUrl(manualSeleccionado.id)" 
-                  :alt="manualSeleccionado.titulo"
-                  class="w-full h-36 sm:h-44 object-cover"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-              </div>
-              <!-- Fondo decorativo si no hay imagen -->
-              <div v-else class="modal-placeholder-bg">
-                <div class="modal-plants-pattern">
-                  <svg class="modal-plant modal-plant-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 22V12m0 0c0-3-2.5-6-6-7 3.5 1 6 4 6 7zm0 0c0-3 2.5-6 6-7-3.5 1-6 4-6 7z"/>
-                  </svg>
-                  <svg class="modal-plant modal-plant-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 22v-8m0 0c-2 0-4-2-4-5 0 3-2 5-4 5m8 0c2 0 4-2 4-5 0 3 2 5 4 5"/>
-                  </svg>
-                  <svg class="modal-plant modal-plant-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 21c3-3 6-9 6-15 0 6 3 12 6 15"/>
-                  </svg>
+          <!-- Contenedor relativo para posicionar el botón -->
+          <div class="relative">
+            <!-- Botón cerrar (fuera del modal) -->
+            <button 
+              @click="cerrarModal" 
+              class="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 z-10 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all shadow-lg border border-white/30"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+            
+            <!-- Modal Content -->
+            <div class="relative w-full max-w-sm sm:max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all max-h-[85vh] flex flex-col">
+              <!-- Header con fondo decorativo de plantas -->
+              <div class="relative flex-shrink-0">
+                <!-- Fondo decorativo con burbujas animadas (siempre) -->
+                <div class="modal-placeholder-bg">
+                  <div class="bubbles-container">
+                    <div class="bubble bubble-1"></div>
+                    <div class="bubble bubble-2"></div>
+                    <div class="bubble bubble-3"></div>
+                    <div class="bubble bubble-4"></div>
+                    <div class="bubble bubble-5"></div>
+                    <div class="bubble bubble-6"></div>
+                    <div class="bubble bubble-7"></div>
+                    <div class="bubble bubble-8"></div>
+                  </div>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-4 sm:pb-5 text-white">
+                  <h2 class="text-sm sm:text-base font-semibold break-words leading-snug">{{ manualSeleccionado?.titulo }}</h2>
+                  <p v-if="manualSeleccionado?.subtitulo" class="text-xs opacity-90 mt-1 break-words leading-snug">{{ manualSeleccionado?.subtitulo }}</p>
                 </div>
               </div>
-              <div :class="[
-                'modal-header-content',
-                manualSeleccionado?.imagen_nombre ? 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-4 sm:pb-5 text-white' : 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-4 sm:pb-5 text-white'
-              ]">
-                <h2 class="text-sm sm:text-base font-semibold break-words leading-snug">{{ manualSeleccionado?.titulo }}</h2>
-                <p v-if="manualSeleccionado?.subtitulo" class="text-xs opacity-90 mt-1 break-words leading-snug">{{ manualSeleccionado?.subtitulo }}</p>
-              </div>
-              
-              <!-- Botón cerrar -->
-              <button 
-                @click="cerrarModal" 
-                class="absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
             
             <!-- Body -->
             <div class="flex-1 overflow-y-auto p-3 sm:p-4 overscroll-contain">
               <!-- Descripción -->
               <div v-if="manualSeleccionado?.descripcion" class="mb-3 sm:mb-4">
-                <h3 class="text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">Descripción</h3>
                 <p class="text-xs sm:text-sm text-gray-600 leading-relaxed whitespace-pre-wrap break-words">{{ manualSeleccionado.descripcion }}</p>
+              </div>
+              
+              <!-- Imagen (si existe, se muestra aquí después de la descripción) -->
+              <div v-if="manualSeleccionado?.imagen_nombre" class="mb-3 sm:mb-4">
+                <div class="rounded-2xl overflow-hidden shadow-lg">
+                  <img 
+                    :src="getImagenUrl(manualSeleccionado.id)" 
+                    :alt="manualSeleccionado.titulo"
+                    class="w-full h-auto object-cover"
+                  />
+                </div>
               </div>
               
               <!-- Información -->
@@ -351,6 +351,7 @@
                 Cerrar
               </button>
             </div>
+          </div>
           </div>
         </div>
       </transition>
@@ -665,11 +666,11 @@ onMounted(() => {
   transform: scale(1.1);
 }
 
-/* ===== MODAL PLACEHOLDER CON PLANTAS ===== */
+/* ===== MODAL PLACEHOLDER CON BURBUJAS ===== */
 .modal-placeholder-bg {
   position: relative;
   height: 120px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
   overflow: hidden;
 }
 
@@ -679,36 +680,110 @@ onMounted(() => {
   }
 }
 
-.modal-plants-pattern {
+.bubbles-container {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 0 20px;
-  opacity: 0.2;
+  overflow: hidden;
 }
 
-.modal-plant {
-  color: white;
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(134, 239, 172, 0.15);
+  backdrop-filter: blur(2px);
+  animation: float-up 8s ease-in-out infinite;
 }
 
-.modal-plant-1 {
-  width: 48px;
-  height: 48px;
-  transform: rotate(-10deg);
+@keyframes float-up {
+  0% {
+    transform: translateY(100%) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100%) scale(1);
+    opacity: 0;
+  }
 }
 
-.modal-plant-2 {
+.bubble-1 {
   width: 40px;
   height: 40px;
-  transform: rotate(15deg) translateY(-10px);
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 7s;
 }
 
-.modal-plant-3 {
-  width: 44px;
-  height: 44px;
-  transform: rotate(-5deg) translateY(5px);
+.bubble-2 {
+  width: 60px;
+  height: 60px;
+  left: 25%;
+  animation-delay: 1.5s;
+  animation-duration: 8s;
+}
+
+.bubble-3 {
+  width: 35px;
+  height: 35px;
+  left: 45%;
+  animation-delay: 0.5s;
+  animation-duration: 6.5s;
+}
+
+.bubble-4 {
+  width: 50px;
+  height: 50px;
+  left: 65%;
+  animation-delay: 2s;
+  animation-duration: 7.5s;
+}
+
+.bubble-5 {
+  width: 45px;
+  height: 45px;
+  left: 80%;
+  animation-delay: 1s;
+  animation-duration: 8.5s;
+}
+
+.bubble-6 {
+  width: 30px;
+  height: 30px;
+  left: 15%;
+  animation-delay: 3s;
+  animation-duration: 7s;
+}
+
+.bubble-7 {
+  width: 55px;
+  height: 55px;
+  left: 55%;
+  animation-delay: 2.5s;
+  animation-duration: 6s;
+}
+
+.bubble-8 {
+  width: 38px;
+  height: 38px;
+  left: 75%;
+  animation-delay: 0.8s;
+  animation-duration: 7.8s;
+}
+
+@media (min-width: 640px) {
+  .bubble-1 { width: 50px; height: 50px; }
+  .bubble-2 { width: 70px; height: 70px; }
+  .bubble-3 { width: 45px; height: 45px; }
+  .bubble-4 { width: 60px; height: 60px; }
+  .bubble-5 { width: 55px; height: 55px; }
+  .bubble-6 { width: 40px; height: 40px; }
+  .bubble-7 { width: 65px; height: 65px; }
+  .bubble-8 { width: 48px; height: 48px; }
 }
 
 /* ===== MODAL RESPONSIVO MEJORADO ===== */

@@ -101,6 +101,13 @@
                         </svg>
                         IMG
                       </span>
+                      <span v-if="manual.video_nombre" class="badge badge-video" title="Video adjunto">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polygon points="23 7 16 12 23 17 23 7"/>
+                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                        </svg>
+                        VIDEO
+                      </span>
                       <span v-if="manual.enlace_url" class="badge badge-url" title="Enlace externo">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -109,7 +116,7 @@
                         </svg>
                         URL
                       </span>
-                      <span v-if="!manual.archivo_nombre && !manual.imagen_nombre && !manual.enlace_url" class="badge badge-text">
+                      <span v-if="!manual.archivo_nombre && !manual.imagen_nombre && !manual.video_nombre && !manual.enlace_url" class="badge badge-text">
                         Solo texto
                       </span>
                     </div>
@@ -270,10 +277,39 @@
                 </div>
               </div>
 
-              <!-- Imagen -->
+              <!-- Selector de Media (Imagen o Video) -->
               <div class="form-group">
-                <label>Imagen de Portada</label>
-                <div class="file-upload-area" @click="$refs.imagenInput.click()">
+                <label>Multimedia de Portada</label>
+                <div class="media-type-selector">
+                  <label class="media-option" :class="{ active: tipoMedia === 'ninguno' }">
+                    <input type="radio" v-model="tipoMedia" value="ninguno" hidden />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                    <span>Ninguno</span>
+                  </label>
+                  <label class="media-option" :class="{ active: tipoMedia === 'imagen' }">
+                    <input type="radio" v-model="tipoMedia" value="imagen" hidden />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span>Imagen</span>
+                  </label>
+                  <label class="media-option" :class="{ active: tipoMedia === 'video' }">
+                    <input type="radio" v-model="tipoMedia" value="video" hidden />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="23 7 16 12 23 17 23 7"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span>Video</span>
+                  </label>
+                </div>
+                
+                <!-- Subir Imagen -->
+                <div v-if="tipoMedia === 'imagen'" class="file-upload-area" @click="$refs.imagenInput.click()">
                   <input
                     ref="imagenInput"
                     type="file"
@@ -293,6 +329,33 @@
                     <img :src="imagenPreview" alt="Preview" class="image-preview" />
                     <span>{{ imagenSeleccionada.name }}</span>
                     <button type="button" class="btn-remove-file" @click.stop="removerImagen">×</button>
+                  </div>
+                </div>
+                
+                <!-- Subir Video -->
+                <div v-if="tipoMedia === 'video'" class="file-upload-area" @click="$refs.videoInput.click()">
+                  <input
+                    ref="videoInput"
+                    type="file"
+                    accept=".mp4,.webm,.mov,.avi,.mkv"
+                    @change="handleVideoChange"
+                    hidden
+                  />
+                  <div v-if="!videoSeleccionado" class="upload-placeholder">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="23 7 16 12 23 17 23 7"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span>Clic para subir video (máx. 100MB)</span>
+                    <small style="color: #888; margin-top: 4px;">Formatos: MP4, WebM, MOV, AVI, MKV</small>
+                  </div>
+                  <div v-else class="file-selected">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                      <polygon points="23 7 16 12 23 17 23 7"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span>{{ videoSeleccionado.name }}</span>
+                    <button type="button" class="btn-remove-file" @click.stop="removerVideo">×</button>
                   </div>
                 </div>
               </div>
@@ -591,6 +654,8 @@ export default {
     const archivoSeleccionado = ref(null)
     const imagenSeleccionada = ref(null)
     const imagenPreview = ref(null)
+    const videoSeleccionado = ref(null)
+    const tipoMedia = ref('ninguno') // 'ninguno', 'imagen', 'video'
     const enviando = ref(false)
     const eliminando = ref(false)
     const busquedaUsuario = ref('')
@@ -673,6 +738,29 @@ export default {
       imagenPreview.value = null
     }
     
+    const handleVideoChange = (event) => {
+      const file = event.target.files[0]
+      if (file) {
+        // Validar extensión
+        const extensionesPermitidas = ['.mp4', '.webm', '.mov', '.avi', '.mkv']
+        const extension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'))
+        if (!extensionesPermitidas.includes(extension)) {
+          alert('Formato de video no permitido. Use: MP4, WEBM, MOV, AVI o MKV')
+          return
+        }
+        // Validar tamaño (max 100MB)
+        if (file.size > 100 * 1024 * 1024) {
+          alert('El video no puede superar los 100MB')
+          return
+        }
+        videoSeleccionado.value = file
+      }
+    }
+    
+    const removerVideo = () => {
+      videoSeleccionado.value = null
+    }
+    
     // Crear manual
     const crearManual = async () => {
       if (!formManual.value.titulo.trim()) {
@@ -690,7 +778,8 @@ export default {
         await manualesService.crearManual(
           formManual.value,
           archivoSeleccionado.value,
-          imagenSeleccionada.value
+          tipoMedia.value === 'imagen' ? imagenSeleccionada.value : null,
+          tipoMedia.value === 'video' ? videoSeleccionado.value : null
         )
         
         cerrarModalCrear()
@@ -778,6 +867,8 @@ export default {
       archivoSeleccionado.value = null
       imagenSeleccionada.value = null
       imagenPreview.value = null
+      videoSeleccionado.value = null
+      tipoMedia.value = 'ninguno'
     }
     
     const cerrarModalDetalle = () => {
@@ -835,6 +926,8 @@ export default {
       archivoSeleccionado,
       imagenSeleccionada,
       imagenPreview,
+      videoSeleccionado,
+      tipoMedia,
       enviando,
       eliminando,
       busquedaUsuario,
@@ -844,8 +937,10 @@ export default {
       cargarManuales,
       handleArchivoChange,
       handleImagenChange,
+      handleVideoChange,
       removerArchivo,
       removerImagen,
+      removerVideo,
       crearManual,
       verDetalle,
       verEstadisticas,
@@ -1063,6 +1158,11 @@ export default {
 .badge-img {
   background: #f0fdf4;
   color: #16a34a;
+}
+
+.badge-video {
+  background: #fef3e2;
+  color: #ea580c;
 }
 
 .badge-url {
@@ -1288,6 +1388,49 @@ export default {
   text-align: right;
   display: block;
   margin-top: 4px;
+}
+
+/* Media Type Selector */
+.media-type-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.media-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.media-option:hover {
+  border-color: #1a73e8;
+  background: #f0f7ff;
+}
+
+.media-option.active {
+  border-color: #1a73e8;
+  background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
+  color: #1a73e8;
+}
+
+.media-option.active svg {
+  stroke: #1a73e8;
+}
+
+.media-option svg {
+  stroke: #9ca3af;
+  transition: stroke 0.2s ease;
 }
 
 /* File Upload */

@@ -8133,11 +8133,20 @@ def crear_tablas_manuales():
                 archivo_nombre VARCHAR(255),
                 imagen BYTEA,
                 imagen_nombre VARCHAR(255),
+                video BYTEA,
+                video_nombre VARCHAR(255),
                 enviado_a_todos BOOLEAN DEFAULT TRUE,
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 activo BOOLEAN DEFAULT TRUE
             )
         """)
+        
+        # Agregar columnas de video si no existen (para BD existentes)
+        try:
+            cursor.execute("ALTER TABLE manuales ADD COLUMN IF NOT EXISTS video BYTEA")
+            cursor.execute("ALTER TABLE manuales ADD COLUMN IF NOT EXISTS video_nombre VARCHAR(255)")
+        except:
+            pass
         
         # Tabla de relación manuales-usuarios (para envíos específicos)
         cursor.execute("""
@@ -8179,7 +8188,8 @@ async def crear_manual(
     enviado_a_todos: bool = Form(True),
     usuario_ids: str = Form(None),
     archivo: UploadFile = File(None),
-    imagen: UploadFile = File(None)
+    imagen: UploadFile = File(None),
+    video: UploadFile = File(None)
 ):
     """Crear un nuevo manual"""
     try:
@@ -8266,6 +8276,25 @@ async def crear_manual(
             
             print(f"🖼️ Imagen procesada: {imagen_nombre} ({len(imagen_bytes)} bytes)")
         
+        # Procesar video
+        video_bytes = None
+        video_nombre = None
+        
+        if video and video.filename:
+            print(f"🎬 Procesando video: {video.filename}")
+            
+            ext = os.path.splitext(video.filename)[1].lower()
+            if ext not in ['.mp4', '.webm', '.mov', '.avi', '.mkv']:
+                raise HTTPException(status_code=400, detail="Formato de video no válido. Use: mp4, webm, mov, avi, mkv")
+            
+            video_bytes = await video.read()
+            video_nombre = video.filename
+            
+            if len(video_bytes) > 100 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="El video no debe exceder 100MB")
+            
+            print(f"🎬 Video procesado: {video_nombre} ({len(video_bytes)} bytes)")
+        
         fecha_creacion = obtener_fecha_hora_cdmx_notificaciones()
         
         # Insertar manual
@@ -8274,13 +8303,15 @@ async def crear_manual(
                 titulo, subtitulo, descripcion, enlace_url,
                 archivo, archivo_tipo, archivo_nombre,
                 imagen, imagen_nombre,
+                video, video_nombre,
                 enviado_a_todos, fecha_creacion
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (
             titulo, subtitulo, descripcion, enlace_url,
             archivo_bytes, archivo_tipo, archivo_nombre,
             imagen_bytes, imagen_nombre,
+            video_bytes, video_nombre,
             enviado_a_todos, fecha_creacion
         ))
         
@@ -8308,6 +8339,7 @@ async def crear_manual(
             "usuarios_destinatarios": len(usuarios_seleccionados) if not enviado_a_todos else "todos",
             "tiene_archivo": archivo_nombre is not None,
             "tiene_imagen": imagen_nombre is not None,
+            "tiene_video": video_nombre is not None,
             "fecha_creacion": fecha_creacion.isoformat()
         }
         
@@ -8396,7 +8428,7 @@ async def obtener_manuales_usuario(usuario_id: int):
         cursor.execute("""
             SELECT 
                 m.id, m.titulo, m.subtitulo, m.descripcion, m.enlace_url,
-                m.archivo_nombre, m.archivo_tipo, m.imagen_nombre,
+                m.archivo_nombre, m.archivo_tipo, m.imagen_nombre, m.video_nombre,
                 m.enviado_a_todos, m.fecha_creacion,
                 EXISTS(SELECT 1 FROM manual_leidos WHERE manual_id = m.id AND usuario_id = %s) as leido
             FROM manuales m
@@ -8414,7 +8446,7 @@ async def obtener_manuales_usuario(usuario_id: int):
         no_leidos = 0
         
         for row in rows:
-            leido = row[10]
+            leido = row[11]
             if not leido:
                 no_leidos += 1
             
@@ -8427,8 +8459,9 @@ async def obtener_manuales_usuario(usuario_id: int):
                 "archivo_nombre": row[5],
                 "archivo_tipo": row[6],
                 "imagen_nombre": row[7],
-                "enviado_a_todos": row[8],
-                "fecha_creacion": row[9].isoformat() if row[9] else None,
+                "video_nombre": row[8],
+                "enviado_a_todos": row[9],
+                "fecha_creacion": row[10].isoformat() if row[10] else None,
                 "leido": leido
             }
             manuales.append(manual)
@@ -8457,7 +8490,7 @@ async def obtener_manual(manual_id: int):
         cursor.execute("""
             SELECT 
                 id, titulo, subtitulo, descripcion, enlace_url,
-                archivo_nombre, archivo_tipo, imagen_nombre,
+                archivo_nombre, archivo_tipo, imagen_nombre, video_nombre,
                 enviado_a_todos, fecha_creacion, activo
             FROM manuales
             WHERE id = %s
@@ -8474,7 +8507,7 @@ async def obtener_manual(manual_id: int):
         
         # Obtener destinatarios específicos si aplica
         destinatarios = []
-        if not row[8]:  # No enviado a todos
+        if not row[9]:  # No enviado a todos
             cursor.execute("""
                 SELECT u.id, u.nombre_completo, u.correo,
                        EXISTS(SELECT 1 FROM manual_leidos WHERE manual_id = %s AND usuario_id = u.id) as leido
@@ -8500,9 +8533,10 @@ async def obtener_manual(manual_id: int):
             "archivo_nombre": row[5],
             "archivo_tipo": row[6],
             "imagen_nombre": row[7],
-            "enviado_a_todos": row[8],
-            "fecha_creacion": row[9].isoformat() if row[9] else None,
-            "activo": row[10],
+            "video_nombre": row[8],
+            "enviado_a_todos": row[9],
+            "fecha_creacion": row[10].isoformat() if row[10] else None,
+            "activo": row[11],
             "total_lecturas": total_lecturas,
             "destinatarios": destinatarios
         }
@@ -8608,6 +8642,53 @@ async def obtener_imagen_manual(manual_id: int):
     except Exception as e:
         print(f"❌ Error obteniendo imagen: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener imagen: {str(e)}")
+
+@app.get("/manuales/{manual_id}/video")
+async def obtener_video_manual(manual_id: int):
+    """Obtener video de un manual"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        cursor.execute(
+            "SELECT video, video_nombre FROM manuales WHERE id = %s",
+            (manual_id,)
+        )
+        row = cursor.fetchone()
+        
+        if not row or not row[0]:
+            raise HTTPException(status_code=404, detail="Video no encontrado")
+        
+        video_bytes = bytes(row[0])
+        video_nombre = row[1] or "video.mp4"
+        
+        # Determinar content type por extensión
+        ext = os.path.splitext(video_nombre)[1].lower() if video_nombre else '.mp4'
+        content_types = {
+            '.mp4': 'video/mp4',
+            '.webm': 'video/webm',
+            '.mov': 'video/quicktime',
+            '.avi': 'video/x-msvideo',
+            '.mkv': 'video/x-matroska'
+        }
+        
+        content_type = content_types.get(ext, 'video/mp4')
+        
+        return Response(
+            content=video_bytes,
+            media_type=content_type,
+            headers={
+                "Cache-Control": "public, max-age=86400",
+                "Access-Control-Allow-Origin": "*",
+                "Accept-Ranges": "bytes"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo video: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener video: {str(e)}")
 
 @app.post("/manuales/{manual_id}/leer")
 async def marcar_manual_leido(manual_id: int, usuario_id: int):

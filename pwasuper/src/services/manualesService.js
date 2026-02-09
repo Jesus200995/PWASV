@@ -125,6 +125,13 @@ export const manualesService = {
   },
 
   /**
+   * Obtener URL del video
+   */
+  getVideoUrl(manualId) {
+    return `${API_BASE_URL}/manuales/${manualId}/video`
+  },
+
+  /**
    * Manejo de errores
    */
   handleError(error) {

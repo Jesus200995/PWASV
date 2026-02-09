@@ -218,6 +218,13 @@
                         </svg>
                         URL
                       </span>
+                      <span v-if="manual.video_nombre" class="manual-badge-small badge-video">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <polygon points="23 7 16 12 23 17 23 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke-width="2"/>
+                        </svg>
+                        VIDEO
+                      </span>
                     </div>
                     <span class="text-xs text-gray-400">
                       {{ formatearFecha(manual.fecha_creacion) }}
@@ -299,6 +306,22 @@
                     :alt="manualSeleccionado.titulo"
                     class="w-full h-auto object-cover"
                   />
+                </div>
+              </div>
+              
+              <!-- Video (si existe) -->
+              <div v-if="manualSeleccionado?.video_nombre" class="mb-3 sm:mb-4">
+                <div class="rounded-2xl overflow-hidden shadow-lg bg-black">
+                  <video 
+                    :src="getVideoUrl(manualSeleccionado.id)" 
+                    controls
+                    controlsList="nodownload"
+                    playsinline
+                    preload="metadata"
+                    class="w-full h-auto"
+                  >
+                    Tu navegador no soporta la reproducción de video.
+                  </video>
                 </div>
               </div>
               
@@ -429,6 +452,11 @@ const cerrarModal = () => {
 // Obtener URL de imagen
 const getImagenUrl = (manualId) => {
   return manualesService.getImagenUrl(manualId)
+}
+
+// Obtener URL de video
+const getVideoUrl = (manualId) => {
+  return manualesService.getVideoUrl(manualId)
 }
 
 // Obtener URL de archivo
@@ -573,6 +601,11 @@ onMounted(() => {
 .badge-url {
   background: #eff6ff;
   color: #2563eb;
+}
+
+.badge-video {
+  background: #fef3e2;
+  color: #ea580c;
 }
 
 /* Modal transitions */

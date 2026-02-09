@@ -23,9 +23,10 @@ export const manualesService = {
    * @param {Object} manual - Datos del manual
    * @param {File} archivo - Archivo PDF/documento opcional
    * @param {File} imagen - Imagen de portada opcional
+   * @param {File} video - Video opcional
    * @returns {Promise} Respuesta de la API
    */
-  async crearManual(manual, archivo = null, imagen = null) {
+  async crearManual(manual, archivo = null, imagen = null, video = null) {
     try {
       console.log('📚 Creando manual:', manual)
       
@@ -61,6 +62,12 @@ export const manualesService = {
       if (imagen) {
         formData.append('imagen', imagen)
         console.log('🖼️ Imagen adjunta:', imagen.name)
+      }
+      
+      // Agregar video si existe
+      if (video) {
+        formData.append('video', video)
+        console.log('🎬 Video adjunto:', video.name)
       }
       
       const formDataApi = createFormDataApi()

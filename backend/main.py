@@ -8547,7 +8547,10 @@ async def descargar_archivo_manual(manual_id: int):
         return Response(
             content=archivo_bytes,
             media_type=content_type,
-            headers={"Content-Disposition": f'attachment; filename="{archivo_nombre}"'}
+            headers={
+                "Content-Disposition": f'inline; filename="{archivo_nombre}"',
+                "Access-Control-Allow-Origin": "*"
+            }
         )
         
     except HTTPException:
@@ -8573,10 +8576,10 @@ async def obtener_imagen_manual(manual_id: int):
             raise HTTPException(status_code=404, detail="Imagen no encontrada")
         
         imagen_bytes = bytes(row[0])
-        imagen_nombre = row[1]
+        imagen_nombre = row[1] or "imagen.jpg"
         
         # Determinar content type por extensión
-        ext = os.path.splitext(imagen_nombre)[1].lower()
+        ext = os.path.splitext(imagen_nombre)[1].lower() if imagen_nombre else '.jpg'
         content_types = {
             '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
             '.png': 'image/png', '.gif': 'image/gif',
@@ -8587,7 +8590,11 @@ async def obtener_imagen_manual(manual_id: int):
         
         return Response(
             content=imagen_bytes,
-            media_type=content_type
+            media_type=content_type,
+            headers={
+                "Cache-Control": "public, max-age=86400",
+                "Access-Control-Allow-Origin": "*"
+            }
         )
         
     except HTTPException:

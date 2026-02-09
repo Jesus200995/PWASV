@@ -1,9 +1,7 @@
 import axios from 'axios'
 
-// Configuración de la API
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://apipwa.sembrandodatos.com' 
-  : 'http://localhost:8000'
+// Configuración de la API - Siempre usar producción
+const API_BASE_URL = 'https://apipwa.sembrandodatos.com'
 
 // Crear instancia de axios con configuración
 const api = axios.create({

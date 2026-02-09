@@ -501,6 +501,30 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Feedback (Éxito/Error) -->
+    <Transition name="fade">
+      <div v-if="mostrarModalFeedback" class="feedback-overlay" @click="cerrarFeedback">
+        <div class="feedback-modal" :class="feedbackTipo" @click.stop>
+          <div class="feedback-icon">
+            <svg v-if="feedbackTipo === 'success'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <h4 class="feedback-title">{{ feedbackTitulo }}</h4>
+          <p class="feedback-message">{{ feedbackMensaje }}</p>
+          <button class="feedback-btn" :class="feedbackTipo" @click="cerrarFeedback">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -531,6 +555,23 @@ export default {
     const mostrarModalDetalle = ref(false)
     const mostrarModalEstadisticas = ref(false)
     const mostrarModalEliminar = ref(false)
+    
+    // Modal de feedback
+    const mostrarModalFeedback = ref(false)
+    const feedbackTipo = ref('success') // 'success' o 'error'
+    const feedbackTitulo = ref('')
+    const feedbackMensaje = ref('')
+    
+    const mostrarFeedback = (tipo, titulo, mensaje) => {
+      feedbackTipo.value = tipo
+      feedbackTitulo.value = titulo
+      feedbackMensaje.value = mensaje
+      mostrarModalFeedback.value = true
+    }
+    
+    const cerrarFeedback = () => {
+      mostrarModalFeedback.value = false
+    }
     
     // Datos de modales
     const manualDetalle = ref(null)
@@ -654,10 +695,26 @@ export default {
         
         cerrarModalCrear()
         await cargarManuales()
-        alert('Manual creado exitosamente')
+        mostrarFeedback('success', '¡Manual Creado!', 'El manual se ha publicado correctamente y ya está disponible para los usuarios.')
       } catch (err) {
         console.error('Error:', err)
-        alert(err.response?.data?.detail || 'Error al crear manual')
+        
+        // Determinar mensaje de error más descriptivo
+        let mensajeError = 'Error desconocido al crear el manual'
+        
+        if (err.code === 'ERR_NETWORK') {
+          if (err.message?.includes('413') || err.request?.status === 413) {
+            mensajeError = 'El archivo es demasiado grande. El límite es de 50MB para documentos y 10MB para imágenes.'
+          } else {
+            mensajeError = 'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.'
+          }
+        } else if (err.response?.status === 413) {
+          mensajeError = 'El archivo es demasiado grande. El límite es de 50MB para documentos y 10MB para imágenes.'
+        } else if (err.response?.data?.detail) {
+          mensajeError = err.response.data.detail
+        }
+        
+        mostrarFeedback('error', 'Error al Crear', mensajeError)
       } finally {
         enviando.value = false
       }
@@ -801,7 +858,12 @@ export default {
       cerrarModalEstadisticas,
       cerrarModalEliminar,
       formatearFecha,
-      logout
+      logout,
+      mostrarModalFeedback,
+      feedbackTipo,
+      feedbackTitulo,
+      feedbackMensaje,
+      cerrarFeedback
     }
   }
 }
@@ -1594,6 +1656,150 @@ export default {
   .modal-content {
     width: 95%;
     margin: 16px;
+  }
+}
+
+/* ===== MODAL DE FEEDBACK ===== */
+.feedback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.feedback-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: feedbackPop 0.3s ease-out;
+}
+
+@keyframes feedbackPop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.feedback-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.feedback-modal.success .feedback-icon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.feedback-modal.error .feedback-icon {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.feedback-icon svg {
+  width: 32px;
+  height: 32px;
+  color: white;
+}
+
+.feedback-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #1f2937;
+}
+
+.feedback-message {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.feedback-btn {
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.feedback-btn.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.feedback-btn.success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.feedback-btn.error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.feedback-btn.error:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Transiciones */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Responsive feedback */
+@media (max-width: 480px) {
+  .feedback-modal {
+    padding: 24px 20px;
+    max-width: 300px;
+  }
+  
+  .feedback-icon {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .feedback-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .feedback-title {
+    font-size: 18px;
+  }
+  
+  .feedback-message {
+    font-size: 13px;
   }
 }
 </style>

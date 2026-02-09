@@ -12,8 +12,8 @@
       <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-2 sm:px-3 lg:px-4 pt-2 sm:pt-3">
         <div class="w-full max-w-md mx-auto">
           <div class="glass-card mb-0 relative">
-            <div class="text-center mb-1 relative py-0.5">
-              <h1 class="text-base font-medium tracking-wide text-indigo-700" style="font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; letter-spacing: 0.025em;">
+            <div class="text-center mb-0.5 relative py-0">
+              <h1 class="text-sm font-medium tracking-wide text-indigo-700" style="font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; letter-spacing: 0.025em;">
                 Mis Manuales
               </h1>
               <!-- Botón de refresh -->

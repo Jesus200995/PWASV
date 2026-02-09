@@ -326,7 +326,7 @@ const manualSeleccionado = ref(null)
 
 // Usuario actual
 const usuarioId = computed(() => {
-  const userData = localStorage.getItem('user_data')
+  const userData = localStorage.getItem('user')
   if (userData) {
     const user = JSON.parse(userData)
     return user.id || user.usuario_id

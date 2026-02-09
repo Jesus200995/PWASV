@@ -442,6 +442,9 @@ const abrirManual = async (manual) => {
     // Actualizar el estado local
     manual.leido = true
     manual.fecha_lectura = new Date().toISOString()
+    
+    // Emitir evento para actualizar contador en App.vue
+    window.dispatchEvent(new CustomEvent('manual-leido'))
   }
 }
 

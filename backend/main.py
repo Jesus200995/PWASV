@@ -8872,7 +8872,9 @@ async def contar_manuales_no_leidos(usuario_id: int):
         
         no_leidos = cursor.fetchone()[0]
         
-        return {"no_leidos": no_leidos}
+        print(f"📚 Usuario {usuario_id} tiene {no_leidos} manuales no leídos")
+        
+        return {"total": no_leidos, "no_leidos": no_leidos}
         
     except Exception as e:
         print(f"❌ Error contando manuales no leídos: {e}")

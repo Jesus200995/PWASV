@@ -51,7 +51,9 @@ const cargarConteoManuales = async () => {
       const user = JSON.parse(storedUser);
       const userId = user.id || user.usuario_id;
       if (userId) {
-        unreadManualesCount.value = await manualesService.obtenerConteoNoLeidos(userId);
+        const conteo = await manualesService.obtenerConteoNoLeidos(userId);
+        unreadManualesCount.value = conteo;
+        console.log('📚 Manuales no leídos:', conteo);
       }
     } catch (error) {
       console.error('Error cargando conteo manuales:', error);
@@ -334,6 +336,9 @@ onMounted(() => {
   // Escuchar cambios en localStorage
   window.addEventListener('storage', handleStorageChange);
   
+  // Escuchar evento de manual marcado como leído para actualizar contador
+  window.addEventListener('manual-leido', cargarConteoManuales);
+  
   // Iniciar verificación periódica de datos del usuario (si está logueado)
   if (userData.value) {
     startUserDataCheck();
@@ -343,6 +348,7 @@ onMounted(() => {
 onUnmounted(() => {
   // Limpiar listener
   window.removeEventListener('storage', handleStorageChange);
+  window.removeEventListener('manual-leido', cargarConteoManuales);
   // Detener el polling de notificaciones
   stopPolling(notificationPollingId);
   // Detener polling de manuales
@@ -616,7 +622,7 @@ const currentUserId = computed(() => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
               </svg>
               <!-- Badge de manuales no leídos -->
-              <span v-if="unreadManualesCount > 0" class="absolute -top-1 -right-1 h-5 w-5 bg-emerald-400 text-white text-xs font-bold rounded-full flex items-center justify-center">
+              <span v-if="unreadManualesCount > 0" class="absolute -top-1 -right-1 h-5 w-5 bg-purple-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
                 {{ unreadManualesCount > 9 ? '9+' : unreadManualesCount }}
               </span>
             </router-link>

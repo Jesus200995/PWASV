@@ -59,8 +59,9 @@ export const manualesService = {
       
       const response = await api.get(`/manuales/usuario/${usuarioId}/no-leidos`)
       
-      console.log(`✅ ${response.data.total} manuales no leídos`)
-      return response.data.total || 0
+      const conteo = response.data.total || response.data.no_leidos || 0
+      console.log(`✅ ${conteo} manuales no leídos`)
+      return conteo
     } catch (error) {
       console.error('Error obteniendo conteo no leídos:', error)
       

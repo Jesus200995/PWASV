@@ -650,15 +650,16 @@ const currentUserId = computed(() => {
         v-if="isLoggedIn && showMobileMenu" 
         class="fixed top-[60px] inset-x-0 z-30 bg-green-800 shadow-lg rounded-b-3xl mx-2"
       >
-        <div class="px-2 py-2">
-          <nav class="space-y-1.5">
+        <div class="px-2 py-3">
+          <nav class="space-y-1">
+            <!-- Sección Principal: Registro de Trabajo -->
             <router-link
               to="/"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              class="flex items-center pl-3 pr-3 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors"
               :class="{ 'bg-green-600': route.name === 'Home' }"
             >
-              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <svg class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
               <span>Inicio</span>
@@ -667,26 +668,30 @@ const currentUserId = computed(() => {
             <router-link
               to="/historial"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              class="flex items-center pl-3 pr-3 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors"
               :class="{ 'bg-green-600': route.name === 'Historial' }"
             >
-              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <svg class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
               </svg>
               <span>Historial</span>
             </router-link>
 
+            <!-- Separador -->
+            <div class="border-t border-green-700/50 my-2"></div>
+
+            <!-- Sección Comunicación: Notificaciones y Manuales -->
             <router-link
               to="/notificaciones"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors relative"
+              class="flex items-center pl-3 pr-3 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors relative"
               :class="{ 'bg-green-600': route.name === 'Notificaciones' }"
             >
-              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <svg class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
               </svg>
               <span>Notificaciones</span>
-              <span v-if="unreadCount > 0" class="ml-auto h-4 w-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
+              <span v-if="unreadCount > 0" class="ml-auto h-5 w-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
                 {{ unreadCount > 9 ? '9+' : unreadCount }}
               </span>
             </router-link>
@@ -694,78 +699,88 @@ const currentUserId = computed(() => {
             <router-link
               to="/manuales"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors relative"
+              class="flex items-center pl-3 pr-3 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors relative"
               :class="{ 'bg-green-600': route.name === 'Manuales' }"
             >
-              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <svg class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
               </svg>
               <span>Manuales</span>
-              <span v-if="unreadManualesCount > 0" class="ml-auto h-4 w-4 bg-indigo-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
+              <span v-if="unreadManualesCount > 0" class="ml-auto h-5 w-5 bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
                 {{ unreadManualesCount > 9 ? '9+' : unreadManualesCount }}
               </span>
             </router-link>
 
+            <!-- Separador -->
+            <div class="border-t border-green-700/50 my-2"></div>
+
+            <!-- Sección Análisis -->
+            <router-link
+              to="/reportes"
+              @click="closeMobileMenu"
+              class="flex items-center pl-3 pr-3 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              :class="{ 'bg-green-600': route.name === 'Reportes' }"
+            >
+              <svg class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+              </svg>
+              <span>Reportes</span>
+            </router-link>
+
+            <!-- Separador -->
+            <div class="border-t border-green-700/50 my-2"></div>
+
+            <!-- Sección Personal: Perfil, Configuración y Soporte -->
             <router-link
               to="/profile"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              class="flex items-center pl-3 pr-3 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors"
               :class="{ 'bg-green-600': route.name === 'Profile' }"
             >
-              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <svg class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
               </svg>
               <span>Mi Perfil</span>
             </router-link>
 
             <router-link
-              to="/support"
-              @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
-              :class="{ 'bg-green-600': route.name === 'Support' }"
-            >
-              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.829V11a1 1 0 11-2 0v-.171a3.001 3.001 0 01-1.402-5.618 1 1 0 111.73-1A1 1 0 0010 7a1 1 0 001 1h.01a1 1 0 100-2H11a1 1 0 00-1-1zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-              </svg>
-              <span>Soporte</span>
-            </router-link>
-
-            <router-link
-              to="/reportes"
-              @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
-              :class="{ 'bg-green-600': route.name === 'Reportes' }"
-            >
-              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-              </svg>
-              <span>Reportes</span>
-            </router-link>
-
-            <router-link
               to="/settings"
               @click="closeMobileMenu"
-              class="flex items-center pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              class="flex items-center pl-3 pr-3 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors"
               :class="{ 'bg-green-600': route.name === 'Settings' }"
             >
-              <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <svg class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
               </svg>
               <span>Configuración</span>
             </router-link>
 
-            <div class="border-t border-green-600 pt-2 mt-2">
-              <button
-                @click="logout"
-                class="flex items-center w-full pl-2 pr-3 py-1.5 rounded-md text-sm font-medium text-red-300 hover:bg-red-900/30 hover:text-red-200 transition-colors focus:outline-none focus:ring-0 active:bg-red-900/30"
-                style="-webkit-tap-highlight-color: transparent;"
-              >
-                <svg class="h-4 w-4 mr-2.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
-                </svg>
-                <span>Cerrar Sesión</span>
-              </button>
-            </div>
+            <router-link
+              to="/support"
+              @click="closeMobileMenu"
+              class="flex items-center pl-3 pr-3 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              :class="{ 'bg-green-600': route.name === 'Support' }"
+            >
+              <svg class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.829V11a1 1 0 11-2 0v-.171a3.001 3.001 0 01-1.402-5.618 1 1 0 111.73-1A1 1 0 0010 7a1 1 0 001 1h.01a1 1 0 100-2H11a1 1 0 00-1-1zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+              </svg>
+              <span>Soporte</span>
+            </router-link>
+
+            <!-- Separador Final -->
+            <div class="border-t border-green-700/50 my-2"></div>
+
+            <!-- Cerrar Sesión -->
+            <button
+              @click="logout"
+              class="flex items-center w-full pl-3 pr-3 py-2.5 rounded-lg text-sm font-medium text-red-300 hover:bg-red-900/30 hover:text-red-200 transition-colors focus:outline-none focus:ring-0 active:bg-red-900/30"
+              style="-webkit-tap-highlight-color: transparent;"
+            >
+              <svg class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+              </svg>
+              <span>Cerrar Sesión</span>
+            </button>
           </nav>
         </div>
       </div>

@@ -127,6 +127,13 @@ const handleStorageChange = (e) => {
         notificationPollingId = null;
       }
       
+      // Detener polling de manuales
+      if (manualesPollingId) {
+        clearInterval(manualesPollingId);
+        manualesPollingId = null;
+      }
+      unreadManualesCount.value = 0;
+      
       router.push('/login');
     } else if (e.newValue) {
       // Si se agregó o actualizó un usuario, cargar los datos
@@ -139,6 +146,13 @@ const handleStorageChange = (e) => {
           console.log('⚠️ [Storage Change] Usuario sin territorio, mostrando modal obligatorio');
           showTerritorioModal.value = true;
         }
+        // Reiniciar polling de manuales
+        if (manualesPollingId) {
+          clearInterval(manualesPollingId);
+        }
+        cargarConteoManuales();
+        manualesPollingId = setInterval(cargarConteoManuales, 60000);
+        
         
         // Reiniciar polling de notificaciones para el nuevo usuario
         if (notificationPollingId) {
@@ -380,6 +394,13 @@ function logout() {
   stopPolling(notificationPollingId);
   notificationPollingId = null;
   
+  // Detener el polling de manuales
+  if (manualesPollingId) {
+    clearInterval(manualesPollingId);
+    manualesPollingId = null;
+  }
+  unreadManualesCount.value = 0;
+  
   // Limpiar el estado reactivo primero
   userData.value = null;
   showWelcome.value = false;
@@ -580,6 +601,23 @@ const currentUserId = computed(() => {
               <!-- Badge de notificaciones no leídas -->
               <span v-if="unreadCount > 0" class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                 {{ unreadCount > 9 ? '9+' : unreadCount }}
+              </span>
+            </router-link>
+
+            <!-- Botón de manuales -->
+            <router-link
+              to="/manuales"
+              class="relative p-1.5 rounded-full text-white hover:bg-green-700 focus:outline-none focus:ring-0 transition-colors"
+              :class="route.name === 'Manuales' ? 'bg-green-700' : 'bg-transparent'"
+              style="-webkit-tap-highlight-color: transparent;"
+            >
+              <!-- Icono de libro/manual (Heroicons) -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
+              <!-- Badge de manuales no leídos -->
+              <span v-if="unreadManualesCount > 0" class="absolute -top-1 -right-1 h-5 w-5 bg-emerald-400 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                {{ unreadManualesCount > 9 ? '9+' : unreadManualesCount }}
               </span>
             </router-link>
             

@@ -315,7 +315,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { manualesService } from '@/services/manualesService'
+import { manualesService } from '../services/manualesService'
 
 // Estado
 const cargando = ref(false)

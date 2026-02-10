@@ -601,12 +601,20 @@ const confirmLogout = () => {
 // Handler para actualización de usuario en tiempo real
 const handleUserSessionUpdated = (event) => {
   console.log('🔄 Sidebar: Usuario actualizado en tiempo real', event.detail)
-  currentUser.value = event.detail
   
-  // Forzar re-render del sidebar
-  const newUser = authService.getCurrentUser()
-  if (newUser) {
-    currentUser.value = { ...newUser }
+  // Actualizar authService.user desde localStorage
+  authService.user = authService.getUserFromStorage()
+  
+  // Usar datos del evento (ya están actualizados)
+  if (event.detail) {
+    currentUser.value = { ...event.detail }
+    console.log('✅ Sidebar: Permisos actualizados reactivamente:', currentUser.value.permisos)
+  } else {
+    // Fallback: leer desde authService actualizado
+    const newUser = authService.getCurrentUser()
+    if (newUser) {
+      currentUser.value = { ...newUser }
+    }
   }
 }
 

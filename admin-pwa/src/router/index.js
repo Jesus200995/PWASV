@@ -152,16 +152,18 @@ router.beforeEach(async (to, from, next) => {
 
 // Función auxiliar para encontrar una ruta accesible
 function encontrarRutaAccesible() {
-  const rutasPorPrioridad = ['visor', 'asistencia', 'registros', 'historiales', 'notificaciones', 'usuarios', 'permisos', 'configuracion']
+  const rutasPorPrioridad = ['visor', 'asistencia', 'registros', 'historiales', 'notificaciones', 'manuales', 'usuarios', 'permisos', 'configuracion', 'reportes']
   const rutasMap = {
     'visor': '/visor-map',
     'asistencia': '/asistencia',
     'registros': '/registros',
     'historiales': '/historiales',
     'notificaciones': '/notificaciones',
+    'manuales': '/manuales',
     'usuarios': '/usuarios',
     'permisos': '/permisos',
-    'configuracion': '/configuracion'
+    'configuracion': '/configuracion',
+    'reportes': '/reportes'
   }
   
   for (const permiso of rutasPorPrioridad) {
@@ -171,6 +173,43 @@ function encontrarRutaAccesible() {
   }
   
   return null
+}
+
+// Listener para cambios de permisos en tiempo real
+if (typeof window !== 'undefined') {
+  window.addEventListener('user-session-updated', (event) => {
+    console.log('🔄 Router: Detectado cambio de permisos en tiempo real')
+    
+    // Actualizar authService.user desde localStorage
+    authService.user = authService.getUserFromStorage()
+    
+    // Verificar si el usuario sigue teniendo acceso a la ruta actual
+    const currentRoute = router.currentRoute.value
+    const requiredPermission = currentRoute.meta?.requiredPermission
+    
+    if (requiredPermission) {
+      const hasPermission = authService.hasPermission(requiredPermission)
+      
+      if (!hasPermission) {
+        console.log(`🚫 Router: Permiso removido para ruta actual: ${requiredPermission}`)
+        console.log('🔄 Router: Redirigiendo a ruta accesible...')
+        
+        // Buscar una ruta accesible
+        const rutaAccesible = encontrarRutaAccesible()
+        
+        if (rutaAccesible) {
+          router.push(rutaAccesible)
+        } else {
+          // Si no tiene acceso a nada, cerrar sesión
+          console.log('⚠️ Router: Usuario sin permisos, cerrando sesión')
+          authService.logout()
+          router.push('/login')
+        }
+      } else {
+        console.log(`✅ Router: Usuario mantiene acceso a ruta: ${requiredPermission}`)
+      }
+    }
+  })
 }
 
 export default router

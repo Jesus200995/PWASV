@@ -6486,7 +6486,8 @@ PERMISOS_ADMIN_DEFAULT = {
     "notificaciones_acciones": True,
     "permisos": True,
     "configuracion": True,
-    "reportes": True
+    "reportes": True,
+    "manuales": True
 }
 
 PERMISOS_USER_DEFAULT = {
@@ -6502,7 +6503,8 @@ PERMISOS_USER_DEFAULT = {
     "notificaciones_acciones": False,
     "permisos": False,
     "configuracion": False,
-    "reportes": False
+    "reportes": False,
+    "manuales": False
 }
 
 class AdminUserCreate(BaseModel):

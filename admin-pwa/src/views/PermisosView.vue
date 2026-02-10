@@ -926,6 +926,23 @@
                     </div>
                   </div>
                 </label>
+
+                <!-- Manuales -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.manuales }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.manuales" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Manuales</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
               </div>
 
               <!-- Botones rápidos de selección -->
@@ -1118,7 +1135,8 @@ export default {
           notificaciones_acciones: false,
           permisos: false,
           configuracion: false,
-          reportes: false
+          reportes: false,
+          manuales: false
         }
       },
       
@@ -1173,7 +1191,8 @@ export default {
         notificaciones_acciones: false,
         permisos: false,
         configuracion: false,
-        reportes: false
+        reportes: false,
+        manuales: false
       },
       
       // Modal eliminar

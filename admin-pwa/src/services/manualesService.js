@@ -165,6 +165,15 @@ export const manualesService = {
    */
   getImagenUrl(manualId) {
     return `${API_URL}/manuales/${manualId}/imagen`
+  },
+
+  /**
+   * Obtener URL del video de un manual
+   * @param {number} manualId - ID del manual
+   * @returns {string} URL del video
+   */
+  getVideoUrl(manualId) {
+    return `${API_URL}/manuales/${manualId}/video`
   }
 }
 

@@ -40,7 +40,13 @@
 
         <!-- Mensaje de error -->
         <div v-if="error && !cargando" class="error-state">
-          <div class="error-icon">⚠️</div>
+          <div class="error-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
           <h3>Error al cargar manuales</h3>
           <p>{{ error }}</p>
           <button class="btn-secondary" @click="cargarManuales">Reintentar</button>
@@ -184,9 +190,27 @@
     <!-- Modal Crear Manual -->
     <div v-if="mostrarModalCrear" class="modal-overlay" @click="cerrarModalCrear">
       <div class="modal-content modal-large" @click.stop>
-        <div class="modal-header">
-          <h3>📚 Nuevo Manual</h3>
-          <button class="btn-close" @click="cerrarModalCrear">×</button>
+        <div class="modal-header modal-header-crear">
+          <div class="modal-header-content">
+            <div class="modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                <path d="M12 7v6"/>
+                <path d="M9 10h6"/>
+              </svg>
+            </div>
+            <div class="modal-title-section">
+              <h3>Crear Nuevo Manual</h3>
+              <p class="modal-description">Comparte manuales, guías y documentos con tu equipo</p>
+            </div>
+          </div>
+          <button class="btn-close" @click="cerrarModalCrear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
         
         <div class="modal-body">
@@ -258,7 +282,7 @@
                     hidden
                   />
                   <div v-if="!archivoSeleccionado" class="upload-placeholder">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                       <polyline points="14 2 14 8 20 8"/>
                       <line x1="12" y1="18" x2="12" y2="12"/>
@@ -267,7 +291,7 @@
                     <span>Clic para subir PDF</span>
                   </div>
                   <div v-else class="file-selected">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                       <polyline points="14 2 14 8 20 8"/>
                     </svg>
@@ -318,7 +342,7 @@
                     hidden
                   />
                   <div v-if="!imagenSeleccionada" class="upload-placeholder">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                       <circle cx="8.5" cy="8.5" r="1.5"/>
                       <polyline points="21 15 16 10 5 21"/>
@@ -342,15 +366,15 @@
                     hidden
                   />
                   <div v-if="!videoSeleccionado" class="upload-placeholder">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polygon points="23 7 16 12 23 17 23 7"/>
                       <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
                     </svg>
                     <span>Clic para subir video (máx. 100MB)</span>
-                    <small style="color: #888; margin-top: 4px;">Formatos: MP4, WebM, MOV, AVI, MKV</small>
+                    <small style="color: #888; margin-top: 4px; font-size: 11px;">Formatos: MP4, WebM, MOV, AVI, MKV</small>
                   </div>
                   <div v-else class="file-selected">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
                       <polygon points="23 7 16 12 23 17 23 7"/>
                       <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
                     </svg>
@@ -439,48 +463,124 @@
     <div v-if="mostrarModalDetalle" class="modal-overlay" @click="cerrarModalDetalle">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>📖 Detalle del Manual</h3>
-          <button class="btn-close" @click="cerrarModalDetalle">×</button>
+          <div class="modal-header-content">
+            <div class="modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </div>
+            <div class="modal-title-section">
+              <h3>Detalle del Manual</h3>
+            </div>
+          </div>
+          <button class="btn-close" @click="cerrarModalDetalle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
         <div class="modal-body" v-if="manualDetalle">
           <div class="detalle-header">
-            <h2>{{ manualDetalle.titulo }}</h2>
+            <h2 class="detalle-title">{{ manualDetalle.titulo }}</h2>
             <p v-if="manualDetalle.subtitulo" class="detalle-subtitulo">{{ manualDetalle.subtitulo }}</p>
           </div>
           
-          <div v-if="manualDetalle.imagen_nombre" class="detalle-imagen">
-            <img :src="getImagenUrl(manualDetalle.id)" alt="Imagen del manual" />
+          <div v-if="manualDetalle.imagen_nombre || manualDetalle.video_nombre" class="detalle-media">
+            <img v-if="manualDetalle.imagen_nombre" :src="getImagenUrl(manualDetalle.id)" alt="Imagen del manual" class="detalle-imagen" />
+            <video v-else-if="manualDetalle.video_nombre" :src="getVideoUrl(manualDetalle.id)" controls class="detalle-video"></video>
           </div>
           
           <div v-if="manualDetalle.descripcion" class="detalle-descripcion">
-            <h4>Descripción</h4>
+            <div class="section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <h4>Descripción</h4>
+            </div>
             <p>{{ manualDetalle.descripcion }}</p>
           </div>
           
           <div class="detalle-meta">
-            <div v-if="manualDetalle.archivo_nombre" class="meta-item">
-              <strong>Archivo:</strong>
-              <a :href="getArchivoUrl(manualDetalle.id)" target="_blank" class="link-archivo">
-                📎 {{ manualDetalle.archivo_nombre }}
-              </a>
+            <div class="section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <h4>Información</h4>
             </div>
-            <div v-if="manualDetalle.enlace_url" class="meta-item">
-              <strong>Enlace:</strong>
-              <a :href="manualDetalle.enlace_url" target="_blank" class="link-externo">
-                🔗 {{ manualDetalle.enlace_url }}
-              </a>
-            </div>
-            <div class="meta-item">
-              <strong>Destinatarios:</strong>
-              <span>{{ manualDetalle.enviado_a_todos ? 'Todos los usuarios' : `${manualDetalle.destinatarios?.length || 0} usuarios específicos` }}</span>
-            </div>
-            <div class="meta-item">
-              <strong>Lecturas:</strong>
-              <span>{{ manualDetalle.total_lecturas }} usuarios</span>
-            </div>
-            <div class="meta-item">
-              <strong>Fecha:</strong>
-              <span>{{ formatearFecha(manualDetalle.fecha_creacion) }}</span>
+            <div class="meta-grid">
+              <div v-if="manualDetalle.archivo_nombre" class="meta-item">
+                <div class="meta-icon meta-icon-file">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                    <polyline points="13 2 13 9 20 9"/>
+                  </svg>
+                </div>
+                <div class="meta-content">
+                  <span class="meta-label">Archivo</span>
+                  <a :href="getArchivoUrl(manualDetalle.id)" target="_blank" class="link-archivo">
+                    {{ manualDetalle.archivo_nombre }}
+                  </a>
+                </div>
+              </div>
+              <div v-if="manualDetalle.enlace_url" class="meta-item">
+                <div class="meta-icon meta-icon-link">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                </div>
+                <div class="meta-content">
+                  <span class="meta-label">Enlace</span>
+                  <a :href="manualDetalle.enlace_url" target="_blank" class="link-externo">
+                    {{ manualDetalle.enlace_url }}
+                  </a>
+                </div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-icon meta-icon-users">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <div class="meta-content">
+                  <span class="meta-label">Destinatarios</span>
+                  <span class="meta-value">{{ manualDetalle.enviado_a_todos ? 'Todos los usuarios' : `${manualDetalle.destinatarios?.length || 0} usuarios específicos` }}</span>
+                </div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-icon meta-icon-read">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                  </svg>
+                </div>
+                <div class="meta-content">
+                  <span class="meta-label">Lecturas</span>
+                  <span class="meta-value">{{ manualDetalle.total_lecturas }} usuarios</span>
+                </div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-icon meta-icon-date">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
+                <div class="meta-content">
+                  <span class="meta-label">Fecha de creación</span>
+                  <span class="meta-value">{{ formatearFecha(manualDetalle.fecha_creacion) }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -491,50 +591,132 @@
     <div v-if="mostrarModalEstadisticas" class="modal-overlay" @click="cerrarModalEstadisticas">
       <div class="modal-content modal-large" @click.stop>
         <div class="modal-header">
-          <h3>📊 Estadísticas de Lectura</h3>
-          <button class="btn-close" @click="cerrarModalEstadisticas">×</button>
+          <div class="modal-header-content">
+            <div class="modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 20V10"/>
+                <path d="M12 20V4"/>
+                <path d="M6 20v-6"/>
+              </svg>
+            </div>
+            <div class="modal-title-section">
+              <h3>Estadísticas de Lectura</h3>
+              <p class="modal-description">Análisis detallado de lecturas y compromisos</p>
+            </div>
+          </div>
+          <button class="btn-close" @click="cerrarModalEstadisticas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
         <div class="modal-body" v-if="estadisticas">
           <div class="stats-header">
-            <h2>{{ estadisticas.titulo }}</h2>
+            <h2 class="stats-title">{{ estadisticas.titulo }}</h2>
             <div class="stats-summary">
-              <div class="stat-card">
-                <span class="stat-value">{{ estadisticas.total_lecturas }}</span>
-                <span class="stat-label">Lecturas</span>
+              <div class="stat-card stat-card-primary">
+                <div class="stat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                  </svg>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-value">{{ estadisticas.total_lecturas }}</span>
+                  <span class="stat-label">Lecturas</span>
+                </div>
               </div>
-              <div class="stat-card">
-                <span class="stat-value">{{ estadisticas.total_destinatarios }}</span>
-                <span class="stat-label">Destinatarios</span>
+              <div class="stat-card stat-card-success">
+                <div class="stat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-value">{{ estadisticas.total_destinatarios }}</span>
+                  <span class="stat-label">Destinatarios</span>
+                </div>
               </div>
-              <div class="stat-card">
-                <span class="stat-value">{{ estadisticas.porcentaje_lectura }}%</span>
-                <span class="stat-label">Completado</span>
+              <div class="stat-card stat-card-info">
+                <div class="stat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-value">{{ estadisticas.porcentaje_lectura }}%</span>
+                  <span class="stat-label">Completado</span>
+                </div>
               </div>
             </div>
           </div>
           
           <div class="stats-lists">
             <div class="stats-column">
-              <h4>✅ Usuarios que leyeron ({{ estadisticas.lecturas.length }})</h4>
+              <div class="stats-column-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <h4>Usuarios que leyeron</h4>
+                <span class="stats-count">{{ estadisticas.lecturas.length }}</span>
+              </div>
               <div class="users-list">
                 <div v-for="lectura in estadisticas.lecturas" :key="lectura.usuario_id" class="user-item read">
-                  <span class="user-name">{{ lectura.nombre || lectura.correo }}</span>
-                  <span class="read-date">{{ formatearFecha(lectura.fecha_lectura) }}</span>
+                  <div class="user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  <div class="user-details">
+                    <span class="user-name">{{ lectura.nombre || lectura.correo }}</span>
+                    <span class="read-date">{{ formatearFecha(lectura.fecha_lectura) }}</span>
+                  </div>
                 </div>
                 <div v-if="estadisticas.lecturas.length === 0" class="no-users">
-                  Ningún usuario ha leído este manual aún
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <p>Ningún usuario ha leído este manual aún</p>
                 </div>
               </div>
             </div>
             
             <div v-if="!estadisticas.enviado_a_todos" class="stats-column">
-              <h4>⏳ Pendientes de leer ({{ estadisticas.no_leidos.length }})</h4>
+              <div class="stats-column-header stats-column-header-warning">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <h4>Pendientes de leer</h4>
+                <span class="stats-count">{{ estadisticas.no_leidos.length }}</span>
+              </div>
               <div class="users-list">
                 <div v-for="usuario in estadisticas.no_leidos" :key="usuario.usuario_id" class="user-item pending">
-                  <span class="user-name">{{ usuario.nombre || usuario.correo }}</span>
+                  <div class="user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  <div class="user-details">
+                    <span class="user-name">{{ usuario.nombre || usuario.correo }}</span>
+                  </div>
                 </div>
-                <div v-if="estadisticas.no_leidos.length === 0" class="no-users">
-                  ¡Todos los usuarios han leído el manual!
+                <div v-if="estadisticas.no_leidos.length === 0" class="no-users no-users-success">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  <p>¡Todos los usuarios han leído el manual!</p>
                 </div>
               </div>
             </div>
@@ -547,8 +729,25 @@
     <div v-if="mostrarModalEliminar" class="modal-overlay" @click="cerrarModalEliminar">
       <div class="modal-content modal-small" @click.stop>
         <div class="modal-header modal-header-danger">
-          <h3>🗑️ Confirmar Eliminación</h3>
-          <button class="btn-close" @click="cerrarModalEliminar">×</button>
+          <div class="modal-header-content">
+            <div class="modal-icon modal-icon-danger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+              </svg>
+            </div>
+            <div class="modal-title-section">
+              <h3>Confirmar Eliminación</h3>
+            </div>
+          </div>
+          <button class="btn-close" @click="cerrarModalEliminar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
         <div class="modal-body">
           <p class="confirm-text">
@@ -852,6 +1051,7 @@ export default {
     // URLs
     const getArchivoUrl = (id) => manualesService.getArchivoUrl(id)
     const getImagenUrl = (id) => manualesService.getImagenUrl(id)
+    const getVideoUrl = (id) => manualesService.getVideoUrl(id)
     
     // Cerrar modales
     const cerrarModalCrear = () => {
@@ -948,6 +1148,7 @@ export default {
       eliminarManual,
       getArchivoUrl,
       getImagenUrl,
+      getVideoUrl,
       cerrarModalCrear,
       cerrarModalDetalle,
       cerrarModalEstadisticas,
@@ -1385,8 +1586,21 @@ export default {
 }
 
 .empty-icon, .error-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-radius: 50%;
+  border: 3px solid #fca5a5;
+}
+
+.error-icon svg {
+  width: 48px;
+  height: 48px;
+  stroke: #dc2626;
 }
 
 /* Modales */
@@ -1423,38 +1637,126 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
   color: white;
   border-radius: 20px 20px 0 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  z-index: 1;
+}
+
+.modal-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.modal-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.modal-icon svg {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.modal-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .modal-header h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 0%, #e8f5e8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.3;
+}
+
+.modal-description {
+  margin: 0;
+  font-size: 11px;
+  opacity: 0.9;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  line-height: 1.3;
 }
 
 .modal-header-danger {
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+}
+
+.modal-icon-danger {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .btn-close {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  font-size: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.btn-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.btn-close svg {
+  width: 16px;
+  height: 16px;
 }
 
 .modal-body {
-  padding: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
 }
 
 /* Form */
@@ -1465,39 +1767,52 @@ export default {
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  color: #374151;
-  margin-bottom: 8px;
+  color: #1f2937;
+  margin-bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.3;
 }
 
 .form-input, .form-textarea {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 2px solid #e5e7eb;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.2s ease;
   box-sizing: border-box;
+  background: white;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.4;
 }
 
 .form-input:focus, .form-textarea:focus {
   outline: none;
-  border-color: #1a73e8;
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  background: #fafffe;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 85px;
 }
 
 .char-count {
-  font-size: 11px;
+  font-size: 10px;
   color: #9ca3af;
   text-align: right;
   display: block;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
 /* Media Type Selector */
@@ -1513,29 +1828,35 @@ export default {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 12px 8px;
+  padding: 10px 8px;
   border: 2px solid #e5e7eb;
   border-radius: 10px;
-  background: #fafafa;
+  background: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 13px;
+  font-size: 12px;
   color: #6b7280;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .media-option:hover {
-  border-color: #1a73e8;
-  background: #f0f7ff;
+  border-color: #4CAF50;
+  background: #f8fffe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
 }
 
 .media-option.active {
-  border-color: #1a73e8;
-  background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
-  color: #1a73e8;
+  border-color: #4CAF50;
+  background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+  color: #2E7D32;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
 }
 
 .media-option.active svg {
-  stroke: #1a73e8;
+  stroke: #2E7D32;
 }
 
 .media-option svg {
@@ -1547,87 +1868,112 @@ export default {
 .file-upload-area {
   border: 2px dashed #d1d5db;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: #fafafa;
+  background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
 }
 
 .file-upload-area:hover {
-  border-color: #1a73e8;
-  background: #f0f7ff;
+  border-color: #4CAF50;
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.1);
 }
 
 .upload-placeholder {
   color: #6b7280;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
 .upload-placeholder svg {
-  margin-bottom: 8px;
   stroke: #9ca3af;
+}
+
+.upload-placeholder span {
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.3;
 }
 
 .file-selected {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
+  font-size: 13px;
+}
+
+.file-selected span {
+  line-height: 1.3;
 }
 
 .image-preview {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .btn-remove-file {
   background: #fee2e2;
   color: #dc2626;
   border: none;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-file:hover {
+  background: #fecaca;
 }
 
 /* Destinatarios */
 .destinatarios-options {
   display: flex;
-  gap: 16px;
+  gap: 12px;
 }
 
 .radio-option {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
 }
 
 .radio-label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: 5px;
+  font-size: 13px;
   color: #374151;
+  line-height: 1.3;
 }
 
 /* Usuarios selector */
 .usuarios-selector {
   border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 12px;
   background: #fafafa;
 }
 
 .usuarios-search {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .usuarios-list {
-  max-height: 200px;
+  max-height: 180px;
   overflow-y: auto;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -1637,8 +1983,8 @@ export default {
 .usuario-checkbox {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 8px 10px;
   cursor: pointer;
   transition: background 0.2s ease;
 }
@@ -1650,22 +1996,26 @@ export default {
 .usuario-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .usuario-nombre {
   font-weight: 500;
   color: #1f2937;
+  font-size: 13px;
+  line-height: 1.3;
 }
 
 .usuario-correo {
-  font-size: 12px;
+  font-size: 11px;
   color: #6b7280;
+  line-height: 1.3;
 }
 
 .usuarios-selected-count {
-  margin-top: 12px;
-  font-size: 13px;
-  color: #1a73e8;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #4CAF50;
   font-weight: 500;
 }
 
@@ -1673,40 +2023,85 @@ export default {
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 2px solid #f0f0f0;
 }
 
 .btn-secondary {
-  padding: 12px 24px;
-  background: #f3f4f6;
+  padding: 10px 22px;
+  background: white;
   color: #374151;
-  border: none;
+  border: 2px solid #e5e7eb;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
 }
 
 .btn-secondary:hover {
-  background: #e5e7eb;
+  background: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.btn-danger {
-  padding: 12px 24px;
-  background: #dc2626;
+.form-actions .btn-primary {
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
 }
 
-.btn-danger:hover {
-  background: #b91c1c;
+.form-actions .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
+}
+
+.form-actions .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-danger {
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .spinner {
@@ -1721,143 +2116,505 @@ export default {
 }
 
 /* Detalle */
-.detalle-header h2 {
+.detalle-header {
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.detalle-title {
   color: #1e293b;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .detalle-subtitulo {
   color: #64748b;
-  font-size: 16px;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.3;
 }
 
-.detalle-imagen {
-  margin: 20px 0;
-}
-
-.detalle-imagen img {
-  max-width: 100%;
+.detalle-media {
+  margin: 16px auto;
+  max-width: 480px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.detalle-imagen,
+.detalle-video {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .detalle-descripcion {
-  margin: 20px 0;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 12px;
+  margin: 18px 0;
+  padding: 14px;
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  border-radius: 10px;
+  border-left: 3px solid #4CAF50;
 }
 
-.detalle-descripcion h4 {
-  margin: 0 0 8px;
-  color: #475569;
+.detalle-descripcion p {
+  margin: 6px 0 0;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.section-header svg {
+  width: 18px;
+  height: 18px;
+  stroke: #4CAF50;
+  flex-shrink: 0;
+}
+
+.section-header h4 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .detalle-meta {
+  margin-top: 18px;
+}
+
+.meta-grid {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .meta-item {
   display: flex;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
-.meta-item strong {
+.meta-item:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
+  transform: translateY(-2px);
+}
+
+.meta-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.meta-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.meta-icon-file {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.meta-icon-file svg {
+  stroke: #3b82f6;
+}
+
+.meta-icon-link {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+}
+
+.meta-icon-link svg {
+  stroke: #6366f1;
+}
+
+.meta-icon-users {
+  background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+}
+
+.meta-icon-users svg {
+  stroke: #8b5cf6;
+}
+
+.meta-icon-read {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.meta-icon-read svg {
+  stroke: #10b981;
+}
+
+.meta-icon-date {
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+}
+
+.meta-icon-date svg {
+  stroke: #f59e0b;
+}
+
+.meta-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.meta-label {
+  font-size: 11px;
+  font-weight: 600;
   color: #64748b;
-  min-width: 120px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
 }
 
-.link-archivo, .link-externo {
-  color: #1a73e8;
+.meta-value {
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 500;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.link-archivo,
+.link-externo {
+  color: #4CAF50;
   text-decoration: none;
+  font-weight: 500;
+  font-size: 13px;
+  word-break: break-all;
+  transition: all 0.2s ease;
+  line-height: 1.3;
 }
 
-.link-archivo:hover, .link-externo:hover {
+.link-archivo:hover,
+.link-externo:hover {
+  color: #45a049;
   text-decoration: underline;
 }
 
 /* Estadísticas */
 .stats-header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+}
+
+.stats-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px;
+  line-height: 1.3;
 }
 
 .stats-summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  padding: 20px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card-primary {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.stat-card-primary:hover {
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+}
+
+.stat-card-success {
+  border-color: #4CAF50;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.stat-card-success:hover {
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.2);
+}
+
+.stat-card-info {
+  border-color: #8b5cf6;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+}
+
+.stat-card-info:hover {
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.2);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card-primary .stat-icon {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.stat-card-success .stat-icon {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.stat-card-info .stat-icon {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.stat-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .stat-value {
-  display: block;
-  font-size: 32px;
-  font-weight: 700;
-  color: #1a73e8;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-card-primary .stat-value {
+  color: #1e40af;
+}
+
+.stat-card-success .stat-value {
+  color: #2E7D32;
+}
+
+.stat-card-info .stat-value {
+  color: #6b21a8;
 }
 
 .stat-label {
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   color: #64748b;
 }
 
 .stats-lists {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
 }
 
-.stats-column h4 {
-  margin: 0 0 12px;
+.stats-column {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.stats-column-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-bottom: 2px solid #4CAF50;
+}
+
+.stats-column-header svg {
+  width: 20px;
+  height: 20px;
+  stroke: #2E7D32;
+  flex-shrink: 0;
+}
+
+.stats-column-header h4 {
+  margin: 0;
   font-size: 14px;
-  color: #374151;
+  font-weight: 600;
+  color: #1f2937;
+  flex: 1;
+}
+
+.stats-column-header-warning {
+  background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+  border-bottom-color: #eab308;
+}
+
+.stats-column-header-warning svg {
+  stroke: #a16207;
+}
+
+.stats-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 10px;
+  background: white;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2E7D32;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stats-column-header-warning .stats-count {
+  color: #a16207;
 }
 
 .users-list {
-  max-height: 300px;
+  max-height: 320px;
   overflow-y: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
 }
 
 .user-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 12px 16px;
   border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s ease;
+}
+
+.user-item:last-child {
+  border-bottom: none;
+}
+
+.user-item:hover {
+  background: #f8fafc;
 }
 
 .user-item.read {
+  background: linear-gradient(135deg, #f0fdf4 0%, rgba(240, 253, 244, 0.3) 100%);
+}
+
+.user-item.read:hover {
   background: #f0fdf4;
 }
 
 .user-item.pending {
+  background: linear-gradient(135deg, #fefce8 0%, rgba(254, 252, 232, 0.3) 100%);
+}
+
+.user-item.pending:hover {
   background: #fefce8;
 }
 
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #e5e7eb;
+}
+
+.user-item.read .user-avatar {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-color: #2E7D32;
+}
+
+.user-item.pending .user-avatar {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+  border-color: #a16207;
+}
+
+.user-avatar svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+}
+
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
 .user-name {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 13px;
   color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .read-date {
-  font-size: 12px;
+  font-size: 11px;
   color: #6b7280;
 }
 
 .no-users {
-  padding: 20px;
+  padding: 32px 20px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.no-users svg {
+  width: 48px;
+  height: 48px;
+  stroke: #cbd5e1;
+}
+
+.no-users p {
+  margin: 0;
   color: #9ca3af;
-  font-style: italic;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.no-users-success svg {
+  stroke: #4CAF50;
+}
+
+.no-users-success p {
+  color: #2E7D32;
 }
 
 /* Confirmación */
@@ -1912,6 +2669,36 @@ export default {
     grid-template-columns: 1fr;
   }
   
+  .stats-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-card {
+    padding: 14px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .meta-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .meta-item {
+    padding: 12px;
+  }
+  
+  .meta-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .meta-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  
   .page-header {
     padding: 12px 16px;
   }
@@ -1946,6 +2733,14 @@ export default {
   .modal-content {
     width: 95%;
     margin: 16px;
+  }
+  
+  .modal-large {
+    max-width: 95%;
+  }
+  
+  .detalle-title {
+    font-size: 20px;
   }
 }
 
@@ -1990,6 +2785,62 @@ export default {
   .manuales-table {
     min-width: 650px;
     font-size: 10px;
+  }
+  
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .stat-value {
+    font-size: 22px;
+  }
+  
+  .stat-label {
+    font-size: 11px;
+  }
+  
+  .stats-title {
+    font-size: 18px;
+  }
+  
+  .user-item {
+    padding: 10px 12px;
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .user-avatar svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .user-name {
+    font-size: 12px;
+  }
+  
+  .detalle-title {
+    font-size: 18px;
+  }
+  
+  .detalle-subtitulo {
+    font-size: 13px;
+  }
+  
+  .meta-label {
+    font-size: 11px;
+  }
+  
+  .meta-value {
+    font-size: 13px;
   }
 }
 

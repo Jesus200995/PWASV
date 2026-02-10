@@ -8854,6 +8854,210 @@ async def eliminar_manual(manual_id: int):
         print(f"❌ Error eliminando manual: {e}")
         raise HTTPException(status_code=500, detail=f"Error al eliminar manual: {str(e)}")
 
+@app.put("/manuales/{manual_id}")
+async def actualizar_manual(
+    manual_id: int,
+    titulo: str = Form(...),
+    subtitulo: str = Form(None),
+    descripcion: str = Form(None),
+    enlace_url: str = Form(None),
+    enviado_a_todos: bool = Form(True),
+    usuario_ids: str = Form(None),
+    archivo: UploadFile = File(None),
+    imagen: UploadFile = File(None),
+    video: UploadFile = File(None),
+    mantener_archivo: bool = Form(True),
+    mantener_imagen: bool = Form(True),
+    mantener_video: bool = Form(True)
+):
+    """Actualizar un manual existente"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        print(f"📝 Actualizando manual {manual_id}: {titulo}")
+        
+        # Validar que el manual existe
+        cursor.execute("SELECT id FROM manuales WHERE id = %s AND activo = TRUE", (manual_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Manual no encontrado")
+        
+        # Validaciones
+        if len(titulo.strip()) == 0:
+            raise HTTPException(status_code=400, detail="El título es obligatorio")
+        
+        if len(titulo) > 200:
+            raise HTTPException(status_code=400, detail="El título no puede exceder 200 caracteres")
+        
+        # Validar usuarios si no es para todos
+        usuarios_seleccionados = []
+        if not enviado_a_todos:
+            if not usuario_ids:
+                raise HTTPException(status_code=400, detail="Debe especificar usuarios si no se envía a todos")
+            
+            try:
+                usuarios_seleccionados = json.loads(usuario_ids)
+                if not isinstance(usuarios_seleccionados, list) or len(usuarios_seleccionados) == 0:
+                    raise HTTPException(status_code=400, detail="Debe seleccionar al menos un usuario")
+                
+                cursor.execute("SELECT id FROM usuarios WHERE id = ANY(%s)", (usuarios_seleccionados,))
+                usuarios_existentes = [row[0] for row in cursor.fetchall()]
+                
+                usuarios_inexistentes = set(usuarios_seleccionados) - set(usuarios_existentes)
+                if usuarios_inexistentes:
+                    raise HTTPException(status_code=400, detail=f"Usuarios no encontrados: {list(usuarios_inexistentes)}")
+                
+            except json.JSONDecodeError:
+                raise HTTPException(status_code=400, detail="Formato de usuarios inválido")
+        
+        # Procesar archivo PDF/documento
+        archivo_bytes = None
+        archivo_tipo = None
+        archivo_nombre = None
+        
+        if archivo and archivo.filename:
+            print(f"📎 Procesando nuevo archivo: {archivo.filename}")
+            
+            ext = os.path.splitext(archivo.filename)[1].lower()
+            tipos_permitidos = {
+                '.pdf': 'pdf',
+                '.doc': 'documento', '.docx': 'documento',
+                '.xls': 'excel', '.xlsx': 'excel',
+                '.ppt': 'presentacion', '.pptx': 'presentacion'
+            }
+            
+            if ext not in tipos_permitidos:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Tipo de archivo no permitido. Formatos válidos: {', '.join(tipos_permitidos.keys())}"
+                )
+            
+            archivo_bytes = await archivo.read()
+            archivo_tipo = tipos_permitidos[ext]
+            archivo_nombre = archivo.filename
+            
+            if len(archivo_bytes) > 50 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="El archivo no debe exceder 50MB")
+            
+            print(f"📎 Archivo procesado: {archivo_nombre} ({archivo_tipo}, {len(archivo_bytes)} bytes)")
+        elif not mantener_archivo:
+            # Si no mantener archivo, se borra
+            archivo_bytes = None
+            archivo_tipo = None
+            archivo_nombre = None
+            print("📎 Archivo será eliminado")
+        
+        # Procesar imagen
+        imagen_bytes = None
+        imagen_nombre = None
+        
+        if imagen and imagen.filename:
+            print(f"🖼️ Procesando nueva imagen: {imagen.filename}")
+            
+            ext = os.path.splitext(imagen.filename)[1].lower()
+            if ext not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+                raise HTTPException(status_code=400, detail="Formato de imagen no válido")
+            
+            imagen_bytes = await imagen.read()
+            imagen_nombre = imagen.filename
+            
+            if len(imagen_bytes) > 10 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="La imagen no debe exceder 10MB")
+            
+            print(f"🖼️ Imagen procesada: {imagen_nombre} ({len(imagen_bytes)} bytes)")
+        elif not mantener_imagen:
+            # Si no mantener imagen, se borra
+            imagen_bytes = None
+            imagen_nombre = None
+            print("🖼️ Imagen será eliminada")
+        
+        # Procesar video
+        video_bytes = None
+        video_nombre = None
+        
+        if video and video.filename:
+            print(f"🎬 Procesando nuevo video: {video.filename}")
+            
+            ext = os.path.splitext(video.filename)[1].lower()
+            if ext not in ['.mp4', '.webm', '.mov', '.avi', '.mkv']:
+                raise HTTPException(status_code=400, detail="Formato de video no válido. Use: mp4, webm, mov, avi, mkv")
+            
+            video_bytes = await video.read()
+            video_nombre = video.filename
+            
+            if len(video_bytes) > 100 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail="El video no debe exceder 100MB")
+            
+            print(f"🎬 Video procesado: {video_nombre} ({len(video_bytes)} bytes)")
+        elif not mantener_video:
+            # Si no mantener video, se borra
+            video_bytes = None
+            video_nombre = None
+            print("🎬 Video será eliminado")
+        
+        # Construir query de actualización dinámicamente
+        campos_actualizar = []
+        valores = []
+        
+        campos_actualizar.extend(["titulo = %s", "subtitulo = %s", "descripcion = %s", "enlace_url = %s", "enviado_a_todos = %s"])
+        valores.extend([titulo, subtitulo, descripcion, enlace_url, enviado_a_todos])
+        
+        # Solo actualizar archivos si hay cambios
+        if archivo and archivo.filename:
+            campos_actualizar.extend(["archivo = %s", "archivo_tipo = %s", "archivo_nombre = %s"])
+            valores.extend([archivo_bytes, archivo_tipo, archivo_nombre])
+        elif not mantener_archivo:
+            campos_actualizar.extend(["archivo = NULL", "archivo_tipo = NULL", "archivo_nombre = NULL"])
+        
+        if imagen and imagen.filename:
+            campos_actualizar.extend(["imagen = %s", "imagen_nombre = %s"])
+            valores.extend([imagen_bytes, imagen_nombre])
+        elif not mantener_imagen:
+            campos_actualizar.extend(["imagen = NULL", "imagen_nombre = NULL"])
+        
+        if video and video.filename:
+            campos_actualizar.extend(["video = %s", "video_nombre = %s"])
+            valores.extend([video_bytes, video_nombre])
+        elif not mantener_video:
+            campos_actualizar.extend(["video = NULL", "video_nombre = NULL"])
+        
+        valores.append(manual_id)
+        
+        # Actualizar manual
+        query = f"UPDATE manuales SET {', '.join(campos_actualizar)} WHERE id = %s"
+        cursor.execute(query, valores)
+        
+        # Actualizar relaciones con usuarios
+        cursor.execute("DELETE FROM manual_usuarios WHERE manual_id = %s", (manual_id,))
+        
+        if not enviado_a_todos and usuarios_seleccionados:
+            for usuario_id in usuarios_seleccionados:
+                cursor.execute(
+                    "INSERT INTO manual_usuarios (manual_id, usuario_id) VALUES (%s, %s)",
+                    (manual_id, usuario_id)
+                )
+            print(f"👥 Manual reasignado a {len(usuarios_seleccionados)} usuarios específicos")
+        
+        conn.commit()
+        
+        print(f"✅ Manual {manual_id} actualizado exitosamente")
+        
+        return {
+            "id": manual_id,
+            "status": "success",
+            "message": "Manual actualizado exitosamente",
+            "titulo": titulo,
+            "enviado_a_todos": enviado_a_todos,
+            "usuarios_destinatarios": len(usuarios_seleccionados) if not enviado_a_todos else "todos"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error actualizando manual: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al actualizar manual: {str(e)}")
+
 @app.get("/manuales/usuario/{usuario_id}/no-leidos")
 async def contar_manuales_no_leidos(usuario_id: int):
     """Contar manuales no leídos por un usuario (para badge en pwasuper)"""

@@ -160,6 +160,12 @@
                           <path d="M8 17v-3"/>
                         </svg>
                       </button>
+                      <button v-if="puedeEliminar" class="btn-action btn-edit" @click="abrirModalEditar(manual)" title="Editar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
                       <button v-if="puedeEliminar" class="btn-action btn-delete" @click="confirmarEliminar(manual)" title="Eliminar">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M3 6h18"/>
@@ -764,6 +770,328 @@
       </div>
     </div>
 
+    <!-- Modal Editar Manual -->
+    <div v-if="mostrarModalEditar" class="modal-overlay" @click="cerrarModalEditar">
+      <div class="modal-content modal-large" @click.stop>
+        <div class="modal-header modal-header-crear">
+          <div class="modal-header-content">
+            <div class="modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </div>
+            <div class="modal-title-section">
+              <h3>Editar Manual</h3>
+              <p class="modal-description">Modifica la información del manual</p>
+            </div>
+          </div>
+          <button class="btn-close" @click="cerrarModalEditar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <form @submit.prevent="confirmarActualizacion">
+            <div class="form-row">
+              <!-- Título -->
+              <div class="form-group">
+                <label for="titulo-edit">Título *</label>
+                <input
+                  id="titulo-edit"
+                  v-model="formManual.titulo"
+                  type="text"
+                  class="form-input"
+                  placeholder="Título del manual"
+                  maxlength="200"
+                  required
+                />
+                <small class="char-count">{{ formManual.titulo.length }}/200</small>
+              </div>
+
+              <!-- Subtítulo -->
+              <div class="form-group">
+                <label for="subtitulo-edit">Subtítulo</label>
+                <input
+                  id="subtitulo-edit"
+                  v-model="formManual.subtitulo"
+                  type="text"
+                  class="form-input"
+                  placeholder="Subtítulo opcional"
+                  maxlength="300"
+                />
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="form-group">
+              <label for="descripcion-edit">Descripción</label>
+              <textarea
+                id="descripcion-edit"
+                v-model="formManual.descripcion"
+                class="form-textarea"
+                placeholder="Descripción detallada del manual..."
+                rows="4"
+              ></textarea>
+            </div>
+
+            <!-- URL -->
+            <div class="form-group">
+              <label for="enlace_url-edit">Enlace URL (opcional)</label>
+              <input
+                id="enlace_url-edit"
+                v-model="formManual.enlace_url"
+                type="url"
+                class="form-input"
+                placeholder="https://ejemplo.com/recurso"
+              />
+            </div>
+
+            <div class="form-row">
+              <!-- Archivo PDF -->
+              <div class="form-group">
+                <label>Archivo PDF/Documento</label>
+                <div v-if="manualEditando && manualEditando.archivo_nombre && mantenerArchivoExistente" class="file-current">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  <span>{{ manualEditando.archivo_nombre }}</span>
+                  <button type="button" class="btn-remove-file" @click="removerArchivoExistente">×</button>
+                </div>
+                <div v-else class="file-upload-area" @click="$refs.archivoInputEdit.click()">
+                  <input
+                    ref="archivoInputEdit"
+                    type="file"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                    @change="handleArchivoChange"
+                    hidden
+                  />
+                  <div v-if="!archivoSeleccionado" class="upload-placeholder">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="12" y1="18" x2="12" y2="12"/>
+                      <line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                    <span>Clic para {{ manualEditando && manualEditando.archivo_nombre ? 'cambiar' : 'subir' }} PDF</span>
+                  </div>
+                  <div v-else class="file-selected">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span>{{ archivoSeleccionado.name }}</span>
+                    <button type="button" class="btn-remove-file" @click.stop="removerArchivo">×</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selector de Media (Imagen o Video) -->
+              <div class="form-group">
+                <label>Multimedia de Portada</label>
+                <div class="media-type-selector">
+                  <label class="media-option" :class="{ active: tipoMedia === 'ninguno' }">
+                    <input type="radio" v-model="tipoMedia" value="ninguno" @change="cambiarTipoMedia" hidden />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                    <span>Ninguno</span>
+                  </label>
+                  <label class="media-option" :class="{ active: tipoMedia === 'imagen' }">
+                    <input type="radio" v-model="tipoMedia" value="imagen" @change="cambiarTipoMedia" hidden />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span>Imagen</span>
+                  </label>
+                  <label class="media-option" :class="{ active: tipoMedia === 'video' }">
+                    <input type="radio" v-model="tipoMedia" value="video" @change="cambiarTipoMedia" hidden />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="23 7 16 12 23 17 23 7"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span>Video</span>
+                  </label>
+                </div>
+                
+                <!-- Subir Imagen -->
+                <div v-if="tipoMedia === 'imagen'">
+                  <div v-if="manualEditando && manualEditando.imagen_nombre && mantenerImagenExistente" class="file-current">
+                    <img v-if="manualEditando.imagen_nombre" :src="getImagenUrl(manualEditando.id)" alt="Preview" class="image-preview-small" />
+                    <span>{{ manualEditando.imagen_nombre }}</span>
+                    <button type="button" class="btn-remove-file" @click="removerImagenExistente">×</button>
+                  </div>
+                  <div v-else class="file-upload-area" @click="$refs.imagenInputEdit.click()">
+                    <input
+                      ref="imagenInputEdit"
+                      type="file"
+                      accept="image/*"
+                      @change="handleImagenChange"
+                      hidden
+                    />
+                    <div v-if="!imagenSeleccionada" class="upload-placeholder">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                      <span>Clic para subir imagen</span>
+                    </div>
+                    <div v-else class="file-selected">
+                      <img :src="imagenPreview" alt="Preview" class="image-preview" />
+                      <span>{{ imagenSeleccionada.name }}</span>
+                      <button type="button" class="btn-remove-file" @click.stop="removerImagen">×</button>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Subir Video -->
+                <div v-if="tipoMedia === 'video'">
+                  <div v-if="manualEditando && manualEditando.video_nombre && mantenerVideoExistente" class="file-current">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                      <polygon points="23 7 16 12 23 17 23 7"/>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span>{{ manualEditando.video_nombre }}</span>
+                    <button type="button" class="btn-remove-file" @click="removerVideoExistente">×</button>
+                  </div>
+                  <div v-else class="file-upload-area" @click="$refs.videoInputEdit.click()">
+                    <input
+                      ref="videoInputEdit"
+                      type="file"
+                      accept=".mp4,.webm,.mov,.avi,.mkv"
+                      @change="handleVideoChange"
+                      hidden
+                    />
+                    <div v-if="!videoSeleccionado" class="upload-placeholder">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                      </svg>
+                      <span>Clic para subir video (máx. 100MB)</span>
+                      <small style="color: #888; margin-top: 4px; font-size: 11px;">Formatos: MP4, WebM, MOV, AVI, MKV</small>
+                    </div>
+                    <div v-else class="file-selected">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                      </svg>
+                      <span>{{ videoSeleccionado.name }}</span>
+                      <button type="button" class="btn-remove-file" @click.stop="removerVideo">×</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Destinatarios -->
+            <div class="form-group">
+              <label>Destinatarios</label>
+              <div class="destinatarios-options">
+                <label class="radio-option">
+                  <input type="radio" v-model="formManual.enviado_a_todos" :value="true" />
+                  <span class="radio-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Todos los usuarios
+                  </span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" v-model="formManual.enviado_a_todos" :value="false" />
+                  <span class="radio-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Usuarios específicos
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Selector de usuarios -->
+            <div v-if="!formManual.enviado_a_todos" class="form-group usuarios-selector">
+              <label>Seleccionar Usuarios</label>
+              <div class="usuarios-search">
+                <input
+                  v-model="busquedaUsuario"
+                  type="text"
+                  class="form-input"
+                  placeholder="Buscar usuario..."
+                />
+              </div>
+              <div class="usuarios-list">
+                <label 
+                  v-for="usuario in usuariosFiltrados" 
+                  :key="usuario.id" 
+                  class="usuario-checkbox"
+                >
+                  <input 
+                    type="checkbox" 
+                    :value="usuario.id" 
+                    v-model="formManual.usuario_ids"
+                  />
+                  <span class="usuario-info">
+                    <span class="usuario-nombre">{{ usuario.nombre_completo || usuario.correo }}</span>
+                    <span class="usuario-correo">{{ usuario.correo }}</span>
+                  </span>
+                </label>
+              </div>
+              <div class="usuarios-selected-count">
+                {{ formManual.usuario_ids.length }} usuario(s) seleccionado(s)
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" @click="cerrarModalEditar">Cancelar</button>
+              <button type="submit" class="btn-primary">
+                Guardar Cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Confirmación de Edición -->
+    <div v-if="mostrarModalConfirmarEdicion" class="modal-overlay mini-modal" @click="cerrarConfirmacionEdicion">
+      <div class="modal-content modal-confirm" @click.stop>
+        <div class="modal-header modal-confirm-header">
+          <div class="modal-icon-confirm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </div>
+          <h3>¿Confirmar cambios?</h3>
+        </div>
+        <div class="modal-body-confirm">
+          <p>¿Estás seguro de que deseas actualizar este manual?</p>
+          <p class="confirm-detail">Los cambios se reflejarán inmediatamente para todos los usuarios.</p>
+        </div>
+        <div class="modal-actions-confirm">
+          <button class="btn-cancel" @click="cerrarConfirmacionEdicion" :disabled="editando">
+            Cancelar
+          </button>
+          <button class="btn-confirm-primary" @click="actualizarManual" :disabled="editando">
+            <span v-if="editando" class="spinner"></span>
+            {{ editando ? 'Guardando...' : 'Sí, Actualizar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal de Feedback (Éxito/Error) -->
     <Transition name="fade">
       <div v-if="mostrarModalFeedback" class="feedback-overlay" @click="cerrarFeedback">
@@ -814,9 +1142,12 @@ export default {
     
     // Modales
     const mostrarModalCrear = ref(false)
+    const mostrarModalEditar = ref(false)
+    const mostrarModalConfirmarEdicion = ref(false)
     const mostrarModalDetalle = ref(false)
     const mostrarModalEstadisticas = ref(false)
     const mostrarModalEliminar = ref(false)
+    const manualEditando = ref(null)
     
     // Modal de feedback
     const mostrarModalFeedback = ref(false)
@@ -858,6 +1189,10 @@ export default {
     const enviando = ref(false)
     const eliminando = ref(false)
     const busquedaUsuario = ref('')
+    const editando = ref(false)
+    const mantenerArchivoExistente = ref(true)
+    const mantenerImagenExistente = ref(true)
+    const mantenerVideoExistente = ref(true)
     
     // Permisos
     const userPermisos = computed(() => authService.getCurrentUser()?.permisos || {})
@@ -1048,6 +1383,153 @@ export default {
       }
     }
     
+    // Editar manual
+    const abrirModalEditar = async (manual) => {
+      try {
+        // Obtener detalle completo del manual
+        manualEditando.value = await manualesService.obtenerManual(manual.id)
+        
+        // Pre-llenar formulario
+        formManual.value = {
+          titulo: manualEditando.value.titulo || '',
+          subtitulo: manualEditando.value.subtitulo || '',
+          descripcion: manualEditando.value.descripcion || '',
+          enlace_url: manualEditando.value.enlace_url || '',
+          enviado_a_todos: manualEditando.value.enviado_a_todos,
+          usuario_ids: manualEditando.value.usuario_ids || []
+        }
+        
+        // Resetear archivos nuevos
+        archivoSeleccionado.value = null
+        imagenSeleccionada.value = null
+        imagenPreview.value = null
+        videoSeleccionado.value = null
+        
+        // Determinar tipo de media existente
+        if (manualEditando.value.imagen_nombre) {
+          tipoMedia.value = 'imagen'
+          mantenerImagenExistente.value = true
+        } else if (manualEditando.value.video_nombre) {
+          tipoMedia.value = 'video'
+          mantenerVideoExistente.value = true
+        } else {
+          tipoMedia.value = 'ninguno'
+        }
+        
+        mantenerArchivoExistente.value = !!manualEditando.value.archivo_nombre
+        
+        mostrarModalEditar.value = true
+      } catch (err) {
+        alert('Error al cargar manual para editar')
+        console.error(err)
+      }
+    }
+    
+    const confirmarActualizacion = () => {
+      if (!formManual.value.titulo.trim()) {
+        alert('El título es obligatorio')
+        return
+      }
+      
+      if (!formManual.value.enviado_a_todos && formManual.value.usuario_ids.length === 0) {
+        alert('Debe seleccionar al menos un usuario')
+        return
+      }
+      
+      mostrarModalConfirmarEdicion.value = true
+    }
+    
+    const actualizarManual = async () => {
+      editando.value = true
+      try {
+        await manualesService.actualizarManual(
+          manualEditando.value.id,
+          formManual.value,
+          archivoSeleccionado.value,
+          tipoMedia.value === 'imagen' ? imagenSeleccionada.value : null,
+          tipoMedia.value === 'video' ? videoSeleccionado.value : null,
+          mantenerArchivoExistente.value,
+          tipoMedia.value === 'imagen' ? mantenerImagenExistente.value : false,
+          tipoMedia.value === 'video' ? mantenerVideoExistente.value : false
+        )
+        
+        cerrarModalEditar()
+        cerrarConfirmacionEdicion()
+        await cargarManuales()
+        mostrarFeedback('success', '¡Manual Actualizado!', 'El manual se ha actualizado correctamente.')
+      } catch (err) {
+        console.error('Error:', err)
+        
+        let mensajeError = 'Error desconocido al actualizar el manual'
+        
+        if (err.code === 'ERR_NETWORK') {
+          if (err.message?.includes('413') || err.request?.status === 413) {
+            mensajeError = 'El archivo es demasiado grande. El límite es de 50MB para documentos y 10MB para imágenes.'
+          } else {
+            mensajeError = 'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.'
+          }
+        } else if (err.response?.status === 413) {
+          mensajeError = 'El archivo es demasiado grande. El límite es de 50MB para documentos y 10MB para imágenes.'
+        } else if (err.response?.data?.detail) {
+          mensajeError = err.response.data.detail
+        }
+        
+        mostrarFeedback('error', 'Error al Actualizar', mensajeError)
+      } finally {
+        editando.value = false
+      }
+    }
+    
+    const cerrarModalEditar = () => {
+      mostrarModalEditar.value = false
+      manualEditando.value = null
+      formManual.value = {
+        titulo: '',
+        subtitulo: '',
+        descripcion: '',
+        enlace_url: '',
+        enviado_a_todos: true,
+        usuario_ids: []
+      }
+      archivoSeleccionado.value = null
+      imagenSeleccionada.value = null
+      imagenPreview.value = null
+      videoSeleccionado.value = null
+      tipoMedia.value = 'ninguno'
+      mantenerArchivoExistente.value = true
+      mantenerImagenExistente.value = true
+      mantenerVideoExistente.value = true
+    }
+    
+    const cerrarConfirmacionEdicion = () => {
+      mostrarModalConfirmarEdicion.value = false
+    }
+    
+    const removerArchivoExistente = () => {
+      mantenerArchivoExistente.value = false
+    }
+    
+    const removerImagenExistente = () => {
+      mantenerImagenExistente.value = false
+      tipoMedia.value = 'ninguno'
+    }
+    
+    const removerVideoExistente = () => {
+      mantenerVideoExistente.value = false
+      tipoMedia.value = 'ninguno'
+    }
+    
+    const cambiarTipoMedia = () => {
+      if (tipoMedia.value === 'ninguno') {
+        mantenerImagenExistente.value = false
+        mantenerVideoExistente.value = false
+      } else if (tipoMedia.value === 'imagen') {
+        mantenerVideoExistente.value = false
+      } else if (tipoMedia.value === 'video') {
+        mantenerImagenExistente.value = false
+      }
+    }
+    
     // URLs
     const getArchivoUrl = (id) => manualesService.getArchivoUrl(id)
     const getImagenUrl = (id) => manualesService.getImagenUrl(id)
@@ -1116,12 +1598,15 @@ export default {
       manuales,
       usuarios,
       mostrarModalCrear,
+      mostrarModalEditar,
+      mostrarModalConfirmarEdicion,
       mostrarModalDetalle,
       mostrarModalEstadisticas,
       mostrarModalEliminar,
       manualDetalle,
       estadisticas,
       manualAEliminar,
+      manualEditando,
       formManual,
       archivoSeleccionado,
       imagenSeleccionada,
@@ -1129,8 +1614,12 @@ export default {
       videoSeleccionado,
       tipoMedia,
       enviando,
+      editando,
       eliminando,
       busquedaUsuario,
+      mantenerArchivoExistente,
+      mantenerImagenExistente,
+      mantenerVideoExistente,
       puedeCrearManuales,
       puedeEliminar,
       usuariosFiltrados,
@@ -1146,6 +1635,15 @@ export default {
       verEstadisticas,
       confirmarEliminar,
       eliminarManual,
+      abrirModalEditar,
+      confirmarActualizacion,
+      actualizarManual,
+      cerrarModalEditar,
+      cerrarConfirmacionEdicion,
+      removerArchivoExistente,
+      removerImagenExistente,
+      removerVideoExistente,
+      cambiarTipoMedia,
       getArchivoUrl,
       getImagenUrl,
       getVideoUrl,
@@ -1549,6 +2047,16 @@ export default {
 
 .btn-stats:hover {
   background: #d97706;
+  color: white;
+}
+
+.btn-edit {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.btn-edit:hover {
+  background: #2563eb;
   color: white;
 }
 
@@ -2849,6 +3357,177 @@ export default {
     margin-left: 180px;
     width: calc(100vw - 180px);
   }
+}
+
+/* ===== MODAL DE CONFIRMACIÓN ===== */
+.mini-modal {
+  z-index: 10100;
+}
+
+.modal-confirm {
+  max-width: 420px;
+  animation: slideDown 0.25s ease-out;
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-confirm-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: none;
+}
+
+.modal-icon-confirm {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-icon-confirm svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+}
+
+.modal-confirm-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+}
+
+.modal-body-confirm {
+  padding: 0 24px 20px;
+  text-align: center;
+}
+
+.modal-body-confirm p {
+  margin: 0 0 8px;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.confirm-detail {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.modal-actions-confirm {
+  display: flex;
+  gap: 10px;
+  padding: 0 24px 20px;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 10px 18px;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-confirm-primary {
+  flex: 1;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-confirm-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-confirm-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== ARCHIVOS EXISTENTES EN EDICIÓN ===== */
+.file-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+
+.file-current svg {
+  flex-shrink: 0;
+}
+
+.file-current span {
+  flex: 1;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-current .btn-remove-file {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.file-current .btn-remove-file:hover {
+  background: #bbf7d0;
+}
+
+.image-preview-small {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 /* ===== MODAL DE FEEDBACK ===== */

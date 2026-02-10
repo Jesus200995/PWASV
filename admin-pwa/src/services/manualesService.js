@@ -83,6 +83,79 @@ export const manualesService = {
   },
 
   /**
+   * Actualizar un manual existente
+   * @param {number} manualId - ID del manual a actualizar
+   * @param {Object} manual - Datos del manual
+   * @param {File} archivo - Archivo PDF/documento opcional
+   * @param {File} imagen - Imagen de portada opcional
+   * @param {File} video - Video opcional
+   * @param {boolean} mantenerArchivo - Si true, mantiene el archivo existente
+   * @param {boolean} mantenerImagen - Si true, mantiene la imagen existente
+   * @param {boolean} mantenerVideo - Si true, mantiene el video existente
+   * @returns {Promise} Respuesta de la API
+   */
+  async actualizarManual(manualId, manual, archivo = null, imagen = null, video = null, mantenerArchivo = true, mantenerImagen = true, mantenerVideo = true) {
+    try {
+      console.log('📝 Actualizando manual:', manualId, manual)
+      
+      const formData = new FormData()
+      formData.append('titulo', manual.titulo)
+      
+      if (manual.subtitulo) {
+        formData.append('subtitulo', manual.subtitulo)
+      }
+      
+      if (manual.descripcion) {
+        formData.append('descripcion', manual.descripcion)
+      }
+      
+      if (manual.enlace_url) {
+        formData.append('enlace_url', manual.enlace_url)
+      }
+      
+      formData.append('enviado_a_todos', manual.enviado_a_todos)
+      
+      // Si no es para todos, incluir usuarios seleccionados
+      if (!manual.enviado_a_todos && manual.usuario_ids && manual.usuario_ids.length > 0) {
+        formData.append('usuario_ids', JSON.stringify(manual.usuario_ids))
+      }
+      
+      // Flags para mantener archivos existentes
+      formData.append('mantener_archivo', mantenerArchivo)
+      formData.append('mantener_imagen', mantenerImagen)
+      formData.append('mantener_video', mantenerVideo)
+      
+      // Agregar archivo si existe (nuevo)
+      if (archivo) {
+        formData.append('archivo', archivo)
+        console.log('📎 Nuevo archivo adjunto:', archivo.name)
+      }
+      
+      // Agregar imagen si existe (nueva)
+      if (imagen) {
+        formData.append('imagen', imagen)
+        console.log('🖼️ Nueva imagen adjunta:', imagen.name)
+      }
+      
+      // Agregar video si existe (nuevo)
+      if (video) {
+        formData.append('video', video)
+        console.log('🎬 Nuevo video adjunto:', video.name)
+      }
+      
+      const formDataApi = createFormDataApi()
+      const response = await formDataApi.put(`/manuales/${manualId}`, formData)
+      
+      console.log('✅ Manual actualizado:', response.data)
+      return response.data
+      
+    } catch (error) {
+      console.error('❌ Error actualizando manual:', error)
+      throw error
+    }
+  },
+
+  /**
    * Listar todos los manuales (para admin)
    * @param {number} limit - Límite de resultados
    * @param {number} offset - Desplazamiento

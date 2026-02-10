@@ -99,6 +99,39 @@
                 </div>
               </div>
 
+              <!-- Filtro de Cargo -->
+              <div class="filter-cargo-group">
+                <label class="filter-cargo-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                  <span>Cargo:</span>
+                </label>
+                <div class="filter-cargo-wrapper">
+                  <select v-model="filtroCargo" @change="filtrarUsuarios" class="filter-cargo-select">
+                    <option value="todos">Todos los cargos</option>
+                    <option v-for="cargo in cargosDisponibles.filter(c => c !== 'OTRO')" :key="cargo" :value="cargo">
+                      {{ cargo }}
+                    </option>
+                    <option value="OTRO">OTRO</option>
+                    <option value="sin-cargo">Sin cargo</option>
+                  </select>
+                  <Transition name="count-fade" mode="out-in">
+                    <div :key="contadorPorCargo[filtroCargo] || 0" :class="['cargo-count-badge', `cargo-count-${obtenerColorCargo(filtroCargo === 'todos' ? '' : filtroCargo)}`]">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                      </svg>
+                      <span class="cargo-count-number">{{ contadorPorCargo[filtroCargo] || 0 }}</span>
+                    </div>
+                  </Transition>
+                </div>
+              </div>
+
               <!-- Ordenamiento -->
               <div class="sort-group">
                 <div class="sort-buttons">
@@ -258,7 +291,12 @@
                     <span class="nombre-normal">{{ usuario.nombre_completo || 'Sin nombre' }}</span>
                   </td>
                   <td class="col-correo">{{ usuario.correo }}</td>
-                  <td class="col-cargo">{{ usuario.cargo }}</td>
+                  <td class="col-cargo">
+                    <span v-if="usuario.cargo" :class="['cargo-badge', `cargo-${obtenerColorCargo(usuario.cargo)}`]">
+                      {{ usuario.cargo }}
+                    </span>
+                    <span v-else class="cargo-badge cargo-empty">Sin cargo</span>
+                  </td>
                   <td class="col-supervisor">{{ usuario.supervisor }}</td>
                   <td class="col-curp">
                     <span class="curp-text">{{ (usuario.curp || 'N/A').toUpperCase() }}</span>
@@ -565,7 +603,10 @@
               </div>
               <div class="detail-content">
                 <span class="detail-label">Cargo</span>
-                <span class="detail-value">{{ usuarioSeleccionado.cargo || 'No especificado' }}</span>
+                <span v-if="usuarioSeleccionado.cargo" :class="['cargo-badge', 'cargo-badge-detail', `cargo-${obtenerColorCargo(usuarioSeleccionado.cargo)}`]">
+                  {{ usuarioSeleccionado.cargo }}
+                </span>
+                <span v-else class="detail-value">No especificado</span>
               </div>
             </div>
 
@@ -1124,6 +1165,7 @@ const loading = ref(false)
 const error = ref('')
 const searchTerm = ref('')
 const filtroEstado = ref('todos') // 'todos', 'activos', 'inactivos'
+const filtroCargo = ref('todos') // 'todos' o nombre del cargo
 const supervisoresPorTerritorio = ref({}) // Mapa de territorio -> supervisor
 
 // Variable para contador de usuarios
@@ -1189,6 +1231,79 @@ const normalizarTexto = (texto) => {
 
 // Variables para supervisor automático de técnicos
 const buscandoSupervisor = ref(false)
+
+// Función para obtener color del cargo
+const obtenerColorCargo = (cargo) => {
+  if (!cargo) return 'gray'
+  
+  const cargoUpper = cargo.toUpperCase()
+  
+  const coloresCargo = {
+    'TECNICO PRODUCTIVO': 'emerald',
+    'TECNICO SOCIAL': 'blue',
+    'FACILITADOR COMUNITARIO': 'violet',
+    'COORDINACION TERRITORIAL C': 'orange-light',
+    'COORDINACION TERRITORIAL B': 'orange',
+    'COORDINACION TERRITORIAL A': 'red',
+    'ESPECIALISTAS PRODUCTIVOS Y SOCIALES': 'cyan',
+    'SEMBRADOR': 'yellow',
+    'OTRO': 'gray'
+  }
+  
+  return coloresCargo[cargoUpper] || 'gray'
+}
+
+// Computed: Contar usuarios por cargo (considerando filtros de estado y búsqueda)
+const contadorPorCargo = computed(() => {
+  let usuariosFiltradosBase = [...usuarios.value]
+  
+  // Aplicar filtro de estado
+  if (filtroEstado.value === 'activos') {
+    usuariosFiltradosBase = usuariosFiltradosBase.filter(usuario => 
+      usuario.activo === true || usuario.activo === undefined || usuario.activo === null
+    )
+  } else if (filtroEstado.value === 'inactivos') {
+    usuariosFiltradosBase = usuariosFiltradosBase.filter(usuario => usuario.activo === false)
+  }
+  
+  // Aplicar filtro de búsqueda
+  if (searchTerm.value.trim()) {
+    const termino = searchTerm.value.toLowerCase()
+    usuariosFiltradosBase = usuariosFiltradosBase.filter(usuario => 
+      usuario.correo.toLowerCase().includes(termino) ||
+      (usuario.nombre_completo && usuario.nombre_completo.toLowerCase().includes(termino)) ||
+      (usuario.cargo && usuario.cargo.toLowerCase().includes(termino)) ||
+      (usuario.supervisor && usuario.supervisor.toLowerCase().includes(termino)) ||
+      (usuario.curp && usuario.curp.toLowerCase().includes(termino)) ||
+      (usuario.territorio && usuario.territorio.toLowerCase().includes(termino))
+    )
+  }
+  
+  // Contar por cargo
+  const contador = {}
+  
+  cargosDisponibles.forEach(cargo => {
+    if (cargo === 'OTRO') {
+      contador[cargo] = usuariosFiltradosBase.filter(u => 
+        u.cargo && u.cargo.toUpperCase() === 'OTRO'
+      ).length
+    } else {
+      contador[cargo] = usuariosFiltradosBase.filter(u => 
+        u.cargo && u.cargo.toUpperCase() === cargo.toUpperCase()
+      ).length
+    }
+  })
+  
+  // Contar sin cargo
+  contador['sin-cargo'] = usuariosFiltradosBase.filter(u => 
+    !u.cargo || u.cargo.trim() === ''
+  ).length
+  
+  // Total
+  contador['todos'] = usuariosFiltradosBase.length
+  
+  return contador
+})
 
 // Computed: detectar si el usuario editado es técnico
 const esTecnicoEdicion = computed(() => {
@@ -1734,6 +1849,17 @@ const filtrarUsuarios = (resetPaginacion = true) => {
     resultado = resultado.filter(usuario => usuario.activo === false)
   }
   
+  // Filtrar por cargo
+  if (filtroCargo.value !== 'todos') {
+    if (filtroCargo.value === 'sin-cargo') {
+      resultado = resultado.filter(usuario => !usuario.cargo || usuario.cargo.trim() === '')
+    } else {
+      resultado = resultado.filter(usuario => 
+        usuario.cargo && usuario.cargo.toUpperCase() === filtroCargo.value.toUpperCase()
+      )
+    }
+  }
+  
   // Filtrar por término de búsqueda
   if (searchTerm.value.trim()) {
     const termino = searchTerm.value.toLowerCase()
@@ -2180,6 +2306,10 @@ watch(filtroEstado, () => {
   filtrarUsuarios() // Filtrar en tiempo real cuando cambia el estado
 })
 
+watch(filtroCargo, () => {
+  filtrarUsuarios() // Filtrar en tiempo real cuando cambia el cargo
+})
+
 watch(usuarios, () => {
   // Solo resetear paginación si es recarga completa
   const debeResetear = recargaCompleta.value
@@ -2596,6 +2726,230 @@ const logout = () => {
 .filter-estado-btn svg {
   flex-shrink: 0;
   transition: transform 0.2s ease;
+}
+
+/* ========== FILTRO DE CARGO ========== */
+.filter-cargo-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 255, 244, 0.9) 100%);
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(76, 175, 80, 0.2);
+  box-shadow: 
+    0 2px 8px rgba(76, 175, 80, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.filter-cargo-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4b5563;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.filter-cargo-label svg {
+  flex-shrink: 0;
+  stroke: #4CAF50;
+}
+
+.filter-cargo-label span {
+  color: #374151;
+}
+
+.filter-cargo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-cargo-select {
+  appearance: none;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  border: 1.5px solid rgba(76, 175, 80, 0.25);
+  border-radius: 10px;
+  padding: 6px 32px 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 180px;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filter-cargo-select:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.12);
+  transform: translateY(-1px);
+}
+
+.filter-cargo-select:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 
+    0 0 0 3px rgba(76, 175, 80, 0.15),
+    0 2px 6px rgba(76, 175, 80, 0.2);
+  transform: translateY(-1px);
+}
+
+.filter-cargo-select option {
+  padding: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.filter-cargo-select option::after {
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+/* Contador de cargo con colores */
+.cargo-count-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pulse-subtle 2s ease-in-out infinite;
+  min-width: 50px;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cargo-count-badge::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: shine 3s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0%, 100% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  50% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+.cargo-count-badge svg {
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.cargo-count-number {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+/* Colores para el contador según el cargo */
+.cargo-count-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.cargo-count-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.cargo-count-violet {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+}
+
+.cargo-count-orange-light {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+}
+
+.cargo-count-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+}
+
+.cargo-count-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.cargo-count-cyan {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
+}
+
+.cargo-count-yellow {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+  color: #422006;
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.4);
+}
+
+.cargo-count-gray {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.4);
+}
+
+/* Animación sutil de pulso */
+@keyframes pulse-subtle {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Transición del contador */
+.count-fade-enter-active,
+.count-fade-leave-active {
+  transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.count-fade-enter-from {
+  opacity: 0;
+  transform: scale(0.9) translateY(-5px);
+}
+
+.count-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.9) translateY(5px);
+}
+
+.count-fade-enter-to,
+.count-fade-leave-from {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 
 .filter-estado-btn:hover svg {
@@ -3045,7 +3399,7 @@ const logout = () => {
 .usuarios-table th.col-id { width: 55px; min-width: 55px; }
 .usuarios-table th.col-nombre { width: 160px; min-width: 160px; }
 .usuarios-table th.col-correo { width: 200px; min-width: 200px; }
-.usuarios-table th.col-cargo { width: 140px; min-width: 140px; }
+.usuarios-table th.col-cargo { width: 180px; min-width: 180px; }
 .usuarios-table th.col-supervisor { width: 150px; min-width: 150px; }
 .usuarios-table th.col-curp { width: 145px; min-width: 145px; }
 .usuarios-table th.col-territorio { width: 150px; min-width: 150px; }
@@ -3091,12 +3445,97 @@ const logout = () => {
   text-overflow: ellipsis;
 } /* Correo */
 .usuarios-table td.col-cargo { 
-  min-width: 140px; 
-  max-width: 140px;
+  min-width: 180px; 
+  max-width: 180px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
 } /* Cargo */
+
+/* Badges de cargo */
+.cargo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.cargo-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.cargo-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.cargo-violet {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+}
+
+.cargo-orange-light {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(251, 146, 60, 0.3);
+}
+
+.cargo-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+}
+
+.cargo-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.cargo-cyan {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(6, 182, 212, 0.3);
+}
+
+.cargo-yellow {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+  color: #422006;
+  box-shadow: 0 2px 4px rgba(234, 179, 8, 0.3);
+}
+
+.cargo-gray {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+}
+
+.cargo-empty {
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  color: #6b7280;
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.15);
+}
+
+.cargo-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cargo-badge-detail {
+  font-size: 10px;
+  padding: 5px 12px;
+}
+
 .usuarios-table td.col-supervisor { 
   min-width: 150px; 
   max-width: 150px;
@@ -6127,6 +6566,27 @@ const logout = () => {
     width: 100%;
   }
   
+  .filter-cargo-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .filter-cargo-wrapper {
+    width: 100%;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .filter-cargo-select {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .cargo-count-badge {
+    align-self: flex-start;
+  }
+  
   .controls-right {
     margin-left: 0;
     margin-top: clamp(0.5rem, 1vw, 0.75rem);
@@ -6163,6 +6623,16 @@ const logout = () => {
   .users-stats-compact .compact-stat-label {
     font-size: 0.58rem;
   }
+  
+  .cargo-count-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    min-width: 45px;
+  }
+  
+  .cargo-count-number {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -6187,6 +6657,22 @@ const logout = () => {
   .users-stats-compact .compact-stat-icon svg {
     width: 13px;
     height: 13px;
+  }
+  
+  .cargo-count-badge {
+    font-size: 9px;
+    padding: 4px 7px;
+    min-width: 40px;
+    gap: 4px;
+  }
+  
+  .cargo-count-badge svg {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .cargo-count-number {
+    font-size: 11px;
   }
   
   .users-stats-compact .compact-stat-value {

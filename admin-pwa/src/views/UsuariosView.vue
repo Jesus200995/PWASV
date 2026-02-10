@@ -118,17 +118,15 @@
                     <option value="OTRO">OTRO</option>
                     <option value="sin-cargo">Sin cargo</option>
                   </select>
-                  <Transition name="count-fade" mode="out-in">
-                    <div :key="contadorPorCargo[filtroCargo] || 0" :class="['cargo-count-badge', `cargo-count-${obtenerColorCargo(filtroCargo === 'todos' ? '' : filtroCargo)}`]">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                      </svg>
-                      <span class="cargo-count-number">{{ contadorPorCargo[filtroCargo] || 0 }}</span>
-                    </div>
-                  </Transition>
+                  <div :key="contadorPorCargo[filtroCargo] || 0" :class="['cargo-count-badge', `cargo-count-${obtenerColorCargo(filtroCargo === 'todos' ? '' : filtroCargo)}`]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span class="cargo-count-number">{{ contadorPorCargo[filtroCargo] || 0 }}</span>
+                  </div>
                 </div>
               </div>
 
@@ -2825,38 +2823,10 @@ const logout = () => {
   font-weight: 700;
   color: white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: pulse-subtle 2s ease-in-out infinite;
   min-width: 50px;
   justify-content: center;
   position: relative;
   overflow: hidden;
-}
-
-.cargo-count-badge::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transform: rotate(45deg);
-  animation: shine 3s ease-in-out infinite;
-}
-
-@keyframes shine {
-  0%, 100% {
-    transform: translateX(-100%) translateY(-100%) rotate(45deg);
-  }
-  50% {
-    transform: translateX(100%) translateY(100%) rotate(45deg);
-  }
 }
 
 .cargo-count-badge svg {
@@ -2918,38 +2888,6 @@ const logout = () => {
 .cargo-count-gray {
   background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   box-shadow: 0 2px 8px rgba(107, 114, 128, 0.4);
-}
-
-/* Animación sutil de pulso */
-@keyframes pulse-subtle {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-}
-
-/* Transición del contador */
-.count-fade-enter-active,
-.count-fade-leave-active {
-  transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.count-fade-enter-from {
-  opacity: 0;
-  transform: scale(0.9) translateY(-5px);
-}
-
-.count-fade-leave-to {
-  opacity: 0;
-  transform: scale(0.9) translateY(5px);
-}
-
-.count-fade-enter-to,
-.count-fade-leave-from {
-  opacity: 1;
-  transform: scale(1) translateY(0);
 }
 
 .filter-estado-btn:hover svg {

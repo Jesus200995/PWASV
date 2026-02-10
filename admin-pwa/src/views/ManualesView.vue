@@ -771,11 +771,12 @@
     </div>
 
     <!-- Modal Editar Manual -->
+    <Transition name="modal-fade">
     <div v-if="mostrarModalEditar" class="modal-overlay" @click="cerrarModalEditar">
-      <div class="modal-content modal-large" @click.stop>
-        <div class="modal-header modal-header-crear">
+      <div class="modal-content modal-editar" @click.stop>
+        <div class="modal-header modal-header-editar">
           <div class="modal-header-content">
-            <div class="modal-icon">
+            <div class="modal-icon modal-icon-editar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -786,7 +787,7 @@
               <p class="modal-description">Modifica la información del manual</p>
             </div>
           </div>
-          <button class="btn-close" @click="cerrarModalEditar">
+          <button class="btn-close" @click="cerrarModalEditar" :disabled="cargandoEdicion">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
@@ -795,7 +796,14 @@
         </div>
         
         <div class="modal-body">
-          <form @submit.prevent="confirmarActualizacion">
+          <!-- Loading State -->
+          <div v-if="cargandoEdicion" class="modal-loading">
+            <div class="loading-spinner-modal"></div>
+            <p>Cargando datos del manual...</p>
+          </div>
+          
+          <!-- Formulario -->
+          <form v-else @submit.prevent="confirmarActualizacion">
             <div class="form-row">
               <!-- Título -->
               <div class="form-group">
@@ -834,7 +842,7 @@
                 v-model="formManual.descripcion"
                 class="form-textarea"
                 placeholder="Descripción detallada del manual..."
-                rows="4"
+                rows="3"
               ></textarea>
             </div>
 
@@ -850,142 +858,139 @@
               />
             </div>
 
-            <div class="form-row">
-              <!-- Archivo PDF -->
-              <div class="form-group">
-                <label>Archivo PDF/Documento</label>
-                <div v-if="manualEditando && manualEditando.archivo_nombre && mantenerArchivoExistente" class="file-current">
+            <!-- Archivo PDF -->
+            <div class="form-group">
+              <label>Archivo PDF/Documento</label>
+              <div v-if="manualEditando && manualEditando.archivo_nombre && mantenerArchivoExistente" class="file-current">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <span>{{ manualEditando.archivo_nombre }}</span>
+                <button type="button" class="btn-remove-file" @click="removerArchivoExistente">×</button>
+              </div>
+              <div v-else class="file-upload-area file-upload-compact" @click="$refs.archivoInputEdit.click()">
+                <input
+                  ref="archivoInputEdit"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                  @change="handleArchivoChange"
+                  hidden
+                />
+                <div v-if="!archivoSeleccionado" class="upload-placeholder">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="12" y1="18" x2="12" y2="12"/>
+                    <line x1="9" y1="15" x2="15" y2="15"/>
+                  </svg>
+                  <span>Clic para {{ manualEditando && manualEditando.archivo_nombre ? 'cambiar' : 'subir' }} PDF</span>
+                </div>
+                <div v-else class="file-selected">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
                   </svg>
-                  <span>{{ manualEditando.archivo_nombre }}</span>
-                  <button type="button" class="btn-remove-file" @click="removerArchivoExistente">×</button>
-                </div>
-                <div v-else class="file-upload-area" @click="$refs.archivoInputEdit.click()">
-                  <input
-                    ref="archivoInputEdit"
-                    type="file"
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-                    @change="handleArchivoChange"
-                    hidden
-                  />
-                  <div v-if="!archivoSeleccionado" class="upload-placeholder">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="12" y1="18" x2="12" y2="12"/>
-                      <line x1="9" y1="15" x2="15" y2="15"/>
-                    </svg>
-                    <span>Clic para {{ manualEditando && manualEditando.archivo_nombre ? 'cambiar' : 'subir' }} PDF</span>
-                  </div>
-                  <div v-else class="file-selected">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                    </svg>
-                    <span>{{ archivoSeleccionado.name }}</span>
-                    <button type="button" class="btn-remove-file" @click.stop="removerArchivo">×</button>
-                  </div>
+                  <span>{{ archivoSeleccionado.name }}</span>
+                  <button type="button" class="btn-remove-file" @click.stop="removerArchivo">×</button>
                 </div>
               </div>
+            </div>
 
-              <!-- Selector de Media (Imagen o Video) -->
-              <div class="form-group">
-                <label>Multimedia de Portada</label>
-                <div class="media-type-selector">
-                  <label class="media-option" :class="{ active: tipoMedia === 'ninguno' }">
-                    <input type="radio" v-model="tipoMedia" value="ninguno" @change="cambiarTipoMedia" hidden />
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                    </svg>
-                    <span>Ninguno</span>
-                  </label>
-                  <label class="media-option" :class="{ active: tipoMedia === 'imagen' }">
-                    <input type="radio" v-model="tipoMedia" value="imagen" @change="cambiarTipoMedia" hidden />
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <!-- Selector de Media (Imagen o Video) -->
+            <div class="form-group">
+              <label>Multimedia de Portada</label>
+              <div class="media-type-selector media-selector-compact">
+                <label class="media-option" :class="{ active: tipoMedia === 'ninguno' }">
+                  <input type="radio" v-model="tipoMedia" value="ninguno" @change="cambiarTipoMedia" hidden />
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                  </svg>
+                  <span>Ninguno</span>
+                </label>
+                <label class="media-option" :class="{ active: tipoMedia === 'imagen' }">
+                  <input type="radio" v-model="tipoMedia" value="imagen" @change="cambiarTipoMedia" hidden />
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span>Imagen</span>
+                </label>
+                <label class="media-option" :class="{ active: tipoMedia === 'video' }">
+                  <input type="radio" v-model="tipoMedia" value="video" @change="cambiarTipoMedia" hidden />
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                  </svg>
+                  <span>Video</span>
+                </label>
+              </div>
+              
+              <!-- Subir Imagen -->
+              <div v-if="tipoMedia === 'imagen'" class="media-upload-compact">
+                <div v-if="manualEditando && manualEditando.imagen_nombre && mantenerImagenExistente" class="file-current">
+                  <img v-if="manualEditando.imagen_nombre" :src="getImagenUrl(manualEditando.id)" alt="Preview" class="image-preview-small" />
+                  <span>{{ manualEditando.imagen_nombre }}</span>
+                  <button type="button" class="btn-remove-file" @click="removerImagenExistente">×</button>
+                </div>
+                <div v-else class="file-upload-area file-upload-compact" @click="$refs.imagenInputEdit.click()">
+                  <input
+                    ref="imagenInputEdit"
+                    type="file"
+                    accept="image/*"
+                    @change="handleImagenChange"
+                    hidden
+                  />
+                  <div v-if="!imagenSeleccionada" class="upload-placeholder">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                       <circle cx="8.5" cy="8.5" r="1.5"/>
                       <polyline points="21 15 16 10 5 21"/>
                     </svg>
-                    <span>Imagen</span>
-                  </label>
-                  <label class="media-option" :class="{ active: tipoMedia === 'video' }">
-                    <input type="radio" v-model="tipoMedia" value="video" @change="cambiarTipoMedia" hidden />
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <span>Subir imagen</span>
+                  </div>
+                  <div v-else class="file-selected">
+                    <img :src="imagenPreview" alt="Preview" class="image-preview-small" />
+                    <span>{{ imagenSeleccionada.name }}</span>
+                    <button type="button" class="btn-remove-file" @click.stop="removerImagen">×</button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Subir Video -->
+              <div v-if="tipoMedia === 'video'" class="media-upload-compact">
+                <div v-if="manualEditando && manualEditando.video_nombre && mantenerVideoExistente" class="file-current">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                  </svg>
+                  <span>{{ manualEditando.video_nombre }}</span>
+                  <button type="button" class="btn-remove-file" @click="removerVideoExistente">×</button>
+                </div>
+                <div v-else class="file-upload-area file-upload-compact" @click="$refs.videoInputEdit.click()">
+                  <input
+                    ref="videoInputEdit"
+                    type="file"
+                    accept=".mp4,.webm,.mov,.avi,.mkv"
+                    @change="handleVideoChange"
+                    hidden
+                  />
+                  <div v-if="!videoSeleccionado" class="upload-placeholder">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polygon points="23 7 16 12 23 17 23 7"/>
                       <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
                     </svg>
-                    <span>Video</span>
-                  </label>
-                </div>
-                
-                <!-- Subir Imagen -->
-                <div v-if="tipoMedia === 'imagen'">
-                  <div v-if="manualEditando && manualEditando.imagen_nombre && mantenerImagenExistente" class="file-current">
-                    <img v-if="manualEditando.imagen_nombre" :src="getImagenUrl(manualEditando.id)" alt="Preview" class="image-preview-small" />
-                    <span>{{ manualEditando.imagen_nombre }}</span>
-                    <button type="button" class="btn-remove-file" @click="removerImagenExistente">×</button>
+                    <span>Subir video</span>
                   </div>
-                  <div v-else class="file-upload-area" @click="$refs.imagenInputEdit.click()">
-                    <input
-                      ref="imagenInputEdit"
-                      type="file"
-                      accept="image/*"
-                      @change="handleImagenChange"
-                      hidden
-                    />
-                    <div v-if="!imagenSeleccionada" class="upload-placeholder">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21 15 16 10 5 21"/>
-                      </svg>
-                      <span>Clic para subir imagen</span>
-                    </div>
-                    <div v-else class="file-selected">
-                      <img :src="imagenPreview" alt="Preview" class="image-preview" />
-                      <span>{{ imagenSeleccionada.name }}</span>
-                      <button type="button" class="btn-remove-file" @click.stop="removerImagen">×</button>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Subir Video -->
-                <div v-if="tipoMedia === 'video'">
-                  <div v-if="manualEditando && manualEditando.video_nombre && mantenerVideoExistente" class="file-current">
+                  <div v-else class="file-selected">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
                       <polygon points="23 7 16 12 23 17 23 7"/>
                       <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
                     </svg>
-                    <span>{{ manualEditando.video_nombre }}</span>
-                    <button type="button" class="btn-remove-file" @click="removerVideoExistente">×</button>
-                  </div>
-                  <div v-else class="file-upload-area" @click="$refs.videoInputEdit.click()">
-                    <input
-                      ref="videoInputEdit"
-                      type="file"
-                      accept=".mp4,.webm,.mov,.avi,.mkv"
-                      @change="handleVideoChange"
-                      hidden
-                    />
-                    <div v-if="!videoSeleccionado" class="upload-placeholder">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="23 7 16 12 23 17 23 7"/>
-                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                      </svg>
-                      <span>Clic para subir video (máx. 100MB)</span>
-                      <small style="color: #888; margin-top: 4px; font-size: 11px;">Formatos: MP4, WebM, MOV, AVI, MKV</small>
-                    </div>
-                    <div v-else class="file-selected">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
-                        <polygon points="23 7 16 12 23 17 23 7"/>
-                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                      </svg>
-                      <span>{{ videoSeleccionado.name }}</span>
-                      <button type="button" class="btn-remove-file" @click.stop="removerVideo">×</button>
-                    </div>
+                    <span>{{ videoSeleccionado.name }}</span>
+                    <button type="button" class="btn-remove-file" @click.stop="removerVideo">×</button>
                   </div>
                 </div>
               </div>
@@ -1055,7 +1060,12 @@
 
             <div class="form-actions">
               <button type="button" class="btn-secondary" @click="cerrarModalEditar">Cancelar</button>
-              <button type="submit" class="btn-primary">
+              <button type="submit" class="btn-primary btn-guardar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
                 Guardar Cambios
               </button>
             </div>
@@ -1063,6 +1073,7 @@
         </div>
       </div>
     </div>
+    </Transition>
 
     <!-- Modal Confirmación de Edición -->
     <div v-if="mostrarModalConfirmarEdicion" class="modal-overlay mini-modal" @click="cerrarConfirmacionEdicion">
@@ -1190,6 +1201,7 @@ export default {
     const eliminando = ref(false)
     const busquedaUsuario = ref('')
     const editando = ref(false)
+    const cargandoEdicion = ref(false)
     const mantenerArchivoExistente = ref(true)
     const mantenerImagenExistente = ref(true)
     const mantenerVideoExistente = ref(true)
@@ -1385,11 +1397,25 @@ export default {
     
     // Editar manual
     const abrirModalEditar = async (manual) => {
+      // Abrir modal inmediatamente con loading
+      mostrarModalEditar.value = true
+      cargandoEdicion.value = true
+      
+      // Pre-llenar con datos básicos disponibles
+      formManual.value = {
+        titulo: manual.titulo || '',
+        subtitulo: manual.subtitulo || '',
+        descripcion: '',
+        enlace_url: '',
+        enviado_a_todos: true,
+        usuario_ids: []
+      }
+      
       try {
         // Obtener detalle completo del manual
         manualEditando.value = await manualesService.obtenerManual(manual.id)
         
-        // Pre-llenar formulario
+        // Pre-llenar formulario con datos completos
         formManual.value = {
           titulo: manualEditando.value.titulo || '',
           subtitulo: manualEditando.value.subtitulo || '',
@@ -1418,10 +1444,12 @@ export default {
         
         mantenerArchivoExistente.value = !!manualEditando.value.archivo_nombre
         
-        mostrarModalEditar.value = true
       } catch (err) {
-        alert('Error al cargar manual para editar')
+        mostrarModalEditar.value = false
+        mostrarFeedback('error', 'Error', 'No se pudo cargar el manual para editar')
         console.error(err)
+      } finally {
+        cargandoEdicion.value = false
       }
     }
     
@@ -1615,6 +1643,7 @@ export default {
       tipoMedia,
       enviando,
       editando,
+      cargandoEdicion,
       eliminando,
       busquedaUsuario,
       mantenerArchivoExistente,
@@ -2135,6 +2164,152 @@ export default {
 
 .modal-large {
   max-width: 800px;
+}
+
+/* Modal Editar */
+.modal-editar {
+  max-width: 720px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header-editar {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
+}
+
+.modal-icon-editar {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.modal-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+.loading-spinner-modal {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.modal-loading p {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Modal Fade Transition */
+.modal-fade-enter-active {
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+.modal-fade-leave-active {
+  animation: modalFadeOut 0.2s ease-in;
+}
+
+@keyframes modalFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes modalFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.btn-guardar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Estilos compactos para modal editar */
+.modal-editar .modal-body {
+  overflow-x: hidden;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.file-upload-compact {
+  padding: 12px 16px !important;
+  min-height: auto !important;
+}
+
+.file-upload-compact .upload-placeholder {
+  flex-direction: row !important;
+  gap: 10px !important;
+}
+
+.file-upload-compact .upload-placeholder span {
+  font-size: 13px !important;
+}
+
+.media-selector-compact {
+  gap: 6px !important;
+  flex-wrap: wrap;
+}
+
+.media-selector-compact .media-option {
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  flex: 0 1 auto !important;
+  min-width: 70px;
+}
+
+.media-selector-compact .media-option span {
+  font-size: 12px !important;
+}
+
+.media-upload-compact {
+  margin-top: 10px;
+}
+
+.modal-editar .file-current {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.modal-editar .file-current span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.modal-editar .file-selected span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.btn-guardar svg {
+  flex-shrink: 0;
 }
 
 .modal-small {
@@ -3243,8 +3418,26 @@ export default {
     margin: 16px;
   }
   
-  .modal-large {
+  .modal-large,
+  .modal-editar {
     max-width: 95%;
+  }
+  
+  .modal-editar .modal-body {
+    padding: 16px;
+  }
+  
+  .modal-editar .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-editar .media-type-selector {
+    flex-wrap: wrap;
+  }
+  
+  .modal-editar .file-current span,
+  .modal-editar .file-selected span {
+    max-width: 160px;
   }
   
   .detalle-title {
@@ -3349,6 +3542,59 @@ export default {
   
   .meta-value {
     font-size: 13px;
+  }
+  
+  .modal-editar {
+    max-width: 98%;
+    margin: 8px;
+    max-height: 95vh;
+  }
+  
+  .modal-editar .modal-header {
+    padding: 12px 16px;
+  }
+  
+  .modal-editar .modal-body {
+    padding: 12px;
+  }
+  
+  .modal-editar .form-input,
+  .modal-editar .form-textarea {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+  
+  .modal-editar .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modal-editar .form-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .modal-editar .media-type-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .modal-editar .media-option {
+    justify-content: center;
+  }
+  
+  .modal-editar .file-current span,
+  .modal-editar .file-selected span {
+    max-width: 120px;
+  }
+  
+  .modal-loading {
+    padding: 40px 16px;
+  }
+  
+  .loading-spinner-modal {
+    width: 36px;
+    height: 36px;
   }
 }
 

@@ -1200,6 +1200,7 @@ const cambiandoEstado = ref(false)
 const showEditModal = ref(false)
 const usuarioAEditar = ref(null)
 const editandoUsuario = ref(false)
+const inicializandoModalEdicion = ref(false) // Para evitar que watchers limpien campos al abrir modal
 const datosEdicion = ref({
   correo: '',
   nombre_completo: '',
@@ -1340,6 +1341,9 @@ const buscarSupervisorAutomatico = async (territorio) => {
 
 // Watcher: cuando cambie el territorio en el modal de edición
 watch(() => datosEdicion.value.territorio, async (nuevoTerritorio, viejoTerritorio) => {
+  // No hacer nada si estamos inicializando el modal
+  if (inicializandoModalEdicion.value) return
+  
   if (nuevoTerritorio !== viejoTerritorio && esTecnicoEdicion.value) {
     await buscarSupervisorAutomatico(nuevoTerritorio)
   }
@@ -1347,9 +1351,14 @@ watch(() => datosEdicion.value.territorio, async (nuevoTerritorio, viejoTerritor
 
 // Watcher: cuando cambie el cargo en el modal de edición
 watch(() => datosEdicion.value.cargo, async (nuevoCargo, viejoCargo) => {
+  // No hacer nada si estamos inicializando el modal
+  if (inicializandoModalEdicion.value) return
+  
   if (nuevoCargo !== viejoCargo) {
     const cargoUpper = (nuevoCargo || '').toUpperCase()
     const esNuevoTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO'
+    const viejoCargoUpper = (viejoCargo || '').toUpperCase()
+    const eraViejoTecnico = viejoCargoUpper === 'TECNICO SOCIAL' || viejoCargoUpper === 'TECNICO PRODUCTIVO'
     
     // Limpiar cargoOtro si el usuario cambia de OTRO a otro cargo
     if (viejoCargo === 'OTRO' && nuevoCargo !== 'OTRO') {
@@ -1359,8 +1368,8 @@ watch(() => datosEdicion.value.cargo, async (nuevoCargo, viejoCargo) => {
     if (esNuevoTecnico && datosEdicion.value.territorio) {
       // Si ahora es técnico y tiene territorio, buscar supervisor automático
       await buscarSupervisorAutomatico(datosEdicion.value.territorio)
-    } else if (!esNuevoTecnico) {
-      // Si ya no es técnico, limpiar supervisor para que pueda escribir manualmente
+    } else if (eraViejoTecnico && !esNuevoTecnico) {
+      // Solo limpiar supervisor si está CAMBIANDO de técnico a no-técnico
       datosEdicion.value.supervisor = ''
     }
   }
@@ -2091,6 +2100,7 @@ const eliminarUsuario = async () => {
 const editarUsuario = async (usuario) => {
   usuarioAEditar.value = usuario
   showEditPassword.value = false // Resetear visibilidad de contraseña
+  inicializandoModalEdicion.value = true // Activar bandera de inicialización
   
   // Detectar si el cargo está en la lista de cargos predefinidos
   const cargoUsuario = usuario.cargo || ''
@@ -2108,6 +2118,11 @@ const editarUsuario = async (usuario) => {
     telefono: usuario.telefono || '',
     territorio: usuario.territorio || ''
   }
+  
+  // Esperar un tick para que los watchers no interfieran
+  await new Promise(resolve => setTimeout(resolve, 50))
+  inicializandoModalEdicion.value = false // Desactivar bandera
+  
   showEditModal.value = true
   
   // Si es técnico y tiene territorio, buscar supervisor automático
@@ -2122,6 +2137,7 @@ const cancelarEdicion = () => {
   showEditModal.value = false
   usuarioAEditar.value = null
   editandoUsuario.value = false
+  inicializandoModalEdicion.value = false // Resetear bandera
   showEditPassword.value = false // Resetear visibilidad de contraseña
   // Limpiar formulario
   datosEdicion.value = {

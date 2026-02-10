@@ -2581,7 +2581,7 @@ const logout = () => {
   margin-bottom: clamp(8px, 1.5vw, 12px);
   animation: slideInRight 0.6s ease-out;
   background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
-  border: 2px solid #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
   border-radius: clamp(6px, 1.2vw, 9px);
   padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 12px);
   box-shadow: 
@@ -2591,7 +2591,7 @@ const logout = () => {
 }
 
 .search-section:hover {
-  border-color: #45a049;
+  border-color: rgba(76, 175, 80, 0.5);
   box-shadow: 
     0 8px 32px rgba(76, 175, 80, 0.15),
     0 4px 16px rgba(76, 175, 80, 0.1);

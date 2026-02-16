@@ -52,8 +52,89 @@
               <span v-if="notificacionesFiltradas.length > 0" class="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
                 {{ notificacionesFiltradas.length }}
               </span>
+              <!-- Botón de configuración push -->
+              <button 
+                @click="mostrarConfigPush = !mostrarConfigPush"
+                class="ml-2 p-1.5 rounded-lg hover:bg-emerald-100 transition-colors relative"
+                :class="{ 'bg-emerald-100': mostrarConfigPush }"
+                title="Configurar notificaciones push"
+              >
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                <span v-if="pushEnabled" class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
+              </button>
             </h2>
             <div class="green-line mb-0"></div>
+            
+            <!-- Panel de configuración Push Notifications -->
+            <transition name="slide-fade">
+              <div v-if="mostrarConfigPush" class="mt-3 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="text-xs font-semibold text-gray-800">Notificaciones Push</h3>
+                      <p class="text-[10px] text-gray-500">{{ getPushStatusText }}</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Toggle switch -->
+                  <button 
+                    @click="togglePushNotifications"
+                    :disabled="pushLoading || !canEnablePush"
+                    class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
+                    :class="{
+                      'bg-emerald-500': pushEnabled,
+                      'bg-gray-300': !pushEnabled,
+                      'opacity-50 cursor-not-allowed': pushLoading || !canEnablePush
+                    }"
+                  >
+                    <div 
+                      class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 flex items-center justify-center"
+                      :class="{ 'translate-x-6': pushEnabled, 'translate-x-0.5': !pushEnabled }"
+                    >
+                      <svg v-if="pushLoading" class="w-3 h-3 text-emerald-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                  </button>
+                </div>
+                
+                <!-- Error message -->
+                <div v-if="pushError" class="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <p class="text-[10px] text-red-600 flex items-center gap-1">
+                    <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    {{ pushError }}
+                  </p>
+                </div>
+                
+                <!-- Test button -->
+                <button 
+                  v-if="pushEnabled"
+                  @click="enviarPushPrueba"
+                  :disabled="pushLoading"
+                  class="mt-2 w-full py-1.5 px-3 text-xs font-medium text-emerald-700 bg-white border border-emerald-300 rounded-lg hover:bg-emerald-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                  </svg>
+                  Enviar notificación de prueba
+                </button>
+                
+                <!-- Info -->
+                <p class="mt-2 text-[9px] text-gray-400 text-center">
+                  Recibe alertas instantáneas incluso con la app cerrada
+                </p>
+              </div>
+            </transition>
           </div>
         </div>
       </div>
@@ -636,8 +717,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import notificacionesService from '../services/notificacionesService.js'
+import pushNotificationsService from '../services/pushNotificationsService.js'
 import { useNotifications } from '../composables/useNotifications.js'
 
 // Estados reactivos
@@ -651,6 +733,13 @@ const soloNoLeidas = ref(false) // CAMBIO: Cambiar a no leídas por defecto
 const notificacionesLeidas = ref(new Set()) // IDs de notificaciones leídas
 const conteoNoLeidas = ref(0) // NUEVO: Contador de no leídas
 const conteoAnterior = ref(0) // NUEVO: Para detectar cambios en el contador
+
+// NUEVO: Estados para Push Notifications
+const pushEnabled = ref(false)
+const pushLoading = ref(false)
+const pushPermission = ref('default')
+const pushError = ref('')
+const mostrarConfigPush = ref(false)
 
 // NUEVO: Audio para notificaciones
 let audioNotificacion = null
@@ -1724,6 +1813,170 @@ const esReciente = (fechaISO) => {
   return diferencia < 86400000
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// SISTEMA DE PUSH NOTIFICATIONS - FUNCIONES
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Inicializar el servicio de Push Notifications
+const inicializarPushNotifications = async () => {
+  try {
+    console.log('🔔 Inicializando Push Notifications...')
+    
+    // Verificar soporte
+    if (!pushNotificationsService.isSupported()) {
+      console.warn('⚠️ Push Notifications no soportadas en este navegador')
+      pushError.value = 'Tu navegador no soporta notificaciones push'
+      return
+    }
+    
+    // Obtener permiso actual
+    pushPermission.value = Notification.permission
+    
+    // Verificar si ya está suscrito
+    const suscripcionActiva = await pushNotificationsService.checkSubscription()
+    pushEnabled.value = suscripcionActiva
+    
+    if (suscripcionActiva) {
+      console.log('✅ Push Notifications ya están activadas')
+    }
+    
+    // Configurar listener para mensajes del Service Worker
+    configurarListenerSW()
+    
+  } catch (err) {
+    console.error('❌ Error inicializando Push:', err)
+    pushError.value = 'Error al inicializar notificaciones push'
+  }
+}
+
+// Configurar listener para mensajes del Service Worker
+const configurarListenerSW = () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', async (event) => {
+      const { type, data } = event.data || {}
+      
+      console.log('📨 Mensaje del SW recibido:', type, data)
+      
+      switch (type) {
+        case 'PUSH_RECEIVED':
+          // Notificación push recibida - recargar lista
+          console.log('🔔 Push recibida, actualizando lista...')
+          await refrescarNotificaciones()
+          // Reproducir sonido de notificación
+          reproducirSonidoNotificacion()
+          break
+          
+        case 'NAVIGATE_TO':
+          // Navegar a una URL específica
+          if (data?.url) {
+            console.log('🔗 Navegando a:', data.url)
+            // Aquí se podría usar router.push si es una ruta interna
+          }
+          break
+          
+        case 'NOTIFICATION_CLOSED':
+          // Notificación fue cerrada
+          console.log('❌ Notificación cerrada:', data?.notificationId)
+          break
+      }
+    })
+    
+    console.log('👂 Listener de mensajes SW configurado')
+  }
+}
+
+// Alternar estado de Push Notifications
+const togglePushNotifications = async () => {
+  pushLoading.value = true
+  pushError.value = ''
+  
+  try {
+    const usuarioId = obtenerUsuarioId()
+    if (!usuarioId) {
+      pushError.value = 'No se pudo identificar al usuario'
+      return
+    }
+    
+    if (pushEnabled.value) {
+      // Desactivar push
+      console.log('🔕 Desactivando Push Notifications...')
+      await pushNotificationsService.unsubscribe(usuarioId)
+      pushEnabled.value = false
+      console.log('✅ Push Notifications desactivadas')
+    } else {
+      // Activar push
+      console.log('🔔 Activando Push Notifications...')
+      
+      // Solicitar permiso si es necesario
+      if (Notification.permission === 'default') {
+        const permiso = await pushNotificationsService.requestPermission()
+        pushPermission.value = permiso
+        
+        if (permiso !== 'granted') {
+          pushError.value = 'Debes permitir las notificaciones para activar esta función'
+          return
+        }
+      } else if (Notification.permission === 'denied') {
+        pushError.value = 'Las notificaciones están bloqueadas. Ve a configuración del navegador para activarlas.'
+        return
+      }
+      
+      // Suscribir al usuario
+      const resultado = await pushNotificationsService.subscribe(usuarioId)
+      
+      if (resultado) {
+        pushEnabled.value = true
+        console.log('✅ Push Notifications activadas correctamente')
+      } else {
+        pushError.value = 'No se pudo activar las notificaciones push'
+      }
+    }
+  } catch (err) {
+    console.error('❌ Error toggle push:', err)
+    pushError.value = err.message || 'Error al cambiar estado de notificaciones'
+  } finally {
+    pushLoading.value = false
+  }
+}
+
+// Enviar notificación push de prueba
+const enviarPushPrueba = async () => {
+  pushLoading.value = true
+  pushError.value = ''
+  
+  try {
+    const usuarioId = obtenerUsuarioId()
+    if (!usuarioId) {
+      pushError.value = 'No se pudo identificar al usuario'
+      return
+    }
+    
+    console.log('🧪 Enviando notificación de prueba...')
+    await pushNotificationsService.sendTestNotification(usuarioId)
+    console.log('✅ Notificación de prueba enviada')
+    
+  } catch (err) {
+    console.error('❌ Error enviando prueba:', err)
+    pushError.value = 'Error al enviar notificación de prueba'
+  } finally {
+    pushLoading.value = false
+  }
+}
+
+// Obtener texto descriptivo del estado de push
+const getPushStatusText = computed(() => {
+  if (pushLoading.value) return 'Procesando...'
+  if (pushError.value) return pushError.value
+  if (pushPermission.value === 'denied') return 'Notificaciones bloqueadas'
+  if (pushEnabled.value) return 'Activadas - Recibirás notificaciones en tiempo real'
+  return 'Desactivadas - Actívalas para recibir alertas instantáneas'
+})
+
+// Verificar si se puede activar push
+const canEnablePush = computed(() => {
+  return pushNotificationsService.isSupported() && pushPermission.value !== 'denied'
+})
+
 const cargarConfiguracion = () => {
   // Cargar configuración de filtro no leídas
   const savedSoloNoLeidas = localStorage.getItem('soloNoLeidas')
@@ -1753,6 +2006,9 @@ onMounted(async () => {
   }
   
   cargarConfiguracion()
+  
+  // Inicializar Push Notifications
+  await inicializarPushNotifications()
   
   // Cargar notificaciones inicial (sin detección de cambios)
   await cargarNotificaciones()
@@ -1797,6 +2053,21 @@ onBeforeUnmount(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Transición slide-fade para panel de push */
+.slide-fade-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 /* Clase de texto extra pequeño para mejor responsividad */

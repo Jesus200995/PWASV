@@ -260,6 +260,121 @@
                 </div>
               </div>
 
+              <!-- ========== OPCIONES DE ESTILO PROFESIONAL ========== -->
+              <div class="style-options-section">
+                <div class="style-section-header">
+                  <span class="style-title">✨ Personalización</span>
+                  <span class="style-subtitle">Opciones de estilo y push</span>
+                </div>
+                
+                <!-- Fila 1: Tipo y Prioridad -->
+                <div class="style-row">
+                  <!-- Tipo de notificación -->
+                  <div class="form-group-mini">
+                    <label>Tipo</label>
+                    <select v-model="formNotificacion.tipo" class="form-select-mini">
+                      <option v-for="tipo in tiposNotificacion" :key="tipo.value" :value="tipo.value">
+                        {{ tipo.label }}
+                      </option>
+                    </select>
+                  </div>
+                  
+                  <!-- Prioridad -->
+                  <div class="form-group-mini">
+                    <label>Prioridad</label>
+                    <div class="priority-buttons">
+                      <button
+                        v-for="prio in prioridadesNotificacion"
+                        :key="prio.value"
+                        type="button"
+                        class="priority-btn"
+                        :class="{ active: formNotificacion.prioridad === prio.value }"
+                        :style="{ '--priority-color': prio.color }"
+                        @click="formNotificacion.prioridad = prio.value"
+                        :title="prio.label"
+                      >
+                        {{ prio.label.charAt(0) }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fila 2: Icono y Color -->
+                <div class="style-row">
+                  <!-- Icono -->
+                  <div class="form-group-mini">
+                    <label>Icono</label>
+                    <div class="icon-selector">
+                      <button
+                        v-for="icono in iconosDisponibles"
+                        :key="icono.value"
+                        type="button"
+                        class="icon-btn"
+                        :class="{ active: formNotificacion.icono === icono.value }"
+                        @click="formNotificacion.icono = icono.value"
+                        :title="icono.label"
+                      >
+                        {{ icono.emoji }}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Color de acento -->
+                  <div class="form-group-mini">
+                    <label>Color</label>
+                    <div class="color-selector">
+                      <button
+                        v-for="color in coloresAcento"
+                        :key="color"
+                        type="button"
+                        class="color-btn"
+                        :class="{ active: formNotificacion.color_acento === color }"
+                        :style="{ backgroundColor: color }"
+                        @click="formNotificacion.color_acento = color"
+                      ></button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fila 3: Enviar Push -->
+                <div class="style-row push-row">
+                  <label class="push-toggle">
+                    <input type="checkbox" v-model="formNotificacion.enviar_push" />
+                    <span class="push-slider"></span>
+                    <span class="push-label">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                      </svg>
+                      Enviar Push Notification
+                    </span>
+                  </label>
+                  <span v-if="formNotificacion.enviar_push" class="push-status active">📲 Activo</span>
+                  <span v-else class="push-status inactive">🔕 Inactivo</span>
+                </div>
+
+                <!-- Preview de la notificación -->
+                <div class="notification-preview">
+                  <div class="preview-header">Vista previa</div>
+                  <div class="preview-card" :style="{ borderLeftColor: formNotificacion.color_acento }">
+                    <div class="preview-icon" :style="{ backgroundColor: formNotificacion.color_acento + '20' }">
+                      {{ iconosDisponibles.find(i => i.value === formNotificacion.icono)?.emoji || '🔔' }}
+                    </div>
+                    <div class="preview-content">
+                      <div class="preview-title">{{ formNotificacion.titulo || 'Título de la notificación' }}</div>
+                      <div class="preview-subtitle" v-if="formNotificacion.subtitulo">{{ formNotificacion.subtitulo }}</div>
+                      <div class="preview-meta">
+                        <span class="preview-type">{{ tiposNotificacion.find(t => t.value === formNotificacion.tipo)?.label }}</span>
+                        <span class="preview-priority" :style="{ color: prioridadesNotificacion.find(p => p.value === formNotificacion.prioridad)?.color }">
+                          {{ prioridadesNotificacion.find(p => p.value === formNotificacion.prioridad)?.label }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- ========== FIN OPCIONES DE ESTILO ========== -->
+
               <!-- Archivo adjunto -->
               <div class="form-group-compact">
                 <label for="archivo">Archivo adjunto</label>
@@ -960,8 +1075,54 @@ export default {
         descripcion: '',
         enlace_url: '',
         enviada_a_todos: true,
-        usuario_ids: []
+        usuario_ids: [],
+        // Nuevas opciones de estilo profesional
+        tipo: 'general',
+        prioridad: 'normal',
+        icono: 'bell',
+        color_acento: '#10b981',
+        enviar_push: true
       },
+      
+      // Opciones disponibles para el editor
+      tiposNotificacion: [
+        { value: 'general', label: '📢 General', description: 'Información general' },
+        { value: 'alerta', label: '⚠️ Alerta', description: 'Requiere atención' },
+        { value: 'urgente', label: '🚨 Urgente', description: 'Alta prioridad' },
+        { value: 'recordatorio', label: '📅 Recordatorio', description: 'No olvidar' },
+        { value: 'actualizacion', label: '🔄 Actualización', description: 'Cambios en el sistema' },
+        { value: 'celebracion', label: '🎉 Celebración', description: 'Buenas noticias' }
+      ],
+      prioridadesNotificacion: [
+        { value: 'low', label: 'Baja', color: '#6b7280' },
+        { value: 'normal', label: 'Normal', color: '#10b981' },
+        { value: 'high', label: 'Alta', color: '#f59e0b' },
+        { value: 'urgent', label: 'Urgente', color: '#ef4444' }
+      ],
+      iconosDisponibles: [
+        { value: 'bell', emoji: '🔔', label: 'Campana' },
+        { value: 'info', emoji: 'ℹ️', label: 'Info' },
+        { value: 'warning', emoji: '⚠️', label: 'Advertencia' },
+        { value: 'check', emoji: '✅', label: 'Completado' },
+        { value: 'star', emoji: '⭐', label: 'Destacado' },
+        { value: 'heart', emoji: '❤️', label: 'Importante' },
+        { value: 'calendar', emoji: '📅', label: 'Evento' },
+        { value: 'document', emoji: '📄', label: 'Documento' },
+        { value: 'update', emoji: '🔄', label: 'Actualización' },
+        { value: 'gift', emoji: '🎁', label: 'Regalo' }
+      ],
+      coloresAcento: [
+        '#10b981', // Verde esmeralda
+        '#3b82f6', // Azul
+        '#8b5cf6', // Violeta
+        '#f59e0b', // Ámbar
+        '#ef4444', // Rojo
+        '#ec4899', // Rosa
+        '#06b6d4', // Cyan
+        '#84cc16', // Lima
+        '#6366f1', // Indigo
+        '#f97316'  // Naranja
+      ],
       
       // Modal editar notificación
       mostrarModalEditar: false,
@@ -1246,7 +1407,12 @@ export default {
         descripcion: '',
         enlace_url: '',
         enviada_a_todos: true,
-        usuario_ids: []
+        usuario_ids: [],
+        tipo: 'general',
+        prioridad: 'normal',
+        icono: 'bell',
+        color_acento: '#10b981',
+        enviar_push: true
       }
       this.archivoSeleccionado = null
       if (this.$refs.archivoInput) {
@@ -4081,5 +4247,377 @@ export default {
   width: 40px;
   height: 40px;
   margin: 0 auto 16px;
+}
+
+/* ========== ESTILOS PARA OPCIONES DE PERSONALIZACIÓN ========== */
+
+.style-options-section {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.style-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(16, 185, 129, 0.3);
+}
+
+.style-title {
+  font-weight: 600;
+  color: #065f46;
+  font-size: 14px;
+}
+
+.style-subtitle {
+  font-size: 11px;
+  color: #059669;
+  opacity: 0.8;
+}
+
+.style-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.form-group-mini {
+  flex: 1;
+  min-width: 140px;
+}
+
+.form-group-mini label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-select-mini {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  font-size: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-select-mini:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+}
+
+/* Botones de Prioridad */
+.priority-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.priority-btn {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+}
+
+.priority-btn:hover {
+  border-color: var(--priority-color, #10b981);
+  color: var(--priority-color, #10b981);
+  transform: translateY(-1px);
+}
+
+.priority-btn.active {
+  background: var(--priority-color, #10b981);
+  border-color: var(--priority-color, #10b981);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Selector de Iconos */
+.icon-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  border-color: #10b981;
+  transform: scale(1.1);
+}
+
+.icon-btn.active {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Selector de Colores */
+.color-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.color-btn {
+  width: 28px;
+  height: 28px;
+  border: 3px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.color-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.color-btn.active {
+  border-color: #1f2937;
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Toggle de Push */
+.push-row {
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px dashed rgba(16, 185, 129, 0.2);
+  margin-top: 8px;
+}
+
+.push-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.push-toggle input {
+  display: none;
+}
+
+.push-slider {
+  width: 44px;
+  height: 24px;
+  background: #d1d5db;
+  border-radius: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.push-slider::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.push-toggle input:checked + .push-slider {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.push-toggle input:checked + .push-slider::before {
+  transform: translateX(20px);
+}
+
+.push-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.push-label svg {
+  color: #6b7280;
+}
+
+.push-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.push-status.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+.push-status.inactive {
+  background: rgba(107, 114, 128, 0.15);
+  color: #6b7280;
+}
+
+/* Preview de Notificación */
+.notification-preview {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(16, 185, 129, 0.3);
+}
+
+.preview-header {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b7280;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.preview-card {
+  background: white;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  border-left: 4px solid #10b981;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.preview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.preview-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.preview-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-title {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.preview-type {
+  font-size: 10px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.preview-priority {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Responsive para opciones de estilo */
+@media (max-width: 480px) {
+  .style-options-section {
+    padding: 12px;
+  }
+  
+  .style-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-group-mini {
+    min-width: 100%;
+  }
+  
+  .icon-selector {
+    justify-content: center;
+  }
+  
+  .color-selector {
+    justify-content: center;
+  }
+  
+  .push-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .preview-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .preview-icon {
+    margin: 0 auto;
+  }
+  
+  .preview-meta {
+    justify-content: center;
+  }
 }
 </style>

@@ -154,7 +154,12 @@
 
             <!-- Estado vacío -->
             <div v-if="notificaciones.length === 0" class="empty-state">
-              <div class="empty-icon">📢</div>
+              <div class="empty-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+              </div>
               <h3>No hay notificaciones</h3>
               <p>Crea tu primera notificación para comunicarte con los usuarios del sistema.</p>
               <button class="btn-primary" @click="mostrarModalCrear = true">
@@ -263,7 +268,10 @@
               <!-- ========== OPCIONES DE ESTILO PROFESIONAL ========== -->
               <div class="style-options-section">
                 <div class="style-section-header">
-                  <span class="style-title">✨ Personalización</span>
+                  <svg class="style-header-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <span class="style-title">Personalización</span>
                   <span class="style-subtitle">Opciones de estilo y push</span>
                 </div>
                 
@@ -309,12 +317,12 @@
                         v-for="icono in iconosDisponibles"
                         :key="icono.value"
                         type="button"
-                        class="icon-btn"
+                        class="icon-btn svg-icon-btn"
                         :class="{ active: formNotificacion.icono === icono.value }"
                         @click="formNotificacion.icono = icono.value"
                         :title="icono.label"
                       >
-                        {{ icono.emoji }}
+                        <component :is="getIconComponent(icono.icon)" />
                       </button>
                     </div>
                   </div>
@@ -349,16 +357,28 @@
                       Enviar Push Notification
                     </span>
                   </label>
-                  <span v-if="formNotificacion.enviar_push" class="push-status active">📲 Activo</span>
-                  <span v-else class="push-status inactive">🔕 Inactivo</span>
+                  <span v-if="formNotificacion.enviar_push" class="push-status active">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+                    Activo
+                  </span>
+                  <span v-else class="push-status inactive">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+                    Inactivo
+                  </span>
                 </div>
 
                 <!-- Preview de la notificación -->
                 <div class="notification-preview">
-                  <div class="preview-header">Vista previa</div>
+                  <div class="preview-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Vista previa
+                  </div>
                   <div class="preview-card" :style="{ borderLeftColor: formNotificacion.color_acento }">
-                    <div class="preview-icon" :style="{ backgroundColor: formNotificacion.color_acento + '20' }">
-                      {{ iconosDisponibles.find(i => i.value === formNotificacion.icono)?.emoji || '🔔' }}
+                    <div class="preview-icon" :style="{ backgroundColor: formNotificacion.color_acento + '20', color: formNotificacion.color_acento }">
+                      <component :is="getIconComponent(iconosDisponibles.find(i => i.value === formNotificacion.icono)?.icon || 'bell')" />
                     </div>
                     <div class="preview-content">
                       <div class="preview-title">{{ formNotificacion.titulo || 'Título de la notificación' }}</div>
@@ -431,7 +451,7 @@
                   v-model="busquedaUsuarios"
                   type="text"
                   class="form-input-compact search-users-column"
-                  placeholder="🔍 Buscar por nombre, correo o CURP..."
+                  placeholder="Buscar por nombre, correo o CURP..."
                   autocomplete="off"
                 />
               </div>
@@ -460,11 +480,11 @@
               </div>
               
               <div v-show="busquedaUsuarios && usuariosFiltrados.length === 0" class="no-users-found-column">
-                ❌ No se encontraron usuarios que coincidan con "{{ busquedaUsuarios }}"
+                No se encontraron usuarios que coincidan con "{{ busquedaUsuarios }}"
               </div>
               
               <div v-show="!busquedaUsuarios && usuarios.length === 0" class="no-users-loaded-column">
-                📝 No hay usuarios disponibles
+                No hay usuarios disponibles
               </div>
             </div>
           </div>
@@ -631,7 +651,7 @@
                   v-model="busquedaUsuariosEdicion"
                   type="text"
                   class="form-input-compact search-users-column"
-                  placeholder="🔍 Buscar por nombre, correo o CURP..."
+                  placeholder="Buscar por nombre, correo o CURP..."
                   autocomplete="off"
                 />
               </div>
@@ -660,11 +680,11 @@
               </div>
               
               <div v-show="busquedaUsuariosEdicion && usuariosFiltradosEdicion.length === 0" class="no-users-found-column">
-                ❌ No se encontraron usuarios que coincidan con "{{ busquedaUsuariosEdicion }}"
+                No se encontraron usuarios que coincidan con "{{ busquedaUsuariosEdicion }}"
               </div>
               
               <div v-show="!busquedaUsuariosEdicion && usuarios.length === 0" class="no-users-loaded-column">
-                📝 No hay usuarios disponibles
+                No hay usuarios disponibles
               </div>
             </div>
           </div>
@@ -1037,7 +1057,15 @@
     <div v-if="toast.show" class="toast" :class="toast.type">
       <div class="toast-content">
         <div class="toast-icon">
-          {{ toast.type === 'success' ? '✅' : '❌' }}
+          <svg v-if="toast.type === 'success'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
         </div>
         <div class="toast-message">{{ toast.message }}</div>
       </div>
@@ -1084,14 +1112,14 @@ export default {
         enviar_push: true
       },
       
-      // Opciones disponibles para el editor
+      // Opciones disponibles para el editor - Diseño moderno sin emojis
       tiposNotificacion: [
-        { value: 'general', label: '📢 General', description: 'Información general' },
-        { value: 'alerta', label: '⚠️ Alerta', description: 'Requiere atención' },
-        { value: 'urgente', label: '🚨 Urgente', description: 'Alta prioridad' },
-        { value: 'recordatorio', label: '📅 Recordatorio', description: 'No olvidar' },
-        { value: 'actualizacion', label: '🔄 Actualización', description: 'Cambios en el sistema' },
-        { value: 'celebracion', label: '🎉 Celebración', description: 'Buenas noticias' }
+        { value: 'general', label: 'General', description: 'Información general', icon: 'megaphone' },
+        { value: 'alerta', label: 'Alerta', description: 'Requiere atención', icon: 'exclamation' },
+        { value: 'urgente', label: 'Urgente', description: 'Alta prioridad', icon: 'fire' },
+        { value: 'recordatorio', label: 'Recordatorio', description: 'No olvidar', icon: 'clock' },
+        { value: 'actualizacion', label: 'Actualización', description: 'Cambios en el sistema', icon: 'refresh' },
+        { value: 'celebracion', label: 'Celebración', description: 'Buenas noticias', icon: 'star' }
       ],
       prioridadesNotificacion: [
         { value: 'low', label: 'Baja', color: '#6b7280' },
@@ -1100,16 +1128,16 @@ export default {
         { value: 'urgent', label: 'Urgente', color: '#ef4444' }
       ],
       iconosDisponibles: [
-        { value: 'bell', emoji: '🔔', label: 'Campana' },
-        { value: 'info', emoji: 'ℹ️', label: 'Info' },
-        { value: 'warning', emoji: '⚠️', label: 'Advertencia' },
-        { value: 'check', emoji: '✅', label: 'Completado' },
-        { value: 'star', emoji: '⭐', label: 'Destacado' },
-        { value: 'heart', emoji: '❤️', label: 'Importante' },
-        { value: 'calendar', emoji: '📅', label: 'Evento' },
-        { value: 'document', emoji: '📄', label: 'Documento' },
-        { value: 'update', emoji: '🔄', label: 'Actualización' },
-        { value: 'gift', emoji: '🎁', label: 'Regalo' }
+        { value: 'bell', icon: 'bell', label: 'Campana' },
+        { value: 'info', icon: 'info', label: 'Información' },
+        { value: 'warning', icon: 'warning', label: 'Advertencia' },
+        { value: 'check', icon: 'check', label: 'Completado' },
+        { value: 'star', icon: 'star', label: 'Destacado' },
+        { value: 'heart', icon: 'heart', label: 'Importante' },
+        { value: 'calendar', icon: 'calendar', label: 'Evento' },
+        { value: 'document', icon: 'document', label: 'Documento' },
+        { value: 'refresh', icon: 'refresh', label: 'Actualización' },
+        { value: 'gift', icon: 'gift', label: 'Regalo' }
       ],
       coloresAcento: [
         '#10b981', // Verde esmeralda
@@ -1246,6 +1274,29 @@ export default {
   },
   
   methods: {
+    // Método para generar iconos SVG dinámicamente
+    getIconComponent(iconName) {
+      const icons = {
+        bell: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' },
+        info: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' },
+        warning: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
+        check: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' },
+        star: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' },
+        heart: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' },
+        calendar: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' },
+        document: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' },
+        refresh: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' },
+        gift: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>' },
+        megaphone: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>' },
+        exclamation: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' },
+        fire: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>' },
+        clock: { template: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' }
+      }
+      
+      const icon = icons[iconName] || icons.bell
+      return { template: icon.template }
+    },
+
     configurarEventosConexion() {
       window.addEventListener('online', () => {
         this.isOnline = true
@@ -4261,11 +4312,16 @@ export default {
 
 .style-section-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
   margin-bottom: 14px;
   padding-bottom: 10px;
   border-bottom: 1px dashed rgba(16, 185, 129, 0.3);
+}
+
+.style-header-icon {
+  color: #10b981;
+  flex-shrink: 0;
 }
 
 .style-title {
@@ -4278,6 +4334,7 @@ export default {
   font-size: 11px;
   color: #059669;
   opacity: 0.8;
+  margin-left: auto;
 }
 
 .style-row {
@@ -4370,16 +4427,29 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #6b7280;
+}
+
+.icon-btn.svg-icon-btn {
+  padding: 6px;
+}
+
+.icon-btn.svg-icon-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .icon-btn:hover {
   border-color: #10b981;
+  color: #10b981;
   transform: scale(1.1);
 }
 
 .icon-btn.active {
   border-color: #10b981;
   background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  color: #10b981;
+}
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
@@ -4505,6 +4575,13 @@ export default {
   color: #6b7280;
   margin-bottom: 10px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.preview-header svg {
+  color: #9ca3af;
 }
 
 .preview-card {
@@ -4532,6 +4609,11 @@ export default {
   justify-content: center;
   font-size: 20px;
   flex-shrink: 0;
+}
+
+.preview-icon svg {
+  width: 22px;
+  height: 22px;
 }
 
 .preview-content {

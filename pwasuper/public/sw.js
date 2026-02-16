@@ -1,11 +1,11 @@
 /**
  * Service Worker para la PWA
- * Maneja cache, notificaciones push, actualizaciones obligatorias y sincronización en segundo plano
- * Versión: 2.0.0 - Sistema de Push Notifications Profesional
+ * Maneja cache, notificaciones, actualizaciones obligatorias y sincronización en segundo plano
  */
 
 // Incrementar la versión del cache cuando hay cambios importantes
-const CACHE_NAME = 'pwa-super-v2.0.0';
+// Esto forzará a que se muestre la notificación de actualización
+const CACHE_NAME = 'pwa-super-v1.0.2';
 const OFFLINE_URL = '/offline.html';
 
 // Archivos a cachear para funcionamiento offline
@@ -14,21 +14,12 @@ const urlsToCache = [
   '/src/main.js',
   '/src/style.css',
   '/src/assets/main.css',
-  '/pwa-192x192.png',
-  '/pwa-512x512.png',
   // Agregar más archivos críticos según sea necesario
 ];
 
-// Sonidos para notificaciones (si están disponibles)
-const NOTIFICATION_SOUNDS = {
-  default: '/sounds/notification.mp3',
-  urgent: '/sounds/urgent.mp3',
-  silent: null
-};
-
 // Evento de instalación
 self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker instalándose... v2.0.0');
+  console.log('🔧 Service Worker instalándose...');
   
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -148,169 +139,58 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// Evento de notificación push - Sistema Profesional
+// Evento de notificación push
 self.addEventListener('push', (event) => {
-  console.log('🔔 Push Notification recibida');
+  console.log('🔔 Notificación push recibida:', event);
   
-  let notificationData = {
-    title: 'Nueva Notificación',
-    body: 'Tienes una nueva actualización',
+  const options = {
+    body: event.data ? event.data.text() : 'Tienes nuevas actualizaciones disponibles',
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
-    tag: 'general',
-    data: { url: '/notificaciones' }
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: '1'
+    },
+    actions: [
+      {
+        action: 'explore',
+        title: 'Ver',
+        icon: '/pwa-192x192.png'
+      },
+      {
+        action: 'close',
+        title: 'Cerrar',
+        icon: '/pwa-192x192.png'
+      }
+    ]
   };
   
-  // Intentar parsear los datos del push
-  if (event.data) {
-    try {
-      const pushData = event.data.json();
-      console.log('📦 Datos del push:', pushData);
-      
-      notificationData = {
-        title: pushData.title || notificationData.title,
-        body: pushData.body || pushData.message || notificationData.body,
-        icon: pushData.icon || notificationData.icon,
-        badge: pushData.badge || notificationData.badge,
-        image: pushData.image || null,
-        tag: pushData.tag || `notif-${Date.now()}`,
-        data: {
-          url: pushData.data?.url || '/notificaciones',
-          notificacion_id: pushData.data?.notificacion_id,
-          tipo: pushData.data?.tipo || 'general',
-          prioridad: pushData.data?.prioridad || 'normal',
-          colorAccent: pushData.data?.colorAccent,
-          timestamp: Date.now()
-        },
-        requireInteraction: pushData.requireInteraction || false,
-        renotify: pushData.renotify !== false,
-        silent: pushData.silent || false,
-        vibrate: pushData.vibrate || [100, 50, 100],
-        actions: pushData.actions || [
-          { action: 'open', title: '📖 Ver', icon: '/icons/view.png' },
-          { action: 'dismiss', title: '✕ Cerrar', icon: '/icons/close.png' }
-        ]
-      };
-      
-      // Configurar vibración según prioridad
-      if (notificationData.data.prioridad === 'urgent') {
-        notificationData.vibrate = [200, 100, 200, 100, 200];
-        notificationData.requireInteraction = true;
-      } else if (notificationData.data.prioridad === 'high') {
-        notificationData.vibrate = [150, 75, 150];
-      }
-      
-    } catch (e) {
-      console.warn('⚠️ Error parseando datos del push:', e);
-      notificationData.body = event.data.text();
-    }
-  }
-  
-  // Mostrar la notificación
-  const showNotificationPromise = self.registration.showNotification(
-    notificationData.title,
-    {
-      body: notificationData.body,
-      icon: notificationData.icon,
-      badge: notificationData.badge,
-      image: notificationData.image,
-      tag: notificationData.tag,
-      data: notificationData.data,
-      requireInteraction: notificationData.requireInteraction,
-      renotify: notificationData.renotify,
-      silent: notificationData.silent,
-      vibrate: notificationData.vibrate,
-      actions: notificationData.actions,
-      // Timestamp para ordenar
-      timestamp: Date.now()
-    }
-  );
-  
-  // Notificar a los clientes abiertos sobre la nueva notificación
-  const notifyClientsPromise = self.clients.matchAll({ 
-    type: 'window', 
-    includeUncontrolled: true 
-  }).then(clients => {
-    clients.forEach(client => {
-      client.postMessage({
-        type: 'PUSH_RECEIVED',
-        notification: notificationData
-      });
-    });
-  });
-  
   event.waitUntil(
-    Promise.all([showNotificationPromise, notifyClientsPromise])
+    self.registration.showNotification('PWA Super', options)
   );
 });
 
-// Evento de click en notificación - Manejo mejorado
+// Evento de click en notificación
 self.addEventListener('notificationclick', (event) => {
-  console.log('🖱️ Click en notificación:', event.notification.tag);
+  console.log('🔔 Click en notificación:', event);
   
-  const notification = event.notification;
-  const action = event.action;
-  const notificationData = notification.data || {};
+  event.notification.close();
   
-  // Cerrar la notificación
-  notification.close();
-  
-  // Determinar la URL a abrir
-  let urlToOpen = notificationData.url || '/notificaciones';
-  
-  // Si hay notificacion_id, añadirlo como parámetro
-  if (notificationData.notificacion_id) {
-    urlToOpen = `/notificaciones?id=${notificationData.notificacion_id}`;
+  if (event.action === 'explore') {
+    // Abrir la aplicación
+    event.waitUntil(
+      clients.openWindow('/')
+    );
+  } else if (event.action === 'close') {
+    // Solo cerrar la notificación
+    event.notification.close();
+  } else {
+    // Click general en la notificación
+    event.waitUntil(
+      clients.openWindow('/')
+    );
   }
-  
-  // Manejar acción específica
-  if (action === 'dismiss') {
-    console.log('👋 Notificación descartada por el usuario');
-    // Solo cerrar, no abrir nada
-    return;
-  }
-  
-  // Para acción 'open' o click general - Abrir/enfocar la app
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then(clientList => {
-        // Buscar si ya hay una ventana abierta
-        for (const client of clientList) {
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            // Navegar a la URL de la notificación
-            client.postMessage({
-              type: 'NAVIGATE_TO',
-              url: urlToOpen,
-              notificacion_id: notificationData.notificacion_id
-            });
-            return client.focus();
-          }
-        }
-        
-        // Si no hay ventana abierta, abrir una nueva
-        if (self.clients.openWindow) {
-          return self.clients.openWindow(urlToOpen);
-        }
-      })
-  );
-});
-
-// Evento de cierre de notificación (sin acción específica)
-self.addEventListener('notificationclose', (event) => {
-  console.log('🔕 Notificación cerrada:', event.notification.tag);
-  
-  // Opcional: Registrar que la notificación fue cerrada sin acción
-  const notificationData = event.notification.data || {};
-  
-  self.clients.matchAll({ type: 'window' }).then(clients => {
-    clients.forEach(client => {
-      client.postMessage({
-        type: 'NOTIFICATION_CLOSED',
-        notificacion_id: notificationData.notificacion_id,
-        dismissed: true
-      });
-    });
-  });
 });
 
 // Evento de mensaje (comunicación con la aplicación principal)

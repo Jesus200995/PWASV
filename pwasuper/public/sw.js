@@ -165,42 +165,41 @@ self.addEventListener('sync', (event) => {
 /**
  * Mapeo de tipos de notificación a configuraciones visuales
  * Similar a cómo Mercado Libre diferencia entre tipos de notificación
- * Nota: Todos los iconos apuntan al icono principal ya que los personalizados no están creados
  */
 const NOTIFICATION_TYPES = {
   info: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/icons/info-notification.png',
     color: '#3B82F6', // Azul
     vibrate: [100, 50, 100],
     sound: 'default'
   },
   success: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/icons/success-notification.png',
     color: '#10B981', // Verde
     vibrate: [100, 50, 100],
     sound: 'default'
   },
   warning: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/icons/warning-notification.png',
     color: '#F59E0B', // Amarillo
     vibrate: [150, 75, 150],
     sound: 'default'
   },
   urgent: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/icons/urgent-notification.png',
     color: '#EF4444', // Rojo
     vibrate: [200, 100, 200, 100, 200],
     sound: 'urgent',
     requireInteraction: true
   },
   message: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/icons/message-notification.png',
     color: '#8B5CF6', // Púrpura
     vibrate: [100, 50, 100],
     sound: 'default'
   },
   reminder: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/icons/reminder-notification.png',
     color: '#EC4899', // Rosa
     vibrate: [150, 75, 150, 75, 150],
     sound: 'default'
@@ -230,16 +229,16 @@ function buildRichNotification(pushData) {
     body = `${pushData.subtitle}\n${body}`;
   }
   
-  // Determinar el icono a usar - SIEMPRE usar icono principal como fallback
-  let icon = APP_CONFIG.defaultIcon; // Empezar con el default seguro
+  // Determinar el icono a usar
+  let icon = pushData.icon || typeConfig.icon || APP_CONFIG.defaultIcon;
   
-  // Solo usar icono personalizado si es una URL válida
-  if (pushData.icon && (pushData.icon.startsWith('/pwa') || pushData.icon.startsWith('http'))) {
-    icon = pushData.icon;
+  // Si el icono es un nombre de emoji/icono, usar el icono del tipo
+  if (icon && !icon.startsWith('/') && !icon.startsWith('http')) {
+    icon = typeConfig.icon || APP_CONFIG.defaultIcon;
   }
   
   // Badge (icono pequeño en la barra de estado - Android)
-  const badge = APP_CONFIG.badge || APP_CONFIG.defaultIcon;
+  const badge = pushData.badge || APP_CONFIG.badge || APP_CONFIG.defaultIcon;
   
   // Imagen grande (Big Picture style - como Mercado Libre)
   const image = pushData.image || null;

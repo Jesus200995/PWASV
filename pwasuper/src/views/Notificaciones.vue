@@ -1828,9 +1828,9 @@ const inicializarPushNotifications = async () => {
     
     // Verificar si ya está suscrito
     const suscripcionActiva = await pushNotificationsService.checkSubscription()
-    pushEnabled.value = suscripcionActiva.subscribed || false
+    pushEnabled.value = suscripcionActiva
     
-    if (suscripcionActiva.subscribed) {
+    if (suscripcionActiva) {
       console.log('✅ Push Notifications ya están activadas')
     }
     

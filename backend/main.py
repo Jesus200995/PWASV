@@ -6573,6 +6573,61 @@ async def enviar_push_a_destinatarios(notificacion_id: int, titulo: str, subtitu
         conn.rollback()
         return {"success": False, "error": str(e)}
 
+@app.get("/push/diagnostico")
+async def diagnostico_push():
+    """
+    Endpoint de diagnóstico del sistema de Push Notifications
+    Útil para verificar que todo está configurado correctamente
+    """
+    try:
+        diagnostico = {
+            "push_enabled": PUSH_NOTIFICATIONS_ENABLED,
+            "vapid_key_configured": len(VAPID_PUBLIC_KEY) > 20 if VAPID_PUBLIC_KEY else False,
+            "vapid_public_key_preview": VAPID_PUBLIC_KEY[:30] + "..." if VAPID_PUBLIC_KEY else None,
+            "database_connected": conn is not None,
+            "suscripciones_activas": 0,
+            "tabla_push_subscriptions_existe": False
+        }
+        
+        if conn:
+            try:
+                # Verificar si existe la tabla
+                cursor.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables 
+                        WHERE table_name = 'push_subscriptions'
+                    )
+                """)
+                diagnostico["tabla_push_subscriptions_existe"] = cursor.fetchone()[0]
+                
+                if diagnostico["tabla_push_subscriptions_existe"]:
+                    # Contar suscripciones activas
+                    cursor.execute("SELECT COUNT(*) FROM push_subscriptions WHERE activa = TRUE")
+                    diagnostico["suscripciones_activas"] = cursor.fetchone()[0]
+                    
+                    # Obtener últimas suscripciones
+                    cursor.execute("""
+                        SELECT usuario_id, device_type, created_at 
+                        FROM push_subscriptions 
+                        WHERE activa = TRUE 
+                        ORDER BY created_at DESC 
+                        LIMIT 5
+                    """)
+                    ultimas = cursor.fetchall()
+                    diagnostico["ultimas_suscripciones"] = [
+                        {"usuario_id": r[0], "device": r[1], "fecha": r[2].isoformat() if r[2] else None}
+                        for r in ultimas
+                    ]
+            except Exception as db_error:
+                diagnostico["database_error"] = str(db_error)
+        
+        diagnostico["estado"] = "✅ SISTEMA LISTO" if diagnostico["push_enabled"] and diagnostico["tabla_push_subscriptions_existe"] else "⚠️ REQUIERE CONFIGURACIÓN"
+        
+        return diagnostico
+        
+    except Exception as e:
+        return {"error": str(e), "estado": "❌ ERROR"}
+
 # ==================== FIN ENDPOINTS DE PUSH NOTIFICATIONS ====================
 
 # ==================== ENDPOINTS PARA GESTIÓN DE ROLES Y PERMISOS ====================

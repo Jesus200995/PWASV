@@ -17,12 +17,12 @@ except ImportError:
     WEBPUSH_AVAILABLE = False
     print("⚠️ pywebpush no está instalado. Ejecuta: pip install pywebpush py-vapid")
 
-# Configuración VAPID - IMPORTANTE: Generar claves únicas para producción
-# Puedes generar nuevas claves con: python -c "from py_vapid import Vapid; v = Vapid(); v.generate_keys(); print('PUBLIC:', v.public_key_urlsafe_base64); print('PRIVATE:', v.private_key_urlsafe_base64)"
+# Configuración VAPID - IMPORTANTE: Estas son las claves de producción
+# Generadas con: python generate_vapid_keys.py
 
-# Claves VAPID por defecto (reemplazar con las generadas para producción)
-VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY', 'BHdnfVJMpZTJu4XxLSQKIKyLXGrQQFHYzYDwNmCBfQVAj9j7WRwKRKvjwN-7qM8_kHTp6F2NVpQWVZ1BcLfCZnc')
-VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY', 'dGVzdC1wcml2YXRlLWtleS1mb3ItZGV2ZWxvcG1lbnQtb25seQ')
+# Claves VAPID para Web Push Notifications
+VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY', 'BD-0z4EAUumFxy-j6VQZS5udEjQEyYveFrxr_vwSctewA4Ktayin9zOWNy-GWEBon40sM4D2IEHC4sO8EbChBzI')
+VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY', 'OzDa4UD4CaY87eXfEnC4m2jv2Dtgd0pOav6sG9HrjPs')
 VAPID_CLAIMS = {
     "sub": "mailto:admin@sembrandodatos.com"
 }

@@ -1160,6 +1160,8 @@ import syncService from '../services/syncService.js';
 import geoLocationService from '../services/geoLocationService.js';
 import { obtenerUbicacionSimple } from '../services/geoLocationSimple.js';
 import { compressImage, blobToFile } from '../utils/imageCompressor.js';
+// Importar servicio de Push Notifications
+import { pushNotificationsService } from '../services/pushNotificationsService.js';
 
 // Referencias y estado para asistencia
 const modoAsistencia = ref(false);
@@ -2951,6 +2953,28 @@ onMounted(async () => {
     router.push("/login");
     return;
   }
+  
+  // ═══════════════════════════════════════════════════════════════════
+  // SUSCRIPCIÓN AUTOMÁTICA A PUSH NOTIFICATIONS
+  // ═══════════════════════════════════════════════════════════════════
+  try {
+    const pushInit = await pushNotificationsService.initialize()
+    if (pushInit.success) {
+      const subCheck = await pushNotificationsService.checkSubscription()
+      if (!subCheck.subscribed) {
+        console.log('🔔 Suscribiendo usuario a push notifications...')
+        const subResult = await pushNotificationsService.subscribe(user.value.id)
+        if (subResult.success) {
+          console.log('✅ Push notifications activadas')
+        }
+      } else {
+        console.log('✅ Usuario ya suscrito a push notifications')
+      }
+    }
+  } catch (pushError) {
+    console.warn('⚠️ Error con push notifications:', pushError)
+  }
+  // ═══════════════════════════════════════════════════════════════════
   
   // *** DEBUGGING: Hacer función disponible globalmente ***
   if (typeof window !== 'undefined') {

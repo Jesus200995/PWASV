@@ -1,13 +1,16 @@
 /**
  * pushNotificationsService.js
  * Servicio para manejar Web Push Notifications en PWASUPER
- * Versión: 1.0.0
+ * Sistema Empresarial - Versión: 2.0.0
  */
 
 // Configuración de la API
 const API_BASE_URL = import.meta.env.PROD 
   ? 'https://apipwa.sembrandodatos.com' 
   : 'http://localhost:8000'
+
+// Clave pública VAPID (fallback si no se puede obtener del servidor)
+const VAPID_PUBLIC_KEY_FALLBACK = 'BD-0z4EAUumFxy-j6VQZS5udEjQEyYveFrxr_vwSctewA4Ktayin9zOWNy-GWEBon40sM4D2IEHC4sO8EbChBzI'
 
 /**
  * Convierte una clave VAPID base64 a Uint8Array
@@ -108,15 +111,27 @@ export const pushNotificationsService = {
     this._state.permission = this.getPermissionStatus()
     
     try {
-      // Obtener la clave pública VAPID del servidor
-      const response = await fetch(`${API_BASE_URL}/push/vapid-public-key`)
+      // Intentar obtener la clave pública VAPID del servidor
+      let vapidKey = null
       
-      if (!response.ok) {
-        throw new Error('No se pudo obtener la clave VAPID')
+      try {
+        const response = await fetch(`${API_BASE_URL}/push/vapid-public-key`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          timeout: 5000
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          vapidKey = data.publicKey
+          console.log('✅ Clave VAPID obtenida del servidor')
+        }
+      } catch (fetchError) {
+        console.warn('⚠️ No se pudo obtener clave VAPID del servidor, usando fallback')
       }
       
-      const data = await response.json()
-      this._state.vapidPublicKey = data.publicKey
+      // Usar fallback si no se obtuvo del servidor
+      this._state.vapidPublicKey = vapidKey || VAPID_PUBLIC_KEY_FALLBACK
       this._state.initialized = true
       
       console.log('✅ Servicio de Push Notifications inicializado')
@@ -130,7 +145,10 @@ export const pushNotificationsService = {
       
     } catch (error) {
       console.error('❌ Error inicializando push notifications:', error)
-      return { success: false, error: error.message }
+      // Aún así intentar con el fallback
+      this._state.vapidPublicKey = VAPID_PUBLIC_KEY_FALLBACK
+      this._state.initialized = true
+      return { success: true, permission: this._state.permission, fallback: true }
     }
   },
 

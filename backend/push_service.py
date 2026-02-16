@@ -1,13 +1,11 @@
 # push_service.py
 # Servicio de Web Push Notifications para PWASUPER
-# Sistema Empresarial - Estilo Mercado Libre
 # Requiere: pip install pywebpush py-vapid
 
 import json
 import os
 from typing import List, Optional, Dict, Any
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import dataclass
 
 # Intentar importar pywebpush - si no está instalado, las funciones fallarán gracefully
 try:
@@ -25,55 +23,6 @@ VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY', 'BHdnfVJMpZTJu4XxLSQKIKyLX
 VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY', 'dGVzdC1wcml2YXRlLWtleS1mb3ItZGV2ZWxvcG1lbnQtb25seQ')
 VAPID_CLAIMS = {
     "sub": "mailto:admin@sembrandodatos.com"
-}
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# CONFIGURACIÓN DE TIPOS DE NOTIFICACIÓN - ESTILO EMPRESARIAL
-# ═══════════════════════════════════════════════════════════════════════════════
-
-NOTIFICATION_TYPES = {
-    "info": {
-        "icon": "/icons/info-notification.png",
-        "badge": "/badge-72x72.png",
-        "color": "#3B82F6",
-        "emoji": "ℹ️"
-    },
-    "success": {
-        "icon": "/icons/success-notification.png", 
-        "badge": "/badge-72x72.png",
-        "color": "#10B981",
-        "emoji": "✅"
-    },
-    "warning": {
-        "icon": "/icons/warning-notification.png",
-        "badge": "/badge-72x72.png", 
-        "color": "#F59E0B",
-        "emoji": "⚠️"
-    },
-    "urgent": {
-        "icon": "/icons/urgent-notification.png",
-        "badge": "/badge-72x72.png",
-        "color": "#EF4444",
-        "emoji": "🚨"
-    },
-    "message": {
-        "icon": "/icons/message-notification.png",
-        "badge": "/badge-72x72.png",
-        "color": "#8B5CF6",
-        "emoji": "💬"
-    },
-    "reminder": {
-        "icon": "/icons/reminder-notification.png",
-        "badge": "/badge-72x72.png",
-        "color": "#EC4899",
-        "emoji": "🔔"
-    },
-    "general": {
-        "icon": "/pwa-192x192.png",
-        "badge": "/badge-72x72.png",
-        "color": "#10B981",
-        "emoji": "📢"
-    }
 }
 
 @dataclass
@@ -95,152 +44,58 @@ class PushSubscription:
 
 @dataclass
 class PushNotification:
-    """
-    Modelo para una notificación push empresarial
-    Similar a las notificaciones de Mercado Libre, Amazon, etc.
-    """
+    """Modelo para una notificación push"""
     titulo: str
     mensaje: str
-    # Tipo determina el estilo visual
-    tipo: str = "general"  # info, success, warning, urgent, message, reminder, general
-    # Prioridad determina comportamiento
-    prioridad: str = "normal"  # baja, normal, alta, urgent
-    # Personalización visual
-    icono: str = None  # Si es None, se usa el del tipo
-    badge: str = None
-    imagen: str = None  # Imagen grande (Big Picture style)
-    color_acento: str = None  # Si es None, se usa el del tipo
-    # Navegación
-    url_destino: str = "/notificaciones"
-    # Identificación
-    notificacion_id: int = None
+    icono: str = "/pwa-192x192.png"
+    badge: str = "/pwa-192x192.png"
+    url_destino: str = "/"
     tag: str = None
-    # Contenido adicional
-    subtitulo: str = None  # Línea secundaria
-    # Acciones personalizadas
+    notificacion_id: int = None
+    tipo: str = "general"
+    prioridad: str = "normal"
+    color_acento: str = None
+    imagen: str = None
     acciones: List[Dict] = None
-    # Comportamiento
-    silenciosa: bool = False
-    requiere_interaccion: bool = None  # Si es None, depende de prioridad
-    # Datos extra para la app
-    extra: Dict = None
     
     def to_payload(self) -> str:
-        """
-        Convertir a JSON payload empresarial para enviar
-        Formato compatible con el Service Worker v3.0.0
-        """
-        # Obtener configuración del tipo
-        type_config = NOTIFICATION_TYPES.get(self.tipo, NOTIFICATION_TYPES["general"])
-        
-        # Determinar icono (personalizado > tipo > default)
-        icono = self.icono or type_config["icon"]
-        
-        # Determinar badge
-        badge = self.badge or type_config["badge"]
-        
-        # Determinar color de acento
-        color = self.color_acento or type_config["color"]
-        
-        # Determinar comportamiento según prioridad
-        prioridad_map = {
-            "baja": "low",
-            "normal": "normal", 
-            "alta": "high",
-            "urgent": "urgent",
-            "media": "high"
-        }
-        prioridad_normalizada = prioridad_map.get(self.prioridad, self.prioridad)
-        
-        # Vibración según prioridad
-        vibration_patterns = {
-            "low": [50, 25, 50],
-            "normal": [100, 50, 100],
-            "high": [150, 75, 150],
-            "urgent": [200, 100, 200, 100, 200]
-        }
-        vibrate = vibration_patterns.get(prioridad_normalizada, [100, 50, 100])
-        
-        # Requerir interacción para prioridades altas
-        require_interaction = self.requiere_interaccion
-        if require_interaction is None:
-            require_interaction = prioridad_normalizada in ["high", "urgent"]
-        
-        # Construir payload rico
+        """Convertir a JSON payload para enviar"""
         payload = {
-            # Contenido principal
             "title": self.titulo,
             "body": self.mensaje,
-            "subtitle": self.subtitulo,
-            
-            # Visual
-            "icon": icono,
-            "badge": badge,
-            "image": self.imagen,
-            "color_acento": color,
-            
-            # Tipo y prioridad
-            "tipo": self.tipo,
-            "prioridad": prioridad_normalizada,
-            
-            # Identificación
-            "notificacion_id": self.notificacion_id,
-            "tag": self.tag or f"sv-{self.tipo}-{self.notificacion_id or 'general'}-{int(datetime.now().timestamp())}",
-            
-            # Navegación
-            "url": self.url_destino,
-            
-            # Comportamiento
-            "silent": self.silenciosa,
-            "requireInteraction": require_interaction,
-            "vibrate": vibrate,
+            "icon": self.icono,
+            "badge": self.badge,
+            "data": {
+                "url": self.url_destino,
+                "notificacion_id": self.notificacion_id,
+                "tipo": self.tipo,
+                "prioridad": self.prioridad,
+                "timestamp": None  # Se llenará en el SW
+            },
+            "tag": self.tag or f"notif-{self.notificacion_id or 'general'}",
             "renotify": True,
-            
-            # Acciones
-            "actions": self._build_actions(),
-            
-            # Datos adicionales
-            "extra": self.extra or {},
-            
-            # Timestamp
-            "timestamp": int(datetime.now().timestamp() * 1000)
+            "requireInteraction": self.prioridad in ["high", "urgent"],
+            "vibrate": [100, 50, 100] if self.prioridad == "normal" else [200, 100, 200, 100, 200]
         }
         
-        return json.dumps(payload, ensure_ascii=False)
-    
-    def _build_actions(self) -> List[Dict]:
-        """Construir acciones según tipo de notificación"""
+        # Agregar imagen si existe
+        if self.imagen:
+            payload["image"] = self.imagen
+            
+        # Agregar color de acento si existe
+        if self.color_acento:
+            payload["data"]["colorAccent"] = self.color_acento
+        
+        # Agregar acciones por defecto
         if self.acciones:
-            return self.acciones
-        
-        # Acciones predeterminadas según tipo
-        actions_by_type = {
-            "message": [
-                {"action": "reply", "title": "💬 Responder"},
-                {"action": "open", "title": "📖 Ver"}
-            ],
-            "urgent": [
-                {"action": "open", "title": "🚨 Ver ahora"},
-                {"action": "remind", "title": "⏰ Recordar"}
-            ],
-            "reminder": [
-                {"action": "complete", "title": "✓ Completado"},
-                {"action": "snooze", "title": "⏰ Posponer"}
-            ],
-            "warning": [
-                {"action": "open", "title": "⚠️ Ver detalle"},
-                {"action": "dismiss", "title": "✕ Ignorar"}
-            ],
-            "success": [
-                {"action": "open", "title": "✅ Ver"},
-                {"action": "dismiss", "title": "✕ Cerrar"}
+            payload["actions"] = self.acciones
+        else:
+            payload["actions"] = [
+                {"action": "open", "title": "Ver", "icon": "/icons/view.png"},
+                {"action": "dismiss", "title": "Cerrar", "icon": "/icons/close.png"}
             ]
-        }
         
-        return actions_by_type.get(self.tipo, [
-            {"action": "open", "title": "📖 Ver detalle"},
-            {"action": "dismiss", "title": "✕ Descartar"}
-        ])
+        return json.dumps(payload)
 
 
 class PushService:

@@ -4755,24 +4755,14 @@ async def crear_notificacion(
     enlace_url: str = Form(None),
     enviada_a_todos: bool = Form(True),
     usuario_ids: str = Form(None),  # JSON string con lista de IDs
-    archivo: UploadFile = File(None),
-    # Nuevos campos de estilo para Push Notifications empresariales
-    tipo: str = Form("general"),  # info, success, warning, urgent, message, reminder, general
-    prioridad: str = Form("normal"),  # baja, normal, alta, urgent
-    icono: str = Form(None),  # Icono personalizado
-    color_acento: str = Form(None),  # Color de acento
-    enviar_push: bool = Form(True)  # Si enviar push notification
+    archivo: UploadFile = File(None)
 ):
-    """
-    Crear una nueva notificación con soporte para Push Notifications empresariales
-    Sistema estilo Mercado Libre - Notificaciones ricas y personalizables
-    """
+    """Crear una nueva notificación"""
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
         print(f"🔔 Creando notificación: {titulo}")
-        print(f"   🏷️ Tipo: {tipo} | Prioridad: {prioridad} | Push: {enviar_push}")
         
         # Validaciones básicas
         if len(titulo.strip()) == 0:
@@ -4874,24 +4864,19 @@ async def crear_notificacion(
         
         # Enviar Push Notifications a los destinatarios
         push_result = {"sent": 0, "success": False}
-        if enviar_push:
-            try:
-                push_result = await enviar_push_a_destinatarios(
-                    notificacion_id=notificacion_id,
-                    titulo=titulo,
-                    subtitulo=subtitulo,
-                    enviada_a_todos=enviada_a_todos,
-                    usuario_ids=usuarios_seleccionados if not enviada_a_todos else None,
-                    tipo=tipo,
-                    prioridad=prioridad,
-                    icono=icono,
-                    color_acento=color_acento
-                )
-                print(f"📲 Push notifications: {push_result.get('sent', 0)} enviadas")
-            except Exception as push_error:
-                print(f"⚠️ Error enviando push (la notificación fue guardada): {push_error}")
-        else:
-            print("📴 Push notifications desactivadas para esta notificación")
+        try:
+            push_result = await enviar_push_a_destinatarios(
+                notificacion_id=notificacion_id,
+                titulo=titulo,
+                subtitulo=subtitulo,
+                enviada_a_todos=enviada_a_todos,
+                usuario_ids=usuarios_seleccionados if not enviada_a_todos else None,
+                tipo="general",
+                prioridad="normal"
+            )
+            print(f"📲 Push notifications: {push_result.get('sent', 0)} enviadas")
+        except Exception as push_error:
+            print(f"⚠️ Error enviando push (la notificación fue guardada): {push_error}")
         
         return {
             "id": notificacion_id,
@@ -6393,10 +6378,7 @@ async def obtener_suscripciones_usuario(usuario_id: int):
 
 @app.post("/push/send-test/{usuario_id}")
 async def enviar_push_test(usuario_id: int):
-    """
-    Enviar una notificación push de prueba empresarial a un usuario
-    Demuestra el estilo rico tipo Mercado Libre
-    """
+    """Enviar una notificación push de prueba a un usuario"""
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
@@ -6404,7 +6386,7 @@ async def enviar_push_test(usuario_id: int):
         if not PUSH_NOTIFICATIONS_ENABLED:
             raise HTTPException(status_code=503, detail="Push Notifications no disponible")
         
-        print(f"🧪 Enviando push de prueba empresarial a usuario {usuario_id}")
+        print(f"🧪 Enviando push de prueba a usuario {usuario_id}")
         
         # Obtener suscripciones activas del usuario
         cursor.execute("""
@@ -6421,20 +6403,14 @@ async def enviar_push_test(usuario_id: int):
                 "message": "El usuario no tiene dispositivos suscritos a push notifications"
             }
         
-        # Obtener nombre del usuario para personalizar
-        cursor.execute("SELECT nombre_completo FROM usuarios WHERE id = %s", (usuario_id,))
-        user_row = cursor.fetchone()
-        nombre_usuario = user_row[0] if user_row else "Usuario"
-        
-        # Crear notificación de prueba estilo empresarial
+        # Crear notificación de prueba
         notification = PushNotification(
-            titulo="¡Hola, " + nombre_usuario.split()[0] + "! 👋",
-            mensaje="Las notificaciones push están funcionando perfectamente. Recibirás alertas importantes en tiempo real.",
-            tipo="success",
-            prioridad="normal",
+            titulo="🔔 Notificación de Prueba",
+            mensaje="¡Las notificaciones push están funcionando correctamente!",
+            icono="/pwa-192x192.png",
             url_destino="/notificaciones",
-            subtitulo="Sistema de notificaciones activo",
-            # El icono y color se determinarán automáticamente por el tipo "success"
+            tipo="test",
+            prioridad="normal"
         )
         
         # Enviar a todas las suscripciones del usuario
@@ -6476,21 +6452,16 @@ async def enviar_push_test(usuario_id: int):
 async def enviar_push_a_destinatarios(notificacion_id: int, titulo: str, subtitulo: str = None, 
                                        enviada_a_todos: bool = True, usuario_ids: List[int] = None,
                                        tipo: str = "general", prioridad: str = "normal",
-                                       icono: str = None, color_acento: str = None,
-                                       imagen: str = None):
+                                       icono: str = None, color_acento: str = None):
     """
-    Función interna para enviar push notifications empresariales a los destinatarios
-    Sistema estilo Mercado Libre - Notificaciones ricas con imágenes y acciones
+    Función interna para enviar push notifications a los destinatarios de una notificación
     """
     if not PUSH_NOTIFICATIONS_ENABLED:
         print("⚠️ Push notifications no disponible, saltando envío")
         return {"success": False, "reason": "disabled"}
     
     try:
-        print(f"📤 [PUSH] Preparando envío para notificación {notificacion_id}")
-        print(f"   📝 Título: {titulo}")
-        print(f"   📋 Subtítulo: {subtitulo}")
-        print(f"   🏷️ Tipo: {tipo} | Prioridad: {prioridad}")
+        print(f"📤 Enviando push para notificación {notificacion_id}")
         
         # Obtener suscripciones según destinatarios
         if enviada_a_todos:
@@ -6515,22 +6486,17 @@ async def enviar_push_a_destinatarios(notificacion_id: int, titulo: str, subtitu
             print("⚠️ No hay suscripciones activas para enviar push")
             return {"success": False, "sent": 0, "reason": "no_subscriptions"}
         
-        print(f"📱 {len(results)} dispositivo(s) encontrado(s)")
-        
-        # Crear la notificación push empresarial
+        # Crear la notificación push
+        mensaje = subtitulo if subtitulo else "Tienes una nueva notificación"
         notification = PushNotification(
             titulo=titulo,
-            mensaje=subtitulo or "Tienes una nueva notificación",
+            mensaje=mensaje,
+            icono=icono or "/pwa-192x192.png",
+            url_destino=f"/notificaciones",
+            notificacion_id=notificacion_id,
             tipo=tipo,
             prioridad=prioridad,
-            icono=icono,  # Ahora usa el icono del tipo si es None
-            imagen=imagen,  # Imagen grande estilo Big Picture
-            color_acento=color_acento,
-            url_destino="/notificaciones",
-            notificacion_id=notificacion_id,
-            # Comportamiento basado en prioridad
-            requiere_interaccion=(prioridad in ["alta", "urgent", "high"]),
-            silenciosa=(prioridad == "baja" or prioridad == "low")
+            color_acento=color_acento
         )
         
         # Crear lista de suscripciones
@@ -6565,11 +6531,11 @@ async def enviar_push_a_destinatarios(notificacion_id: int, titulo: str, subtitu
         
         conn.commit()
         
-        print(f"✅ [PUSH] Resultado: {result['sent']}/{len(subscriptions)} exitosos")
+        print(f"✅ Push enviado: {result['sent']}/{len(subscriptions)} exitosos")
         return result
         
     except Exception as e:
-        print(f"❌ [PUSH] Error: {e}")
+        print(f"❌ Error enviando push notifications: {e}")
         conn.rollback()
         return {"success": False, "error": str(e)}
 

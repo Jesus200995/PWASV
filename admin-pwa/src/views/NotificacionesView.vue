@@ -4449,7 +4449,6 @@ export default {
   border-color: #10b981;
   background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
   color: #10b981;
-}
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 

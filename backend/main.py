@@ -6525,7 +6525,7 @@ async def enviar_push_a_destinatarios(notificacion_id: int, titulo: str, subtitu
             cursor.execute("""
                 SELECT ps.endpoint, ps.p256dh, ps.auth, ps.usuario_id
                 FROM push_subscriptions ps
-                WHERE ps.activa = TRUE
+                WHERE ps.activa = TRUE AND ps.p256dh IS NOT NULL AND ps.auth IS NOT NULL
             """)
         else:
             if not usuario_ids:
@@ -6534,7 +6534,7 @@ async def enviar_push_a_destinatarios(notificacion_id: int, titulo: str, subtitu
             cursor.execute("""
                 SELECT ps.endpoint, ps.p256dh, ps.auth, ps.usuario_id
                 FROM push_subscriptions ps
-                WHERE ps.activa = TRUE AND ps.usuario_id = ANY(%s)
+                WHERE ps.activa = TRUE AND ps.p256dh IS NOT NULL AND ps.auth IS NOT NULL AND ps.usuario_id = ANY(%s)
             """, (usuario_ids,))
         
         results = cursor.fetchall()

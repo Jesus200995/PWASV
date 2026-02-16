@@ -1,12 +1,21 @@
 /**
  * Service Worker para la PWA
  * Maneja cache, notificaciones push, actualizaciones obligatorias y sincronización en segundo plano
- * Versión: 2.0.0 - Sistema de Push Notifications Profesional
+ * Versión: 3.0.0 - Sistema de Push Notifications Empresarial (Estilo Mercado Libre)
  */
 
 // Incrementar la versión del cache cuando hay cambios importantes
-const CACHE_NAME = 'pwa-super-v2.0.0';
+const CACHE_NAME = 'pwa-super-v3.0.0';
 const OFFLINE_URL = '/offline.html';
+
+// Configuración de la app para notificaciones
+const APP_CONFIG = {
+  name: 'Sembrando Vida',
+  shortName: 'SV',
+  defaultIcon: '/pwa-192x192.png',
+  badge: '/badge-72x72.png', // Badge monocromático para Android
+  accentColor: '#10B981' // Verde esmeralda - Color de marca
+};
 
 // Archivos a cachear para funcionamiento offline
 const urlsToCache = [
@@ -16,6 +25,7 @@ const urlsToCache = [
   '/src/assets/main.css',
   '/pwa-192x192.png',
   '/pwa-512x512.png',
+  '/badge-72x72.png',
   // Agregar más archivos críticos según sea necesario
 ];
 
@@ -148,93 +158,243 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// Evento de notificación push - Sistema Profesional
-self.addEventListener('push', (event) => {
-  console.log('🔔 Push Notification recibida');
+// ═══════════════════════════════════════════════════════════════════════════════════
+// SISTEMA DE NOTIFICACIONES PUSH EMPRESARIAL - ESTILO MERCADO LIBRE
+// ═══════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Mapeo de tipos de notificación a configuraciones visuales
+ * Similar a cómo Mercado Libre diferencia entre tipos de notificación
+ */
+const NOTIFICATION_TYPES = {
+  info: {
+    icon: '/icons/info-notification.png',
+    color: '#3B82F6', // Azul
+    vibrate: [100, 50, 100],
+    sound: 'default'
+  },
+  success: {
+    icon: '/icons/success-notification.png',
+    color: '#10B981', // Verde
+    vibrate: [100, 50, 100],
+    sound: 'default'
+  },
+  warning: {
+    icon: '/icons/warning-notification.png',
+    color: '#F59E0B', // Amarillo
+    vibrate: [150, 75, 150],
+    sound: 'default'
+  },
+  urgent: {
+    icon: '/icons/urgent-notification.png',
+    color: '#EF4444', // Rojo
+    vibrate: [200, 100, 200, 100, 200],
+    sound: 'urgent',
+    requireInteraction: true
+  },
+  message: {
+    icon: '/icons/message-notification.png',
+    color: '#8B5CF6', // Púrpura
+    vibrate: [100, 50, 100],
+    sound: 'default'
+  },
+  reminder: {
+    icon: '/icons/reminder-notification.png',
+    color: '#EC4899', // Rosa
+    vibrate: [150, 75, 150, 75, 150],
+    sound: 'default'
+  }
+};
+
+/**
+ * Construye una notificación rica estilo empresarial
+ * @param {Object} pushData - Datos recibidos del servidor
+ * @returns {Object} Configuración completa de la notificación
+ */
+function buildRichNotification(pushData) {
+  // Obtener configuración por tipo
+  const typeConfig = NOTIFICATION_TYPES[pushData.tipo] || NOTIFICATION_TYPES.info;
   
-  let notificationData = {
-    title: 'Nueva Notificación',
-    body: 'Tienes una nueva actualización',
-    icon: '/pwa-192x192.png',
-    badge: '/pwa-192x192.png',
-    tag: 'general',
-    data: { url: '/notificaciones' }
-  };
+  // Timestamp formateado
+  const timestamp = Date.now();
   
-  // Intentar parsear los datos del push
-  if (event.data) {
-    try {
-      const pushData = event.data.json();
-      console.log('📦 Datos del push:', pushData);
-      
-      notificationData = {
-        title: pushData.title || notificationData.title,
-        body: pushData.body || pushData.message || notificationData.body,
-        icon: pushData.icon || notificationData.icon,
-        badge: pushData.badge || notificationData.badge,
-        image: pushData.image || null,
-        tag: pushData.tag || `notif-${Date.now()}`,
-        data: {
-          url: pushData.data?.url || '/notificaciones',
-          notificacion_id: pushData.data?.notificacion_id,
-          tipo: pushData.data?.tipo || 'general',
-          prioridad: pushData.data?.prioridad || 'normal',
-          colorAccent: pushData.data?.colorAccent,
-          timestamp: Date.now()
-        },
-        requireInteraction: pushData.requireInteraction || false,
-        renotify: pushData.renotify !== false,
-        silent: pushData.silent || false,
-        vibrate: pushData.vibrate || [100, 50, 100],
-        actions: pushData.actions || [
-          { action: 'open', title: '📖 Ver', icon: '/icons/view.png' },
-          { action: 'dismiss', title: '✕ Cerrar', icon: '/icons/close.png' }
-        ]
-      };
-      
-      // Configurar vibración según prioridad
-      if (notificationData.data.prioridad === 'urgent') {
-        notificationData.vibrate = [200, 100, 200, 100, 200];
-        notificationData.requireInteraction = true;
-      } else if (notificationData.data.prioridad === 'high') {
-        notificationData.vibrate = [150, 75, 150];
-      }
-      
-    } catch (e) {
-      console.warn('⚠️ Error parseando datos del push:', e);
-      notificationData.body = event.data.text();
+  // Construir título profesional
+  let title = pushData.title || 'Sembrando Vida';
+  
+  // Construir cuerpo con formato empresarial
+  let body = pushData.body || pushData.message || '';
+  
+  // Si hay información adicional, añadirla de forma elegante
+  if (pushData.subtitle) {
+    body = `${pushData.subtitle}\n${body}`;
+  }
+  
+  // Determinar el icono a usar
+  let icon = pushData.icon || typeConfig.icon || APP_CONFIG.defaultIcon;
+  
+  // Si el icono es un nombre de emoji/icono, usar el icono del tipo
+  if (icon && !icon.startsWith('/') && !icon.startsWith('http')) {
+    icon = typeConfig.icon || APP_CONFIG.defaultIcon;
+  }
+  
+  // Badge (icono pequeño en la barra de estado - Android)
+  const badge = pushData.badge || APP_CONFIG.badge || APP_CONFIG.defaultIcon;
+  
+  // Imagen grande (Big Picture style - como Mercado Libre)
+  const image = pushData.image || null;
+  
+  // Acciones dinámicas según tipo de notificación
+  let actions = [];
+  
+  // Acciones personalizadas del servidor
+  if (pushData.actions && Array.isArray(pushData.actions)) {
+    actions = pushData.actions;
+  } else {
+    // Acciones predeterminadas según tipo
+    switch (pushData.tipo) {
+      case 'message':
+        actions = [
+          { action: 'reply', title: '💬 Responder' },
+          { action: 'open', title: '📖 Ver' }
+        ];
+        break;
+      case 'urgent':
+        actions = [
+          { action: 'open', title: '🚨 Ver ahora' },
+          { action: 'remind', title: '⏰ Recordar' }
+        ];
+        break;
+      case 'reminder':
+        actions = [
+          { action: 'complete', title: '✓ Completado' },
+          { action: 'snooze', title: '⏰ Posponer' }
+        ];
+        break;
+      default:
+        actions = [
+          { action: 'open', title: '📖 Ver detalle' },
+          { action: 'dismiss', title: '✕ Descartar' }
+        ];
     }
   }
   
+  // Configuración de vibración
+  let vibrate = typeConfig.vibrate;
+  if (pushData.prioridad === 'urgent' || pushData.prioridad === 'alta') {
+    vibrate = [200, 100, 200, 100, 200]; // Vibración más intensa
+  } else if (pushData.prioridad === 'high' || pushData.prioridad === 'media') {
+    vibrate = [150, 75, 150];
+  } else if (pushData.silent) {
+    vibrate = []; // Sin vibración
+  }
+  
+  // Tag único para agrupar/reemplazar notificaciones
+  const tag = pushData.tag || `sv-${pushData.tipo || 'notif'}-${pushData.notificacion_id || timestamp}`;
+  
+  return {
+    title: title,
+    options: {
+      body: body,
+      icon: icon,
+      badge: badge,
+      image: image,
+      tag: tag,
+      // Datos para manejar el click
+      data: {
+        url: pushData.url || pushData.data?.url || '/notificaciones',
+        notificacion_id: pushData.notificacion_id || pushData.data?.notificacion_id,
+        tipo: pushData.tipo || 'general',
+        prioridad: pushData.prioridad || 'normal',
+        colorAccent: pushData.color_acento || typeConfig.color,
+        timestamp: timestamp,
+        // Datos adicionales para la app
+        extra: pushData.extra || {}
+      },
+      // Comportamiento
+      requireInteraction: pushData.requireInteraction || typeConfig.requireInteraction || false,
+      renotify: true, // Siempre notificar aunque sea el mismo tag
+      silent: pushData.silent || false,
+      vibrate: vibrate,
+      // Acciones (botones)
+      actions: actions,
+      // Timestamp para ordenar en el panel de notificaciones
+      timestamp: timestamp,
+      // Dirección del texto
+      dir: 'ltr',
+      // Idioma
+      lang: 'es-MX'
+    }
+  };
+}
+
+// Evento de notificación push - Sistema Empresarial
+self.addEventListener('push', (event) => {
+  console.log('🔔 [PUSH] Notificación recibida');
+  
+  let notificationConfig;
+  
+  try {
+    // Intentar parsear los datos del push
+    if (event.data) {
+      const pushData = event.data.json();
+      console.log('📦 [PUSH] Datos recibidos:', JSON.stringify(pushData, null, 2));
+      
+      // Construir notificación rica
+      notificationConfig = buildRichNotification(pushData);
+    } else {
+      // Notificación sin datos - usar valores por defecto
+      notificationConfig = {
+        title: APP_CONFIG.name,
+        options: {
+          body: 'Tienes una nueva notificación',
+          icon: APP_CONFIG.defaultIcon,
+          badge: APP_CONFIG.badge,
+          tag: `sv-default-${Date.now()}`,
+          data: { url: '/notificaciones' },
+          vibrate: [100, 50, 100],
+          actions: [
+            { action: 'open', title: '📖 Ver' }
+          ]
+        }
+      };
+    }
+  } catch (e) {
+    console.error('❌ [PUSH] Error parseando datos:', e);
+    // Fallback con texto plano
+    notificationConfig = {
+      title: APP_CONFIG.name,
+      options: {
+        body: event.data ? event.data.text() : 'Nueva notificación',
+        icon: APP_CONFIG.defaultIcon,
+        badge: APP_CONFIG.badge,
+        tag: `sv-error-${Date.now()}`,
+        data: { url: '/notificaciones' },
+        vibrate: [100, 50, 100]
+      }
+    };
+  }
+  
+  console.log('🎨 [PUSH] Mostrando notificación:', notificationConfig.title);
+  
   // Mostrar la notificación
   const showNotificationPromise = self.registration.showNotification(
-    notificationData.title,
-    {
-      body: notificationData.body,
-      icon: notificationData.icon,
-      badge: notificationData.badge,
-      image: notificationData.image,
-      tag: notificationData.tag,
-      data: notificationData.data,
-      requireInteraction: notificationData.requireInteraction,
-      renotify: notificationData.renotify,
-      silent: notificationData.silent,
-      vibrate: notificationData.vibrate,
-      actions: notificationData.actions,
-      // Timestamp para ordenar
-      timestamp: Date.now()
-    }
+    notificationConfig.title,
+    notificationConfig.options
   );
   
-  // Notificar a los clientes abiertos sobre la nueva notificación
+  // Notificar a los clientes abiertos
   const notifyClientsPromise = self.clients.matchAll({ 
     type: 'window', 
     includeUncontrolled: true 
   }).then(clients => {
+    console.log(`📢 [PUSH] Notificando a ${clients.length} cliente(s)`);
     clients.forEach(client => {
       client.postMessage({
         type: 'PUSH_RECEIVED',
-        notification: notificationData
+        notification: {
+          title: notificationConfig.title,
+          ...notificationConfig.options.data
+        }
       });
     });
   });
@@ -244,9 +404,11 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// Evento de click en notificación - Manejo mejorado
+// Evento de click en notificación - Manejo Empresarial
 self.addEventListener('notificationclick', (event) => {
-  console.log('🖱️ Click en notificación:', event.notification.tag);
+  console.log('🖱️ [CLICK] Notificación clickeada');
+  console.log('   Tag:', event.notification.tag);
+  console.log('   Action:', event.action || 'click general');
   
   const notification = event.notification;
   const action = event.action;
@@ -255,45 +417,95 @@ self.addEventListener('notificationclick', (event) => {
   // Cerrar la notificación
   notification.close();
   
+  // Manejar acciones específicas
+  switch (action) {
+    case 'dismiss':
+      console.log('👋 [CLICK] Notificación descartada');
+      // Solo cerrar, registrar como descartada
+      trackNotificationAction(notificationData.notificacion_id, 'dismissed');
+      return;
+      
+    case 'snooze':
+    case 'remind':
+      console.log('⏰ [CLICK] Posponiendo notificación');
+      // Programar recordatorio (si se implementa)
+      trackNotificationAction(notificationData.notificacion_id, 'snoozed');
+      // Por ahora, solo cerrar
+      return;
+      
+    case 'complete':
+      console.log('✓ [CLICK] Marcando como completado');
+      trackNotificationAction(notificationData.notificacion_id, 'completed');
+      // Podría enviar al servidor que se completó
+      return;
+      
+    case 'reply':
+      console.log('💬 [CLICK] Abriendo para responder');
+      // Caer a través para abrir la app
+      break;
+      
+    case 'open':
+    default:
+      console.log('📖 [CLICK] Abriendo notificación');
+      trackNotificationAction(notificationData.notificacion_id, 'opened');
+      break;
+  }
+  
   // Determinar la URL a abrir
   let urlToOpen = notificationData.url || '/notificaciones';
   
   // Si hay notificacion_id, añadirlo como parámetro
   if (notificationData.notificacion_id) {
-    urlToOpen = `/notificaciones?id=${notificationData.notificacion_id}`;
+    const separator = urlToOpen.includes('?') ? '&' : '?';
+    urlToOpen = `${urlToOpen}${separator}id=${notificationData.notificacion_id}`;
   }
   
-  // Manejar acción específica
-  if (action === 'dismiss') {
-    console.log('👋 Notificación descartada por el usuario');
-    // Solo cerrar, no abrir nada
-    return;
-  }
+  console.log('🔗 [CLICK] URL a abrir:', urlToOpen);
   
-  // Para acción 'open' o click general - Abrir/enfocar la app
+  // Abrir/enfocar la app
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then(clientList => {
-        // Buscar si ya hay una ventana abierta
+        // Buscar si ya hay una ventana de la app abierta
         for (const client of clientList) {
           if (client.url.includes(self.location.origin) && 'focus' in client) {
+            console.log('📱 [CLICK] Enfocando ventana existente');
             // Navegar a la URL de la notificación
             client.postMessage({
               type: 'NAVIGATE_TO',
               url: urlToOpen,
-              notificacion_id: notificationData.notificacion_id
+              notificacion_id: notificationData.notificacion_id,
+              action: action || 'open'
             });
             return client.focus();
           }
         }
         
         // Si no hay ventana abierta, abrir una nueva
+        console.log('🆕 [CLICK] Abriendo nueva ventana');
         if (self.clients.openWindow) {
           return self.clients.openWindow(urlToOpen);
         }
       })
   );
 });
+
+/**
+ * Registra una acción de notificación (para analytics)
+ */
+function trackNotificationAction(notificacionId, action) {
+  // Enviar a todos los clientes para que registren la acción
+  self.clients.matchAll({ type: 'window' }).then(clients => {
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'NOTIFICATION_ACTION',
+        notificacion_id: notificacionId,
+        action: action,
+        timestamp: Date.now()
+      });
+    });
+  });
+}
 
 // Evento de cierre de notificación (sin acción específica)
 self.addEventListener('notificationclose', (event) => {

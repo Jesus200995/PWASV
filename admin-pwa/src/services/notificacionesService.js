@@ -19,7 +19,7 @@ const createFormDataApi = () => axios.create({
 
 export const notificacionesService = {
   /**
-   * Crear una nueva notificación
+   * Crear una nueva notificación con soporte de Push Notifications empresariales
    * @param {Object} notificacion - Datos de la notificación
    * @param {File} archivo - Archivo adjunto opcional
    * @returns {Promise} Respuesta de la API
@@ -50,6 +50,33 @@ export const notificacionesService = {
       if (!notificacion.enviada_a_todos && notificacion.usuario_ids && notificacion.usuario_ids.length > 0) {
         formData.append('usuario_ids', JSON.stringify(notificacion.usuario_ids))
       }
+      
+      // ═══════════════════════════════════════════════════════════════════
+      // CAMPOS DE PUSH NOTIFICATIONS EMPRESARIALES
+      // ═══════════════════════════════════════════════════════════════════
+      
+      // Tipo de notificación (info, success, warning, urgent, message, reminder, general)
+      if (notificacion.tipo) {
+        formData.append('tipo', notificacion.tipo)
+      }
+      
+      // Prioridad (baja, normal, alta, urgent)
+      if (notificacion.prioridad) {
+        formData.append('prioridad', notificacion.prioridad)
+      }
+      
+      // Icono personalizado
+      if (notificacion.icono) {
+        formData.append('icono', notificacion.icono)
+      }
+      
+      // Color de acento
+      if (notificacion.color_acento) {
+        formData.append('color_acento', notificacion.color_acento)
+      }
+      
+      // Si enviar push notification
+      formData.append('enviar_push', notificacion.enviar_push !== false)
       
       // Agregar archivo si existe
       if (archivo) {

@@ -6395,16 +6395,32 @@ async def obtener_suscripciones_usuario(usuario_id: int):
 async def enviar_push_test(usuario_id: int):
     """
     Enviar una notificación push de prueba empresarial a un usuario
-    Demuestra el estilo rico tipo Mercado Libre
+    Incluye diagnóstico detallado para debugging
     """
+    diagnostico = {
+        "paso": "inicio",
+        "usuario_id": usuario_id,
+        "push_enabled": PUSH_NOTIFICATIONS_ENABLED,
+        "webpush_disponible": False
+    }
+    
     try:
+        # Verificar webpush
+        try:
+            from push_service import WEBPUSH_AVAILABLE
+            diagnostico["webpush_disponible"] = WEBPUSH_AVAILABLE
+        except:
+            diagnostico["webpush_disponible"] = False
+        
         if not conn:
-            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+            diagnostico["error"] = "No hay conexión a la base de datos"
+            return {"success": False, "diagnostico": diagnostico}
         
         if not PUSH_NOTIFICATIONS_ENABLED:
-            raise HTTPException(status_code=503, detail="Push Notifications no disponible")
+            diagnostico["error"] = "Push Notifications no habilitado"
+            return {"success": False, "diagnostico": diagnostico}
         
-        print(f"🧪 Enviando push de prueba empresarial a usuario {usuario_id}")
+        diagnostico["paso"] = "buscando_suscripciones"
         
         # Obtener suscripciones activas del usuario
         cursor.execute("""
@@ -6414,30 +6430,36 @@ async def enviar_push_test(usuario_id: int):
         """, (usuario_id,))
         
         results = cursor.fetchall()
+        diagnostico["suscripciones_encontradas"] = len(results)
         
         if not results:
-            return {
-                "success": False,
-                "message": "El usuario no tiene dispositivos suscritos a push notifications"
-            }
+            diagnostico["error"] = "Usuario sin suscripciones activas"
+            return {"success": False, "diagnostico": diagnostico}
         
-        # Obtener nombre del usuario para personalizar
+        diagnostico["paso"] = "obteniendo_nombre"
+        
+        # Obtener nombre del usuario
         cursor.execute("SELECT nombre_completo FROM usuarios WHERE id = %s", (usuario_id,))
         user_row = cursor.fetchone()
         nombre_usuario = user_row[0] if user_row else "Usuario"
+        primer_nombre = nombre_usuario.split()[0] if nombre_usuario else "Usuario"
         
-        # Crear notificación de prueba estilo empresarial
+        diagnostico["paso"] = "creando_notificacion"
+        diagnostico["nombre_usuario"] = primer_nombre
+        
+        # Crear notificación de prueba
         notification = PushNotification(
-            titulo="¡Hola, " + nombre_usuario.split()[0] + "! 👋",
-            mensaje="Las notificaciones push están funcionando perfectamente. Recibirás alertas importantes en tiempo real.",
+            titulo=f"Hola, {primer_nombre}!",
+            mensaje="Las notificaciones push funcionan correctamente. Recibirás alertas en tiempo real.",
             tipo="success",
             prioridad="normal",
             url_destino="/notificaciones",
-            subtitulo="Sistema de notificaciones activo",
-            # El icono y color se determinarán automáticamente por el tipo "success"
+            subtitulo="Sistema de notificaciones activo"
         )
         
-        # Enviar a todas las suscripciones del usuario
+        diagnostico["paso"] = "enviando_push"
+        
+        # Crear suscripciones
         subscriptions = [
             PushSubscription(
                 endpoint=row[0],
@@ -6448,9 +6470,13 @@ async def enviar_push_test(usuario_id: int):
             for row in results
         ]
         
+        # Enviar
         result = push_service.send_to_multiple(subscriptions, notification)
         
-        # Marcar suscripciones expiradas
+        diagnostico["paso"] = "completado"
+        diagnostico["resultado_envio"] = result
+        
+        # Limpiar suscripciones expiradas
         for expired_endpoint in result.get("expired", []):
             cursor.execute(
                 "UPDATE push_subscriptions SET activa = FALSE WHERE endpoint = %s",
@@ -6464,7 +6490,9 @@ async def enviar_push_test(usuario_id: int):
             "success": result["sent"] > 0,
             "enviados": result["sent"],
             "fallidos": result["failed"],
-            "dispositivos_expirados": len(result.get("expired", []))
+            "dispositivos_expirados": len(result.get("expired", [])),
+            "errores": result.get("errors", []),
+            "diagnostico": diagnostico
         }
         
     except HTTPException:
@@ -6607,10 +6635,10 @@ async def diagnostico_push():
                     
                     # Obtener últimas suscripciones
                     cursor.execute("""
-                        SELECT usuario_id, device_type, created_at 
+                        SELECT usuario_id, device_info, fecha_creacion 
                         FROM push_subscriptions 
                         WHERE activa = TRUE 
-                        ORDER BY created_at DESC 
+                        ORDER BY fecha_creacion DESC 
                         LIMIT 5
                     """)
                     ultimas = cursor.fetchall()

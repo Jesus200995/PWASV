@@ -845,9 +845,15 @@ const detectarNuevasNotificaciones = (nuevoConteo) => {
     // Guardar timestamp del último sonido
     localStorage.setItem('ultimoSonidoNotificacion', ahora.toString())
     
-    // NOTA: Las notificaciones push las maneja el Service Worker
-    // No crear notificaciones locales aquí para evitar duplicados
-    console.log(`📱 ${nuevasNotificaciones} nueva(s) notificación(es) - Push via SW`)
+    // Mostrar notificación del navegador si está permitido
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Nueva notificación', {
+        body: `Tienes ${nuevasNotificaciones} nueva(s) notificación(es)`,
+        icon: '/pwa-192x192.png',
+        tag: 'new-notification',
+        silent: false // Permitir que el navegador también haga sonido
+      })
+    }
   }
   
   // Actualizar contador anterior para la próxima comparación

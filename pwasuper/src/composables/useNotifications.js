@@ -80,29 +80,19 @@ const initializeGlobalAudio = () => {
   }
 }
 
-// NUEVO: Reproducir sonido de notificación global
+// Reproducir solo sonido de notificación (las push llegan via Service Worker)
 const playGlobalNotificationSound = () => {
   try {
     if (globalNotificationState.soundEnabled && globalAudioNotification && typeof globalAudioNotification === 'function') {
       globalAudioNotification()
-      console.log('🔊 Sonido global de notificación reproducido')
-      
-      // Mostrar notificación del navegador si está permitido
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Nueva notificación', {
-          body: `Tienes ${globalNotificationState.unreadCount} notificación(es) no leída(s)`,
-          icon: '/pwa-192x192.png',
-          tag: 'new-notification',
-          silent: false,
-          requireInteraction: false,
-          timestamp: Date.now()
-        })
-      }
+      console.log('🔊 Sonido de notificación reproducido')
+      // NOTA: Las notificaciones push las maneja el Service Worker
+      // No crear notificaciones locales aquí para evitar duplicados
     } else {
       console.log('🔇 Sonido deshabilitado o no disponible')
     }
   } catch (error) {
-    console.warn('⚠️ Error reproduciendo sonido global de notificación:', error)
+    console.warn('⚠️ Error reproduciendo sonido:', error)
   }
 }
 

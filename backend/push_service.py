@@ -29,50 +29,87 @@ VAPID_CLAIMS = {
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONFIGURACIÓN DE TIPOS DE NOTIFICACIÓN - ESTILO EMPRESARIAL
+# Coincide con los tipos del admin-pwa y el Service Worker
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# Usar siempre el icono principal que existe en el proyecto
+APP_ICON = "/pwa-192x192.png"
+APP_BADGE = "/badge-72x72.png"
+
 NOTIFICATION_TYPES = {
+    # === Tipos del admin-pwa (principales) ===
+    "general": {
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#10B981",  # Verde esmeralda - Marca SV
+        "emoji": "📢"
+    },
+    "alerta": {
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#F59E0B",  # Ámbar
+        "emoji": "⚠️"
+    },
+    "urgente": {
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#EF4444",  # Rojo
+        "emoji": "🚨"
+    },
+    "recordatorio": {
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#8B5CF6",  # Violeta
+        "emoji": "📅"
+    },
+    "actualizacion": {
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#3B82F6",  # Azul
+        "emoji": "🔄"
+    },
+    "celebracion": {
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#EC4899",  # Rosa
+        "emoji": "🎉"
+    },
+    # === Tipos adicionales (compatibilidad) ===
     "info": {
-        "icon": "/icons/info-notification.png",
-        "badge": "/badge-72x72.png",
-        "color": "#3B82F6",
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#3B82F6",  # Azul
         "emoji": "ℹ️"
     },
     "success": {
-        "icon": "/icons/success-notification.png", 
-        "badge": "/badge-72x72.png",
-        "color": "#10B981",
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#10B981",  # Verde esmeralda
         "emoji": "✅"
     },
     "warning": {
-        "icon": "/icons/warning-notification.png",
-        "badge": "/badge-72x72.png", 
-        "color": "#F59E0B",
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#F59E0B",  # Naranja/Ámbar
         "emoji": "⚠️"
     },
     "urgent": {
-        "icon": "/icons/urgent-notification.png",
-        "badge": "/badge-72x72.png",
-        "color": "#EF4444",
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#EF4444",  # Rojo
         "emoji": "🚨"
     },
     "message": {
-        "icon": "/icons/message-notification.png",
-        "badge": "/badge-72x72.png",
-        "color": "#8B5CF6",
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#8B5CF6",  # Púrpura
         "emoji": "💬"
     },
     "reminder": {
-        "icon": "/icons/reminder-notification.png",
-        "badge": "/badge-72x72.png",
-        "color": "#EC4899",
+        "icon": APP_ICON,
+        "badge": APP_BADGE,
+        "color": "#EC4899",  # Rosa
         "emoji": "🔔"
-    },
-    "general": {
-        "icon": "/pwa-192x192.png",
-        "badge": "/badge-72x72.png",
-        "color": "#10B981",
-        "emoji": "📢"
     }
 }
 

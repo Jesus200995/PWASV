@@ -1,11 +1,11 @@
 /**
  * Service Worker para la PWA
  * Maneja cache, notificaciones push, actualizaciones obligatorias y sincronización en segundo plano
- * Versión: 3.0.0 - Sistema de Push Notifications Empresarial (Estilo Mercado Libre)
+ * Versión: 4.0.0 - Sistema Push Empresarial Completo (Estilo ML/Banco Azteca)
  */
 
 // Incrementar la versión del cache cuando hay cambios importantes
-const CACHE_NAME = 'pwa-super-v3.0.0';
+const CACHE_NAME = 'pwa-super-v4.0.0';
 const OFFLINE_URL = '/offline.html';
 
 // Configuración de la app para notificaciones
@@ -164,43 +164,82 @@ self.addEventListener('sync', (event) => {
 
 /**
  * Mapeo de tipos de notificación a configuraciones visuales
- * Similar a cómo Mercado Libre diferencia entre tipos de notificación
- * Nota: Todos los iconos apuntan al icono principal ya que los personalizados no están creados
+ * Coincide con los tipos definidos en admin-pwa y backend
+ * Estilo empresarial tipo Mercado Libre / Banco Azteca
  */
 const NOTIFICATION_TYPES = {
+  // === Tipos del admin-pwa ===
+  general: {
+    icon: '/pwa-192x192.png',
+    color: '#10B981', // Verde esmeralda - Marca SV
+    vibrate: [100, 50, 100],
+    sound: 'default'
+  },
+  alerta: {
+    icon: '/pwa-192x192.png',
+    color: '#F59E0B', // Ámbar
+    vibrate: [150, 75, 150],
+    sound: 'default'
+  },
+  urgente: {
+    icon: '/pwa-192x192.png',
+    color: '#EF4444', // Rojo
+    vibrate: [200, 100, 200, 100, 200],
+    sound: 'urgent',
+    requireInteraction: true
+  },
+  recordatorio: {
+    icon: '/pwa-192x192.png',
+    color: '#8B5CF6', // Violeta
+    vibrate: [150, 75, 150, 75, 150],
+    sound: 'default'
+  },
+  actualizacion: {
+    icon: '/pwa-192x192.png',
+    color: '#3B82F6', // Azul
+    vibrate: [100, 50, 100],
+    sound: 'default'
+  },
+  celebracion: {
+    icon: '/pwa-192x192.png',
+    color: '#EC4899', // Rosa
+    vibrate: [100, 30, 100, 30, 100],
+    sound: 'default'
+  },
+  // === Tipos del backend (compatibilidad) ===
   info: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/pwa-192x192.png',
     color: '#3B82F6', // Azul
     vibrate: [100, 50, 100],
     sound: 'default'
   },
   success: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/pwa-192x192.png',
     color: '#10B981', // Verde
     vibrate: [100, 50, 100],
     sound: 'default'
   },
   warning: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/pwa-192x192.png',
     color: '#F59E0B', // Amarillo
     vibrate: [150, 75, 150],
     sound: 'default'
   },
   urgent: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/pwa-192x192.png',
     color: '#EF4444', // Rojo
     vibrate: [200, 100, 200, 100, 200],
     sound: 'urgent',
     requireInteraction: true
   },
   message: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/pwa-192x192.png',
     color: '#8B5CF6', // Púrpura
     vibrate: [100, 50, 100],
     sound: 'default'
   },
   reminder: {
-    icon: '/pwa-192x192.png',  // Usar icono principal
+    icon: '/pwa-192x192.png',
     color: '#EC4899', // Rosa
     vibrate: [150, 75, 150, 75, 150],
     sound: 'default'

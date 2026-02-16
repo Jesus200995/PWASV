@@ -31,6 +31,9 @@ import { registerServiceWorker, waitForServiceWorkerReady } from './utils/servic
 // Importar composable de notificaciones para inicialización global
 import { useNotifications } from './composables/useNotifications.js'
 
+// Importar servicio de Push Notifications
+import { pushNotificationsService } from './services/pushNotificationsService.js'
+
 // Registrar el Service Worker para funcionalidad PWA offline
 window.addEventListener('load', async () => {
   try {
@@ -41,6 +44,54 @@ window.addEventListener('load', async () => {
     await waitForServiceWorkerReady();
     
     console.log('✅ Aplicación lista con soporte offline');
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // INICIALIZACIÓN DE PUSH NOTIFICATIONS
+    // ═══════════════════════════════════════════════════════════════════
+    
+    // Inicializar el servicio de push notifications
+    const pushResult = await pushNotificationsService.initialize()
+    console.log('🔔 Push Notifications:', pushResult.success ? 'Inicializado' : 'No disponible')
+    
+    // Si el usuario ya tiene sesión, intentar suscribirse automáticamente
+    const userData = localStorage.getItem('user')
+    if (userData && pushResult.success) {
+      try {
+        const user = JSON.parse(userData)
+        const userId = user.id || user.usuario_id
+        
+        if (userId) {
+          // Verificar si ya está suscrito
+          const subCheck = await pushNotificationsService.checkSubscription()
+          
+          if (!subCheck.subscribed) {
+            // Intentar suscribir automáticamente
+            console.log('🔔 Intentando suscripción automática para usuario:', userId)
+            const subResult = await pushNotificationsService.subscribe(userId)
+            
+            if (subResult.success) {
+              console.log('✅ Usuario suscrito a push notifications automáticamente')
+            } else {
+              console.log('⚠️ No se pudo suscribir automáticamente:', subResult.reason || subResult.error)
+            }
+          } else {
+            console.log('✅ Usuario ya está suscrito a push notifications')
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ Error verificando suscripción push:', e)
+      }
+    }
+    
+    // Configurar listener para mensajes del SW (push recibido, etc.)
+    pushNotificationsService.setupMessageListener((data) => {
+      if (data.type === 'PUSH_RECEIVED') {
+        console.log('🔔 Push notification recibida en primer plano:', data.notification)
+        // Aquí se podría mostrar un toast o actualizar la UI
+      }
+    })
+    
+    // ═══════════════════════════════════════════════════════════════════
     
     // Inicializar sistema de notificaciones global con sonido
     const { initializeGlobalAudio, requestNotificationPermission } = useNotifications();

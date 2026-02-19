@@ -1324,66 +1324,40 @@ const buscarUsuarioEnBackend = async (termino) => {
     console.log(`📝 Término de búsqueda: "${terminoLimpio}"`)
     console.log(`📊 Registros actuales en memoria: ${registros.value.length}`)
     
-    // Hacer 3 búsquedas en paralelo (una por cada campo) para buscar con OR
-    const busquedas = [
-      axios.get(`${API_URL}/usuarios/buscar`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-        params: { nombre: terminoLimpio },
-        timeout: 10000
-      }).catch((err) => {
-        console.log('⚠️ Búsqueda por nombre sin resultados:', err.response?.status)
-        return { data: { usuarios: [] } }
-      }),
-      
-      axios.get(`${API_URL}/usuarios/buscar`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-        params: { correo: terminoLimpio },
-        timeout: 10000
-      }).catch((err) => {
-        console.log('⚠️ Búsqueda por correo sin resultados:', err.response?.status)
-        return { data: { usuarios: [] } }
-      }),
-      
-      axios.get(`${API_URL}/usuarios/buscar`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-        params: { curp: terminoLimpio },
-        timeout: 10000
-      }).catch((err) => {
-        console.log('⚠️ Búsqueda por CURP sin resultados:', err.response?.status)
-        return { data: { usuarios: [] } }
-      })
-    ]
+    // Hacer UNA SOLA búsqueda pasando el término en todos los campos (backend usa OR)
+    console.log(`📡 Llamando al backend con búsqueda unificada (OR)...`)
     
-    const resultados = await Promise.all(busquedas)
-    
-    // Combinar resultados y eliminar duplicados
-    const usuariosMap = new Map()
-    resultados.forEach((response, index) => {
-      const campo = ['nombre', 'correo', 'CURP'][index]
-      const usuarios = response.data?.usuarios || []
-      console.log(`   📋 Búsqueda por ${campo}: ${usuarios.length} resultados`)
-      usuarios.forEach(usuario => {
-        if (usuario.id) {
-          usuariosMap.set(usuario.id, usuario)
-        }
-      })
+    const response = await axios.get(`${API_URL}/usuarios/buscar`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      params: { 
+        nombre: terminoLimpio,
+        correo: terminoLimpio,
+        curp: terminoLimpio
+      },
+      timeout: 15000
     })
     
-    const usuariosEncontrados = Array.from(usuariosMap.values())
+    const usuariosEncontrados = response.data?.usuarios || []
+    
     console.log(`\n✅ Total usuarios únicos encontrados: ${usuariosEncontrados.length}`)
     
     if (usuariosEncontrados.length === 0) {
       console.log('❌ No se encontraron usuarios con ese criterio')
+      console.log('💡 Verifica que:')
+      console.log('   - La CURP, nombre o correo existan en la BD')
+      console.log('   - El backend esté respondiendo correctamente')
       return []
     }
     
     // Mostrar info de usuarios encontrados
-    usuariosEncontrados.forEach(u => {
-      console.log(`   👤 ID: ${u.id} | Nombre: ${u.nombre_completo} | CURP: ${u.curp || 'N/A'}`)
+    usuariosEncontrados.forEach((u, index) => {
+      console.log(`   👤 ${index + 1}. ID: ${u.id} | Nombre: ${u.nombre_completo} | CURP: ${u.curp || 'N/A'} | Correo: ${u.correo}`)
     })
     
     // Cargar registros de cada usuario encontrado
     console.log(`\n📥 Cargando registros de ${usuariosEncontrados.length} usuario(s)...`)
+    
+    let totalRegistrosNuevos = 0
     
     for (const usuario of usuariosEncontrados) {
       if (usuario.id) {
@@ -1394,18 +1368,28 @@ const buscarUsuarioEnBackend = async (termino) => {
           console.log(`   ⏭️ Usuario ${usuario.id} (${usuario.nombre_completo}) ya tiene ${registrosExistentes.length} registros cargados`)
         } else {
           console.log(`   ⬇️ Cargando registros del usuario ${usuario.id} (${usuario.nombre_completo})...`)
+          const antes = registros.value.length
           await cargarRegistrosParaUsuario(usuario.id)
+          const despues = registros.value.length
+          totalRegistrosNuevos += (despues - antes)
         }
       }
     }
     
     console.log(`\n📊 Total de registros en memoria después de búsqueda: ${registros.value.length}`)
+    if (totalRegistrosNuevos > 0) {
+      console.log(`   ✅ Agregados ${totalRegistrosNuevos} registros nuevos`)
+    }
     console.log(`===== FIN DE BÚSQUEDA =====\n`)
     
     return usuariosEncontrados
     
   } catch (error) {
     console.error('❌ Error buscando usuario en backend:', error)
+    if (error.response) {
+      console.error(`   📛 Status: ${error.response.status}`)
+      console.error(`   📛 Detail: ${error.response.data?.detail || error.message}`)
+    }
     return []
   } finally {
     buscandoUsuario.value = false

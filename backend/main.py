@@ -6395,12 +6395,12 @@ async def obtener_estadisticas_usuarios():
 @app.get("/usuarios/buscar")
 async def buscar_usuarios(correo: Optional[str] = None, nombre: Optional[str] = None, 
                          curp: Optional[str] = None, cargo: Optional[str] = None):
-    """Buscar usuarios por diferentes criterios"""
+    """Buscar usuarios por diferentes criterios con OR"""
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        # Construir consulta dinámica
+        # Construir consulta dinámica con OR
         condiciones = []
         parametros = []
         
@@ -6430,18 +6430,21 @@ async def buscar_usuarios(correo: Optional[str] = None, nombre: Optional[str] = 
         """)
         tiene_rol = bool(cursor.fetchone())
         
+        # CAMBIO CRÍTICO: Usar OR en lugar de AND para buscar en cualquier campo
         consulta = f"""
             SELECT id, correo, nombre_completo, cargo, supervisor, curp, telefono, contrasena
             {'rol' if tiene_rol else ''}
             FROM usuarios 
-            WHERE {' AND '.join(condiciones)}
+            WHERE {' OR '.join(condiciones)}
             ORDER BY id DESC
+            LIMIT 100
         """
         
         if tiene_rol:
             consulta = consulta.replace("contrasena\n", "contrasena, ")
         
         print(f"🔍 Buscando usuarios con consulta: {consulta}")
+        print(f"📝 Parámetros: {parametros}")
         cursor.execute(consulta, parametros)
         
         resultados = cursor.fetchall()
@@ -6462,6 +6465,8 @@ async def buscar_usuarios(correo: Optional[str] = None, nombre: Optional[str] = 
             usuarios.append(usuario)
         
         print(f"✅ Búsqueda completada: {len(usuarios)} usuarios encontrados")
+        if len(usuarios) > 0:
+            print(f"   Primer resultado: {usuarios[0]['nombre_completo']} - CURP: {usuarios[0].get('curp', 'N/A')}")
         return {"usuarios": usuarios}
         
     except HTTPException:

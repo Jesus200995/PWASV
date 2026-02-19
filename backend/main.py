@@ -4266,6 +4266,88 @@ async def eliminar_todos_usuarios():
         print(f"❌ Error general al eliminar usuarios: {e}")
         raise HTTPException(status_code=500, detail=f"Error al eliminar usuarios: {str(e)}")
 
+# Modelo para actualización de registro
+class RegistroUpdate(BaseModel):
+    tipo_actividad: Optional[str] = None
+    descripcion: Optional[str] = None
+    categoria_actividad: Optional[str] = None
+    categoria_actividad_otro: Optional[str] = None
+    fecha_hora: Optional[str] = None
+
+@app.put("/api/registros/{registro_id}")
+async def actualizar_registro(registro_id: int, datos: RegistroUpdate):
+    """Actualiza un registro de actividad específico"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Verificar si el registro existe
+        cursor.execute("SELECT id FROM registros WHERE id = %s", (registro_id,))
+        registro = cursor.fetchone()
+        
+        if not registro:
+            raise HTTPException(status_code=404, detail=f"Registro con ID {registro_id} no encontrado")
+        
+        # Construir la consulta de actualización dinámicamente
+        campos_actualizar = []
+        valores = []
+        
+        if datos.tipo_actividad is not None:
+            campos_actualizar.append("tipo_actividad = %s")
+            valores.append(datos.tipo_actividad)
+        
+        if datos.descripcion is not None:
+            campos_actualizar.append("descripcion = %s")
+            valores.append(datos.descripcion)
+        
+        if datos.categoria_actividad is not None:
+            campos_actualizar.append("categoria_actividad = %s")
+            valores.append(datos.categoria_actividad)
+        
+        if datos.categoria_actividad_otro is not None:
+            campos_actualizar.append("categoria_actividad_otro = %s")
+            valores.append(datos.categoria_actividad_otro)
+        
+        if datos.fecha_hora is not None:
+            campos_actualizar.append("fecha_hora = %s")
+            valores.append(datos.fecha_hora)
+        
+        if not campos_actualizar:
+            raise HTTPException(status_code=400, detail="No se proporcionaron campos para actualizar")
+        
+        # Agregar el ID al final de los valores
+        valores.append(registro_id)
+        
+        query = f"UPDATE registros SET {', '.join(campos_actualizar)} WHERE id = %s"
+        cursor.execute(query, tuple(valores))
+        conn.commit()
+        
+        print(f"✏️ Registro #{registro_id} actualizado: tipo={datos.tipo_actividad}, categoria={datos.categoria_actividad}, fecha_hora={datos.fecha_hora}")
+        
+        return {
+            "status": "success",
+            "message": f"Registro #{registro_id} actualizado exitosamente",
+            "registro_id": registro_id,
+            "campos_actualizados": {
+                "tipo_actividad": datos.tipo_actividad,
+                "descripcion": datos.descripcion,
+                "categoria_actividad": datos.categoria_actividad,
+                "categoria_actividad_otro": datos.categoria_actividad_otro,
+                "fecha_hora": datos.fecha_hora
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except psycopg2.Error as e:
+        conn.rollback()
+        print(f"❌ Error de PostgreSQL al actualizar registro: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error general al actualizar registro: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al actualizar registro: {str(e)}")
+
 @app.delete("/admin/registros/{registro_id}")
 async def eliminar_registro(registro_id: int):
     """Elimina un registro específico por su ID"""

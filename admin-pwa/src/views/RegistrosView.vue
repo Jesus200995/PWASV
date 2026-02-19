@@ -470,6 +470,14 @@
                         <span class="btn-label">Detalles</span>
                       </div>
                       <div v-if="puedeEliminarRegistros" class="action-container">
+                        <button @click="abrirModalEditar(registro)" class="btn-editar" title="Editar registro">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                          </svg>
+                        </button>
+                        <span class="btn-label-editar">Editar</span>
+                      </div>
+                      <div v-if="puedeEliminarRegistros" class="action-container">
                         <button @click="confirmarEliminarRegistro(registro)" class="btn-eliminar" title="Eliminar registro">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -897,6 +905,254 @@
         </div>
       </Transition>
     </Teleport>
+
+    <!-- Modal de Edición de Registro -->
+    <Teleport to="body" v-if="showEditModal">
+      <div class="modal-overlay-edit" @click="cerrarModalEditar">
+        <div class="modal-edit-container" @click.stop>
+          <!-- Header elegante -->
+          <div class="modal-edit-header">
+            <div class="header-icon-wrapper">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
+                <path d="M19.5 7.125L16.862 4.487"/>
+              </svg>
+            </div>
+            <div class="header-text">
+              <h3>Editar Registro de Actividad</h3>
+              <span class="header-subtitle">ID #{{ registroEditando?.id }} - {{ registroEditando?.usuario?.nombre_completo || 'Usuario' }}</span>
+            </div>
+            <button @click="cerrarModalEditar" class="btn-close-edit" title="Cerrar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Contenido del modal con scroll -->
+          <div class="modal-edit-scroll-area">
+            <!-- Sección de datos NO editables -->
+            <div class="modal-edit-readonly-section">
+              <h4 class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0110 0v4"/>
+                </svg>
+                Información no editable
+              </h4>
+              
+              <!-- Grid de 2 columnas para Ubicación y Fotografía -->
+              <div class="readonly-grid-2col">
+                <!-- Ubicación -->
+                <div class="readonly-card">
+                  <div class="readonly-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                  </div>
+                  <div class="readonly-card-content">
+                    <span class="readonly-card-label">Ubicación GPS</span>
+                    <span class="readonly-card-value">{{ parseFloat(registroEditando?.latitud || 0).toFixed(6) }}, {{ parseFloat(registroEditando?.longitud || 0).toFixed(6) }}</span>
+                  </div>
+                </div>
+
+                <!-- Fotografía -->
+                <div class="readonly-card readonly-card-photo">
+                  <div class="readonly-card-icon" :class="{ 'readonly-card-icon-muted': !registroEditando?.foto_url }">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                    </svg>
+                  </div>
+                  <div class="readonly-card-content">
+                    <span class="readonly-card-label">Fotografía</span>
+                    <div v-if="registroEditando?.foto_url" class="readonly-photo-preview-compact">
+                      <img 
+                        :src="`${API_URL}/${registroEditando.foto_url}`" 
+                        alt="Foto del registro" 
+                        class="edit-photo-thumb-compact"
+                        @click="abrirFotoCompleta(registroEditando.foto_url)"
+                      >
+                    </div>
+                    <span v-else class="readonly-card-value readonly-muted">Sin foto</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Formulario de edición -->
+            <div class="modal-edit-body">
+              <h4 class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                Campos editables
+              </h4>
+              
+              <form @submit.prevent="guardarEdicion" class="edit-form">
+                <!-- Fecha y Hora -->
+                <div class="form-row-2col">
+                  <div class="form-group">
+                    <label for="edit-fecha" class="form-label">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                      </svg>
+                      Fecha
+                    </label>
+                    <input 
+                      type="date"
+                      id="edit-fecha"
+                      v-model="editForm.fecha"
+                      class="form-input"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="edit-hora" class="form-label">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                      </svg>
+                      Hora
+                    </label>
+                    <input 
+                      type="time"
+                      id="edit-hora"
+                      v-model="editForm.hora"
+                      class="form-input"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <!-- Tipo de Actividad (Modalidad) -->
+                <div class="form-group">
+                  <label for="edit-tipo" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Modalidad
+                  </label>
+                  <div class="tipo-selector">
+                    <button 
+                      type="button"
+                      @click="editForm.tipo_actividad = 'campo'"
+                      :class="['tipo-btn', 'tipo-campo', { active: editForm.tipo_actividad === 'campo' }]"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9zM5.6 10.25c0 1.38 1.12 2.5 2.5 2.5.53 0 1.01-.16 1.42-.44l-.02.19c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5l-.02-.19c.4.28.89.44 1.42.44 1.38 0 2.5-1.12 2.5-2.5 0-1-.59-1.85-1.43-2.25.84-.4 1.43-1.25 1.43-2.25 0-1.38-1.12-2.5-2.5-2.5-.53 0-1.01.16-1.42.44l.02-.19C14.5 3.62 13.38 2.5 12 2.5S9.5 3.62 9.5 5l.02.19c-.4-.28-.89-.44-1.42-.44-1.38 0-2.5 1.12-2.5 2.5 0 1 .59 1.85 1.43 2.25-.84.4-1.43 1.25-1.43 2.25zM12 5.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5S9.5 9.38 9.5 8s1.12-2.5 2.5-2.5zM3 13c0 4.97 4.03 9 9 9 0-4.97-4.03-9-9-9z"/>
+                      </svg>
+                      <span>Campo</span>
+                    </button>
+                    <button 
+                      type="button"
+                      @click="editForm.tipo_actividad = 'gabinete'"
+                      :class="['tipo-btn', 'tipo-gabinete', { active: editForm.tipo_actividad === 'gabinete' }]"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                      </svg>
+                      <span>Gabinete</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Categoría de Actividad -->
+                <div class="form-group">
+                  <label for="edit-categoria" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                    </svg>
+                    Tipo de Actividad
+                  </label>
+                  <select 
+                    id="edit-categoria"
+                    v-model="editForm.categoria_actividad"
+                    class="form-select"
+                    :disabled="!editForm.tipo_actividad"
+                    required
+                  >
+                    <option value="" disabled>{{ !editForm.tipo_actividad ? 'Primero selecciona la modalidad' : 'Selecciona el tipo de actividad' }}</option>
+                    <option v-for="cat in categoriasActividad" :key="cat" :value="cat">{{ cat }}</option>
+                  </select>
+                </div>
+
+                <!-- Campo Otro (condicional) -->
+                <div v-if="editForm.categoria_actividad === 'Otro'" class="form-group">
+                  <label for="edit-otro" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                    Especifica la actividad
+                  </label>
+                  <input 
+                    type="text"
+                    id="edit-otro"
+                    v-model="editForm.categoria_actividad_otro"
+                    class="form-input"
+                    placeholder="Describe el tipo de actividad..."
+                    maxlength="100"
+                    required
+                  />
+                </div>
+
+                <!-- Descripción -->
+                <div class="form-group">
+                  <label for="edit-descripcion" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                    </svg>
+                    Descripción
+                    <span class="optional-label">(opcional)</span>
+                  </label>
+                  <textarea 
+                    id="edit-descripcion"
+                    v-model="editForm.descripcion"
+                    class="form-textarea"
+                    rows="3"
+                    placeholder="Describe la actividad realizada..."
+                    maxlength="1000"
+                  ></textarea>
+                  <span class="char-counter">{{ editForm.descripcion?.length || 0 }} / 1000</span>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Footer con acciones -->
+          <div class="modal-edit-footer">
+            <button 
+              type="button" 
+              @click="cerrarModalEditar" 
+              class="btn-cancel-edit"
+              :disabled="isEditSaving"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Cancelar
+            </button>
+            <button 
+              type="button"
+              @click="guardarEdicion" 
+              class="btn-save-edit"
+              :disabled="isEditSaving || !editForm.tipo_actividad || !editForm.categoria_actividad || (editForm.categoria_actividad === 'Otro' && !editForm.categoria_actividad_otro?.trim())"
+            >
+              <svg v-if="!isEditSaving" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              <svg v-else class="spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+              {{ isEditSaving ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1044,6 +1300,33 @@ const registroAEliminar = ref(null)
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref('success') // 'success' | 'error' | 'info'
+
+// Variables para modal de edición
+const showEditModal = ref(false)
+const registroEditando = ref(null)
+const editForm = ref({
+  tipo_actividad: '',
+  descripcion: '',
+  categoria_actividad: '',
+  categoria_actividad_otro: '',
+  fecha: '',
+  hora: ''
+})
+const isEditSaving = ref(false)
+
+// Categorías de actividad (igual que en pwasuper)
+const categoriasActividad = [
+  "Acompañamiento técnico",
+  "Productivas directas",
+  "Ahorro y trámites financieros",
+  "Capacitación / talleres / cursos",
+  "Difusión y comunicación",
+  "Eventos comunitarios / ferias / tianguis",
+  "Reuniones y asambleas",
+  "Trabajo administrativo y captura",
+  "Viveros y biofábricas",
+  "Otro"
+]
 
 let map = null
 
@@ -2785,6 +3068,123 @@ const requestFullscreen = (event) => {
   }
 }
 
+// Funciones para edición de registros
+const abrirModalEditar = (registro) => {
+  registroEditando.value = registro
+  
+  // Parsear fecha y hora del registro
+  let fecha = ''
+  let hora = ''
+  if (registro.fecha_hora) {
+    try {
+      const fechaObj = new Date(registro.fecha_hora)
+      fecha = fechaObj.toISOString().split('T')[0]
+      hora = fechaObj.toTimeString().slice(0, 5)
+    } catch (e) {
+      console.error('Error parseando fecha:', e)
+    }
+  }
+  
+  editForm.value = {
+    tipo_actividad: registro.tipo_actividad || '',
+    descripcion: registro.descripcion || '',
+    categoria_actividad: registro.categoria_actividad || '',
+    categoria_actividad_otro: registro.categoria_actividad_otro || '',
+    fecha: fecha,
+    hora: hora
+  }
+  showEditModal.value = true
+}
+
+const cerrarModalEditar = () => {
+  showEditModal.value = false
+  registroEditando.value = null
+  editForm.value = {
+    tipo_actividad: '',
+    descripcion: '',
+    categoria_actividad: '',
+    categoria_actividad_otro: '',
+    fecha: '',
+    hora: ''
+  }
+  isEditSaving.value = false
+}
+
+const guardarEdicion = async () => {
+  if (!registroEditando.value || !editForm.value.tipo_actividad) {
+    mostrarToast('Por favor selecciona un tipo de actividad', 'error')
+    return
+  }
+
+  if (!editForm.value.categoria_actividad) {
+    mostrarToast('Por favor selecciona una categoría de actividad', 'error')
+    return
+  }
+
+  if (editForm.value.categoria_actividad === 'Otro' && !editForm.value.categoria_actividad_otro?.trim()) {
+    mostrarToast('Por favor especifica la categoría', 'error')
+    return
+  }
+
+  isEditSaving.value = true
+  
+  try {
+    const token = localStorage.getItem('admin_token')
+    
+    // Construir fecha_hora combinando fecha y hora
+    let fechaHoraStr = null
+    if (editForm.value.fecha && editForm.value.hora) {
+      fechaHoraStr = `${editForm.value.fecha}T${editForm.value.hora}:00`
+    }
+    
+    const response = await axios.put(
+      `${API_URL}/api/registros/${registroEditando.value.id}`,
+      {
+        tipo_actividad: editForm.value.tipo_actividad,
+        descripcion: editForm.value.descripcion?.trim() || '',
+        categoria_actividad: editForm.value.categoria_actividad,
+        categoria_actividad_otro: editForm.value.categoria_actividad === 'Otro' ? editForm.value.categoria_actividad_otro?.trim() : '',
+        fecha_hora: fechaHoraStr
+      },
+      {
+        headers: { 'Authorization': `Bearer ${token}` },
+        timeout: 15000
+      }
+    )
+
+    if (response.data) {
+      // Actualizar el registro en la lista local
+      const indexRegistros = registros.value.findIndex(r => r.id === registroEditando.value.id)
+      const indexFiltrados = registrosFiltrados.value.findIndex(r => r.id === registroEditando.value.id)
+      
+      const registroActualizado = {
+        ...registroEditando.value,
+        tipo_actividad: editForm.value.tipo_actividad,
+        descripcion: editForm.value.descripcion?.trim() || '',
+        categoria_actividad: editForm.value.categoria_actividad,
+        categoria_actividad_otro: editForm.value.categoria_actividad === 'Otro' ? editForm.value.categoria_actividad_otro?.trim() : '',
+        fecha_hora: fechaHoraStr || registroEditando.value.fecha_hora
+      }
+      
+      if (indexRegistros !== -1) {
+        registros.value[indexRegistros] = registroActualizado
+      }
+      if (indexFiltrados !== -1) {
+        registrosFiltrados.value[indexFiltrados] = registroActualizado
+      }
+      
+      mostrarToast('Registro actualizado correctamente', 'success')
+      cerrarModalEditar()
+    }
+  } catch (error) {
+    console.error('Error al actualizar registro:', error)
+    const mensaje = error.response?.data?.detail || 'Error al actualizar el registro'
+    mostrarToast(mensaje, 'error')
+  } finally {
+    isEditSaving.value = false
+  }
+}
+
 const cerrarModal = () => {
   showModal.value = false
   if (map) {
@@ -3585,7 +3985,7 @@ const logout = () => {
 }
 
 .page-content {
-  padding: clamp(8px, 1.5vw, 16px) clamp(16px, 4vw, 32px);
+  padding: clamp(8px, 1.5vw, 16px) clamp(12px, 2vw, 20px);
   box-sizing: border-box;
   width: 100%;
 }
@@ -4232,7 +4632,7 @@ const logout = () => {
     0 2px 16px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255,255,255,0.8);
   border: 1px solid rgba(76, 175, 80, 0.1);
-  padding: clamp(16px, 4vw, 24px);
+  padding: clamp(12px, 2.5vw, 18px);
   transition: all 0.3s ease;
   position: relative;
   z-index: 5;
@@ -4404,7 +4804,7 @@ const logout = () => {
 
 .registros-table {
   width: 100%;
-  min-width: clamp(500px, 70vw, 700px);
+  min-width: clamp(500px, 85vw, 900px);
   border-collapse: collapse;
   position: relative;
 }
@@ -4478,11 +4878,12 @@ const logout = () => {
 
 .ubicacion {
   font-family: monospace;
-  font-size: clamp(8px, 1.8vw, 10px);
+  font-size: clamp(7px, 1.6vw, 9px);
+  line-height: 1.3;
 }
 
 .descripcion {
-  max-width: clamp(120px, 16vw, 160px);
+  max-width: clamp(110px, 14vw, 140px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4511,8 +4912,8 @@ const logout = () => {
 }
 
 .btn-ver {
-  width: clamp(24px, 4vw, 28px);
-  height: clamp(24px, 4vw, 28px);
+  width: 32px;
+  height: 32px;
   padding: 0;
   background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
@@ -4520,7 +4921,7 @@ const logout = () => {
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -4546,20 +4947,18 @@ const logout = () => {
 
 .btn-ver:hover {
   background: linear-gradient(135deg, #43A047, #388E3C);
-  transform: translateY(-2px) scale(1.1);
-  box-shadow: 
-    0 6px 16px rgba(76, 175, 80, 0.4),
-    0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
 .btn-ver:active {
-  transform: translateY(-1px) scale(1.05);
+  transform: scale(1.05);
   box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
 }
 
 .btn-ver svg {
-  width: clamp(14px, 3vw, 16px);
-  height: clamp(14px, 3vw, 16px);
+  width: 16px;
+  height: 16px;
   transition: all 0.3s ease;
 }
 
@@ -4568,8 +4967,8 @@ const logout = () => {
 }
 
 .btn-eliminar {
-  width: clamp(24px, 4vw, 28px);
-  height: clamp(24px, 4vw, 28px);
+  width: 32px;
+  height: 32px;
   padding: 0;
   background: linear-gradient(135deg, #f44336, #d32f2f);
   color: white;
@@ -4577,7 +4976,7 @@ const logout = () => {
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.25);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -4603,67 +5002,18 @@ const logout = () => {
 
 .btn-eliminar:hover {
   background: linear-gradient(135deg, #d32f2f, #c62828);
-  transform: translateY(-2px) scale(1.1);
-  box-shadow: 
-    0 6px 16px rgba(244, 67, 54, 0.4),
-    0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.btn-eliminar:active {
-  transform: translateY(-1px) scale(1.05);
-  box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
-}
-
-.btn-eliminar svg {
-  width: clamp(14px, 3vw, 16px);
-  height: clamp(14px, 3vw, 16px);
-  transition: all 0.3s ease;
-}
-
-.btn-eliminar:hover svg {
   transform: scale(1.1);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.25);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-left: 6px;
-}
-
-.btn-eliminar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  transition: left 0.5s ease;
-}
-
-.btn-eliminar:hover::before {
-  left: 100%;
-}
-
-.btn-eliminar:hover {
-  background: linear-gradient(135deg, #d32f2f, #c62828);
-  transform: translateY(-2px) scale(1.1);
-  box-shadow: 
-    0 6px 16px rgba(244, 67, 54, 0.4),
-    0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
 }
 
 .btn-eliminar:active {
-  transform: translateY(-1px) scale(1.05);
+  transform: scale(1.05);
   box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
 }
 
 .btn-eliminar svg {
-  width: clamp(14px, 3vw, 16px);
-  height: clamp(14px, 3vw, 16px);
+  width: 16px;
+  height: 16px;
   transition: all 0.3s ease;
 }
 
@@ -4771,7 +5121,7 @@ const logout = () => {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   padding: 8px 0;
 }
 
@@ -4782,6 +5132,7 @@ const logout = () => {
   align-items: center;
   justify-content: center;
   gap: 4px;
+  min-width: 50px;
 }
 
 /* Label para botón ver/detalles (verde) */
@@ -4789,10 +5140,12 @@ const logout = () => {
   font-size: 10px;
   color: #4CAF50;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  margin-top: 2px;
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  margin-top: 3px;
+  opacity: 0.85;
+  transition: all 0.3s ease;
+  text-align: center;
 }
 
 .action-container:hover .btn-label {
@@ -4800,15 +5153,35 @@ const logout = () => {
   color: #43A047;
 }
 
+/* Label para botón editar (morado) */
+.btn-label-editar {
+  font-size: 10px;
+  color: #6366f1;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  margin-top: 3px;
+  opacity: 0.85;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.action-container:hover .btn-label-editar {
+  opacity: 1;
+  color: #5558e3;
+}
+
 /* Label para botón eliminar (rojo) */
 .btn-label-eliminar {
   font-size: 10px;
   color: #f44336;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  margin-top: 2px;
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  margin-top: 3px;
+  opacity: 0.85;
+  transition: all 0.3s ease;
+  text-align: center;
 }
 
 .action-container:hover .btn-label-eliminar {
@@ -4818,53 +5191,53 @@ const logout = () => {
 
 /* Estilos para columnas específicas de la tabla */
 .col-id {
-  width: 60px !important;
-  max-width: 60px !important;
-  min-width: 60px !important;
+  width: 55px !important;
+  max-width: 55px !important;
+  min-width: 55px !important;
 }
 
 .col-usuario {
-  width: 180px !important;
-  max-width: 180px !important;
-  min-width: 180px !important;
+  width: 170px !important;
+  max-width: 170px !important;
+  min-width: 170px !important;
   text-align: left !important;
 }
 
 .col-foto {
-  width: 60px !important;
-  max-width: 60px !important;
-  min-width: 60px !important;
+  width: 55px !important;
+  max-width: 55px !important;
+  min-width: 55px !important;
 }
 
 .col-tipo {
-  width: 80px !important;
-  max-width: 80px !important;
-  min-width: 80px !important;
+  width: 75px !important;
+  max-width: 75px !important;
+  min-width: 75px !important;
 }
 
 .col-ubicacion {
-  width: 120px !important;
-  max-width: 120px !important;
-  min-width: 120px !important;
+  width: 110px !important;
+  max-width: 110px !important;
+  min-width: 110px !important;
 }
 
 .col-descripcion {
-  width: 150px !important;
-  max-width: 150px !important;
-  min-width: 150px !important;
+  width: 140px !important;
+  max-width: 140px !important;
+  min-width: 140px !important;
   text-align: left !important;
 }
 
 .col-fecha {
-  width: 100px !important;
-  max-width: 100px !important;
-  min-width: 100px !important;
+  width: 90px !important;
+  max-width: 90px !important;
+  min-width: 90px !important;
 }
 
 .col-acciones {
-  width: 80px !important;
-  max-width: 80px !important;
-  min-width: 80px !important;
+  width: 160px !important;
+  max-width: 160px !important;
+  min-width: 160px !important;
 }
 
 /* Estilos para contenedor de fecha y hora */
@@ -5240,7 +5613,7 @@ const logout = () => {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.95);
-  z-index: 2000;
+  z-index: 11000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5589,6 +5962,709 @@ const logout = () => {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* ========== MODAL DE EDICIÓN DE REGISTRO ========== */
+.modal-overlay-edit {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(6px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-edit-container {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 95%;
+  max-width: 580px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.modal-edit-header {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.header-icon-wrapper {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-edit-header h3 {
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 500;
+  display: block;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-close-edit {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-close-edit:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.1) rotate(90deg);
+}
+
+/* Área de scroll */
+.modal-edit-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Sección de solo lectura */
+.modal-edit-readonly-section {
+  padding: 20px 24px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 16px 0;
+}
+
+.section-title svg {
+  color: #94a3b8;
+}
+
+/* Grid de 2 columnas para ubicación y foto */
+.readonly-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.readonly-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.readonly-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.readonly-card-icon-muted {
+  background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%);
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.3);
+}
+
+.readonly-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.readonly-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.readonly-card-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.readonly-photo-preview-compact {
+  margin-top: 4px;
+}
+
+.edit-photo-thumb-compact {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid #e2e8f0;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-photo-thumb-compact:hover {
+  transform: scale(1.08);
+  border-color: #8b5cf6;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.readonly-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.readonly-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.readonly-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.readonly-icon-muted {
+  background: #cbd5e1;
+}
+
+.readonly-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.readonly-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.readonly-value {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.readonly-muted {
+  color: #94a3b8;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.readonly-photo-item {
+  align-items: flex-start;
+}
+
+.readonly-photo-preview {
+  margin-top: 8px;
+}
+
+.edit-photo-thumb {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid #e2e8f0;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-photo-thumb:hover {
+  transform: scale(1.05);
+  border-color: #8b5cf6;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.photo-hint {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 6px;
+}
+
+/* Body del formulario */
+.modal-edit-body {
+  padding: 20px 24px 24px 24px;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-label svg {
+  color: #8b5cf6;
+  flex-shrink: 0;
+}
+
+.optional-label {
+  font-size: 11px;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-left: auto;
+}
+
+/* Selector de tipo (Campo/Gabinete) */
+.tipo-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.tipo-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.tipo-btn svg {
+  transition: all 0.25s ease;
+}
+
+.tipo-btn:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.tipo-btn.tipo-campo.active {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  border-color: #22c55e;
+  color: #166534;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.25);
+}
+
+.tipo-btn.tipo-campo.active svg {
+  color: #22c55e;
+}
+
+.tipo-btn.tipo-gabinete.active {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #f59e0b;
+  color: #92400e;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25);
+}
+
+.tipo-btn.tipo-gabinete.active svg {
+  color: #f59e0b;
+}
+
+/* Select de categoría */
+.form-select {
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #334155;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 44px;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+
+.form-select:hover:not(:disabled) {
+  border-color: #cbd5e1;
+}
+
+.form-select:disabled {
+  background-color: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Input de texto */
+.form-input {
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #334155;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+
+.form-input:hover:not(:disabled) {
+  border-color: #cbd5e1;
+}
+
+.form-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Textarea */
+.form-textarea {
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #334155;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+
+.form-textarea:hover {
+  border-color: #cbd5e1;
+}
+
+.form-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.char-counter {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: right;
+  margin-top: -4px;
+}
+
+/* Footer */
+.modal-edit-footer {
+  padding: 18px 24px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.btn-cancel-edit {
+  padding: 12px 24px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cancel-edit:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.btn-cancel-edit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-save-edit {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+}
+
+.btn-save-edit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+}
+
+.btn-save-edit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-save-edit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive modal de edición */
+@media (max-width: 768px) {
+  .modal-edit-container {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .modal-edit-header {
+    padding: 12px 16px;
+  }
+
+  .header-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .modal-edit-header h3 {
+    font-size: 16px;
+  }
+
+  .modal-edit-readonly-section,
+  .modal-edit-body {
+    padding: 16px 20px;
+  }
+
+  .readonly-grid-2col {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .readonly-card {
+    padding: 14px;
+  }
+
+  .readonly-card-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .form-row-2col {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .tipo-selector {
+    gap: 10px;
+  }
+
+  .tipo-btn {
+    padding: 14px 10px;
+    font-size: 13px;
+  }
+
+  .modal-edit-footer {
+    padding: 14px 20px;
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .btn-cancel-edit,
+  .btn-save-edit {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 24px;
+  }
+
+  .edit-photo-thumb {
+    width: 100px;
+    height: 75px;
+  }
+}
+
+/* Botón de editar en acciones */
+.btn-editar {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.btn-editar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-editar:hover::before {
+  left: 100%;
+}
+
+.btn-editar svg {
+  width: 16px;
+  height: 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-editar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.btn-editar:active {
+  transform: scale(1.05);
+  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.3);
+}
+
+.btn-editar:hover svg {
+  transform: scale(1.1);
+}
+
+.btn-label-editar {
+  font-size: 10px;
+  color: #6366f1;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  margin-top: 3px;
 }
 
 /* Responsive */

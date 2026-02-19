@@ -60,6 +60,12 @@ const routes = [
     meta: { requiresAuth: true, requiredPermission: 'registros' }
   },
   {
+    path: '/debug-buscador',
+    name: 'DebugBuscador',
+    component: () => import('../views/DebugBuscadorView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/configuracion',
     name: 'Configuracion',
     component: ConfiguracionView,

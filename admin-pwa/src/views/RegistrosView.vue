@@ -1327,7 +1327,7 @@ const buscarUsuarioEnBackend = async (termino) => {
     // Hacer UNA SOLA búsqueda pasando el término en todos los campos (backend usa OR)
     console.log(`📡 Llamando al backend con búsqueda unificada (OR)...`)
     
-    const response = await axios.get(`${API_URL}/usuarios/buscar`, {
+    const response = await axios.get(`${API_URL}/api/buscar-usuarios`, {
       headers: { 'Authorization': `Bearer ${token}` },
       params: { 
         nombre: terminoLimpio,

@@ -9180,7 +9180,7 @@ async def contar_manuales_no_leidos(usuario_id: int):
 @app.get("/api/buscar-usuarios")
 async def buscar_usuarios_api(correo: Optional[str] = None, nombre: Optional[str] = None,
                               curp: Optional[str] = None, cargo: Optional[str] = None):
-    """Buscar usuarios por diferentes criterios con OR - Sin conflicto de rutas"""
+    """Buscar usuarios por diferentes criterios con OR - Búsqueda exacta o parcial según el formato"""
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexion a la base de datos")
@@ -9188,26 +9188,44 @@ async def buscar_usuarios_api(correo: Optional[str] = None, nombre: Optional[str
         condiciones = []
         parametros = []
         
-        if correo:
-            condiciones.append("correo ILIKE %s")
-            parametros.append(f"%{correo}%")
-        
-        if nombre:
-            condiciones.append("nombre_completo ILIKE %s")
-            parametros.append(f"%{nombre}%")
-        
-        if curp:
-            condiciones.append("curp ILIKE %s")
-            parametros.append(f"%{curp.upper()}%")
-        
-        if cargo:
-            condiciones.append("cargo ILIKE %s")
-            parametros.append(f"%{cargo}%")
-        
-        if not condiciones:
+        # Determinar tipo de búsqueda basado en el formato del término
+        termino = correo or nombre or curp or cargo
+        if not termino:
             raise HTTPException(status_code=400, detail="Debe proporcionar al menos un criterio de busqueda")
         
-        # Usar OR para buscar en cualquiera de los campos
+        termino = termino.strip()
+        
+        # Si parece un correo completo (tiene @ y dominio completo), buscar EXACTO
+        if '@' in termino and '.' in termino.split('@')[-1] and len(termino.split('@')[-1].split('.')[-1]) >= 2:
+            print(f"🎯 Búsqueda EXACTA por correo: {termino}")
+            condiciones.append("correo ILIKE %s")
+            parametros.append(termino)
+        
+        # Si parece una CURP completa (18 caracteres alfanuméricos), buscar EXACTO
+        elif len(termino) == 18 and termino.replace(' ', '').isalnum():
+            print(f"🎯 Búsqueda EXACTA por CURP: {termino}")
+            condiciones.append("curp ILIKE %s")
+            parametros.append(termino.upper())
+        
+        # Si tiene 13+ caracteres y solo alfanuméricos, puede ser CURP parcial
+        elif len(termino) >= 13 and termino.replace(' ', '').isalnum():
+            print(f"🔍 Búsqueda PARCIAL por CURP: {termino}")
+            condiciones.append("curp ILIKE %s")
+            parametros.append(f"%{termino.upper()}%")
+        
+        # Si parece parte de un correo (tiene @), buscar parcial en correo
+        elif '@' in termino:
+            print(f"🔍 Búsqueda PARCIAL por correo: {termino}")
+            condiciones.append("correo ILIKE %s")
+            parametros.append(f"%{termino}%")
+        
+        # En cualquier otro caso, buscar por nombre (parcial)
+        else:
+            print(f"🔍 Búsqueda PARCIAL por nombre: {termino}")
+            condiciones.append("nombre_completo ILIKE %s")
+            parametros.append(f"%{termino}%")
+        
+        # Construir consulta
         consulta = f"""
             SELECT id, correo, nombre_completo, cargo, supervisor, curp, telefono
             FROM usuarios
@@ -9232,7 +9250,6 @@ async def buscar_usuarios_api(correo: Optional[str] = None, nombre: Optional[str
                 "telefono": row[6]
             })
         
-        print(f"🔍 Búsqueda con criterios: correo={correo}, nombre={nombre}, curp={curp}, cargo={cargo}")
         print(f"✅ Se encontraron {len(usuarios)} usuarios")
         
         return {"usuarios": usuarios, "total": len(usuarios)}

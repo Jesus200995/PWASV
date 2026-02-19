@@ -1354,6 +1354,10 @@ const buscarUsuarioEnBackend = async (termino) => {
       console.log(`   👤 ${index + 1}. ID: ${u.id} | Nombre: ${u.nombre_completo} | CURP: ${u.curp || 'N/A'} | Correo: ${u.correo}`)
     })
     
+    // CAMBIO: Limpiar registros previos para mostrar SOLO los del usuario buscado
+    console.log(`\n🗑️ Limpiando registros previos para mostrar solo los del usuario buscado...`)
+    registros.value = []
+    
     // Cargar registros de cada usuario encontrado
     console.log(`\n📥 Cargando registros de ${usuariosEncontrados.length} usuario(s)...`)
     
@@ -1361,24 +1365,19 @@ const buscarUsuarioEnBackend = async (termino) => {
     
     for (const usuario of usuariosEncontrados) {
       if (usuario.id) {
-        // Verificar si ya tenemos registros de este usuario
-        const registrosExistentes = registros.value.filter(r => r.usuario_id === usuario.id)
-        
-        if (registrosExistentes.length > 0) {
-          console.log(`   ⏭️ Usuario ${usuario.id} (${usuario.nombre_completo}) ya tiene ${registrosExistentes.length} registros cargados`)
-        } else {
-          console.log(`   ⬇️ Cargando registros del usuario ${usuario.id} (${usuario.nombre_completo})...`)
-          const antes = registros.value.length
-          await cargarRegistrosParaUsuario(usuario.id)
-          const despues = registros.value.length
-          totalRegistrosNuevos += (despues - antes)
-        }
+        console.log(`   ⬇️ Cargando registros del usuario ${usuario.id} (${usuario.nombre_completo})...`)
+        const antes = registros.value.length
+        await cargarRegistrosParaUsuario(usuario.id)
+        const despues = registros.value.length
+        totalRegistrosNuevos += (despues - antes)
       }
     }
     
-    console.log(`\n📊 Total de registros en memoria después de búsqueda: ${registros.value.length}`)
+    console.log(`\n📊 Total de registros cargados: ${registros.value.length}`)
     if (totalRegistrosNuevos > 0) {
-      console.log(`   ✅ Agregados ${totalRegistrosNuevos} registros nuevos`)
+      console.log(`   ✅ ${totalRegistrosNuevos} registros del usuario buscado`)
+    } else {
+      console.log(`   ⚠️ El usuario no tiene registros de actividades`)
     }
     console.log(`===== FIN DE BÚSQUEDA =====\n`)
     
@@ -1412,16 +1411,25 @@ const buscarEnTiempoReal = async () => {
       console.log(`🚀 Ejecutando búsqueda para: "${termino}"`)
       const usuariosEncontrados = await buscarUsuarioEnBackend(termino)
       
-      // Después de cargar los registros, aplicar el filtro
-      console.log(`🔎 Aplicando filtro local...`)
-      await filtrarRegistros()
+      // CAMBIO: Después de cargar los registros del usuario, mostrarlos directamente
+      // NO aplicar filtro local porque ya tenemos exactamente los registros que queremos
+      if (usuariosEncontrados.length > 0) {
+        console.log(`✅ Mostrando todos los registros del usuario encontrado`)
+        registrosFiltrados.value = [...registros.value]
+        aplicarOrdenamiento()
+        actualizarUsuariosUnicos()
+        actualizarFiltrosActivos()
+      } else {
+        console.log(`⚠️ No se encontraron usuarios, mostrando registros vacíos`)
+        registrosFiltrados.value = []
+      }
       
-      console.log(`✅ Búsqueda completada. Registros filtrados: ${registrosFiltrados.value.length}`)
+      console.log(`✅ Búsqueda completada. Registros mostrados: ${registrosFiltrados.value.length}`)
     }, 500) // Esperar 500ms después de que el usuario deje de escribir
   } else if (termino.length === 0) {
-    // Si se borra la búsqueda, mostrar todos los registros
-    console.log('🔄 Búsqueda vacía, mostrando todos los registros')
-    filtrarRegistros()
+    // Si se borra la búsqueda, recargar todos los registros
+    console.log('🔄 Búsqueda vacía, recargando registros...')
+    await cargarRegistros()
   } else {
     // Si es menos de 3 caracteres, solo filtrar localmente
     console.log(`📝 Búsqueda corta (${termino.length} caracteres), solo filtro local`)
@@ -1445,9 +1453,13 @@ const filtrarRegistros = async () => {
   }
 
   // Filtro por texto de búsqueda (ahora incluye CURP)
-  if (searchTerm.value && searchTerm.value.trim()) {
-    const termino = searchTerm.value.trim().toLowerCase()
-    console.log(`🔎 Aplicando filtro de búsqueda: "${termino}"`)
+  // NOTA: Este filtro solo se aplica cuando NO se ha hecho una búsqueda de usuario
+  // Si se buscó un usuario, los registros ya están filtrados por usuario
+  const terminoBusqueda = searchTerm.value?.trim() || ''
+  if (terminoBusqueda && terminoBusqueda.length < 3) {
+    // Solo filtrar localmente si es una búsqueda corta (no se fue al backend)
+    const termino = terminoBusqueda.toLowerCase()
+    console.log(`🔎 Aplicando filtro local corto: "${termino}"`)
     
     const antesDeFiltrar = filtrados.length
     
@@ -1729,9 +1741,10 @@ const actualizarFiltrosActivos = () => {
 }
 
 // Nuevas funciones para filtros avanzados
-const limpiarBusqueda = () => {
+const limpiarBusqueda = async () => {
   searchTerm.value = ''
-  filtrarRegistros()
+  console.log('🔄 Limpiando búsqueda, recargando registros iniciales...')
+  await cargarRegistros()
 }
 
 const seleccionarFechaRapida = (tipo) => {

@@ -1,0 +1,81 @@
+==============================================================================
+🔥 COMANDOS LISTOS PARA COPIAR Y PEGAR 🔥
+==============================================================================
+
+PASO 1: Conectar al servidor
+-----------------------------
+ssh root@31.97.8.51
+
+
+PASO 2: Encontrar main.py
+--------------------------
+find /root /home -name 'main.py' -type f 2>/dev/null | grep -v node_modules
+
+(Copia la ruta que te muestre, ejemplo: /root/backend/main.py)
+
+
+PASO 3-8: Ejecutar TODO DE UNA VEZ
+-----------------------------------
+Reemplaza "/root/backend/main.py" con la ruta que encontraste en el paso 2.
+Luego COPIA Y PEGA TODO ESTE BLOQUE:
+
+-------- COPIAR DESDE AQUÍ --------
+
+RUTA="/root/backend/main.py"
+
+echo "=== 1. Haciendo backup ==="
+cp $RUTA $RUTA.backup_$(date +%Y%m%d_%H%M%S)
+echo "✅ Backup creado"
+
+echo ""
+echo "=== 2. Verificando línea actual ==="
+grep -n "join.*condiciones" $RUTA | head -2
+
+echo ""
+echo "=== 3. Aplicando cambio (AND -> OR) ==="
+sed -i "s/WHERE {' AND '.join(condiciones)}/WHERE {' OR '.join(condiciones)}/g" $RUTA
+echo "✅ Cambio aplicado"
+
+echo ""
+echo "=== 4. Verificando cambio ==="
+grep -n "OR.*join.*condiciones" $RUTA
+
+echo ""
+echo "=== 5. Reiniciando servicio ==="
+if command -v pm2 &> /dev/null; then
+    echo "Usando PM2..."
+    pm2 restart all
+elif systemctl list-units | grep -q "pwa.*backend"; then
+    echo "Usando systemctl..."
+    systemctl restart pwa-backend
+else
+    echo "⚠️ Reinicia manualmente el proceso uvicorn"
+fi
+
+echo ""
+echo "=== 6. Verificando proceso ==="
+ps aux | grep -E '[u]vicorn|[p]ython.*main' | head -2
+
+echo ""
+echo "✅ COMPLETADO!"
+
+-------- HASTA AQUÍ --------
+
+
+DESPUÉS DEL DESPLIEGUE:
+-----------------------
+1. Sal del servidor:
+   exit
+
+2. Inicia el admin local:
+   cd admin-pwa
+   npm run dev
+
+3. Abre en navegador:
+   http://localhost:5173/#/debug-buscador
+
+4. Busca: ROCR820619MSLJSB05
+
+==============================================================================
+¡LISTO! Solo ejecuta estos comandos en orden 👆
+==============================================================================

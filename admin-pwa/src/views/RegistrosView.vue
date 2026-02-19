@@ -48,11 +48,16 @@
                 <input 
                   v-model="searchTerm" 
                   type="text" 
-                  placeholder="Buscar por usuario, descripción o ubicación..." 
+                  placeholder="Buscar por CURP, correo, nombre, descripción o ubicación..." 
                   class="search-input"
-                  @input="filtrarRegistros"
+                  @input="buscarEnTiempoReal"
                 >
-                <button v-if="searchTerm" @click="limpiarBusqueda" class="clear-search-btn">
+                <span v-if="buscandoUsuario" class="search-loading">
+                  <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                  </svg>
+                </span>
+                <button v-if="searchTerm && !buscandoUsuario" @click="limpiarBusqueda" class="clear-search-btn">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -953,6 +958,7 @@ const direccionOrdenamiento = ref('desc') // Por defecto más reciente primero
 
 // Variables para filtros avanzados (nuevas)
 const searchTerm = ref('')
+const buscandoUsuario = ref(false)
 const filtroFechaInicio = ref('')
 const filtroFechaFin = ref('')
 const filtroRapido = ref('')
@@ -1301,6 +1307,95 @@ const calcularEstadisticasLocales = () => {
   }
 }
 
+// Variable para debounce de búsqueda
+let busquedaTimeout = null
+
+// Función para buscar usuarios en el backend y cargar sus registros
+const buscarUsuarioEnBackend = async (termino) => {
+  if (!termino || termino.length < 3) return []
+  
+  buscandoUsuario.value = true
+  
+  try {
+    const token = localStorage.getItem('admin_token')
+    const terminoLimpio = termino.trim()
+    
+    console.log(`🔍 Buscando usuarios con término: "${terminoLimpio}"...`)
+    
+    // Hacer 3 búsquedas en paralelo (una por cada campo) para buscar con OR
+    const busquedas = [
+      axios.get(`${API_URL}/usuarios/buscar`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        params: { nombre: terminoLimpio },
+        timeout: 10000
+      }).catch(() => ({ data: { usuarios: [] } })),
+      
+      axios.get(`${API_URL}/usuarios/buscar`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        params: { correo: terminoLimpio },
+        timeout: 10000
+      }).catch(() => ({ data: { usuarios: [] } })),
+      
+      axios.get(`${API_URL}/usuarios/buscar`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        params: { curp: terminoLimpio },
+        timeout: 10000
+      }).catch(() => ({ data: { usuarios: [] } }))
+    ]
+    
+    const resultados = await Promise.all(busquedas)
+    
+    // Combinar resultados y eliminar duplicados
+    const usuariosMap = new Map()
+    resultados.forEach(response => {
+      const usuarios = response.data?.usuarios || []
+      usuarios.forEach(usuario => {
+        if (usuario.id) {
+          usuariosMap.set(usuario.id, usuario)
+        }
+      })
+    })
+    
+    const usuariosEncontrados = Array.from(usuariosMap.values())
+    console.log(`✅ Encontrados ${usuariosEncontrados.length} usuarios únicos`)
+    
+    // Cargar registros de cada usuario encontrado
+    for (const usuario of usuariosEncontrados) {
+      if (usuario.id && !registros.value.some(r => r.usuario_id === usuario.id)) {
+        console.log(`📥 Cargando registros del usuario: ${usuario.nombre_completo}`)
+        await cargarRegistrosParaUsuario(usuario.id)
+      }
+    }
+    
+    return usuariosEncontrados
+    
+  } catch (error) {
+    console.warn('⚠️ Error buscando usuario en backend:', error)
+    return []
+  } finally {
+    buscandoUsuario.value = false
+  }
+}
+
+// Función de búsqueda en tiempo real con debounce
+const buscarEnTiempoReal = async () => {
+  // Limpiar timeout anterior
+  if (busquedaTimeout) {
+    clearTimeout(busquedaTimeout)
+  }
+  
+  // Si el término de búsqueda tiene 3 o más caracteres, buscar en el backend
+  if (searchTerm.value && searchTerm.value.trim().length >= 3) {
+    busquedaTimeout = setTimeout(async () => {
+      await buscarUsuarioEnBackend(searchTerm.value)
+      filtrarRegistros()
+    }, 500) // Esperar 500ms después de que el usuario deje de escribir
+  } else {
+    // Si es menos de 3 caracteres, solo filtrar localmente
+    filtrarRegistros()
+  }
+}
+
 const filtrarRegistros = async () => {
   let filtrados = [...registros.value]
   
@@ -1313,12 +1408,13 @@ const filtrarRegistros = async () => {
     filtrados = [...registros.value]
   }
 
-  // Filtro por texto de búsqueda
+  // Filtro por texto de búsqueda (ahora incluye CURP)
   if (searchTerm.value) {
     const termino = searchTerm.value.toLowerCase()
     filtrados = filtrados.filter(registro => 
       (registro.usuario?.nombre_completo && registro.usuario.nombre_completo.toLowerCase().includes(termino)) ||
       (registro.usuario?.correo && registro.usuario.correo.toLowerCase().includes(termino)) ||
+      (registro.usuario?.curp && registro.usuario.curp.toLowerCase().includes(termino)) ||
       (registro.descripcion && registro.descripcion.toLowerCase().includes(termino)) ||
       (registro.latitud && registro.latitud.toString().includes(termino)) ||
       (registro.longitud && registro.longitud.toString().includes(termino))
@@ -3520,6 +3616,36 @@ const logout = () => {
   width: clamp(10px, 1.5vw, 12px);
   height: clamp(10px, 1.5vw, 12px);
   color: #ef4444;
+}
+
+.search-loading {
+  position: absolute;
+  right: clamp(12px, 1.5vw, 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.search-loading svg {
+  width: clamp(14px, 2vw, 16px);
+  height: clamp(14px, 2vw, 16px);
+  color: #3b82f6;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .date-range-filter {

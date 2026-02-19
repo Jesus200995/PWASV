@@ -1320,7 +1320,9 @@ const buscarUsuarioEnBackend = async (termino) => {
     const token = localStorage.getItem('admin_token')
     const terminoLimpio = termino.trim()
     
-    console.log(`🔍 Buscando usuarios con término: "${terminoLimpio}"...`)
+    console.log(`\n🔍 ===== INICIANDO BÚSQUEDA =====`)
+    console.log(`📝 Término de búsqueda: "${terminoLimpio}"`)
+    console.log(`📊 Registros actuales en memoria: ${registros.value.length}`)
     
     // Hacer 3 búsquedas en paralelo (una por cada campo) para buscar con OR
     const busquedas = [
@@ -1328,27 +1330,38 @@ const buscarUsuarioEnBackend = async (termino) => {
         headers: { 'Authorization': `Bearer ${token}` },
         params: { nombre: terminoLimpio },
         timeout: 10000
-      }).catch(() => ({ data: { usuarios: [] } })),
+      }).catch((err) => {
+        console.log('⚠️ Búsqueda por nombre sin resultados:', err.response?.status)
+        return { data: { usuarios: [] } }
+      }),
       
       axios.get(`${API_URL}/usuarios/buscar`, {
         headers: { 'Authorization': `Bearer ${token}` },
         params: { correo: terminoLimpio },
         timeout: 10000
-      }).catch(() => ({ data: { usuarios: [] } })),
+      }).catch((err) => {
+        console.log('⚠️ Búsqueda por correo sin resultados:', err.response?.status)
+        return { data: { usuarios: [] } }
+      }),
       
       axios.get(`${API_URL}/usuarios/buscar`, {
         headers: { 'Authorization': `Bearer ${token}` },
         params: { curp: terminoLimpio },
         timeout: 10000
-      }).catch(() => ({ data: { usuarios: [] } }))
+      }).catch((err) => {
+        console.log('⚠️ Búsqueda por CURP sin resultados:', err.response?.status)
+        return { data: { usuarios: [] } }
+      })
     ]
     
     const resultados = await Promise.all(busquedas)
     
     // Combinar resultados y eliminar duplicados
     const usuariosMap = new Map()
-    resultados.forEach(response => {
+    resultados.forEach((response, index) => {
+      const campo = ['nombre', 'correo', 'CURP'][index]
       const usuarios = response.data?.usuarios || []
+      console.log(`   📋 Búsqueda por ${campo}: ${usuarios.length} resultados`)
       usuarios.forEach(usuario => {
         if (usuario.id) {
           usuariosMap.set(usuario.id, usuario)
@@ -1357,20 +1370,42 @@ const buscarUsuarioEnBackend = async (termino) => {
     })
     
     const usuariosEncontrados = Array.from(usuariosMap.values())
-    console.log(`✅ Encontrados ${usuariosEncontrados.length} usuarios únicos`)
+    console.log(`\n✅ Total usuarios únicos encontrados: ${usuariosEncontrados.length}`)
+    
+    if (usuariosEncontrados.length === 0) {
+      console.log('❌ No se encontraron usuarios con ese criterio')
+      return []
+    }
+    
+    // Mostrar info de usuarios encontrados
+    usuariosEncontrados.forEach(u => {
+      console.log(`   👤 ID: ${u.id} | Nombre: ${u.nombre_completo} | CURP: ${u.curp || 'N/A'}`)
+    })
     
     // Cargar registros de cada usuario encontrado
+    console.log(`\n📥 Cargando registros de ${usuariosEncontrados.length} usuario(s)...`)
+    
     for (const usuario of usuariosEncontrados) {
-      if (usuario.id && !registros.value.some(r => r.usuario_id === usuario.id)) {
-        console.log(`📥 Cargando registros del usuario: ${usuario.nombre_completo}`)
-        await cargarRegistrosParaUsuario(usuario.id)
+      if (usuario.id) {
+        // Verificar si ya tenemos registros de este usuario
+        const registrosExistentes = registros.value.filter(r => r.usuario_id === usuario.id)
+        
+        if (registrosExistentes.length > 0) {
+          console.log(`   ⏭️ Usuario ${usuario.id} (${usuario.nombre_completo}) ya tiene ${registrosExistentes.length} registros cargados`)
+        } else {
+          console.log(`   ⬇️ Cargando registros del usuario ${usuario.id} (${usuario.nombre_completo})...`)
+          await cargarRegistrosParaUsuario(usuario.id)
+        }
       }
     }
+    
+    console.log(`\n📊 Total de registros en memoria después de búsqueda: ${registros.value.length}`)
+    console.log(`===== FIN DE BÚSQUEDA =====\n`)
     
     return usuariosEncontrados
     
   } catch (error) {
-    console.warn('⚠️ Error buscando usuario en backend:', error)
+    console.error('❌ Error buscando usuario en backend:', error)
     return []
   } finally {
     buscandoUsuario.value = false
@@ -1384,19 +1419,36 @@ const buscarEnTiempoReal = async () => {
     clearTimeout(busquedaTimeout)
   }
   
+  const termino = searchTerm.value?.trim() || ''
+  
   // Si el término de búsqueda tiene 3 o más caracteres, buscar en el backend
-  if (searchTerm.value && searchTerm.value.trim().length >= 3) {
+  if (termino.length >= 3) {
+    console.log(`⏳ Iniciando búsqueda en 500ms para: "${termino}"`)
     busquedaTimeout = setTimeout(async () => {
-      await buscarUsuarioEnBackend(searchTerm.value)
-      filtrarRegistros()
+      console.log(`🚀 Ejecutando búsqueda para: "${termino}"`)
+      const usuariosEncontrados = await buscarUsuarioEnBackend(termino)
+      
+      // Después de cargar los registros, aplicar el filtro
+      console.log(`🔎 Aplicando filtro local...`)
+      await filtrarRegistros()
+      
+      console.log(`✅ Búsqueda completada. Registros filtrados: ${registrosFiltrados.value.length}`)
     }, 500) // Esperar 500ms después de que el usuario deje de escribir
+  } else if (termino.length === 0) {
+    // Si se borra la búsqueda, mostrar todos los registros
+    console.log('🔄 Búsqueda vacía, mostrando todos los registros')
+    filtrarRegistros()
   } else {
     // Si es menos de 3 caracteres, solo filtrar localmente
+    console.log(`📝 Búsqueda corta (${termino.length} caracteres), solo filtro local`)
     filtrarRegistros()
   }
 }
 
 const filtrarRegistros = async () => {
+  console.log(`\n🔍 ===== INICIANDO FILTRADO =====`)
+  console.log(`📊 Total de registros en memoria: ${registros.value.length}`)
+  
   let filtrados = [...registros.value]
   
   // Actualizar usuariosUnicos basado en los registros actuales
@@ -1409,16 +1461,45 @@ const filtrarRegistros = async () => {
   }
 
   // Filtro por texto de búsqueda (ahora incluye CURP)
-  if (searchTerm.value) {
-    const termino = searchTerm.value.toLowerCase()
-    filtrados = filtrados.filter(registro => 
-      (registro.usuario?.nombre_completo && registro.usuario.nombre_completo.toLowerCase().includes(termino)) ||
-      (registro.usuario?.correo && registro.usuario.correo.toLowerCase().includes(termino)) ||
-      (registro.usuario?.curp && registro.usuario.curp.toLowerCase().includes(termino)) ||
-      (registro.descripcion && registro.descripcion.toLowerCase().includes(termino)) ||
-      (registro.latitud && registro.latitud.toString().includes(termino)) ||
-      (registro.longitud && registro.longitud.toString().includes(termino))
-    )
+  if (searchTerm.value && searchTerm.value.trim()) {
+    const termino = searchTerm.value.trim().toLowerCase()
+    console.log(`🔎 Aplicando filtro de búsqueda: "${termino}"`)
+    
+    const antesDeFiltrar = filtrados.length
+    
+    filtrados = filtrados.filter(registro => {
+      // Asegurarse de que el registro tenga información de usuario
+      if (!registro.usuario) {
+        return false
+      }
+      
+      const nombre = (registro.usuario.nombre_completo || '').toLowerCase()
+      const correo = (registro.usuario.correo || '').toLowerCase()
+      const curp = (registro.usuario.curp || '').toLowerCase()
+      const descripcion = (registro.descripcion || '').toLowerCase()
+      const latitud = registro.latitud ? registro.latitud.toString() : ''
+      const longitud = registro.longitud ? registro.longitud.toString() : ''
+      
+      const coincide = 
+        nombre.includes(termino) ||
+        correo.includes(termino) ||
+        curp.includes(termino) ||
+        descripcion.includes(termino) ||
+        latitud.includes(termino) ||
+        longitud.includes(termino)
+      
+      return coincide
+    })
+    
+    console.log(`   ✅ Registros después de búsqueda: ${filtrados.length} (filtrados: ${antesDeFiltrar - filtrados.length})`)
+    
+    // Mostrar algunos ejemplos de registros que coinciden
+    if (filtrados.length > 0 && filtrados.length <= 5) {
+      console.log(`   📋 Registros encontrados:`)
+      filtrados.forEach((r, i) => {
+        console.log(`      ${i+1}. ${r.usuario?.nombre_completo} (${r.usuario?.curp || 'Sin CURP'}) - ${r.descripcion?.substring(0, 30) || 'Sin descripción'}`)
+      })
+    }
   }
 
   // Filtro por usuario específico
@@ -1506,6 +1587,17 @@ const filtrarRegistros = async () => {
 
   registrosFiltrados.value = filtrados
   
+  console.log(`\n📊 RESULTADO FINAL DEL FILTRADO:`)
+  console.log(`   🗂️ Registros mostrados: ${filtrados.length}`)
+  console.log(`   🔢 Usuarios únicos: ${new Set(filtrados.map(r => r.usuario_id)).size}`)
+  
+  if (searchTerm.value && filtrados.length === 0) {
+    console.warn(`   ⚠️ No se encontraron registros para "${searchTerm.value}"`)
+    console.log(`   💡 Sugerencia: Verifica que el usuario tenga registros en la base de datos`)
+  }
+  
+  console.log(`===== FIN DE FILTRADO =====\n`)
+  
   // Resetear a la primera página cuando se aplican filtros
   paginaActual.value = 1
   
@@ -1523,12 +1615,12 @@ const cargarRegistrosParaUsuario = async (usuarioId) => {
     // Obtener filtro de territorio si el admin es territorial
     const territorioFilter = authService.getTerritorioFilter()
     
-    console.log(`🔍 Cargando registros para usuario ${usuarioId}...`)
+    console.log(`      🔍 Solicitando registros del usuario ${usuarioId} al backend...`)
     
     // Construir parámetros con filtro territorial si aplica
     const params = {
       page: 1,
-      page_size: 1000,
+      page_size: 5000, // Aumentar para obtener más registros
       usuario_id: usuarioId
     }
     
@@ -1542,26 +1634,44 @@ const cargarRegistrosParaUsuario = async (usuarioId) => {
         'Content-Type': 'application/json'
       },
       params,
-      timeout: 15000
+      timeout: 20000 // Aumentar timeout
     })
     
-    const { registros: registrosUsuario = [] } = response.data
+    const { registros: registrosUsuario = [], total = 0 } = response.data
+    
+    console.log(`      📦 Backend respondió: ${registrosUsuario.length} registros de ${total} totales`)
     
     if (registrosUsuario.length > 0) {
+      console.log(`      🔄 Enriqueciendo registros con información de usuarios...`)
       const registrosEnriquecidos = await usuariosService.enriquecerRegistrosConUsuarios(registrosUsuario)
       
       // Combinar con registros existentes (evitar duplicados)
       const idsExistentes = new Set(registros.value.map(r => r.id))
       const registrosNuevos = registrosEnriquecidos.filter(r => !idsExistentes.has(r.id))
       
+      console.log(`      📊 Registros nuevos: ${registrosNuevos.length} | Ya existentes: ${registrosEnriquecidos.length - registrosNuevos.length}`)
+      
       if (registrosNuevos.length > 0) {
         registros.value = [...registros.value, ...registrosNuevos]
-        console.log(`✅ Agregados ${registrosNuevos.length} registros del usuario ${usuarioId}`)
+        console.log(`      ✅ Total registros en memoria ahora: ${registros.value.length}`)
+        
+        // Verificar que los registros tengan información del usuario con CURP
+        const registroConCurp = registrosNuevos.find(r => r.usuario?.curp)
+        if (registroConCurp) {
+          console.log(`      📋 Ejemplo de registro con CURP: ${registroConCurp.usuario.nombre_completo} - ${registroConCurp.usuario.curp}`)
+        }
+      } else {
+        console.log(`      ℹ️ No hay registros nuevos para agregar (todos ya existían)`)
       }
+    } else {
+      console.log(`      ⚠️ No se encontraron registros para el usuario ${usuarioId}`)
     }
     
   } catch (error) {
-    console.error(`Error cargando registros del usuario ${usuarioId}:`, error)
+    console.error(`      ❌ Error cargando registros del usuario ${usuarioId}:`, error)
+    if (error.response) {
+      console.error(`      📛 Status: ${error.response.status} | Message: ${error.response.data?.detail || error.message}`)
+    }
   }
 }
 

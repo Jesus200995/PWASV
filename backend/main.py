@@ -9175,6 +9175,75 @@ async def contar_manuales_no_leidos(usuario_id: int):
 
 # ==================== FIN SISTEMA DE MANUALES ====================
 
+
+# ========== ENDPOINT DE BÚSQUEDA DE USUARIOS SIN CONFLICTO DE RUTAS ==========
+@app.get("/api/buscar-usuarios")
+async def buscar_usuarios_api(correo: Optional[str] = None, nombre: Optional[str] = None,
+                              curp: Optional[str] = None, cargo: Optional[str] = None):
+    """Buscar usuarios por diferentes criterios con OR - Sin conflicto de rutas"""
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexion a la base de datos")
+        
+        condiciones = []
+        parametros = []
+        
+        if correo:
+            condiciones.append("correo ILIKE %s")
+            parametros.append(f"%{correo}%")
+        
+        if nombre:
+            condiciones.append("nombre_completo ILIKE %s")
+            parametros.append(f"%{nombre}%")
+        
+        if curp:
+            condiciones.append("curp ILIKE %s")
+            parametros.append(f"%{curp.upper()}%")
+        
+        if cargo:
+            condiciones.append("cargo ILIKE %s")
+            parametros.append(f"%{cargo}%")
+        
+        if not condiciones:
+            raise HTTPException(status_code=400, detail="Debe proporcionar al menos un criterio de busqueda")
+        
+        # Usar OR para buscar en cualquiera de los campos
+        consulta = f"""
+            SELECT id, correo, nombre_completo, cargo, supervisor, curp, telefono
+            FROM usuarios
+            WHERE {' OR '.join(condiciones)}
+            ORDER BY id DESC
+            LIMIT 50
+        """
+        
+        cursor = conn.cursor()
+        cursor.execute(consulta, tuple(parametros))
+        resultados = cursor.fetchall()
+        
+        usuarios = []
+        for row in resultados:
+            usuarios.append({
+                "id": row[0],
+                "correo": row[1],
+                "nombre_completo": row[2],
+                "cargo": row[3],
+                "supervisor": row[4],
+                "curp": row[5],
+                "telefono": row[6]
+            })
+        
+        print(f"🔍 Búsqueda con criterios: correo={correo}, nombre={nombre}, curp={curp}, cargo={cargo}")
+        print(f"✅ Se encontraron {len(usuarios)} usuarios")
+        
+        return {"usuarios": usuarios, "total": len(usuarios)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en búsqueda de usuarios: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al buscar usuarios: {str(e)}")
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

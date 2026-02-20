@@ -134,8 +134,20 @@
     </div>
 
     <!-- Enlaces rápidos: Geoportal y App Móvil -->
-    <div class="quick-links">
-      <a v-if="isAdmin" href="https://geoportal.sembrandodatos.com/" target="_blank" class="quick-link geoportal">
+    <div class="quick-links-wrapper">
+      <div class="quick-links-header" @click="quickLinksExpanded = !quickLinksExpanded">
+        <span class="header-title">Enlaces Rápidos</span>
+        <svg class="header-chevron" :class="{ 'rotated': quickLinksExpanded }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <transition 
+        name="links-expand"
+        @enter="onEnter"
+        @leave="onLeave"
+      >
+        <div v-show="quickLinksExpanded" class="quick-links-content">
+          <a v-if="isAdmin" href="https://geoportal.sembrandodatos.com/" target="_blank" class="quick-link geoportal">
         <div class="link-icon-container">
           <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
@@ -169,6 +181,8 @@
         </div>
         <span>Resumen Ejecutivo</span>
       </a>
+        </div>
+      </transition>
     </div>
 
     <!-- Navegación principal -->
@@ -450,6 +464,7 @@ const isCollapsed = ref(false)
 const showLogoutModal = ref(false)
 const currentUser = ref(null)
 const unreadNotifications = ref(0)
+const quickLinksExpanded = ref(false) // Inicia colapsado
 
 // Permisos por defecto (todos en false, el usuario solo ve lo que se le asignó)
 const permisosDefault = {
@@ -653,6 +668,24 @@ const handleKeydown = (event) => {
     closeModal()
   }
 }
+
+// Animaciones fluidas para transición de enlaces rápidos
+const onEnter = (el) => {
+  el.style.height = '0'
+  el.style.opacity = '0'
+  requestAnimationFrame(() => {
+    el.style.height = el.scrollHeight + 'px'
+    el.style.opacity = '1'
+  })
+}
+
+const onLeave = (el) => {
+  el.style.height = el.scrollHeight + 'px'
+  requestAnimationFrame(() => {
+    el.style.height = '0'
+    el.style.opacity = '0'
+  })
+}
 </script>
 
 <style scoped>
@@ -761,7 +794,7 @@ const handleKeydown = (event) => {
 
 /* Header */
 .sidebar-header {
-  padding: 12px 12px 8px;
+  padding: 4px 12px 8px;
   position: relative;
 }
 
@@ -920,20 +953,96 @@ const handleKeydown = (event) => {
 }
 
 /* Links rápidos */
-.quick-links {
+.quick-links-wrapper {
+  margin: 0 10px 10px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(22, 163, 74, 0.18) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1.5px solid rgba(74, 222, 128, 0.35);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.quick-links-wrapper:hover {
+  border-color: rgba(74, 222, 128, 0.5);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.quick-links-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(34, 197, 94, 0.08);
+  border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+  user-select: none;
+  min-height: 36px;
+}
+
+.quick-links-header:hover {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.quick-links-header:active {
+  transform: scale(0.98);
+}
+
+.header-title {
+  font-size: 10px;
+  font-weight: 400;
+  color: #39FF14;
+  letter-spacing: 0.3px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+}
+
+.header-chevron {
+  width: 16px;
+  height: 16px;
+  color: #39FF14;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  will-change: transform;
+}
+
+.header-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.quick-links-content {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
   gap: 8px;
-  padding: 8px 12px;
-  margin: 0 10px 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 14px 12px;
+  min-height: fit-content;
+}
+
+/* Transiciones fluidas para colapsar/expandir */
+.links-expand-enter-active {
+  transition: height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.25s ease-in;
+  overflow: hidden;
+}
+
+.links-expand-leave-active {
+  transition: height 0.25s cubic-bezier(0.4, 0, 1, 1),
+              opacity 0.2s ease-out;
+  overflow: hidden;
+}
+
+.links-expand-enter-from,
+.links-expand-leave-to {
+  opacity: 0;
 }
 
 .quick-link {
@@ -942,14 +1051,14 @@ const handleKeydown = (event) => {
   align-items: center;
   text-decoration: none;
   color: white;
-  gap: 3px;
-  padding: 4px;
-  border-radius: 6px;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
   transition: all 0.3s ease;
   width: 45%;
   max-width: 70px;
+  min-height: 52px;
   position: relative;
-  overflow: hidden;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -964,7 +1073,8 @@ const handleKeydown = (event) => {
 .quick-link.resumen-ejecutivo {
   width: 100%;
   max-width: none;
-  margin-top: 4px;
+  min-height: 44px;
+  margin-top: 0;
 }
 
 .quick-link:hover {
@@ -998,8 +1108,8 @@ const handleKeydown = (event) => {
 }
 
 .link-icon-container {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   display: flex;
@@ -1009,6 +1119,7 @@ const handleKeydown = (event) => {
   z-index: 1;
   transition: all 0.3s ease;
   border: none;
+  flex-shrink: 0;
 }
 
 .quick-link:hover .link-icon-container {
@@ -1033,13 +1144,15 @@ const handleKeydown = (event) => {
 }
 
 .quick-link span {
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 400;
   position: relative;
   z-index: 1;
   color: white;
   letter-spacing: 0.1px;
   white-space: nowrap;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .quick-link:active .link-icon-container {
@@ -1277,17 +1390,23 @@ const handleKeydown = (event) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 8px 10px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  border: 1px solid rgba(57, 255, 20, 0.5);
-  box-shadow: none;
-  transition: all 0.3s ease;
+  gap: 4px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(22, 163, 74, 0.12) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1.5px solid rgba(74, 222, 128, 0.3);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(34, 197, 94, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
 }
 
 /* Fila con avatar y nombre */
@@ -1300,9 +1419,30 @@ const handleKeydown = (event) => {
   width: 100%;
 }
 
+.user-info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(74, 222, 128, 0.6) 20%, 
+    rgba(34, 197, 94, 0.8) 50%, 
+    rgba(74, 222, 128, 0.6) 80%, 
+    transparent 100%);
+  opacity: 0.8;
+}
+
 .user-info:hover {
-  border-color: rgba(57, 255, 20, 0.7);
-  box-shadow: 0 0 4px rgba(57, 255, 20, 0.2);
+  border-color: rgba(74, 222, 128, 0.5);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(22, 163, 74, 0.18) 100%);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(34, 197, 94, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 .user-details {
@@ -1335,53 +1475,68 @@ const handleKeydown = (event) => {
 /* Nombre completo como título principal */
 .user-fullname {
   margin: 0;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: #39FF14;
+  color: #d4f4dd;
+  background: linear-gradient(135deg, #d4f4dd 0%, #a7f3d0 50%, #6ee7b7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-align: center;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
-  text-shadow: 
-    0 0 4px rgba(57, 255, 20, 0.5),
-    0 0 8px rgba(57, 255, 20, 0.3),
-    0 1px 2px rgba(0, 0, 0, 0.5);
-  letter-spacing: 0.2px;
-  line-height: 1.3;
+  text-shadow: none;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
   width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 /* Username como subtítulo pequeño */
 .user-username {
   margin: 0;
-  font-size: 8px;
-  color: rgba(57, 255, 20, 0.75);
+  font-size: 9px;
+  color: rgba(167, 243, 208, 0.85);
   font-weight: 500;
-  font-style: italic;
+  font-style: normal;
   text-align: center;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  line-height: 1.1;
+  letter-spacing: 0.3px;
+  font-family: 'Courier New', monospace;
+  opacity: 0.95;
 }
 
 /* Cargo del usuario */
 .user-cargo {
   margin: 0;
-  font-size: 7px;
-  color: rgba(255, 255, 255, 0.95);
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.98);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  background: rgba(57, 255, 20, 0.2);
-  padding: 2px 6px;
-  border-radius: 8px;
-  border: 1px solid rgba(57, 255, 20, 0.4);
+  letter-spacing: 0.8px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25) 0%, rgba(22, 163, 74, 0.35) 100%);
+  padding: 3px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(74, 222, 128, 0.4);
   text-align: center;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  line-height: 1.1;
   max-width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+  transition: all 0.3s ease;
+}
+
+.user-cargo:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.35) 0%, rgba(22, 163, 74, 0.45) 100%);
+  border-color: rgba(74, 222, 128, 0.6);
+  box-shadow: 0 3px 12px rgba(34, 197, 94, 0.25);
 }
 
 .user-role {

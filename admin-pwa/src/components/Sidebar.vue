@@ -991,6 +991,44 @@ const onLeave = (el) => {
   border-bottom: 1px solid rgba(74, 222, 128, 0.2);
   user-select: none;
   min-height: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-links-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(
+    ellipse at top left,
+    rgba(139, 195, 74, 0.35) 0%,
+    rgba(139, 195, 74, 0.2) 30%,
+    rgba(139, 195, 74, 0.08) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+  opacity: 1;
+}
+
+.quick-links-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(
+    ellipse at bottom right,
+    rgba(139, 195, 74, 0.35) 0%,
+    rgba(139, 195, 74, 0.2) 30%,
+    rgba(139, 195, 74, 0.08) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+  opacity: 1;
 }
 
 .header-title-wrapper {
@@ -998,6 +1036,8 @@ const onLeave = (el) => {
   align-items: center;
   gap: 8px;
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .header-icon {
@@ -1070,6 +1110,8 @@ const onLeave = (el) => {
   will-change: transform;
   opacity: 0.9;
   margin-top: -1px;
+  position: relative;
+  z-index: 1;
 }
 
 .header-chevron.rotated {

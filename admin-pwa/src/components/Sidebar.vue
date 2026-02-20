@@ -136,7 +136,12 @@
     <!-- Enlaces rápidos: Geoportal y App Móvil -->
     <div class="quick-links-wrapper">
       <div class="quick-links-header" @click="quickLinksExpanded = !quickLinksExpanded">
-        <span class="header-title">Enlaces Rápidos</span>
+        <div class="header-title-wrapper">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span class="header-title">Enlaces Rápidos</span>
+        </div>
         <svg class="header-chevron" :class="{ 'rotated': quickLinksExpanded }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
@@ -979,13 +984,41 @@ const onLeave = (el) => {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 12px 14px;
   cursor: pointer;
   transition: all 0.3s ease;
   background: rgba(34, 197, 94, 0.08);
   border-bottom: 1px solid rgba(74, 222, 128, 0.2);
   user-select: none;
-  min-height: 36px;
+  min-height: 40px;
+}
+
+.header-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.header-icon {
+  width: 16px;
+  height: 16px;
+  color: #39FF14;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px rgba(57, 255, 20, 0.6));
+  animation: pulse-glow 2s ease-in-out infinite;
+  margin-top: -1px;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(57, 255, 20, 0.6));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.8));
+    transform: scale(1.05);
+  }
 }
 
 .quick-links-header:hover {
@@ -997,7 +1030,7 @@ const onLeave = (el) => {
 }
 
 .header-title {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   background: linear-gradient(
     90deg,
@@ -1014,6 +1047,9 @@ const onLeave = (el) => {
   letter-spacing: 0.5px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   animation: shimmer-text 3s infinite linear;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 @keyframes shimmer-text {
@@ -1028,10 +1064,12 @@ const onLeave = (el) => {
 .header-chevron {
   width: 16px;
   height: 16px;
-  color: #39FF14;
+  color: #ffffff;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   will-change: transform;
+  opacity: 0.9;
+  margin-top: -1px;
 }
 
 .header-chevron.rotated {

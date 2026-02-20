@@ -955,11 +955,11 @@ const onLeave = (el) => {
 /* Links rápidos */
 .quick-links-wrapper {
   margin: 0 10px 10px;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(22, 163, 74, 0.18) 100%);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(22, 163, 74, 0.12) 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 12px;
-  border: 1.5px solid rgba(74, 222, 128, 0.35);
+  border: 1.5px solid rgba(74, 222, 128, 0.25);
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -998,10 +998,31 @@ const onLeave = (el) => {
 
 .header-title {
   font-size: 10px;
-  font-weight: 400;
-  color: #39FF14;
-  letter-spacing: 0.3px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+  font-weight: 800;
+  background: linear-gradient(
+    90deg,
+    #39FF14 0%,
+    #39FF14 30%,
+    #a7f3d0 50%,
+    #39FF14 70%,
+    #39FF14 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  animation: shimmer-text 3s infinite linear;
+}
+
+@keyframes shimmer-text {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .header-chevron {

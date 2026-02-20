@@ -113,14 +113,12 @@
 
         <!-- Register Link -->
         <div class="text-center mt-4">
-          <!-- TEMPORALMENTE DESACTIVADO - Para reactivar, descomentar las siguientes líneas
           <p class="text-xs text-gray-700">
             ¿No tienes cuenta?
             <router-link to="/register" class="font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
               Crear cuenta
             </router-link>
           </p>
-          -->
           <p class="text-xs text-gray-700 mt-1">
             <router-link to="/forgot-password" class="font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
               ¿Olvidaste tu contraseña?

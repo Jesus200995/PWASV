@@ -15,8 +15,8 @@
               </svg>
             </div>
             <div class="header-text">
-              <h1 class="header-title">Centro de Notificaciones</h1>
-              <p class="header-subtitle">Gestiona todas las notificaciones y alertas del sistema</p>
+              <h1 class="header-title">Notificaciones Grupales</h1>
+              <p class="header-subtitle">Envía notificaciones masivas a todos los usuarios del sistema</p>
             </div>
           </div>
           <div v-if="puedeCrearNotificaciones" class="header-actions">
@@ -49,7 +49,7 @@
         <!-- Lista de notificaciones -->
         <div v-if="!cargando && !error" class="notificaciones-list">
           <div class="list-header">
-            <h2>Notificaciones Enviadas ({{ notificaciones.length }})</h2>
+            <h2>Notificaciones Enviadas a Todos ({{ notificaciones.length }})</h2>
             <button class="btn-refresh" @click="cargarNotificaciones" :disabled="cargando">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M23 4v6h-6"/>
@@ -155,10 +155,10 @@
             <!-- Estado vacío -->
             <div v-if="notificaciones.length === 0" class="empty-state">
               <div class="empty-icon">📢</div>
-              <h3>No hay notificaciones</h3>
-              <p>Crea tu primera notificación para comunicarte con los usuarios del sistema.</p>
+              <h3>No hay notificaciones grupales</h3>
+              <p>Crea tu primera notificación grupal para comunicarte con todos los usuarios del sistema.</p>
               <button class="btn-primary" @click="mostrarModalCrear = true">
-                Crear Primera Notificación
+                Crear Primera Notificación Grupal
               </button>
             </div>
           </div>
@@ -1119,9 +1119,20 @@ export default {
       this.error = null
       
       try {
-        const respuesta = await notificacionesService.listarNotificaciones()
+        console.log('🔄 CARGANDO notificaciones grupales (enviadas a TODOS)...')
+        console.log('📤 Parámetros: limit=50, offset=0, tipo="grupales"')
+        
+        // Filtrar solo notificaciones enviadas a TODOS los usuarios (enviada_a_todos = true)
+        const respuesta = await notificacionesService.listarNotificaciones(50, 0, 'grupales')
+        
         this.notificaciones = respuesta.notificaciones || []
-        console.log('✅ Notificaciones cargadas:', this.notificaciones.length)
+        
+        console.log(`✅ Notificaciones grupales cargadas: ${this.notificaciones.length}`)
+        console.log('📋 Detalle de notificaciones:')
+        this.notificaciones.forEach((notif, index) => {
+          console.log(`   ${index + 1}. ${notif.titulo} - enviada_a_todos: ${notif.enviada_a_todos}`)
+        })
+        
       } catch (error) {
         console.error('❌ Error cargando notificaciones:', error)
         this.error = error.message

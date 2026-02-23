@@ -373,17 +373,27 @@
         <div class="notification-modal-content flex-1 p-4 sm:p-5 overflow-y-auto min-h-0">
           
           <!-- Sección de Vista Previa de Actividad (SI EXISTE) -->
-          <div v-if="notificacionSeleccionada.actividad" class="mb-6">
-            <div class="flex items-center gap-2 mb-3">
-              <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <h3 class="text-sm font-bold text-gray-800">Actividad relacionada</h3>
+          <div v-if="notificacionSeleccionada.actividad" class="mb-5">
+            <!-- Etiqueta superior -->
+            <div class="flex items-center gap-2 mb-2.5">
+              <div :class="[
+                'w-6 h-6 rounded-lg flex items-center justify-center shadow-sm',
+                notificacionSeleccionada.actividad.tipo_actividad === 'campo'
+                  ? 'bg-gradient-to-br from-green-500 to-emerald-600'
+                  : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
+                  ? 'bg-gradient-to-br from-orange-500 to-amber-600'
+                  : 'bg-gradient-to-br from-gray-500 to-gray-600'
+              ]">
+                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+              </div>
+              <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Actividad relacionada</h3>
             </div>
             
-            <!-- Card de actividad estilo Historial -->
+            <!-- Card de actividad estilo Historial.vue -->
             <div :class="[
-              'relative overflow-hidden rounded-xl transition-all duration-300 border shadow-md',
+              'relative overflow-hidden rounded-xl transition-all duration-300 border shadow-sm',
               'backdrop-filter backdrop-blur-xl',
               notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
                 ? 'bg-gradient-to-br from-green-50/80 via-emerald-25/40 to-green-100/60 border-green-200/60' 
@@ -393,14 +403,14 @@
             ]"
             style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
               
-              <!-- Efectos decorativos -->
+              <!-- Efectos decorativos de vidrio líquido -->
               <div class="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-60 rounded-xl pointer-events-none"></div>
               <div v-if="notificacionSeleccionada.actividad.tipo_actividad === 'campo'" class="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-green-400/20 to-transparent rounded-full blur-lg"></div>
               <div v-else-if="notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'" class="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-orange-400/20 to-transparent rounded-full blur-lg"></div>
               
-              <!-- Borde superior colorido -->
+              <!-- Borde superior colorido delgado -->
               <div :class="[
-                'absolute top-0 left-0 right-0 h-1 rounded-t-xl',
+                'absolute top-0 left-0 right-0 h-0.5 rounded-t-xl',
                 notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
                   ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-green-600' 
                   : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
@@ -408,77 +418,139 @@
                   : 'bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600'
               ]"></div>
               
-              <div class="relative z-10 p-3">
-                <div class="flex gap-3">
-                  <!-- Foto de la actividad -->
-                  <div class="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-lg overflow-hidden relative shadow-md cursor-pointer" 
+              <div class="relative z-10 p-2.5">
+                <div class="flex gap-2.5">
+                  <!-- Foto de la actividad (tamaño compacto como Historial) -->
+                  <div class="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden relative shadow-md" 
+                       :class="{'cursor-pointer': notificacionSeleccionada.actividad.foto_url}" 
                        @click="notificacionSeleccionada.actividad.foto_url && verImagen(notificacionSeleccionada.actividad.foto_url)">
                     <img v-if="notificacionSeleccionada.actividad.foto_url" 
                          :src="notificacionSeleccionada.actividad.foto_url" 
                          class="w-full h-full object-cover transition-transform duration-300 hover:scale-110" 
                          alt="Foto de actividad" />
-                    <div v-else :class="[
-                      'w-full h-full rounded flex items-center justify-center relative shadow-md border',
-                      notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
-                        ? 'bg-gradient-to-br from-green-100 to-green-50 border-green-200/50' 
-                        : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                        ? 'bg-gradient-to-br from-orange-100 to-orange-50 border-orange-200/50'
-                        : 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200/50'
-                    ]">
-                      <svg xmlns="http://www.w3.org/2000/svg" :class="[
-                        'h-8 w-8',
+                    <div v-else class="flex justify-center">
+                      <div :class="[
+                        'w-12 h-12 rounded flex items-center justify-center relative group shadow-md border',
                         notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
-                          ? 'text-green-600' 
+                          ? 'bg-gradient-to-br from-green-100 to-green-50 border-green-200/50' 
                           : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                          ? 'text-orange-600'
-                          : 'text-gray-500'
-                      ]" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+                          ? 'bg-gradient-to-br from-orange-100 to-orange-50 border-orange-200/50'
+                          : 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200/50'
+                      ]">
+                        <div :class="[
+                          'flex flex-col items-center justify-center',
+                          notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                            ? 'text-green-600' 
+                            : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
+                            ? 'text-orange-600'
+                            : 'text-gray-500'
+                        ]">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+                          </svg>
+                        </div>
+                        <div :class="[
+                          'absolute top-0 right-0 w-2 h-2 rounded-full',
+                          notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                            ? 'bg-green-500' 
+                            : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
+                            ? 'bg-orange-500'
+                            : 'bg-gray-500'
+                        ]"></div>
+                      </div>
+                    </div>
+                    <!-- Overlay hover para ampliar foto -->
+                    <div v-if="notificacionSeleccionada.actividad.foto_url" class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 flex items-center justify-center transition-opacity rounded-lg">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white opacity-0 hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
                   </div>
                   
                   <!-- Información de la actividad -->
-                  <div class="flex-1 min-w-0 space-y-2">
-                    <!-- Tipo y categoría -->
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <span :class="[
-                        'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border',
-                        notificacionSeleccionada.actividad.tipo_actividad === 'campo'
-                          ? 'bg-green-100 text-green-700 border-green-300'
+                  <div class="flex-1 min-w-0 space-y-1">
+                    
+                    <!-- Header: Fecha y categoría -->
+                    <div class="flex justify-between items-start">
+                      <div class="flex flex-col">
+                        <p v-if="notificacionSeleccionada.actividad.fecha" class="text-xs font-semibold text-gray-700 leading-tight">
+                          {{ formatearFechaActividad(notificacionSeleccionada.actividad.fecha) }}
+                        </p>
+                        <p v-if="notificacionSeleccionada.actividad.categoria_actividad" :class="[
+                          'text-xs font-bold leading-tight mt-0.5',
+                          notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                            ? 'text-green-700' 
+                            : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
+                            ? 'text-orange-700'
+                            : 'text-gray-700'
+                        ]">
+                          {{ notificacionSeleccionada.actividad.categoria_actividad }}
+                        </p>
+                      </div>
+                      <!-- Coordenadas compactas -->
+                      <div v-if="notificacionSeleccionada.actividad.latitud && notificacionSeleccionada.actividad.longitud" :class="[
+                        'text-right bg-white/60 backdrop-blur-sm rounded px-1.5 py-0.5 border text-xs flex-shrink-0',
+                        notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                          ? 'border-green-200/60' 
                           : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                          ? 'bg-orange-100 text-orange-700 border-orange-300'
-                          : 'bg-gray-100 text-gray-700 border-gray-300'
+                          ? 'border-orange-200/60'
+                          : 'border-gray-200/60'
                       ]">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
-                        </svg>
-                        {{ notificacionSeleccionada.actividad.tipo_actividad === 'campo' ? 'Campo' : 'Gabinete' }}
-                      </span>
-                      <span v-if="notificacionSeleccionada.actividad.categoria_actividad" class="text-xs text-gray-600 font-medium px-2 py-1 bg-white/60 rounded-full border border-gray-200">
-                        {{ notificacionSeleccionada.actividad.categoria_actividad }}
-                      </span>
+                        <div class="text-xs text-gray-600 font-mono leading-tight">
+                          {{ notificacionSeleccionada.actividad.latitud.toFixed(3) }}
+                        </div>
+                        <div class="text-xs text-gray-600 font-mono leading-tight">
+                          {{ notificacionSeleccionada.actividad.longitud.toFixed(3) }}
+                        </div>
+                      </div>
                     </div>
                     
-                    <!-- Fecha de la actividad -->
-                    <div v-if="notificacionSeleccionada.actividad.fecha" class="flex items-center gap-1.5 text-xs text-gray-600">
-                      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span class="font-medium">{{ formatearFechaActividad(notificacionSeleccionada.actividad.fecha) }}</span>
-                    </div>
-                    
-                    <!-- Descripción de la actividad (si existe) -->
-                    <div v-if="notificacionSeleccionada.actividad.descripcion" class="text-xs text-gray-700 bg-white/50 rounded-lg p-2 border border-gray-200/50 line-clamp-2">
+                    <!-- Descripción compacta -->
+                    <p v-if="notificacionSeleccionada.actividad.descripcion" class="text-xs text-gray-800 leading-relaxed line-clamp-2">
                       {{ notificacionSeleccionada.actividad.descripcion }}
-                    </div>
+                    </p>
                     
-                    <!-- Ubicación (si existe) -->
-                    <div v-if="notificacionSeleccionada.actividad.latitud && notificacionSeleccionada.actividad.longitud" class="flex items-center gap-1.5 text-xs text-gray-600">
-                      <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                      </svg>
-                      <span class="text-xs">{{ notificacionSeleccionada.actividad.latitud.toFixed(6) }}, {{ notificacionSeleccionada.actividad.longitud.toFixed(6) }}</span>
+                    <!-- Tipo de actividad con icono circular (idéntico a Historial) -->
+                    <div v-if="notificacionSeleccionada.actividad.tipo_actividad" class="flex items-center justify-between">
+                      <div class="flex items-center space-x-2">
+                        <!-- Icono circular con gradiente -->
+                        <div :class="[
+                          'w-7 h-7 rounded-full flex items-center justify-center shadow-md relative',
+                          notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                            ? 'bg-gradient-to-br from-green-600 to-green-700 shadow-green-600/40' 
+                            : 'bg-gradient-to-br from-orange-600 to-orange-700 shadow-orange-600/40'
+                        ]">
+                          <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-full"></div>
+                          <!-- Icono Campo -->
+                          <svg v-if="notificacionSeleccionada.actividad.tipo_actividad === 'campo'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                          </svg>
+                          <!-- Icono Gabinete -->
+                          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        
+                        <!-- Labels de tipo -->
+                        <div class="flex flex-col">
+                          <span :class="[
+                            'text-xs font-bold leading-tight',
+                            notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                              ? 'text-green-800' 
+                              : 'text-orange-800'
+                          ]">
+                            {{ notificacionSeleccionada.actividad.tipo_actividad === 'campo' ? 'Campo' : 'Gabinete' }}
+                          </span>
+                          <span :class="[
+                            'text-xs leading-tight',
+                            notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                              ? 'text-green-600' 
+                              : 'text-orange-600'
+                          ]">
+                            {{ notificacionSeleccionada.actividad.tipo_actividad === 'campo' ? 'Terreno' : 'Oficina' }}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

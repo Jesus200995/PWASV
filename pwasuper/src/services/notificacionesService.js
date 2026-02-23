@@ -128,17 +128,26 @@ export const notificacionesService = {
     try {
       console.log(`📋 Obteniendo lista filtrada para usuario ${usuarioId} (filtro: ${filtro})`)
       
-      const response = await api.get('/notificaciones/list', {
-        params: {
-          usuario_id: usuarioId,
-          filtro: filtro,
-          limit: limit,
-          offset: offset
-        }
+      // Usar el endpoint correcto que devuelve los datos de actividad
+      const response = await api.get(`/notificaciones/usuario/${usuarioId}`, {
+        params: { limit, offset }
       })
       
-      console.log(`✅ ${response.data.notificaciones.length} notificaciones filtradas obtenidas`)
-      return response.data
+      console.log(`✅ ${response.data.notificaciones.length} notificaciones obtenidas`)
+      
+      // Aplicar filtro en el frontend si es necesario
+      let notificacionesFiltradas = response.data.notificaciones
+      if (filtro === 'unread') {
+        notificacionesFiltradas = response.data.notificaciones.filter(n => !n.leida)
+      }
+      
+      return {
+        ...response.data,
+        notificaciones: notificacionesFiltradas,
+        total: filtro === 'unread' 
+          ? notificacionesFiltradas.length 
+          : response.data.total
+      }
     } catch (error) {
       console.error('Error obteniendo lista filtrada:', error)
       

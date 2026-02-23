@@ -10,6 +10,7 @@ import ConfiguracionView from '../views/ConfiguracionView.vue'
 import AsistenciaView from '../views/AsistenciaView.vue'
 import VisorMapView from '../views/VisorMap.vue'
 import NotificacionesView from '../views/NotificacionesView.vue'
+import NotificacionesIndividualesView from '../views/NotificacionesIndividualesView.vue'
 import PermisosView from '../views/PermisosView.vue'
 import ManualesView from '../views/ManualesView.vue'
 
@@ -75,6 +76,12 @@ const routes = [
     path: '/notificaciones',
     name: 'Notificaciones',
     component: NotificacionesView,
+    meta: { requiresAuth: true, requiredPermission: 'notificaciones' }
+  },
+  {
+    path: '/notificaciones-individuales',
+    name: 'NotificacionesIndividuales',
+    component: NotificacionesIndividualesView,
     meta: { requiresAuth: true, requiredPermission: 'notificaciones' }
   },
   {

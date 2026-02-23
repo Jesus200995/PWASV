@@ -4964,15 +4964,23 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 't
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        print(f"📋 Listando notificaciones (limit: {limit}, offset: {offset}, tipo: {tipo})")
+        print(f"\n{'='*60}")
+        print(f"📋 LISTANDO NOTIFICACIONES")
+        print(f"   - Limit: {limit}")
+        print(f"   - Offset: {offset}")
+        print(f"   - Tipo: '{tipo}'")
+        print(f"{'='*60}\n")
         
         # Construir filtro WHERE según el tipo
         where_clause = ""
         if tipo == 'individuales':
             where_clause = "WHERE n.enviada_a_todos = FALSE"
+            print(f"🔍 FILTRO APLICADO: Solo notificaciones individuales (enviada_a_todos = FALSE)")
         elif tipo == 'grupales':
             where_clause = "WHERE n.enviada_a_todos = TRUE"
-        # Si tipo == 'todas', no se agrega filtro
+            print(f"🔍 FILTRO APLICADO: Solo notificaciones grupales (enviada_a_todos = TRUE)")
+        else:
+            print(f"🔍 SIN FILTRO: Mostrando todas las notificaciones")
         
         # Obtener notificaciones con información de destinatarios
         query = f"""
@@ -4994,9 +5002,17 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 't
             LIMIT %s OFFSET %s
         """
         
+        print(f"📝 Query SQL:\n{query}\n")
+        
         cursor.execute(query, (limit, offset))
         
         resultados = cursor.fetchall()
+        
+        print(f"✅ Resultados encontrados: {len(resultados)}")
+        
+        # Debug: Mostrar el valor de enviada_a_todos para cada resultado
+        for row in resultados:
+            print(f"   - ID: {row[0]}, Título: {row[1]}, enviada_a_todos: {row[7]}")
         
         # Obtener total de notificaciones con el mismo filtro
         count_query = f"SELECT COUNT(*) FROM notificaciones n {where_clause}"
@@ -5020,7 +5036,11 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 't
             }
             notificaciones.append(notificacion)
         
-        print(f"📋 {len(notificaciones)} notificaciones listadas de {total} totales (tipo: {tipo})")
+        print(f"\n📦 RESPUESTA FINAL:")
+        print(f"   - Notificaciones listadas: {len(notificaciones)}")
+        print(f"   - Total en BD (con filtro): {total}")
+        print(f"   - Tipo aplicado: '{tipo}'")
+        print(f"{'='*60}\n")
         
         return {
             "notificaciones": notificaciones,

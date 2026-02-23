@@ -391,10 +391,20 @@ export default {
       this.error = null
       
       try {
-        // Filtrar solo notificaciones individuales
+        console.log('🔄 CARGANDO notificaciones individuales...')
+        console.log('📤 Parámetros: limit=50, offset=0, tipo="individuales"')
+        
+        // Filtrar solo notificaciones individuales (enviada_a_todos = false)
         const respuesta = await notificacionesService.listarNotificaciones(50, 0, 'individuales')
+        
         this.notificaciones = respuesta.notificaciones || []
-        console.log('✅ Notificaciones individuales cargadas:', this.notificaciones.length)
+        
+        console.log(`✅ Notificaciones individuales cargadas: ${this.notificaciones.length}`)
+        console.log('📋 Detalle de notificaciones:')
+        this.notificaciones.forEach((notif, index) => {
+          console.log(`   ${index + 1}. ${notif.titulo} - enviada_a_todos: ${notif.enviada_a_todos}`)
+        })
+        
       } catch (error) {
         console.error('❌ Error cargando notificaciones:', error)
         this.error = error.message

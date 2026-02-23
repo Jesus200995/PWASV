@@ -83,16 +83,18 @@ export const notificacionesService = {
     try {
       console.log(`📋 Obteniendo notificaciones (limit: ${limit}, offset: ${offset}, tipo: ${tipo})`)
       
-      const params = { limit, offset }
-      if (tipo !== 'todas') {
-        params.tipo = tipo
+      // SIEMPRE enviar el parámetro tipo al backend
+      const params = { 
+        limit, 
+        offset,
+        tipo
       }
       
       const response = await api.get('/notificaciones', {
         params
       })
       
-      console.log(`✅ ${response.data.notificaciones.length} notificaciones obtenidas`)
+      console.log(`✅ ${response.data.notificaciones.length} notificaciones obtenidas (tipo: ${tipo})`)
       return response.data
       
     } catch (error) {

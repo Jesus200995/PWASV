@@ -469,6 +469,14 @@
                         </button>
                         <span class="btn-label">Detalles</span>
                       </div>
+                      <div class="action-container">
+                        <button @click="abrirModalNotificar(registro)" class="btn-notificar" title="Enviar notificación sobre esta actividad">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                          </svg>
+                        </button>
+                        <span class="btn-label-notificar">Notificar</span>
+                      </div>
                       <div v-if="puedeEliminarRegistros" class="action-container">
                         <button @click="abrirModalEditar(registro)" class="btn-editar" title="Editar registro">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -1153,6 +1161,228 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Modal para notificar sobre actividad -->
+    <Teleport to="body" v-if="showNotificarModal">
+      <div class="modal-overlay-edit" @click="cerrarModalNotificar">
+        <div class="modal-edit-container modal-notificar" @click.stop>
+          <!-- Header -->
+          <div class="modal-edit-header">
+            <div class="header-icon-wrapper header-icon-notificar">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              </svg>
+            </div>
+            <div class="header-text">
+              <h3>Notificar sobre Actividad</h3>
+              <span class="header-subtitle" v-if="actividadANotificar">
+                {{ actividadANotificar.tipo_actividad }} - {{ actividadANotificar.usuario?.nombre_completo || 'Usuario' }}
+              </span>
+            </div>
+            <button @click="cerrarModalNotificar" class="btn-close-edit" title="Cerrar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Contenido del modal con scroll -->
+          <div class="modal-edit-scroll-area">
+            <!-- Información de la actividad (readonly) -->
+            <div class="modal-edit-readonly-section">
+              <h4 class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Actividad seleccionada
+              </h4>
+              
+              <div class="readonly-grid-3col" v-if="actividadANotificar">
+                <div class="readonly-card">
+                  <div class="readonly-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+                  <div class="readonly-card-content">
+                    <span class="readonly-card-label">Tipo</span>
+                    <span class="readonly-card-value">{{ actividadANotificar.tipo_actividad }}</span>
+                  </div>
+                </div>
+
+                <div class="readonly-card">
+                  <div class="readonly-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                    </svg>
+                  </div>
+                  <div class="readonly-card-content">
+                    <span class="readonly-card-label">Categoría</span>
+                    <span class="readonly-card-value">{{ actividadANotificar.categoria_actividad || 'N/A' }}</span>
+                  </div>
+                </div>
+
+                <div class="readonly-card">
+                  <div class="readonly-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                    </svg>
+                  </div>
+                  <div class="readonly-card-content">
+                    <span class="readonly-card-label">Fecha</span>
+                    <span class="readonly-card-value">{{ new Date(actividadANotificar.fecha).toLocaleDateString('es-MX') }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Formulario de notificación -->
+            <div class="modal-edit-body">
+              <h4 class="section-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Datos de la notificación
+              </h4>
+              
+              <form @submit.prevent="enviarNotificacion" class="edit-form">
+                <!-- Título (pre-llenado) -->
+                <div class="form-group">
+                  <label for="notif-titulo" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                    Título * (puedes editarlo)
+                  </label>
+                  <input 
+                    type="text"
+                    id="notif-titulo"
+                    v-model="formNotificacion.titulo"
+                    class="form-input"
+                    maxlength="150"
+                    required
+                  />
+                  <small class="char-count">{{ formNotificacion.titulo.length }}/150</small>
+                </div>
+
+                <!-- Subtítulo (pre-llenado, opcional) -->
+                <div class="form-group">
+                  <label for="notif-subtitulo" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h4l3 3 3-3h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                    Subtítulo (opcional)
+                  </label>
+                  <input 
+                    type="text"
+                    id="notif-subtitulo"
+                    v-model="formNotificacion.subtitulo"
+                    class="form-input"
+                    maxlength="200"
+                  />
+                  <small class="char-count">{{ formNotificacion.subtitulo.length }}/200</small>
+                </div>
+
+                <!-- Motivos de atención (checkboxes) -->
+                <div class="form-group">
+                  <label class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                    </svg>
+                    Motivos de atención *
+                  </label>
+                  <div class="motivos-grid">
+                    <label 
+                      v-for="motivo in motivosAtencionOpciones"  
+                      :key="motivo.value"
+                      class="motivo-checkbox"
+                      :class="{ selected: formNotificacion.motivos_atencion.includes(motivo.value) }"
+                    >
+                      <input 
+                        type="checkbox"
+                        :value="motivo.value"
+                        v-model="formNotificacion.motivos_atencion"
+                      />
+                      <span>{{ motivo.label }}</span>
+                    </label>
+                  </div>
+                  <small class="form-help">Selecciona al menos uno</small>
+                </div>
+
+                <!-- Descripción detallada -->
+                <div class="form-group">
+                  <label for="notif-descripcion" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                    </svg>
+                    Mensaje detallado *
+                  </label>
+                  <textarea 
+                    id="notif-descripcion"
+                    v-model="formNotificacion.descripcion"
+                    class="form-textarea"
+                    rows="5"
+                    placeholder="Escribe un mensaje detallado al usuario sobre por qué se le está notificando..."
+                    required
+                  ></textarea>
+                  <small class="form-help">Explica claramente el motivo de la notificación</small>
+                </div>
+
+                <!-- Enlace URL (opcional) -->
+                <div class="form-group">
+                  <label for="notif-url" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                    </svg>
+                    Enlace adicional (opcional)
+                  </label>
+                  <input 
+                    type="url"
+                    id="notif-url"
+                    v-model="formNotificacion.enlace_url"
+                    class="form-input"
+                    placeholder="https://ejemplo.com"
+                  />
+                  <small class="form-help">URL con información adicional</small>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Footer con acciones -->
+          <div class="modal-edit-footer">
+            <button 
+              type="button" 
+              @click="cerrarModalNotificar" 
+              class="btn-cancel-edit"
+              :disabled="enviandoNotificacion"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Cancelar
+            </button>
+            <button 
+              type="button"
+              @click="enviarNotificacion" 
+              class="btn-save-edit btn-enviar-notificacion"
+              :disabled="enviandoNotificacion || !formNotificacion.titulo.trim() || formNotificacion.motivos_atencion.length === 0 || !formNotificacion.descripcion.trim()"
+            >
+              <svg v-if="!enviandoNotificacion" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m22 2-7 20-4-9-9-4Z"/>
+                <path d="M22 2 11 13"/>
+              </svg>
+              <svg v-else class="spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+              {{ enviandoNotificacion ? 'Enviando...' : 'Enviar Notificación' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1164,6 +1394,7 @@ import * as XLSX from 'xlsx'
 import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
 import authService from '../services/authService.js'
+import notificacionesService from '../services/notificacionesService.js'
 
 const router = useRouter()
 
@@ -1313,6 +1544,32 @@ const editForm = ref({
   hora: ''
 })
 const isEditSaving = ref(false)
+
+// Variables para modal de notificación sobre actividad
+const showNotificarModal = ref(false)
+const actividadANotificar = ref(null)
+const formNotificacion = ref({
+  titulo: '',
+  subtitulo: '',
+  descripcion: '',
+  motivos_atencion: [],
+  enlace_url: '',
+  actividad_id: null,
+  usuario_ids: []
+})
+const enviandoNotificacion = ref(false)
+
+// Opciones de motivos de atención
+const motivosAtencionOpciones = [
+  { value: 'llamar_atencion', label: 'Llamar atención' },
+  { value: 'correccion_requerida', label: 'Corrección requerida' },
+  { value: 'informacion_faltante', label: 'Información faltante' },
+  { value: 'revision_urgente', label: 'Revisión urgente' },
+  { value: 'documentacion_pendiente', label: 'Documentación pendiente' },
+  { value: 'seguimiento', label: 'Seguimiento necesario' },
+  { value: 'felicitacion', label: 'Felicitación por buen trabajo' },
+  { value: 'otro', label: 'Otro motivo' }
+]
 
 // Categorías de actividad (igual que en pwasuper)
 const categoriasActividad = [
@@ -3061,6 +3318,86 @@ const cerrarLightbox = () => {
   showLightbox.value = false
   lightboxImageUrl.value = ''
 }
+
+// ==================== MÉTODOS DE NOTIFICACIÓN ====================
+
+const abrirModalNotificar = (registro) => {
+  console.log('🔔 Abriendo modal para notificar sobre actividad:', registro)
+  
+  actividadANotificar.value = registro
+  
+  // Pre-llenar el formulario
+  const tipoActividad = registro.tipo_actividad || 'Actividad'
+  const categoriaActividad = registro.categoria_actividad || ''
+  const fecha = registro.fecha ? new Date(registro.fecha).toLocaleDateString('es-MX') : ''
+  
+  formNotificacion.value = {
+    titulo: `Notificación sobre ${tipoActividad} - ${fecha}`,
+    subtitulo: categoriaActividad ? `Categoría: ${categoriaActividad}` : '',
+    descripcion: '',
+    motivos_atencion: [],
+    enlace_url: '',
+    actividad_id: registro.id,
+    usuario_ids: [registro.usuario_id] // El usuario de la actividad
+  }
+  
+  showNotificarModal.value = true
+}
+
+const cerrarModalNotificar = () => {
+  showNotificarModal.value = false
+  actividadANotificar.value = null
+  formNotificacion.value = {
+    titulo: '',
+    subtitulo: '',
+    descripcion: '',
+    motivos_atencion: [],
+    enlace_url: '',
+    actividad_id: null,
+    usuario_ids: []
+  }
+}
+
+const enviarNotificacion = async () => {
+  if (!formNotificacion.value.titulo.trim()) {
+    mostrarToast('El título es obligatorio', 'error')
+    return
+  }
+  
+  if (formNotificacion.value.motivos_atencion.length === 0) {
+    mostrarToast('Selecciona al menos un motivo de atención', 'error')
+    return
+  }
+  
+  if (!formNotificacion.value.descripcion.trim()) {
+    mostrarToast('La descripción es obligatoria', 'error')
+    return
+  }
+  
+  enviandoNotificacion.value = true
+  
+  try {
+    const notificacion = {
+      ...formNotificacion.value,
+      enviada_a_todos: false // Siempre individual
+    }
+    
+    const respuesta = await notificacionesService.crearNotificacion(notificacion, null)
+    
+    console.log('✅ Notificación enviada:', respuesta)
+    mostrarToast('Notificación enviada exitosamente', 'success')
+    
+    cerrarModalNotificar()
+    
+  } catch (error) {
+    console.error('❌ Error enviando notificación:', error)
+    mostrarToast(error.message || 'Error al enviar la notificación', 'error')
+  } finally {
+    enviandoNotificacion.value = false
+  }
+}
+
+// ==================== FIN MÉTODOS DE NOTIFICACIÓN ====================
 
 const requestFullscreen = (event) => {
   if (event.target.requestFullscreen) {
@@ -5019,6 +5356,174 @@ const logout = () => {
 
 .btn-eliminar:hover svg {
   transform: scale(1.1);
+}
+
+/* Botón de notificar */
+.btn-notificar {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-notificar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-notificar:hover::before {
+  left: 100%;
+}
+
+.btn-notificar:hover {
+  background: linear-gradient(135deg, #F57C00, #EF6C00);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+.btn-notificar:active {
+  transform: scale(1.05);
+  box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+}
+
+.btn-notificar svg {
+  width: 16px;
+  height: 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-notificar:hover svg {
+  transform: scale(1.1);
+}
+
+.btn-label-notificar {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #666;
+  white-space: nowrap;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Estilos para el modal de notificación */
+.modal-notificar {
+  max-width: 900px !important;
+}
+
+.header-icon-notificar {
+  background: linear-gradient(135deg, #FF9800, #F57C00) !important;
+}
+
+.readonly-grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.motivos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.motivo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.motivo-checkbox:hover {
+  border-color: #FF9800;
+  background: rgba(255, 152, 0, 0.05);
+}
+
+.motivo-checkbox.selected {
+  border-color: #FF9800;
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 152, 0, 0.05));
+}
+
+.motivo-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #FF9800;
+}
+
+.motivo-checkbox span {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+  resize: vertical;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #FF9800;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.form-help {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.char-count {
+  display: block;
+  text-align: right;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #999;
+}
+
+.btn-enviar-notificacion {
+  background: linear-gradient(135deg, #FF9800, #F57C00) !important;
+}
+
+.btn-enviar-notificacion:hover:not(:disabled) {
+  background: linear-gradient(135deg, #F57C00, #EF6C00) !important;
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3) !important;
 }
 
 .confirm-delete-modal {

@@ -51,6 +51,16 @@ export const notificacionesService = {
         formData.append('usuario_ids', JSON.stringify(notificacion.usuario_ids))
       }
       
+      // Agregar actividad_id si existe (para notificaciones vinculadas a reportes)
+      if (notificacion.actividad_id) {
+        formData.append('actividad_id', notificacion.actividad_id)
+      }
+      
+      // Agregar motivos de atención si existen
+      if (notificacion.motivos_atencion && notificacion.motivos_atencion.length > 0) {
+        formData.append('motivos_atencion', JSON.stringify(notificacion.motivos_atencion))
+      }
+      
       // Agregar archivo si existe
       if (archivo) {
         formData.append('archivo', archivo)

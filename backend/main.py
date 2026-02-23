@@ -4827,6 +4827,8 @@ async def crear_notificacion(
     enlace_url: str = Form(None),
     enviada_a_todos: bool = Form(True),
     usuario_ids: str = Form(None),  # JSON string con lista de IDs
+    actividad_id: int = Form(None),  # ID de la actividad/reporte vinculado
+    motivos_atencion: str = Form(None),  # JSON string con lista de motivos
     archivo: UploadFile = File(None)
 ):
     """Crear una nueva notificación"""
@@ -4901,6 +4903,24 @@ async def crear_notificacion(
             
             print(f"📎 Archivo procesado: {archivo_nombre} ({archivo_tipo}, {len(archivo_bytes)} bytes)")
         
+        # Procesar motivos de atención si se proporcionan
+        motivos_array = None
+        if motivos_atencion:
+            try:
+                motivos_array = json.loads(motivos_atencion)
+                if not isinstance(motivos_array, list):
+                    raise HTTPException(status_code=400, detail="Los motivos deben ser un array")
+                print(f"⚠️ Motivos de atención: {motivos_array}")
+            except json.JSONDecodeError:
+                raise HTTPException(status_code=400, detail="Formato de motivos inválido")
+        
+        # Validar actividad_id si se proporciona
+        if actividad_id:
+            cursor.execute("SELECT id FROM reportes_generados WHERE id = %s", (actividad_id,))
+            if not cursor.fetchone():
+                raise HTTPException(status_code=404, detail=f"Actividad con ID {actividad_id} no encontrada")
+            print(f"📊 Notificación vinculada a actividad ID: {actividad_id}")
+        
         # Obtener fecha y hora actual en CDMX
         fecha_creacion = obtener_fecha_hora_cdmx_notificaciones()
         fecha_envio = fecha_creacion  # Se considera enviada inmediatamente
@@ -4910,13 +4930,15 @@ async def crear_notificacion(
             INSERT INTO notificaciones (
                 titulo, subtitulo, descripcion, enlace_url,
                 archivo, archivo_tipo, archivo_nombre,
-                enviada_a_todos, fecha_creacion, fecha_envio
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                enviada_a_todos, actividad_id, motivos_atencion,
+                fecha_creacion, fecha_envio
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (
             titulo, subtitulo, descripcion, enlace_url,
             archivo_bytes, archivo_tipo, archivo_nombre,
-            enviada_a_todos, fecha_creacion, fecha_envio
+            enviada_a_todos, actividad_id, motivos_array,
+            fecha_creacion, fecha_envio
         ))
         
         notificacion_id = cursor.fetchone()[0]

@@ -1167,20 +1167,23 @@
       <div class="modal-overlay-edit" @click="cerrarModalNotificar">
         <div class="modal-edit-container modal-notificar" @click.stop>
           <!-- Header -->
-          <div class="modal-edit-header">
+          <div class="modal-edit-header modal-notificar-header">
             <div class="header-icon-wrapper header-icon-notificar">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
             </div>
             <div class="header-text">
-              <h3>Notificar sobre Actividad</h3>
-              <span class="header-subtitle" v-if="actividadANotificar">
+              <h3 class="header-title-notificar">Notificar sobre Actividad</h3>
+              <span class="header-subtitle header-subtitle-notificar" v-if="actividadANotificar">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; flex-shrink: 0;">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
                 {{ actividadANotificar.tipo_actividad }} - {{ actividadANotificar.usuario?.nombre_completo || 'Usuario' }}
               </span>
             </div>
-            <button @click="cerrarModalNotificar" class="btn-close-edit" title="Cerrar">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button @click="cerrarModalNotificar" class="btn-close-edit btn-close-notificar" title="Cerrar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                 <line x1="18" y1="6" x2="6" y2="18"/>
                 <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
@@ -1190,9 +1193,9 @@
           <!-- Contenido del modal con scroll -->
           <div class="modal-edit-scroll-area">
             <!-- Información de la actividad (readonly) -->
-            <div class="modal-edit-readonly-section">
-              <h4 class="section-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="modal-edit-readonly-section readonly-section-notificar">
+              <h4 class="section-title section-title-notificar">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                   <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 Actividad seleccionada
@@ -1201,7 +1204,7 @@
               <div class="readonly-grid-3col" v-if="actividadANotificar">
                 <div class="readonly-card">
                   <div class="readonly-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                     </svg>
                   </div>
@@ -1213,19 +1216,19 @@
 
                 <div class="readonly-card">
                   <div class="readonly-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
                     </svg>
                   </div>
                   <div class="readonly-card-content">
                     <span class="readonly-card-label">Categoría</span>
-                    <span class="readonly-card-value">{{ actividadANotificar.categoria_actividad || 'N/A' }}</span>
+                    <span class="readonly-card-value">{{ actividadANotificar.categoria_actividad || 'Sin categoría' }}</span>
                   </div>
                 </div>
 
                 <div class="readonly-card">
                   <div class="readonly-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
                     </svg>
                   </div>
@@ -1239,8 +1242,8 @@
 
             <!-- Formulario de notificación -->
             <div class="modal-edit-body">
-              <h4 class="section-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <h4 class="section-title section-title-notificar">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                   <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
                 Datos de la notificación
@@ -1266,22 +1269,17 @@
                   <small class="char-count">{{ formNotificacion.titulo.length }}/150</small>
                 </div>
 
-                <!-- Subtítulo (pre-llenado, opcional) -->
-                <div class="form-group">
-                  <label for="notif-subtitulo" class="form-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <!-- Subtítulo (generado automáticamente desde motivos) -->
+                <div class="form-group" v-if="formNotificacion.motivos_atencion.length > 0">
+                  <label class="form-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M19 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h4l3 3 3-3h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
                     </svg>
-                    Subtítulo (opcional)
+                    Motivos seleccionados (se enviarán en el subtítulo)
                   </label>
-                  <input 
-                    type="text"
-                    id="notif-subtitulo"
-                    v-model="formNotificacion.subtitulo"
-                    class="form-input"
-                    maxlength="200"
-                  />
-                  <small class="char-count">{{ formNotificacion.subtitulo.length }}/200</small>
+                  <div class="subtitulo-preview">
+                    {{ motivosAtencionOpciones.filter(m => formNotificacion.motivos_atencion.includes(m.value)).map(m => m.label).join(', ') }}
+                  </div>
                 </div>
 
                 <!-- Motivos de atención (checkboxes) -->
@@ -1321,12 +1319,15 @@
                   <textarea 
                     id="notif-descripcion"
                     v-model="formNotificacion.descripcion"
-                    class="form-textarea"
-                    rows="5"
+                    class="form-textarea form-textarea-notificacion"
+                    rows="7"
                     placeholder="Escribe un mensaje detallado al usuario sobre por qué se le está notificando..."
                     required
                   ></textarea>
-                  <small class="form-help">Explica claramente el motivo de la notificación</small>
+                  <div class="textarea-footer">
+                    <small class="form-help">Explica claramente el motivo de la notificación</small>
+                    <small class="char-count">{{ formNotificacion.descripcion.length }} caracteres</small>
+                  </div>
                 </div>
 
                 <!-- Enlace URL (opcional) -->
@@ -3330,11 +3331,15 @@ const abrirModalNotificar = (registro) => {
   const tipoActividad = registro.tipo_actividad || 'Actividad'
   const categoriaActividad = registro.categoria_actividad || ''
   const fecha = registro.fecha ? new Date(registro.fecha).toLocaleDateString('es-MX') : ''
+  const nombreUsuario = registro.usuario?.nombre_completo || 'Usuario'
+  
+  // Mensaje por defecto personalizado
+  const mensajePorDefecto = `Estimado/a ${nombreUsuario.split(' ')[0]},\n\nHemos revisado tu registro de actividad tipo "${tipoActividad}" del ${fecha}.\n\nTe contactamos para informarte sobre aspectos importantes relacionados con esta actividad. Por favor, revisa los motivos de atención seleccionados y toma las acciones necesarias.\n\nSi tienes dudas o requieres más información, no dudes en contactarnos.\n\nSaludos.`
   
   formNotificacion.value = {
     titulo: `Notificación sobre ${tipoActividad} - ${fecha}`,
-    subtitulo: categoriaActividad ? `Categoría: ${categoriaActividad}` : '',
-    descripcion: '',
+    subtitulo: '', // Se actualizará automáticamente cuando se seleccionen motivos
+    descripcion: mensajePorDefecto,
     motivos_atencion: [],
     enlace_url: '',
     actividad_id: registro.id,
@@ -3359,6 +3364,14 @@ const cerrarModalNotificar = () => {
 }
 
 const enviarNotificacion = async () => {
+  // Actualizar subtítulo con los motivos seleccionados
+  const motivosSeleccionados = motivosAtencionOpciones
+    .filter(m => formNotificacion.value.motivos_atencion.includes(m.value))
+    .map(m => m.label)
+    .join(', ')
+  
+  formNotificacion.value.subtitulo = motivosSeleccionados
+  
   if (!formNotificacion.value.titulo.trim()) {
     mostrarToast('El título es obligatorio', 'error')
     return
@@ -5358,18 +5371,18 @@ const logout = () => {
   transform: scale(1.1);
 }
 
-/* Botón de notificar */
+/* Botón de notificar - Naranja oscuro */
 .btn-notificar {
   width: 32px;
   height: 32px;
   padding: 0;
-  background: linear-gradient(135deg, #FF9800, #F57C00);
+  background: linear-gradient(135deg, #E65100, #D84315);
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(230, 81, 0, 0.35);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -5394,14 +5407,14 @@ const logout = () => {
 }
 
 .btn-notificar:hover {
-  background: linear-gradient(135deg, #F57C00, #EF6C00);
+  background: linear-gradient(135deg, #D84315, #BF360C);
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.45);
 }
 
 .btn-notificar:active {
   transform: scale(1.05);
-  box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+  box-shadow: 0 3px 10px rgba(230, 81, 0, 0.35);
 }
 
 .btn-notificar svg {
@@ -5414,116 +5427,437 @@ const logout = () => {
   transform: scale(1.1);
 }
 
+/* Label para botón notificar (naranja oscuro) */
 .btn-label-notificar {
-  position: absolute;
-  bottom: -24px;
-  left: 50%;
-  transform: translateX(-50%);
   font-size: 10px;
-  color: #666;
-  white-space: nowrap;
+  color: #E65100;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  margin-top: 3px;
+  opacity: 0.85;
+  transition: all 0.3s ease;
   text-align: center;
-  font-weight: 500;
 }
 
-/* Estilos para el modal de notificación */
-.modal-notificar {
-  max-width: 900px !important;
+.action-container:hover .btn-label-notificar {
+  opacity: 1;
+  color: #D84315;
 }
 
-.header-icon-notificar {
-  background: linear-gradient(135deg, #FF9800, #F57C00) !important;
+/* Modal de notificación - Naranja Oscuro Profesional - CON ESPECIFICIDAD ALTA */
+.modal-notificar.modal-edit-container {
+  max-width: 720px !important;
+  animation: modalSlideIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 14px !important;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(230, 81, 0, 0.35) !important;
 }
 
-.readonly-grid-3col {
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header con naranja oscuro - MAYOR ESPECIFICIDAD */
+.modal-notificar.modal-edit-container .modal-edit-header {
+  background: linear-gradient(135deg, #E65100 0%, #D84315 50%, #BF360C 100%) !important;
+  padding: 16px 22px !important;
+  border-bottom: 3px solid #BF360C !important;
+  box-shadow: 0 4px 16px rgba(230, 81, 0, 0.4) !important;
+  position: relative;
+}
+
+.modal-notificar.modal-edit-container .modal-edit-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 15% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.modal-notificar.modal-edit-container .modal-edit-header h3 {
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+  letter-spacing: 0.3px !important;
+  margin: 0 !important;
+}
+
+.modal-notificar.modal-edit-container .header-subtitle {
+  color: rgba(255, 255, 255, 0.93) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center;
+  margin-top: 4px !important;
+  background: rgba(0, 0, 0, 0.18) !important;
+  padding: 3px 9px !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(8px);
+}
+
+.modal-notificar.modal-edit-container .btn-close-edit {
+  background: rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.28) !important;
+  transition: all 0.3s ease !important;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+}
+
+.modal-notificar.modal-edit-container .btn-close-edit:hover {
+  background: rgba(255, 255, 255, 0.28) !important;
+  transform: rotate(90deg) scale(1.05) !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.modal-notificar.modal-edit-container .header-icon-wrapper {
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+  width: 38px !important;
+  height: 38px !important;
+}
+
+/* Section titles con especificidad alta */
+.modal-notificar .section-title {
+  color: #D84315 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-bottom: 12px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 2px solid rgba(230, 81, 0, 0.18) !important;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-notificar .section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background: #D84315;
+  border-radius: 2px;
+}
+
+.modal-notificar .modal-edit-readonly-section {
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.04), transparent) !important;
+  border: 1.5px solid rgba(230, 81, 0, 0.18) !important;
+  border-radius: 11px !important;
+  padding: 14px !important;
+}
+
+.modal-notificar .readonly-grid-3col {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.motivos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-  margin-top: 8px;
+.modal-notificar .readonly-card {
+  background: white !important;
+  border: 1.5px solid rgba(230, 81, 0, 0.22) !important;
+  border-radius: 9px !important;
+  padding: 10px !important;
+  transition: all 0.25s ease;
+  position: relative;
 }
 
-.motivo-checkbox {
+.modal-notificar .readonly-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: #D84315;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.25s ease;
+  border-radius: 9px 0 0 9px;
+}
+
+.modal-notificar .readonly-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.2) !important;
+  border-color: #D84315 !important;
+}
+
+.modal-notificar .readonly-card:hover::before {
+  transform: scaleY(1);
+}
+
+.modal-notificar .readonly-card-icon {
+  color: #E65100 !important;
+  margin-bottom: 7px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  justify-content: center;
+  width: 32px !important;
+  height: 32px !important;
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.13), rgba(230, 81, 0, 0.07)) !important;
+  border-radius: 8px !important;
+  transition: all 0.25s ease;
+}
+
+.modal-notificar .readonly-card:hover .readonly-card-icon {
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.22), rgba(230, 81, 0, 0.13)) !important;
+  transform: scale(1.08);
+}
+
+.modal-notificar .readonly-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modal-notificar .readonly-card-label {
+  font-size: 9px !important;
+  color: #777 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.4px !important;
+}
+
+.modal-notificar .readonly-card-value {
+  font-size: 12px !important;
+  color: #1a1a1a !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+
+/* Preview de subtítulo */
+.modal-notificar .subtitulo-preview {
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.09), rgba(230, 81, 0, 0.05)) !important;
+  border: 1.5px solid rgba(230, 81, 0, 0.25) !important;
+  border-radius: 9px !important;
+  padding: 8px 11px !important;
+  font-size: 11px !important;
+  color: #D84315 !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  margin-top: 5px !important;
+}
+
+.modal-notificar .motivos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.modal-notificar .motivo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 7px !important;
+  padding: 8px 10px !important;
+  border: 1.5px solid #ddd !important;
+  border-radius: 8px !important;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: white;
+  transition: all 0.25s ease;
+  background: white !important;
+  position: relative;
 }
 
-.motivo-checkbox:hover {
-  border-color: #FF9800;
-  background: rgba(255, 152, 0, 0.05);
+.modal-notificar .motivo-checkbox:hover {
+  border-color: #E65100 !important;
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.07), rgba(230, 81, 0, 0.03)) !important;
+  transform: translateX(2px);
+  box-shadow: 0 2px 7px rgba(230, 81, 0, 0.14) !important;
 }
 
-.motivo-checkbox.selected {
-  border-color: #FF9800;
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 152, 0, 0.05));
+.modal-notificar .motivo-checkbox.selected {
+  border-color: #D84315 !important;
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.13), rgba(230, 81, 0, 0.07)) !important;
+  box-shadow: 0 2px 7px rgba(230, 81, 0, 0.17) !important;
 }
 
-.motivo-checkbox input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+.modal-notificar .motivo-checkbox.selected:hover {
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.17), rgba(230, 81, 0, 0.09)) !important;
+}
+
+.modal-notificar .motivo-checkbox input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px !important;
   cursor: pointer;
-  accent-color: #FF9800;
+  accent-color: #D84315 !important;
+  flex-shrink: 0;
 }
 
-.motivo-checkbox span {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
+.modal-notificar .motivo-checkbox span {
+  font-size: 11px !important;
+  color: #333 !important;
+  font-weight: 500 !important;
+  transition: color 0.2s ease;
+  line-height: 1.3 !important;
 }
 
-.form-textarea {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  transition: all 0.3s ease;
-  resize: vertical;
+.modal-notificar .motivo-checkbox.selected span {
+  color: #D84315 !important;
+  font-weight: 600 !important;
 }
 
-.form-textarea:focus {
-  outline: none;
-  border-color: #FF9800;
-  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+.modal-notificar .form-textarea {
+  width: 100% !important;
+  padding: 10px !important;
+  border: 1.5px solid #ddd !important;
+  border-radius: 9px !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.25s ease !important;
+  resize: vertical !important;
+  background: white !important;
 }
 
-.form-help {
+.modal-notificar .form-textarea-notificacion {
+  min-height: 130px !important;
+}
+
+.modal-notificar .form-textarea:focus {
+  outline: none !important;
+  border-color: #D84315 !important;
+  box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.13), 0 3px 9px rgba(230, 81, 0, 0.13) !important;
+  background: white !important;
+}
+
+.modal-notificar .form-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #555 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-bottom: 5px !important;
+}
+
+.modal-notificar .form-label svg {
+  color: #D84315 !important;
+}
+
+.modal-notificar .form-help {
   display: block;
-  margin-top: 6px;
-  font-size: 12px;
-  color: #666;
+  margin-top: 4px !important;
+  font-size: 10px !important;
+  color: #666 !important;
   font-style: italic;
 }
 
-.char-count {
-  display: block;
-  text-align: right;
-  margin-top: 4px;
-  font-size: 11px;
-  color: #999;
+.modal-notificar .textarea-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px !important;
+  gap: 8px;
 }
 
-.btn-enviar-notificacion {
-  background: linear-gradient(135deg, #FF9800, #F57C00) !important;
+.modal-notificar .char-count {
+  font-size: 9px !important;
+  color: #999 !important;
+  font-weight: 500 !important;
+  white-space: nowrap;
 }
 
-.btn-enviar-notificacion:hover:not(:disabled) {
-  background: linear-gradient(135deg, #F57C00, #EF6C00) !important;
-  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3) !important;
+.modal-notificar .btn-enviar-notificacion,
+.modal-notificar .modal-edit-actions button:last-child {
+  background: linear-gradient(135deg, #E65100, #D84315, #BF360C) !important;
+  box-shadow: 0 3px 11px rgba(230, 81, 0, 0.38) !important;
+  font-size: 12px !important;
+  padding: 9px 18px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  color: white !important;
+}
+
+.modal-notificar .btn-enviar-notificacion:hover:not(:disabled),
+.modal-notificar .modal-edit-actions button:last-child:hover:not(:disabled) {
+  background: linear-gradient(135deg, #D84315, #BF360C, #A51C00) !important;
+  box-shadow: 0 5px 16px rgba(230, 81, 0, 0.48) !important;
+  transform: translateY(-1px) !important;
+}
+
+.modal-notificar .btn-enviar-notificacion:active:not(:disabled),
+.modal-notificar .modal-edit-actions button:last-child:active:not(:disabled) {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 9px rgba(230, 81, 0, 0.38) !important;
+}
+
+/* Responsividad con especificidad */
+@media (max-width: 768px) {
+  .modal-notificar.modal-edit-container {
+    max-width: 95vw !important;
+    margin: 10px !important;
+  }
+  
+  .modal-notificar .readonly-grid-3col {
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+  }
+  
+  .modal-notificar .motivos-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .modal-notificar .textarea-footer {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+  
+  .modal-notificar .char-count {
+    align-self: flex-end !important;
+  }
+  
+  .modal-notificar.modal-edit-container .modal-edit-header h3 {
+    font-size: 14px !important;
+  }
+  
+  .modal-notificar .section-title {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-notificar.modal-edit-container {
+    max-width: 100vw !important;
+    margin: 0 !important;
+    border-radius: 14px 14px 0 0 !important;
+  }
+  
+  .modal-notificar .form-textarea-notificacion {
+    min-height: 110px !important;
+    font-size: 11px !important;
+  }
+  
+  .modal-notificar.modal-edit-container .modal-edit-header {
+    padding: 13px 16px !important;
+  }
+  
+  .modal-notificar .readonly-card {
+    padding: 9px !important;
+  }
+  
+  .modal-notificar .readonly-card-icon {
+    width: 28px !important;
+    height: 28px !important;
+  }
 }
 
 .confirm-delete-modal {

@@ -831,52 +831,57 @@ export default {
 
 /* Lista de notificaciones */
 .notificaciones-list {
-  background: white;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  padding: 0;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(76, 175, 80, 0.1);
 }
 
 .list-header {
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
 }
 
 .list-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2E7D32;
   margin: 0;
-  font-size: 1.5rem;
-  color: #1f2937;
   font-family: 'Inter', sans-serif;
 }
 
 .btn-refresh {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #4CAF50;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
+  padding: 8px 12px;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
 }
 
 .btn-refresh:hover:not(:disabled) {
-  background: #45a049;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
 .btn-refresh:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* Tabla de notificaciones */
@@ -887,36 +892,28 @@ export default {
 .notifications-table {
   width: 100%;
   border-collapse: collapse;
-}
-
-.notifications-table thead {
-  background: #f9fafb;
+  font-family: 'Inter', sans-serif;
 }
 
 .notifications-table th {
-  padding: 1rem;
-  text-align: left;
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  color: #2E7D32;
   font-weight: 600;
-  color: #374151;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: 'Inter', sans-serif;
-}
-
-.notifications-table tbody tr {
-  border-bottom: 1px solid #f3f4f6;
-  transition: background-color 0.2s ease;
-}
-
-.notifications-table tbody tr:hover {
-  background: #f9fafb;
+  font-size: 13px;
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 2px solid rgba(76, 175, 80, 0.2);
+  white-space: nowrap;
 }
 
 .notifications-table td {
-  padding: 1rem;
-  color: #4b5563;
-  font-family: 'Inter', sans-serif;
+  padding: 16px;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+  vertical-align: middle;
+}
+
+.notification-row:hover {
+  background: linear-gradient(135deg, #f8fffe 0%, #f0fff4 100%);
 }
 
 .title-cell {
@@ -926,41 +923,47 @@ export default {
 .title-content {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .notification-title {
   font-weight: 600;
-  color: #1f2937;
+  color: #333;
+  font-size: 14px;
 }
 
 .attachment-badge {
-  font-size: 0.75rem;
-  color: #6b7280;
+  font-size: 12px;
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: fit-content;
 }
 
 .subtitle-cell {
-  min-width: 150px;
+  max-width: 250px;
 }
 
 .notification-subtitle {
-  color: #6b7280;
+  color: #666;
+  font-size: 13px;
 }
 
 .no-subtitle {
-  color: #9ca3af;
+  color: #999;
   font-style: italic;
-  font-size: 0.875rem;
+  font-size: 12px;
 }
 
 .recipients-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background: #dbeafe;
-  color: #1e40af;
+  padding: 4px 8px;
   border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1976d2;
 }
 
 .date-cell {
@@ -968,66 +971,68 @@ export default {
 }
 
 .notification-date {
-  color: #6b7280;
-  font-size: 0.875rem;
+  color: #666;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 4px 8px;
   border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .status-sent {
-  background: #d1fae5;
-  color: #065f46;
+  background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+  color: #2e7d32;
 }
 
 .action-buttons {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  gap: 8px;
 }
 
 .btn-action {
   width: 32px;
   height: 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .btn-view {
-  background: #dbe afe;
-  color: #1e40af;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1976d2;
 }
 
 .btn-view:hover {
-  background: #bfdbfe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
 }
 
 .btn-stats {
-  background: #fef3c7;
-  color: #92400e;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #2e7d32;
 }
 
 .btn-stats:hover {
-  background: #fde68a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
 }
 
 .btn-delete {
-  background: #fee2e2;
-  color: #991b1b;
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #d32f2f;
 }
 
 .btn-delete:hover {
-  background: #fecaca;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
 }
 
 /* Estado vacío */

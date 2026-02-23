@@ -423,9 +423,9 @@
                   <!-- Foto compacta -->
                   <div class="w-11 h-11 flex-shrink-0 rounded-md overflow-hidden relative shadow-sm" 
                        :class="{'cursor-pointer': notificacionSeleccionada.actividad.foto_url}" 
-                       @click="notificacionSeleccionada.actividad.foto_url && verImagen(notificacionSeleccionada.actividad.foto_url)">
+                       @click="notificacionSeleccionada.actividad.foto_url && verImagen(getActividadFotoUrl(notificacionSeleccionada.actividad.foto_url))">
                     <img v-if="notificacionSeleccionada.actividad.foto_url" 
-                         :src="notificacionSeleccionada.actividad.foto_url" 
+                         :src="getActividadFotoUrl(notificacionSeleccionada.actividad.foto_url)" 
                          class="w-full h-full object-cover transition-transform duration-300 hover:scale-110" 
                          alt="Foto" />
                     <div v-else class="flex justify-center">
@@ -494,10 +494,10 @@
             </div>
           </div>
           
-          <!-- Sección de Descripción/Mensaje -->
+          <!-- Sección de Descripción/Mensaje - Estilo email empresarial -->
           <div class="notification-description-section mb-3">
-            <div class="bg-gradient-to-br from-gray-50/80 to-white border border-gray-200/60 rounded-lg p-3 shadow-sm">
-              <div class="notification-description-text text-xs text-gray-700 leading-relaxed" v-html="formatearDescripcion(notificacionSeleccionada.descripcion)"></div>
+            <div class="bg-white border-l-4 border-orange-400 pl-4 pr-3 py-3">
+              <div class="notification-description-text text-sm text-gray-700 leading-relaxed [&_p]:mb-0 [&_p+p]:mt-2.5" v-html="formatearDescripcion(notificacionSeleccionada.descripcion)"></div>
             </div>
           </div>
 
@@ -777,6 +777,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import notificacionesService from '../services/notificacionesService.js'
+import { apiService } from '../services/apiService.js'
 import { useNotifications } from '../composables/useNotifications.js'
 
 // Estados reactivos
@@ -794,6 +795,9 @@ const conteoAnterior = ref(0) // NUEVO: Para detectar cambios en el contador
 // Modal de imagen para actividades
 const imagenModalVisible = ref(false)
 const imagenSeleccionada = ref('')
+
+// Variable para la URL de la API (para construir URLs de fotos)
+const currentApiUrl = ref('')
 
 // NUEVO: Audio para notificaciones
 let audioNotificacion = null
@@ -1860,6 +1864,27 @@ const verImagen = (url) => {
   })
 }
 
+// Función para construir URL completa de foto de actividad
+const getActividadFotoUrl = (fotoUrl) => {
+  if (!fotoUrl) return null
+  
+  // Si ya es una URL completa (http:// o https://), devolverla directamente
+  if (fotoUrl.startsWith('http://') || fotoUrl.startsWith('https://')) {
+    return fotoUrl
+  }
+  
+  // Si es una ruta relativa, agregar el prefijo de la API
+  const baseUrl = currentApiUrl.value || ''
+  if (baseUrl) {
+    // Asegurar que no haya doble barra
+    const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+    const cleanPath = fotoUrl.startsWith('/') ? fotoUrl : `/${fotoUrl}`
+    return `${cleanBase}${cleanPath}`
+  }
+  
+  return fotoUrl
+}
+
 // Función para formatear la descripción respetando saltos de línea y formato
 const formatearDescripcion = (texto) => {
   if (!texto) return ''
@@ -1873,22 +1898,37 @@ const formatearDescripcion = (texto) => {
   
   let textoFormateado = escaparHtml(texto)
   
-  // Convertir saltos de línea a <br>
-  textoFormateado = textoFormateado.replace(/\n\n/g, '</p><p class="mt-3">')
-  textoFormateado = textoFormateado.replace(/\n/g, '<br>')
+  // PASO 1: Normalizar todos los tipos de saltos de línea
+  textoFormateado = textoFormateado.replace(/\r\n/g, '\n')
+  textoFormateado = textoFormateado.replace(/\r/g, '\n')
   
-  // Detectar URLs y convertirlas en enlaces
+  // PASO 2: Colapsar múltiples saltos consecutivos a un solo separador de párrafo
+  // Cualquier combinación de 2+ saltos se convierte en UN separador de párrafo
+  textoFormateado = textoFormateado.replace(/\n{2,}/g, '{{PARRAFO}}')
+  
+  // PASO 3: Eliminar saltos simples dentro del texto (fluir como texto corrido)
+  // Esto es estándar en emails empresariales - saltos simples se ignoran
+  textoFormateado = textoFormateado.replace(/\n/g, ' ')
+  
+  // PASO 4: Limpiar espacios múltiples que puedan quedar
+  textoFormateado = textoFormateado.replace(/\s{2,}/g, ' ')
+  
+  // PASO 5: Convertir marcadores de párrafo a HTML con espaciado CSS controlado
+  textoFormateado = textoFormateado.replace(/\{\{PARRAFO\}\}/g, '</p><p class="mt-3">')
+  
+  // PASO 6: Detectar URLs y convertirlas en enlaces
   const urlRegex = /(https?:\/\/[^\s<]+)/g
-  textoFormateado = textoFormateado.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline break-all">$1</a>')
+  textoFormateado = textoFormateado.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-orange-600 hover:text-orange-800 underline break-all">$1</a>')
   
-  // Detectar texto entre asteriscos como negrita
+  // PASO 7: Detectar texto entre asteriscos como negrita/itálica
   textoFormateado = textoFormateado.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
   textoFormateado = textoFormateado.replace(/\*(.+?)\*/g, '<em class="italic">$1</em>')
   
-  // Envolver en párrafo si no está ya
-  if (!textoFormateado.startsWith('<p')) {
-    textoFormateado = `<p class="mb-0">${textoFormateado}</p>`
-  }
+  // PASO 8: Envolver en contenedor de párrafos
+  textoFormateado = `<p class="mt-0">${textoFormateado}</p>`
+  
+  // Limpiar párrafos vacíos
+  textoFormateado = textoFormateado.replace(/<p class="mt-\d+">\s*<\/p>/g, '')
   
   return textoFormateado
 }
@@ -1918,6 +1958,10 @@ const cargarConfiguracion = () => {
 // Ciclo de vida ACTUALIZADO
 onMounted(async () => {
   console.log('📱 Componente Notificaciones montado')
+  
+  // Inicializar URL de la API para las fotos
+  currentApiUrl.value = apiService.getCurrentApiUrl() || ''
+  console.log(`🌐 API URL inicializada: ${currentApiUrl.value}`)
   
   // Inicializar audio de notificaciones
   inicializarAudio()

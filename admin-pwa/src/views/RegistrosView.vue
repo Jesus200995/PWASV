@@ -1175,11 +1175,14 @@
             </div>
             <div class="header-text">
               <h3 class="header-title-notificar">Notificar sobre Actividad</h3>
-              <span class="header-subtitle header-subtitle-notificar" v-if="actividadANotificar">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px; flex-shrink: 0;">
+              <span class="header-subtitle header-subtitle-notificar" v-if="actividadANotificar" style="display: flex; align-items: center; gap: 6px;">
+                <span :class="['tipo-badge', getTipoClass(actividadANotificar.tipo_actividad)]" style="font-size: 9px; padding: 3px 7px;">
+                  {{ actividadANotificar.tipo_actividad?.toUpperCase() }}
+                </span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0;">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
-                {{ actividadANotificar.tipo_actividad }} - {{ actividadANotificar.usuario?.nombre_completo || 'Usuario' }}
+                {{ actividadANotificar.usuario?.nombre_completo || 'Usuario' }}
               </span>
             </div>
             <button @click="cerrarModalNotificar" class="btn-close-edit btn-close-notificar" title="Cerrar">
@@ -1210,7 +1213,11 @@
                   </div>
                   <div class="readonly-card-content">
                     <span class="readonly-card-label">Tipo</span>
-                    <span class="readonly-card-value">{{ actividadANotificar.tipo_actividad }}</span>
+                    <span class="readonly-card-value">
+                      <span :class="['tipo-badge', getTipoClass(actividadANotificar.tipo_actividad)]" style="font-size: 11px; padding: 4px 10px;">
+                        {{ actividadANotificar.tipo_actividad?.toUpperCase() }}
+                      </span>
+                    </span>
                   </div>
                 </div>
 
@@ -1234,7 +1241,7 @@
                   </div>
                   <div class="readonly-card-content">
                     <span class="readonly-card-label">Fecha</span>
-                    <span class="readonly-card-value">{{ new Date(actividadANotificar.fecha).toLocaleDateString('es-MX') }}</span>
+                    <span class="readonly-card-value">{{ actividadANotificar.fecha_hora ? new Date(actividadANotificar.fecha_hora).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Sin fecha' }}</span>
                   </div>
                 </div>
               </div>
@@ -1256,7 +1263,7 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                     </svg>
-                    Título * (puedes editarlo)
+                    Título *
                   </label>
                   <input 
                     type="text"
@@ -1264,6 +1271,7 @@
                     v-model="formNotificacion.titulo"
                     class="form-input"
                     maxlength="150"
+                    placeholder="Ej: Reporte sobre tu actividad de campo"
                     required
                   />
                   <small class="char-count">{{ formNotificacion.titulo.length }}/150</small>
@@ -3330,16 +3338,13 @@ const abrirModalNotificar = (registro) => {
   // Pre-llenar el formulario
   const tipoActividad = registro.tipo_actividad || 'Actividad'
   const categoriaActividad = registro.categoria_actividad || ''
-  const fecha = registro.fecha ? new Date(registro.fecha).toLocaleDateString('es-MX') : ''
+  const fecha = registro.fecha_hora ? new Date(registro.fecha_hora).toLocaleDateString('es-MX') : ''
   const nombreUsuario = registro.usuario?.nombre_completo || 'Usuario'
   
-  // Mensaje por defecto personalizado
-  const mensajePorDefecto = `Estimado/a ${nombreUsuario.split(' ')[0]},\n\nHemos revisado tu registro de actividad tipo "${tipoActividad}" del ${fecha}.\n\nTe contactamos para informarte sobre aspectos importantes relacionados con esta actividad. Por favor, revisa los motivos de atención seleccionados y toma las acciones necesarias.\n\nSi tienes dudas o requieres más información, no dudes en contactarnos.\n\nSaludos.`
-  
   formNotificacion.value = {
-    titulo: `Notificación sobre ${tipoActividad} - ${fecha}`,
+    titulo: '', // Vacío - obligatorio que el admin escriba el título
     subtitulo: '', // Se actualizará automáticamente cuando se seleccionen motivos
-    descripcion: mensajePorDefecto,
+    descripcion: '', // Vacío - obligatorio que el admin escriba el mensaje
     motivos_atencion: [],
     enlace_url: '',
     actividad_id: registro.id,

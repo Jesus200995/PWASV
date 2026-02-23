@@ -4953,16 +4953,29 @@ async def crear_notificacion(
         raise HTTPException(status_code=500, detail=f"Error al crear notificación: {str(e)}")
 
 @app.get("/notificaciones")
-async def listar_notificaciones(limit: int = 50, offset: int = 0):
-    """Listar todas las notificaciones"""
+async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 'todas'):
+    """Listar todas las notificaciones
+    Args:
+        limit: Número máximo de resultados
+        offset: Desplazamiento para paginación
+        tipo: Filtro por tipo - 'todas', 'individuales', 'grupales'
+    """
     try:
         if not conn:
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        print(f"📋 Listando notificaciones (limit: {limit}, offset: {offset})")
+        print(f"📋 Listando notificaciones (limit: {limit}, offset: {offset}, tipo: {tipo})")
+        
+        # Construir filtro WHERE según el tipo
+        where_clause = ""
+        if tipo == 'individuales':
+            where_clause = "WHERE n.enviada_a_todos = FALSE"
+        elif tipo == 'grupales':
+            where_clause = "WHERE n.enviada_a_todos = TRUE"
+        # Si tipo == 'todas', no se agrega filtro
         
         # Obtener notificaciones con información de destinatarios
-        cursor.execute("""
+        query = f"""
             SELECT 
                 n.id, n.titulo, n.subtitulo, n.descripcion, n.enlace_url,
                 n.archivo_nombre, n.archivo_tipo, n.enviada_a_todos,
@@ -4976,14 +4989,18 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0):
                     )
                 END as destinatarios_texto
             FROM notificaciones n
+            {where_clause}
             ORDER BY n.fecha_creacion DESC
             LIMIT %s OFFSET %s
-        """, (limit, offset))
+        """
+        
+        cursor.execute(query, (limit, offset))
         
         resultados = cursor.fetchall()
         
-        # Obtener total de notificaciones
-        cursor.execute("SELECT COUNT(*) FROM notificaciones")
+        # Obtener total de notificaciones con el mismo filtro
+        count_query = f"SELECT COUNT(*) FROM notificaciones n {where_clause}"
+        cursor.execute(count_query)
         total = cursor.fetchone()[0]
         
         notificaciones = []
@@ -5003,7 +5020,7 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0):
             }
             notificaciones.append(notificacion)
         
-        print(f"📋 {len(notificaciones)} notificaciones listadas de {total} totales")
+        print(f"📋 {len(notificaciones)} notificaciones listadas de {total} totales (tipo: {tipo})")
         
         return {
             "notificaciones": notificaciones,

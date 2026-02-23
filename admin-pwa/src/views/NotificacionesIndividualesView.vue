@@ -6,7 +6,7 @@
       <header class="page-header">
         <div class="header-content">
           <div class="header-main">
-            <div class="header-icon">
+       <div class="header-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -19,12 +19,12 @@
             </div>
           </div>
           <div class="header-actions">
-            <button class="btn-primary" @click="mostrarModalEnviar = true">
+            <button class="btn-primary" @click="mostrarModalCrear = true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 2L11 13"/>
-                <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+                <path d="M12 5v14"/>
+                <path d="M5 12h14"/>
               </svg>
-              Enviar Notificación
+              Nueva Notificación
             </button>
           </div>
         </div>
@@ -34,334 +34,543 @@
         <!-- Mensaje de carga -->
         <div v-if="cargando" class="loading-state">
           <div class="loading-spinner"></div>
-          <p>Cargando usuarios...</p>
+          <p>Cargando notificaciones...</p>
         </div>
 
         <!-- Mensaje de error -->
         <div v-if="error && !cargando" class="error-state">
           <div class="error-icon">⚠️</div>
-          <h3>Error al cargar datos</h3>
+          <h3>Error al cargar notificaciones</h3>
           <p>{{ error }}</p>
-          <button class="btn-secondary" @click="cargarUsuarios">Reintentar</button>
+          <button class="btn-secondary" @click="cargarNotificaciones">Reintentar</button>
         </div>
 
-        <!-- Lista de usuarios -->
-        <div v-if="!cargando && !error" class="usuarios-section">
-          <div class="section-header">
-            <h2>Seleccionar Usuario</h2>
-            <div class="search-container">
-              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
+        <!-- Lista de notificaciones -->
+        <div v-if="!cargando && !error" class="notificaciones-list">
+          <div class="list-header">
+            <h2>Notificaciones Enviadas Individualmente ({{ notificaciones.length }})</h2>
+            <button class="btn-refresh" @click="cargarNotificaciones" :disabled="cargando">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 4v6h-6"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
               </svg>
-              <input 
-                type="text" 
-                v-model="busqueda" 
-                placeholder="Buscar por nombre, correo o CURP..."
-                class="search-input"
-              >
-            </div>
+              Actualizar
+            </button>
           </div>
 
-          <!-- Tabla de usuarios -->
-          <div class="usuarios-table-container">
-            <table class="usuarios-table">
+          <!-- Tabla de notificaciones -->
+          <div class="notifications-table-container">
+            <table class="notifications-table">
               <thead>
                 <tr>
-                  <th>Nombre</th>
-                  <th>Correo</th>
-                  <th>CURP</th>
-                  <th>Cargo</th>
+                  <th>Título</th>
+                  <th>Subtítulo</th>
+                  <th>Destinatarios</th>
+                  <th>Fecha de Envío</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="usuario in usuariosFiltrados" :key="usuario.id" class="usuario-row">
-                  <td class="name-cell">
-                    <div class="user-avatar">
-                      {{ obtenerIniciales(usuario.nombre_completo) }}
+                <tr v-for="notificacion in notificaciones" :key="notificacion.id" class="notification-row">
+                  <td class="title-cell">
+                    <div class="title-content">
+                      <span class="notification-title">{{ notificacion.titulo }}</span>
+                      <span v-if="notificacion.archivo_nombre" class="attachment-badge">
+                        📎 {{ notificacion.archivo_nombre }}
+                      </span>
                     </div>
-                    <span class="user-name">{{ usuario.nombre_completo }}</span>
                   </td>
-                  <td>{{ usuario.correo }}</td>
-                  <td>{{ usuario.curp || 'N/A' }}</td>
-                  <td>
-                    <span class="cargo-badge">{{ usuario.cargo || 'Sin cargo' }}</span>
+                  <td class="subtitle-cell">
+                    <span v-if="notificacion.subtitulo" class="notification-subtitle">
+                      {{ notificacion.subtitulo }}
+                    </span>
+                    <span v-else class="no-subtitle">Sin subtítulo</span>
                   </td>
-                  <td>
-                    <span :class="['status-badge', usuario.activo ? 'status-active' : 'status-inactive']">
-                      {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                  <td class="recipients-cell">
+                    <span class="recipients-badge">
+                      {{ notificacion.destinatarios_texto }}
                     </span>
                   </td>
-                  <td>
-                    <button 
-                      class="btn-enviar" 
-                      @click="seleccionarUsuario(usuario)"
-                      :disabled="!usuario.activo"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 2L11 13"/>
-                        <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
-                      </svg>
-                      Enviar
-                    </button>
+                  <td class="date-cell">
+                    <span class="notification-date">{{ formatearFecha(notificacion.fecha_envio) }}</span>
+                  </td>
+                  <td class="status-cell">
+                    <span class="status-badge status-sent">Enviada</span>
+                  </td>
+                  <td class="actions-cell">
+                    <div class="action-buttons">
+                      <button class="btn-action btn-view" @click="verDetalle(notificacion)" title="Ver detalles">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </button>
+                      <button class="btn-action btn-stats" @click="verEstadisticas(notificacion)" title="Ver estadísticas">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M3 3v18h18"/>
+                          <path d="M18 17V9"/>
+                          <path d="M13 17V5"/>
+                          <path d="M8 17v-3"/>
+                        </svg>
+                      </button>
+                      <button class="btn-action btn-delete" @click="confirmarEliminar(notificacion)" title="Eliminar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M3 6h18"/>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
             </table>
-            
-            <div v-if="usuariosFiltrados.length === 0" class="empty-state">
-              <p>No se encontraron usuarios con esos criterios de búsqueda</p>
+
+            <!-- Estado vacío -->
+            <div v-if="notificaciones.length === 0" class="empty-state">
+              <div class="empty-icon">📢</div>
+              <h3>No hay notificaciones individuales</h3>
+              <p>Crea tu primera notificación individualizada para usuarios específicos.</p>
+              <button class="btn-primary-large" @click="mostrarModalCrear = true">
+                Crear Primera Notification
+              </button>
             </div>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Modal para enviar notificación -->
-    <Teleport to="body">
-      <transition name="modal">
-        <div v-if="mostrarModalEnviar" class="modal-overlay" @click="cerrarModal">
-          <div class="modal-container" @click.stop>
-            <div class="modal-header">
-              <h3>{{ usuarioSeleccionado ? 'Enviar Notificación Individual' : 'Enviar Notificación' }}</h3>
-              <button class="modal-close" @click="cerrarModal">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-
-            <div class="modal-body">
-              <div v-if="usuarioSeleccionado" class="user-selected">
-                <p><strong>Destinatario:</strong> {{ usuarioSeleccionado.nombre_completo }}</p>
-                <p><strong>Correo:</strong> {{ usuarioSeleccionado.correo }}</p>
-              </div>
-
-              <div class="form-group">
-                <label for="titulo">Título de la notificación</label>
-                <input 
-                  type="text" 
+    <!-- Modal Crear Notificación -->
+    <div v-if="mostrarModalCrear" class="modal-overlay" @click="cerrarModalCrear">
+      <div class="modal-content modal-expanded" @click.stop>
+        <div class="modal-header">
+          <h3>Nueva Notificación Individual</h3>
+          <button class="btn-close" @click="cerrarModalCrear">×</button>
+        </div>
+        
+        <div class="modal-body modal-body-two-columns">
+          <!-- Columna principal del formulario -->
+          <div class="form-column">
+            <form @submit.prevent="crearNotificacion">
+              <!-- Título -->
+              <div class="form-group-compact">
+                <label for="titulo">Título *</label>
+                <input
                   id="titulo"
-                  v-model="formulario.titulo" 
-                  placeholder="Ej: Recuerda completar tu reporte"
-                  class="form-input"
-                  maxlength="100"
-                >
+                  v-model="formNotificacion.titulo"
+                  type="text"
+                  class="form-input-compact"
+                  placeholder="Título de la notificación"
+                  maxlength="150"
+                  required
+                />
+                <small class="char-count">{{ formNotificacion.titulo.length }}/150</small>
               </div>
 
-              <div class="form-group">
-                <label for="mensaje">Mensaje</label>
-                <textarea 
-                  id="mensaje"
-                  v-model="formulario.mensaje" 
-                  placeholder="Escribe el mensaje de la notificación..."
-                  class="form-textarea"
-                  rows="4"
-                  maxlength="500"
+              <!-- Subtítulo -->
+              <div class="form-group-compact">
+                <label for="subtitulo">Subtítulo</label>
+                <input
+                  id="subtitulo"
+                  v-model="formNotificacion.subtitulo"
+                  type="text"
+                  class="form-input-compact"
+                  placeholder="Subtítulo opcional"
+                  maxlength="200"
+                />
+                <small class="char-count">{{ formNotificacion.subtitulo.length }}/200</small>
+              </div>
+
+              <!-- Descripción -->
+              <div class="form-group-compact">
+                <label for="descripcion">Descripción</label>
+                <textarea
+                  id="descripcion"
+                  v-model="formNotificacion.descripcion"
+                  class="form-textarea-compact"
+                  placeholder="Descripción detallada"
+                  rows="3"
                 ></textarea>
-                <small class="char-count">{{ formulario.mensaje.length }}/500</small>
               </div>
 
-              <div v-if="errorEnvio" class="error-message">
-                {{ errorEnvio }}
+              <!-- Enlace URL -->
+              <div class="form-group-compact">
+                <label for="enlace_url">Enlace URL (opcional)</label>
+                <input
+                  id="enlace_url"
+                  v-model="formNotificacion.enlace_url"
+                  type="url"
+                  class="form-input-compact"
+                  placeholder="https://ejemplo.com"
+                />
+              </div>
+
+              <!-- Archivo adjunto -->
+              <div class="form-group-compact">
+                <label for="archivo">Archivo adjunto</label>
+                <div class="file-input-container-compact">
+                  <input
+                    id="archivo"
+                    ref="archivoInput"
+                    type="file"
+                    class="file-input"
+                    accept=".jpg,.jpeg,.png,.gif,.pdf,.mp4,.avi,.mov,.wmv"
+                    @change="manejarArchivoSeleccionado"
+                  />
+                  <label for="archivo" class="file-input-label-compact">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14,2 14,8 20,8"/>
+                    </svg>
+                    <span class="file-text">{{ archivoSeleccionado ? archivoSeleccionado.name : 'Seleccionar archivo' }}</span>
+                  </label>
+                </div>
+                <small class="file-help-compact">JPG, PNG, PDF, MP4 (máx. 50MB)</small>
+              </div>
+
+              <!-- Botones -->
+              <div class="modal-actions-compact">
+                <button type="button" class="btn-secondary-compact" @click="cerrarModalCrear">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-primary-compact" :disabled="enviandoNotificacion || formNotificacion.usuario_ids.length === 0">
+                  <span v-if="enviandoNotificacion" class="loading-spinner-small"></span>
+                  {{ enviandoNotificacion ? 'Enviando...' : 'Enviar' }}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Columna del selector de usuarios -->
+          <div class="users-column">
+            <div class="users-column-header">
+              <h4>Seleccionar Usuarios</h4>
+              <div class="selected-count-badge">
+                {{ formNotificacion.usuario_ids.length }} seleccionados
               </div>
             </div>
-
-            <div class="modal-footer">
-              <button class="btn-cancel" @click="cerrarModal" :disabled="enviando">
-                Cancelar
-              </button>
-              <button class="btn-send" @click="enviarNotificacion" :disabled="!formularioValido || enviando">
-                <span v-if="!enviando">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 2L11 13"/>
-                    <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
-                  </svg>
-                  Enviar Notificación
-                </span>
-                <span v-else>
-                  <div class="spinner-small"></div>
-                  Enviando...
-                </span>
-              </button>
+            
+            <div v-if="cargandoUsuarios" class="loading-users-compact">
+              <div class="loading-spinner-small"></div>
+              <span>Cargando usuarios...</span>
+            </div>
+            
+            <div v-else class="users-selector-column">
+              <div class="search-input-wrapper">
+                <input
+                  v-model="busquedaUsuarios"
+                  type="text"
+                  class="form-input-compact search-users-column"
+                  placeholder="🔍 Buscar por nombre, correo o CURP..."
+                  autocomplete="off"
+                />
+              </div>
+              
+              <div class="users-list-column" v-show="usuariosFiltrados.length > 0">
+                <div class="users-list-header" v-if="busquedaUsuarios">
+                  {{ usuariosFiltrados.length }} resultado(s) encontrado(s)
+                </div>
+                <label
+                  v-for="usuario in usuariosFiltrados"
+                  :key="usuario.id"
+                  class="user-option-column"
+                  :class="{ 'selected': formNotificacion.usuario_ids.includes(usuario.id) }"
+                >
+                  <input
+                    v-model="formNotificacion.usuario_ids"
+                    :value="usuario.id"
+                    type="checkbox"
+                  />
+                  <div class="user-info-column">
+                    <span class="user-name-column">{{ usuario.nombre_completo || usuario.nombre || 'Sin nombre' }}</span>
+                    <span class="user-email-column">{{ usuario.correo || usuario.email || 'Sin email' }}</span>
+                    <span v-if="usuario.curp" class="user-curp-column">CURP: {{ usuario.curp }}</span>
+                  </div>
+                </label>
+              </div>
+              
+              <div v-show="busquedaUsuarios && usuariosFiltrados.length === 0" class="no-users-found-column">
+                ❌ No se encontraron usuarios que coincidan con "{{ busquedaUsuarios }}"
+              </div>
+              
+              <div v-show="!busquedaUsuarios && usuarios.length === 0" class="no-users-loaded-column">
+                📝 No hay usuarios disponibles
+              </div>
             </div>
           </div>
         </div>
-      </transition>
-    </Teleport>
+      </div>
+    </div>
 
-    <!-- Modal de éxito -->
-    <Teleport to="body">
-      <transition name="modal">
-        <div v-if="mostrarExito" class="modal-overlay" @click="cerrarModalExito">
-          <div class="modal-container success-modal" @click.stop>
-            <div class="success-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </div>
-            <h3>¡Notificación Enviada!</h3>
-            <p>La notificación ha sido enviada exitosamente</p>
-            <button class="btn-primary" @click="cerrarModalExito">Aceptar</button>
-          </div>
+    <!-- Toast de notificaciones -->
+    <div v-if="toast.show" class="toast" :class="toast.type">
+      <div class="toast-content">
+        <div class="toast-icon">
+          {{ toast.type === 'success' ? '✅' : '❌' }}
         </div>
-      </transition>
-    </Teleport>
+        <div class="toast-message">{{ toast.message }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import Sidebar from '../components/Sidebar.vue'
-import authService from '../services/authService'
-import usuariosService from '../services/usuariosService'
-import notificacionesService from '../services/notificacionesService'
+import notificacionesService from '../services/notificacionesService.js'
+import usuariosService from '../services/usuariosService.js'
+import authService from '../services/authService.js'
 
 export default {
   name: 'NotificacionesIndividualesView',
   components: {
     Sidebar
   },
-  setup() {
-    const router = useRouter()
-    const usuarios = ref([])
-    const cargando = ref(false)
-    const error = ref(null)
-    const busqueda = ref('')
-    const mostrarModalEnviar = ref(false)
-    const usuarioSeleccionado = ref(null)
-    const enviando = ref(false)
-    const errorEnvio = ref(null)
-    const mostrarExito = ref(false)
-
-    const formulario = ref({
-      titulo: '',
-      mensaje: ''
-    })
-
-    const usuariosFiltrados = computed(() => {
-      if (!busqueda.value) return usuarios.value
-
-      const termino = busqueda.value.toLowerCase()
-      return usuarios.value.filter(usuario => 
-        usuario.nombre_completo?.toLowerCase().includes(termino) ||
-        usuario.correo?.toLowerCase().includes(termino) ||
-        usuario.curp?.toLowerCase().includes(termino)
-      )
-    })
-
-    const formularioValido = computed(() => {
-      return formulario.value.titulo.trim().length > 0 && 
-             formulario.value.mensaje.trim().length > 0
-    })
-
-    const cargarUsuarios = async () => {
-      cargando.value = true
-      error.value = null
+  data() {
+    return {
+      cargando: false,
+      error: null,
+      
+      // Lista de notificaciones
+      notificaciones: [],
+      
+      // Modal crear notificación
+      mostrarModalCrear: false,
+      enviandoNotificacion: false,
+      archivoSeleccionado: null,
+      formNotificacion: {
+        titulo: '',
+        subtitulo: '',
+        descripcion: '',
+        enlace_url: '',
+        enviada_a_todos: false,  // Siempre false para individuales
+        usuario_ids: []
+      },
+      
+      // Usuarios para selector
+      usuarios: [],
+      cargandoUsuarios: false,
+      busquedaUsuarios: '',
+      
+      // Toast
+      toast: {
+        show: false,
+        type: 'success',
+        message: ''
+      }
+    }
+  },
+  
+  computed: {
+    usuariosFiltrados() {
+      if (!this.busquedaUsuarios.trim()) return this.usuarios
+      
+      const busqueda = this.busquedaUsuarios.toLowerCase().trim()
+      return this.usuarios.filter(usuario => {
+        const nombre = (usuario.nombre_completo || usuario.nombre || '').toLowerCase()
+        const email = (usuario.correo || usuario.email || '').toLowerCase()
+        const curp = (usuario.curp || '').toLowerCase()
+        const cargo = (usuario.cargo || '').toLowerCase()
+        
+        return nombre.includes(busqueda) || 
+               email.includes(busqueda) || 
+               curp.includes(busqueda) ||
+               cargo.includes(busqueda)
+      })
+    }
+  },
+  
+  mounted() {
+    this.cargarNotificaciones()
+    this.cargarUsuarios()
+  },
+  
+  methods: {
+    async cargarNotificaciones() {
+      this.cargando = true
+      this.error = null
       
       try {
-        const respuesta = await usuariosService.getUsuarios()
-        usuarios.value = respuesta.data || respuesta
-      } catch (err) {
-        console.error('Error al cargar usuarios:', err)
-        error.value = 'No se pudieron cargar los usuarios. Por favor, intenta de nuevo.'
+        // Filtrar solo notificaciones individuales
+        const respuesta = await notificacionesService.listarNotificaciones(50, 0, 'individuales')
+        this.notificaciones = respuesta.notificaciones || []
+        console.log('✅ Notificaciones individuales cargadas:', this.notificaciones.length)
+      } catch (error) {
+        console.error('❌ Error cargando notificaciones:', error)
+        this.error = error.message
       } finally {
-        cargando.value = false
+        this.cargando = false
       }
-    }
+    },
 
-    const seleccionarUsuario = (usuario) => {
-      usuarioSeleccionado.value = usuario
-      mostrarModalEnviar.value = true
-    }
-
-    const cerrarModal = () => {
-      mostrarModalEnviar.value = false
-      usuarioSeleccionado.value = null
-      formulario.value = {
-        titulo: '',
-        mensaje: ''
+    async cargarUsuarios() {
+      if (this.usuarios.length > 0) {
+        return
       }
-      errorEnvio.value = null
-    }
-
-    const cerrarModalExito = () => {
-      mostrarExito.value = false
-      cerrarModal()
-    }
-
-    const enviarNotificacion = async () => {
-      if (!formularioValido.value) return
-
-      enviando.value = true
-      errorEnvio.value = null
-
+      
+      this.cargandoUsuarios = true
       try {
-        const datos = {
-          titulo: formulario.value.titulo.trim(),
-          subtitulo: formulario.value.mensaje.trim(),
-          usuario_id: usuarioSeleccionado.value?.id
-        }
-
-        await notificacionesService.enviarNotificacion(datos)
+        const respuesta = await usuariosService.obtenerUsuarios()
         
-        mostrarExito.value = true
-        enviando.value = false
-      } catch (err) {
-        console.error('Error al enviar notificación:', err)
-        errorEnvio.value = 'No se pudo enviar la notificación. Por favor, intenta de nuevo.'
-        enviando.value = false
+        if (Array.isArray(respuesta)) {
+          this.usuarios = respuesta
+        } else if (respuesta && Array.isArray(respuesta.usuarios)) {
+          this.usuarios = respuesta.usuarios
+        } else {
+          this.usuarios = []
+        }
+        
+        console.log('✅ Usuarios cargados:', this.usuarios.length)
+        
+      } catch (error) {
+        console.error('❌ Error cargando usuarios:', error)
+        this.mostrarToast('Error al cargar usuarios: ' + error.message, 'error')
+        this.usuarios = []
+      } finally {
+        this.cargandoUsuarios = false
       }
-    }
+    },
 
-    const obtenerIniciales = (nombre) => {
-      if (!nombre) return '?'
-      const palabras = nombre.split(' ')
-      if (palabras.length >= 2) {
-        return (palabras[0][0] + palabras[1][0]).toUpperCase()
+    manejarArchivoSeleccionado(evento) {
+      const archivo = evento.target.files[0]
+      if (archivo) {
+        // Validar tamaño (50MB)
+        if (archivo.size > 50 * 1024 * 1024) {
+          this.mostrarToast('El archivo no debe exceder 50MB', 'error')
+          this.$refs.archivoInput.value = ''
+          return
+        }
+        
+        this.archivoSeleccionado = archivo
+        console.log('📎 Archivo seleccionado:', archivo.name)
+      } else {
+        this.archivoSeleccionado = null
       }
-      return nombre.substring(0, 2).toUpperCase()
-    }
+    },
 
-    const logout = () => {
+    async crearNotificacion() {
+      // Validaciones
+      if (!this.formNotificacion.titulo.trim()) {
+        this.mostrarToast('El título es obligatorio', 'error')
+        return
+      }
+      
+      if (this.formNotificacion.usuario_ids.length === 0) {
+        this.mostrarToast('Debe seleccionar al menos un usuario', 'error')
+        return
+      }
+      
+      this.enviandoNotificacion = true
+      
+      try {
+        const respuesta = await notificacionesService.crearNotificacion(
+          this.formNotificacion,
+          this.archivoSeleccionado
+        )
+        
+        console.log('✅ Notificación creada:', respuesta)
+        this.mostrarToast('Notificación enviada exitosamente', 'success')
+        
+        this.cargarNotificaciones()
+        this.cerrarModalCrear()
+        
+      } catch (error) {
+        console.error('❌ Error creando notificación:', error)
+        this.mostrarToast(error.message, 'error')
+      } finally {
+        this.enviandoNotificacion = false
+      }
+    },
+
+    cerrarModalCrear() {
+      this.mostrarModalCrear = false
+      this.limpiarFormulario()
+    },
+
+    limpiarFormulario() {
+      this.formNotificacion = {
+        titulo: '',
+        subtitulo: '',
+        descripcion: '',
+        enlace_url: '',
+        enviada_a_todos: false,
+        usuario_ids: []
+      }
+      this.archivoSeleccionado = null
+      if (this.$refs.archivoInput) {
+        this.$refs.archivoInput.value = ''
+      }
+      this.busquedaUsuarios = ''
+    },
+
+    verDetalle(notificacion) {
+      console.log('Ver detalle:', notificacion)
+      this.mostrarToast('Función en desarrollo', 'error')
+    },
+
+    verEstadisticas(notificacion) {
+      console.log('Ver estadísticas:', notificacion)
+      this.mostrarToast('Función en desarrollo', 'error')
+    },
+
+    confirmarEliminar(notificacion) {
+      if (confirm(`¿Estás seguro de que deseas eliminar la notificación "${notificacion.titulo}"?`)) {
+        this.eliminarNotificacion(notificacion.id)
+      }
+    },
+
+    async eliminarNotificacion(id) {
+      try {
+        await notificacionesService.eliminarNotificacion(id)
+        this.mostrarToast('Notificación eliminada exitosamente', 'success')
+        this.cargarNotificaciones()
+      } catch (error) {
+        console.error('❌ Error eliminando notificación:', error)
+        this.mostrarToast(error.message, 'error')
+      }
+    },
+
+    formatearFecha(fecha) {
+      if (!fecha) return 'Sin fecha'
+      
+      try {
+        const date = new Date(fecha)
+        return date.toLocaleDateString('es-MX', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      } catch (error) {
+        return 'Fecha inválida'
+      }
+    },
+
+    mostrarToast(message, type = 'success') {
+      this.toast = {
+        show: true,
+        type,
+        message
+      }
+
+      setTimeout(() => {
+        this.toast.show = false
+      }, 4000)
+    },
+    
+    logout() {
       authService.logout()
-      router.push('/login')
-    }
-
-    onMounted(() => {
-      cargarUsuarios()
-    })
-
-    return {
-      usuarios,
-      cargando,
-      error,
-      busqueda,
-      usuariosFiltrados,
-      mostrarModalEnviar,
-      usuarioSeleccionado,
-      formulario,
-      formularioValido,
-      enviando,
-      errorEnvio,
-      mostrarExito,
-      cargarUsuarios,
-      seleccionarUsuario,
-      cerrarModal,
-      cerrarModalExito,
-      enviarNotificacion,
-      obtenerIniciales,
-      logout
+      this.$router.push('/login')
     }
   }
 }
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Copiar los estilos de NotificacionesView.vue */
 .notificaciones-individuales-container {
   display: flex;
   min-height: 100vh;
@@ -444,8 +653,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -561,21 +769,10 @@ export default {
   transform: scale(1.05);
 }
 
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
 /* Contenido de la página */
 .page-content {
-  max-width: 1400px;
-  margin: 2rem auto;
-  padding: 0 2rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  flex: 1;
 }
 
 /* Estados de carga y error */
@@ -591,7 +788,7 @@ export default {
   width: 50px;
   height: 50px;
   border: 4px solid #f3f4f6;
-  border-top-color: #22c55e;
+  border-top-color: #4CAF50;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -609,7 +806,7 @@ export default {
 .btn-secondary {
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
-  background: #22c55e;
+  background: #4CAF50;
   color: white;
   border: none;
   border-radius: 10px;
@@ -619,18 +816,18 @@ export default {
 }
 
 .btn-secondary:hover {
-  background: #16a34a;
+  background: #45a049;
 }
 
-/* Sección de usuarios */
-.usuarios-section {
+/* Lista de notificaciones */
+.notificaciones-list {
   background: white;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-.section-header {
+.list-header {
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
@@ -640,58 +837,53 @@ export default {
   gap: 1rem;
 }
 
-.section-header h2 {
+.list-header h2 {
   margin: 0;
   font-size: 1.5rem;
   color: #1f2937;
+  font-family: 'Inter', sans-serif;
 }
 
-.search-container {
-  position: relative;
-  flex: 1;
-  max-width: 400px;
-}
-
-.search-icon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  color: #9ca3af;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 3rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  font-size: 0.95rem;
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 0.875rem;
 }
 
-.search-input:focus {
-  outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+.btn-refresh:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-2px);
 }
 
-/* Tabla de usuarios */
-.usuarios-table-container {
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tabla de notificaciones */
+.notifications-table-container {
   overflow-x: auto;
 }
 
-.usuarios-table {
+.notifications-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.usuarios-table thead {
+.notifications-table thead {
   background: #f9fafb;
 }
 
-.usuarios-table th {
+.notifications-table th {
   padding: 1rem;
   text-align: left;
   font-weight: 600;
@@ -699,54 +891,75 @@ export default {
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  font-family: 'Inter', sans-serif;
 }
 
-.usuarios-table tbody tr {
+.notifications-table tbody tr {
   border-bottom: 1px solid #f3f4f6;
   transition: background-color 0.2s ease;
 }
 
-.usuarios-table tbody tr:hover {
+.notifications-table tbody tr:hover {
   background: #f9fafb;
 }
 
-.usuarios-table td {
+.notifications-table td {
   padding: 1rem;
   color: #4b5563;
+  font-family: 'Inter', sans-serif;
 }
 
-.name-cell {
+.title-cell {
+  min-width: 200px;
+}
+
+.title-content {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.user-name {
+.notification-title {
   font-weight: 600;
   color: #1f2937;
 }
 
-.cargo-badge {
+.attachment-badge {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.subtitle-cell {
+  min-width: 150px;
+}
+
+.notification-subtitle {
+  color: #6b7280;
+}
+
+.no-subtitle {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.recipients-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  background: #e0f2fe;
-  color: #0369a1;
-  border-radius: 6px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.date-cell {
+  white-space: nowrap;
+}
+
+.notification-date {
+  color: #6b7280;
+  font-size: 0.875rem;
 }
 
 .status-badge {
@@ -757,46 +970,97 @@ export default {
   font-weight: 600;
 }
 
-.status-active {
+.status-sent {
   background: #d1fae5;
   color: #065f46;
 }
 
-.status-inactive {
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-action {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-view {
+  background: #dbe afe;
+  color: #1e40af;
+}
+
+.btn-view:hover {
+  background: #bfdbfe;
+}
+
+.btn-stats {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.btn-stats:hover {
+  background: #fde68a;
+}
+
+.btn-delete {
   background: #fee2e2;
   color: #991b1b;
 }
 
-.btn-enviar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #22c55e;
+.btn-delete:hover {
+  background: #fecaca;
+}
+
+/* Estado vacío */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.empty-state p {
+  margin: 0 0 1.5rem 0;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-primary-large {
+  padding: 0.75rem 2rem;
+  background: #4CAF50;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.875rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
 }
 
-.btn-enviar:hover:not(:disabled) {
-  background: #16a34a;
+.btn-primary-large:hover {
+  background: #45a049;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-}
-
-.btn-enviar:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: #6b7280;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
 /* Modal */
@@ -814,14 +1078,18 @@ export default {
   padding: 1rem;
 }
 
-.modal-container {
+.modal-content {
   background: white;
   border-radius: 16px;
   width: 100%;
-  max-width: 600px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   max-height: 90vh;
   overflow-y: auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.modal-expanded {
+  max-width: 1000px;
 }
 
 .modal-header {
@@ -836,76 +1104,77 @@ export default {
   margin: 0;
   font-size: 1.5rem;
   color: #1f2937;
+  font-family: 'Inter', sans-serif;
 }
 
-.modal-close {
+.btn-close {
   background: none;
   border: none;
+  font-size: 2rem;
+  color: #6b7280;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   border-radius: 8px;
   transition: background-color 0.2s ease;
 }
 
-.modal-close:hover {
+.btn-close:hover {
   background: #f3f4f6;
 }
 
-.modal-close svg {
-  width: 20px;
-  height: 20px;
-  color: #6b7280;
-}
-
 .modal-body {
+  padding: 0;
+}
+
+.modal-body-two-columns {
+  display: grid;
+  grid-template-columns:  1fr 350px;
+  gap: 0;
+  height: calc(90vh - 140px);
+}
+
+.form-column {
   padding: 2rem;
+  overflow-y: auto;
+  border-right: 1px solid #e5e7eb;
 }
 
-.user-selected {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 10px;
-  padding: 1rem;
+.form-group-compact {
   margin-bottom: 1.5rem;
 }
 
-.user-selected p {
-  margin: 0.5rem 0;
-  color: #166534;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
+.form-group-compact label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
   color: #374151;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
 }
 
-.form-input, .form-textarea {
+.form-input-compact, .form-textarea-compact {
   width: 100%;
   padding: 0.75rem;
   border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-family: inherit;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
   transition: all 0.3s ease;
 }
 
-.form-input:focus, .form-textarea:focus {
+.form-input-compact:focus, .form-textarea-compact:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
-.form-textarea {
+.form-textarea-compact {
   resize: vertical;
 }
 
@@ -913,67 +1182,101 @@ export default {
   display: block;
   text-align: right;
   margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-input-container-compact {
+  position: relative;
+}
+
+.file-input-label-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.file-input-label-compact:hover {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.file-text {
+  flex: 1;
   font-size: 0.875rem;
   color: #6b7280;
 }
 
-.error-message {
-  background: #fee2e2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-top: 1rem;
+.file-help-compact {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-family: 'Inter', sans-serif;
 }
 
-.modal-footer {
+.modal-actions-compact {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding: 1.5rem 2rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
   border-top: 1px solid #e5e7eb;
 }
 
-.btn-cancel {
+.btn-secondary-compact {
   padding: 0.75rem 1.5rem;
   background: #f3f4f6;
   color: #374151;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
 }
 
-.btn-cancel:hover {
+.btn-secondary-compact:hover {
   background: #e5e7eb;
 }
 
-.btn-send {
+.btn-primary-compact {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: #22c55e;
+  background: #4CAF50;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
 }
 
-.btn-send:hover:not(:disabled) {
-  background: #16a34a;
+.btn-primary-compact:hover:not(:disabled) {
+  background: #45a049;
   transform: translateY(-2px);
 }
 
-.btn-send:disabled {
+.btn-primary-compact:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.spinner-small {
+.loading-spinner-small {
   width: 16px;
   height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -982,57 +1285,188 @@ export default {
   animation: spin 1s linear infinite;
 }
 
-/* Modal de éxito */
-.success-modal {
-  text-align: center;
-  padding: 3rem 2rem;
+/* Selector de usuarios */
+.users-column {
+  padding: 1.5rem;
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
-.success-icon {
-  width: 80px;
-  height: 80px;
-  background: #d1fae5;
-  border-radius: 50%;
+.users-column-header {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.users-column-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.selected-count-badge {
+  padding: 0.25rem 0.75rem;
+  background: #4CAF50;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.loading-users-compact {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.5rem;
+  padding: 2rem;
+  gap: 1rem;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
 }
 
-.success-icon svg {
-  width: 40px;
-  height: 40px;
-  color: #22c55e;
+.users-selector-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.success-modal h3 {
-  margin: 0 0 0.5rem 0;
+.search-input-wrapper {
+  margin-bottom: 1rem;
+}
+
+.search-users-column {
+  width: 100%;
+}
+
+.users-list-column {
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(90vh - 300px);
+}
+
+.users-list-header {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-option-column {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-option-column:hover {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.user-option-column.selected {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.user-option-column input[type="checkbox"] {
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.user-info-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-name-column {
+  font-weight: 600;
   color: #1f2937;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-email-column {
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-curp-column {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.no-users-found-column, .no-users-loaded-column {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 300px;
+  z-index: 2000;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast.success {
+  border-left: 4px solid #4CAF50;
+}
+
+.toast.error {
+  border-left: 4px solid #ef4444;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toast-icon {
   font-size: 1.5rem;
 }
 
-.success-modal p {
-  margin: 0 0 1.5rem 0;
-  color: #6b7280;
-}
-
-/* Transiciones del modal */
-.modal-enter-active, .modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from, .modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-active .modal-container, 
-.modal-leave-active .modal-container {
-  transition: transform 0.3s ease;
-}
-
-.modal-enter-from .modal-container, 
-.modal-leave-to .modal-container {
-  transform: scale(0.95);
+.toast-message {
+  color: #1f2937;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Responsive */
@@ -1040,25 +1474,6 @@ export default {
   .main-content {
     margin-left: 200px;
     width: calc(100vw - 200px);
-  }
-}
-
-@media (min-width: 481px) and (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-    width: 100vw;
-  }
-  
-  .modal-overlay {
-    padding: 16px;
-    align-items: flex-start;
-    padding-top: 40px;
-  }
-  
-  .modal-container {
-    width: 100%;
-    max-width: 680px;
-    max-height: calc(100vh - 80px);
   }
 }
 
@@ -1094,47 +1509,27 @@ export default {
     padding: 12px 16px;
   }
 
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .search-container {
-    max-width: 100%;
-  }
-
-  .modal-overlay {
-    padding: 0;
-    align-items: stretch;
+  .modal-body-two-columns {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
   }
   
-  .modal-container {
-    width: 100%;
-    max-width: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-    margin: 0;
+  .form-column {
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
   }
   
-  .modal-body {
-    padding: 16px;
-  }
-  
-  .modal-header {
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 10;
-    padding: 16px;
-    border-bottom: 1px solid #e0e0e0;
+  .users-column {
+    max-height: 50vh;
   }
 
-  .usuarios-table {
+  .notifications-table {
     font-size: 11px;
   }
 
-  .usuarios-table th,
-  .usuarios-table td {
+  .notifications-table th,
+  .notifications-table td {
     padding: 6px;
   }
 }
@@ -1167,22 +1562,26 @@ export default {
     font-size: 11px;
   }
 
-  .usuarios-table-container {
+  .notifications-table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
   
-  .usuarios-table {
+  .notifications-table {
     min-width: 650px;
     font-size: 10px;
   }
   
-  .modal-container {
+  .modal-content {
     width: 100%;
     max-width: 100%;
     height: 100vh;
     max-height: 100vh;
     border-radius: 0;
+  }
+  
+  .modal-body-two-columns {
+    height: calc(100vh - 140px);
   }
 }
 </style>

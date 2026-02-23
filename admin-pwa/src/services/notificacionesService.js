@@ -76,14 +76,20 @@ export const notificacionesService = {
    * Listar todas las notificaciones
    * @param {number} limit - Límite de resultados
    * @param {number} offset - Offset para paginación
+   * @param {string} tipo - Filtro por tipo: 'todas', 'individuales', 'grupales'
    * @returns {Promise} Lista de notificaciones
    */
-  async listarNotificaciones(limit = 50, offset = 0) {
+  async listarNotificaciones(limit = 50, offset = 0, tipo = 'todas') {
     try {
-      console.log(`📋 Obteniendo notificaciones (limit: ${limit}, offset: ${offset})`)
+      console.log(`📋 Obteniendo notificaciones (limit: ${limit}, offset: ${offset}, tipo: ${tipo})`)
+      
+      const params = { limit, offset }
+      if (tipo !== 'todas') {
+        params.tipo = tipo
+      }
       
       const response = await api.get('/notificaciones', {
-        params: { limit, offset }
+        params
       })
       
       console.log(`✅ ${response.data.notificaciones.length} notificaciones obtenidas`)

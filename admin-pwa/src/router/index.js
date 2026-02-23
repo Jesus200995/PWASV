@@ -10,7 +10,7 @@ import ConfiguracionView from '../views/ConfiguracionView.vue'
 import AsistenciaView from '../views/AsistenciaView.vue'
 import VisorMapView from '../views/VisorMap.vue'
 import NotificacionesView from '../views/NotificacionesView.vue'
-import NotificacionesIndividualesView from '../views/NotificacionesIndividualesView.vue'
+// import NotificacionesIndividualesView from '../views/NotificacionesIndividualesView.vue' // YA NO SE USA - Fusionado en NotificacionesView con pestañas
 import PermisosView from '../views/PermisosView.vue'
 import ManualesView from '../views/ManualesView.vue'
 
@@ -78,12 +78,12 @@ const routes = [
     component: NotificacionesView,
     meta: { requiresAuth: true, requiredPermission: 'notificaciones' }
   },
-  {
-    path: '/notificaciones-individuales',
-    name: 'NotificacionesIndividuales',
-    component: NotificacionesIndividualesView,
-    meta: { requiresAuth: true, requiredPermission: 'notificaciones' }
-  },
+  // {
+  //   path: '/notificaciones-individuales',
+  //   name: 'NotificacionesIndividuales',
+  //   component: NotificacionesIndividualesView,
+  //   meta: { requiresAuth: true, requiredPermission: 'notificaciones' }
+  // }, // YA NO SE USA - Fusionado en NotificacionesView con pestañas
   {
     path: '/manuales',
     name: 'Manuales',

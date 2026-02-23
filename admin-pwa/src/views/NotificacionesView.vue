@@ -10,17 +10,17 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                <circle cx="18" cy="6" r="3" fill="#ff4757" opacity="0.9"/>
-                <circle cx="18" cy="6" r="1.5" fill="#ffffff" opacity="0.8"/>
+                <circle :cx="tabActual === 'grupales' ? '18' : '12'" :cy="tabActual === 'grupales' ? '6' : '12'" :r="tabActual === 'grupales' ? '3' : '2'" :fill="tabActual === 'grupales' ? '#ff4757' : 'currentColor'" :opacity="tabActual === 'grupales' ? '0.9' : '1'"/>
+                <circle v-if="tabActual === 'grupales'" cx="18" cy="6" r="1.5" fill="#ffffff" opacity="0.8"/>
               </svg>
             </div>
             <div class="header-text">
-              <h1 class="header-title">Notificaciones Grupales</h1>
-              <p class="header-subtitle">Envía notificaciones masivas a todos los usuarios del sistema</p>
+              <h1 class="header-title">Sistema de Notificaciones</h1>
+              <p class="header-subtitle">{{ tabActual === 'grupales' ? 'Envía notificaciones masivas a todos los usuarios del sistema' : 'Envía notificaciones personalizadas a usuarios específicos' }}</p>
             </div>
           </div>
           <div v-if="puedeCrearNotificaciones" class="header-actions">
-            <button class="btn-primary" @click="mostrarModalCrear = true">
+            <button class="btn-primary" @click="abrirModalCrear">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 5v14"/>
                 <path d="M5 12h14"/>
@@ -32,6 +32,34 @@
       </header>
 
       <div class="page-content">
+        <!-- Tabs de navegación -->
+        <div class="tabs-container">
+          <button 
+            :class="['tab-button', { 'active': tabActual === 'grupales' }]"
+            @click="cambiarTab('grupales')"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Notificaciones Grupales
+            <span class="tab-badge">{{ tabActual === 'grupales' ? notificaciones.length : '' }}</span>
+          </button>
+          <button 
+            :class="['tab-button', { 'active': tabActual === 'individuales' }]"
+            @click="cambiarTab('individuales')"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/>
+            </svg>
+            Notificaciones Individuales
+            <span class="tab-badge">{{ tabActual === 'individuales' ? notificaciones.length : '' }}</span>
+          </button>
+        </div>
+        
         <!-- Mensaje de carga -->
         <div v-if="cargando" class="loading-state">
           <div class="loading-spinner"></div>
@@ -49,7 +77,7 @@
         <!-- Lista de notificaciones -->
         <div v-if="!cargando && !error" class="notificaciones-list">
           <div class="list-header">
-            <h2>Notificaciones Enviadas a Todos ({{ notificaciones.length }})</h2>
+            <h2>{{ tabActual === 'grupales' ? 'Notificaciones Enviadas a Todos' : 'Notificaciones Individuales' }} ({{ notificaciones.length }})</h2>
             <button class="btn-refresh" @click="cargarNotificaciones" :disabled="cargando">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M23 4v6h-6"/>
@@ -947,6 +975,9 @@ export default {
       cargando: false,
       error: null,
       
+      // Pestaña activa ('grupales' o 'individuales')
+      tabActual: 'grupales',
+      
       // Lista de notificaciones
       notificaciones: [],
       
@@ -1114,20 +1145,33 @@ export default {
 
     // ==================== GESTIÓN DE NOTIFICACIONES ====================
     
+    cambiarTab(tab) {
+      if (this.tabActual === tab) return
+      
+      console.log(`🔄 Cambiando de pestaña: ${this.tabActual} → ${tab}`)
+      this.tabActual = tab
+      
+      // Actualizar formNotificacion.enviada_a_todos según la pestaña
+      this.formNotificacion.enviada_a_todos = (tab === 'grupales')
+      
+      // Recargar notificaciones
+      this.cargarNotificaciones()
+    },
+    
     async cargarNotificaciones() {
       this.cargando = true
       this.error = null
       
       try {
-        console.log('🔄 CARGANDO notificaciones grupales (enviadas a TODOS)...')
-        console.log('📤 Parámetros: limit=50, offset=0, tipo="grupales"')
+        const tipo = this.tabActual // 'grupales' o 'individuales'
+        console.log(`🔄 CARGANDO notificaciones ${tipo}...`)
+        console.log(`📤 Parámetros: limit=50, offset=0, tipo="${tipo}"`)
         
-        // Filtrar solo notificaciones enviadas a TODOS los usuarios (enviada_a_todos = true)
-        const respuesta = await notificacionesService.listarNotificaciones(50, 0, 'grupales')
+        const respuesta = await notificacionesService.listarNotificaciones(50, 0, tipo)
         
         this.notificaciones = respuesta.notificaciones || []
         
-        console.log(`✅ Notificaciones grupales cargadas: ${this.notificaciones.length}`)
+        console.log(`✅ Notificaciones ${tipo} cargadas: ${this.notificaciones.length}`)
         console.log('📋 Detalle de notificaciones:')
         this.notificaciones.forEach((notif, index) => {
           console.log(`   ${index + 1}. ${notif.titulo} - enviada_a_todos: ${notif.enviada_a_todos}`)
@@ -1210,6 +1254,18 @@ export default {
       }
     },
 
+    abrirModalCrear() {
+      // Establecer enviada_a_todos según la pestaña activa
+      this.formNotificacion.enviada_a_todos = (this.tabActual === 'grupales')
+      console.log(`📝 Abriendo modal de crear - enviada_a_todos: ${this.formNotificacion.enviada_a_todos}`)
+      this.mostrarModalCrear = true
+      
+      // Si es notificación individual, cargar usuarios
+      if (this.tabActual === 'individuales') {
+        this.cargarUsuarios()
+      }
+    },
+
     async crearNotificacion() {
       // Validaciones
       if (!this.formNotificacion.titulo.trim()) {
@@ -1256,7 +1312,7 @@ export default {
         subtitulo: '',
         descripcion: '',
         enlace_url: '',
-        enviada_a_todos: true,
+        enviada_a_todos: (this.tabActual === 'grupales'), // Usar el valor de la pestaña activa
         usuario_ids: []
       }
       this.archivoSeleccionado = null
@@ -1705,6 +1761,114 @@ export default {
   flex-shrink: 0;
 }
 
+/* === TABS STYLES === */
+.tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 0 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  background: #fafafa;
+  border-radius: 0;
+  margin: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(180deg, #bdbdbd 0%, #9e9e9e 100%);
+  border: 2px solid #757575;
+  border-bottom: 2px solid #9e9e9e;
+  border-radius: 10px 10px 0 0;
+  color: #424242;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.tab-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, transparent 100%);
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.tab-button:hover:not(.active) {
+  background: linear-gradient(180deg, #c0c0c0 0%, #a8a8a8 100%);
+  color: #212121;
+  border-color: #616161;
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.tab-button:hover:not(.active)::before {
+  opacity: 1;
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: #ffffff;
+  border: 2px solid #45a049;
+  border-bottom: none;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 3px 8px rgba(76, 175, 80, 0.3);
+  font-weight: 700;
+  transform: translateY(-1px);
+  margin-bottom: -2px;
+}
+
+.tab-button svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+.tab-button.active svg {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 0.45rem;
+  background: rgba(66, 66, 66, 0.4);
+  color: #ffffff;
+  border-radius: 11px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-left: 0.4rem;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.tab-button.active .tab-badge {
+  background: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
 .btn-primary {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
   backdrop-filter: blur(16px);
@@ -1845,7 +2009,7 @@ export default {
 /* === CONTENT STYLES === */
 .page-content {
   flex: 1;
-  padding: 24px;
+  padding: 0 24px 24px 24px;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
@@ -1856,6 +2020,10 @@ export default {
   text-align: center;
   padding: 60px 20px;
   color: #666;
+  margin-top: 0;
+  background: white;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .loading-spinner {
@@ -1877,6 +2045,10 @@ export default {
   text-align: center;
   padding: 60px 20px;
   color: #666;
+  margin-top: 0;
+  background: white;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .error-icon {
@@ -1905,13 +2077,15 @@ export default {
 /* === NOTIFICATIONS LIST === */
 .notificaciones-list {
   background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  border-radius: 16px;
+  border-radius: 0 0 16px 16px;
   padding: 0;
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.08),
     0 4px 16px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(76, 175, 80, 0.1);
+  border-top: none;
+  margin-top: 0;
 }
 
 .list-header {

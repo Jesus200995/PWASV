@@ -469,7 +469,7 @@
                         </button>
                         <span class="btn-label">Detalles</span>
                       </div>
-                      <div class="action-container">
+                      <div v-if="puedeNotificarRegistros" class="action-container">
                         <button @click="abrirModalNotificar(registro)" class="btn-notificar" title="Enviar notificación sobre esta actividad">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -1438,6 +1438,19 @@ const puedeEliminarRegistros = computed(() => {
   return tienePermiso
 })
 
+// Permiso para notificar sobre registros - REACTIVO
+const puedeNotificarRegistros = computed(() => {
+  // Admin siempre puede notificar
+  if (userRol.value === 'admin' || authService.isAdmin()) {
+    console.log('✅ RegistrosView: Usuario es admin - puede notificar')
+    return true
+  }
+  // Verificar permiso específico usando la variable reactiva
+  const tienePermiso = userPermisos.value?.registros_notificar === true
+  console.log('🔍 RegistrosView: Verificando permiso registros_notificar:', tienePermiso, userPermisos.value)
+  return tienePermiso
+})
+
 // Función para actualizar permisos cuando el evento es disparado
 const actualizarPermisosUsuario = (event) => {
   const userData = event.detail
@@ -1445,7 +1458,7 @@ const actualizarPermisosUsuario = (event) => {
   console.log('📋 RegistrosView: Nuevos permisos recibidos:', userData.permisos)
   userPermisos.value = userData.permisos || {}
   userRol.value = userData.rol || ''
-  console.log('✅ RegistrosView: Variables reactivas actualizadas. registros_acciones =', userPermisos.value?.registros_acciones)
+  console.log('✅ RegistrosView: Variables reactivas actualizadas. registros_acciones =', userPermisos.value?.registros_acciones, ', registros_notificar =', userPermisos.value?.registros_notificar)
 }
 
 // Variables para ordenamiento

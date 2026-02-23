@@ -759,6 +759,21 @@
                         </div>
                       </div>
                     </label>
+                    
+                    <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.registros_notificar }">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.registros_notificar" />
+                      <div class="sub-permiso-icons">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+                      </div>
+                      <span class="sub-permiso-text">Permitir notificar</span>
+                      <div class="sub-toggle">
+                        <div class="sub-toggle-track">
+                          <div class="sub-toggle-thumb"></div>
+                        </div>
+                      </div>
+                    </label>
                   </div>
                 </div>
 
@@ -1132,6 +1147,7 @@ export default {
           asistencia: false,
           registros: false,
           registros_acciones: false,
+          registros_notificar: false,
           usuarios: false,
           usuarios_acciones: false,
           usuarios_estado: false,
@@ -1188,6 +1204,7 @@ export default {
         asistencia: false,
         registros: false,
         registros_acciones: false,
+        registros_notificar: false,
         usuarios: false,
         usuarios_acciones: false,
         usuarios_estado: false,
@@ -1279,9 +1296,10 @@ export default {
 
     // Handler cuando se cambia el permiso de registros
     onRegistrosChange() {
-      // Si se desactiva registros, también desactivar registros_acciones
+      // Si se desactiva registros, también desactivar los subpermisos
       if (!this.formularioUsuario.permisos.registros) {
         this.formularioUsuario.permisos.registros_acciones = false
+        this.formularioUsuario.permisos.registros_notificar = false
       }
     },
 

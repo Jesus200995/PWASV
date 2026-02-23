@@ -13,7 +13,6 @@ import { useNotifications } from './composables/useNotifications.js';
 import { API_URL } from './utils/network.js';
 import { apiService } from './services/apiService.js';
 import { manualesService } from './services/manualesService.js';
-import screenshotPrevention from './utils/screenshotPrevention.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -286,13 +285,6 @@ onMounted(() => {
     try {
       userData.value = JSON.parse(storedUser);
       
-      // Activar sistema de prevención de capturas de pantalla
-      screenshotPrevention.init({
-        nombre: userData.value.nombre_completo || 'Usuario',
-        id: userData.value.id || userData.value.usuario_id || ''
-      });
-      console.log('🔒 Protección de capturas activada para:', userData.value.nombre_completo);
-      
       // Inicializar sistema de notificaciones una vez que el usuario está identificado
       notificationPollingId = startPolling();
       
@@ -403,10 +395,6 @@ const handleAccountDeactivatedLogout = () => {
 function logout() {
   isLoggingOut.value = true;
   showMobileMenu.value = false;
-  
-  // Desactivar sistema de prevención de capturas
-  screenshotPrevention.disable();
-  console.log('🔓 Protección de capturas desactivada');
   
   // Detener el polling de notificaciones
   stopPolling(notificationPollingId);

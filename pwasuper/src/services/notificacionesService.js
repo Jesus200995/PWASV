@@ -1,27 +1,71 @@
 import axios from 'axios'
+import { getBestApiUrl } from '../utils/network.js'
 
-// Configuración de la API
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://apipwa.sembrandodatos.com' 
-  : 'http://localhost:8000'
+// Variable para almacenar la URL actual
+let currentApiUrl = null
+
+// Función para inicializar la URL de la API
+async function initializeApiUrl() {
+  if (!currentApiUrl) {
+    currentApiUrl = await getBestApiUrl()
+    console.log(`🔗 notificacionesService inicializado con: ${currentApiUrl}`)
+  }
+  return currentApiUrl
+}
 
 // Crear instancia de axios con configuración
 const api = axios.create({
-  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   }
 })
 
+// Interceptor para agregar la URL base automáticamente
+api.interceptors.request.use(async (config) => {
+  if (!currentApiUrl) {
+    await initializeApiUrl()
+  }
+  
+  // Si no tiene baseURL, agregarla
+  if (!config.baseURL && !config.url.startsWith('http')) {
+    config.baseURL = currentApiUrl
+  }
+  
+  return config
+})
+
 // Interceptor para manejo de errores
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     console.error('Error en API de notificaciones:', error)
+    
+    // Si hay error de conexión, intentar refrescar URL
+    if (error.code === 'ECONNABORTED' || error.code === 'NETWORK_ERROR' || !error.response) {
+      console.log('❌ Error de conexión en notificaciones, intentando con servidor alternativo...')
+      try {
+        const newUrl = await getBestApiUrl()
+        if (newUrl !== currentApiUrl) {
+          currentApiUrl = newUrl
+          console.log(`🔄 Reintentando con: ${currentApiUrl}`)
+          
+          // Reintentar la petición original
+          const originalRequest = error.config
+          originalRequest.baseURL = currentApiUrl
+          return api(originalRequest)
+        }
+      } catch (retryError) {
+        console.log('❌ Error en reintento:', retryError)
+      }
+    }
+    
     return Promise.reject(error)
   }
 )
+
+// Inicializar automáticamente al importar
+initializeApiUrl()
 
 export const notificacionesService = {
   /**
@@ -30,7 +74,7 @@ export const notificacionesService = {
   async obtenerNotificacionesUsuario(usuarioId, limit = 20, offset = 0) {
     try {
       console.log(`📱 Obteniendo notificaciones para usuario ${usuarioId}`)
-      console.log(`🌐 URL: ${API_BASE_URL}/notificaciones/usuario/${usuarioId}`)
+      console.log(`🌐 URL: ${currentApiUrl}/notificaciones/usuario/${usuarioId}`)
       
       const response = await api.get(`/notificaciones/usuario/${usuarioId}`, {
         params: { limit, offset }
@@ -262,7 +306,7 @@ export const notificacionesService = {
   obtenerUrlArchivo(notificacionId, safe = false) {
     // Si safe=true, usar parámetro safe en el endpoint principal
     if (safe) {
-      return `${API_BASE_URL}/notificaciones/${notificacionId}/archivo?safe=true`
+      return `${currentApiUrl}/notificaciones/${notificacionId}/archivo?safe=true`
     }
     
     // En desarrollo, generar URLs de placeholder para testing
@@ -273,11 +317,11 @@ export const notificacionesService = {
         case 3: // Video
           return 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4'
         default:
-          return `${API_BASE_URL}/notificaciones/${notificacionId}/archivo`
+          return `${currentApiUrl}/notificaciones/${notificacionId}/archivo`
       }
     }
     
-    return `${API_BASE_URL}/notificaciones/${notificacionId}/archivo`
+    return `${currentApiUrl}/notificaciones/${notificacionId}/archivo`
   },
 
   /**

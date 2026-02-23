@@ -372,6 +372,120 @@
         <!-- Contenido del Artículo -->
         <div class="notification-modal-content flex-1 p-4 sm:p-5 overflow-y-auto min-h-0">
           
+          <!-- Sección de Vista Previa de Actividad (SI EXISTE) -->
+          <div v-if="notificacionSeleccionada.actividad" class="mb-6">
+            <div class="flex items-center gap-2 mb-3">
+              <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <h3 class="text-sm font-bold text-gray-800">Actividad relacionada</h3>
+            </div>
+            
+            <!-- Card de actividad estilo Historial -->
+            <div :class="[
+              'relative overflow-hidden rounded-xl transition-all duration-300 border shadow-md',
+              'backdrop-filter backdrop-blur-xl',
+              notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                ? 'bg-gradient-to-br from-green-50/80 via-emerald-25/40 to-green-100/60 border-green-200/60' 
+                : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
+                ? 'bg-gradient-to-br from-orange-50/80 via-amber-25/40 to-orange-100/60 border-orange-200/60'
+                : 'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60'
+            ]"
+            style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+              
+              <!-- Efectos decorativos -->
+              <div class="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-60 rounded-xl pointer-events-none"></div>
+              <div v-if="notificacionSeleccionada.actividad.tipo_actividad === 'campo'" class="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-green-400/20 to-transparent rounded-full blur-lg"></div>
+              <div v-else-if="notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'" class="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-orange-400/20 to-transparent rounded-full blur-lg"></div>
+              
+              <!-- Borde superior colorido -->
+              <div :class="[
+                'absolute top-0 left-0 right-0 h-1 rounded-t-xl',
+                notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                  ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-green-600' 
+                  : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
+                  ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600'
+                  : 'bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600'
+              ]"></div>
+              
+              <div class="relative z-10 p-3">
+                <div class="flex gap-3">
+                  <!-- Foto de la actividad -->
+                  <div class="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-lg overflow-hidden relative shadow-md cursor-pointer" 
+                       @click="notificacionSeleccionada.actividad.foto_url && verImagen(notificacionSeleccionada.actividad.foto_url)">
+                    <img v-if="notificacionSeleccionada.actividad.foto_url" 
+                         :src="notificacionSeleccionada.actividad.foto_url" 
+                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-110" 
+                         alt="Foto de actividad" />
+                    <div v-else :class="[
+                      'w-full h-full rounded flex items-center justify-center relative shadow-md border',
+                      notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                        ? 'bg-gradient-to-br from-green-100 to-green-50 border-green-200/50' 
+                        : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
+                        ? 'bg-gradient-to-br from-orange-100 to-orange-50 border-orange-200/50'
+                        : 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200/50'
+                    ]">
+                      <svg xmlns="http://www.w3.org/2000/svg" :class="[
+                        'h-8 w-8',
+                        notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
+                          ? 'text-green-600' 
+                          : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
+                          ? 'text-orange-600'
+                          : 'text-gray-500'
+                      ]" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  <!-- Información de la actividad -->
+                  <div class="flex-1 min-w-0 space-y-2">
+                    <!-- Tipo y categoría -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span :class="[
+                        'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border',
+                        notificacionSeleccionada.actividad.tipo_actividad === 'campo'
+                          ? 'bg-green-100 text-green-700 border-green-300'
+                          : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
+                          ? 'bg-orange-100 text-orange-700 border-orange-300'
+                          : 'bg-gray-100 text-gray-700 border-gray-300'
+                      ]">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
+                        </svg>
+                        {{ notificacionSeleccionada.actividad.tipo_actividad === 'campo' ? 'Campo' : 'Gabinete' }}
+                      </span>
+                      <span v-if="notificacionSeleccionada.actividad.categoria_actividad" class="text-xs text-gray-600 font-medium px-2 py-1 bg-white/60 rounded-full border border-gray-200">
+                        {{ notificacionSeleccionada.actividad.categoria_actividad }}
+                      </span>
+                    </div>
+                    
+                    <!-- Fecha de la actividad -->
+                    <div v-if="notificacionSeleccionada.actividad.fecha" class="flex items-center gap-1.5 text-xs text-gray-600">
+                      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span class="font-medium">{{ formatearFechaActividad(notificacionSeleccionada.actividad.fecha) }}</span>
+                    </div>
+                    
+                    <!-- Descripción de la actividad (si existe) -->
+                    <div v-if="notificacionSeleccionada.actividad.descripcion" class="text-xs text-gray-700 bg-white/50 rounded-lg p-2 border border-gray-200/50 line-clamp-2">
+                      {{ notificacionSeleccionada.actividad.descripcion }}
+                    </div>
+                    
+                    <!-- Ubicación (si existe) -->
+                    <div v-if="notificacionSeleccionada.actividad.latitud && notificacionSeleccionada.actividad.longitud" class="flex items-center gap-1.5 text-xs text-gray-600">
+                      <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                      </svg>
+                      <span class="text-xs">{{ notificacionSeleccionada.actividad.latitud.toFixed(6) }}, {{ notificacionSeleccionada.actividad.longitud.toFixed(6) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <!-- Sección de Descripción/Mensaje -->
           <div class="notification-description-section mb-6">
             <div class="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-xl p-4 shadow-sm">
@@ -631,12 +745,29 @@
         </div>
       </div>
     </teleport>
+
+    <!-- Modal para visualizar imagen de actividad -->
+    <teleport to="body">
+      <div v-if="imagenModalVisible" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-2" @click="imagenModalVisible = false">
+        <div class="relative max-w-full max-h-full">
+          <button @click="imagenModalVisible = false" class="absolute right-1 top-1 bg-black bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-70 transition-opacity z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <div class="overflow-auto max-h-[90vh]" @click.stop>
+            <img :src="imagenSeleccionada" class="w-full h-auto object-contain max-h-[75vh]" alt="Imagen ampliada" />
+          </div>
+        </div>
+      </div>
+    </teleport>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import notificacionesService from '../services/notificacionesService.js'
 import { useNotifications } from '../composables/useNotifications.js'
 
@@ -651,6 +782,10 @@ const soloNoLeidas = ref(false) // CAMBIO: Cambiar a no leídas por defecto
 const notificacionesLeidas = ref(new Set()) // IDs de notificaciones leídas
 const conteoNoLeidas = ref(0) // NUEVO: Contador de no leídas
 const conteoAnterior = ref(0) // NUEVO: Para detectar cambios en el contador
+
+// Modal de imagen para actividades
+const imagenModalVisible = ref(false)
+const imagenSeleccionada = ref('')
 
 // NUEVO: Audio para notificaciones
 let audioNotificacion = null
@@ -1678,6 +1813,43 @@ const formatearFecha = (fechaISO) => {
 
 const formatearFechaCompleta = (fechaISO) => {
   return notificacionesService.formatearFechaCompleta(fechaISO)
+}
+
+// Función para formatear fecha de actividad
+const formatearFechaActividad = (fechaISO) => {
+  if (!fechaISO) return ''
+  
+  try {
+    const fecha = new Date(fechaISO)
+    const opciones = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }
+    return fecha.toLocaleDateString('es-MX', opciones)
+  } catch (error) {
+    return fechaISO
+  }
+}
+
+// Función para abrir modal de imagen
+const verImagen = (url) => {
+  if (!url) return
+  imagenSeleccionada.value = url
+  imagenModalVisible.value = true
+  
+  // Cerrar con tecla ESC
+  nextTick(() => {
+    const handleKeyPress = (event) => {
+      if (event.key === 'Escape') {
+        imagenModalVisible.value = false
+        document.removeEventListener('keydown', handleKeyPress)
+      }
+    }
+    document.addEventListener('keydown', handleKeyPress)
+  })
 }
 
 // Función para formatear la descripción respetando saltos de línea y formato

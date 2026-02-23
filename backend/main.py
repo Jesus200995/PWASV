@@ -6256,15 +6256,20 @@ async def obtener_notificaciones_usuario_mejorado(
         # Configurar zona horaria para la sesión
         cursor.execute("SET TIME ZONE 'America/Mexico_City'")
         
-        # Obtener notificaciones del usuario con estado de lectura
+        # Obtener notificaciones del usuario con estado de lectura y datos de actividad si existe
         cursor.execute("""
             SELECT DISTINCT n.id, n.titulo, n.subtitulo, n.descripcion, n.enlace_url,
                    n.archivo_nombre, n.archivo_tipo, n.enviada_a_todos,
                    n.fecha_creacion, n.fecha_envio,
-                   CASE WHEN nl.id IS NOT NULL THEN TRUE ELSE FALSE END as leida
+                   CASE WHEN nl.id IS NOT NULL THEN TRUE ELSE FALSE END as leida,
+                   n.actividad_id, n.motivos_atencion,
+                   r.tipo_actividad, r.categoria_actividad, r.categoria_actividad_otro,
+                   r.foto_url, r.fecha_hora as actividad_fecha, r.descripcion as actividad_descripcion,
+                   r.latitud, r.longitud
             FROM notificaciones n
             LEFT JOIN notificacion_usuarios nu ON n.id = nu.notificacion_id
             LEFT JOIN notificacion_leidos nl ON n.id = nl.notificacion_id AND nl.usuario_id = %s
+            LEFT JOIN registros r ON n.actividad_id = r.id
             WHERE (n.enviada_a_todos = TRUE OR nu.usuario_id = %s)
             AND n.fecha_envio IS NOT NULL
             ORDER BY n.fecha_envio DESC NULLS LAST, n.fecha_creacion DESC
@@ -6286,6 +6291,26 @@ async def obtener_notificaciones_usuario_mejorado(
         
         notificaciones = []
         for resultado in resultados:
+            # Construir objeto de actividad si existe
+            actividad_data = None
+            if resultado[11]:  # Si actividad_id existe
+                # Formatear fecha de actividad con zona horaria CDMX
+                fecha_actividad_iso = None
+                if resultado[17]:  # actividad_fecha
+                    fecha_actividad_iso = resultado[17].isoformat() + "-06:00"
+                
+                actividad_data = {
+                    "id": resultado[11],  # actividad_id
+                    "tipo_actividad": resultado[13],  # tipo_actividad
+                    "categoria_actividad": resultado[14],  # categoria_actividad
+                    "categoria_actividad_otro": resultado[15],  # categoria_actividad_otro
+                    "foto_url": resultado[16],  # foto_url
+                    "fecha": fecha_actividad_iso,  # actividad_fecha
+                    "descripcion": resultado[18],  # actividad_descripcion
+                    "latitud": float(resultado[19]) if resultado[19] is not None else None,
+                    "longitud": float(resultado[20]) if resultado[20] is not None else None
+                }
+            
             notificacion = {
                 "id": resultado[0],
                 "titulo": resultado[1],
@@ -6298,7 +6323,9 @@ async def obtener_notificaciones_usuario_mejorado(
                 "fecha_creacion": resultado[8].isoformat() if resultado[8] else None,
                 "fecha_envio": resultado[9].isoformat() if resultado[9] else None,
                 "tiene_archivo": bool(resultado[5]),
-                "leida": bool(resultado[10])  # Nuevo campo con estado de lectura
+                "leida": bool(resultado[10]),  # Estado de lectura
+                "actividad": actividad_data,  # Datos de la actividad vinculada
+                "motivos_atencion": resultado[12]  # Motivos de atención
             }
             notificaciones.append(notificacion)
         

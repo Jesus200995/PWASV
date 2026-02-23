@@ -5,6 +5,11 @@
     <link rel="icon" type="image/png" href="/pwa-192x192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     
+    <!-- Seguridad contra capturas de pantalla -->
+    <meta name="screenshot-prevention" content="enabled" />
+    <meta name="secure-mode" content="true" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; img-src 'self' https: data: blob:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; font-src 'self' https: data:;">
+    
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#6ee7b7" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#6ee7b7" />

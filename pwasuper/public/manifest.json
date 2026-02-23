@@ -84,11 +84,5 @@
         }
       ]
     }
-  },
-  "display_override": ["standalone", "minimal-ui"],
-  "screenshots": [],
-  "handle_links": "preferred",
-  "scope_extensions": [],
-  "permissions": ["notifications", "geolocation"],
-  "secureModeEnabled": true
+  }
 }

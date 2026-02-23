@@ -13,7 +13,6 @@ import { useNotifications } from './composables/useNotifications.js';
 import { API_URL } from './utils/network.js';
 import { apiService } from './services/apiService.js';
 import { manualesService } from './services/manualesService.js';
-import screenSecurityService from './services/screenSecurityService.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -279,10 +278,6 @@ const stopUserDataCheck = () => {
 };
 
 onMounted(() => {
-  // Inicializar protección contra capturas de pantalla
-  console.log('🔒 [ScreenSecurity] Iniciando protección contra capturas...');
-  screenSecurityService.initialize();
-  
   // Verificar el estado de autenticación al cargar la app
   const storedUser = localStorage.getItem('user');
   
@@ -351,8 +346,6 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  // Limpiar protección de pantalla
-  screenSecurityService.destroy();
   // Limpiar listener
   window.removeEventListener('storage', handleStorageChange);
   window.removeEventListener('manual-leido', cargarConteoManuales);

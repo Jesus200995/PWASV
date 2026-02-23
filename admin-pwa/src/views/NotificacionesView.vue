@@ -45,7 +45,7 @@
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
             Notificaciones Grupales
-            <span class="tab-badge">{{ tabActual === 'grupales' ? notificaciones.length : '' }}</span>
+            <span v-if="tabActual === 'grupales'" class="tab-badge">{{ notificaciones.length }}</span>
           </button>
           <button 
             :class="['tab-button', { 'active': tabActual === 'individuales' }]"
@@ -56,7 +56,7 @@
               <path d="M12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/>
             </svg>
             Notificaciones Individuales
-            <span class="tab-badge">{{ tabActual === 'individuales' ? notificaciones.length : '' }}</span>
+            <span v-if="tabActual === 'individuales'" class="tab-badge">{{ notificaciones.length }}</span>
           </button>
         </div>
         
@@ -1783,52 +1783,39 @@ export default {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background: linear-gradient(180deg, #bdbdbd 0%, #9e9e9e 100%);
-  border: 2px solid #757575;
-  border-bottom: 2px solid #9e9e9e;
+  background: #d0d0d0 !important;
+  border: none !important;
   border-radius: 10px 10px 0 0;
-  color: #424242;
+  color: #666666 !important;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: none !important;
 }
 
 .tab-button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, transparent 100%);
-  opacity: 1;
-  transition: opacity 0.2s ease;
+  display: none;
 }
 
 .tab-button:hover:not(.active) {
-  background: linear-gradient(180deg, #c0c0c0 0%, #a8a8a8 100%);
-  color: #212121;
-  border-color: #616161;
+  background: #c5c5c5 !important;
+  color: #555555 !important;
+  border: none !important;
   transform: translateY(-1px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 3px 6px rgba(0, 0, 0, 0.2);
-}
-
-.tab-button:hover:not(.active)::before {
-  opacity: 1;
+  box-shadow: none !important;
 }
 
 .tab-button.active {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  color: #ffffff;
-  border: 2px solid #45a049;
-  border-bottom: none;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 3px 8px rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3) !important;
   font-weight: 700;
   transform: translateY(-1px);
-  margin-bottom: -2px;
+  margin-bottom: 0;
 }
 
 .tab-button svg {
@@ -1836,12 +1823,14 @@ export default {
   height: 16px;
   flex-shrink: 0;
   transition: transform 0.2s ease;
-  opacity: 0.7;
+  opacity: 0.7 !important;
+  color: #666666 !important;
 }
 
 .tab-button.active svg {
   transform: scale(1.1);
-  opacity: 1;
+  opacity: 1 !important;
+  color: #ffffff !important;
 }
 
 .tab-badge {
@@ -1851,20 +1840,20 @@ export default {
   min-width: 22px;
   height: 22px;
   padding: 0 0.45rem;
-  background: rgba(66, 66, 66, 0.4);
-  color: #ffffff;
+  background: rgba(102, 102, 102, 0.3) !important;
+  color: #666666 !important;
   border-radius: 11px;
   font-size: 0.7rem;
   font-weight: 700;
   margin-left: 0.4rem;
   transition: all 0.2s ease;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: none !important;
 }
 
 .tab-button.active .tab-badge {
-  background: rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  border: none !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   transform: scale(1.05);
 }
@@ -4115,29 +4104,7 @@ export default {
   border-bottom: 1px solid #e9ecef;
 }
 
-.tab-button {
-  flex: 1;
-  padding: 16px 20px;
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  font-weight: 600;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'Inter', sans-serif;
-}
-
-.tab-button:hover {
-  background: rgba(76, 175, 80, 0.1);
-  color: #4CAF50;
-}
-
-.tab-button.active {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-}
+/* Estilos de tab-button movidos arriba - no duplicar aquí */
 
 .tab-content {
   padding: 20px;

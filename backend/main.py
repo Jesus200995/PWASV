@@ -4914,12 +4914,12 @@ async def crear_notificacion(
             except json.JSONDecodeError:
                 raise HTTPException(status_code=400, detail="Formato de motivos inválido")
         
-        # Validar actividad_id si se proporciona
+        # Validar actividad_id si se proporciona (tabla registros)
         if actividad_id:
-            cursor.execute("SELECT id FROM reportes_generados WHERE id = %s", (actividad_id,))
+            cursor.execute("SELECT id FROM registros WHERE id = %s", (actividad_id,))
             if not cursor.fetchone():
-                raise HTTPException(status_code=404, detail=f"Actividad con ID {actividad_id} no encontrada")
-            print(f"📊 Notificación vinculada a actividad ID: {actividad_id}")
+                raise HTTPException(status_code=404, detail=f"Actividad con ID {actividad_id} no encontrada en registros")
+            print(f"📊 Notificación vinculada a actividad (registro) ID: {actividad_id}")
         
         # Obtener fecha y hora actual en CDMX
         fecha_creacion = obtener_fecha_hora_cdmx_notificaciones()

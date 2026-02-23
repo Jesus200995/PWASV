@@ -19,19 +19,23 @@ Se ha implementado un sistema completo para enviar notificaciones individuales a
 
 ## 🚀 PASOS PARA APLICAR LOS CAMBIOS
 
-### 1. Actualizar la Base de Datos
+### 1. ✅ Actualizar la Base de Datos (COMPLETADO)
 
-Ejecuta el script Python para agregar los nuevos campos:
+**Estado**: Los cambios ya fueron aplicados y corregidos exitosamente en el VPS.
 
-```bash
-cd backend
-python agregar_actividad_notificaciones.py
+Los siguientes campos fueron agregados y corregidos:
+- ✅ Campo `actividad_id` en la tabla `notificaciones` (vincula con `registros`)
+- ✅ Campo `motivos_atencion` (array de strings)
+- ✅ Índice `idx_notificaciones_actividad` para optimizar consultas
+- ✅ Foreign key corregida para apuntar a la tabla `registros` (en lugar de `reportes_generados`)
+
+**Verificación**:
 ```
-
-Este script agregará:
-- Campo `actividad_id` en la tabla `notificaciones` (vincula con `reportes_generados`)
-- Campo `motivos_atencion` (array de strings)
-- Índice para optimizar consultas por actividad
+   column_name    | data_type 
+------------------+-----------
+ actividad_id     | integer
+ motivos_atencion | ARRAY
+```
 
 ### 2. Reiniciar el Backend
 
@@ -110,9 +114,11 @@ npm run dev
 ### Base de Datos (PostgreSQL)
 ```sql
 -- Nuevos campos en tabla notificaciones
-actividad_id INTEGER REFERENCES reportes_generados(id) ON DELETE SET NULL
+actividad_id INTEGER REFERENCES registros(id) ON DELETE SET NULL
 motivos_atencion TEXT[]
 ```
+
+**Nota importante**: El campo `actividad_id` hace referencia a la tabla `registros` (donde se almacenan las actividades/reportes de los usuarios), no a `reportes_generados`.
 
 ### Backend (main.py)
 - Endpoint `POST /notificaciones` actualizado con:

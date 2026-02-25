@@ -320,6 +320,22 @@
           <div class="nav-indicator"></div>
         </li>
 
+        <!-- Estadísticas -->
+        <li class="nav-item" :class="{ active: $route.name === 'Estadisticas' }" v-if="tienePermiso('estadisticas')">
+          <router-link to="/estadisticas" class="nav-link">
+            <div class="nav-icon-container">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+              </svg>
+            </div>
+            <span class="nav-text">Estadísticas</span>
+          </router-link>
+          <div class="nav-indicator"></div>
+        </li>
+
         <!-- Permisos Administrativos -->
         <li class="nav-item" :class="{ active: $route.name === 'Permisos' }" v-if="tienePermiso('permisos')">
           <router-link to="/permisos" class="nav-link">

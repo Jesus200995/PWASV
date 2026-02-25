@@ -13,6 +13,7 @@ import NotificacionesView from '../views/NotificacionesView.vue'
 // import NotificacionesIndividualesView from '../views/NotificacionesIndividualesView.vue' // YA NO SE USA - Fusionado en NotificacionesView con pestañas
 import PermisosView from '../views/PermisosView.vue'
 import ManualesView from '../views/ManualesView.vue'
+import EstadisticasView from '../views/EstadisticasView.vue'
 
 const routes = [
   {
@@ -89,6 +90,12 @@ const routes = [
     name: 'Manuales',
     component: ManualesView,
     meta: { requiresAuth: true, requiredPermission: 'manuales' }
+  },
+  {
+    path: '/estadisticas',
+    name: 'Estadisticas',
+    component: EstadisticasView,
+    meta: { requiresAuth: true, requiredPermission: 'estadisticas' }
   },
   {
     path: '/permisos',

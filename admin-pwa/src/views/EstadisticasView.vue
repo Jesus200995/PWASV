@@ -7,15 +7,14 @@
         <div class="header-content">
           <div class="header-main">
             <div class="header-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"/>
-                <rect x="14" y="3" width="7" height="7"/>
-                <rect x="14" y="14" width="7" height="7"/>
-                <rect x="3" y="14" width="7" height="7"/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 20V10"/>
+                <path d="M12 20V4"/>
+                <path d="M6 20v-6"/>
               </svg>
             </div>
             <div class="header-text">
-              <h1 class="header-title">📊 Estadísticas de Dispositivos</h1>
+              <h1 class="header-title">Estadísticas de Dispositivos</h1>
               <p class="header-subtitle">Análisis de plataformas utilizadas por los usuarios</p>
             </div>
           </div>
@@ -32,16 +31,16 @@
       </header>
 
       <div class="page-content">
-        <!-- Mensaje de carga -->
+        <!-- Loading -->
         <div v-if="cargando" class="loading-state">
           <div class="loading-spinner"></div>
           <p>Cargando estadísticas...</p>
         </div>
 
-        <!-- Mensaje de error -->
+        <!-- Error -->
         <div v-if="error && !cargando" class="error-state">
           <div class="error-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
               <line x1="12" y1="8" x2="12" y2="12"/>
               <line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -53,166 +52,235 @@
         </div>
 
         <!-- Estadísticas -->
-        <div v-if="!cargando && !error && estadisticas" class="estadisticas-grid">
+        <div v-if="!cargando && !error && estadisticas" class="stats-wrapper">
           
-          <!-- Tarjeta de Total de Usuarios -->
-          <div class="stat-card total-card">
-            <div class="stat-icon total-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </div>
-            <div class="stat-content">
-              <h3 class="stat-label">Total de Usuarios</h3>
-              <p class="stat-value total-value">{{ estadisticas.total_usuarios.toLocaleString() }}</p>
-            </div>
-          </div>
-
-          <!-- Tarjetas por Dispositivo -->
-          <div 
-            v-for="dispositivo in estadisticas.por_dispositivo" 
-            :key="dispositivo.dispositivo"
-            class="stat-card"
-            :class="`card-${dispositivo.dispositivo.toLowerCase()}`"
-          >
-            <div class="stat-icon" :class="`icon-${dispositivo.dispositivo.toLowerCase()}`">
-              <span class="device-emoji">{{ getIconoDispositivo(dispositivo.dispositivo) }}</span>
-            </div>
-            <div class="stat-content">
-              <h3 class="stat-label">{{ dispositivo.dispositivo }}</h3>
-              <p class="stat-value">{{ dispositivo.cantidad.toLocaleString() }}</p>
-              <div class="stat-progress">
-                <div 
-                  class="progress-bar" 
-                  :class="`progress-${dispositivo.dispositivo.toLowerCase()}`"
-                  :style="{ width: dispositivo.porcentaje + '%' }"
-                >
-                  <span class="progress-label">{{ dispositivo.porcentaje }}%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Gráfica de Dona (Distribución General) -->
-          <div class="chart-card donut-card">
-            <div class="chart-header">
-              <h3 class="chart-title">📱 Distribución por Plataforma</h3>
-            </div>
-            <div class="chart-content">
-              <div class="donut-chart">
-                <svg viewBox="0 0 200 200" class="donut-svg">
-                  <circle
-                    v-for="(dispositivo, index) in estadisticas.por_dispositivo"
-                    :key="dispositivo.dispositivo"
-                    cx="100"
-                    cy="100"
-                    r="70"
-                    fill="none"
-                    :stroke="getColorDispositivo(dispositivo.dispositivo)"
-                    stroke-width="40"
-                    :stroke-dasharray="`${getCircunferencia(dispositivo.porcentaje)} ${440 - getCircunferencia(dispositivo.porcentaje)}`"
-                    :stroke-dashoffset="getOffset(index)"
-                    class="donut-segment"
-                    :class="`segment-${dispositivo.dispositivo.toLowerCase()}`"
-                  />
-                  <text x="100" y="95" text-anchor="middle" class="donut-total-label">Total</text>
-                  <text x="100" y="115" text-anchor="middle" class="donut-total-value">
-                    {{ estadisticas.total_usuarios }}
-                  </text>
+          <!-- Tarjeta Principal -->
+          <section class="main-stat-card animate-fade-in">
+            <div class="main-stat-glow"></div>
+            <div class="main-stat-content">
+              <div class="main-stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
               </div>
-              <div class="donut-legend">
-                <div 
-                  v-for="dispositivo in estadisticas.por_dispositivo"
-                  :key="dispositivo.dispositivo"
-                  class="legend-item"
-                >
+              <div class="main-stat-info">
+                <span class="main-stat-label">Total de Usuarios Registrados</span>
+                <span class="main-stat-value">{{ estadisticas.total_usuarios.toLocaleString() }}</span>
+                <span class="main-stat-desc">Usuarios activos en la plataforma</span>
+              </div>
+              <div class="main-stat-trend">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                  <polyline points="17 6 23 6 23 12"/>
+                </svg>
+              </div>
+            </div>
+          </section>
+
+          <!-- Grid de Dispositivos -->
+          <section class="devices-section">
+            <div 
+              v-for="(dispositivo, index) in estadisticas.por_dispositivo" 
+              :key="dispositivo.dispositivo"
+              class="device-card animate-slide-up"
+              :class="`device-${dispositivo.dispositivo.toLowerCase()}`"
+              :style="{ animationDelay: `${index * 0.1}s` }"
+            >
+              <div class="device-header">
+                <div class="device-icon-wrapper" :class="`bg-${dispositivo.dispositivo.toLowerCase()}`">
+                  <!-- Android Icon -->
+                  <svg v-if="dispositivo.dispositivo.toLowerCase() === 'android'" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.532 15.106a1.003 1.003 0 1 1 .001-2.007 1.003 1.003 0 0 1-.001 2.007zm-11.044 0a1.003 1.003 0 1 1 .001-2.007 1.003 1.003 0 0 1-.001 2.007zm11.4-6.018l2.006-3.459a.413.413 0 1 0-.721-.407l-2.027 3.5a12.243 12.243 0 0 0-5.13-1.108c-1.85 0-3.595.398-5.141 1.098l-2.027-3.49a.413.413 0 1 0-.72.407l1.995 3.458C2.696 10.947.345 14.417 0 18.523h24c-.347-4.106-2.696-7.576-6.112-9.435z"/>
+                  </svg>
+                  <!-- iOS Icon -->
+                  <svg v-else-if="dispositivo.dispositivo.toLowerCase() === 'ios'" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  <!-- Desktop Icon -->
+                  <svg v-else-if="dispositivo.dispositivo.toLowerCase() === 'desktop'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                  <!-- Unknown Icon -->
+                  <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <div class="device-data">
+                  <h4 class="device-name">{{ capitalizar(dispositivo.dispositivo) }}</h4>
+                  <p class="device-count">{{ dispositivo.cantidad.toLocaleString() }} usuarios</p>
+                </div>
+              </div>
+              <div class="device-progress-container">
+                <div class="progress-bar-track">
                   <div 
-                    class="legend-color" 
-                    :style="{ backgroundColor: getColorDispositivo(dispositivo.dispositivo) }"
-                  ></div>
-                  <span class="legend-label">
-                    {{ getIconoDispositivo(dispositivo.dispositivo) }} {{ dispositivo.dispositivo }}
-                  </span>
-                  <span class="legend-value">{{ dispositivo.cantidad }}</span>
+                    class="progress-bar-fill"
+                    :class="`fill-${dispositivo.dispositivo.toLowerCase()}`"
+                    :style="{ width: dispositivo.porcentaje + '%' }"
+                  >
+                    <div class="progress-shine"></div>
+                  </div>
+                </div>
+                <span class="progress-percent">{{ dispositivo.porcentaje }}%</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Gráficas en 2 columnas -->
+          <section class="charts-row">
+            <!-- Gráfica de Dona -->
+            <div class="chart-card donut-chart-card animate-fade-in" style="animation-delay: 0.3s">
+              <div class="chart-card-header">
+                <div class="chart-header-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 2a10 10 0 0 1 7.07 17.07"/>
+                  </svg>
+                </div>
+                <h3 class="chart-card-title">Distribución por Plataforma</h3>
+              </div>
+              <div class="chart-card-body">
+                <div class="donut-wrapper">
+                  <svg viewBox="0 0 200 200" class="donut-svg">
+                    <circle
+                      v-for="(dispositivo, index) in estadisticas.por_dispositivo"
+                      :key="dispositivo.dispositivo"
+                      cx="100"
+                      cy="100"
+                      r="70"
+                      fill="none"
+                      :stroke="getColorDispositivo(dispositivo.dispositivo)"
+                      stroke-width="35"
+                      :stroke-dasharray="`${getCircunferencia(dispositivo.porcentaje)} ${440 - getCircunferencia(dispositivo.porcentaje)}`"
+                      :stroke-dashoffset="getOffset(index)"
+                      class="donut-ring"
+                    />
+                    <circle cx="100" cy="100" r="50" fill="white"/>
+                    <text x="100" y="95" text-anchor="middle" class="donut-center-label">Total</text>
+                    <text x="100" y="115" text-anchor="middle" class="donut-center-value">{{ estadisticas.total_usuarios }}</text>
+                  </svg>
+                </div>
+                <div class="donut-legend">
+                  <div 
+                    v-for="dispositivo in estadisticas.por_dispositivo"
+                    :key="dispositivo.dispositivo"
+                    class="donut-legend-item"
+                  >
+                    <span class="legend-dot" :style="{ backgroundColor: getColorDispositivo(dispositivo.dispositivo) }"></span>
+                    <span class="legend-name">{{ capitalizar(dispositivo.dispositivo) }}</span>
+                    <span class="legend-qty">{{ dispositivo.cantidad }}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Gráfica de Barras (Por Rol) -->
-          <div class="chart-card bars-card">
-            <div class="chart-header">
-              <h3 class="chart-title">👥 Distribución por Rol</h3>
-            </div>
-            <div class="chart-content">
-              <div class="bars-chart">
-                <div 
-                  v-for="rol in getRolesSummary()"
-                  :key="rol.nombre"
-                  class="bar-group"
-                >
-                  <div class="bar-label">{{ rol.nombre }}</div>
-                  <div class="bar-container">
-                    <div class="bar-wrapper">
+            <!-- Gráfica de Barras por Rol -->
+            <div class="chart-card bars-chart-card animate-fade-in" style="animation-delay: 0.4s">
+              <div class="chart-card-header">
+                <div class="chart-header-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="8.5" cy="7" r="4"/>
+                    <polyline points="17 11 19 13 23 9"/>
+                  </svg>
+                </div>
+                <h3 class="chart-card-title">Distribución por Rol</h3>
+              </div>
+              <div class="chart-card-body">
+                <div class="roles-bars">
+                  <div 
+                    v-for="rol in getRolesSummary()"
+                    :key="rol.nombre"
+                    class="role-bar-group"
+                  >
+                    <div class="role-bar-header">
+                      <span class="role-name">{{ rol.nombre }}</span>
+                      <span class="role-total">{{ rol.total }}</span>
+                    </div>
+                    <div class="role-bar-track">
                       <div 
                         v-for="dispositivo in rol.dispositivos"
                         :key="dispositivo.tipo"
-                        class="bar-segment"
-                        :class="`bar-${dispositivo.tipo.toLowerCase()}`"
+                        class="role-bar-segment"
                         :style="{ 
                           width: (dispositivo.cantidad / rol.total * 100) + '%',
                           backgroundColor: getColorDispositivo(dispositivo.tipo)
                         }"
                         :title="`${dispositivo.tipo}: ${dispositivo.cantidad}`"
                       >
-                        <span v-if="dispositivo.cantidad > 0" class="bar-value">{{ dispositivo.cantidad }}</span>
+                        <span v-if="dispositivo.cantidad > 50" class="segment-value">{{ dispositivo.cantidad }}</span>
                       </div>
                     </div>
-                    <span class="bar-total">{{ rol.total }}</span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <!-- Usuarios Activos (Últimos 30 días) -->
-          <div class="chart-card active-users-card">
-            <div class="chart-header">
-              <h3 class="chart-title">🔥 Usuarios Activos (30 días)</h3>
-            </div>
-            <div class="chart-content">
-              <div v-if="estadisticas.activos_30_dias && estadisticas.activos_30_dias.length > 0">
-                <div class="active-stats">
-                  <div class="active-total">
-                    <span class="active-number">{{ getTotalActivos() }}</span>
-                    <span class="active-label">usuarios activos</span>
+          <!-- Usuarios Activos -->
+          <section class="active-section animate-fade-in" style="animation-delay: 0.5s">
+            <div class="chart-card active-card">
+              <div class="chart-card-header">
+                <div class="chart-header-icon pulse-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                  </svg>
+                </div>
+                <h3 class="chart-card-title">Usuarios Activos (últimos 30 días)</h3>
+              </div>
+              <div class="chart-card-body">
+                <div v-if="estadisticas.activos_30_dias && estadisticas.activos_30_dias.length > 0" class="active-content">
+                  <div class="active-summary">
+                    <div class="active-stat-box">
+                      <span class="active-big-number">{{ getTotalActivos() }}</span>
+                      <span class="active-stat-label">usuarios activos</span>
+                    </div>
+                    <div class="active-stat-box">
+                      <span class="active-big-percent">{{ ((getTotalActivos() / estadisticas.total_usuarios) * 100).toFixed(1) }}%</span>
+                      <span class="active-stat-label">del total</span>
+                    </div>
                   </div>
-                  <div class="active-percentage">
-                    {{ ((getTotalActivos() / estadisticas.total_usuarios) * 100).toFixed(1) }}%
-                    <span class="percentage-label">del total</span>
+                  <div class="active-by-device">
+                    <div 
+                      v-for="activo in estadisticas.activos_30_dias"
+                      :key="activo.dispositivo"
+                      class="active-device-chip"
+                      :class="`chip-${activo.dispositivo.toLowerCase()}`"
+                    >
+                      <!-- Icon based on device -->
+                      <svg v-if="activo.dispositivo.toLowerCase() === 'android'" viewBox="0 0 24 24" fill="currentColor" class="chip-icon">
+                        <path d="M17.532 15.106a1.003 1.003 0 1 1 .001-2.007 1.003 1.003 0 0 1-.001 2.007zm-11.044 0a1.003 1.003 0 1 1 .001-2.007 1.003 1.003 0 0 1-.001 2.007zm11.4-6.018l2.006-3.459a.413.413 0 1 0-.721-.407l-2.027 3.5a12.243 12.243 0 0 0-5.13-1.108c-1.85 0-3.595.398-5.141 1.098l-2.027-3.49a.413.413 0 1 0-.72.407l1.995 3.458C2.696 10.947.345 14.417 0 18.523h24c-.347-4.106-2.696-7.576-6.112-9.435z"/>
+                      </svg>
+                      <svg v-else-if="activo.dispositivo.toLowerCase() === 'ios'" viewBox="0 0 24 24" fill="currentColor" class="chip-icon">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                      </svg>
+                      <svg v-else-if="activo.dispositivo.toLowerCase() === 'desktop'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chip-icon">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                      </svg>
+                      <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chip-icon">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                      </svg>
+                      <span class="chip-name">{{ capitalizar(activo.dispositivo) }}</span>
+                      <span class="chip-count">{{ activo.cantidad }}</span>
+                    </div>
                   </div>
                 </div>
-                <div class="active-devices">
-                  <div 
-                    v-for="activo in estadisticas.activos_30_dias"
-                    :key="activo.dispositivo"
-                    class="active-device-item"
-                  >
-                    <span class="active-emoji">{{ getIconoDispositivo(activo.dispositivo) }}</span>
-                    <span class="active-device-name">{{ activo.dispositivo }}</span>
-                    <span class="active-device-count">{{ activo.cantidad }}</span>
-                  </div>
+                <div v-else class="no-active-data">
+                  <p>No hay datos de usuarios activos en los últimos 30 días</p>
                 </div>
               </div>
-              <div v-else class="no-active-data">
-                <p>No hay datos de usuarios activos en los últimos 30 días</p>
-              </div>
             </div>
-          </div>
+          </section>
 
         </div>
       </div>
@@ -221,7 +289,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Sidebar from '../components/Sidebar.vue';
 import { obtenerEstadisticasDispositivos } from '../services/dispositivosService.js';
@@ -238,7 +306,7 @@ async function cargarEstadisticas() {
   
   try {
     estadisticas.value = await obtenerEstadisticasDispositivos();
-    console.log('📊 Estadísticas cargadas:', estadisticas.value);
+    console.log('Estadísticas cargadas:', estadisticas.value);
   } catch (err) {
     console.error('Error al cargar estadísticas:', err);
     error.value = 'No se pudieron cargar las estadísticas. Por favor, intenta de nuevo.';
@@ -247,39 +315,33 @@ async function cargarEstadisticas() {
   }
 }
 
-// Iconos por dispositivo
-function getIconoDispositivo(dispositivo) {
-  const iconos = {
-    'Android': '🤖',
-    'iOS': '🍎',
-    'Desktop': '💻',
-    'desconocido': '❓'
-  };
-  return iconos[dispositivo] || '📱';
+// Capitalizar primera letra
+function capitalizar(texto) {
+  if (!texto) return '';
+  return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
 }
 
 // Colores por dispositivo
 function getColorDispositivo(dispositivo) {
   const colores = {
-    'Android': '#3DDC84',
-    'iOS': '#147EFB',
-    'Desktop': '#6B7280',
-    'desconocido': '#9CA3AF'
+    'android': '#3DDC84',
+    'ios': '#007AFF',
+    'desktop': '#6366F1',
+    'desconocido': '#94A3B8'
   };
-  return colores[dispositivo] || '#9CA3AF';
+  return colores[dispositivo?.toLowerCase()] || '#94A3B8';
 }
 
-// Calcular circunferencia para gráfica de dona
+// Calcular circunferencia
 function getCircunferencia(porcentaje) {
   const radio = 70;
   const circunferencia = 2 * Math.PI * radio;
   return (porcentaje / 100) * circunferencia;
 }
 
-// Calcular offset para gráfica de dona
+// Calcular offset
 function getOffset(index) {
   if (!estadisticas.value || index === 0) return 0;
-  
   let offset = 0;
   for (let i = 0; i < index; i++) {
     offset += getCircunferencia(estadisticas.value.por_dispositivo[i].porcentaje);
@@ -290,27 +352,18 @@ function getOffset(index) {
 // Obtener resumen por roles
 function getRolesSummary() {
   if (!estadisticas.value || !estadisticas.value.por_rol) return [];
-  
   const roles = {};
   estadisticas.value.por_rol.forEach(item => {
     if (!roles[item.rol]) {
-      roles[item.rol] = {
-        nombre: item.rol,
-        total: 0,
-        dispositivos: []
-      };
+      roles[item.rol] = { nombre: item.rol, total: 0, dispositivos: [] };
     }
     roles[item.rol].total += item.cantidad;
-    roles[item.rol].dispositivos.push({
-      tipo: item.dispositivo,
-      cantidad: item.cantidad
-    });
+    roles[item.rol].dispositivos.push({ tipo: item.dispositivo, cantidad: item.cantidad });
   });
-  
   return Object.values(roles);
 }
 
-// Obtener total de usuarios activos
+// Total activos
 function getTotalActivos() {
   if (!estadisticas.value || !estadisticas.value.activos_30_dias) return 0;
   return estadisticas.value.activos_30_dias.reduce((sum, item) => sum + item.cantidad, 0);
@@ -323,130 +376,142 @@ function logout() {
   router.push('/login');
 }
 
-// Cargar al montar
 onMounted(() => {
   cargarEstadisticas();
-  
-  // Auto-refresh cada 30 segundos
-  const interval = setInterval(() => {
-    cargarEstadisticas();
-  }, 30000);
-  
-  // Limpiar interval al desmontar
+  const interval = setInterval(() => cargarEstadisticas(), 30000);
   return () => clearInterval(interval);
 });
 </script>
 
 <style scoped>
-/* Contenedor principal */
+/* === ANIMATIONS === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+/* === CONTAINER === */
 .estadisticas-container {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
 }
 
-/* Contenido principal */
 .main-content {
   flex: 1;
-  margin-left: 280px;
-  transition: margin-left 0.3s ease;
+  margin-left: min(220px, 18vw);
+  width: calc(100vw - min(220px, 18vw));
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: all 0.3s ease;
 }
 
-@media (max-width: 1024px) {
-  .main-content {
-    margin-left: 80px;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-  }
-}
-
-/* Header de página */
+/* === HEADER === */
 .page-header {
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  padding: clamp(0.4rem, 1vw, 0.6rem) clamp(1rem, 2vw, 1.5rem);
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
   position: sticky;
   top: 0;
-  z-index: 10;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 100;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .header-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
 }
 
 .header-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.header-text {
-  flex: 1;
+  width: 20px;
+  height: 20px;
 }
 
 .header-title {
-  font-size: 1.5rem;
+  font-size: clamp(14px, 2.5vw, 18px);
   font-weight: 700;
-  color: #111827;
   margin: 0;
 }
 
 .header-subtitle {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0.25rem 0 0;
+  font-size: clamp(10px, 1.5vw, 12px);
+  opacity: 0.9;
+  margin: 2px 0 0;
 }
 
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-/* Botones */
 .btn-refresh {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  color: #374151;
-  font-weight: 500;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
 .btn-refresh:hover:not(:disabled) {
-  background: #f9fafb;
-  border-color: #22c55e;
-  color: #22c55e;
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-2px);
 }
 
 .btn-refresh:disabled {
@@ -454,49 +519,35 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-.btn-secondary {
-  padding: 0.75rem 1.5rem;
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  color: #374151;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background: #e5e7eb;
-}
-
-/* Contenido de página */
+/* === PAGE CONTENT === */
 .page-content {
-  padding: 2rem;
+  flex: 1;
+  padding: clamp(16px, 2.5vw, 24px);
 }
 
-/* Estados de carga y error */
-.loading-state,
-.error-state {
+.stats-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.5vw, 24px);
+}
+
+/* === LOADING/ERROR === */
+.loading-state, .error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  padding: 60px 20px;
   text-align: center;
 }
 
 .loading-spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid #e5e7eb;
-  border-top-color: #22c55e;
+  border: 4px solid #e0e0e0;
+  border-top-color: #4CAF50;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .error-icon {
@@ -507,7 +558,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .error-icon svg {
@@ -516,413 +567,594 @@ onMounted(() => {
   color: #dc2626;
 }
 
-.error-state h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 0.5rem;
+.btn-secondary {
+  padding: 10px 20px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.error-state p {
-  color: #6b7280;
-  margin: 0 0 1.5rem;
+.btn-secondary:hover {
+  background: #e5e7eb;
 }
 
-/* Grid de estadísticas */
-.estadisticas-grid {
+/* === MAIN STAT CARD === */
+.main-stat-card {
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  border-radius: 20px;
+  padding: clamp(24px, 3vw, 36px);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 10px 40px rgba(76, 175, 80, 0.3),
+    0 4px 12px rgba(0,0,0,0.1);
+}
+
+.main-stat-glow {
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  animation: glow 3s ease-in-out infinite;
+}
+
+.main-stat-content {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vw, 32px);
+  position: relative;
+  z-index: 1;
+}
+
+.main-stat-icon {
+  width: clamp(60px, 8vw, 80px);
+  height: clamp(60px, 8vw, 80px);
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.main-stat-icon svg {
+  width: 50%;
+  height: 50%;
+  color: white;
+}
+
+.main-stat-info {
+  flex: 1;
+  color: white;
+}
+
+.main-stat-label {
+  display: block;
+  font-size: clamp(11px, 1.5vw, 13px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.main-stat-value {
+  display: block;
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.main-stat-desc {
+  display: block;
+  font-size: clamp(11px, 1.5vw, 13px);
+  opacity: 0.85;
+}
+
+.main-stat-trend {
+  width: 48px;
+  height: 48px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-stat-trend svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+/* === DEVICES SECTION === */
+.devices-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(12px, 2vw, 20px);
 }
 
-@media (min-width: 1280px) {
-  .estadisticas-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  
-  .total-card {
-    grid-column: span 4;
-  }
-  
-  .donut-card {
-    grid-column: span 2;
-  }
-  
-  .bars-card {
-    grid-column: span 2;
-  }
-  
-  .active-users-card {
-    grid-column: span 4;
-  }
-}
-
-/* Tarjetas de estadísticas */
-.stat-card {
+.device-card {
   background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 16px;
+  padding: clamp(18px, 2.5vw, 24px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+}
+
+.device-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+.device-card.device-android:hover { border-color: #3DDC84; }
+.device-card.device-ios:hover { border-color: #007AFF; }
+.device-card.device-desktop:hover { border-color: #6366F1; }
+.device-card.device-desconocido:hover { border-color: #94A3B8; }
+
+.device-header {
   display: flex;
-  gap: 1rem;
-  align-items: flex-start;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.total-card {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  color: white;
-}
-
-.stat-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+.device-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  flex-shrink: 0;
+  transition: transform 0.3s ease;
 }
 
-.total-icon {
-  background: rgba(255, 255, 255, 0.2);
+.device-card:hover .device-icon-wrapper {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.device-icon-wrapper svg {
+  width: 26px;
+  height: 26px;
   color: white;
 }
 
-.total-icon svg {
-  width: 28px;
-  height: 28px;
-}
+.device-icon-wrapper.bg-android { background: linear-gradient(135deg, #3DDC84, #2BC470); }
+.device-icon-wrapper.bg-ios { background: linear-gradient(135deg, #007AFF, #0056B3); }
+.device-icon-wrapper.bg-desktop { background: linear-gradient(135deg, #6366F1, #4F46E5); }
+.device-icon-wrapper.bg-desconocido { background: linear-gradient(135deg, #94A3B8, #64748B); }
 
-.card-android .stat-icon { background: #e8f8f0; }
-.card-ios .stat-icon { background: #e8f4ff; }
-.card-desktop .stat-icon { background: #f3f4f6; }
-.card-desconocido .stat-icon { background: #f9fafb; }
-
-.device-emoji {
-  font-size: 2rem;
-  line-height: 1;
-}
-
-.stat-content {
+.device-data {
   flex: 1;
-  min-width: 0;
 }
 
-.stat-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6b7280;
-  margin: 0 0 0.5rem;
-  text-transform: capitalize;
-}
-
-.total-card .stat-label {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.stat-value {
-  font-size: 2rem;
+.device-name {
+  font-size: clamp(15px, 2vw, 17px);
   font-weight: 700;
-  color: #111827;
+  color: #1e293b;
+  margin: 0 0 4px;
+}
+
+.device-count {
+  font-size: clamp(12px, 1.6vw, 13px);
+  color: #64748b;
   margin: 0;
-  line-height: 1;
 }
 
-.total-value {
-  color: white;
-  font-size: 2.5rem;
+/* === PROGRESS BAR === */
+.device-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-/* Barra de progreso */
-.stat-progress {
-  margin-top: 1rem;
-  background: #f3f4f6;
-  border-radius: 999px;
-  height: 8px;
+.progress-bar-track {
+  flex: 1;
+  height: 12px;
+  background: #f1f5f9;
+  border-radius: 20px;
   overflow: hidden;
+  position: relative;
 }
 
-.progress-bar {
+.progress-bar-fill {
   height: 100%;
-  border-radius: 999px;
-  transition: width 0.6s ease;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 0.5rem;
+  border-radius: 20px;
   position: relative;
-}
-
-.progress-android { background: #3DDC84; }
-.progress-ios { background: #147EFB; }
-.progress-desktop { background: #6B7280; }
-.progress-desconocido { background: #9CA3AF; }
-
-.progress-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* Tarjetas de gráficas */
-.chart-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.chart-header {
-  margin-bottom: 1.5rem;
-}
-
-.chart-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 0;
-}
-
-/* Gráfica de Dona */
-.donut-chart {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.donut-svg {
-  width: 200px;
-  height: 200px;
-  transform: rotate(-90deg);
-}
-
-.donut-segment {
-  transition: stroke-width 0.3s;
-}
-
-.donut-segment:hover {
-  stroke-width: 45;
-}
-
-.donut-total-label {
-  font-size: 14px;
-  fill: #6b7280;
-  font-weight: 500;
-}
-
-.donut-total-value {
-  font-size: 24px;
-  fill: #111827;
-  font-weight: 700;
-}
-
-/* Leyenda */
-.donut-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.legend-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.legend-label {
-  flex: 1;
-  font-size: 0.875rem;
-  color: #374151;
-}
-
-.legend-value {
-  font-weight: 600;
-  color: #111827;
-}
-
-/* Gráfica de Barras */
-.bars-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.bar-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.bar-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #374151;
-  text-transform: capitalize;
-}
-
-.bar-container {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.bar-wrapper {
-  flex: 1;
-  display: flex;
-  height: 32px;
-  background: #f3f4f6;
-  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
-.bar-segment {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-  position: relative;
+.progress-bar-fill.fill-android { background: linear-gradient(90deg, #3DDC84, #2BC470); }
+.progress-bar-fill.fill-ios { background: linear-gradient(90deg, #007AFF, #0056B3); }
+.progress-bar-fill.fill-desktop { background: linear-gradient(90deg, #6366F1, #4F46E5); }
+.progress-bar-fill.fill-desconocido { background: linear-gradient(90deg, #94A3B8, #64748B); }
+
+.progress-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shine 2s infinite;
 }
 
-.bar-segment:hover {
-  filter: brightness(1.1);
-}
-
-.bar-value {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.bar-total {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #111827;
-  min-width: 40px;
+.progress-percent {
+  font-size: clamp(12px, 1.6vw, 14px);
+  font-weight: 700;
+  color: #475569;
+  min-width: 45px;
   text-align: right;
 }
 
-/* Usuarios Activos */
-.active-stats {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border-radius: 12px;
-}
-
-.active-total {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.active-number {
-  font-size: 3rem;
-  font-weight: 700;
-  color: #16a34a;
-  line-height: 1;
-}
-
-.active-label {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-top: 0.5rem;
-}
-
-.active-percentage {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #22c55e;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.percentage-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6b7280;
-  margin-top: 0.25rem;
-}
-
-.active-devices {
+/* === CHARTS ROW (2 COLUMNS) === */
+.charts-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(16px, 2.5vw, 24px);
 }
 
-.active-device-item {
+@media (max-width: 900px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === CHART CARD === */
+.chart-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.chart-card-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  gap: 12px;
+  padding: clamp(16px, 2vw, 20px);
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.active-emoji {
-  font-size: 1.5rem;
+.chart-header-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.active-device-name {
-  flex: 1;
+.chart-header-icon svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.chart-header-icon.pulse-icon {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.chart-card-title {
+  font-size: clamp(14px, 2vw, 16px);
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.chart-card-body {
+  padding: clamp(16px, 2.5vw, 24px);
+}
+
+/* === DONUT CHART === */
+.donut-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.donut-svg {
+  width: 180px;
+  height: 180px;
+  transform: rotate(-90deg);
+}
+
+.donut-ring {
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+
+.donut-ring:hover {
+  stroke-width: 40;
+  filter: brightness(1.1);
+}
+
+.donut-center-label {
+  font-size: 14px;
+  fill: #64748b;
   font-weight: 500;
-  color: #374151;
+  transform: rotate(90deg);
+  transform-origin: 100px 100px;
+}
+
+.donut-center-value {
+  font-size: 22px;
+  fill: #1e293b;
+  font-weight: 800;
+  transform: rotate(90deg);
+  transform-origin: 100px 100px;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.donut-legend-item:hover {
+  background: #f1f5f9;
+  transform: translateX(4px);
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.legend-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.legend-qty {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* === BARS CHART === */
+.roles-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.role-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.role-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.role-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
   text-transform: capitalize;
 }
 
-.active-device-count {
+.role-total {
+  font-size: 14px;
   font-weight: 700;
-  color: #111827;
-  font-size: 1.125rem;
+  color: #1e293b;
+}
+
+.role-bar-track {
+  display: flex;
+  height: 32px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.role-bar-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.role-bar-segment:hover {
+  filter: brightness(1.1);
+}
+
+.segment-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* === ACTIVE USERS === */
+.active-section {
+  width: 100%;
+}
+
+.active-card {
+  width: 100%;
+}
+
+.active-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.active-summary {
+  display: flex;
+  justify-content: center;
+  gap: clamp(24px, 5vw, 48px);
+  padding: clamp(20px, 3vw, 32px);
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border-radius: 16px;
+}
+
+.active-stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.active-big-number {
+  font-size: clamp(36px, 5vw, 52px);
+  font-weight: 800;
+  color: #059669;
+  line-height: 1;
+}
+
+.active-big-percent {
+  font-size: clamp(32px, 4.5vw, 44px);
+  font-weight: 800;
+  color: #10b981;
+  line-height: 1;
+}
+
+.active-stat-label {
+  font-size: clamp(11px, 1.5vw, 13px);
+  color: #64748b;
+  font-weight: 500;
+}
+
+.active-by-device {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.active-device-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.active-device-chip:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.active-device-chip.chip-android:hover { border-color: #3DDC84; }
+.active-device-chip.chip-ios:hover { border-color: #007AFF; }
+.active-device-chip.chip-desktop:hover { border-color: #6366F1; }
+.active-device-chip.chip-desconocido:hover { border-color: #94A3B8; }
+
+.chip-icon {
+  width: 22px;
+  height: 22px;
+  color: #64748b;
+}
+
+.chip-android .chip-icon { color: #3DDC84; }
+.chip-ios .chip-icon { color: #007AFF; }
+.chip-desktop .chip-icon { color: #6366F1; }
+
+.chip-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.chip-count {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e293b;
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 8px;
 }
 
 .no-active-data {
   text-align: center;
-  padding: 2rem;
-  color: #6b7280;
+  padding: 40px 20px;
+  color: #64748b;
 }
 
-/* Responsive */
+/* === RESPONSIVE === */
+@media (max-width: 992px) {
+  .main-content {
+    margin-left: 200px;
+    width: calc(100vw - 200px);
+  }
+}
+
 @media (max-width: 768px) {
-  .page-header {
-    padding: 1rem;
+  .main-content {
+    margin-left: 240px;
+    width: calc(100vw - 240px);
   }
   
-  .header-title {
-    font-size: 1.25rem;
+  .main-stat-content {
+    flex-direction: column;
+    text-align: center;
   }
   
-  .page-content {
-    padding: 1rem;
+  .main-stat-trend {
+    display: none;
   }
   
-  .estadisticas-grid {
+  .devices-section {
     grid-template-columns: 1fr;
   }
   
-  .active-stats {
+  .active-summary {
     flex-direction: column;
-    gap: 1.5rem;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    margin-left: 200px;
+    width: calc(100vw - 200px);
+  }
+  
+  .devices-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .donut-svg {
+    width: 150px;
+    height: 150px;
   }
 }
 </style>

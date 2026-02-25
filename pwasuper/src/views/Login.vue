@@ -139,6 +139,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URL, getBestApiUrl, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
 import SupportBubbleLogin from '../components/SupportBubbleLogin.vue';
+import { enviarInfoDispositivo } from '../services/dispositivoTrackingService.js';
 
 const router = useRouter();
 const email = ref('');
@@ -168,52 +169,6 @@ onMounted(async () => {
 
 function togglePasswordVisibility() {
   showPassword.value = !showPassword.value;
-}
-
-/**
- * Detecta el tipo de dispositivo del usuario
- * @returns {string} 'Android', 'iOS', 'Desktop', o 'Desconocido'
- */
-function detectarDispositivo() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  
-  // Detectar iOS
-  if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-    return 'iOS';
-  }
-  
-  // Detectar Android
-  if (/android/i.test(userAgent)) {
-    return 'Android';
-  }
-  
-  // Detectar Desktop (Windows, Mac, Linux)
-  if (/Windows|Macintosh|Linux/.test(userAgent)) {
-    return 'Desktop';
-  }
-  
-  return 'Desconocido';
-}
-
-/**
- * Envía información del dispositivo al backend
- */
-async function enviarInfoDispositivo(usuarioId) {
-  try {
-    const dispositivo = detectarDispositivo();
-    const userAgent = navigator.userAgent;
-    
-    await axios.post(`${currentApiUrl.value}/actualizar_dispositivo`, {
-      usuario_id: usuarioId,
-      dispositivo: dispositivo,
-      user_agent: userAgent
-    });
-    
-    console.log(`📱 Dispositivo registrado: ${dispositivo}`);
-  } catch (error) {
-    console.warn('⚠️ No se pudo actualizar el dispositivo:', error);
-    // No mostrar error al usuario, es información estadística
-  }
 }
 
 async function login() {

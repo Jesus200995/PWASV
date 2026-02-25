@@ -13,6 +13,7 @@ import { useNotifications } from './composables/useNotifications.js';
 import { API_URL } from './utils/network.js';
 import { apiService } from './services/apiService.js';
 import { manualesService } from './services/manualesService.js';
+import { registrarDispositivoActual, iniciarTrackingPeriodico, detenerTrackingPeriodico } from './services/dispositivoTrackingService.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -42,6 +43,9 @@ let notificationPollingId = null;
 // Contador de manuales no leídos
 const unreadManualesCount = ref(0);
 let manualesPollingId = null;
+
+// Tracking de dispositivos
+let dispositivoTrackingId = null;
 
 // Función para cargar conteo de manuales no leídos
 const cargarConteoManuales = async () => {
@@ -170,6 +174,14 @@ const handleStorageChange = (e) => {
   }
 };
 
+// 📱 Handler para cuando la app vuelve a primer plano (útil para tracking en móviles)
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible' && userData.value) {
+    console.log('📱 [Visibility] App volvió a primer plano, actualizando tracking...');
+    registrarDispositivoActual();
+  }
+};
+
 // Función para verificar periódicamente los datos del usuario desde el servidor
 // Esto detecta cambios realizados por el admin (ej: eliminar territorio, cargo o desactivar cuenta)
 const checkUserDataFromServer = async () => {
@@ -288,6 +300,13 @@ onMounted(() => {
       // Inicializar sistema de notificaciones una vez que el usuario está identificado
       notificationPollingId = startPolling();
       
+      // 📱 Registrar dispositivo del usuario (tracking en tiempo real)
+      // Se ejecuta cada vez que abren la app, no solo en login
+      registrarDispositivoActual();
+      // Tracking periódico cada 5 minutos para mantener datos actualizados
+      dispositivoTrackingId = iniciarTrackingPeriodico(300000);
+      console.log('📱 [App] Tracking de dispositivo iniciado');
+      
       // Cargar conteo de manuales no leídos
       cargarConteoManuales();
       // Polling para manuales cada 60 segundos
@@ -339,6 +358,9 @@ onMounted(() => {
   // Escuchar evento de manual marcado como leído para actualizar contador
   window.addEventListener('manual-leido', cargarConteoManuales);
   
+  // 📱 Escuchar cuando la app vuelve a primer plano para actualizar tracking
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  
   // Iniciar verificación periódica de datos del usuario (si está logueado)
   if (userData.value) {
     startUserDataCheck();
@@ -349,12 +371,16 @@ onUnmounted(() => {
   // Limpiar listener
   window.removeEventListener('storage', handleStorageChange);
   window.removeEventListener('manual-leido', cargarConteoManuales);
+  // 📱 Limpiar listener de visibilidad
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
   // Detener el polling de notificaciones
   stopPolling(notificationPollingId);
   // Detener polling de manuales
   if (manualesPollingId) clearInterval(manualesPollingId);
   // Detener verificación de datos del usuario
   stopUserDataCheck();
+  // 📱 Detener tracking de dispositivos
+  detenerTrackingPeriodico(dispositivoTrackingId);
 });
 
 const isLoggedIn = computed(() => {

@@ -1206,9 +1206,12 @@ export default {
     const mantenerImagenExistente = ref(true)
     const mantenerVideoExistente = ref(true)
     
-    // Permisos
-    const userPermisos = computed(() => authService.getCurrentUser()?.permisos || {})
-    const userRol = computed(() => authService.getUserRole())
+    // Usuario actual (ref reactivo para permisos en tiempo real)
+    const currentUser = ref(authService.getCurrentUser())
+    
+    // Permisos (basados en ref reactivo)
+    const userPermisos = computed(() => currentUser.value?.permisos || {})
+    const userRol = computed(() => currentUser.value?.rol || 'user')
     
     const puedeCrearManuales = computed(() => {
       if (userRol.value === 'super_admin' || userRol.value === 'admin') return true
@@ -1616,6 +1619,9 @@ export default {
     }
     
     onMounted(() => {
+      // Cargar usuario actual
+      currentUser.value = authService.getCurrentUser()
+      
       cargarManuales()
       cargarUsuarios()
       
@@ -1630,8 +1636,20 @@ export default {
     // Handler para actualizaciones de permisos en tiempo real
     const handleUserSessionUpdated = (event) => {
       console.log('🔄 ManualesView: Permisos actualizados en tiempo real', event.detail)
-      // Los computed properties se actualizan automáticamente al cambiar authService.user
+      
+      // Actualizar authService.user
       authService.user = authService.getUserFromStorage()
+      
+      // CRITICAL: Actualizar ref reactivo para que los computed se recalculen
+      if (event.detail) {
+        currentUser.value = { ...event.detail }
+        console.log('✅ ManualesView: currentUser actualizado reactivamente')
+        console.log('📋 ManualesView: manuales_crear =', currentUser.value.permisos?.manuales_crear)
+        console.log('🔑 ManualesView: puedeCrearManuales =', puedeCrearManuales.value)
+      } else {
+        // Fallback: leer desde authService actualizado
+        currentUser.value = authService.getCurrentUser()
+      }
     }
     
     return {
@@ -1700,7 +1718,9 @@ export default {
       feedbackTipo,
       feedbackTitulo,
       feedbackMensaje,
-      cerrarFeedback
+      cerrarFeedback,
+      puedeCrearManuales,
+      puedeEliminar
     }
   }
 }

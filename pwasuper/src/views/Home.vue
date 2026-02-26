@@ -1154,13 +1154,15 @@
         <!-- Checklist de progreso estilo Apple amarillo oscuro -->
         <div v-if="entradaMarcada && !salidaMarcada && (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || !descripcionRegistro.trim())" 
              class="apple-checklist-card mb-4">
-          <div class="flex items-center mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
+          <div class="apple-checklist-header">
+            <div class="apple-checklist-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            </div>
             <span class="apple-checklist-title">Completa estos pasos</span>
           </div>
-          <div class="grid grid-cols-2 gap-2">
+          <div class="apple-checklist-items">
             <!-- Ubicación -->
             <div :class="['apple-checklist-item', latitudRegistro && longitudRegistro ? 'apple-checklist-item-done' : 'apple-checklist-item-pending']">
               <div :class="['apple-checklist-circle', latitudRegistro && longitudRegistro ? 'apple-checklist-circle-done' : 'apple-checklist-circle-pending']">
@@ -3554,9 +3556,10 @@ watch([entradaMarcada, salidaMarcada], () => {
     0 2px 8px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -1px 0 rgba(59, 130, 246, 0.05) !important;
-  padding: 1rem 0.375rem !important;
+  padding: 1rem 1rem !important;
   position: relative !important;
   overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 .glass-card-blue::before {
@@ -3590,9 +3593,10 @@ watch([entradaMarcada, salidaMarcada], () => {
     0 2px 8px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -1px 0 rgba(239, 68, 68, 0.05) !important;
-  padding: 1rem 0.375rem !important;
+  padding: 1rem 1rem !important;
   position: relative !important;
   overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 .glass-card-red::before {
@@ -3626,9 +3630,10 @@ watch([entradaMarcada, salidaMarcada], () => {
     0 2px 8px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -1px 0 rgba(168, 85, 247, 0.05) !important;
-  padding: 1rem 0.5rem !important;
+  padding: 1rem 1rem !important;
   position: relative !important;
   overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 .glass-card-purple::before {
@@ -5237,6 +5242,36 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* ===== ESTILOS APPLE PARA REGISTRO DE ASISTENCIA ===== */
 
+/* Estilos globales para evitar desbordamiento */
+[class*="apple-"] {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.apple-form-container *,
+.apple-attendance-container *,
+.apple-activities-container * {
+  box-sizing: border-box;
+}
+
+/* Asegurar que todos los elementos respeten el ancho del contenedor */
+.apple-header-card,
+.apple-user-card,
+.apple-step-card,
+.apple-step-card-purple,
+.apple-checklist-card,
+.apple-ready-card,
+.apple-warning-card,
+.apple-action-buttons,
+.apple-photo-buttons,
+.apple-textarea,
+.apple-select,
+.apple-input {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
 /* Contenedor principal del formulario */
 .apple-form-container,
 .apple-attendance-container {
@@ -5251,8 +5286,10 @@ watch([entradaMarcada, salidaMarcada], () => {
 .apple-attendance-container > .apple-action-buttons,
 .apple-attendance-container > .apple-checklist-card,
 .apple-attendance-container > .apple-ready-card {
-  margin-left: 0.375rem;
-  margin-right: 0.375rem;
+  margin-left: 0;
+  margin-right: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @keyframes apple-fade-in {
@@ -5711,6 +5748,9 @@ watch([entradaMarcada, salidaMarcada], () => {
   border-radius: 14px;
   padding: 0.75rem 0.875rem !important;
   box-shadow: 0 2px 8px rgba(180, 140, 0, 0.1);
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .apple-checklist-header {
@@ -5742,11 +5782,15 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 .apple-checklist-items {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
+  max-width: 100%;
 }
 
 .apple-checklist-item {
-  flex: 1;
+  flex: 1 1 calc(50% - 0.25rem);
+  min-width: 100px;
+  max-width: calc(50% - 0.25rem);
   display: flex;
   align-items: center;
   padding: 0.5rem 0.625rem;
@@ -5755,6 +5799,9 @@ watch([entradaMarcada, salidaMarcada], () => {
   font-size: 0.6875rem;
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 /* Estados del item del checklist */
@@ -5865,7 +5912,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   border: 1px solid rgba(147, 51, 234, 0.15);
   border-radius: 24px;
-  padding: 1rem 0.375rem !important;
+  padding: 1rem 1rem !important;
   box-shadow: 
     0 8px 32px rgba(147, 51, 234, 0.12),
     0 2px 8px rgba(0, 0, 0, 0.04),
@@ -5874,6 +5921,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   animation: apple-fade-in 0.4s ease-out;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Espaciado lateral para elementos hijos */
@@ -5881,16 +5929,20 @@ watch([entradaMarcada, salidaMarcada], () => {
 .apple-activities-container > .apple-header-card,
 .apple-activities-container > .apple-user-card,
 .apple-activities-container > form {
-  margin-left: 0.375rem;
-  margin-right: 0.375rem;
+  margin-left: 0;
+  margin-right: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .apple-activities-container > form > .apple-step-card-purple,
 .apple-activities-container > form > .apple-checklist-card,
 .apple-activities-container > form > .apple-ready-card,
 .apple-activities-container > form > button {
-  margin-left: 0.375rem;
-  margin-right: 0.375rem;
+  margin-left: 0;
+  margin-right: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .apple-activities-container::before {
@@ -6223,7 +6275,38 @@ watch([entradaMarcada, salidaMarcada], () => {
   }
   
   .apple-checklist-card {
-    padding: 0.5rem 0.375rem;
+    padding: 0.5rem 0.5rem !important;
+  }
+  
+  .apple-checklist-items {
+    gap: 0.375rem;
+  }
+  
+  .apple-checklist-item {
+    flex: 1 1 calc(50% - 0.1875rem);
+    max-width: calc(50% - 0.1875rem);
+    min-width: 90px;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.625rem;
+  }
+  
+  .apple-checklist-item span {
+    font-size: 0.625rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .apple-checklist-title {
+    font-size: 0.75rem;
+  }
+  
+  .glass-card-blue,
+  .glass-card-red {
+    padding: 1rem 0.75rem !important;
+  }
+  
+  .apple-activities-container {
+    padding: 1rem 0.75rem !important;
   }
 }
 
@@ -6255,6 +6338,22 @@ watch([entradaMarcada, salidaMarcada], () => {
   
   .apple-step-title {
     font-size: 0.8125rem;
+  }
+  
+  .apple-checklist-item {
+    flex: 1 1 calc(50% - 0.25rem);
+    max-width: calc(50% - 0.25rem);
+    min-width: 95px;
+    padding: 0.4375rem 0.5625rem;
+  }
+  
+  .glass-card-blue,
+  .glass-card-red {
+    padding: 1rem 0.875rem !important;
+  }
+  
+  .apple-activities-container {
+    padding: 1rem 0.875rem !important;
   }
 }
 
@@ -6288,6 +6387,18 @@ watch([entradaMarcada, salidaMarcada], () => {
   
   .apple-step-title {
     font-size: 0.875rem;
+  }
+  
+  .apple-checklist-item {
+    flex: 1 1 calc(50% - 0.25rem);
+    max-width: calc(50% - 0.25rem);
+    min-width: 100px;
+  }
+  
+  .glass-card-blue,
+  .glass-card-red,
+  .apple-activities-container {
+    padding: 1rem 1rem !important;
   }
   
   .apple-step-card,

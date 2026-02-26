@@ -261,6 +261,17 @@
                 {{ eliminandoImagenes ? 'Eliminando...' : 'Eliminar Imágenes' }}
               </button>
 
+              <button @click="abrirModalEliminarPorFecha" class="action-btn calendar-images-btn" :disabled="eliminandoImagenesPorFecha">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                  <line x1="9" y1="16" x2="15" y2="16"></line>
+                </svg>
+                {{ eliminandoImagenesPorFecha ? 'Eliminando...' : 'Eliminar por Fecha' }}
+              </button>
+
               <button @click="abrirModalTransferencia" class="action-btn transfer-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M16 3h5v5"></path>
@@ -357,6 +368,16 @@
       @completado="onProgressCompletado"
     />
 
+    <!-- Modal de progreso NARANJA para eliminación por fecha -->
+    <ProgressModalFecha
+      ref="progressModalFechaRef"
+      :show="showProgressModalFecha"
+      titulo="Eliminar imágenes por fecha"
+      :periodo="periodoTextoPreview"
+      @cerrar="cerrarProgressModalFecha"
+      @completado="onProgressFechaCompletado"
+    />
+
     <!-- Modal de progreso para descarga de BD -->
     <DescargaProgressModal
       ref="descargaProgressRef"
@@ -368,6 +389,112 @@
       ref="descargaCSVProgressRef"
       :show="showDescargaCSVProgress"
     />
+
+    <!-- Modal para Eliminar Imágenes por Fecha -->
+    <div v-if="showEliminarPorFechaModal" class="modal-overlay" @click="cerrarModalEliminarPorFecha">
+      <div class="modal-content modal-eliminar-fecha" @click.stop>
+        <div class="modal-header modal-header-fecha">
+          <div class="header-icon-fecha">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <h3>Eliminar Imágenes por Fecha</h3>
+          <button @click="cerrarModalEliminarPorFecha" class="btn-close">×</button>
+        </div>
+        
+        <div class="modal-body modal-body-fecha">
+          <div class="fecha-form">
+            <p class="fecha-description">
+              Selecciona el período de imágenes que deseas eliminar. Esta acción eliminará las fotos de registros y asistencias del período seleccionado.
+            </p>
+            
+            <div class="fecha-options">
+              <div class="fecha-option-toggle">
+                <button 
+                  @click="eliminarFechaConfig.soloMes = true" 
+                  :class="['toggle-btn', { active: eliminarFechaConfig.soloMes }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  Solo un Mes
+                </button>
+                <button 
+                  @click="eliminarFechaConfig.soloMes = false" 
+                  :class="['toggle-btn', { active: !eliminarFechaConfig.soloMes }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  Año Completo
+                </button>
+              </div>
+
+              <div class="fecha-selectors">
+                <div v-if="eliminarFechaConfig.soloMes" class="fecha-field">
+                  <label>Mes</label>
+                  <select v-model="eliminarFechaConfig.mes" class="fecha-select">
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                  </select>
+                </div>
+                <div class="fecha-field">
+                  <label>Año</label>
+                  <select v-model="eliminarFechaConfig.anio" class="fecha-select">
+                    <option v-for="year in aniosDisponibles" :key="year" :value="year">{{ year }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="fecha-preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"></path>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                </svg>
+                <span>
+                  Se eliminarán imágenes de: 
+                  <strong>{{ periodoTextoPreview }}</strong>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer modal-footer-fecha">
+          <button @click="cerrarModalEliminarPorFecha" class="btn-cancel" :disabled="eliminandoImagenesPorFecha">
+            Cancelar
+          </button>
+          <button 
+            @click="confirmarEliminarPorFecha" 
+            class="btn-danger-fecha" 
+            :disabled="eliminandoImagenesPorFecha"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            {{ eliminandoImagenesPorFecha ? 'Eliminando...' : 'Eliminar Imágenes' }}
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Modal de Transferencia de Actividades -->
     <div v-if="showTransferenciaModal" class="modal-overlay" @click="cerrarModalTransferencia">
@@ -671,12 +798,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import ProgressModal from '../components/ProgressModal.vue'
+import ProgressModalFecha from '../components/ProgressModalFecha.vue'
 import DescargaProgressModal from '../components/DescargaProgressModal.vue'
 import DescargaCSVProgressModal from '../components/DescargaCSVProgressModal.vue'
 import asistenciasService from '../services/asistenciasService.js'
@@ -734,6 +862,35 @@ const descargandoUsuarios = ref(false)
 const eliminandoImagenes = ref(false)
 const descargandoBDRapida = ref(false)
 const descargandoRegistrosCSV = ref(false)
+
+// Variables para eliminar imágenes por fecha
+const showEliminarPorFechaModal = ref(false)
+const eliminandoImagenesPorFecha = ref(false)
+const progresoEliminacionFecha = ref(0)
+const mensajeProgresoFecha = ref('')
+const showProgressModalFecha = ref(false)
+const progressModalFechaRef = ref(null)
+const eliminarFechaConfig = reactive({
+  mes: new Date().getMonth() + 1,
+  anio: new Date().getFullYear(),
+  soloMes: true
+})
+
+// Años disponibles para seleccionar (últimos 5 años)
+const aniosDisponibles = computed(() => {
+  const currentYear = new Date().getFullYear()
+  return Array.from({ length: 6 }, (_, i) => currentYear - i)
+})
+
+// Preview del período a eliminar
+const periodoTextoPreview = computed(() => {
+  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+  if (eliminarFechaConfig.soloMes) {
+    return `${meses[eliminarFechaConfig.mes - 1]} ${eliminarFechaConfig.anio}`
+  }
+  return `Todo el año ${eliminarFechaConfig.anio}`
+})
 
 // Variables para el modal de progreso
 const showProgressModal = ref(false)
@@ -1824,6 +1981,112 @@ const onProgressCompletado = () => {
   }, 2000)
 }
 
+// ==================== FUNCIONES DE ELIMINAR IMÁGENES POR FECHA ====================
+
+const abrirModalEliminarPorFecha = () => {
+  // Resetear valores
+  eliminarFechaConfig.mes = new Date().getMonth() + 1
+  eliminarFechaConfig.anio = new Date().getFullYear()
+  eliminarFechaConfig.soloMes = true
+  progresoEliminacionFecha.value = 0
+  mensajeProgresoFecha.value = ''
+  showEliminarPorFechaModal.value = true
+}
+
+const cerrarModalEliminarPorFecha = () => {
+  if (eliminandoImagenesPorFecha.value) return // No cerrar mientras elimina
+  showEliminarPorFechaModal.value = false
+}
+
+const confirmarEliminarPorFecha = () => {
+  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+  
+  const periodo = eliminarFechaConfig.soloMes 
+    ? `${meses[eliminarFechaConfig.mes - 1]} ${eliminarFechaConfig.anio}`
+    : `todo el año ${eliminarFechaConfig.anio}`
+  
+  confirmType.value = 'danger'
+  confirmTitle.value = '⚠️ ELIMINAR IMÁGENES POR FECHA'
+  confirmMessage.value = `¿Estás seguro de que quieres eliminar todas las imágenes de <strong>${periodo}</strong>?
+
+Esta acción NO SE PUEDE DESHACER y eliminará:
+• Fotos de registros de actividades del período
+• Fotos de entrada/salida de asistencias del período
+
+Los datos asociados (registros y asistencias) permanecerán, solo se eliminarán las imágenes.`
+  
+  confirmAction.value = async () => {
+    const confirmacion = prompt(`Para confirmar, escribe: ELIMINAR ${eliminarFechaConfig.anio}`)
+    if (confirmacion === `ELIMINAR ${eliminarFechaConfig.anio}`) {
+      await ejecutarEliminarPorFecha()
+    } else {
+      mostrarMensaje('Cancelado', 'Eliminación de imágenes cancelada.')
+    }
+  }
+  showConfirmModal.value = true
+}
+
+const ejecutarEliminarPorFecha = async () => {
+  // Cerrar modal de configuración y abrir modal de progreso
+  showEliminarPorFechaModal.value = false
+  eliminandoImagenesPorFecha.value = true
+  showProgressModalFecha.value = true
+  
+  try {
+    console.log('🚀 Iniciando eliminación de imágenes por fecha...')
+    
+    // Iniciar el progreso visual
+    const detenerProgreso = await progressModalFechaRef.value.iniciarProgreso()
+    
+    // Llamar al servicio para eliminar imágenes
+    console.log('📞 Llamando al servicio...')
+    const resultado = await imagenesService.eliminarImagenesPorFecha(
+      eliminarFechaConfig.mes,
+      eliminarFechaConfig.anio,
+      eliminarFechaConfig.soloMes
+    )
+    
+    console.log('📊 Resultado recibido:', resultado)
+    
+    // Actualizar el modal con las estadísticas reales
+    progressModalFechaRef.value.actualizar({
+      registros_limpiados: resultado.estadisticas?.registros_limpiados || 0,
+      asistencias_limpiadas: resultado.estadisticas?.asistencias_limpiadas || 0,
+      archivos_eliminados: resultado.estadisticas?.archivos_eliminados || 0,
+      archivos_no_encontrados: resultado.estadisticas?.archivos_no_encontrados || 0,
+      total_procesado: resultado.estadisticas?.total_procesado || 0,
+      errores: resultado.estadisticas?.errores || 0
+    })
+    
+    // Marcar como completado
+    detenerProgreso()
+    progressModalFechaRef.value.completar()
+    
+    console.log('✅ Eliminación por fecha completada:', resultado)
+    
+  } catch (error) {
+    console.error('❌ Error al eliminar imágenes por fecha:', error)
+    
+    eliminandoImagenesPorFecha.value = false
+    showProgressModalFecha.value = false
+    
+    mostrarMensaje('❌ Error', error.message || 'Error al eliminar imágenes')
+  }
+}
+
+const cerrarProgressModalFecha = () => {
+  showProgressModalFecha.value = false
+  eliminandoImagenesPorFecha.value = false
+}
+
+const onProgressFechaCompletado = () => {
+  // El modal se cierra después de unos segundos automáticamente
+  setTimeout(() => {
+    cerrarProgressModalFecha()
+  }, 2000)
+}
+
 // ==================== FUNCIONES DE TRANSFERENCIA DE ACTIVIDADES ====================
 
 const abrirModalTransferencia = () => {
@@ -2587,6 +2850,17 @@ const logout = () => {
   box-shadow: 0 2px 4px rgba(236, 72, 153, 0.2);
 }
 
+.calendar-images-btn {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+}
+
+.calendar-images-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+}
+
 .transfer-btn {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
@@ -2941,6 +3215,261 @@ const logout = () => {
     margin-left: 180px;
     width: calc(100vw - 180px);
   }
+}
+
+/* ==================== ESTILOS DEL MODAL ELIMINAR POR FECHA ==================== */
+.modal-eliminar-fecha {
+  max-width: min(500px, 95vw);
+  width: 95%;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.modal-header-fecha {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  padding: clamp(14px, 4vw, 20px);
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-header-fecha h3 {
+  flex: 1;
+  margin: 0;
+  font-size: clamp(15px, 4vw, 18px);
+  font-weight: 600;
+}
+
+.modal-header-fecha .btn-close {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-header-fecha .btn-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.header-icon-fecha {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon-fecha svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+}
+
+.modal-body-fecha {
+  padding: clamp(16px, 4vw, 24px);
+  background: white;
+}
+
+.fecha-progress {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1px solid #fdba74;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.progress-bar-orange {
+  background: linear-gradient(90deg, #f97316 0%, #ea580c 100%);
+  transition: width 0.5s ease;
+}
+
+.fecha-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fecha-description {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.fecha-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fecha-option-toggle {
+  display: flex;
+  gap: 10px;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.toggle-btn.active {
+  background: white;
+  color: #f97316;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.toggle-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.fecha-selectors {
+  display: flex;
+  gap: 16px;
+}
+
+.fecha-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fecha-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fecha-select {
+  padding: 12px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fecha-select:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+.fecha-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1px solid #fdba74;
+  border-radius: 10px;
+  color: #9a3412;
+  font-size: 13px;
+}
+
+.fecha-preview svg {
+  width: 20px;
+  height: 20px;
+  color: #ea580c;
+  flex-shrink: 0;
+}
+
+.fecha-preview strong {
+  color: #c2410c;
+}
+
+.modal-footer-fecha {
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.btn-danger-fecha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-danger-fecha svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-danger-fecha:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.btn-danger-fecha:disabled,
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ==================== ESTILOS DEL MODAL DE TRANSFERENCIA ==================== */

@@ -7616,6 +7616,196 @@ async def eliminar_todas_imagenes():
 
 # ==================== FIN ENDPOINT ELIMINAR IMÁGENES ====================
 
+# ==================== ENDPOINT PARA ELIMINAR IMÁGENES POR FECHA ====================
+
+class EliminarImagenesPorFechaRequest(BaseModel):
+    mes: int  # 1-12
+    anio: int  # Ejemplo: 2025
+    solo_mes: bool = True  # Si True, solo el mes especificado. Si False, todo el año
+
+@app.delete("/imagenes/eliminar-por-fecha")
+async def eliminar_imagenes_por_fecha(request: EliminarImagenesPorFechaRequest):
+    """
+    Endpoint para eliminar imágenes filtradas por mes/año.
+    Elimina:
+    - Fotos de registros de actividades del período especificado
+    - Fotos de asistencias del período especificado
+    - Los archivos físicos correspondientes
+    """
+    try:
+        if not conn:
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        mes = request.mes
+        anio = request.anio
+        solo_mes = request.solo_mes
+        
+        # Validar mes
+        if mes < 1 or mes > 12:
+            raise HTTPException(status_code=400, detail="El mes debe estar entre 1 y 12")
+        
+        # Validar año
+        if anio < 2020 or anio > 2050:
+            raise HTTPException(status_code=400, detail="El año debe estar entre 2020 y 2050")
+        
+        # Calcular rango de fechas
+        if solo_mes:
+            fecha_inicio = f"{anio}-{mes:02d}-01"
+            # Calcular último día del mes
+            if mes == 12:
+                fecha_fin = f"{anio + 1}-01-01"
+            else:
+                fecha_fin = f"{anio}-{mes + 1:02d}-01"
+            periodo_texto = f"{mes:02d}/{anio}"
+        else:
+            fecha_inicio = f"{anio}-01-01"
+            fecha_fin = f"{anio + 1}-01-01"
+            periodo_texto = f"año {anio}"
+        
+        print(f"🗑️ INICIANDO ELIMINACIÓN DE IMÁGENES POR FECHA...")
+        print(f"📅 Período: {periodo_texto}")
+        print(f"📅 Rango: {fecha_inicio} a {fecha_fin}")
+        
+        # Contadores
+        fotos_registros_eliminadas = 0
+        fotos_asistencias_eliminadas = 0
+        archivos_eliminados = 0
+        archivos_no_encontrados = 0
+        errores = 0
+        
+        # 1. Obtener fotos de REGISTROS en el período
+        try:
+            cursor.execute("""
+                SELECT id, foto_url FROM registros 
+                WHERE foto_url IS NOT NULL 
+                AND fecha_hora >= %s AND fecha_hora < %s
+            """, (fecha_inicio, fecha_fin))
+            fotos_registros = cursor.fetchall()
+            print(f"📸 Se encontraron {len(fotos_registros)} fotos de registros en el período")
+            
+            for foto_row in fotos_registros:
+                registro_id = foto_row[0]
+                foto_path = foto_row[1]
+                if foto_path:
+                    # Intentar eliminar archivo físico
+                    if os.path.exists(foto_path):
+                        try:
+                            os.remove(foto_path)
+                            archivos_eliminados += 1
+                        except Exception as e:
+                            errores += 1
+                            print(f"   ❌ Error eliminando {foto_path}: {e}")
+                    else:
+                        archivos_no_encontrados += 1
+                    
+                    # Limpiar referencia en BD
+                    try:
+                        cursor.execute("UPDATE registros SET foto_url = NULL WHERE id = %s", (registro_id,))
+                        fotos_registros_eliminadas += 1
+                    except Exception as e:
+                        errores += 1
+                        print(f"   ❌ Error limpiando registro {registro_id}: {e}")
+            
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(f"⚠️ Error al procesar fotos de registros: {e}")
+            errores += 1
+        
+        # 2. Obtener fotos de ASISTENCIAS en el período
+        try:
+            cursor.execute("""
+                SELECT id, foto_entrada_url, foto_salida_url FROM asistencias 
+                WHERE (foto_entrada_url IS NOT NULL OR foto_salida_url IS NOT NULL)
+                AND fecha >= %s AND fecha < %s
+            """, (fecha_inicio, fecha_fin))
+            fotos_asistencias = cursor.fetchall()
+            print(f"📸 Se encontraron {len(fotos_asistencias)} registros de asistencia con fotos en el período")
+            
+            for foto_row in fotos_asistencias:
+                asistencia_id = foto_row[0]
+                foto_entrada = foto_row[1]
+                foto_salida = foto_row[2]
+                
+                # Procesar foto de entrada
+                if foto_entrada:
+                    if os.path.exists(foto_entrada):
+                        try:
+                            os.remove(foto_entrada)
+                            archivos_eliminados += 1
+                        except Exception as e:
+                            errores += 1
+                    else:
+                        archivos_no_encontrados += 1
+                
+                # Procesar foto de salida
+                if foto_salida:
+                    if os.path.exists(foto_salida):
+                        try:
+                            os.remove(foto_salida)
+                            archivos_eliminados += 1
+                        except Exception as e:
+                            errores += 1
+                    else:
+                        archivos_no_encontrados += 1
+                
+                # Limpiar referencias en BD
+                try:
+                    cursor.execute("""
+                        UPDATE asistencias 
+                        SET foto_entrada_url = NULL, foto_salida_url = NULL 
+                        WHERE id = %s
+                    """, (asistencia_id,))
+                    fotos_asistencias_eliminadas += 1
+                except Exception as e:
+                    errores += 1
+                    print(f"   ❌ Error limpiando asistencia {asistencia_id}: {e}")
+            
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(f"⚠️ Error al procesar fotos de asistencias: {e}")
+            errores += 1
+        
+        # Preparar resumen
+        resumen = {
+            "status": "success",
+            "message": f"Eliminación de imágenes del período {periodo_texto} completada",
+            "periodo": {
+                "mes": mes,
+                "anio": anio,
+                "solo_mes": solo_mes,
+                "fecha_inicio": fecha_inicio,
+                "fecha_fin": fecha_fin
+            },
+            "estadisticas": {
+                "registros_limpiados": fotos_registros_eliminadas,
+                "asistencias_limpiadas": fotos_asistencias_eliminadas,
+                "archivos_eliminados": archivos_eliminados,
+                "archivos_no_encontrados": archivos_no_encontrados,
+                "total_procesado": fotos_registros_eliminadas + fotos_asistencias_eliminadas,
+                "errores": errores
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        print("\n✅ ELIMINACIÓN POR FECHA COMPLETADA:")
+        print(f"   📸 Registros limpiados: {fotos_registros_eliminadas}")
+        print(f"   📸 Asistencias limpiadas: {fotos_asistencias_eliminadas}")
+        print(f"   🗑️ Archivos eliminados: {archivos_eliminados}")
+        print(f"   ⚠️ Archivos no encontrados: {archivos_no_encontrados}")
+        print(f"   ❌ Errores: {errores}")
+        
+        return resumen
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error general en eliminación de imágenes por fecha: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar imágenes: {str(e)}")
+
+# ==================== FIN ENDPOINT ELIMINAR IMÁGENES POR FECHA ====================
+
 # ==================== NUEVO ENDPOINT: DESCARGAR BD COMPLETA RÁPIDA ====================
 
 @app.get("/descargar-bd-completa", response_class=StreamingResponse)

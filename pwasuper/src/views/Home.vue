@@ -324,11 +324,11 @@
         </div>
 
         <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
-        <div v-if="modoAsistencia" class="apple-form-container mt-6 pt-6">
+        <div v-if="modoAsistencia" class="apple-attendance-container mt-6 pt-6">
           <!-- Header estilo Apple -->
           <div class="apple-header-card mb-5" :class="tipoAsistencia === 'entrada' ? 'apple-header-entrada' : 'apple-header-salida'">
             <div class="flex items-center justify-center">
-              <div class="apple-header-icon mr-3">
+              <div class="apple-header-icon mr-2">
                 <svg v-if="tipoAsistencia === 'entrada'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>
@@ -373,84 +373,80 @@
               </div>
             </div>
             
-            <!-- Botón de ubicación empresarial moderno -->
-            <div class="location-container-corporate">
+          <!-- Botón de ubicación Apple circular -->
+          <div class="apple-location-container">
+            <div class="apple-location-wrapper">
+              <!-- Botón circular principal -->
               <button
                 type="button"
                 @click="getUbicacion"
                 :disabled="obteniendoUbicacion"
-                class="location-button-corporate relative w-full py-4 px-6 font-semibold text-white shadow-lg transform transition-all duration-300 hover:-translate-y-1 active:translate-y-0"
+                class="apple-location-btn"
                 :class="{
-                  'opacity-60 cursor-not-allowed': obteniendoUbicacion,
-                  'location-button-success-corporate': latitud && longitud && !obteniendoUbicacion,
-                  'rounded-2xl': !latitud || !longitud,
-                  'rounded-t-2xl': latitud && longitud
+                  'apple-location-btn-loading': obteniendoUbicacion,
+                  'apple-location-btn-success': latitud && longitud && !obteniendoUbicacion,
+                  'apple-location-btn-default': !latitud && !longitud && !obteniendoUbicacion
                 }"
               >
-                <!-- Efecto de brillo superior -->
-                <div class="location-button-shine"></div>
+                <!-- Anillo de progreso animado -->
+                <div v-if="obteniendoUbicacion" class="apple-location-ring">
+                  <svg class="apple-location-ring-svg" viewBox="0 0 100 100">
+                    <circle class="apple-location-ring-bg" cx="50" cy="50" r="45"/>
+                    <circle class="apple-location-ring-progress" cx="50" cy="50" r="45"/>
+                  </svg>
+                </div>
                 
-                <!-- Contenido del botón -->
-                <div class="relative z-10 flex items-center justify-between">
-                  <div class="flex items-center space-x-3">
-                    <!-- Spinner de carga -->
-                    <div v-if="obteniendoUbicacion" class="flex items-center space-x-3">
-                      <div class="animate-spin rounded-full h-6 w-6 border-3 border-white border-t-transparent"></div>
-                      <span class="text-sm font-semibold tracking-wide">Obteniendo ubicación...</span>
-                    </div>
-                    
-                    <!-- Estado completado -->
-                    <template v-else-if="latitud && longitud">
-                      <div class="location-icon-wrapper-success">
-                        <svg class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div class="flex flex-col items-start">
-                        <span class="text-sm font-semibold tracking-wide">Ubicación Confirmada</span>
-                        <span class="text-xs opacity-90 font-medium">GPS activo</span>
-                      </div>
-                    </template>
-                    
-                    <!-- Estado inicial -->
-                    <template v-else>
-                      <div class="location-icon-wrapper">
-                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </div>
-                      <div class="flex flex-col items-start">
-                        <span class="text-sm font-semibold tracking-wide">Obtener Ubicación</span>
-                        <span class="text-xs opacity-90 font-medium">Toca para activar GPS</span>
-                      </div>
-                    </template>
-                  </div>
-                  
-                  <!-- Flecha indicadora -->
-                  <div v-if="!obteniendoUbicacion && !latitud && !longitud" class="location-arrow">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
+                <!-- Pulso de éxito -->
+                <div v-if="latitud && longitud && !obteniendoUbicacion" class="apple-location-pulse"></div>
+                
+                <!-- Icono central -->
+                <div class="apple-location-icon">
+                  <!-- Loading -->
+                  <svg v-if="obteniendoUbicacion" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <!-- Success -->
+                  <svg v-else-if="latitud && longitud" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <!-- Default -->
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
                 </div>
               </button>
-
-              <!-- Coordenadas minimalistas verde -->
-              <div v-if="latitud && longitud" class="coordinates-card-corporate">
-                <div class="flex items-center justify-center space-x-3">
-                  <div class="coordinate-badge">
-                    <span class="coordinate-label-corp">Lat</span>
-                    <span class="coordinate-value-corp">{{ latitud }}</span>
-                  </div>
-                  <div class="coordinate-badge">
-                    <span class="coordinate-label-corp">Lon</span>
-                    <span class="coordinate-value-corp">{{ longitud }}</span>
-                  </div>
-                </div>
+              
+              <!-- Texto de estado -->
+              <div class="apple-location-info">
+                <span class="apple-location-title">
+                  <span v-if="obteniendoUbicacion">Obteniendo...</span>
+                  <span v-else-if="latitud && longitud">Ubicación lista</span>
+                  <span v-else>Obtener GPS</span>
+                </span>
+                <span class="apple-location-subtitle">
+                  <span v-if="obteniendoUbicacion">Espera un momento</span>
+                  <span v-else-if="latitud && longitud">Coordenadas capturadas</span>
+                  <span v-else>Toca para activar</span>
+                </span>
+              </div>
+            </div>
+            
+            <!-- Coordenadas compactas -->
+            <div v-if="latitud && longitud" class="apple-coordinates">
+              <div class="apple-coord-item">
+                <span class="apple-coord-label">Lat</span>
+                <span class="apple-coord-value">{{ latitud }}</span>
+              </div>
+              <div class="apple-coord-divider"></div>
+              <div class="apple-coord-item">
+                <span class="apple-coord-label">Lon</span>
+                <span class="apple-coord-value">{{ longitud }}</span>
               </div>
             </div>
           </div>
+        </div>
 
           <!-- Paso 2: Imagen -->
           <div class="apple-step-card mb-4">
@@ -714,7 +710,7 @@
       <!-- Header estilo Apple morado -->
       <div class="apple-header-card apple-header-purple mb-5">
         <div class="flex items-center justify-center">
-          <div class="apple-header-icon mr-3">
+          <div class="apple-header-icon mr-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
@@ -757,95 +753,71 @@
             </div>
           </div>
           
-          <!-- Botón para obtener ubicación -->
-          <div class="location-container-corporate">
-          <button
-            type="button"
-            @click="getUbicacionRegistro"
-            :disabled="!entradaMarcada || salidaMarcada"
-            class="location-button-corporate relative w-full py-4 px-6 font-semibold text-white shadow-lg transform transition-all duration-300 hover:-translate-y-1 active:translate-y-0"
-            :class="{
-              'location-button-success-corporate': latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada,
-              'location-button-disabled-corporate': !entradaMarcada || salidaMarcada,
-              'rounded-2xl': !latitudRegistro || !longitudRegistro,
-              'rounded-t-2xl': latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada
-            }"
-          >
-            <!-- Efecto de brillo superior -->
-            <div class="location-button-shine"></div>
-            
-            <!-- Contenido del botón -->
-            <div class="relative z-10 flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <!-- Estado completado -->
-                <template v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada">
-                  <div class="location-icon-wrapper-success">
-                    <svg class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div class="flex flex-col items-start">
-                    <span class="text-sm font-semibold tracking-wide">Ubicación Confirmada</span>
-                    <span class="text-xs opacity-90 font-medium">GPS activo</span>
-                  </div>
-                </template>
+          <!-- Botón de ubicación Apple circular para actividades -->
+          <div class="apple-location-container">
+            <div class="apple-location-wrapper">
+              <!-- Botón circular principal -->
+              <button
+                type="button"
+                @click="getUbicacionRegistro"
+                :disabled="!entradaMarcada || salidaMarcada"
+                class="apple-location-btn"
+                :class="{
+                  'apple-location-btn-disabled': !entradaMarcada || salidaMarcada,
+                  'apple-location-btn-success': latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada,
+                  'apple-location-btn-default': entradaMarcada && !salidaMarcada && !latitudRegistro && !longitudRegistro
+                }"
+              >
+                <!-- Pulso de éxito -->
+                <div v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada" class="apple-location-pulse"></div>
                 
-                <!-- Estado bloqueado -->
-                <template v-else-if="!entradaMarcada || salidaMarcada">
-                  <div class="location-icon-wrapper-disabled">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div class="flex flex-col items-start">
-                    <span class="text-sm font-semibold tracking-wide">
-                      <span v-if="!entradaMarcada">Ubicación Bloqueada</span>
-                      <span v-else>Actividades Cerradas</span>
-                    </span>
-                    <span class="text-xs opacity-75 font-medium">
-                      <span v-if="!entradaMarcada">Marca entrada primero</span>
-                      <span v-else>Salida registrada</span>
-                    </span>
-                  </div>
-                </template>
-                
-                <!-- Estado inicial -->
-                <template v-else>
-                  <div class="location-icon-wrapper">
-                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div class="flex flex-col items-start">
-                    <span class="text-sm font-semibold tracking-wide">Obtener Ubicación</span>
-                    <span class="text-xs opacity-90 font-medium">Toca para activar GPS</span>
-                  </div>
-                </template>
-              </div>
+                <!-- Icono central -->
+                <div class="apple-location-icon">
+                  <!-- Bloqueado -->
+                  <svg v-if="!entradaMarcada || salidaMarcada" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <!-- Success -->
+                  <svg v-else-if="latitudRegistro && longitudRegistro" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <!-- Default -->
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+              </button>
               
-              <!-- Flecha indicadora -->
-              <div v-if="entradaMarcada && !salidaMarcada && !latitudRegistro && !longitudRegistro" class="location-arrow">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                </svg>
+              <!-- Texto de estado -->
+              <div class="apple-location-info">
+                <span class="apple-location-title">
+                  <span v-if="!entradaMarcada">Bloqueado</span>
+                  <span v-else-if="salidaMarcada">Cerrado</span>
+                  <span v-else-if="latitudRegistro && longitudRegistro">Ubicación lista</span>
+                  <span v-else>Obtener GPS</span>
+                </span>
+                <span class="apple-location-subtitle">
+                  <span v-if="!entradaMarcada">Marca entrada primero</span>
+                  <span v-else-if="salidaMarcada">Jornada finalizada</span>
+                  <span v-else-if="latitudRegistro && longitudRegistro">Coordenadas capturadas</span>
+                  <span v-else>Toca para activar</span>
+                </span>
               </div>
             </div>
-          </button>
-
-          <!-- Coordenadas minimalistas verde -->
-          <div v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada" class="coordinates-card-corporate">
-            <div class="flex items-center justify-center space-x-3">
-              <div class="coordinate-badge">
-                <span class="coordinate-label-corp">Lat</span>
-                <span class="coordinate-value-corp">{{ latitudRegistro }}</span>
+            
+            <!-- Coordenadas compactas -->
+            <div v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada" class="apple-coordinates">
+              <div class="apple-coord-item">
+                <span class="apple-coord-label">Lat</span>
+                <span class="apple-coord-value">{{ latitudRegistro }}</span>
               </div>
-              <div class="coordinate-badge">
-                <span class="coordinate-label-corp">Lon</span>
-                <span class="coordinate-value-corp">{{ longitudRegistro }}</span>
+              <div class="apple-coord-divider"></div>
+              <div class="apple-coord-item">
+                <span class="apple-coord-label">Lon</span>
+                <span class="apple-coord-value">{{ longitudRegistro }}</span>
               </div>
             </div>
-          </div>
           </div>
         </div>
 
@@ -5194,7 +5166,8 @@ watch([entradaMarcada, salidaMarcada], () => {
 /* ===== ESTILOS APPLE PARA REGISTRO DE ASISTENCIA ===== */
 
 /* Contenedor principal del formulario */
-.apple-form-container {
+.apple-form-container,
+.apple-attendance-container {
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   animation: apple-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -5233,23 +5206,30 @@ watch([entradaMarcada, salidaMarcada], () => {
 }
 
 .apple-header-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+  flex-shrink: 0;
+}
+
+.apple-header-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .apple-header-title {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: white;
   letter-spacing: -0.02em;
   margin: 0;
+  white-space: nowrap;
 }
 
 /* User card estilo Apple */
@@ -5337,24 +5317,25 @@ watch([entradaMarcada, salidaMarcada], () => {
 }
 
 .apple-step-number {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: linear-gradient(180deg, #0a84ff 0%, #0071e3 100%);
   color: white;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0.625rem;
+  margin-right: 0.5rem;
   box-shadow: 0 2px 6px rgba(10, 132, 255, 0.3);
+  flex-shrink: 0;
 }
 
 .apple-step-title {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #1d1d1f;
   letter-spacing: -0.01em;
@@ -5833,19 +5814,20 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Step number morado */
 .apple-step-number-purple {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: linear-gradient(180deg, #9333ea 0%, #7c3aed 100%);
   color: white;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0.625rem;
+  margin-right: 0.5rem;
   box-shadow: 0 2px 6px rgba(147, 51, 234, 0.3);
+  flex-shrink: 0;
 }
 
 /* Warning card estilo Apple */
@@ -6036,5 +6018,445 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 .apple-photo-delete-btn:active {
   transform: scale(0.95);
+}
+
+/* ========================================
+   MEDIA QUERIES RESPONSIVAS ESTILO APPLE
+   ======================================== */
+
+/* Pantallas pequeñas (móviles) */
+@media (max-width: 374px) {
+  .apple-header-card {
+    padding: 0.625rem 0.875rem;
+    border-radius: 12px;
+  }
+  
+  .apple-header-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    margin-right: 0.5rem;
+  }
+  
+  .apple-header-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .apple-header-title {
+    font-size: 0.8125rem;
+  }
+  
+  .apple-step-card,
+  .apple-step-card-purple {
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
+  
+  .apple-step-number,
+  .apple-step-number-purple {
+    width: 18px;
+    height: 18px;
+    font-size: 0.625rem;
+    margin-right: 0.375rem;
+  }
+  
+  .apple-step-title {
+    font-size: 0.75rem;
+  }
+  
+  .apple-user-card {
+    padding: 0.625rem 0.75rem;
+    border-radius: 12px;
+  }
+  
+  .apple-avatar,
+  .apple-avatar-purple {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .apple-avatar-initials {
+    font-size: 0.6875rem;
+  }
+  
+  .apple-photo-buttons {
+    gap: 0.5rem;
+  }
+  
+  .apple-photo-btn {
+    padding: 0.875rem 0.75rem;
+    min-height: 80px;
+  }
+  
+  .apple-checklist-card {
+    padding: 0.625rem 0.75rem;
+  }
+}
+
+/* Pantallas medianas (móviles grandes) */
+@media (min-width: 375px) and (max-width: 428px) {
+  .apple-header-card {
+    padding: 0.75rem 1rem;
+  }
+  
+  .apple-header-icon {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .apple-header-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+  
+  .apple-header-title {
+    font-size: 0.875rem;
+  }
+  
+  .apple-step-number,
+  .apple-step-number-purple {
+    width: 19px;
+    height: 19px;
+  }
+  
+  .apple-step-title {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Pantallas grandes (tablets y desktop) */
+@media (min-width: 429px) {
+  .apple-header-card {
+    padding: 0.875rem 1.25rem;
+  }
+  
+  .apple-header-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+  
+  .apple-header-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .apple-header-title {
+    font-size: 1rem;
+  }
+  
+  .apple-step-number,
+  .apple-step-number-purple {
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
+  }
+  
+  .apple-step-title {
+    font-size: 0.875rem;
+  }
+  
+  .apple-step-card,
+  .apple-step-card-purple {
+    padding: 1.125rem;
+  }
+}
+
+/* Tablets */
+@media (min-width: 768px) {
+  .apple-activities-container,
+  .apple-attendance-container {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .apple-header-title {
+    font-size: 1.0625rem;
+  }
+}
+
+/* ========================================
+   BOTÓN DE UBICACIÓN APPLE CIRCULAR
+   ======================================== */
+
+.apple-location-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.5rem 0;
+}
+
+.apple-location-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+/* Botón circular principal */
+.apple-location-btn {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Estado default - azul Apple */
+.apple-location-btn-default {
+  background: linear-gradient(180deg, #0a84ff 0%, #0071e3 100%);
+  box-shadow: 
+    0 6px 20px rgba(10, 132, 255, 0.4),
+    0 2px 6px rgba(10, 132, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.apple-location-btn-default:hover {
+  transform: scale(1.05);
+  box-shadow: 
+    0 8px 28px rgba(10, 132, 255, 0.5),
+    0 4px 10px rgba(10, 132, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.apple-location-btn-default:active {
+  transform: scale(0.95);
+  box-shadow: 
+    0 3px 12px rgba(10, 132, 255, 0.4),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estado loading */
+.apple-location-btn-loading {
+  background: linear-gradient(180deg, #5ac8fa 0%, #34aadc 100%);
+  box-shadow: 
+    0 6px 20px rgba(90, 200, 250, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  cursor: wait;
+}
+
+/* Estado success - verde Apple */
+.apple-location-btn-success {
+  background: linear-gradient(180deg, #30d158 0%, #28a745 100%);
+  box-shadow: 
+    0 6px 20px rgba(48, 209, 88, 0.4),
+    0 2px 6px rgba(48, 209, 88, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.apple-location-btn-success:hover {
+  transform: scale(1.02);
+}
+
+/* Estado disabled - gris Apple */
+.apple-location-btn-disabled {
+  background: linear-gradient(180deg, #8e8e93 0%, #636366 100%);
+  box-shadow: 
+    0 4px 12px rgba(142, 142, 147, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Icono central */
+.apple-location-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 2;
+}
+
+/* Anillo de progreso animado estilo Apple */
+.apple-location-ring {
+  position: absolute;
+  inset: -6px;
+  z-index: 1;
+  animation: apple-ring-rotate 1s linear infinite;
+}
+
+.apple-location-ring-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.apple-location-ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 4;
+}
+
+.apple-location-ring-progress {
+  fill: none;
+  stroke: white;
+  stroke-width: 4;
+  stroke-linecap: round;
+  /* Circunferencia = 2 * PI * r = 2 * 3.14159 * 45 = 282.74 */
+  /* Mostrar ~25% del arco visible */
+  stroke-dasharray: 70 213;
+  stroke-dashoffset: 0;
+  transform-origin: center;
+}
+
+@keyframes apple-ring-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pulso de éxito */
+.apple-location-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(48, 209, 88, 0.3);
+  animation: apple-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  z-index: 0;
+}
+
+@keyframes apple-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* Información de ubicación */
+.apple-location-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.apple-location-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+}
+
+.apple-location-subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: #86868b;
+}
+
+/* Coordenadas compactas */
+.apple-coordinates {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(48, 209, 88, 0.08) 0%, rgba(52, 199, 89, 0.12) 100%);
+  border: 1px solid rgba(48, 209, 88, 0.2);
+  border-radius: 100px;
+  padding: 0.375rem 0.875rem;
+  animation: apple-coords-appear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes apple-coords-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.apple-coord-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.apple-coord-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: #30d158;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.apple-coord-value {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Menlo', monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.apple-coord-divider {
+  width: 1px;
+  height: 12px;
+  background: rgba(48, 209, 88, 0.3);
+  margin: 0 0.625rem;
+}
+
+/* Responsividad del botón de ubicación */
+@media (max-width: 374px) {
+  .apple-location-btn {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .apple-location-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .apple-location-title {
+    font-size: 0.75rem;
+  }
+  
+  .apple-location-subtitle {
+    font-size: 0.625rem;
+  }
+  
+  .apple-coordinates {
+    padding: 0.25rem 0.625rem;
+  }
+  
+  .apple-coord-value {
+    font-size: 0.625rem;
+  }
+}
+
+@media (min-width: 429px) {
+  .apple-location-btn {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .apple-location-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .apple-location-title {
+    font-size: 0.875rem;
+  }
+  
+  .apple-location-subtitle {
+    font-size: 0.75rem;
+  }
 }
 </style>

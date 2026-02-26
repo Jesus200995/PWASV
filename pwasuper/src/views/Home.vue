@@ -324,35 +324,53 @@
         </div>
 
         <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
-        <div v-if="modoAsistencia" class="mt-6 border-t border-gray-200 pt-6">
-          <div class="text-center mb-4">
-            <h2 class="text-sm font-bold text-gray-800 mb-2 title-case"
-                :class="tipoAsistencia === 'entrada' ? 'entrada-title' : 'salida-title'">
-              {{ tipoAsistencia === 'entrada' ? 'REGISTRO DE INICIO' : 'REGISTRO DE TÉRMINO' }}
-            </h2>
+        <div v-if="modoAsistencia" class="apple-form-container mt-6 pt-6">
+          <!-- Header estilo Apple -->
+          <div class="apple-header-card mb-5" :class="tipoAsistencia === 'entrada' ? 'apple-header-entrada' : 'apple-header-salida'">
+            <div class="flex items-center justify-center">
+              <div class="apple-header-icon mr-3">
+                <svg v-if="tipoAsistencia === 'entrada'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <h2 class="apple-header-title">
+                {{ tipoAsistencia === 'entrada' ? 'Registro de Inicio' : 'Registro de Término' }}
+              </h2>
+            </div>
           </div>
           
-          <!-- Info del usuario -->
-          <div class="bg-primary/10 rounded-lg p-2 mb-6">
+          <!-- Info del usuario estilo Apple -->
+          <div class="apple-user-card mb-5">
             <div class="flex items-center">
-              <div class="relative w-8 h-8 rounded-full border-2 border-green-600 flex items-center justify-center mr-2">
-                <!-- Iniciales -->
-                <span class="text-green-600 text-xs font-semibold">{{ getUserInitials }}</span>
+              <div class="apple-avatar" :class="tipoAsistencia === 'entrada' ? 'apple-avatar-blue' : 'apple-avatar-red'">
+                <span class="apple-avatar-initials">{{ getUserInitials }}</span>
               </div>
-              <div>
-                <p class="font-medium text-primary text-xs">{{ user.nombre_completo }}</p>
-                <p class="text-xs text-gray-500">{{ user.cargo }}</p>
+              <div class="ml-3 flex-1">
+                <p class="apple-user-name">{{ user.nombre_completo }}</p>
+                <p class="apple-user-role">{{ user.cargo }}</p>
+              </div>
+              <div class="apple-status-badge" :class="tipoAsistencia === 'entrada' ? 'apple-badge-blue' : 'apple-badge-red'">
+                {{ tipoAsistencia === 'entrada' ? 'Entrada' : 'Salida' }}
               </div>
             </div>
           </div>
 
           <!-- Paso 1: Ubicación -->
-          <div class="mb-4">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-base font-semibold text-gray-800">1. Ubicación</h3>
-              <span v-if="latitud && longitud" 
-                :class="tipoAsistencia === 'entrada' ? 'text-blue-600' : 'text-green-600'"
-                class="text-xs">✓ Completado</span>
+          <div class="apple-step-card mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="apple-step-number">1</div>
+                <h3 class="apple-step-title">Ubicación</h3>
+              </div>
+              <div v-if="latitud && longitud" class="apple-completed-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Listo
+              </div>
             </div>
             
             <!-- Botón de ubicación empresarial moderno -->
@@ -435,53 +453,75 @@
           </div>
 
           <!-- Paso 2: Imagen -->
-          <div class="mb-4">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-base font-semibold text-gray-800">2. Imagen (Tomar o Seleccionar)</h3>
-              <span v-if="foto" 
-                :class="tipoAsistencia === 'entrada' ? 'text-blue-600' : 'text-green-600'"
-                class="text-xs">✓ Completado</span>
+          <div class="apple-step-card mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="apple-step-number">2</div>
+                <h3 class="apple-step-title">Imagen</h3>
+              </div>
+              <div v-if="foto" class="apple-completed-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Listo
+              </div>
             </div>
             
             <!-- Vista previa de la foto -->
             <div v-if="foto" class="mb-3">
-              <div class="w-full h-32 bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+              <div class="apple-image-preview">
                 <img :src="foto" class="w-full h-full object-cover" />
+                <div class="apple-image-overlay">
+                  <button
+                    @click="eliminarFoto"
+                    class="apple-delete-image-btn"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span class="ml-1.5">Eliminar</span>
+                  </button>
+                </div>
               </div>
-              <button
-                @click="eliminarFoto"
-                class="mt-2 text-xs text-red-600 hover:text-red-800 flex items-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Eliminar imagen
-              </button>
             </div>
             
             <!-- Botones para capturar foto -->
-            <div v-if="!foto" class="space-y-2.5">
+            <div v-if="!foto" class="apple-photo-buttons">
               <!-- Botón para tomar foto con cámara -->
               <button
                 @click="tomarFotoConCamara"
-                class="photo-button-glass photo-button-pink w-full flex items-center justify-center px-4 py-2.5 text-white rounded-full transition-all duration-300"
+                class="apple-photo-btn apple-photo-btn-camera"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span class="font-semibold text-sm">Cámara</span>
+                <div class="apple-photo-btn-content">
+                  <div class="apple-photo-btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div class="apple-photo-btn-info">
+                    <span class="apple-photo-btn-title">Cámara</span>
+                    <span class="apple-photo-btn-subtitle">Tomar foto ahora</span>
+                  </div>
+                </div>
               </button>
               
               <!-- Botón para seleccionar de galería -->
               <button
                 @click="seleccionarDeGaleria"
-                class="photo-button-glass photo-button-gallery w-full flex items-center justify-center px-4 py-2.5 text-white rounded-full transition-all duration-300"
+                class="apple-photo-btn apple-photo-btn-gallery"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span class="font-semibold text-sm">Galería</span>
+                <div class="apple-photo-btn-content">
+                  <div class="apple-photo-btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div class="apple-photo-btn-info">
+                    <span class="apple-photo-btn-title">Galería</span>
+                    <span class="apple-photo-btn-subtitle">Seleccionar imagen</span>
+                  </div>
+                </div>
               </button>
             </div>
             
@@ -504,58 +544,111 @@
           </div>
 
           <!-- Paso 3: Descripción -->
-          <div class="mb-4">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-base font-semibold text-gray-800">3. Descripción/Notas</h3>
-              <span v-if="descripcion.trim()" 
-                :class="tipoAsistencia === 'entrada' ? 'text-blue-600' : 'text-green-600'"
-                class="text-xs">✓ Completado</span>
+          <div class="apple-step-card mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="apple-step-number">3</div>
+                <h3 class="apple-step-title">Descripción</h3>
+              </div>
+              <div v-if="descripcion.trim()" class="apple-completed-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Listo
+              </div>
             </div>
             
             <textarea
               v-model="descripcion"
               rows="2"
-              class="glass-input w-full text-xs"
+              class="apple-textarea"
               :placeholder="'Describe el lugar donde ' + (tipoAsistencia === 'entrada' ? 'inicias' : 'terminas') + ' tu jornada...'"
             ></textarea>
           </div>
 
-          <!-- Botones de acción -->
-          <div class="flex gap-2">
+          <!-- Botones de acción estilo Apple -->
+          <div class="apple-action-buttons">
             <button
               @click="cancelarAsistencia"
-              class="glass-button-secondary flex-1 text-xs py-2"
+              class="apple-btn-cancel"
             >
-              Cancelar
+              <span>Cancelar</span>
             </button>
             
             <button
               @click="confirmarAsistencia"
               :disabled="!puedeEnviarAsistencia || enviandoAsistencia"
-              class="flex-1 relative text-xs py-2"
+              class="apple-btn-submit"
               :class="[
-                'glass-button',
-                tipoAsistencia === 'entrada' ? 'glass-button-entrada' : 'glass-button-salida',
-                {'opacity-50 cursor-not-allowed': !puedeEnviarAsistencia || enviandoAsistencia}
+                tipoAsistencia === 'entrada' ? 'apple-btn-entrada' : 'apple-btn-salida',
+                {'apple-btn-disabled': !puedeEnviarAsistencia || enviandoAsistencia}
               ]"
             >
-              <div v-if="enviandoAsistencia" class="absolute inset-0 bg-white bg-opacity-20 flex items-center justify-center rounded">
-                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+              <div v-if="enviandoAsistencia" class="apple-spinner">
+                <div class="apple-spinner-ring"></div>
               </div>
-              <span>{{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}</span>
+              <template v-else>
+                <svg v-if="tipoAsistencia === 'entrada'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>{{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}</span>
+              </template>
             </button>
           </div>
 
-          <!-- Advertencia si faltan datos -->
-          <div v-if="!puedeEnviarAsistencia" class="mt-4 p-2.5 bg-gradient-to-r from-slate-50 to-slate-100 border border-slate-300 rounded-2xl backdrop-blur-md shadow-sm">
-            <div class="flex items-center justify-center text-slate-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-xs font-medium tracking-wide">
-                Completa: 
-                <span class="font-semibold">{{ !latitud || !longitud ? 'Ubicación' : '' }}{{ (!latitud || !longitud) && !foto ? ', ' : '' }}{{ !foto ? 'Foto' : '' }}{{ ((!latitud || !longitud) || !foto) && !descripcion.trim() ? ', ' : '' }}{{ !descripcion.trim() ? 'Descripción' : '' }}</span>
-              </span>
+          <!-- Checklist estilo Apple -->
+          <div v-if="!puedeEnviarAsistencia" class="apple-checklist-card mt-4">
+            <div class="apple-checklist-header">
+              <div class="apple-checklist-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <span class="apple-checklist-title">Completa los pasos</span>
+            </div>
+            <div class="apple-checklist-items">
+              <!-- Ubicación -->
+              <div :class="['apple-checklist-item', latitud && longitud ? 'apple-checklist-done' : 'apple-checklist-pending']">
+                <div :class="['apple-checklist-check', latitud && longitud ? 'apple-check-done' : 'apple-check-pending']">
+                  <svg v-if="latitud && longitud" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span>Ubicación</span>
+              </div>
+              <!-- Imagen -->
+              <div :class="['apple-checklist-item', foto ? 'apple-checklist-done' : 'apple-checklist-pending']">
+                <div :class="['apple-checklist-check', foto ? 'apple-check-done' : 'apple-check-pending']">
+                  <svg v-if="foto" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span>Imagen</span>
+              </div>
+              <!-- Descripción -->
+              <div :class="['apple-checklist-item', descripcion.trim() ? 'apple-checklist-done' : 'apple-checklist-pending']">
+                <div :class="['apple-checklist-check', descripcion.trim() ? 'apple-check-done' : 'apple-check-pending']">
+                  <svg v-if="descripcion.trim()" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span>Descripción</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Indicador de listo estilo Apple -->
+          <div v-if="puedeEnviarAsistencia && !enviandoAsistencia" class="apple-ready-card mt-4">
+            <div class="apple-ready-content">
+              <div class="apple-ready-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span class="apple-ready-text">¡Listo para registrar!</span>
             </div>
           </div>
         </div>
@@ -1016,6 +1109,76 @@
             :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"
             :placeholder="entradaMarcada && !salidaMarcada ? 'Describe el lugar o añade notas...' : !entradaMarcada ? 'Marca entrada primero...' : 'Función bloqueada...'"
           ></textarea>
+        </div>
+
+        <!-- Indicador de progreso visual tipo Apple -->
+        <div v-if="entradaMarcada && !salidaMarcada && (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()))" 
+             class="mb-4 p-3 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100 shadow-sm">
+          <div class="flex items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-xs font-semibold text-gray-700">Completa estos pasos</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <!-- Ubicación -->
+            <div :class="['flex items-center px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-300', 
+                          latitudRegistro && longitudRegistro ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200']">
+              <div :class="['w-4 h-4 rounded-full flex items-center justify-center mr-2 transition-all duration-300',
+                            latitudRegistro && longitudRegistro ? 'bg-green-500' : 'bg-gray-300']">
+                <svg v-if="latitudRegistro && longitudRegistro" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Ubicación</span>
+            </div>
+            <!-- Imagen -->
+            <div :class="['flex items-center px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-300', 
+                          fotoRegistro ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200']">
+              <div :class="['w-4 h-4 rounded-full flex items-center justify-center mr-2 transition-all duration-300',
+                            fotoRegistro ? 'bg-green-500' : 'bg-gray-300']">
+                <svg v-if="fotoRegistro" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Imagen</span>
+            </div>
+            <!-- Modalidad -->
+            <div :class="['flex items-center px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-300', 
+                          tipoActividad ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200']">
+              <div :class="['w-4 h-4 rounded-full flex items-center justify-center mr-2 transition-all duration-300',
+                            tipoActividad ? 'bg-green-500' : 'bg-gray-300']">
+                <svg v-if="tipoActividad" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Modalidad</span>
+            </div>
+            <!-- Categoría -->
+            <div :class="['flex items-center px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-300', 
+                          categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim()) ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200']">
+              <div :class="['w-4 h-4 rounded-full flex items-center justify-center mr-2 transition-all duration-300',
+                            categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim()) ? 'bg-green-500' : 'bg-gray-300']">
+                <svg v-if="categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim())" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Categoría</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicador de listo para enviar -->
+        <div v-if="entradaMarcada && !salidaMarcada && latitudRegistro && longitudRegistro && fotoRegistro && tipoActividad && categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim())" 
+             class="mb-4 p-3 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 shadow-sm">
+          <div class="flex items-center justify-center">
+            <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-2 animate-bounce">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span class="text-sm font-semibold text-green-700">Todo listo para enviar</span>
+          </div>
         </div>
 
         <!-- Botón enviar -->
@@ -1967,22 +2130,19 @@ async function enviarRegistro() {
     return;
   }
 
+  // Validación silenciosa - el indicador visual ya muestra qué falta
+  // El botón está deshabilitado así que esto es solo una protección adicional
   if (!latitudRegistro.value || !longitudRegistro.value || !archivoFotoRegistro.value || !tipoActividad.value) {
-    error.value = "Falta información: necesitas ubicación, foto y tipo de actividad";
     return;
   }
 
-  // Validar categoría de actividad
+  // Validar categoría de actividad - protección silenciosa
   if (!categoriaActividad.value) {
-    error.value = "❌ Debes seleccionar una categoría de actividad.";
-    setTimeout(() => error.value = null, 5000);
     return;
   }
 
-  // Validar campo "Otro" si está seleccionado
+  // Validar campo "Otro" si está seleccionado - protección silenciosa
   if (categoriaActividad.value === 'Otro' && !categoriaActividadOtro.value.trim()) {
-    error.value = "❌ Debes especificar el tipo de actividad cuando seleccionas 'Otro'.";
-    setTimeout(() => error.value = null, 5000);
     return;
   }
 
@@ -3479,35 +3639,50 @@ watch([entradaMarcada, salidaMarcada], () => {
   left: 100%;
 }
 
+/* ===== BOTONES ESTILO APPLE ===== */
+
+/* Botón secundario (Cancelar) - Estilo Apple */
 .glass-button-secondary {
   padding: 0.875rem 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(156, 163, 175, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(156, 163, 175, 0.6) 0%, 
-    rgba(107, 114, 128, 0.6) 100%);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  color: white;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(180deg, 
+    #f5f5f7 0%, 
+    #e8e8ed 100%);
+  color: #1d1d1f;
   font-weight: 600;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  letter-spacing: -0.01em;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 4px 20px 0 rgba(156, 163, 175, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .glass-button-secondary:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: scale(1.02);
+  background: linear-gradient(180deg, 
+    #ffffff 0%, 
+    #f0f0f5 100%);
   box-shadow: 
-    0 8px 30px 0 rgba(156, 163, 175, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.glass-button-secondary:active:not(:disabled) {
+  transform: scale(0.98);
+  background: linear-gradient(180deg, 
+    #e8e8ed 0%, 
+    #d4d4d9 100%);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .glass-button-action {
@@ -3528,46 +3703,48 @@ watch([entradaMarcada, salidaMarcada], () => {
     inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Estilos específicos para botones de entrada (azul) */
+/* Botón Entrada (Azul) - Estilo Apple */
 .glass-button-entrada {
   padding: 0.875rem 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(30, 144, 255, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(30, 144, 255, 0.8) 0%, 
-    rgba(25, 118, 210, 0.8) 100%);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(180deg, 
+    #0a84ff 0%, 
+    #0071e3 100%);
   color: white;
   font-weight: 600;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  letter-spacing: -0.01em;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 4px 20px 0 rgba(30, 144, 255, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    0 4px 16px rgba(10, 132, 255, 0.4),
+    0 2px 4px rgba(0, 112, 227, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .glass-button-entrada:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: scale(1.02) translateY(-1px);
+  background: linear-gradient(180deg, 
+    #3399ff 0%, 
+    #0a84ff 100%);
   box-shadow: 
-    0 8px 30px 0 rgba(30, 144, 255, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(30, 144, 255, 0.9) 0%, 
-    rgba(25, 118, 210, 0.9) 100%);
+    0 8px 24px rgba(10, 132, 255, 0.5),
+    0 4px 8px rgba(0, 112, 227, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .glass-button-entrada:active:not(:disabled) {
-  transform: translateY(0px);
+  transform: scale(0.98);
+  background: linear-gradient(180deg, 
+    #0071e3 0%, 
+    #005bb5 100%);
   box-shadow: 
-    0 4px 15px 0 rgba(30, 144, 255, 0.3),
-    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    0 2px 8px rgba(10, 132, 255, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .glass-button-entrada::before {
@@ -3578,58 +3755,85 @@ watch([entradaMarcada, salidaMarcada], () => {
   width: 100%;
   height: 100%;
   background: linear-gradient(
-    90deg,
+    120deg,
     transparent,
-    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.3),
     transparent
   );
-  transition: left 0.5s;
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-button-entrada:hover::before {
   left: 100%;
 }
 
-/* Estilos específicos para botones de salida (rojo) */
+/* Estados deshabilitados estilo Apple - todos los botones */
+.glass-button-entrada:disabled,
+.glass-button-salida:disabled,
+.glass-button-registro:disabled,
+.glass-button-secondary:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  filter: saturate(0.8);
+}
+
+.glass-button-entrada:disabled::before,
+.glass-button-salida:disabled::before,
+.glass-button-registro:disabled::before {
+  display: none;
+}
+
+.glass-button-entrada:disabled:hover,
+.glass-button-salida:disabled:hover,
+.glass-button-registro:disabled:hover,
+.glass-button-secondary:disabled:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+}
+
+/* Botón Salida (Rojo) - Estilo Apple */
 .glass-button-salida {
   padding: 0.875rem 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(220, 20, 60, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(220, 20, 60, 0.8) 0%, 
-    rgba(183, 28, 28, 0.8) 100%);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(180deg, 
+    #ff453a 0%, 
+    #d70015 100%);
   color: white;
   font-weight: 600;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  letter-spacing: -0.01em;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 4px 20px 0 rgba(220, 20, 60, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    0 4px 16px rgba(255, 69, 58, 0.4),
+    0 2px 4px rgba(215, 0, 21, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .glass-button-salida:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: scale(1.02) translateY(-1px);
+  background: linear-gradient(180deg, 
+    #ff6961 0%, 
+    #ff453a 100%);
   box-shadow: 
-    0 8px 30px 0 rgba(220, 20, 60, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(220, 20, 60, 0.9) 0%, 
-    rgba(183, 28, 28, 0.9) 100%);
+    0 8px 24px rgba(255, 69, 58, 0.5),
+    0 4px 8px rgba(215, 0, 21, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .glass-button-salida:active:not(:disabled) {
-  transform: translateY(0px);
+  transform: scale(0.98);
+  background: linear-gradient(180deg, 
+    #d70015 0%, 
+    #a50000 100%);
   box-shadow: 
-    0 4px 15px 0 rgba(220, 20, 60, 0.3),
-    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    0 2px 8px rgba(255, 69, 58, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .glass-button-salida::before {
@@ -3640,58 +3844,60 @@ watch([entradaMarcada, salidaMarcada], () => {
   width: 100%;
   height: 100%;
   background: linear-gradient(
-    90deg,
+    120deg,
     transparent,
-    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.3),
     transparent
   );
-  transition: left 0.5s;
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-button-salida:hover::before {
   left: 100%;
 }
 
-/* Estilos específicos para botones de registro (morado) */
+/* Botón Registro (Morado) - Estilo Apple */
 .glass-button-registro {
   padding: 0.875rem 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(128, 0, 128, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(128, 0, 128, 0.8) 0%, 
-    rgba(102, 16, 242, 0.8) 100%);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(180deg, 
+    #bf5af2 0%, 
+    #9d4edd 100%);
   color: white;
   font-weight: 600;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  letter-spacing: -0.01em;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
   box-shadow: 
-    0 4px 20px 0 rgba(128, 0, 128, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    0 4px 16px rgba(191, 90, 242, 0.4),
+    0 2px 4px rgba(157, 78, 221, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .glass-button-registro:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: scale(1.02) translateY(-1px);
+  background: linear-gradient(180deg, 
+    #d17df5 0%, 
+    #bf5af2 100%);
   box-shadow: 
-    0 8px 30px 0 rgba(128, 0, 128, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(128, 0, 128, 0.9) 0%, 
-    rgba(102, 16, 242, 0.9) 100%);
+    0 8px 24px rgba(191, 90, 242, 0.5),
+    0 4px 8px rgba(157, 78, 221, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .glass-button-registro:active:not(:disabled) {
-  transform: translateY(0px);
+  transform: scale(0.98);
+  background: linear-gradient(180deg, 
+    #9d4edd 0%, 
+    #7b2cbf 100%);
   box-shadow: 
-    0 4px 15px 0 rgba(128, 0, 128, 0.3),
-    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    0 2px 8px rgba(191, 90, 242, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .glass-button-registro::before {
@@ -3702,12 +3908,12 @@ watch([entradaMarcada, salidaMarcada], () => {
   width: 100%;
   height: 100%;
   background: linear-gradient(
-    90deg,
+    120deg,
     transparent,
-    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.3),
     transparent
   );
-  transition: left 0.5s;
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-button-registro:hover::before {
@@ -4064,53 +4270,62 @@ watch([entradaMarcada, salidaMarcada], () => {
   margin-bottom: 1rem;
 }
 
-/* Botón principal con gradiente corporativo */
+/* Botón principal con gradiente corporativo - Estilo Apple */
 .location-button-corporate {
-  background: linear-gradient(135deg, 
-    #1e40af 0%,      /* Azul corporativo profundo */
-    #1e3a8a 50%,     /* Azul oscuro */
-    #1e293b 100%     /* Slate oscuro */
+  background: linear-gradient(180deg, 
+    #0a84ff 0%,
+    #0071e3 100%
   );
-  border: 2px solid rgba(59, 130, 246, 0.3);
+  border: none;
   position: relative;
   overflow: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  letter-spacing: -0.01em;
   box-shadow: 
-    0 10px 25px -5px rgba(0, 0, 0, 0.2),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    0 4px 16px rgba(10, 132, 255, 0.4),
+    0 2px 4px rgba(0, 112, 227, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .location-button-corporate:hover:not(:disabled) {
-  background: linear-gradient(135deg, 
-    #2563eb 0%,
-    #1d4ed8 50%,
-    #1e40af 100%
+  transform: scale(1.02) translateY(-2px);
+  background: linear-gradient(180deg, 
+    #3399ff 0%,
+    #0a84ff 100%
   );
   box-shadow: 
-    0 20px 35px -10px rgba(37, 99, 235, 0.4),
-    0 10px 15px -8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
-  border-color: rgba(96, 165, 250, 0.5);
+    0 10px 28px rgba(10, 132, 255, 0.5),
+    0 4px 8px rgba(0, 112, 227, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
-/* Efecto de brillo superior */
+.location-button-corporate:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 
+    0 2px 8px rgba(10, 132, 255, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Efecto de brillo superior - Apple shine effect */
 .location-button-shine {
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
+  left: -150%;
+  width: 150%;
   height: 100%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(255, 255, 255, 0.2), 
-    transparent
+  background: linear-gradient(120deg, 
+    transparent 0%,
+    transparent 40%, 
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 60%,
+    transparent 100%
   );
-  transition: left 0.5s ease;
+  transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .location-button-corporate:hover .location-button-shine {
-  left: 100%;
+  left: 150%;
 }
 
 /* Icono wrapper con círculo de fondo */
@@ -4129,31 +4344,37 @@ watch([entradaMarcada, salidaMarcada], () => {
   transform: scale(1.1);
 }
 
-/* Wrapper para estado exitoso */
+/* Wrapper para estado exitoso - Apple checkmark animation */
 .location-icon-wrapper-success {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
-  background: transparent;
+  border-radius: 50%;
+  background: rgba(48, 209, 88, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #10ff00;
-  filter: drop-shadow(0 0 6px rgba(16, 255, 0, 0.5));
-  animation: success-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  color: #30d158;
+  animation: apple-success-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Animación de aparición del icono de éxito */
-@keyframes success-pop {
+.location-icon-wrapper-success svg {
+  filter: drop-shadow(0 0 8px rgba(48, 209, 88, 0.6));
+}
+
+/* Animación de aparición del icono de éxito estilo Apple */
+@keyframes apple-success-bounce {
   0% {
-    transform: scale(0) rotate(-180deg);
+    transform: scale(0);
     opacity: 0;
   }
   50% {
-    transform: scale(1.2) rotate(10deg);
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(0.95);
   }
   100% {
-    transform: scale(1) rotate(0deg);
+    transform: scale(1);
     opacity: 1;
   }
 }
@@ -4187,59 +4408,68 @@ watch([entradaMarcada, salidaMarcada], () => {
   transform: translateX(4px);
 }
 
-/* Botón en estado de éxito */
+/* Botón en estado de éxito - Estilo Apple verde */
 .location-button-success-corporate {
-  background: linear-gradient(135deg, 
-    #059669 0%,
-    #047857 50%,
-    #065f46 100%
+  background: linear-gradient(180deg, 
+    #30d158 0%,
+    #28a745 100%
   ) !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
+  border: none !important;
   box-shadow: 
-    0 10px 25px -5px rgba(5, 150, 105, 0.3),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
-    0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+    0 4px 16px rgba(48, 209, 88, 0.4),
+    0 2px 4px rgba(40, 167, 69, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .location-button-success-corporate:hover:not(:disabled) {
-  background: linear-gradient(135deg, 
-    #10b981 0%,
-    #059669 50%,
-    #047857 100%
+  transform: scale(1.02) translateY(-2px) !important;
+  background: linear-gradient(180deg, 
+    #4ade80 0%,
+    #30d158 100%
   ) !important;
   box-shadow: 
-    0 20px 35px -10px rgba(16, 185, 129, 0.4),
-    0 10px 15px -8px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
-    0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+    0 10px 28px rgba(48, 209, 88, 0.5),
+    0 4px 8px rgba(40, 167, 69, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
 }
 
-/* Botón deshabilitado */
+.location-button-success-corporate:active:not(:disabled) {
+  transform: scale(0.98) !important;
+  box-shadow: 
+    0 2px 8px rgba(48, 209, 88, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Botón deshabilitado - Estilo Apple */
 .location-button-disabled-corporate {
-  background: linear-gradient(135deg, 
-    #6b7280 0%,
-    #4b5563 50%,
-    #374151 100%
+  background: linear-gradient(180deg, 
+    #f5f5f7 0%,
+    #e8e8ed 100%
   ) !important;
-  border-color: rgba(156, 163, 175, 0.3) !important;
+  border: none !important;
   cursor: not-allowed !important;
-  opacity: 0.6 !important;
+  opacity: 0.5 !important;
+  filter: saturate(0.7);
+  color: #86868b !important;
 }
 
 .location-button-disabled-corporate:hover {
   transform: none !important;
+  box-shadow: inherit !important;
 }
 
-/* Tarjeta de coordenadas minimalista verde */
+/* Tarjeta de coordenadas estilo Apple */
 .coordinates-card-corporate {
   margin-top: 0;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 0 0 16px 16px;
+  background: linear-gradient(180deg, #30d158 0%, #28a745 100%);
+  border-radius: 0 0 14px 14px;
   padding: 0.75rem 1rem;
-  animation: slide-in-corporate 0.3s ease-out;
+  animation: slide-in-corporate 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 
+    0 4px 12px rgba(48, 209, 88, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 /* Badge de coordenadas - verde con blanco */
@@ -4905,5 +5135,591 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 .photo-button-glass:disabled::before {
   display: none;
+}
+
+/* ===== ESTILOS APPLE PARA REGISTRO DE ASISTENCIA ===== */
+
+/* Contenedor principal del formulario */
+.apple-form-container {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  animation: apple-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes apple-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header card - estilo Apple */
+.apple-header-card {
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.apple-header-entrada {
+  background: linear-gradient(135deg, #0a84ff 0%, #0066cc 100%);
+  box-shadow: 
+    0 8px 24px rgba(10, 132, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.apple-header-salida {
+  background: linear-gradient(135deg, #ff453a 0%, #cc3333 100%);
+  box-shadow: 
+    0 8px 24px rgba(255, 69, 58, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.apple-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.apple-header-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: white;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/* User card estilo Apple */
+.apple-user-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 0.875rem 1rem;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.apple-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+}
+
+.apple-avatar-blue {
+  background: linear-gradient(180deg, #e1f0ff 0%, #cce4ff 100%);
+  border: 2px solid #0a84ff;
+}
+
+.apple-avatar-red {
+  background: linear-gradient(180deg, #ffe5e5 0%, #ffcccc 100%);
+  border: 2px solid #ff453a;
+}
+
+.apple-avatar-initials {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.apple-user-name {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+}
+
+.apple-user-role {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.75rem;
+  color: #86868b;
+}
+
+.apple-status-badge {
+  padding: 0.25rem 0.625rem;
+  border-radius: 100px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.apple-badge-blue {
+  background: rgba(10, 132, 255, 0.1);
+  color: #0a84ff;
+}
+
+.apple-badge-red {
+  background: rgba(255, 69, 58, 0.1);
+  color: #ff453a;
+}
+
+/* Step cards estilo Apple */
+.apple-step-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-step-card:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.apple-step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #0a84ff 0%, #0071e3 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.625rem;
+  box-shadow: 0 2px 6px rgba(10, 132, 255, 0.3);
+}
+
+.apple-step-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+}
+
+.apple-completed-badge {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 100px;
+  background: rgba(48, 209, 88, 0.1);
+  color: #30d158;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  animation: apple-badge-pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes apple-badge-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Image preview estilo Apple */
+.apple-image-preview {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f5f5f7;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.apple-image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  display: flex;
+  justify-content: flex-end;
+}
+
+.apple-delete-image-btn {
+  display: flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  border-radius: 100px;
+  background: rgba(255, 69, 58, 0.9);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-delete-image-btn:hover {
+  background: rgba(255, 69, 58, 1);
+  transform: scale(1.05);
+}
+
+.apple-delete-image-btn:active {
+  transform: scale(0.95);
+}
+
+/* Photo buttons estilo Apple */
+.apple-photo-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.apple-photo-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 1rem;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 100px;
+}
+
+.apple-photo-btn-camera {
+  background: linear-gradient(180deg, #d6214c 0%, #a81839 100%);
+  color: white;
+  box-shadow: 
+    0 4px 14px rgba(214, 33, 76, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.apple-photo-btn-gallery {
+  background: linear-gradient(180deg, #4442a8 0%, #362f8c 100%);
+  color: white;
+  box-shadow: 
+    0 4px 14px rgba(68, 66, 168, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.apple-photo-btn:hover {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.apple-photo-btn:active {
+  transform: scale(0.98);
+}
+
+.apple-photo-btn-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.apple-photo-btn-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apple-photo-btn-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.apple-photo-btn-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.apple-photo-btn-subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.6875rem;
+  opacity: 0.85;
+}
+
+/* Textarea estilo Apple */
+.apple-textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.875rem;
+  color: #1d1d1f;
+  resize: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.apple-textarea:focus {
+  outline: none;
+  border-color: #0a84ff;
+  box-shadow: 
+    0 0 0 3px rgba(10, 132, 255, 0.15),
+    inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.apple-textarea::placeholder {
+  color: #86868b;
+}
+
+/* Action buttons estilo Apple */
+.apple-action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.apple-btn-cancel {
+  flex: 0.4;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(180deg, #f5f5f7 0%, #e8e8ed 100%);
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.apple-btn-cancel:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #f0f0f5 100%);
+  transform: scale(1.02);
+}
+
+.apple-btn-cancel:active {
+  transform: scale(0.98);
+  background: linear-gradient(180deg, #e8e8ed 0%, #d8d8de 100%);
+}
+
+.apple-btn-submit {
+  flex: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 1.25rem;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-btn-entrada {
+  background: linear-gradient(180deg, #0a84ff 0%, #0071e3 100%);
+  box-shadow: 
+    0 4px 14px rgba(10, 132, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.apple-btn-salida {
+  background: linear-gradient(180deg, #ff453a 0%, #d70015 100%);
+  box-shadow: 
+    0 4px 14px rgba(255, 69, 58, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.apple-btn-submit:hover:not(.apple-btn-disabled) {
+  transform: scale(1.02) translateY(-1px);
+}
+
+.apple-btn-submit:active:not(.apple-btn-disabled) {
+  transform: scale(0.98);
+}
+
+.apple-btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: saturate(0.8);
+}
+
+/* Spinner estilo Apple */
+.apple-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-spinner-ring {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: apple-spin 0.8s linear infinite;
+}
+
+@keyframes apple-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Checklist card estilo Apple */
+.apple-checklist-card {
+  background: linear-gradient(135deg, #fff4e6 0%, #ffe8cc 100%);
+  border: 1px solid rgba(255, 152, 0, 0.15);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.08);
+}
+
+.apple-checklist-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.apple-checklist-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ff9500 0%, #e68600 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-right: 0.625rem;
+  box-shadow: 0 2px 6px rgba(255, 149, 0, 0.35);
+}
+
+.apple-checklist-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+}
+
+.apple-checklist-items {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.apple-checklist-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.625rem;
+  border-radius: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-checklist-done {
+  background: rgba(48, 209, 88, 0.1);
+  color: #30d158;
+  border: 1px solid rgba(48, 209, 88, 0.2);
+}
+
+.apple-checklist-pending {
+  background: rgba(142, 142, 147, 0.1);
+  color: #8e8e93;
+  border: 1px solid rgba(142, 142, 147, 0.15);
+}
+
+.apple-checklist-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.375rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-check-done {
+  background: linear-gradient(180deg, #30d158 0%, #28a745 100%);
+  box-shadow: 0 2px 4px rgba(48, 209, 88, 0.3);
+}
+
+.apple-check-pending {
+  background: #c7c7cc;
+}
+
+/* Ready card estilo Apple */
+.apple-ready-card {
+  background: linear-gradient(135deg, rgba(48, 209, 88, 0.1) 0%, rgba(52, 199, 89, 0.15) 100%);
+  border: 1px solid rgba(48, 209, 88, 0.25);
+  border-radius: 14px;
+  padding: 0.875rem 1rem;
+  animation: apple-ready-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes apple-ready-pop {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.apple-ready-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-ready-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #30d158 0%, #28a745 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  animation: apple-pulse-icon 1.5s ease-in-out infinite;
+  box-shadow: 0 3px 8px rgba(48, 209, 88, 0.4);
+}
+
+@keyframes apple-pulse-icon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.apple-ready-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #30d158;
+  letter-spacing: -0.01em;
 }
 </style>

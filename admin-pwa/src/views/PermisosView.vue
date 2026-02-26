@@ -948,22 +948,41 @@
                   </div>
                 </label>
 
-                <!-- Manuales -->
-                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.manuales }">
-                  <input type="checkbox" v-model="formularioUsuario.permisos.manuales" />
-                  <div class="permiso-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                    </svg>
-                  </div>
-                  <span class="permiso-card-name">Manuales</span>
-                  <div class="permiso-toggle">
-                    <div class="toggle-track">
-                      <div class="toggle-thumb"></div>
+                <!-- Manuales (con sub-permiso integrado) -->
+                <div class="permiso-card-wrapper" :class="{ 'expanded': formularioUsuario.permisos.manuales }">
+                  <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.manuales }">
+                    <input type="checkbox" v-model="formularioUsuario.permisos.manuales" @change="onManualesChange" />
+                    <div class="permiso-card-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                      </svg>
                     </div>
+                    <span class="permiso-card-name">Manuales</span>
+                    <div class="permiso-toggle">
+                      <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                      </div>
+                    </div>
+                  </label>
+                  
+                  <!-- Sub-permiso de Manuales (dentro del mismo recuadro) -->
+                  <div v-if="formularioUsuario.permisos.manuales" class="sub-permiso-container">
+                    <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.manuales_crear }">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.manuales_crear" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14"/>
+                        <path d="M5 12h14"/>
+                      </svg>
+                      <span class="sub-permiso-text">Permitir crear nuevos</span>
+                      <div class="sub-toggle">
+                        <div class="sub-toggle-track">
+                          <div class="sub-toggle-thumb"></div>
+                        </div>
+                      </div>
+                    </label>
                   </div>
-                </label>
+                </div>
 
                 <!-- Estadísticas -->
                 <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.estadisticas }">
@@ -1177,6 +1196,7 @@ export default {
           configuracion: false,
           reportes: false,
           manuales: false,
+          manuales_crear: false,
           estadisticas: false
         }
       },
@@ -1235,6 +1255,7 @@ export default {
         configuracion: false,
         reportes: false,
         manuales: false,
+        manuales_crear: false,
         estadisticas: false
       },
       
@@ -1340,6 +1361,14 @@ export default {
       }
     },
 
+    // Handler cuando se cambia el permiso de manuales
+    onManualesChange() {
+      // Si se desactiva manuales, también desactivar los subpermisos
+      if (!this.formularioUsuario.permisos.manuales) {
+        this.formularioUsuario.permisos.manuales_crear = false
+      }
+    },
+
     // Handler cuando se cambia el checkbox de territorial
     onTerritorialChange() {
       // Si se desactiva territorial, limpiar el territorio seleccionado
@@ -1396,6 +1425,18 @@ export default {
       // Asegurar que el nuevo permiso de activar/desactivar usuarios existe
       if (permisosUsuario.usuarios_estado === undefined) {
         permisosUsuario.usuarios_estado = false
+      }
+      
+      // MIGRACIÓN: Si el usuario ya tiene manuales activo pero no tiene el sub-permiso definido,
+      // activarlo automáticamente (para usuarios que ya tenían manuales antes de esta actualización)
+      if (permisosUsuario.manuales === true && permisosUsuario.manuales_crear === undefined) {
+        permisosUsuario.manuales_crear = true
+        console.log('🔄 Migración automática: Activando manuales_crear para usuario con manuales existente')
+      }
+      
+      // Asegurar que el nuevo permiso existe en el objeto
+      if (permisosUsuario.manuales_crear === undefined) {
+        permisosUsuario.manuales_crear = false
       }
       
       this.formularioUsuario = {

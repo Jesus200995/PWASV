@@ -1130,7 +1130,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '../components/Sidebar.vue'
 import authService from '../services/authService'
@@ -1618,7 +1618,21 @@ export default {
     onMounted(() => {
       cargarManuales()
       cargarUsuarios()
+      
+      // Listener para actualizar permisos en tiempo real
+      window.addEventListener('user-session-updated', handleUserSessionUpdated)
     })
+    
+    onUnmounted(() => {
+      window.removeEventListener('user-session-updated', handleUserSessionUpdated)
+    })
+    
+    // Handler para actualizaciones de permisos en tiempo real
+    const handleUserSessionUpdated = (event) => {
+      console.log('🔄 ManualesView: Permisos actualizados en tiempo real', event.detail)
+      // Los computed properties se actualizan automáticamente al cambiar authService.user
+      authService.user = authService.getUserFromStorage()
+    }
     
     return {
       cargando,

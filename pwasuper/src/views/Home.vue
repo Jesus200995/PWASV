@@ -595,7 +595,7 @@
             </button>
           </div>
 
-          <!-- Checklist estilo Apple -->
+          <!-- Checklist estilo Apple amarillo oscuro -->
           <div v-if="!puedeEnviarAsistencia" class="apple-checklist-card mt-4">
             <div class="apple-checklist-header">
               <div class="apple-checklist-icon">
@@ -1151,11 +1151,11 @@
           ></textarea>
         </div>
 
-        <!-- Checklist de progreso estilo Apple naranja -->
+        <!-- Checklist de progreso estilo Apple amarillo oscuro -->
         <div v-if="entradaMarcada && !salidaMarcada && (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || !descripcionRegistro.trim())" 
              class="apple-checklist-card mb-4">
           <div class="flex items-center mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
             <span class="apple-checklist-title">Completa estos pasos</span>
@@ -5321,8 +5321,8 @@ watch([entradaMarcada, salidaMarcada], () => {
 .apple-step-card {
   background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
-  padding: 1rem;
+  border-radius: 12px;
+  padding: 0.5rem 0.375rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -5427,7 +5427,7 @@ watch([entradaMarcada, salidaMarcada], () => {
 .apple-photo-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .apple-photo-btn {
@@ -5435,14 +5435,14 @@ watch([entradaMarcada, salidaMarcada], () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1.25rem 1rem;
-  border-radius: 14px;
+  padding: 0.75rem 0.5rem;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  min-height: 100px;
+  min-height: 70px;
 }
 
 .apple-photo-btn-camera {
@@ -5476,7 +5476,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.375rem;
 }
 
 .apple-photo-btn-icon {
@@ -5636,13 +5636,13 @@ watch([entradaMarcada, salidaMarcada], () => {
   to { transform: rotate(360deg); }
 }
 
-/* Checklist card estilo Apple */
+/* Checklist card estilo Apple - Amarillo oscuro */
 .apple-checklist-card {
-  background: linear-gradient(135deg, #fff4e6 0%, #ffe8cc 100%);
-  border: 1px solid rgba(255, 152, 0, 0.15);
+  background: linear-gradient(135deg, #fef9e7 0%, #fcf3cf 100%);
+  border: 1px solid rgba(180, 140, 0, 0.2);
   border-radius: 14px;
   padding: 1rem;
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(180, 140, 0, 0.1);
 }
 
 .apple-checklist-header {
@@ -5655,13 +5655,13 @@ watch([entradaMarcada, salidaMarcada], () => {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: linear-gradient(180deg, #ff9500 0%, #e68600 100%);
+  background: linear-gradient(180deg, #d4a000 0%, #b8860b 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   margin-right: 0.625rem;
-  box-shadow: 0 2px 6px rgba(255, 149, 0, 0.35);
+  box-shadow: 0 2px 6px rgba(180, 134, 11, 0.35);
 }
 
 .apple-checklist-title {
@@ -5825,8 +5825,8 @@ watch([entradaMarcada, salidaMarcada], () => {
 .apple-step-card-purple {
   background: linear-gradient(180deg, #ffffff 0%, #fdfaff 100%);
   border: 1px solid rgba(147, 51, 234, 0.1);
-  border-radius: 14px;
-  padding: 1rem;
+  border-radius: 12px;
+  padding: 0.5rem 0.375rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -6072,7 +6072,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   
   .apple-step-card,
   .apple-step-card-purple {
-    padding: 0.75rem;
+    padding: 0.5rem 0.375rem;
     border-radius: 12px;
   }
   
@@ -6104,12 +6104,12 @@ watch([entradaMarcada, salidaMarcada], () => {
   }
   
   .apple-photo-buttons {
-    gap: 0.5rem;
+    gap: 0.375rem;
   }
   
   .apple-photo-btn {
-    padding: 0.875rem 0.75rem;
-    min-height: 80px;
+    padding: 0.625rem 0.375rem;
+    min-height: 60px;
   }
   
   .apple-checklist-card {
@@ -6182,7 +6182,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   
   .apple-step-card,
   .apple-step-card-purple {
-    padding: 1.125rem;
+    padding: 0.625rem 0.5rem;
   }
 }
 

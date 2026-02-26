@@ -964,6 +964,24 @@
                     </div>
                   </div>
                 </label>
+
+                <!-- Estadísticas -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.estadisticas }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.estadisticas" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="20" x2="18" y2="10"/>
+                      <line x1="12" y1="20" x2="12" y2="4"/>
+                      <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Estadísticas</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
               </div>
 
               <!-- Botones rápidos de selección -->
@@ -1158,7 +1176,8 @@ export default {
           permisos: false,
           configuracion: false,
           reportes: false,
-          manuales: false
+          manuales: false,
+          estadisticas: false
         }
       },
       
@@ -1215,7 +1234,8 @@ export default {
         permisos: false,
         configuracion: false,
         reportes: false,
-        manuales: false
+        manuales: false,
+        estadisticas: false
       },
       
       // Modal eliminar

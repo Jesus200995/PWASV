@@ -3554,7 +3554,7 @@ watch([entradaMarcada, salidaMarcada], () => {
     0 2px 8px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -1px 0 rgba(59, 130, 246, 0.05) !important;
-  padding: 1rem 0.5rem !important;
+  padding: 1rem 0.75rem !important;
   position: relative !important;
   overflow: hidden !important;
 }
@@ -3590,7 +3590,7 @@ watch([entradaMarcada, salidaMarcada], () => {
     0 2px 8px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -1px 0 rgba(239, 68, 68, 0.05) !important;
-  padding: 1rem 0.5rem !important;
+  padding: 1rem 0.75rem !important;
   position: relative !important;
   overflow: hidden !important;
 }
@@ -5244,6 +5244,17 @@ watch([entradaMarcada, salidaMarcada], () => {
   animation: apple-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Espaciado lateral para elementos hijos de asistencias */
+.apple-attendance-container > .apple-header-card,
+.apple-attendance-container > .apple-user-card,
+.apple-attendance-container > .apple-step-card,
+.apple-attendance-container > .apple-action-buttons,
+.apple-attendance-container > .apple-checklist-card,
+.apple-attendance-container > .apple-ready-card {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
 @keyframes apple-fade-in {
   from {
     opacity: 0;
@@ -5854,7 +5865,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   border: 1px solid rgba(147, 51, 234, 0.15);
   border-radius: 24px;
-  padding: 1rem 0.5rem !important;
+  padding: 1rem 0.75rem !important;
   box-shadow: 
     0 8px 32px rgba(147, 51, 234, 0.12),
     0 2px 8px rgba(0, 0, 0, 0.04),
@@ -5863,6 +5874,23 @@ watch([entradaMarcada, salidaMarcada], () => {
   animation: apple-fade-in 0.4s ease-out;
   position: relative;
   overflow: hidden;
+}
+
+/* Espaciado lateral para elementos hijos */
+.apple-activities-container > .apple-warning-card,
+.apple-activities-container > .apple-header-card,
+.apple-activities-container > .apple-user-card,
+.apple-activities-container > form {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+.apple-activities-container > form > .apple-step-card-purple,
+.apple-activities-container > form > .apple-checklist-card,
+.apple-activities-container > form > .apple-ready-card,
+.apple-activities-container > form > button {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
 }
 
 .apple-activities-container::before {

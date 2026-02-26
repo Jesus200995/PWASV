@@ -1153,7 +1153,7 @@
 
         <!-- Checklist de progreso estilo Apple amarillo oscuro -->
         <div v-if="entradaMarcada && !salidaMarcada && (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || !descripcionRegistro.trim())" 
-             class="apple-checklist-card mb-2">
+             class="apple-checklist-card mb-4">
           <div class="flex items-center mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -1211,7 +1211,7 @@
 
         <!-- Indicador de listo para enviar estilo Apple -->
         <div v-if="entradaMarcada && !salidaMarcada && latitudRegistro && longitudRegistro && fotoRegistro && tipoActividad && categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim()) && descripcionRegistro.trim()" 
-             class="apple-ready-card mb-2">
+             class="apple-ready-card mb-4">
           <div class="flex items-center justify-center">
             <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-2 animate-bounce">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -3554,7 +3554,7 @@ watch([entradaMarcada, salidaMarcada], () => {
     0 2px 8px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -1px 0 rgba(59, 130, 246, 0.05) !important;
-  padding: 1rem 0.75rem !important;
+  padding: 1rem 0.375rem !important;
   position: relative !important;
   overflow: hidden !important;
 }
@@ -3590,7 +3590,7 @@ watch([entradaMarcada, salidaMarcada], () => {
     0 2px 8px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -1px 0 rgba(239, 68, 68, 0.05) !important;
-  padding: 1rem 0.75rem !important;
+  padding: 1rem 0.375rem !important;
   position: relative !important;
   overflow: hidden !important;
 }

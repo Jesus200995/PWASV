@@ -10,136 +10,62 @@
     <div class="absolute inset-0 overflow-y-auto pt-16 sm:pt-20 pb-4">
       <div class="page-container relative z-10 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-5 min-h-full max-w-full">
     <!-- Tabs para alternar entre registros normales y asistencias -->
-    <div class="glass-card mb-2">
-      <div class="flex justify-center border-b border-white/20 mb-2 pb-3">
-        <div class="flex bg-gradient-to-r from-white/10 via-white/15 to-white/10 backdrop-blur-3xl rounded-full p-1.5 gap-1 shadow-2xl border border-white/30 relative overflow-hidden">
-          <!-- Brillo de fondo superior -->
-          <div class="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full"></div>
-          
-          <!-- Indicador de fondo animado fluido HD -->
-          <div 
-            class="absolute top-1.5 bottom-1.5 rounded-full transition-all duration-500 ease-out"
-            :style="{
-              left: tabActiva === 'asistencias' ? '6px' : '50%',
-              width: 'calc(50% - 12px)',
-              background: tabActiva === 'asistencias' 
-                ? 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(37, 99, 235) 50%, rgb(29, 78, 216) 100%)' 
-                : 'linear-gradient(135deg, rgb(139, 92, 246) 0%, rgb(124, 58, 237) 50%, rgb(109, 40, 217) 100%)',
-              boxShadow: tabActiva === 'asistencias'
-                ? 'rgba(59, 130, 246, 0.6) 0px 12px 40px, rgba(37, 99, 235, 0.4) 0px 6px 25px, rgba(59, 130, 246, 0.25) 0px 0px 30px, inset 0px 1px 2px rgba(255, 255, 255, 0.3)'
-                : 'rgba(139, 92, 246, 0.6) 0px 12px 40px, rgba(124, 58, 237, 0.4) 0px 6px 25px, rgba(139, 92, 246, 0.25) 0px 0px 30px, inset 0px 1px 2px rgba(255, 255, 255, 0.3)'
-            }"
-          ></div>
-          
-          <!-- Efecto de brillo interior -->
-          <div 
-            class="absolute top-1.5 bottom-1.5 rounded-full pointer-events-none transition-all duration-500 ease-out"
-            :style="{
-              left: tabActiva === 'asistencias' ? '6px' : '50%',
-              width: 'calc(50% - 12px)',
-              background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%)',
-            }"
-          ></div>
-          
-          <button 
-            @click="cambiarTab('asistencias')" 
-            :class="[
-              'tab-button-liquid px-12 py-2.5 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden z-10 flex items-center justify-center hover:scale-105 active:scale-95',
-              tabActiva === 'asistencias' 
-                ? 'text-white drop-shadow-lg' 
-                : 'text-gray-600 hover:text-gray-800'
-            ]"
-          >
-            <span class="relative z-20 font-bold tracking-wider">Registros</span>
-            <!-- Ripple de fondo interior -->
-            <span v-if="tabActiva === 'asistencias'" class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-transparent blur-lg z-0"></span>
-          </button>
-          <button 
-            @click="cambiarTab('registros')" 
-            :class="[
-              'tab-button-liquid px-12 py-2.5 font-semibold text-xs rounded-full transition-all duration-500 ease-out relative overflow-hidden z-10 flex items-center justify-center hover:scale-105 active:scale-95',
-              tabActiva === 'registros' 
-                ? 'text-white drop-shadow-lg' 
-                : 'text-gray-600 hover:text-gray-800'
-            ]"
-          >
-            <span class="relative z-20 font-bold tracking-wider">Actividades</span>
-            <!-- Ripple de fondo interior -->
-            <span v-if="tabActiva === 'registros'" class="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400/20 to-transparent blur-lg z-0"></span>
-          </button>
-        </div>
+    <div class="apple-header-section">
+      <!-- Segmented Control estilo Apple -->
+      <div class="apple-segmented-control">
+        <div class="apple-segment-bg" :class="tabActiva === 'asistencias' ? 'apple-segment-left' : 'apple-segment-right'"></div>
+        <button 
+          @click="cambiarTab('asistencias')" 
+          :class="['apple-segment-btn', tabActiva === 'asistencias' ? 'apple-segment-active' : '']"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="apple-segment-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Registros</span>
+        </button>
+        <button 
+          @click="cambiarTab('registros')" 
+          :class="['apple-segment-btn', tabActiva === 'registros' ? 'apple-segment-active' : '']"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="apple-segment-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>Actividades</span>
+        </button>
       </div>
 
       <!-- Tab de Registros Normales -->
-      <div v-show="tabActiva === 'registros'">
-        <!-- Título centralizado para Actividades - Diseño Mejorado -->
-        <div class="text-center mb-2 px-2">
-          <div class="inline-block">
-            <div class="flex items-center justify-center gap-2 mb-2">
-              <div class="h-1 w-8 bg-gradient-to-r from-purple-400 via-purple-500 to-transparent rounded-full"></div>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <div class="h-1 w-8 bg-gradient-to-l from-purple-400 via-purple-500 to-transparent rounded-full"></div>
-            </div>
-            <h2 class="text-lg font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent mb-1 tracking-wide">
-              Historial de Actividades
-            </h2>
-            <div class="flex items-center justify-center gap-1">
-              <div class="h-px w-6 bg-gradient-to-r from-transparent to-purple-300"></div>
-              <p v-if="userInfo" class="text-xs text-gray-600 font-medium">
-                {{ userInfo.nombre_completo }}
-              </p>
-              <div class="h-px w-6 bg-gradient-to-l from-transparent to-purple-300"></div>
-            </div>
+      <div v-show="tabActiva === 'registros'" class="apple-tab-content">
+        <div class="apple-title-row">
+          <div class="apple-title-group">
+            <h2 class="apple-section-title apple-title-purple">Actividades</h2>
+            <p class="apple-section-subtitle">Historial de trabajo registrado</p>
           </div>
-        </div>
-        
-        <div class="flex justify-end items-center mb-2">
-          <button @click="cargarRegistros" class="glass-button-refresh text-xs px-2 py-1 flex items-center gap-1">
-            <svg :class="['h-2.5 w-2.5 transition-transform duration-500', cargando ? 'animate-spin' : '']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <button @click="cargarRegistros" class="apple-refresh-btn apple-refresh-purple">
+            <svg :class="['apple-refresh-icon', cargando ? 'apple-spinning' : '']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span class="text-xs">{{ cargando ? 'Cargando...' : 'Actualizar' }}</span>
           </button>
         </div>
       </div>
 
       <!-- Tab de Asistencias -->
-      <div v-show="tabActiva === 'asistencias'">
-        <!-- Título centralizado para Asistencias - Diseño Mejorado -->
-        <div class="text-center mb-2 px-2">
-          <div class="inline-block">
-            <div class="flex items-center justify-center gap-2 mb-2">
-              <div class="h-1 w-8 bg-gradient-to-r from-blue-400 via-blue-500 to-transparent rounded-full"></div>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-              </svg>
-              <div class="h-1 w-8 bg-gradient-to-l from-blue-400 via-blue-500 to-transparent rounded-full"></div>
-            </div>
-            <h2 class="text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent mb-1 tracking-wide">
-              Historial de Registros
-            </h2>
-            <div class="flex items-center justify-center gap-1">
-              <div class="h-px w-6 bg-gradient-to-r from-transparent to-blue-300"></div>
-              <p v-if="userInfo" class="text-xs text-gray-600 font-medium">
-                {{ userInfo.nombre_completo }}
-              </p>
-              <div class="h-px w-6 bg-gradient-to-l from-transparent to-blue-300"></div>
-            </div>
+      <div v-show="tabActiva === 'asistencias'" class="apple-tab-content">
+        <div class="apple-title-row">
+          <div class="apple-title-group">
+            <h2 class="apple-section-title apple-title-blue">Registros</h2>
+            <p class="apple-section-subtitle">Entradas y salidas del día</p>
           </div>
-        </div>
-        
-        <div class="flex justify-end items-center mb-2">
-          <button @click="cargarAsistencias" class="glass-button-refresh text-xs px-2 py-1 flex items-center gap-1">
-            <svg :class="['h-2.5 w-2.5 transition-transform duration-500', cargandoAsistencias ? 'animate-spin' : '']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <button @click="cargarAsistencias" class="apple-refresh-btn apple-refresh-blue">
+            <svg :class="['apple-refresh-icon', cargandoAsistencias ? 'apple-spinning' : '']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span class="text-xs">{{ cargandoAsistencias ? 'Cargando...' : 'Actualizar' }}</span>
           </button>
         </div>
       </div>
+    </div>
 
+    <div class="glass-card mb-2">
       <div v-if="error" class="mb-3 bg-red-100 border-l-4 border-red-500 text-red-700 p-3" role="alert">
         <p class="text-xs">{{ error }}</p>
         <p class="text-xs mt-1">
@@ -168,36 +94,32 @@
               <div class="flex-1 h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
             </div>
             
-            <!-- Registros del día -->
-            <div class="space-y-1.5 pl-1">
+            <!-- Registros del día - Diseño Apple -->
+            <div class="apple-historial-registros pl-1">
               <div v-for="(registro, index) in grupo.registros" :key="`${grupo.fecha}-${index}`" 
                :class="[
-                 'relative overflow-hidden rounded-xl transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg',
-                 'backdrop-filter backdrop-blur-xl border shadow-sm',
+                 'apple-activity-card',
                  registro.tipo_actividad === 'campo' 
-                   ? 'bg-gradient-to-br from-green-50/80 via-emerald-25/40 to-green-100/60 border-green-200/60 hover:shadow-green-200/50' 
+                   ? 'apple-activity-card-campo' 
                    : registro.tipo_actividad === 'gabinete'
-                   ? 'bg-gradient-to-br from-orange-50/80 via-amber-25/40 to-orange-100/60 border-orange-200/60 hover:shadow-orange-200/50'
-                   : 'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60 hover:shadow-gray-200/50'
-               ]"
-               style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+                   ? 'apple-activity-card-gabinete'
+                   : 'apple-activity-card-default'
+               ]">
             
-            <!-- Efectos decorativos de vidrio líquido más pequeños -->
-            <div class="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-60 rounded-xl pointer-events-none"></div>
-            <div v-if="registro.tipo_actividad === 'campo'" class="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-green-400/20 to-transparent rounded-full blur-lg"></div>
-            <div v-else-if="registro.tipo_actividad === 'gabinete'" class="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-orange-400/20 to-transparent rounded-full blur-lg"></div>
+            <!-- Efecto de brillo superior Apple -->
+            <div class="apple-card-shine"></div>
             
-            <!-- Borde superior colorido más delgado -->
+            <!-- Indicador lateral de tipo -->
             <div :class="[
-              'absolute top-0 left-0 right-0 h-0.5 rounded-t-xl',
+              'apple-card-indicator',
               registro.tipo_actividad === 'campo' 
-                ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-green-600' 
+                ? 'apple-indicator-campo' 
                 : registro.tipo_actividad === 'gabinete'
-                ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600'
-                : 'bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600'
+                ? 'apple-indicator-gabinete'
+                : 'apple-indicator-default'
             ]"></div>
             
-            <div class="relative z-10 p-2.5">
+            <div class="apple-card-content">
               <div class="flex gap-2.5">
                 <!-- Imagen más pequeña -->
                 <div class="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden relative shadow-md" 
@@ -2038,5 +1960,810 @@ function verImagen(url) {
   50% {
     box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
   }
+}
+
+/* ================================================
+   ESTILOS APPLE PARA HISTORIAL - LIQUID GLASS 
+   ================================================ */
+
+/* ============================================
+   HEADER APPLE - SEGMENTED CONTROL
+   ============================================ */
+
+.apple-header-section {
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(249, 250, 251, 0.95) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 
+    0 2px 16px rgba(0, 0, 0, 0.04),
+    0 1px 4px rgba(0, 0, 0, 0.02);
+  animation: appleFadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Segmented Control estilo iOS */
+.apple-segmented-control {
+  display: flex;
+  position: relative;
+  background: rgba(118, 118, 128, 0.12);
+  border-radius: 10px;
+  padding: 2px;
+  margin-bottom: 0.75rem;
+}
+
+/* Indicador del segmento activo */
+.apple-segment-bg {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  width: calc(50% - 2px);
+  background: white;
+  border-radius: 8px;
+  box-shadow: 
+    0 3px 8px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-segment-left {
+  left: 2px;
+}
+
+.apple-segment-right {
+  left: calc(50%);
+}
+
+/* Botones del segmento */
+.apple-segment-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgba(0, 0, 0, 0.5);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transition: color 0.25s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+}
+
+.apple-segment-btn:active {
+  transform: scale(0.97);
+}
+
+.apple-segment-active {
+  color: rgba(0, 0, 0, 0.95);
+}
+
+.apple-segment-icon {
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 2.5;
+  transition: transform 0.3s ease;
+}
+
+.apple-segment-active .apple-segment-icon {
+  transform: scale(1.1);
+}
+
+/* Tab content */
+.apple-tab-content {
+  animation: appleSlideUp 0.3s ease-out;
+}
+
+@keyframes appleSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fila del título */
+.apple-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Título de sección */
+.apple-section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  margin: 0;
+}
+
+.apple-title-purple {
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.apple-title-blue {
+  background: linear-gradient(135deg, #0a84ff 0%, #2563eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Grupo de título con subtítulo */
+.apple-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+/* Subtítulo de sección */
+.apple-section-subtitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.45);
+  letter-spacing: -0.01em;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+}
+
+/* Botón de actualizar */
+.apple-refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: rgba(0, 0, 0, 0.04);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.apple-refresh-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  transform: scale(1.05);
+}
+
+.apple-refresh-btn:active {
+  transform: scale(0.95);
+}
+
+.apple-refresh-icon {
+  width: 1rem;
+  height: 1rem;
+  color: rgba(0, 0, 0, 0.5);
+  transition: all 0.25s ease;
+}
+
+.apple-refresh-btn:hover .apple-refresh-icon {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* Botón refresh azul (Registros) */
+.apple-refresh-blue {
+  background: rgba(10, 132, 255, 0.12);
+}
+
+.apple-refresh-blue .apple-refresh-icon {
+  color: #0a84ff;
+}
+
+.apple-refresh-blue:hover {
+  background: rgba(10, 132, 255, 0.2);
+}
+
+.apple-refresh-blue:hover .apple-refresh-icon {
+  color: #0066cc;
+}
+
+/* Botón refresh morado (Actividades) */
+.apple-refresh-purple {
+  background: rgba(147, 51, 234, 0.12);
+}
+
+.apple-refresh-purple .apple-refresh-icon {
+  color: #9333ea;
+}
+
+.apple-refresh-purple:hover {
+  background: rgba(147, 51, 234, 0.2);
+}
+
+.apple-refresh-purple:hover .apple-refresh-icon {
+  color: #7c3aed;
+}
+
+.apple-spinning {
+  animation: appleSpin 1s linear infinite;
+}
+
+@keyframes appleSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   FIN HEADER APPLE
+   ============================================ */
+
+/* Contenedor de registros de actividades */
+.apple-historial-registros {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Tarjeta de actividad estilo Apple */
+.apple-activity-card {
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0.9) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  animation: appleCardSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.apple-activity-card:nth-child(1) { animation-delay: 0s; }
+.apple-activity-card:nth-child(2) { animation-delay: 0.05s; }
+.apple-activity-card:nth-child(3) { animation-delay: 0.1s; }
+.apple-activity-card:nth-child(4) { animation-delay: 0.15s; }
+.apple-activity-card:nth-child(5) { animation-delay: 0.2s; }
+
+@keyframes appleCardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.apple-activity-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.apple-activity-card:active {
+  transform: scale(0.99);
+}
+
+/* Efecto de brillo superior Apple */
+.apple-card-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.5) 0%, 
+    rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  border-radius: 16px 16px 0 0;
+}
+
+/* Indicador lateral de tipo */
+.apple-card-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 16px 0 0 16px;
+}
+
+.apple-indicator-campo {
+  background: linear-gradient(180deg, #30d158 0%, #28a745 100%);
+  box-shadow: 2px 0 12px rgba(48, 209, 88, 0.3);
+}
+
+.apple-indicator-gabinete {
+  background: linear-gradient(180deg, #ff9500 0%, #ff6b00 100%);
+  box-shadow: 2px 0 12px rgba(255, 149, 0, 0.3);
+}
+
+.apple-indicator-default {
+  background: linear-gradient(180deg, #8e8e93 0%, #636366 100%);
+}
+
+/* Contenido de la tarjeta */
+.apple-card-content {
+  position: relative;
+  z-index: 10;
+  padding: 1rem;
+  padding-left: 1.25rem;
+}
+
+/* Variante Campo - Verde Apple */
+.apple-activity-card-campo {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(240, 255, 244, 0.85) 50%,
+    rgba(255, 255, 255, 0.9) 100%);
+  border-color: rgba(48, 209, 88, 0.15);
+}
+
+.apple-activity-card-campo:hover {
+  border-color: rgba(48, 209, 88, 0.3);
+  box-shadow: 
+    0 12px 40px rgba(48, 209, 88, 0.15),
+    0 4px 12px rgba(48, 209, 88, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Variante Gabinete - Naranja Apple */
+.apple-activity-card-gabinete {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 248, 240, 0.85) 50%,
+    rgba(255, 255, 255, 0.9) 100%);
+  border-color: rgba(255, 149, 0, 0.15);
+}
+
+.apple-activity-card-gabinete:hover {
+  border-color: rgba(255, 149, 0, 0.3);
+  box-shadow: 
+    0 12px 40px rgba(255, 149, 0, 0.15),
+    0 4px 12px rgba(255, 149, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Imagen de actividad estilo Apple */
+.apple-activity-image {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-activity-image:hover {
+  transform: scale(1.05);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.apple-activity-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-activity-image:hover img {
+  transform: scale(1.1);
+}
+
+/* Botón de ubicación estilo Apple */
+.apple-location-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 100px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  cursor: pointer;
+}
+
+.apple-location-btn-campo {
+  background: linear-gradient(180deg, #30d158 0%, #28a745 100%);
+  color: white;
+  box-shadow: 
+    0 4px 12px rgba(48, 209, 88, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.apple-location-btn-gabinete {
+  background: linear-gradient(180deg, #ff9500 0%, #ff6b00 100%);
+  color: white;
+  box-shadow: 
+    0 4px 12px rgba(255, 149, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.apple-location-btn:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.apple-location-btn:active {
+  transform: scale(0.98);
+}
+
+/* Badge de tipo estilo Apple */
+.apple-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.apple-type-badge-campo {
+  background: rgba(48, 209, 88, 0.12);
+  color: #1d7a34;
+}
+
+.apple-type-badge-gabinete {
+  background: rgba(255, 149, 0, 0.12);
+  color: #995a00;
+}
+
+/* Coordenadas estilo Apple */
+.apple-coords {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(142, 142, 147, 0.08);
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 0.625rem;
+  color: #636366;
+}
+
+/* ========================================
+   TARJETAS DE ASISTENCIAS ESTILO APPLE
+   ======================================== */
+
+/* Tarjeta de asistencia - Liquid Glass */
+.glass-item {
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0.9) 100%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  animation: appleCardSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.glass-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.5) 0%, 
+    rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  border-radius: 16px 16px 0 0;
+}
+
+.glass-item:hover {
+  transform: translateY(-2px) scale(1.005) !important;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Columnas de Inicio y Término mejoradas */
+.entrada-bg-light {
+  background: linear-gradient(135deg, 
+    rgba(10, 132, 255, 0.08) 0%, 
+    rgba(10, 132, 255, 0.04) 100%) !important;
+  border: 1.5px solid rgba(10, 132, 255, 0.2) !important;
+  border-radius: 14px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.entrada-bg-light:hover {
+  background: linear-gradient(135deg, 
+    rgba(10, 132, 255, 0.12) 0%, 
+    rgba(10, 132, 255, 0.06) 100%) !important;
+  border-color: rgba(10, 132, 255, 0.3) !important;
+}
+
+.salida-bg-light {
+  background: linear-gradient(135deg, 
+    rgba(255, 69, 58, 0.08) 0%, 
+    rgba(255, 69, 58, 0.04) 100%) !important;
+  border: 1.5px solid rgba(255, 69, 58, 0.2) !important;
+  border-radius: 14px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.salida-bg-light:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 69, 58, 0.12) 0%, 
+    rgba(255, 69, 58, 0.06) 100%) !important;
+  border-color: rgba(255, 69, 58, 0.3) !important;
+}
+
+/* Títulos estilo Apple */
+.entrada-text-dark {
+  color: #0a84ff !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+}
+
+.salida-text-dark {
+  color: #ff453a !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+}
+
+.entrada-text {
+  color: #0a84ff !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+}
+
+.salida-text {
+  color: #ff453a !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+}
+
+/* glass-card mejorado para tabs */
+.glass-card {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.9) 0%, 
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0.85) 100%) !important;
+  backdrop-filter: blur(25px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  padding: 1rem !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Separadores de fecha mejorados */
+.flex.items-center.gap-2.my-3 {
+  animation: appleFadeInScale 0.4s ease-out backwards;
+}
+
+@keyframes appleFadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Botón de actualizar mejorado */
+.glass-button-refresh {
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.9) 0%, 
+    rgba(245, 245, 247, 0.9) 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 100px !important;
+  padding: 0.5rem 1rem !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif !important;
+  font-weight: 600 !important;
+  color: #1d1d1f !important;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.glass-button-refresh:hover {
+  transform: translateY(-1px) scale(1.02) !important;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+/* ================================================
+   RESPONSIVIDAD APPLE
+   ================================================ */
+
+/* Móviles pequeños */
+@media (max-width: 374px) {
+  .apple-header-section {
+    padding: 0.75rem;
+    border-radius: 16px;
+  }
+  
+  .apple-segmented-control {
+    border-radius: 8px;
+  }
+  
+  .apple-segment-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .apple-segment-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  
+  .apple-section-title {
+    font-size: 1rem;
+  }
+  
+  .apple-refresh-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  
+  .apple-refresh-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  
+  .apple-activity-card {
+    border-radius: 14px;
+  }
+  
+  .apple-card-content {
+    padding: 0.75rem;
+    padding-left: 1rem;
+  }
+  
+  .apple-activity-image {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
+  
+  .apple-location-btn {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.625rem;
+  }
+  
+  .glass-item {
+    border-radius: 14px !important;
+  }
+  
+  .glass-card {
+    border-radius: 16px !important;
+    padding: 0.75rem !important;
+  }
+  
+  .entrada-bg-light,
+  .salida-bg-light {
+    border-radius: 12px !important;
+    padding: 0.5rem !important;
+  }
+  
+  .entrada-text,
+  .salida-text {
+    font-size: 0.875rem !important;
+  }
+}
+
+/* Móviles medianos */
+@media (min-width: 375px) and (max-width: 428px) {
+  .apple-activity-card {
+    border-radius: 16px;
+  }
+  
+  .apple-card-content {
+    padding: 0.875rem;
+    padding-left: 1.125rem;
+  }
+  
+  .apple-activity-image {
+    width: 52px;
+    height: 52px;
+    border-radius: 11px;
+  }
+}
+
+/* Tablets y Desktop */
+@media (min-width: 429px) {
+  .apple-activity-card {
+    border-radius: 18px;
+  }
+  
+  .apple-card-content {
+    padding: 1.125rem;
+    padding-left: 1.375rem;
+  }
+  
+  .apple-activity-image {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+  }
+  
+  .apple-location-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+  
+  .glass-item {
+    border-radius: 18px !important;
+  }
+  
+  .glass-card {
+    border-radius: 22px !important;
+    padding: 1.25rem !important;
+  }
+  
+  .entrada-bg-light,
+  .salida-bg-light {
+    border-radius: 16px !important;
+  }
+}
+
+/* Tablets grandes */
+@media (min-width: 768px) {
+  .apple-activity-card {
+    border-radius: 20px;
+  }
+  
+  .apple-historial-registros {
+    gap: 1rem;
+  }
+  
+  .glass-item {
+    border-radius: 20px !important;
+  }
+}
+
+/* Animación de scroll suave */
+.apple-historial-registros > *,
+.space-y-2 > * {
+  will-change: transform, opacity;
 }
 </style>

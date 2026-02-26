@@ -62,7 +62,7 @@
       </div>
 
       <!-- Sistema de Asistencia Integrado -->
-      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" :class="modoAsistencia ? (tipoAsistencia === 'entrada' ? 'glass-card-blue relative px-3 py-2' : 'glass-card-red relative px-3 py-2') : 'relative px-3 py-2'">
+      <div v-if="seccionActiva === 'asistencia' || modoAsistencia" :class="modoAsistencia ? (tipoAsistencia === 'entrada' ? 'glass-card-blue relative px-0 py-2' : 'glass-card-red relative px-0 py-2') : 'relative px-0 py-2'">
         <!-- Icono de regresar (solo visible en modo asistencia) -->
         <button 
           v-if="modoAsistencia"
@@ -324,9 +324,9 @@
         </div>
 
         <!-- Formulario de Asistencia (solo visible en modo asistencia) -->
-        <div v-if="modoAsistencia" class="apple-attendance-container mt-6 pt-6">
+        <div v-if="modoAsistencia" class="apple-attendance-container mt-2 pt-2">
           <!-- Header estilo Apple -->
-          <div class="apple-header-card mb-5" :class="tipoAsistencia === 'entrada' ? 'apple-header-entrada' : 'apple-header-salida'">
+          <div class="apple-header-card mb-3" :class="tipoAsistencia === 'entrada' ? 'apple-header-entrada' : 'apple-header-salida'">
             <div class="flex items-center justify-center">
               <div class="apple-header-icon mr-2">
                 <svg v-if="tipoAsistencia === 'entrada'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -343,7 +343,7 @@
           </div>
           
           <!-- Info del usuario estilo Apple -->
-          <div class="apple-user-card mb-5">
+          <div class="apple-user-card mb-3">
             <div class="flex items-center">
               <div class="apple-avatar" :class="tipoAsistencia === 'entrada' ? 'apple-avatar-blue' : 'apple-avatar-red'">
                 <span class="apple-avatar-initials">{{ getUserInitials }}</span>
@@ -359,8 +359,8 @@
           </div>
 
           <!-- Paso 1: Ubicación -->
-          <div class="apple-step-card mb-4">
-            <div class="flex items-center justify-between mb-3">
+          <div class="apple-step-card mb-2">
+            <div class="flex items-center justify-between mb-2">
               <div class="flex items-center">
                 <div class="apple-step-number">1</div>
                 <h3 class="apple-step-title">Ubicación</h3>
@@ -437,20 +437,20 @@
             <div v-if="latitud && longitud" class="apple-coordinates">
               <div class="apple-coord-item">
                 <span class="apple-coord-label">Lat</span>
-                <span class="apple-coord-value">{{ latitud }}</span>
+                <span class="apple-coord-value">{{ parseFloat(latitud).toFixed(6) }}</span>
               </div>
               <div class="apple-coord-divider"></div>
               <div class="apple-coord-item">
                 <span class="apple-coord-label">Lon</span>
-                <span class="apple-coord-value">{{ longitud }}</span>
+                <span class="apple-coord-value">{{ parseFloat(longitud).toFixed(6) }}</span>
               </div>
             </div>
           </div>
         </div>
 
           <!-- Paso 2: Imagen -->
-          <div class="apple-step-card mb-4">
-            <div class="flex items-center justify-between mb-3">
+          <div class="apple-step-card mb-2">
+            <div class="flex items-center justify-between mb-2">
               <div class="flex items-center">
                 <div class="apple-step-number">2</div>
                 <h3 class="apple-step-title">Imagen</h3>
@@ -540,8 +540,8 @@
           </div>
 
           <!-- Paso 3: Descripción -->
-          <div class="apple-step-card mb-4">
-            <div class="flex items-center justify-between mb-3">
+          <div class="apple-step-card mb-2">
+            <div class="flex items-center justify-between mb-2">
               <div class="flex items-center">
                 <div class="apple-step-number">3</div>
                 <h3 class="apple-step-title">Descripción</h3>
@@ -562,41 +562,8 @@
             ></textarea>
           </div>
 
-          <!-- Botones de acción estilo Apple -->
-          <div class="apple-action-buttons">
-            <button
-              @click="cancelarAsistencia"
-              class="apple-btn-cancel"
-            >
-              <span>Cancelar</span>
-            </button>
-            
-            <button
-              @click="confirmarAsistencia"
-              :disabled="!puedeEnviarAsistencia || enviandoAsistencia"
-              class="apple-btn-submit"
-              :class="[
-                tipoAsistencia === 'entrada' ? 'apple-btn-entrada' : 'apple-btn-salida',
-                {'apple-btn-disabled': !puedeEnviarAsistencia || enviandoAsistencia}
-              ]"
-            >
-              <div v-if="enviandoAsistencia" class="apple-spinner">
-                <div class="apple-spinner-ring"></div>
-              </div>
-              <template v-else>
-                <svg v-if="tipoAsistencia === 'entrada'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                <span>{{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}</span>
-              </template>
-            </button>
-          </div>
-
           <!-- Checklist estilo Apple amarillo oscuro -->
-          <div v-if="!puedeEnviarAsistencia" class="apple-checklist-card mt-4">
+          <div v-if="!puedeEnviarAsistencia" class="apple-checklist-card mt-2">
             <div class="apple-checklist-header">
               <div class="apple-checklist-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -637,7 +604,7 @@
           </div>
           
           <!-- Indicador de listo estilo Apple -->
-          <div v-if="puedeEnviarAsistencia && !enviandoAsistencia" class="apple-ready-card mt-4">
+          <div v-if="puedeEnviarAsistencia && !enviandoAsistencia" class="apple-ready-card mt-2">
             <div class="apple-ready-content">
               <div class="apple-ready-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -646,6 +613,39 @@
               </div>
               <span class="apple-ready-text">¡Listo para registrar!</span>
             </div>
+          </div>
+
+          <!-- Botones de acción estilo Apple -->
+          <div class="apple-action-buttons">
+            <button
+              @click="cancelarAsistencia"
+              class="apple-btn-cancel"
+            >
+              <span>Cancelar</span>
+            </button>
+            
+            <button
+              @click="confirmarAsistencia"
+              :disabled="!puedeEnviarAsistencia || enviandoAsistencia"
+              class="apple-btn-submit"
+              :class="[
+                tipoAsistencia === 'entrada' ? 'apple-btn-entrada' : 'apple-btn-salida',
+                {'apple-btn-disabled': !puedeEnviarAsistencia || enviandoAsistencia}
+              ]"
+            >
+              <div v-if="enviandoAsistencia" class="apple-spinner">
+                <div class="apple-spinner-ring"></div>
+              </div>
+              <template v-else>
+                <svg v-if="tipoAsistencia === 'entrada'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>{{ tipoAsistencia === 'entrada' ? 'Registrar Entrada' : 'Registrar Salida' }}</span>
+              </template>
+            </button>
           </div>
         </div>
       </div>
@@ -708,7 +708,7 @@
       </div>
 
       <!-- Header estilo Apple morado -->
-      <div class="apple-header-card apple-header-purple mb-5">
+      <div class="apple-header-card apple-header-purple mb-3">
         <div class="flex items-center justify-center">
           <div class="apple-header-icon mr-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -722,7 +722,7 @@
       </div>
       
       <!-- Info del usuario estilo Apple -->
-      <div class="apple-user-card mb-5">
+      <div class="apple-user-card mb-3">
         <div class="flex items-center">
           <div class="apple-avatar apple-avatar-purple">
             <span class="apple-avatar-initials">{{ getUserInitials }}</span>
@@ -739,8 +739,8 @@
 
       <form @submit.prevent="enviarRegistro" :class="{ 'opacity-50 pointer-events-none': !entradaMarcada || salidaMarcada }">
         <!-- Paso 1: Ubicación -->
-        <div class="apple-step-card-purple mb-4">
-          <div class="flex items-center justify-between mb-3">
+        <div class="apple-step-card-purple mb-2">
+          <div class="flex items-center justify-between mb-2">
             <div class="flex items-center">
               <div class="apple-step-number-purple">1</div>
               <h3 class="apple-step-title">Ubicación</h3>
@@ -810,20 +810,20 @@
             <div v-if="latitudRegistro && longitudRegistro && entradaMarcada && !salidaMarcada" class="apple-coordinates">
               <div class="apple-coord-item">
                 <span class="apple-coord-label">Lat</span>
-                <span class="apple-coord-value">{{ latitudRegistro }}</span>
+                <span class="apple-coord-value">{{ parseFloat(latitudRegistro).toFixed(6) }}</span>
               </div>
               <div class="apple-coord-divider"></div>
               <div class="apple-coord-item">
                 <span class="apple-coord-label">Lon</span>
-                <span class="apple-coord-value">{{ longitudRegistro }}</span>
+                <span class="apple-coord-value">{{ parseFloat(longitudRegistro).toFixed(6) }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Paso 2: Modalidad - Campo o Gabinete -->
-        <div class="apple-step-card-purple mb-4">
-          <div class="flex items-center justify-between mb-3">
+        <div class="apple-step-card-purple mb-2">
+          <div class="flex items-center justify-between mb-2">
             <div class="flex items-center">
               <div class="apple-step-number-purple">2</div>
               <h3 class="apple-step-title">Modalidad</h3>
@@ -946,8 +946,8 @@
         </div>
 
         <!-- Paso 3: Categoría de Actividad -->
-        <div class="apple-step-card-purple mb-4">
-          <div class="flex items-center justify-between mb-3">
+        <div class="apple-step-card-purple mb-2">
+          <div class="flex items-center justify-between mb-2">
             <div class="flex items-center">
               <div class="apple-step-number-purple">3</div>
               <h3 class="apple-step-title">Categoría</h3>
@@ -1028,8 +1028,8 @@
         </div>
 
         <!-- Paso 4: Imagen -->
-        <div class="apple-step-card-purple mb-4">
-          <div class="flex items-center justify-between mb-3">
+        <div class="apple-step-card-purple mb-2">
+          <div class="flex items-center justify-between mb-2">
             <div class="flex items-center">
               <div class="apple-step-number-purple">4</div>
               <h3 class="apple-step-title">Evidencia Fotográfica</h3>
@@ -1125,8 +1125,8 @@
         </div>
 
         <!-- Paso 5: Descripción (Obligatorio) -->
-        <div class="apple-step-card-purple mb-4">
-          <div class="flex items-center justify-between mb-3">
+        <div class="apple-step-card-purple mb-2">
+          <div class="flex items-center justify-between mb-2">
             <div class="flex items-center">
               <div class="apple-step-number-purple">5</div>
               <h3 class="apple-step-title">Descripción</h3>
@@ -1153,8 +1153,8 @@
 
         <!-- Checklist de progreso estilo Apple amarillo oscuro -->
         <div v-if="entradaMarcada && !salidaMarcada && (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || !descripcionRegistro.trim())" 
-             class="apple-checklist-card mb-4">
-          <div class="flex items-center mb-3">
+             class="apple-checklist-card mb-2">
+          <div class="flex items-center mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
@@ -1211,7 +1211,7 @@
 
         <!-- Indicador de listo para enviar estilo Apple -->
         <div v-if="entradaMarcada && !salidaMarcada && latitudRegistro && longitudRegistro && fotoRegistro && tipoActividad && categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim()) && descripcionRegistro.trim()" 
-             class="apple-ready-card mb-4">
+             class="apple-ready-card mb-2">
           <div class="flex items-center justify-center">
             <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-2 animate-bounce">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -3537,55 +3537,112 @@ watch([entradaMarcada, salidaMarcada], () => {
   left: 150%;
 }
 
-/* Efecto de vidrio azul suave para entrada */
+/* Efecto de vidrio azul suave para entrada - Liquid Glass */
 .glass-card-blue {
-  background: #ffffff !important;
-  background-color: #ffffff !important;
-  background-image: none !important;
-  border-radius: 20px !important;
-  border: 1px solid rgba(59, 130, 246, 0.35) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-  padding: 1.25rem !important;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(248, 250, 255, 0.9) 25%,
+    rgba(240, 245, 255, 0.85) 50%,
+    rgba(248, 250, 255, 0.9) 75%,
+    rgba(255, 255, 255, 0.95) 100%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(59, 130, 246, 0.15) !important;
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(59, 130, 246, 0.05) !important;
+  padding: 1rem 0.5rem !important;
   position: relative !important;
   overflow: hidden !important;
 }
 
 .glass-card-blue::before {
-  display: none !important;
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 50% !important;
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0) 100%) !important;
+  pointer-events: none !important;
+  border-radius: 24px 24px 0 0 !important;
 }
 
-/* Efecto de vidrio rojo suave para término */
+/* Efecto de vidrio rojo suave para término - Liquid Glass */
 .glass-card-red {
-  background: #ffffff !important;
-  background-color: #ffffff !important;
-  background-image: none !important;
-  border-radius: 20px !important;
-  border: 1px solid rgba(239, 68, 68, 0.35) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-  padding: 1.25rem !important;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 250, 250, 0.9) 25%,
+    rgba(255, 245, 245, 0.85) 50%,
+    rgba(255, 250, 250, 0.9) 75%,
+    rgba(255, 255, 255, 0.95) 100%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(239, 68, 68, 0.15) !important;
+  box-shadow: 
+    0 8px 32px rgba(239, 68, 68, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(239, 68, 68, 0.05) !important;
+  padding: 1rem 0.5rem !important;
   position: relative !important;
   overflow: hidden !important;
 }
 
 .glass-card-red::before {
-  display: none !important;
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 50% !important;
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0) 100%) !important;
+  pointer-events: none !important;
+  border-radius: 24px 24px 0 0 !important;
 }
 
 /* Efecto de vidrio morado para actividades */
 .glass-card-purple {
-  background: #ffffff !important;
-  background-color: #ffffff !important;
-  background-image: none !important;
-  border-radius: 20px !important;
-  border: 1px solid rgba(168, 85, 247, 0.35) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-  padding: 1.25rem !important;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(252, 250, 255, 0.9) 25%,
+    rgba(248, 245, 255, 0.85) 50%,
+    rgba(252, 250, 255, 0.9) 75%,
+    rgba(255, 255, 255, 0.95) 100%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(168, 85, 247, 0.15) !important;
+  box-shadow: 
+    0 8px 32px rgba(168, 85, 247, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(168, 85, 247, 0.05) !important;
+  padding: 1rem 0.5rem !important;
   position: relative !important;
   overflow: hidden !important;
 }
 
 .glass-card-purple::before {
-  display: none !important;
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 50% !important;
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0) 100%) !important;
+  pointer-events: none !important;
+  border-radius: 24px 24px 0 0 !important;
 }
 
 .glass-input {
@@ -4117,8 +4174,8 @@ watch([entradaMarcada, salidaMarcada], () => {
 /* Mejoras de responsividad para pantallas móviles */
 @media (max-width: 480px) {
   .page-container {
-    padding-left: 0.375rem;
-    padding-right: 0.375rem;
+    padding-left: 0.125rem;
+    padding-right: 0.125rem;
     max-width: 100%;
   }
   
@@ -4165,8 +4222,8 @@ watch([entradaMarcada, salidaMarcada], () => {
 @media (max-width: 375px) and (max-height: 667px) {
   .page-container {
     max-width: 100%;
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
+    padding-left: 0.125rem;
+    padding-right: 0.125rem;
   }
   
   .glass-card {
@@ -5200,7 +5257,7 @@ watch([entradaMarcada, salidaMarcada], () => {
 
 /* Header card - estilo Apple */
 .apple-header-card {
-  padding: 1rem 1.25rem;
+  padding: 0.625rem 0.875rem !important;
   border-radius: 16px;
   position: relative;
   overflow: hidden;
@@ -5252,7 +5309,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 14px;
-  padding: 0.875rem 1rem;
+  padding: 0.625rem 0.875rem !important;
   box-shadow: 
     0 2px 8px rgba(0, 0, 0, 0.04),
     0 1px 2px rgba(0, 0, 0, 0.02);
@@ -5322,7 +5379,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 12px;
-  padding: 0.5rem 0.375rem;
+  padding: 0.5rem 0.875rem !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -5641,7 +5698,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   background: linear-gradient(135deg, #fef9e7 0%, #fcf3cf 100%);
   border: 1px solid rgba(180, 140, 0, 0.2);
   border-radius: 14px;
-  padding: 1rem;
+  padding: 0.75rem 0.875rem !important;
   box-shadow: 0 2px 8px rgba(180, 140, 0, 0.1);
 }
 
@@ -5734,7 +5791,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   background: linear-gradient(135deg, rgba(48, 209, 88, 0.1) 0%, rgba(52, 199, 89, 0.15) 100%);
   border: 1px solid rgba(48, 209, 88, 0.25);
   border-radius: 14px;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 0.5rem;
   animation: apple-ready-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -5785,16 +5842,41 @@ watch([entradaMarcada, salidaMarcada], () => {
    ESTILOS APPLE PARA SECCIÓN ACTIVIDADES (MORADO)
    ======================================== */
 
-/* Contenedor principal actividades */
+/* Contenedor principal actividades - Liquid Glass */
 .apple-activities-container {
-  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-  border: 1px solid rgba(147, 51, 234, 0.1);
-  border-radius: 20px;
-  padding: 1.25rem;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(252, 250, 255, 0.9) 25%,
+    rgba(248, 245, 255, 0.85) 50%,
+    rgba(252, 250, 255, 0.9) 75%,
+    rgba(255, 255, 255, 0.95) 100%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(147, 51, 234, 0.15);
+  border-radius: 24px;
+  padding: 0.5rem 0 !important;
   box-shadow: 
-    0 4px 20px rgba(147, 51, 234, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 8px 32px rgba(147, 51, 234, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(147, 51, 234, 0.05);
   animation: apple-fade-in 0.4s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.apple-activities-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  border-radius: 24px 24px 0 0;
 }
 
 /* Header morado */
@@ -5826,7 +5908,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   background: linear-gradient(180deg, #ffffff 0%, #fdfaff 100%);
   border: 1px solid rgba(147, 51, 234, 0.1);
   border-radius: 12px;
-  padding: 0.5rem 0.375rem;
+  padding: 0.5rem 0.875rem !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -5859,7 +5941,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   border: 1px solid rgba(255, 149, 0, 0.3);
   border-left: 4px solid #ff9500;
   border-radius: 12px;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 0.5rem;
   animation: apple-fade-in 0.3s ease-out;
 }
 
@@ -6050,7 +6132,7 @@ watch([entradaMarcada, salidaMarcada], () => {
 /* Pantallas pequeñas (móviles) */
 @media (max-width: 374px) {
   .apple-header-card {
-    padding: 0.625rem 0.875rem;
+    padding: 0.5rem 0.75rem !important;
     border-radius: 12px;
   }
   
@@ -6072,10 +6154,10 @@ watch([entradaMarcada, salidaMarcada], () => {
   
   .apple-step-card,
   .apple-step-card-purple {
-    padding: 0.5rem 0.375rem;
+    padding: 0.5rem 0.75rem !important;
     border-radius: 12px;
   }
-  
+
   .apple-step-number,
   .apple-step-number-purple {
     width: 18px;
@@ -6083,13 +6165,13 @@ watch([entradaMarcada, salidaMarcada], () => {
     font-size: 0.625rem;
     margin-right: 0.375rem;
   }
-  
+
   .apple-step-title {
     font-size: 0.75rem;
   }
-  
+
   .apple-user-card {
-    padding: 0.625rem 0.75rem;
+    padding: 0.5rem 0.75rem !important;
     border-radius: 12px;
   }
   
@@ -6113,14 +6195,14 @@ watch([entradaMarcada, salidaMarcada], () => {
   }
   
   .apple-checklist-card {
-    padding: 0.625rem 0.75rem;
+    padding: 0.5rem 0.375rem;
   }
 }
 
 /* Pantallas medianas (móviles grandes) */
 @media (min-width: 375px) and (max-width: 428px) {
   .apple-header-card {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0.875rem !important;
   }
   
   .apple-header-icon {
@@ -6151,7 +6233,7 @@ watch([entradaMarcada, salidaMarcada], () => {
 /* Pantallas grandes (tablets y desktop) */
 @media (min-width: 429px) {
   .apple-header-card {
-    padding: 0.875rem 1.25rem;
+    padding: 0.625rem 1rem !important;
   }
   
   .apple-header-icon {
@@ -6182,7 +6264,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   
   .apple-step-card,
   .apple-step-card-purple {
-    padding: 0.625rem 0.5rem;
+    padding: 0.5rem 1rem !important;
   }
 }
 
@@ -6387,11 +6469,14 @@ watch([entradaMarcada, salidaMarcada], () => {
 .apple-coordinates {
   display: flex;
   align-items: center;
+  justify-content: center;
   background: linear-gradient(135deg, rgba(48, 209, 88, 0.08) 0%, rgba(52, 199, 89, 0.12) 100%);
   border: 1px solid rgba(48, 209, 88, 0.2);
   border-radius: 100px;
-  padding: 0.375rem 0.875rem;
+  padding: 0.25rem 0.5rem;
   animation: apple-coords-appear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 100%;
+  overflow: hidden;
 }
 
 @keyframes apple-coords-appear {
@@ -6408,30 +6493,38 @@ watch([entradaMarcada, salidaMarcada], () => {
 .apple-coord-item {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.125rem;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .apple-coord-label {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  font-size: 0.625rem;
+  font-size: 0.5rem;
   font-weight: 600;
   color: #30d158;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  flex-shrink: 0;
 }
 
 .apple-coord-value {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Menlo', monospace;
-  font-size: 0.6875rem;
+  font-size: 0.5625rem;
   font-weight: 500;
   color: #1d1d1f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
 }
 
 .apple-coord-divider {
   width: 1px;
-  height: 12px;
+  height: 10px;
   background: rgba(48, 209, 88, 0.3);
-  margin: 0 0.625rem;
+  margin: 0 0.375rem;
+  flex-shrink: 0;
 }
 
 /* Responsividad del botón de ubicación */
@@ -6455,11 +6548,27 @@ watch([entradaMarcada, salidaMarcada], () => {
   }
   
   .apple-coordinates {
-    padding: 0.25rem 0.625rem;
+    padding: 0.1875rem 0.375rem;
+  }
+  
+  .apple-coord-label {
+    font-size: 0.4375rem;
   }
   
   .apple-coord-value {
-    font-size: 0.625rem;
+    font-size: 0.5rem;
+    max-width: 60px;
+  }
+  
+  .apple-coord-divider {
+    margin: 0 0.25rem;
+    height: 8px;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 428px) {
+  .apple-coord-value {
+    max-width: 70px;
   }
 }
 
@@ -6480,6 +6589,15 @@ watch([entradaMarcada, salidaMarcada], () => {
   
   .apple-location-subtitle {
     font-size: 0.75rem;
+  }
+  
+  .apple-coord-value {
+    max-width: 100px;
+    font-size: 0.625rem;
+  }
+  
+  .apple-coord-label {
+    font-size: 0.5625rem;
   }
 }
 </style>

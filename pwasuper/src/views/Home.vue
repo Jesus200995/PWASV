@@ -5251,8 +5251,8 @@ watch([entradaMarcada, salidaMarcada], () => {
 .apple-attendance-container > .apple-action-buttons,
 .apple-attendance-container > .apple-checklist-card,
 .apple-attendance-container > .apple-ready-card {
-  margin-left: 0.25rem;
-  margin-right: 0.25rem;
+  margin-left: 0.375rem;
+  margin-right: 0.375rem;
 }
 
 @keyframes apple-fade-in {
@@ -5881,16 +5881,16 @@ watch([entradaMarcada, salidaMarcada], () => {
 .apple-activities-container > .apple-header-card,
 .apple-activities-container > .apple-user-card,
 .apple-activities-container > form {
-  margin-left: 0.25rem;
-  margin-right: 0.25rem;
+  margin-left: 0.375rem;
+  margin-right: 0.375rem;
 }
 
 .apple-activities-container > form > .apple-step-card-purple,
 .apple-activities-container > form > .apple-checklist-card,
 .apple-activities-container > form > .apple-ready-card,
 .apple-activities-container > form > button {
-  margin-left: 0.25rem;
-  margin-right: 0.25rem;
+  margin-left: 0.375rem;
+  margin-right: 0.375rem;
 }
 
 .apple-activities-container::before {

@@ -733,17 +733,18 @@ async def estadisticas_dispositivos():
         """)
         dispositivos = cursor.fetchall()
         
-        # Por rol
+        # Por cargo (puesto)
         cursor.execute("""
             SELECT 
-                rol,
-                COALESCE(dispositivo, 'desconocido') as dispositivo,
-                COUNT(*) as cantidad
+                COALESCE(cargo, 'Sin cargo') as cargo,
+                COUNT(*) as cantidad,
+                ROUND(COUNT(*) * 100.0 / NULLIF((SELECT COUNT(*) FROM usuarios), 0), 2) as porcentaje
             FROM usuarios
-            GROUP BY rol, dispositivo
-            ORDER BY rol, cantidad DESC
+            GROUP BY cargo
+            ORDER BY cantidad DESC
+            LIMIT 10
         """)
-        por_rol = cursor.fetchall()
+        por_cargo = cursor.fetchall()
         
         # Usuarios activos (último acceso en últimos 30 días)
         cursor.execute("""
@@ -779,13 +780,13 @@ async def estadisticas_dispositivos():
                 }
                 for d in dispositivos
             ],
-            "por_rol": [
+            "por_cargo": [
                 {
-                    "rol": r[0],
-                    "dispositivo": r[1],
-                    "cantidad": r[2]
+                    "cargo": c[0],
+                    "cantidad": c[1],
+                    "porcentaje": float(c[2])
                 }
-                for r in por_rol
+                for c in por_cargo
             ],
             "activos_30_dias": [
                 {

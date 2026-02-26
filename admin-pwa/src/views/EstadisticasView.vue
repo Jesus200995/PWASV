@@ -180,44 +180,52 @@
               </div>
             </div>
 
-            <!-- Gráfica de Barras por Rol -->
-            <div class="chart-card bars-chart-card animate-fade-in" style="animation-delay: 0.4s">
+            <!-- Gráfica Compacta por Cargo -->
+            <div class="chart-card cargo-chart-card animate-fade-in" style="animation-delay: 0.4s">
               <div class="chart-card-header">
-                <div class="chart-header-icon">
+                <div class="chart-header-icon cargo-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="8.5" cy="7" r="4"/>
-                    <polyline points="17 11 19 13 23 9"/>
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
                   </svg>
                 </div>
-                <h3 class="chart-card-title">Distribución por Rol</h3>
+                <h3 class="chart-card-title">Distribución por Cargo</h3>
               </div>
               <div class="chart-card-body">
-                <div class="roles-bars">
+                <div v-if="estadisticas.por_cargo && estadisticas.por_cargo.length > 0" class="cargo-compact-list">
                   <div 
-                    v-for="rol in getRolesSummary()"
-                    :key="rol.nombre"
-                    class="role-bar-group"
+                    v-for="(cargo, idx) in estadisticas.por_cargo"
+                    :key="cargo.cargo"
+                    class="cargo-compact-item"
                   >
-                    <div class="role-bar-header">
-                      <span class="role-name">{{ rol.nombre }}</span>
-                      <span class="role-total">{{ rol.total }}</span>
+                    <div class="cargo-compact-header">
+                      <div class="cargo-compact-icon" :style="{ background: getCargoGradient(idx) }">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <circle cx="12" cy="7" r="4"/>
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        </svg>
+                      </div>
+                      <div class="cargo-compact-info">
+                        <span class="cargo-compact-name">{{ capitalizar(cargo.cargo) }}</span>
+                        <span class="cargo-compact-count">{{ cargo.cantidad.toLocaleString() }} usuarios</span>
+                      </div>
+                      <span class="cargo-compact-percent" :style="{ color: getCargoColor(idx) }">{{ cargo.porcentaje }}%</span>
                     </div>
-                    <div class="role-bar-track">
+                    <div class="cargo-compact-bar-track">
                       <div 
-                        v-for="dispositivo in rol.dispositivos"
-                        :key="dispositivo.tipo"
-                        class="role-bar-segment"
+                        class="cargo-compact-bar-fill"
                         :style="{ 
-                          width: (dispositivo.cantidad / rol.total * 100) + '%',
-                          backgroundColor: getColorDispositivo(dispositivo.tipo)
+                          width: cargo.porcentaje + '%',
+                          background: getCargoGradient(idx)
                         }"
-                        :title="`${dispositivo.tipo}: ${dispositivo.cantidad}`"
                       >
-                        <span v-if="dispositivo.cantidad > 50" class="segment-value">{{ dispositivo.cantidad }}</span>
+                        <div class="cargo-bar-shine"></div>
                       </div>
                     </div>
                   </div>
+                </div>
+                <div v-else class="no-cargo-data">
+                  <p>No hay datos de cargos disponibles</p>
                 </div>
               </div>
             </div>
@@ -432,18 +440,27 @@ function getOffsetEstado(index) {
   return -offset;
 }
 
-// Obtener resumen por roles
-function getRolesSummary() {
-  if (!estadisticas.value || !estadisticas.value.por_rol) return [];
-  const roles = {};
-  estadisticas.value.por_rol.forEach(item => {
-    if (!roles[item.rol]) {
-      roles[item.rol] = { nombre: item.rol, total: 0, dispositivos: [] };
-    }
-    roles[item.rol].total += item.cantidad;
-    roles[item.rol].dispositivos.push({ tipo: item.dispositivo, cantidad: item.cantidad });
-  });
-  return Object.values(roles);
+// Colores para cargos
+function getCargoColor(index) {
+  const colores = ['#8B5CF6', '#06B6D4', '#F59E0B', '#EC4899', '#10B981', '#6366F1', '#EF4444', '#14B8A6', '#F97316', '#84CC16'];
+  return colores[index % colores.length];
+}
+
+// Gradientes para cargos
+function getCargoGradient(index) {
+  const gradientes = [
+    'linear-gradient(135deg, #8B5CF6, #7C3AED)',
+    'linear-gradient(135deg, #06B6D4, #0891B2)',
+    'linear-gradient(135deg, #F59E0B, #D97706)',
+    'linear-gradient(135deg, #EC4899, #DB2777)',
+    'linear-gradient(135deg, #10B981, #059669)',
+    'linear-gradient(135deg, #6366F1, #4F46E5)',
+    'linear-gradient(135deg, #EF4444, #DC2626)',
+    'linear-gradient(135deg, #14B8A6, #0D9488)',
+    'linear-gradient(135deg, #F97316, #EA580C)',
+    'linear-gradient(135deg, #84CC16, #65A30D)'
+  ];
+  return gradientes[index % gradientes.length];
 }
 
 // Total activos
@@ -1022,63 +1039,111 @@ onMounted(() => {
   color: #1e293b;
 }
 
-/* === BARS CHART === */
-.roles-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* === CARGO CHART COMPACT === */
+.cargo-icon {
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED) !important;
 }
 
-.role-bar-group {
+.cargo-compact-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
-.role-bar-header {
+.cargo-compact-item {
+  background: linear-gradient(135deg, #fafbfc, #f8fafc);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: all 0.3s ease;
+}
+
+.cargo-compact-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border-color: #c7d2fe;
+}
+
+.cargo-compact-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-.role-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #475569;
-  text-transform: capitalize;
-}
-
-.role-total {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.role-bar-track {
-  display: flex;
+.cargo-compact-icon {
+  width: 32px;
   height: 32px;
-  background: #f1f5f9;
   border-radius: 8px;
-  overflow: hidden;
-}
-
-.role-bar-segment {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  flex-shrink: 0;
 }
 
-.role-bar-segment:hover {
-  filter: brightness(1.1);
-}
-
-.segment-value {
-  font-size: 11px;
-  font-weight: 700;
+.cargo-compact-icon svg {
+  width: 16px;
+  height: 16px;
   color: white;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.cargo-compact-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cargo-compact-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cargo-compact-count {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.cargo-compact-percent {
+  font-size: 15px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.cargo-compact-bar-track {
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cargo-compact-bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  position: relative;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.cargo-bar-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shine 2s infinite;
+}
+
+.no-cargo-data {
+  text-align: center;
+  padding: 30px 20px;
+  color: #64748b;
 }
 
 /* === ACTIVE USERS === */

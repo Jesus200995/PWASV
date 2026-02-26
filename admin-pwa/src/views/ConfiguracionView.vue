@@ -21,324 +21,449 @@
       </header>
 
       <div class="page-content">
-        <!-- Grid de configuraciones compacto -->
-        <div class="config-grid">
-          <!-- Configuración de API -->
-          <div class="config-card">
-            <div class="card-header">
-              <div class="card-icon api-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                  <line x1="12" y1="18" x2="12" y2="12"/>
-                  <line x1="9" y1="15" x2="15" y2="15"/>
+        <!-- Sección: Configuración General -->
+        <section class="config-section">
+          <div class="section-glass-container">
+            <div class="section-header">
+              <div class="section-icon settings-section-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                 </svg>
               </div>
-              <h3>API Configuration</h3>
+              <div class="section-title">
+                <h2>Configuracion General</h2>
+                <p>Ajustes de API, aplicacion e informacion del sistema</p>
+              </div>
             </div>
             
-            <div class="form-group">
-              <label>URL del Servidor</label>
-              <input 
-                v-model="apiConfig.url" 
-                type="url" 
-                class="form-input"
-                placeholder="https://apipwa.sembrandodatos.com"
-              >
-            </div>
-            
-            <div class="form-group">
-              <label>Timeout (segundos)</label>
-              <input 
-                v-model="apiConfig.timeout" 
-                type="number" 
-                class="form-input"
-                min="5"
-                max="60"
-              >
-            </div>
-            
-            <button @click="guardarConfigAPI" class="btn btn-primary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
-              </svg>
-              Guardar
-            </button>
-          </div>
+            <div class="config-grid config-grid-3">
+              <!-- API -->
+              <div class="config-card-modern">
+                <div class="card-header-modern">
+                  <div class="card-icon-modern api-gradient">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                      <polyline points="14,2 14,8 20,8"/>
+                      <line x1="12" y1="18" x2="12" y2="12"/>
+                      <line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                  </div>
+                  <div class="card-title-modern">
+                    <h3>Conexion API</h3>
+                    <span class="card-subtitle">Servidor de datos</span>
+                  </div>
+                </div>
+                <div class="card-body-modern">
+                  <div class="form-group-modern">
+                    <label>URL del Servidor</label>
+                    <input v-model="apiConfig.url" type="url" class="form-input-modern" placeholder="https://apipwa.sembrandodatos.com">
+                  </div>
+                  <div class="form-group-modern">
+                    <label>Timeout (segundos)</label>
+                    <input v-model="apiConfig.timeout" type="number" class="form-input-modern" min="5" max="60">
+                  </div>
+                </div>
+                <div class="card-footer-modern">
+                  <button @click="guardarConfigAPI" class="btn-modern btn-modern-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Guardar
+                  </button>
+                </div>
+              </div>
 
-          <!-- Configuración de la App -->
-          <div class="config-card">
-            <div class="card-header">
-              <div class="card-icon app-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                  <line x1="8" y1="21" x2="16" y2="21"/>
-                  <line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>
+              <!-- Aplicacion -->
+              <div class="config-card-modern">
+                <div class="card-header-modern">
+                  <div class="card-icon-modern app-gradient">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                      <line x1="8" y1="21" x2="16" y2="21"/>
+                      <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                  </div>
+                  <div class="card-title-modern">
+                    <h3>Aplicacion</h3>
+                    <span class="card-subtitle">Preferencias generales</span>
+                  </div>
+                </div>
+                <div class="card-body-modern">
+                  <div class="form-group-modern">
+                    <label>Nombre</label>
+                    <input v-model="appConfig.name" type="text" class="form-input-modern" placeholder="Sembrando Vida Admin">
+                  </div>
+                  <div class="form-group-modern">
+                    <label>Registros por pagina</label>
+                    <select v-model="appConfig.recordsPerPage" class="form-select-modern">
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                    </select>
+                  </div>
+                  <div class="checkbox-group-modern">
+                    <label class="toggle-switch">
+                      <input id="autoRefresh" v-model="appConfig.autoRefresh" type="checkbox">
+                      <span class="toggle-slider"></span>
+                    </label>
+                    <label for="autoRefresh" class="toggle-label">Actualizacion automatica</label>
+                  </div>
+                </div>
+                <div class="card-footer-modern">
+                  <button @click="guardarConfigApp" class="btn-modern btn-modern-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Guardar
+                  </button>
+                </div>
               </div>
-              <h3>Aplicación</h3>
-            </div>
-            
-            <div class="form-group">
-              <label>Nombre de la App</label>
-              <input 
-                v-model="appConfig.name" 
-                type="text" 
-                class="form-input"
-                placeholder="Sembrando Vida Admin"
-              >
-            </div>
-            
-            <div class="form-group">
-              <label>Registros por página</label>
-              <select v-model="appConfig.recordsPerPage" class="form-select">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-            </div>
-            
-            <div class="checkbox-group">
-              <input 
-                id="autoRefresh"
-                v-model="appConfig.autoRefresh" 
-                type="checkbox" 
-                class="checkbox"
-              >
-              <label for="autoRefresh">Actualización automática</label>
-            </div>
-            
-            <button @click="guardarConfigApp" class="btn btn-primary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
-              </svg>
-              Guardar
-            </button>
-          </div>
 
-          <!-- Información del Sistema -->
-          <div class="config-card">
-            <div class="card-header">
-              <div class="card-icon info-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="16" x2="12" y2="12"/>
-                  <line x1="12" y1="8" x2="12.01" y2="8"/>
-                </svg>
+              <!-- Sistema -->
+              <div class="config-card-modern">
+                <div class="card-header-modern">
+                  <div class="card-icon-modern info-gradient">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="16" x2="12" y2="12"/>
+                      <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                  </div>
+                  <div class="card-title-modern">
+                    <h3>Sistema</h3>
+                    <span class="card-subtitle">Informacion del servidor</span>
+                  </div>
+                </div>
+                <div class="card-body-modern">
+                  <div class="info-grid-modern">
+                    <div class="info-row-modern">
+                      <span class="info-label-modern">Version</span>
+                      <span class="info-value-modern">v1.0.0</span>
+                    </div>
+                    <div class="info-row-modern">
+                      <span class="info-label-modern">Actualizacion</span>
+                      <span class="info-value-modern">{{ new Date().toLocaleDateString('es-ES') }}</span>
+                    </div>
+                    <div class="info-row-modern">
+                      <span class="info-label-modern">Estado</span>
+                      <span :class="['status-badge-modern', serverStatus.class]">{{ serverStatus.text }}</span>
+                    </div>
+                    <div class="info-row-modern">
+                      <span class="info-label-modern">Admin</span>
+                      <span class="info-value-modern">{{ adminUser }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-footer-modern">
+                  <button @click="verificarEstadoServidor" class="btn-modern btn-modern-secondary" :disabled="checking">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    {{ checking ? 'Verificando...' : 'Verificar' }}
+                  </button>
+                </div>
               </div>
-              <h3>Sistema</h3>
             </div>
-            
-            <div class="info-list">
-              <div class="info-item">
-                <span class="info-label">Versión</span>
-                <span class="info-value">v1.0.0</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Última actualización</span>
-                <span class="info-value">{{ new Date().toLocaleDateString('es-ES') }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Estado del servidor</span>
-                <span :class="['status-badge', serverStatus.class]">{{ serverStatus.text }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Administrador</span>
-                <span class="info-value">{{ adminUser }}</span>
-              </div>
-            </div>
-            
-            <button @click="verificarEstadoServidor" class="btn btn-secondary" :disabled="checking">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12c0 1-.19 1.96-.55 2.84l1.34.82c.24-.94.35-1.94.35-2.96 0-3.22-1.2-6.15-3.15-8.37l-1.06 1.06C19.55 7 21 9.36 21 12z"/>
-                <path d="M3 12c0-1 .19-1.96.55-2.84L2.21 8.34C1.97 9.28 1.86 10.28 1.86 12c0 3.22 1.2 6.15 3.15 8.37l1.06-1.06C4.45 17 3 14.64 3 12z"/>
-                <path d="M19 12c0-1.66-.61-3.15-1.61-4.31l-1.06 1.06C17.09 9.64 17.5 10.77 17.5 12s-.41 2.36-1.17 3.25l1.06 1.06C18.39 15.15 19 13.66 19 12z"/>
-                <path d="M5 12c0 1.66.61 3.15 1.61 4.31l1.06-1.06C6.91 14.36 6.5 13.23 6.5 12s.41-2.36 1.17-3.25L6.61 7.69C5.61 8.85 5 10.34 5 12z"/>
-                <circle cx="12" cy="12" r="2"/>
-              </svg>
-              {{ checking ? 'Verificando...' : 'Verificar' }}
-            </button>
           </div>
+        </section>
 
-          <!-- Acciones del Sistema -->
-          <div class="config-card">
-            <div class="card-header">
-              <div class="card-icon actions-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="9,11 12,14 22,4"/>
-                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                </svg>
-              </div>
-              <h3>Acciones</h3>
-            </div>
-            
-            <div class="actions-grid">
-              <button @click="exportarDatos" class="action-btn export-btn" :disabled="exporting">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7,10 12,15 17,10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                {{ exporting ? 'Exportando JSON...' : 'Exportar Datos (JSON)' }}
-              </button>
-              
-              <button @click="descargarBaseDatos" class="action-btn database-btn" :disabled="descargandoBD">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Seccion: Gestion de Datos -->
+        <section class="config-section">
+          <div class="section-glass-container">
+            <div class="section-header">
+              <div class="section-icon data-section-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <ellipse cx="12" cy="5" rx="9" ry="3"/>
                   <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
                   <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
                 </svg>
-                {{ descargandoBD ? 'Descargando...' : 'Descargar BD' }}
-              </button>
-              
-              <button @click="descargarBDRapida" class="action-btn bd-rapida-btn" :disabled="descargandoBDRapida">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14,2 14,8 20,8"></polyline>
-                  <path d="M12 18v-6"></path>
-                  <path d="M9 15h6"></path>
+              </div>
+              <div class="section-title">
+                <h2>Gestion de Datos</h2>
+                <p>Exportacion y descarga de informacion del sistema</p>
+              </div>
+            </div>
+            
+            <div class="data-actions-grid">
+              <div class="data-action-card" @click="exportarDatos" :class="{ disabled: exporting }">
+                <div class="data-action-icon blue-gradient">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </div>
+                <div class="data-action-info">
+                  <h4>{{ exporting ? 'Exportando...' : 'Exportar JSON' }}</h4>
+                  <p>Todos los datos en formato JSON</p>
+                </div>
+                <div class="data-action-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+              <div class="data-action-card" @click="descargarBaseDatos" :class="{ disabled: descargandoBD }">
+                <div class="data-action-icon purple-gradient">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                  </svg>
+                </div>
+                <div class="data-action-info">
+                  <h4>{{ descargandoBD ? 'Descargando...' : 'Base de Datos' }}</h4>
+                  <p>Descarga completa de BD</p>
+                </div>
+                <div class="data-action-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+              <div class="data-action-card" @click="descargarBDRapida" :class="{ disabled: descargandoBDRapida }">
+                <div class="data-action-icon pink-gradient">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                </div>
+                <div class="data-action-info">
+                  <h4>{{ descargandoBDRapida ? 'Descargando...' : 'BD Rapida' }}</h4>
+                  <p>Descarga optimizada</p>
+                </div>
+                <div class="data-action-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+              <div class="data-action-card" @click="descargarRegistrosCSV" :class="{ disabled: descargandoRegistrosCSV }">
+                <div class="data-action-icon orange-gradient">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                </div>
+                <div class="data-action-info">
+                  <h4>{{ descargandoRegistrosCSV ? 'Exportando...' : 'Actividades CSV' }}</h4>
+                  <p>Registros en formato CSV</p>
+                </div>
+                <div class="data-action-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+              <div class="data-action-card" @click="descargarUsuarios" :class="{ disabled: descargandoUsuarios }">
+                <div class="data-action-icon cyan-gradient">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <div class="data-action-info">
+                  <h4>{{ descargandoUsuarios ? 'Descargando...' : 'Exportar Usuarios' }}</h4>
+                  <p>Lista de usuarios registrados</p>
+                </div>
+                <div class="data-action-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Seccion: Gestion de Imagenes -->
+        <section class="config-section">
+          <div class="section-glass-container">
+            <div class="section-header">
+              <div class="section-icon images-section-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
                 </svg>
-                {{ descargandoBDRapida ? 'Descargando BD...' : '⚡ BD Completa Rápida' }}
+              </div>
+              <div class="section-title">
+                <h2>Gestion de Imagenes</h2>
+                <p>Limpieza y administracion de archivos de imagen</p>
+              </div>
+            </div>
+            
+            <div class="images-grid-two-col">
+              <div class="image-card-large" @click="confirmarEliminarImagenes" :class="{ disabled: eliminandoImagenes }">
+                <div class="image-card-header red-accent">
+                  <div class="image-card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      <line x1="10" y1="11" x2="10" y2="17"/>
+                      <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                  </div>
+                  <span class="image-card-badge destructive">Accion destructiva</span>
+                </div>
+                <div class="image-card-body">
+                  <h4>{{ eliminandoImagenes ? 'Eliminando...' : 'Eliminar Todas las Imagenes' }}</h4>
+                  <p>Elimina todas las imagenes de registros y asistencias del sistema de forma permanente</p>
+                </div>
+                <div class="image-card-footer">
+                  <span class="image-card-action">Ejecutar</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+              <div class="image-card-large" @click="abrirModalEliminarPorFecha" :class="{ disabled: eliminandoImagenesPorFecha }">
+                <div class="image-card-header orange-accent">
+                  <div class="image-card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                      <line x1="9" y1="16" x2="15" y2="16"/>
+                    </svg>
+                  </div>
+                  <span class="image-card-badge selective">Selectiva</span>
+                </div>
+                <div class="image-card-body">
+                  <h4>{{ eliminandoImagenesPorFecha ? 'Eliminando...' : 'Eliminar por Periodo' }}</h4>
+                  <p>Selecciona un mes o año especifico para eliminar imagenes de forma controlada</p>
+                </div>
+                <div class="image-card-footer">
+                  <span class="image-card-action">Configurar</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Seccion: Herramientas -->
+        <section class="config-section">
+          <div class="section-glass-container">
+            <div class="section-header">
+              <div class="section-icon tools-section-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+              </div>
+              <div class="section-title">
+                <h2>Herramientas del Sistema</h2>
+                <p>Mantenimiento y utilidades de administracion</p>
+              </div>
+            </div>
+            
+            <div class="tools-grid-modern">
+              <button class="tool-card-modern" @click="limpiarCache">
+                <div class="tool-card-icon amber-gradient">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
+                </div>
+                <span class="tool-card-label">Limpiar Cache</span>
               </button>
 
-              <button @click="descargarRegistrosCSV" class="action-btn registros-csv-btn" :disabled="descargandoRegistrosCSV">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14,2 14,8 20,8"></polyline>
-                  <line x1="12" y1="13" x2="12" y2="19"></line>
-                  <line x1="9" y1="16" x2="15" y2="16"></line>
-                </svg>
-                {{ descargandoRegistrosCSV ? 'Exportando CSV...' : '📊 Actividades CSV' }}
-              </button>
-              
-              <button @click="limpiarCache" class="action-btn cache-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 6h18"/>
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                </svg>
-                Limpiar Cache
-              </button>
-              
-              <button @click="reiniciarContadores" class="action-btn reset-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                  <path d="M21 3v5h-5"/>
-                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-                  <path d="M8 16H3v5"/>
-                </svg>
-                Reiniciar Contadores
-              </button>
-              
-              <button @click="mostrarLogs" class="action-btn logs-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10,9 9,9 8,9"/>
-                </svg>
-                Ver Logs
-              </button>
-              
-              <button @click="descargarUsuarios" class="action-btn users-btn" :disabled="descargandoUsuarios">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                {{ descargandoUsuarios ? 'Descargando...' : 'Exportar Usuarios' }}
+              <button class="tool-card-modern" @click="reiniciarContadores">
+                <div class="tool-card-icon green-gradient">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <polyline points="1 20 1 14 7 14"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                  </svg>
+                </div>
+                <span class="tool-card-label">Reiniciar Contadores</span>
               </button>
 
-              <button @click="confirmarEliminarImagenes" class="action-btn images-btn" :disabled="eliminandoImagenes">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"></path>
-                  <polyline points="17 6 17 16"></polyline>
-                  <line x1="13" y1="10" x2="7" y2="10"></line>
-                </svg>
-                {{ eliminandoImagenes ? 'Eliminando...' : 'Eliminar Imágenes' }}
+              <button class="tool-card-modern" @click="mostrarLogs">
+                <div class="tool-card-icon gray-gradient">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                  </svg>
+                </div>
+                <span class="tool-card-label">Ver Logs</span>
               </button>
 
-              <button @click="abrirModalEliminarPorFecha" class="action-btn calendar-images-btn" :disabled="eliminandoImagenesPorFecha">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                  <line x1="9" y1="16" x2="15" y2="16"></line>
-                </svg>
-                {{ eliminandoImagenesPorFecha ? 'Eliminando...' : 'Eliminar por Fecha' }}
-              </button>
-
-              <button @click="abrirModalTransferencia" class="action-btn transfer-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M16 3h5v5"></path>
-                  <line x1="21" y1="3" x2="14" y2="10"></line>
-                  <path d="M8 21H3v-5"></path>
-                  <line x1="3" y1="21" x2="10" y2="14"></line>
-                  <path d="M21 14v7h-7"></path>
-                  <path d="M3 10V3h7"></path>
-                </svg>
-                Transferir Actividades
+              <button class="tool-card-modern" @click="abrirModalTransferencia">
+                <div class="tool-card-icon teal-gradient">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="17 1 21 5 17 9"/>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                    <polyline points="7 23 3 19 7 15"/>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                  </svg>
+                </div>
+                <span class="tool-card-label">Transferir Actividades</span>
               </button>
             </div>
           </div>
+        </section>
 
-          <!-- Eliminación Masiva - BLOQUEADA -->
-          <div class="config-card danger-card danger-card-blocked">
-            <div class="card-header">
-              <div class="card-icon danger-icon danger-icon-blocked">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="15" y1="9" x2="9" y2="15"/>
-                  <line x1="9" y1="9" x2="15" y2="15"/>
+        <!-- Seccion: Zona Peligrosa (BLOQUEADA) -->
+        <section class="config-section">
+          <div class="section-glass-container danger-glass">
+            <div class="section-header">
+              <div class="section-icon danger-section-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
               </div>
-              <h3>Zona Peligrosa (Bloqueada)</h3>
-            </div>
-            
-            <div class="danger-warning danger-warning-blocked">
-              <div class="warning-content">
-                <strong>🔒 Sección Bloqueada:</strong> Esta zona está temporalmente deshabilitada por seguridad. Las funciones de eliminación masiva no están disponibles.
+              <div class="section-title">
+                <h2>Zona Peligrosa</h2>
+                <p>Acciones destructivas - Seccion bloqueada por seguridad</p>
               </div>
             </div>
             
-            <div class="danger-actions">
-              <button class="danger-btn registros-btn danger-btn-blocked" disabled>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10,9 9,9 8,9"/>
-                </svg>
-                Eliminar Registros (Bloqueado)
-              </button>
-              
-              <button class="danger-btn asistencias-btn danger-btn-blocked" disabled>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12,6 12,12 16,14"/>
-                </svg>
-                Eliminar Asistencias (Bloqueado)
-              </button>
-            </div>
-            
-            <!-- Overlay de bloqueo -->
-            <div class="blocked-overlay">
-              <div class="blocked-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <div class="danger-card-modern">
+              <div class="danger-warning-modern">
+                <svg class="danger-warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <circle cx="12" cy="16" r="1"/>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
+                <div class="danger-warning-text">
+                  <strong>Seccion Bloqueada</strong>
+                  <p>Esta zona esta temporalmente deshabilitada por seguridad. Las funciones de eliminacion masiva no estan disponibles.</p>
+                </div>
               </div>
-              <div class="blocked-text">BLOQUEADO</div>
+              
+              <div class="danger-buttons-grid">
+                <button class="danger-btn-modern" disabled>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                  <span>Eliminar Registros</span>
+                </button>
+                
+                <button class="danger-btn-modern" disabled>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12,6 12,12 16,14"/>
+                  </svg>
+                  <span>Eliminar Asistencias</span>
+                </button>
+              </div>
+              
+              <!-- Overlay de bloqueo -->
+              <div class="blocked-overlay-modern">
+                <div class="blocked-content">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <circle cx="12" cy="16" r="1"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <span>BLOQUEADO</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </main>    <!-- Modal para mensajes -->
     <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
@@ -2446,6 +2571,1164 @@ const logout = () => {
   margin-bottom: 16px;
 }
 
+.config-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .config-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .config-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === SECCIONES === */
+.config-section {
+  margin-bottom: 24px;
+}
+
+/* === GLASS CONTAINER === */
+.section-glass-container {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.section-glass-container.danger-glass {
+  background: rgba(254, 242, 242, 0.7);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.section-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+}
+
+.settings-section-icon {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.data-section-icon {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.images-section-icon {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+}
+
+.tools-section-icon {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.danger-section-icon {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.section-title h2 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.section-title p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+/* === CONFIG CARDS MODERN === */
+.config-card-modern {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.config-card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.card-header-modern {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-icon-modern {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-icon-modern svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+}
+
+.card-icon-modern.api-gradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.card-icon-modern.app-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.card-icon-modern.info-gradient {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.card-title-modern h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: #9ca3af;
+  font-family: 'Inter', sans-serif;
+}
+
+.card-body-modern {
+  padding: 16px 20px;
+}
+
+.form-group-modern {
+  margin-bottom: 14px;
+}
+
+.form-group-modern label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input-modern, .form-select-modern {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+  background: #f9fafb;
+  box-sizing: border-box;
+}
+
+.form-input-modern:focus, .form-select-modern:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.checkbox-group-modern {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e5e7eb;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-label {
+  font-size: 13px;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+.card-footer-modern {
+  padding: 0 20px 20px;
+}
+
+.btn-modern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modern svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-modern-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-modern-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-modern-secondary {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+}
+
+.btn-modern-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
+}
+
+.btn-modern:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Info Grid Modern */
+.info-grid-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row-modern {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.info-row-modern:last-child {
+  border-bottom: none;
+}
+
+.info-label-modern {
+  font-size: 12px;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+.info-value-modern {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.status-badge-modern {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge-modern.status-online {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.status-badge-modern.status-offline {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+/* === DATA ACTION CARDS === */
+.data-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .data-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.data-action-card {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.data-action-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.data-action-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.data-action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.data-action-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+}
+
+.data-action-icon.blue-gradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.data-action-icon.purple-gradient {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+}
+
+.data-action-icon.pink-gradient {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: white;
+}
+
+.data-action-icon.orange-gradient {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+}
+
+.data-action-icon.cyan-gradient {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+}
+
+.data-action-info {
+  flex: 1;
+}
+
+.data-action-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.data-action-info p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+.data-action-arrow {
+  color: #d1d5db;
+  transition: all 0.2s ease;
+}
+
+.data-action-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.data-action-card:hover .data-action-arrow {
+  color: #9ca3af;
+  transform: translateX(2px);
+}
+
+/* === IMAGE CARDS LARGE === */
+.images-grid-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .images-grid-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.image-card-large {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.image-card-large:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+.image-card-large.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.image-card-header {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.image-card-header.red-accent {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.04) 100%);
+  border-bottom: 2px solid rgba(239, 68, 68, 0.2);
+}
+
+.image-card-header.orange-accent {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(234, 88, 12, 0.04) 100%);
+  border-bottom: 2px solid rgba(249, 115, 22, 0.2);
+}
+
+.image-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-card-header.red-accent .image-card-icon {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.image-card-header.orange-accent .image-card-icon {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.image-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.image-card-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.image-card-badge.destructive {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.image-card-badge.selective {
+  background: rgba(249, 115, 22, 0.15);
+  color: #ea580c;
+}
+
+.image-card-body {
+  padding: 20px;
+}
+
+.image-card-body h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.image-card-body p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+.image-card-footer {
+  padding: 16px 20px;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.image-card-action {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+.image-card-footer svg {
+  width: 18px;
+  height: 18px;
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+}
+
+.image-card-large:hover .image-card-footer svg {
+  transform: translateX(4px);
+}
+
+/* === TOOLS GRID MODERN === */
+.tools-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .tools-grid-modern {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .tools-grid-modern {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tool-card-modern {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: center;
+}
+
+.tool-card-modern:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.tool-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.tool-card-icon.amber-gradient {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.tool-card-icon.green-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.tool-card-icon.gray-gradient {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.tool-card-icon.teal-gradient {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+}
+
+.tool-card-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+}
+
+/* === DANGER SECTION MODERN === */
+.danger-card-modern {
+  background: white;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.danger-warning-modern {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(239, 68, 68, 0.06);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.danger-warning-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: #dc2626;
+}
+
+.danger-warning-text strong {
+  display: block;
+  font-size: 14px;
+  color: #991b1b;
+  margin-bottom: 4px;
+  font-family: 'Inter', sans-serif;
+}
+
+.danger-warning-text p {
+  margin: 0;
+  font-size: 13px;
+  color: #7f1d1d;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+.danger-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .danger-buttons-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.danger-btn-modern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  border: none;
+  border-radius: 12px;
+  color: #e5e7eb;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: not-allowed;
+}
+
+.danger-btn-modern svg {
+  width: 18px;
+  height: 18px;
+}
+
+.blocked-overlay-modern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(107, 114, 128, 0.08);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+}
+
+.blocked-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+}
+
+.blocked-content svg {
+  width: 40px;
+  height: 40px;
+}
+
+.blocked-content span {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* === RESPONSIVE GRID 3 === */
+.config-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1100px) {
+  .config-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .config-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === ACTION CARDS (Gestion de Datos) === */
+.action-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.action-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.action-card:hover::before {
+  opacity: 1;
+}
+
+.action-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.action-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.action-card-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+}
+
+.action-card-icon.blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+.action-card:has(.action-card-icon.blue)::before {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+}
+
+.action-card-icon.purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+}
+.action-card:has(.action-card-icon.purple)::before {
+  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+}
+
+.action-card-icon.pink {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: white;
+}
+.action-card:has(.action-card-icon.pink)::before {
+  background: linear-gradient(90deg, #ec4899, #db2777);
+}
+
+.action-card-icon.orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+}
+.action-card:has(.action-card-icon.orange)::before {
+  background: linear-gradient(90deg, #f97316, #ea580c);
+}
+
+.action-card-icon.cyan {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+}
+.action-card:has(.action-card-icon.cyan)::before {
+  background: linear-gradient(90deg, #06b6d4, #0891b2);
+}
+
+.action-card-content {
+  flex: 1;
+}
+
+.action-card-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.action-card-content p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+/* === IMAGE ACTIONS (Gestion de Imagenes) === */
+.images-actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.image-action-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.image-action-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.image-action-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.image-action-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.image-action-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2;
+}
+
+.image-action-icon.red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+
+.image-action-icon.orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+}
+
+.image-action-content {
+  flex: 1;
+}
+
+.image-action-content h4 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.image-action-content p {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+.action-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.action-badge.destructive {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.action-badge.selective {
+  background: rgba(249, 115, 22, 0.1);
+  color: #ea580c;
+}
+
+.image-action-arrow {
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+}
+
+.image-action-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.image-action-card:hover .image-action-arrow {
+  transform: translateX(4px);
+  color: #6b7280;
+}
+
+/* === TOOLS GRID === */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.tool-btn {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.tool-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.tool-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tool-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+.tool-icon.amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.tool-icon.green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.tool-icon.gray {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+}
+
+.tool-icon.teal {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  color: white;
+}
+
+/* === DANGER SECTION === */
+.danger-section .section-header {
+  border-bottom-color: rgba(239, 68, 68, 0.2);
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
 /* Cards modernos */
 .config-card {
   background: rgba(255, 255, 255, 0.9);
@@ -2935,6 +4218,17 @@ const logout = () => {
 
 .danger-warning-blocked .warning-content {
   color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lock-icon-inline {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: #6b7280;
 }
 
 .danger-btn-blocked {

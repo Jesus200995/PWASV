@@ -13,10 +13,15 @@
     <div class="apple-header-section">
       <!-- Segmented Control estilo Apple -->
       <div class="apple-segmented-control">
-        <div class="apple-segment-bg" :class="tabActiva === 'asistencias' ? 'apple-segment-left' : 'apple-segment-right'"></div>
+        <div 
+          class="apple-segment-bg" 
+          :class="[
+            tabActiva === 'asistencias' ? 'apple-segment-left apple-segment-bg-blue' : 'apple-segment-right apple-segment-bg-purple'
+          ]"
+        ></div>
         <button 
           @click="cambiarTab('asistencias')" 
-          :class="['apple-segment-btn', tabActiva === 'asistencias' ? 'apple-segment-active' : '']"
+          :class="['apple-segment-btn', tabActiva === 'asistencias' ? 'apple-segment-active apple-segment-active-blue' : '']"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="apple-segment-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -25,7 +30,7 @@
         </button>
         <button 
           @click="cambiarTab('registros')" 
-          :class="['apple-segment-btn', tabActiva === 'registros' ? 'apple-segment-active' : '']"
+          :class="['apple-segment-btn', tabActiva === 'registros' ? 'apple-segment-active apple-segment-active-purple' : '']"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="apple-segment-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -2007,7 +2012,7 @@ function verImagen(url) {
   box-shadow: 
     0 3px 8px rgba(0, 0, 0, 0.12),
     0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .apple-segment-left {
@@ -2016,6 +2021,21 @@ function verImagen(url) {
 
 .apple-segment-right {
   left: calc(50%);
+}
+
+/* Colores del indicador */
+.apple-segment-bg-blue {
+  background: linear-gradient(135deg, #0a84ff 0%, #2563eb 100%);
+  box-shadow: 
+    0 4px 12px rgba(10, 132, 255, 0.35),
+    0 2px 4px rgba(10, 132, 255, 0.2);
+}
+
+.apple-segment-bg-purple {
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+  box-shadow: 
+    0 4px 12px rgba(147, 51, 234, 0.35),
+    0 2px 4px rgba(147, 51, 234, 0.2);
 }
 
 /* Botones del segmento */
@@ -2045,7 +2065,16 @@ function verImagen(url) {
 }
 
 .apple-segment-active {
-  color: rgba(0, 0, 0, 0.95);
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.apple-segment-active-blue {
+  color: white;
+}
+
+.apple-segment-active-purple {
+  color: white;
 }
 
 .apple-segment-icon {

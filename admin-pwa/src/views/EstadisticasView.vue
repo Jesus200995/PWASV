@@ -223,60 +223,128 @@
             </div>
           </section>
 
-          <!-- Usuarios Activos -->
-          <section class="active-section animate-fade-in" style="animation-delay: 0.5s">
-            <div class="chart-card active-card">
-              <div class="chart-card-header">
-                <div class="chart-header-icon pulse-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                  </svg>
+          <!-- Estado de Usuarios (Activos/Inactivos) -->
+          <section class="status-section animate-fade-in" style="animation-delay: 0.5s">
+            <div class="status-row">
+              <!-- Gráfica de Estado -->
+              <div class="chart-card status-chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-header-icon status-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                  </div>
+                  <h3 class="chart-card-title">Estado de Usuarios</h3>
                 </div>
-                <h3 class="chart-card-title">Usuarios Activos (últimos 30 días)</h3>
+                <div class="chart-card-body">
+                  <div v-if="estadisticas.estado_usuarios && estadisticas.estado_usuarios.length > 0" class="status-chart-content">
+                    <div class="status-donut-wrapper">
+                      <svg viewBox="0 0 200 200" class="status-donut-svg">
+                        <circle
+                          v-for="(estado, index) in estadisticas.estado_usuarios"
+                          :key="estado.estado"
+                          cx="100"
+                          cy="100"
+                          r="70"
+                          fill="none"
+                          :stroke="getColorEstado(estado.estado)"
+                          stroke-width="35"
+                          :stroke-dasharray="`${getCircunferencia(estado.porcentaje)} ${440 - getCircunferencia(estado.porcentaje)}`"
+                          :stroke-dashoffset="getOffsetEstado(index)"
+                          class="status-ring"
+                        />
+                        <circle cx="100" cy="100" r="50" fill="white"/>
+                        <text x="100" y="95" text-anchor="middle" class="status-center-label">Total</text>
+                        <text x="100" y="115" text-anchor="middle" class="status-center-value">{{ estadisticas.total_usuarios }}</text>
+                      </svg>
+                    </div>
+                    <div class="status-legend">
+                      <div 
+                        v-for="estado in estadisticas.estado_usuarios"
+                        :key="estado.estado"
+                        class="status-legend-item"
+                        :class="estado.estado === 'Activos' ? 'legend-active' : 'legend-inactive'"
+                      >
+                        <div class="legend-icon-wrapper">
+                          <svg v-if="estado.estado === 'Activos'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                          </svg>
+                          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                          </svg>
+                        </div>
+                        <div class="legend-info">
+                          <span class="legend-estado">{{ estado.estado }}</span>
+                          <span class="legend-porcentaje">{{ estado.porcentaje }}%</span>
+                        </div>
+                        <span class="legend-cantidad">{{ estado.cantidad.toLocaleString() }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else class="no-status-data">
+                    <p>No hay datos de estado de usuarios</p>
+                  </div>
+                </div>
               </div>
-              <div class="chart-card-body">
-                <div v-if="estadisticas.activos_30_dias && estadisticas.activos_30_dias.length > 0" class="active-content">
-                  <div class="active-summary">
-                    <div class="active-stat-box">
-                      <span class="active-big-number">{{ getTotalActivos() }}</span>
-                      <span class="active-stat-label">usuarios activos</span>
-                    </div>
-                    <div class="active-stat-box">
-                      <span class="active-big-percent">{{ ((getTotalActivos() / estadisticas.total_usuarios) * 100).toFixed(1) }}%</span>
-                      <span class="active-stat-label">del total</span>
-                    </div>
+
+              <!-- Actividad Reciente (30 días) -->
+              <div class="chart-card recent-activity-card">
+                <div class="chart-card-header">
+                  <div class="chart-header-icon pulse-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
                   </div>
-                  <div class="active-by-device">
-                    <div 
-                      v-for="activo in estadisticas.activos_30_dias"
-                      :key="activo.dispositivo"
-                      class="active-device-chip"
-                      :class="`chip-${activo.dispositivo.toLowerCase()}`"
-                    >
-                      <!-- Icon based on device -->
-                      <svg v-if="activo.dispositivo.toLowerCase() === 'android'" viewBox="0 0 24 24" fill="currentColor" class="chip-icon">
-                        <path d="M17.532 15.106a1.003 1.003 0 1 1 .001-2.007 1.003 1.003 0 0 1-.001 2.007zm-11.044 0a1.003 1.003 0 1 1 .001-2.007 1.003 1.003 0 0 1-.001 2.007zm11.4-6.018l2.006-3.459a.413.413 0 1 0-.721-.407l-2.027 3.5a12.243 12.243 0 0 0-5.13-1.108c-1.85 0-3.595.398-5.141 1.098l-2.027-3.49a.413.413 0 1 0-.72.407l1.995 3.458C2.696 10.947.345 14.417 0 18.523h24c-.347-4.106-2.696-7.576-6.112-9.435z"/>
-                      </svg>
-                      <svg v-else-if="activo.dispositivo.toLowerCase() === 'ios'" viewBox="0 0 24 24" fill="currentColor" class="chip-icon">
-                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                      </svg>
-                      <svg v-else-if="activo.dispositivo.toLowerCase() === 'desktop'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chip-icon">
-                        <rect x="2" y="3" width="20" height="14" rx="2"/>
-                        <line x1="8" y1="21" x2="16" y2="21"/>
-                        <line x1="12" y1="17" x2="12" y2="21"/>
-                      </svg>
-                      <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chip-icon">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                      </svg>
-                      <span class="chip-name">{{ capitalizar(activo.dispositivo) }}</span>
-                      <span class="chip-count">{{ activo.cantidad }}</span>
-                    </div>
-                  </div>
+                  <h3 class="chart-card-title">Actividad Reciente (30 días)</h3>
                 </div>
-                <div v-else class="no-active-data">
-                  <p>No hay datos de usuarios activos en los últimos 30 días</p>
+                <div class="chart-card-body">
+                  <div v-if="estadisticas.activos_30_dias && estadisticas.activos_30_dias.length > 0" class="active-content">
+                    <div class="active-summary">
+                      <div class="active-stat-box">
+                        <span class="active-big-number">{{ getTotalActivos() }}</span>
+                        <span class="active-stat-label">usuarios activos</span>
+                      </div>
+                      <div class="active-stat-box">
+                        <span class="active-big-percent">{{ ((getTotalActivos() / estadisticas.total_usuarios) * 100).toFixed(1) }}%</span>
+                        <span class="active-stat-label">del total</span>
+                      </div>
+                    </div>
+                    <div class="active-by-device">
+                      <div 
+                        v-for="activo in estadisticas.activos_30_dias"
+                        :key="activo.dispositivo"
+                        class="active-device-chip"
+                        :class="`chip-${activo.dispositivo.toLowerCase()}`"
+                      >
+                        <!-- Icon based on device -->
+                        <svg v-if="activo.dispositivo.toLowerCase() === 'android'" viewBox="0 0 24 24" fill="currentColor" class="chip-icon">
+                          <path d="M17.532 15.106a1.003 1.003 0 1 1 .001-2.007 1.003 1.003 0 0 1-.001 2.007zm-11.044 0a1.003 1.003 0 1 1 .001-2.007 1.003 1.003 0 0 1-.001 2.007zm11.4-6.018l2.006-3.459a.413.413 0 1 0-.721-.407l-2.027 3.5a12.243 12.243 0 0 0-5.13-1.108c-1.85 0-3.595.398-5.141 1.098l-2.027-3.49a.413.413 0 1 0-.72.407l1.995 3.458C2.696 10.947.345 14.417 0 18.523h24c-.347-4.106-2.696-7.576-6.112-9.435z"/>
+                        </svg>
+                        <svg v-else-if="activo.dispositivo.toLowerCase() === 'ios'" viewBox="0 0 24 24" fill="currentColor" class="chip-icon">
+                          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                        </svg>
+                        <svg v-else-if="activo.dispositivo.toLowerCase() === 'desktop'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chip-icon">
+                          <rect x="2" y="3" width="20" height="14" rx="2"/>
+                          <line x1="8" y1="21" x2="16" y2="21"/>
+                          <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                        <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chip-icon">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                          <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        <span class="chip-name">{{ capitalizar(activo.dispositivo) }}</span>
+                        <span class="chip-count">{{ activo.cantidad }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else class="no-active-data">
+                    <p>No hay datos de actividad reciente</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -345,6 +413,21 @@ function getOffset(index) {
   let offset = 0;
   for (let i = 0; i < index; i++) {
     offset += getCircunferencia(estadisticas.value.por_dispositivo[i].porcentaje);
+  }
+  return -offset;
+}
+
+// Colores para estado de usuarios
+function getColorEstado(estado) {
+  return estado === 'Activos' ? '#10B981' : '#EF4444';
+}
+
+// Calcular offset para gráfica de estados
+function getOffsetEstado(index) {
+  if (!estadisticas.value || !estadisticas.value.estado_usuarios || index === 0) return 0;
+  let offset = 0;
+  for (let i = 0; i < index; i++) {
+    offset += getCircunferencia(estadisticas.value.estado_usuarios[i].porcentaje);
   }
   return -offset;
 }
@@ -1103,6 +1186,159 @@ onMounted(() => {
 }
 
 .no-active-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+/* === STATUS SECTION === */
+.status-section {
+  width: 100%;
+}
+
+.status-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(16px, 2.5vw, 24px);
+}
+
+@media (max-width: 900px) {
+  .status-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.status-chart-card,
+.recent-activity-card {
+  height: 100%;
+}
+
+.status-icon {
+  background: linear-gradient(135deg, #10B981, #059669) !important;
+}
+
+.status-chart-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.status-donut-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.status-donut-svg {
+  width: 180px;
+  height: 180px;
+  transform: rotate(-90deg);
+}
+
+.status-ring {
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+
+.status-ring:hover {
+  stroke-width: 40;
+  filter: brightness(1.1);
+}
+
+.status-center-label {
+  font-size: 14px;
+  fill: #64748b;
+  font-weight: 500;
+  transform: rotate(90deg);
+  transform-origin: 100px 100px;
+}
+
+.status-center-value {
+  font-size: 22px;
+  fill: #1e293b;
+  font-weight: 800;
+  transform: rotate(90deg);
+  transform-origin: 100px 100px;
+}
+
+.status-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.status-legend-item.legend-active {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 2px solid #10B981;
+}
+
+.status-legend-item.legend-inactive {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 2px solid #EF4444;
+}
+
+.status-legend-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.legend-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.legend-active .legend-icon-wrapper {
+  background: #10B981;
+}
+
+.legend-inactive .legend-icon-wrapper {
+  background: #EF4444;
+}
+
+.legend-icon-wrapper svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.legend-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.legend-estado {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.legend-porcentaje {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.legend-cantidad {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.no-status-data {
   text-align: center;
   padding: 40px 20px;
   color: #64748b;

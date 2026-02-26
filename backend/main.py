@@ -757,6 +757,18 @@ async def estadisticas_dispositivos():
         """)
         activos = cursor.fetchall()
         
+        # Estado de usuarios (activo/inactivo basado en campo 'activo')
+        cursor.execute("""
+            SELECT 
+                CASE WHEN activo = true THEN 'Activos' ELSE 'Inactivos' END as estado,
+                COUNT(*) as cantidad,
+                ROUND(COUNT(*) * 100.0 / NULLIF((SELECT COUNT(*) FROM usuarios), 0), 2) as porcentaje
+            FROM usuarios
+            GROUP BY activo
+            ORDER BY activo DESC
+        """)
+        estado_usuarios = cursor.fetchall()
+        
         return {
             "total_usuarios": total,
             "por_dispositivo": [
@@ -781,6 +793,14 @@ async def estadisticas_dispositivos():
                     "cantidad": a[1]
                 }
                 for a in activos
+            ],
+            "estado_usuarios": [
+                {
+                    "estado": e[0],
+                    "cantidad": e[1],
+                    "porcentaje": float(e[2])
+                }
+                for e in estado_usuarios
             ]
         }
     except Exception as e:

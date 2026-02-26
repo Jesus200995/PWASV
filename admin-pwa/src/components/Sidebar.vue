@@ -109,23 +109,32 @@
           <h1 class="brand-name">SEMBRANDO VIDA</h1>
           <p class="brand-tagline">App de Seguimiento</p>
           
-          <!-- Información del usuario -->
-          <div class="user-info" style="margin-top: 12px;">
-            <!-- Territorio arriba para usuarios territoriales -->
-            <div v-if="isTerritorial && territorioAsignado" class="user-territorio">
-              <span class="user-territorio-text">{{ territorioAsignado }}</span>
+          <!-- Información del usuario - Diseño moderno tipo tarjeta -->
+          <div class="user-card">
+            <!-- Avatar con iniciales -->
+            <div class="user-avatar">
+              <span class="avatar-initials">{{ userInitials }}</span>
+              <div class="avatar-status"></div>
             </div>
-            <p v-if="isTerritorial && estadosDelTerritorio" class="user-estados">{{ estadosDelTerritorio }}</p>
-            <!-- Línea separadora verde después del territorio -->
-            <div v-if="isTerritorial && territorioAsignado" class="territorio-separator"></div>
-            <!-- Fila: Avatar + Nombre -->
-            <div class="user-header-row">
-              <p class="user-fullname">{{ userFullName }}</p>
+            
+            <!-- Info principal -->
+            <div class="user-main-info">
+              <h4 class="user-name-title">{{ userFullName }}</h4>
+              <span v-if="userCargo" class="user-role-badge">{{ userCargo }}</span>
+              <span class="user-handle">@{{ userDisplayName }}</span>
             </div>
-            <!-- 2. Cargo del usuario -->
-            <p v-if="userCargo" class="user-cargo">{{ userCargo }}</p>
-            <!-- 3. Username -->
-            <p class="user-username">@{{ userDisplayName }}</p>
+            
+            <!-- Territorio (solo para usuarios territoriales) -->
+            <div v-if="isTerritorial && territorioAsignado" class="user-territory-section">
+              <div class="territory-badge">
+                <svg class="territory-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>{{ territorioAsignado }}</span>
+              </div>
+              <p v-if="estadosDelTerritorio" class="territory-states">{{ estadosDelTerritorio }}</p>
+            </div>
           </div>
           
           <div class="text-underline"></div>
@@ -1702,6 +1711,253 @@ const onLeave = (el) => {
   font-weight: 400;
   font-style: italic;
   line-height: 1.2;
+}
+
+/* ============================================
+   NUEVO DISEÑO: User Card Premium Verde
+   ============================================ */
+.user-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px 10px;
+  margin-top: 12px;
+  background: linear-gradient(165deg, 
+    rgba(20, 83, 45, 0.95) 0%, 
+    rgba(5, 46, 22, 0.98) 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  background-clip: padding-box;
+  box-shadow: 
+    0 6px 24px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(74, 222, 128, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Efecto de brillo superior */
+.user-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    #22c55e 20%, 
+    #4ade80 50%, 
+    #22c55e 80%,
+    transparent 100%);
+}
+
+/* Efecto de gradiente decorativo */
+.user-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(74, 222, 128, 0.08) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.user-card:hover::after {
+  opacity: 1;
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 32px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(74, 222, 128, 0.35),
+    0 0 20px rgba(74, 222, 128, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Avatar compacto */
+.user-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #4ade80 0%, #22c55e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 4px 14px rgba(74, 222, 128, 0.45),
+    0 0 0 2px rgba(5, 46, 22, 1),
+    0 0 0 4px rgba(74, 222, 128, 0.25);
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.avatar-initials {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.avatar-status {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);
+  border-radius: 50%;
+  border: 2px solid #052e16;
+  box-shadow: 0 0 8px rgba(134, 239, 172, 0.7);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 8px rgba(134, 239, 172, 0.7);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 14px rgba(134, 239, 172, 0.9);
+    transform: scale(1.05);
+  }
+}
+
+/* Info principal del usuario */
+.user-main-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  z-index: 1;
+}
+
+.user-name-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #dcfce7;
+  text-align: center;
+  letter-spacing: 0.4px;
+  line-height: 1.3;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.user-role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  font-size: 7px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #86efac;
+  background: linear-gradient(135deg, 
+    rgba(134, 239, 172, 0.15) 0%, 
+    rgba(74, 222, 128, 0.22) 100%);
+  border: 1px solid rgba(134, 239, 172, 0.4);
+  border-radius: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 
+    0 2px 6px rgba(74, 222, 128, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.user-role-badge:hover {
+  background: linear-gradient(135deg, 
+    rgba(134, 239, 172, 0.22) 0%, 
+    rgba(74, 222, 128, 0.3) 100%);
+  border-color: rgba(134, 239, 172, 0.55);
+  box-shadow: 
+    0 3px 10px rgba(74, 222, 128, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.user-handle {
+  font-size: 10px;
+  color: #bbf7d0;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 0.2px;
+  opacity: 0.85;
+  transition: color 0.3s ease;
+}
+
+.user-handle:hover {
+  color: #dcfce7;
+}
+
+/* Sección de territorio */
+.user-territory-section {
+  width: 100%;
+  padding-top: 8px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(74, 222, 128, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 1;
+}
+
+.territory-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, 
+    rgba(251, 146, 60, 0.15) 0%, 
+    rgba(249, 115, 22, 0.22) 100%);
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  border-radius: 8px;
+  font-size: 8px;
+  font-weight: 600;
+  color: #fdba74;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0 2px 6px rgba(249, 115, 22, 0.15);
+  transition: all 0.3s ease;
+}
+
+.territory-badge:hover {
+  background: linear-gradient(135deg, 
+    rgba(251, 146, 60, 0.22) 0%, 
+    rgba(249, 115, 22, 0.3) 100%);
+  border-color: rgba(251, 146, 60, 0.55);
+}
+
+.territory-icon {
+  width: 10px;
+  height: 10px;
+  color: #fb923c;
+  flex-shrink: 0;
+}
+
+.territory-states {
+  margin: 0;
+  font-size: 8px;
+  color: rgba(187, 247, 208, 0.8);
+  font-style: italic;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .logout-button {

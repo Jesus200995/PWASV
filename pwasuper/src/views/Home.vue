@@ -692,50 +692,73 @@
     />
 
     <!-- Formulario de registro normal (solo cuando no está en modo asistencia) -->
-    <div v-if="seccionActiva === 'actividades' && !modoAsistencia" class="glass-card-purple">
+    <div v-if="seccionActiva === 'actividades' && !modoAsistencia" class="apple-activities-container">
       <!-- Mensaje de estado de actividades bloqueadas -->
-      <div v-if="!entradaMarcada || salidaMarcada" class="mb-4">
-        <div class="bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded-lg">
-          <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      <div v-if="!entradaMarcada || salidaMarcada" class="apple-warning-card mb-4">
+        <div class="flex items-center">
+          <div class="apple-warning-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            <div>
-              <h3 class="text-sm font-medium text-yellow-800">Registro de actividades bloqueado</h3>
-              <p class="text-xs text-yellow-700 mt-1">
-                <span v-if="!entradaMarcada">Debes marcar tu entrada primero para registrar actividades.</span>
-                <span v-else-if="salidaMarcada">Has marcado tu salida. No puedes registrar más actividades hoy.</span>
-              </p>
-            </div>
+          </div>
+          <div class="ml-3">
+            <h3 class="apple-warning-title">Registro de actividades bloqueado</h3>
+            <p class="apple-warning-text">
+              <span v-if="!entradaMarcada">Debes marcar tu entrada primero para registrar actividades.</span>
+              <span v-else-if="salidaMarcada">Has marcado tu salida. No puedes registrar más actividades hoy.</span>
+            </p>
           </div>
         </div>
       </div>
 
-      <div class="text-center mb-3">
-        <h2 class="text-xl font-semibold text-purple-600 mb-1"
-            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: -0.02em;"
-            :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }">
-          Registra Tus Actividades
-        </h2>
+      <!-- Header estilo Apple morado -->
+      <div class="apple-header-card apple-header-purple mb-5">
+        <div class="flex items-center justify-center">
+          <div class="apple-header-icon mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          </div>
+          <h2 class="apple-header-title">
+            Registro de Actividades
+          </h2>
+        </div>
       </div>
       
-      <!-- Info del usuario -->
-      <div class="bg-primary/10 rounded-lg p-2 mb-6">
+      <!-- Info del usuario estilo Apple -->
+      <div class="apple-user-card mb-5">
         <div class="flex items-center">
-          <div class="relative w-8 h-8 rounded-full border-2 border-green-600 flex items-center justify-center mr-2">
-            <!-- Iniciales -->
-            <span class="text-green-600 text-xs font-semibold">{{ getUserInitials }}</span>
+          <div class="apple-avatar apple-avatar-purple">
+            <span class="apple-avatar-initials">{{ getUserInitials }}</span>
           </div>
-          <div>
-            <p class="font-medium text-primary text-xs">{{ user.nombre_completo }}</p>
-            <p class="text-xs text-gray-500">{{ user.cargo }}</p>
+          <div class="ml-3 flex-1">
+            <p class="apple-user-name">{{ user.nombre_completo }}</p>
+            <p class="apple-user-role">{{ user.cargo }}</p>
+          </div>
+          <div class="apple-status-badge apple-badge-purple">
+            Actividades
           </div>
         </div>
       </div>
 
       <form @submit.prevent="enviarRegistro" :class="{ 'opacity-50 pointer-events-none': !entradaMarcada || salidaMarcada }">
-        <!-- Botón para obtener ubicación empresarial moderno para actividades -->
-        <div class="location-container-corporate mb-3">
+        <!-- Paso 1: Ubicación -->
+        <div class="apple-step-card-purple mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div class="apple-step-number-purple">1</div>
+              <h3 class="apple-step-title">Ubicación</h3>
+            </div>
+            <div v-if="latitudRegistro && longitudRegistro" class="apple-completed-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Listo
+            </div>
+          </div>
+          
+          <!-- Botón para obtener ubicación -->
+          <div class="location-container-corporate">
           <button
             type="button"
             @click="getUbicacionRegistro"
@@ -823,17 +846,23 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
-        <!-- Modalidad - Campo o Gabinete -->
-        <div class="mb-3">
-          <label class="block text-xs font-medium text-gray-700 mb-2 flex items-center"
-                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-green-600" :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-            Modalidad <span class="text-red-500 text-sm">*</span>
-          </label>
+        <!-- Paso 2: Modalidad - Campo o Gabinete -->
+        <div class="apple-step-card-purple mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div class="apple-step-number-purple">2</div>
+              <h3 class="apple-step-title">Modalidad</h3>
+            </div>
+            <div v-if="tipoActividad" class="apple-completed-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Listo
+            </div>
+          </div>
           
           <!-- Contenedor de opciones con estilo vidrio líquido compacto -->
           <div class="relative">
@@ -944,8 +973,20 @@
           </div>
         </div>
 
-        <!-- Selector de Categoría de Actividad -->
-        <div class="mb-3">
+        <!-- Paso 3: Categoría de Actividad -->
+        <div class="apple-step-card-purple mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div class="apple-step-number-purple">3</div>
+              <h3 class="apple-step-title">Categoría</h3>
+            </div>
+            <div v-if="categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim())" class="apple-completed-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Listo
+            </div>
+          </div>
           <label class="block text-xs font-medium mb-2 flex items-center"
                  :class="{ 
                    'text-gray-400': !entradaMarcada || salidaMarcada || !tipoActividad,
@@ -961,9 +1002,9 @@
             <select
               v-model="categoriaActividad"
               :disabled="!entradaMarcada || salidaMarcada || !tipoActividad"
-              class="glass-input w-full text-sm appearance-none pr-10"
+              class="apple-select w-full text-sm appearance-none pr-10"
               :class="{ 
-                'opacity-50 cursor-not-allowed bg-gray-100': !entradaMarcada || salidaMarcada || !tipoActividad,
+                'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada || !tipoActividad,
                 'border-red-400': !categoriaActividad && tipoActividad && entradaMarcada && !salidaMarcada
               }"
             >
@@ -973,7 +1014,7 @@
               </option>
             </select>
             <!-- Icono de flecha para el select -->
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-purple-500">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
@@ -984,77 +1025,90 @@
           <div v-if="!categoriaActividad && tipoActividad && entradaMarcada && !salidaMarcada" class="mt-1.5">
             <p class="text-xs text-red-500 font-medium animate-pulse">Por favor selecciona el tipo de actividad</p>
           </div>
-        </div>
 
-        <!-- NUEVO: Campo para especificar "Otro" si se selecciona esa opción -->
-        <div v-if="categoriaActividad === 'Otro'" class="mb-3">
-          <label class="block text-xs font-medium text-gray-700 mb-2 flex items-center"
-                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Especifica cuál <span class="text-red-500 text-sm ml-1">*</span>
-          </label>
-          
-          <input
-            type="text"
-            v-model="categoriaActividadOtro"
-            :disabled="!entradaMarcada || salidaMarcada"
-            class="glass-input w-full text-sm"
-            :class="{ 
-              'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada,
-              'border-red-400': categoriaActividad === 'Otro' && !categoriaActividadOtro.trim() && entradaMarcada && !salidaMarcada
-            }"
-            placeholder="Escribe el tipo de actividad..."
-            maxlength="200"
-          />
-          
-          <!-- Mensaje de error si no se ha especificado el otro tipo -->
-          <div v-if="categoriaActividad === 'Otro' && !categoriaActividadOtro.trim() && entradaMarcada && !salidaMarcada" class="mt-1.5">
-            <p class="text-xs text-red-500 font-medium animate-pulse">Por favor especifica el tipo de actividad</p>
+          <!-- Campo para especificar "Otro" si se selecciona esa opción -->
+          <div v-if="categoriaActividad === 'Otro'" class="mt-3">
+            <label class="apple-input-label flex items-center mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Especifica cuál <span class="text-red-500 text-sm ml-1">*</span>
+            </label>
+            
+            <input
+              type="text"
+              v-model="categoriaActividadOtro"
+              :disabled="!entradaMarcada || salidaMarcada"
+              class="apple-input w-full text-sm"
+              :class="{ 
+                'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada,
+                'border-red-400': categoriaActividad === 'Otro' && !categoriaActividadOtro.trim() && entradaMarcada && !salidaMarcada
+              }"
+              placeholder="Escribe el tipo de actividad..."
+              maxlength="200"
+            />
+            
+            <!-- Mensaje de error si no se ha especificado el otro tipo -->
+            <div v-if="categoriaActividad === 'Otro' && !categoriaActividadOtro.trim() && entradaMarcada && !salidaMarcada" class="mt-1.5">
+              <p class="text-xs text-red-500 font-medium animate-pulse">Por favor especifica el tipo de actividad</p>
+            </div>
           </div>
         </div>
 
-        <!-- Input de archivo para imagen -->
-        <div class="mb-3">
-          <label class="block text-sm font-medium text-gray-700 mb-2" 
-                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">Imagen (Tomar o Seleccionar)</label>
+        <!-- Paso 4: Imagen -->
+        <div class="apple-step-card-purple mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div class="apple-step-number-purple">4</div>
+              <h3 class="apple-step-title">Evidencia Fotográfica</h3>
+            </div>
+            <div v-if="fotoRegistro" class="apple-completed-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Listo
+            </div>
+          </div>
           
           <!-- Vista previa de la foto -->
-          <div v-if="fotoRegistro" class="mb-3">
-            <div class="w-full h-32 bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+          <div v-if="fotoRegistro" class="apple-photo-preview mb-3">
+            <div class="apple-photo-container">
               <img :src="fotoRegistro" class="w-full h-full object-cover" />
+              <div class="apple-photo-overlay">
+                <button
+                  @click="eliminarFotoRegistro"
+                  :disabled="!entradaMarcada || salidaMarcada"
+                  class="apple-photo-delete-btn"
+                  :class="{ 'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada }"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>Eliminar</span>
+                </button>
+              </div>
             </div>
-            <button
-              @click="eliminarFotoRegistro"
-              :disabled="!entradaMarcada || salidaMarcada"
-              class="mt-2 text-xs text-red-600 hover:text-red-800 flex items-center"
-              :class="{ 'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada }"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Eliminar imagen
-            </button>
           </div>
           
-          <!-- Botones para capturar foto -->
-          <div v-if="!fotoRegistro" class="space-y-2.5">
+          <!-- Botones para capturar foto estilo Apple -->
+          <div v-if="!fotoRegistro" class="apple-photo-buttons">
             <!-- Botón para tomar foto con cámara -->
             <button
               @click="tomarFotoConCamaraRegistro"
               :disabled="!entradaMarcada || salidaMarcada"
-              class="photo-button-glass photo-button-pink w-full flex items-center justify-center px-4 py-2.5 text-white rounded-full transition-all duration-300"
+              class="apple-photo-btn apple-photo-btn-camera-dark"
               :class="{ 'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span class="font-semibold text-sm">
+              <div class="apple-photo-btn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <span class="apple-photo-btn-text">
                 <span v-if="entradaMarcada && !salidaMarcada">Cámara</span>
-                <span v-else-if="!entradaMarcada">Marca entrada primero</span>
-                <span v-else>Función bloqueada</span>
+                <span v-else-if="!entradaMarcada">Bloqueado</span>
+                <span v-else>Bloqueado</span>
               </span>
             </button>
             
@@ -1062,16 +1116,18 @@
             <button
               @click="seleccionarDeGaleriaRegistro"
               :disabled="!entradaMarcada || salidaMarcada"
-              class="photo-button-glass photo-button-gallery w-full flex items-center justify-center px-4 py-2.5 text-white rounded-full transition-all duration-300"
+              class="apple-photo-btn apple-photo-btn-gallery-dark"
               :class="{ 'opacity-50 cursor-not-allowed': !entradaMarcada || salidaMarcada }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span class="font-semibold text-sm">
+              <div class="apple-photo-btn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span class="apple-photo-btn-text">
                 <span v-if="entradaMarcada && !salidaMarcada">Galería</span>
-                <span v-else-if="!entradaMarcada">Marca entrada primero</span>
-                <span v-else>Función bloqueada</span>
+                <span v-else-if="!entradaMarcada">Bloqueado</span>
+                <span v-else>Bloqueado</span>
               </span>
             </button>
           </div>
@@ -1096,36 +1152,40 @@
           />
         </div>
 
-        <!-- Descripción -->
-        <div class="mb-3">
-          <label for="descripcionRegistro" class="block text-sm font-medium text-gray-700 mb-2"
-                 :class="{ 'text-gray-400': !entradaMarcada || salidaMarcada }">Descripción</label>
+        <!-- Paso 5: Descripción (Opcional) -->
+        <div class="apple-step-card-purple mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div class="apple-step-number-purple">5</div>
+              <h3 class="apple-step-title">Descripción</h3>
+            </div>
+            <span class="text-xs text-gray-400 font-medium">Opcional</span>
+          </div>
+          
           <textarea
             v-model="descripcionRegistro"
             id="descripcionRegistro"
             rows="3"
             :disabled="!entradaMarcada || salidaMarcada"
-            class="glass-input w-full"
+            class="apple-textarea w-full"
             :class="{ 'opacity-50': !entradaMarcada || salidaMarcada }"
-            :placeholder="entradaMarcada && !salidaMarcada ? 'Describe el lugar o añade notas...' : !entradaMarcada ? 'Marca entrada primero...' : 'Función bloqueada...'"
+            :placeholder="entradaMarcada && !salidaMarcada ? 'Describe la actividad o añade notas...' : !entradaMarcada ? 'Marca entrada primero...' : 'Función bloqueada...'"
           ></textarea>
         </div>
 
-        <!-- Indicador de progreso visual tipo Apple -->
+        <!-- Checklist de progreso estilo Apple naranja -->
         <div v-if="entradaMarcada && !salidaMarcada && (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()))" 
-             class="mb-4 p-3 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100 shadow-sm">
-          <div class="flex items-center mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+             class="apple-checklist-card mb-4">
+          <div class="flex items-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-            <span class="text-xs font-semibold text-gray-700">Completa estos pasos</span>
+            <span class="apple-checklist-title">Completa estos pasos</span>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <!-- Ubicación -->
-            <div :class="['flex items-center px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-300', 
-                          latitudRegistro && longitudRegistro ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200']">
-              <div :class="['w-4 h-4 rounded-full flex items-center justify-center mr-2 transition-all duration-300',
-                            latitudRegistro && longitudRegistro ? 'bg-green-500' : 'bg-gray-300']">
+            <div :class="['apple-checklist-item', latitudRegistro && longitudRegistro ? 'apple-checklist-item-done' : 'apple-checklist-item-pending']">
+              <div :class="['apple-checklist-circle', latitudRegistro && longitudRegistro ? 'apple-checklist-circle-done' : 'apple-checklist-circle-pending']">
                 <svg v-if="latitudRegistro && longitudRegistro" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -1133,10 +1193,8 @@
               <span>Ubicación</span>
             </div>
             <!-- Imagen -->
-            <div :class="['flex items-center px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-300', 
-                          fotoRegistro ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200']">
-              <div :class="['w-4 h-4 rounded-full flex items-center justify-center mr-2 transition-all duration-300',
-                            fotoRegistro ? 'bg-green-500' : 'bg-gray-300']">
+            <div :class="['apple-checklist-item', fotoRegistro ? 'apple-checklist-item-done' : 'apple-checklist-item-pending']">
+              <div :class="['apple-checklist-circle', fotoRegistro ? 'apple-checklist-circle-done' : 'apple-checklist-circle-pending']">
                 <svg v-if="fotoRegistro" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -1144,10 +1202,8 @@
               <span>Imagen</span>
             </div>
             <!-- Modalidad -->
-            <div :class="['flex items-center px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-300', 
-                          tipoActividad ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200']">
-              <div :class="['w-4 h-4 rounded-full flex items-center justify-center mr-2 transition-all duration-300',
-                            tipoActividad ? 'bg-green-500' : 'bg-gray-300']">
+            <div :class="['apple-checklist-item', tipoActividad ? 'apple-checklist-item-done' : 'apple-checklist-item-pending']">
+              <div :class="['apple-checklist-circle', tipoActividad ? 'apple-checklist-circle-done' : 'apple-checklist-circle-pending']">
                 <svg v-if="tipoActividad" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -1155,10 +1211,8 @@
               <span>Modalidad</span>
             </div>
             <!-- Categoría -->
-            <div :class="['flex items-center px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-300', 
-                          categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim()) ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200']">
-              <div :class="['w-4 h-4 rounded-full flex items-center justify-center mr-2 transition-all duration-300',
-                            categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim()) ? 'bg-green-500' : 'bg-gray-300']">
+            <div :class="['apple-checklist-item', categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim()) ? 'apple-checklist-item-done' : 'apple-checklist-item-pending']">
+              <div :class="['apple-checklist-circle', categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim()) ? 'apple-checklist-circle-done' : 'apple-checklist-circle-pending']">
                 <svg v-if="categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim())" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -1168,9 +1222,9 @@
           </div>
         </div>
 
-        <!-- Indicador de listo para enviar -->
+        <!-- Indicador de listo para enviar estilo Apple -->
         <div v-if="entradaMarcada && !salidaMarcada && latitudRegistro && longitudRegistro && fotoRegistro && tipoActividad && categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim())" 
-             class="mb-4 p-3 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 shadow-sm">
+             class="apple-ready-card mb-4">
           <div class="flex items-center justify-center">
             <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-2 animate-bounce">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -5721,5 +5775,266 @@ watch([entradaMarcada, salidaMarcada], () => {
   font-weight: 600;
   color: #30d158;
   letter-spacing: -0.01em;
+}
+
+/* ========================================
+   ESTILOS APPLE PARA SECCIÓN ACTIVIDADES (MORADO)
+   ======================================== */
+
+/* Contenedor principal actividades */
+.apple-activities-container {
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  border: 1px solid rgba(147, 51, 234, 0.1);
+  border-radius: 20px;
+  padding: 1.25rem;
+  box-shadow: 
+    0 4px 20px rgba(147, 51, 234, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  animation: apple-fade-in 0.4s ease-out;
+}
+
+/* Header morado */
+.apple-header-purple {
+  background: linear-gradient(180deg, #9333ea 0%, #7c3aed 100%);
+  box-shadow: 
+    0 4px 14px rgba(147, 51, 234, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Avatar morado */
+.apple-avatar-purple {
+  background: linear-gradient(180deg, rgba(147, 51, 234, 0.1) 0%, rgba(124, 58, 237, 0.15) 100%);
+  border-color: #9333ea;
+}
+
+.apple-avatar-purple .apple-avatar-initials {
+  color: #7c3aed;
+}
+
+/* Badge morado */
+.apple-badge-purple {
+  background: rgba(147, 51, 234, 0.1);
+  color: #9333ea;
+}
+
+/* Step card morado */
+.apple-step-card-purple {
+  background: linear-gradient(180deg, #ffffff 0%, #fdfaff 100%);
+  border: 1px solid rgba(147, 51, 234, 0.1);
+  border-radius: 14px;
+  padding: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-step-card-purple:hover {
+  border-color: rgba(147, 51, 234, 0.2);
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.08);
+}
+
+/* Step number morado */
+.apple-step-number-purple {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #9333ea 0%, #7c3aed 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.625rem;
+  box-shadow: 0 2px 6px rgba(147, 51, 234, 0.3);
+}
+
+/* Warning card estilo Apple */
+.apple-warning-card {
+  background: linear-gradient(135deg, rgba(255, 214, 10, 0.15) 0%, rgba(255, 149, 0, 0.1) 100%);
+  border: 1px solid rgba(255, 149, 0, 0.3);
+  border-left: 4px solid #ff9500;
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+  animation: apple-fade-in 0.3s ease-out;
+}
+
+.apple-warning-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 149, 0, 0.15);
+  color: #ff9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-warning-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #995a00;
+  letter-spacing: -0.01em;
+}
+
+.apple-warning-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.75rem;
+  color: #996600;
+  margin-top: 0.25rem;
+}
+
+/* Select estilo Apple */
+.apple-select {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(147, 51, 234, 0.15);
+  background: linear-gradient(180deg, #ffffff 0%, #fdfaff 100%);
+  color: #1d1d1f;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-select:focus {
+  border-color: #9333ea;
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.15);
+}
+
+/* Input estilo Apple */
+.apple-input {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  color: #1d1d1f;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-input:focus {
+  border-color: #9333ea;
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.15);
+  background: #ffffff;
+}
+
+.apple-input-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #86868b;
+}
+
+/* Textarea estilo Apple */
+.apple-textarea {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.875rem;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(147, 51, 234, 0.12);
+  background: linear-gradient(180deg, #ffffff 0%, #fdfaff 100%);
+  color: #1d1d1f;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-textarea:focus {
+  border-color: #9333ea;
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.15);
+  background: #ffffff;
+}
+
+.apple-textarea::placeholder {
+  color: #86868b;
+  font-weight: 400;
+}
+
+/* Botones de foto oscuros para actividades */
+.apple-photo-btn-camera-dark {
+  background: linear-gradient(180deg, #d6214c 0%, #a81839 100%);
+  color: white;
+  box-shadow: 
+    0 4px 14px rgba(214, 33, 76, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.apple-photo-btn-gallery-dark {
+  background: linear-gradient(180deg, #4442a8 0%, #362f8c 100%);
+  color: white;
+  box-shadow: 
+    0 4px 14px rgba(68, 66, 168, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.apple-photo-btn-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 0.5rem;
+}
+
+/* Vista previa de foto estilo Apple */
+.apple-photo-preview {
+  position: relative;
+  animation: apple-fade-in 0.3s ease-out;
+}
+
+.apple-photo-container {
+  width: 100%;
+  height: 140px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f5f5f7;
+  border: 1px solid rgba(147, 51, 234, 0.15);
+  box-shadow: 
+    0 4px 12px rgba(147, 51, 234, 0.1),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.apple-photo-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+  display: flex;
+  justify-content: flex-end;
+  border-radius: 0 0 14px 14px;
+}
+
+.apple-photo-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 100px;
+  background: rgba(255, 69, 58, 0.9);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-photo-delete-btn:hover {
+  background: rgba(255, 69, 58, 1);
+  transform: scale(1.05);
+}
+
+.apple-photo-delete-btn:active {
+  transform: scale(0.95);
 }
 </style>

@@ -45,7 +45,11 @@
               <span class="label">Fotos en BD limpiadas</span>
               <span class="value">{{ estadisticas.fotos_bd_limpiadas }}</span>
             </div>
-            <div class="info-check" v-if="estadisticas.fotos_bd_limpiadas > 0">✓</div>
+            <div class="info-check" v-if="estadisticas.fotos_bd_limpiadas > 0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
           </div>
 
           <div class="info-item" :class="{ completado: estadisticas.archivos_eliminados > 0 }">
@@ -60,7 +64,11 @@
               <span class="label">Archivos eliminados</span>
               <span class="value">{{ estadisticas.archivos_eliminados }}</span>
             </div>
-            <div class="info-check" v-if="estadisticas.archivos_eliminados > 0">✓</div>
+            <div class="info-check" v-if="estadisticas.archivos_eliminados > 0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
           </div>
 
           <div v-if="estadisticas.archivos_no_encontrados > 0" class="info-item warning">
@@ -503,18 +511,21 @@ defineExpose({
 }
 
 .info-check {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
   border-radius: 50%;
-  font-weight: 700;
-  font-size: 16px;
   flex-shrink: 0;
   animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.info-check svg {
+  width: 14px;
+  height: 14px;
+  color: white;
 }
 
 @keyframes checkPop {

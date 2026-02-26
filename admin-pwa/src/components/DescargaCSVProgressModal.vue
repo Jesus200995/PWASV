@@ -1,11 +1,19 @@
 <template>
   <div v-if="show" class="descarga-overlay">
     <div class="descarga-modal">
-      <!-- Header NARANJA -->
+      <!-- Header -->
       <div class="descarga-header">
         <div class="descarga-title">
-          <div class="descarga-icon">📊</div>
-          <h3>Descargando Registros CSV</h3>
+          <div class="descarga-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <h3>Exportando Registros CSV</h3>
         </div>
       </div>
 
@@ -14,7 +22,7 @@
         <!-- Barra de progreso principal -->
         <div class="progress-section">
           <div class="progress-info">
-            <span class="progress-label">Progreso de exportación</span>
+            <span class="progress-label">Progreso de exportacion</span>
             <span class="progress-percent">{{ progreso }}%</span>
           </div>
           <div class="progress-bar-container">
@@ -27,7 +35,13 @@
         <!-- Estadísticas de descarga -->
         <div class="descarga-stats">
           <div class="stat-item">
-            <div class="stat-icon">📊</div>
+            <div class="stat-icon downloaded">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
             <div class="stat-content">
               <div class="stat-label">Descargado</div>
               <div class="stat-value">{{ bytesDescargadosFormato }}</div>
@@ -35,15 +49,23 @@
           </div>
 
           <div class="stat-item">
-            <div class="stat-icon">📦</div>
+            <div class="stat-icon total">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              </svg>
+            </div>
             <div class="stat-content">
-              <div class="stat-label">Tamaño Total</div>
+              <div class="stat-label">Tamano Total</div>
               <div class="stat-value">{{ tamanoTotalFormato }}</div>
             </div>
           </div>
 
           <div class="stat-item">
-            <div class="stat-icon">⚡</div>
+            <div class="stat-icon speed">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
             <div class="stat-content">
               <div class="stat-label">Velocidad</div>
               <div class="stat-value">{{ velocidadDescarga }}</div>
@@ -51,7 +73,12 @@
           </div>
 
           <div class="stat-item">
-            <div class="stat-icon">⏱️</div>
+            <div class="stat-icon time">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
             <div class="stat-content">
               <div class="stat-label">Tiempo restante</div>
               <div class="stat-value">{{ tiempoRestante }}</div>
@@ -61,7 +88,7 @@
 
         <!-- Mensaje de estado -->
         <div class="descarga-message">
-          {{ mensaje }}
+          <span class="message-text">{{ cleanMessage }}</span>
         </div>
 
         <!-- Animación de puntos -->
@@ -74,6 +101,11 @@
 
       <!-- Footer -->
       <div class="descarga-footer">
+        <svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
         <p class="descarga-note">No cierre esta ventana durante la descarga</p>
       </div>
     </div>
@@ -139,6 +171,11 @@ const tiempoRestante = computed(() => {
   return `${segundosRestantes}s`
 })
 
+// Limpia emojis del mensaje
+const cleanMessage = computed(() => {
+  return mensaje.value.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F000}-\u{1F02F}]|[\u{1F0A0}-\u{1F0FF}]|[\u{1F100}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|✅|📊|📦|⚡|⏱️|🎉/gu, '').trim()
+})
+
 // Funciones
 function formatearBytes(bytes) {
   if (bytes === 0) return '0 B'
@@ -174,7 +211,7 @@ function iniciar() {
 }
 
 function completar() {
-  mensaje.value = '✅ Exportación completada exitosamente'
+  mensaje.value = 'Exportacion completada exitosamente'
 }
 
 function cancelar() {
@@ -258,16 +295,30 @@ watch(() => props.show, (newVal) => {
 }
 
 .descarga-icon {
-  font-size: 28px;
-  animation: bounce 0.6s ease-in-out infinite;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-icon 2s ease-in-out infinite;
 }
 
-@keyframes bounce {
+.descarga-icon svg {
+  width: 22px;
+  height: 22px;
+  color: white;
+}
+
+@keyframes pulse-icon {
   0%, 100% {
-    transform: translateY(0);
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255,255,255,0.3);
   }
   50% {
-    transform: translateY(-6px);
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(255,255,255,0);
   }
 }
 
@@ -383,8 +434,38 @@ watch(() => props.show, (newVal) => {
 }
 
 .stat-icon {
-  font-size: 20px;
-  min-width: 20px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.stat-icon.downloaded {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  color: white;
+}
+
+.stat-icon.total {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  color: white;
+}
+
+.stat-icon.speed {
+  background: linear-gradient(135deg, #eab308 0%, #fbbf24 100%);
+  color: white;
+}
+
+.stat-icon.time {
+  background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+  color: white;
 }
 
 .stat-content {
@@ -457,7 +538,17 @@ watch(() => props.show, (newVal) => {
   padding: 12px 24px;
   background: rgba(249, 250, 251, 0.8);
   border-top: 1px solid #e5e7eb;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.footer-icon {
+  width: 14px;
+  height: 14px;
+  color: #9ca3af;
+  flex-shrink: 0;
 }
 
 .descarga-note {

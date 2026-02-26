@@ -276,7 +276,7 @@
                 </div>
                 
                 <div class="data-list">
-                  <div class="data-item" @click="exportarDatos" :class="{ disabled: exporting }">
+                  <div class="data-item" @click="confirmarExportarDatos" :class="{ disabled: exporting }">
                     <div class="data-icon blue">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -291,7 +291,7 @@
                     <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                   </div>
 
-                  <div class="data-item" @click="descargarBaseDatos" :class="{ disabled: descargandoBD }">
+                  <div class="data-item" @click="confirmarDescargarBaseDatos" :class="{ disabled: descargandoBD }">
                     <div class="data-icon purple">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <ellipse cx="12" cy="5" rx="9" ry="3"/>
@@ -306,7 +306,7 @@
                     <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                   </div>
 
-                  <div class="data-item" @click="descargarBDRapida" :class="{ disabled: descargandoBDRapida }">
+                  <div class="data-item" @click="confirmarDescargarBDRapida" :class="{ disabled: descargandoBDRapida }">
                     <div class="data-icon pink">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -319,7 +319,7 @@
                     <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                   </div>
 
-                  <div class="data-item" @click="descargarRegistrosCSV" :class="{ disabled: descargandoRegistrosCSV }">
+                  <div class="data-item" @click="confirmarDescargarCSV" :class="{ disabled: descargandoRegistrosCSV }">
                     <div class="data-icon orange">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -333,7 +333,7 @@
                     <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                   </div>
 
-                  <div class="data-item" @click="descargarUsuarios" :class="{ disabled: descargandoUsuarios }">
+                  <div class="data-item" @click="confirmarDescargarUsuarios" :class="{ disabled: descargandoUsuarios }">
                     <div class="data-icon cyan">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -408,13 +408,36 @@
         </div>
       </div>
     </main>    <!-- Modal para mensajes -->
-    <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>{{ modalTitle }}</h3>
-          <button @click="cerrarModal" class="btn-close">×</button>
+    <div v-if="showModal" class="modal-overlay message-modal-overlay" @click="cerrarModal">
+      <div class="modal-content message-modal" @click.stop>
+        <div class="message-modal-header" :class="modalHeaderClass">
+          <div class="message-icon-wrapper">
+            <!-- Icono de exito -->
+            <svg v-if="modalType === 'success'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <!-- Icono de error -->
+            <svg v-else-if="modalType === 'error'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            <!-- Icono de info -->
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+          </div>
+          <h3>{{ cleanModalTitle }}</h3>
         </div>
-        <div class="modal-body" v-html="modalContent"></div>
+        <div class="message-modal-body" v-html="modalContent"></div>
+        <div class="message-modal-footer">
+          <button @click="cerrarModal" class="btn-message-ok" :class="modalType">
+            Aceptar
+          </button>
+        </div>
       </div>
     </div>    <!-- Modal de confirmación -->
     <ConfirmModal
@@ -591,8 +614,10 @@
           <!-- Usuario Origen -->
           <div class="transferencia-seccion">
             <h4 class="seccion-titulo">
-              <span class="seccion-icon origen">📤</span>
-              Usuario Origen (De quien se transferirán)
+              <span class="seccion-icon origen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg>
+              </span>
+              Usuario Origen (De quien se transferiran)
             </h4>
             <div class="busqueda-curp">
               <input 
@@ -667,8 +692,10 @@
           <!-- Usuario Destino -->
           <div class="transferencia-seccion">
             <h4 class="seccion-titulo">
-              <span class="seccion-icon destino">📥</span>
-              Usuario Destino (A quien se transferirán)
+              <span class="seccion-icon destino">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+              </span>
+              Usuario Destino (A quien se transferiran)
             </h4>
             <div class="busqueda-curp">
               <input 
@@ -801,13 +828,17 @@
               
               <div class="transfer-summary">
                 <div class="summary-item">
-                  <span class="summary-icon">📝</span>
+                  <span class="summary-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  </span>
                   <span class="summary-text">
                     <strong>{{ usuarioOrigen?.total_actividades || 0 }}</strong> actividades
                   </span>
                 </div>
                 <div v-if="incluirAsistencias" class="summary-item">
-                  <span class="summary-icon">🕐</span>
+                  <span class="summary-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </span>
                   <span class="summary-text">
                     <strong>{{ usuarioOrigen?.total_asistencias || 0 }}</strong> asistencias
                   </span>
@@ -983,6 +1014,25 @@ const showModal = ref(false)
 const modalTitle = ref('')
 const modalContent = ref('')
 
+// Computed para el modal de mensajes
+const modalType = computed(() => {
+  const title = modalTitle.value.toLowerCase()
+  if (title.includes('exito') || title.includes('exitosa') || title.includes('eliminado') || title.includes('eliminadas') || title.includes('completada')) {
+    return 'success'
+  } else if (title.includes('error') || title.includes('fallo')) {
+    return 'error'
+  }
+  return 'info'
+})
+
+const cleanModalTitle = computed(() => {
+  return modalTitle.value.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F000}-\u{1F02F}]|[\u{1F0A0}-\u{1F0FF}]|[\u{1F100}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|✅|❌|⚠️|ℹ️|🎉/gu, '').trim()
+})
+
+const modalHeaderClass = computed(() => {
+  return `header-${modalType.value}`
+})
+
 onMounted(() => {
   cargarConfiguraciones()
   verificarEstadoServidor()
@@ -1043,7 +1093,92 @@ const verificarEstadoServidor = async () => {
   }
 }
 
-const exportarDatos = async () => {
+// === CONFIRMACIONES PARA GESTIÓN DE DATOS ===
+const confirmarExportarDatos = () => {
+  confirmType.value = 'info'
+  confirmTitle.value = 'Exportar Datos JSON'
+  confirmMessage.value = `Se exportarán todos los datos del sistema en formato JSON.
+
+Esta acción generará un archivo con:
+• Lista completa de usuarios registrados
+• Todos los registros de actividades
+• Metadatos y estadísticas del sistema
+
+El archivo se descargará automáticamente.`
+  
+  confirmAction.value = ejecutarExportarDatos
+  showConfirmModal.value = true
+}
+
+const confirmarDescargarBaseDatos = () => {
+  confirmType.value = 'info'
+  confirmTitle.value = 'Descargar Base de Datos'
+  confirmMessage.value = `Se descargará una copia completa de la base de datos.
+
+Esta acción incluirá:
+• Todos los usuarios del sistema
+• Registros de actividades completos
+• Historial de asistencias
+• Datos de ubicación y fotografías
+
+Esta operación puede tardar varios minutos.`
+  
+  confirmAction.value = ejecutarDescargarBaseDatos
+  showConfirmModal.value = true
+}
+
+const confirmarDescargarBDRapida = () => {
+  confirmType.value = 'info'
+  confirmTitle.value = 'Descarga Rapida de BD'
+  confirmMessage.value = `Se descargará una versión optimizada de la base de datos.
+
+Esta descarga incluye:
+• Usuarios y registros esenciales
+• Datos comprimidos para mayor velocidad
+• Exportación en formato JSON
+
+Ideal para respaldos rápidos del sistema.`
+  
+  confirmAction.value = ejecutarDescargarBDRapida
+  showConfirmModal.value = true
+}
+
+const confirmarDescargarCSV = () => {
+  confirmType.value = 'warning'
+  confirmTitle.value = 'Exportar Actividades CSV'
+  confirmMessage.value = `Se exportarán todas las actividades en formato CSV.
+
+El archivo incluirá:
+• Registros de actividades de campo
+• Registros de actividades de gabinete
+• Fechas, ubicaciones y descripciones
+
+Formato compatible con Excel y hojas de cálculo.`
+  
+  confirmAction.value = ejecutarDescargarCSV
+  showConfirmModal.value = true
+}
+
+const confirmarDescargarUsuarios = () => {
+  confirmType.value = 'info'
+  confirmTitle.value = 'Exportar Lista de Usuarios'
+  confirmMessage.value = `Se exportará la lista completa de usuarios registrados.
+
+El archivo incluirá:
+• Nombres y correos electrónicos
+• CURP y datos de identificación
+• Información de supervisores
+• Estados y roles de usuarios
+
+El archivo se descargará en formato JSON.`
+  
+  confirmAction.value = ejecutarDescargarUsuarios
+  showConfirmModal.value = true
+}
+
+// === FUNCIONES DE EJECUCIÓN ===
+const ejecutarExportarDatos = async () => {
+  showConfirmModal.value = false
   exporting.value = true
   
   try {
@@ -1135,25 +1270,25 @@ const exportarDatos = async () => {
     // Calcular tamaño del archivo
     const tamanhoKB = Math.round(blob.size / 1024)
     
-    mostrarMensaje('✅ Exportación JSON Exitosa', 
+    mostrarMensaje('Exportacion JSON Exitosa', 
       `<div style="text-align: left;">
-        <h4 style="color: #2563eb; margin-bottom: 15px;">📄 Archivo JSON Generado</h4>
-        <p><strong>📁 Archivo:</strong> registros_actividades_${timestamp}.json</p>
-        <p><strong>📊 Tamaño:</strong> ${tamanhoKB} KB</p>
+        <h4 style="color: #2563eb; margin-bottom: 15px;">Archivo JSON Generado</h4>
+        <p><strong>Archivo:</strong> registros_actividades_${timestamp}.json</p>
+        <p><strong>Tamano:</strong> ${tamanhoKB} KB</p>
         <hr style="margin: 15px 0;">
-        <h5 style="color: #1e40af;">📋 Datos Exportados:</h5>
+        <h5 style="color: #1e40af;">Datos Exportados:</h5>
         <ul style="margin: 10px 0; padding-left: 20px;">
-          <li><strong>👥 Usuarios:</strong> ${datos.resumen.total_usuarios}</li>
-          <li><strong>📝 Total registros:</strong> ${datos.resumen.total_registros}</li>
-          <li><strong>🏞️ Actividades campo:</strong> ${datos.resumen.registros_campo}</li>
-          <li><strong>🏢 Actividades gabinete:</strong> ${datos.resumen.registros_gabinete}</li>
-          <li><strong>❓ Sin tipo:</strong> ${datos.resumen.registros_sin_tipo}</li>
+          <li><strong>Usuarios:</strong> ${datos.resumen.total_usuarios}</li>
+          <li><strong>Total registros:</strong> ${datos.resumen.total_registros}</li>
+          <li><strong>Actividades campo:</strong> ${datos.resumen.registros_campo}</li>
+          <li><strong>Actividades gabinete:</strong> ${datos.resumen.registros_gabinete}</li>
+          <li><strong>Sin tipo:</strong> ${datos.resumen.registros_sin_tipo}</li>
         </ul>
         <hr style="margin: 15px 0;">
         <p style="font-size: 12px; color: #666; margin-top: 15px;">
-          El archivo JSON contiene todos los registros de actividades con información 
-          detallada de usuarios, ubicaciones y metadatos. Compatible con análisis de datos 
-          y herramientas de visualización.
+          El archivo JSON contiene todos los registros de actividades con informacion 
+          detallada de usuarios, ubicaciones y metadatos. Compatible con analisis de datos 
+          y herramientas de visualizacion.
         </p>
       </div>`
     )
@@ -1172,13 +1307,14 @@ const exportarDatos = async () => {
       errorMsg += err.message || 'Error desconocido'
     }
     
-    mostrarMensaje('❌ Error', errorMsg)
+    mostrarMensaje('Error', errorMsg)
   } finally {
     exporting.value = false
   }
 }
 
-const descargarBaseDatos = async () => {
+const ejecutarDescargarBaseDatos = async () => {
+  showConfirmModal.value = false
   descargandoBD.value = true
   
   try {
@@ -1395,23 +1531,23 @@ const descargarBaseDatos = async () => {
     const tamanhoKB = Math.round(blob.size / 1024)
     const totalRegistros = usuariosData.length + registrosData.length + asistenciasData.length
     
-    mostrarMensaje('🎉 Base de Datos Completa Descargada', 
+    mostrarMensaje('Base de Datos Completa Descargada', 
       `<div style="text-align: left;">
-        <h4 style="color: #2563eb; margin-bottom: 15px;">✅ Exportación Exitosa</h4>
-        <p><strong>📁 Archivo:</strong> BASE_DATOS_COMPLETA_${timestamp}.sql</p>
-        <p><strong>📊 Tamaño:</strong> ${tamanhoKB} KB</p>
+        <h4 style="color: #2563eb; margin-bottom: 15px;">Exportacion Exitosa</h4>
+        <p><strong>Archivo:</strong> BASE_DATOS_COMPLETA_${timestamp}.sql</p>
+        <p><strong>Tamano:</strong> ${tamanhoKB} KB</p>
         <hr style="margin: 15px 0;">
-        <h5 style="color: #1e40af;">📋 Datos Exportados:</h5>
+        <h5 style="color: #1e40af;">Datos Exportados:</h5>
         <ul style="margin: 10px 0; padding-left: 20px;">
-          <li><strong>👥 Usuarios:</strong> ${usuariosData.length} registros</li>
-          <li><strong>📝 Registros:</strong> ${registrosData.length} registros</li>
-          <li><strong>🕐 Asistencias:</strong> ${asistenciasData.length} registros</li>
+          <li><strong>Usuarios:</strong> ${usuariosData.length} registros</li>
+          <li><strong>Registros:</strong> ${registrosData.length} registros</li>
+          <li><strong>Asistencias:</strong> ${asistenciasData.length} registros</li>
         </ul>
         <hr style="margin: 15px 0;">
-        <p><strong>🔢 Total de registros:</strong> ${totalRegistros}</p>
+        <p><strong>Total de registros:</strong> ${totalRegistros}</p>
         <p style="font-size: 12px; color: #666; margin-top: 15px;">
           El archivo contiene la estructura completa de la base de datos con todos los datos disponibles, 
-          índices y constraints. Puede ser restaurado en cualquier servidor PostgreSQL.
+          indices y constraints. Puede ser restaurado en cualquier servidor PostgreSQL.
         </p>
       </div>`
     )
@@ -1432,14 +1568,15 @@ const descargarBaseDatos = async () => {
       errorMsg += err.message || 'Error desconocido'
     }
     
-    mostrarMensaje('❌ Error', errorMsg)
+    mostrarMensaje('Error', errorMsg)
   } finally {
     descargandoBD.value = false
   }
 }
 
 // ⚡ NUEVA FUNCIÓN: Descarga rápida de BD completa con progreso en tiempo real
-const descargarBDRapida = async () => {
+const ejecutarDescargarBDRapida = async () => {
+  showConfirmModal.value = false
   descargandoBDRapida.value = true
   showDescargaProgress.value = true
   
@@ -1475,14 +1612,14 @@ const descargarBDRapida = async () => {
       descargandoBDRapida.value = false
       
       // Mostrar mensaje de éxito
-      mostrarMensaje('✅ Descarga Exitosa', 
+      mostrarMensaje('Descarga Exitosa', 
         `<div style="text-align: left;">
-          <h4 style="color: #ec4899; margin-bottom: 15px;">⚡ Base de Datos Descargada</h4>
-          <p><strong>📁 Archivo:</strong> ${resultado.archivo}</p>
-          <p><strong>📊 Tamaño:</strong> ${resultado.tamanhoMB} MB</p>
+          <h4 style="color: #ec4899; margin-bottom: 15px;">Base de Datos Descargada</h4>
+          <p><strong>Archivo:</strong> ${resultado.archivo}</p>
+          <p><strong>Tamano:</strong> ${resultado.tamanhoMB} MB</p>
           <hr style="margin: 15px 0;">
           <p style="font-size: 12px; color: #666; margin-top: 15px;">
-            ✅ La base de datos completa ha sido descargada exitosamente en formato SQL.
+            La base de datos completa ha sido descargada exitosamente en formato SQL.
             Incluye todas las tablas, usuarios, registros y asistencias.
           </p>
         </div>`
@@ -1499,25 +1636,26 @@ const descargarBDRapida = async () => {
     
     // Personalizar mensajes de error
     if (errorMsg.includes('No autorizado')) {
-      errorMsg = '❌ No autorizado. Por favor inicia sesión nuevamente.'
+      errorMsg = 'No autorizado. Por favor inicia sesión nuevamente.'
     } else if (errorMsg.includes('Acceso denegado')) {
-      errorMsg = '❌ Acceso denegado. No tienes permisos para descargar la BD.'
+      errorMsg = 'Acceso denegado. No tienes permisos para descargar la BD.'
     } else if (errorMsg.includes('Endpoint no disponible')) {
-      errorMsg = '❌ Endpoint no disponible. Verifica que el servidor está actualizado.'
+      errorMsg = 'Endpoint no disponible. Verifica que el servidor está actualizado.'
     } else if (errorMsg.includes('Error del servidor')) {
-      errorMsg = '❌ Error del servidor. Por favor intenta más tarde.'
+      errorMsg = 'Error del servidor. Por favor intenta más tarde.'
     } else if (errorMsg.includes('No se pudo conectar')) {
-      errorMsg = '❌ No se pudo conectar con el servidor. Verifica la conexión.'
+      errorMsg = 'No se pudo conectar con el servidor. Verifica la conexión.'
     }
     
-    mostrarMensaje('❌ Error', errorMsg)
+    mostrarMensaje('Error', errorMsg)
   } finally {
     descargandoBDRapida.value = false
   }
 }
 
 // 📊 NUEVA FUNCIÓN: Descarga de registros CSV con progreso en tiempo real
-const descargarRegistrosCSV = async () => {
+const ejecutarDescargarCSV = async () => {
+  showConfirmModal.value = false
   descargandoRegistrosCSV.value = true
   showDescargaCSVProgress.value = true
   
@@ -1553,26 +1691,26 @@ const descargarRegistrosCSV = async () => {
       descargandoRegistrosCSV.value = false
       
       // Mostrar mensaje de éxito
-      mostrarMensaje('✅ Exportación Exitosa', 
+      mostrarMensaje('Exportacion Exitosa', 
         `<div style="text-align: left;">
-          <h4 style="color: #f97316; margin-bottom: 15px;">📊 Actividades Exportadas</h4>
-          <p><strong>📁 Archivo:</strong> ${resultado.archivo}</p>
-          <p><strong>📊 Tamaño:</strong> ${resultado.tamanhoMB} MB</p>
+          <h4 style="color: #f97316; margin-bottom: 15px;">Actividades Exportadas</h4>
+          <p><strong>Archivo:</strong> ${resultado.archivo}</p>
+          <p><strong>Tamano:</strong> ${resultado.tamanhoMB} MB</p>
           <hr style="margin: 15px 0;">
-          <h5 style="color: #ea580c;">📋 Columnas incluidas:</h5>
+          <h5 style="color: #ea580c;">Columnas incluidas:</h5>
           <ul style="margin: 10px 0; padding-left: 20px; font-size: 12px;">
             <li>ID, Usuario, Nombre, Correo, Cargo</li>
-            <li>Ubicación (Latitud, Longitud)</li>
-            <li>Descripción de la actividad</li>
+            <li>Ubicacion (Latitud, Longitud)</li>
+            <li>Descripcion de la actividad</li>
             <li><strong>Modalidad</strong> (Campo/Gabinete)</li>
-            <li><strong>Tipo de Actividad</strong> (categoría)</li>
-            <li><strong>Tipo de Actividad Otro</strong> (especificación)</li>
+            <li><strong>Tipo de Actividad</strong> (categoria)</li>
+            <li><strong>Tipo de Actividad Otro</strong> (especificacion)</li>
             <li>Fecha/Hora, Foto URL</li>
           </ul>
           <hr style="margin: 15px 0;">
           <p style="font-size: 12px; color: #666; margin-top: 15px;">
-            ✅ Todas las actividades han sido exportadas exitosamente en formato CSV.
-            Puedes abrir el archivo en Excel o cualquier editor de hojas de cálculo.
+            Todas las actividades han sido exportadas exitosamente en formato CSV.
+            Puedes abrir el archivo en Excel o cualquier editor de hojas de calculo.
           </p>
         </div>`
       )
@@ -1588,18 +1726,18 @@ const descargarRegistrosCSV = async () => {
     
     // Personalizar mensajes de error
     if (errorMsg.includes('No autorizado')) {
-      errorMsg = '❌ No autorizado. Por favor inicia sesión nuevamente.'
+      errorMsg = 'No autorizado. Por favor inicia sesión nuevamente.'
     } else if (errorMsg.includes('Acceso denegado')) {
-      errorMsg = '❌ Acceso denegado. No tienes permisos para descargar los registros.'
+      errorMsg = 'Acceso denegado. No tienes permisos para descargar los registros.'
     } else if (errorMsg.includes('Endpoint no disponible')) {
-      errorMsg = '❌ Endpoint no disponible. Verifica que el servidor está actualizado.'
+      errorMsg = 'Endpoint no disponible. Verifica que el servidor está actualizado.'
     } else if (errorMsg.includes('Error del servidor')) {
-      errorMsg = '❌ Error del servidor. Por favor intenta más tarde.'
+      errorMsg = 'Error del servidor. Por favor intenta más tarde.'
     } else if (errorMsg.includes('No se pudo conectar')) {
-      errorMsg = '❌ No se pudo conectar con el servidor. Verifica la conexión.'
+      errorMsg = 'No se pudo conectar con el servidor. Verifica la conexión.'
     }
     
-    mostrarMensaje('❌ Error', errorMsg)
+    mostrarMensaje('Error', errorMsg)
   } finally {
     descargandoRegistrosCSV.value = false
   }
@@ -1683,7 +1821,7 @@ const cerrarModal = () => {
 // MÉTODOS DE ELIMINACIÓN MASIVA
 const confirmarEliminarRegistros = () => {
   showConfirmation(
-    '⚠️ ELIMINAR TODOS LOS REGISTROS',
+    'ELIMINAR TODOS LOS REGISTROS',
     '¿Estás COMPLETAMENTE SEGURO de que quieres eliminar TODOS los registros del sistema?<br><br><strong>Esta acción NO SE PUEDE DESHACER</strong> y eliminará:<br>• Todos los registros históricos<br>• Fotos y documentos asociados<br>• Datos de ubicación<br><br>Esta operación es irreversible.',
     async () => {
       // Segunda confirmación más estricta
@@ -1699,7 +1837,7 @@ const confirmarEliminarRegistros = () => {
 
 const confirmarEliminarAsistencias = () => {
   showConfirmation(
-    '⚠️ ELIMINAR TODAS LAS ASISTENCIAS',
+    'ELIMINAR TODAS LAS ASISTENCIAS',
     '¿Estás COMPLETAMENTE SEGURO de que quieres eliminar TODAS las asistencias del sistema?<br><br><strong>Esta acción NO SE PUEDE DESHACER</strong> y eliminará:<br>• Todos los registros de entrada y salida<br>• Fotos de asistencia<br>• Datos de ubicación de asistencias<br>• Historial completo de asistencias<br><br>Esta operación es irreversible.',
     async () => {
       // Segunda confirmación más estricta
@@ -1721,14 +1859,14 @@ const eliminarTodosRegistros = async () => {
     
     if (resultado.status === 'success') {
       mostrarMensaje(
-        '✅ Registros Eliminados', 
-        `Se han eliminado ${resultado.registros_eliminados} registros exitosamente.<br><br><strong>⚠️ El sistema de registros ha sido completamente limpiado.</strong>`
+        'Registros Eliminados', 
+        `Se han eliminado ${resultado.registros_eliminados} registros exitosamente.<br><br><strong>El sistema de registros ha sido completamente limpiado.</strong>`
       )
     } else if (resultado.status === 'info') {
-      mostrarMensaje('ℹ️ Sin Datos', resultado.message)
+      mostrarMensaje('Sin Datos', resultado.message)
     }
   } catch (error) {
-    mostrarMensaje('❌ Error', 'Error al eliminar registros: ' + (error.message || 'Error desconocido'))
+    mostrarMensaje('Error', 'Error al eliminar registros: ' + (error.message || 'Error desconocido'))
   } finally {
     eliminandoRegistros.value = false
   }
@@ -1742,26 +1880,27 @@ const eliminarTodasAsistencias = async () => {
     
     if (resultado.status === 'success') {
       mostrarMensaje(
-        '✅ Asistencias Eliminadas', 
-        `Se han eliminado ${resultado.asistencias_eliminadas} asistencias y ${resultado.fotos_eliminadas || 0} fotos exitosamente.<br><br><strong>⚠️ El sistema de asistencias ha sido completamente limpiado.</strong>`
+        'Asistencias Eliminadas', 
+        `Se han eliminado ${resultado.asistencias_eliminadas} asistencias y ${resultado.fotos_eliminadas || 0} fotos exitosamente.<br><br><strong>El sistema de asistencias ha sido completamente limpiado.</strong>`
       )
     } else if (resultado.status === 'info') {
-      mostrarMensaje('ℹ️ Sin Datos', resultado.message)
+      mostrarMensaje('Sin Datos', resultado.message)
     }
   } catch (error) {
-    mostrarMensaje('❌ Error', 'Error al eliminar asistencias: ' + (error.message || 'Error desconocido'))
+    mostrarMensaje('Error', 'Error al eliminar asistencias: ' + (error.message || 'Error desconocido'))
   } finally {
     eliminandoAsistencias.value = false
   }
 }
 
-const descargarUsuarios = async () => {
+const ejecutarDescargarUsuarios = async () => {
+  showConfirmModal.value = false
   descargandoUsuarios.value = true
   
   try {
     const token = localStorage.getItem('admin_token')
     
-    mostrarMensaje('Iniciando', '📥 Obteniendo todos los usuarios de la base de datos...')
+    mostrarMensaje('Iniciando', 'Obteniendo todos los usuarios de la base de datos...')
     
     // Obtener TODOS los usuarios con información completa incluyendo contraseñas
     const response = await axios.get(`${apiConfig.url}/usuarios/exportacion-completa`, {
@@ -1781,7 +1920,7 @@ const descargarUsuarios = async () => {
     })
     
     if (usuariosData.length === 0) {
-      mostrarMensaje('⚠️ Sin Datos', 'No hay usuarios en la base de datos para exportar.')
+      mostrarMensaje('Sin Datos', 'No hay usuarios en la base de datos para exportar.')
       return
     }
     
@@ -1887,21 +2026,21 @@ const descargarUsuarios = async () => {
     // Calcular tamaño del archivo
     const tamanhoKB = Math.round(blob.size / 1024)
     
-    mostrarMensaje('✅ Exportación de Usuarios Exitosa', 
+    mostrarMensaje('Exportacion de Usuarios Exitosa', 
       `<div style="text-align: left;">
-        <h4 style="color: #0ea5e9; margin-bottom: 15px;">👥 Base de Usuarios Exportada</h4>
-        <p><strong>📁 Archivo:</strong> USUARIOS_${timestamp}.sql</p>
-        <p><strong>📊 Tamaño:</strong> ${tamanhoKB} KB</p>
+        <h4 style="color: #0ea5e9; margin-bottom: 15px;">Base de Usuarios Exportada</h4>
+        <p><strong>Archivo:</strong> USUARIOS_${timestamp}.sql</p>
+        <p><strong>Tamano:</strong> ${tamanhoKB} KB</p>
         <hr style="margin: 15px 0;">
-        <h5 style="color: #0284c7;">📋 Estadísticas:</h5>
+        <h5 style="color: #0284c7;">Estadisticas:</h5>
         <ul style="margin: 10px 0; padding-left: 20px;">
-          <li><strong>👤 Total usuarios:</strong> ${usuariosData.length}</li>
-          <li><strong>🆔 Con CURP:</strong> ${usuariosConCurp}</li>
-          <li><strong>📞 Con teléfono:</strong> ${usuariosConTelefono}</li>
-          <li><strong>👔 Con supervisor:</strong> ${usuariosConSupervisor}</li>
+          <li><strong>Total usuarios:</strong> ${usuariosData.length}</li>
+          <li><strong>Con CURP:</strong> ${usuariosConCurp}</li>
+          <li><strong>Con telefono:</strong> ${usuariosConTelefono}</li>
+          <li><strong>Con supervisor:</strong> ${usuariosConSupervisor}</li>
         </ul>
         <hr style="margin: 15px 0;">
-        <h5 style="color: #0284c7;">📊 Por Rol:</h5>
+        <h5 style="color: #0284c7;">Por Rol:</h5>
         <ul style="margin: 10px 0; padding-left: 20px;">
           ${Object.entries(usuariosPorRol).map(([rol, cantidad]) => 
             `<li><strong>${rol}:</strong> ${cantidad}</li>`
@@ -1909,14 +2048,14 @@ const descargarUsuarios = async () => {
         </ul>
         <hr style="margin: 15px 0;">
         <p style="font-size: 12px; color: #666; margin-top: 15px;">
-          ✅ El archivo SQL contiene la estructura completa de la tabla usuarios 
+          El archivo SQL contiene la estructura completa de la tabla usuarios 
           con todos los datos incluyendo contraseñas. Puede restaurarse en 
           cualquier servidor PostgreSQL.
         </p>
       </div>`
     )
   } catch (err) {
-    let errorMsg = '❌ Error al exportar usuarios: '
+    let errorMsg = 'Error al exportar usuarios: '
     
     if (err.response?.status === 401) {
       errorMsg += 'No autorizado. Inicia sesión nuevamente.'
@@ -1933,7 +2072,7 @@ const descargarUsuarios = async () => {
     }
     
     console.error('Error completo:', err)
-    mostrarMensaje('❌ Error', errorMsg)
+    mostrarMensaje('Error', errorMsg)
   } finally {
     descargandoUsuarios.value = false
   }
@@ -1942,7 +2081,7 @@ const descargarUsuarios = async () => {
 // NUEVAS FUNCIONES PARA ELIMINAR IMÁGENES
 const confirmarEliminarImagenes = () => {
   confirmType.value = 'danger'
-  confirmTitle.value = '⚠️ ELIMINAR TODAS LAS IMÁGENES'
+  confirmTitle.value = 'ELIMINAR TODAS LAS IMÁGENES'
   confirmMessage.value = `¿Estás completamente seguro de que quieres eliminar TODAS las imágenes del sistema?
 
 Esta acción NO SE PUEDE DESHACER y eliminará:
@@ -2011,7 +2150,7 @@ const eliminarTodasLasImagenes = async () => {
         errorMsg.includes('Error en el servidor') ||
         errorMsg.includes('Error de conexión') ||
         errorMsg.includes('endpoint')) {
-      mostrarMensaje('❌ Error', errorMsg)
+      mostrarMensaje('Error', errorMsg)
       return
     }
     
@@ -2028,7 +2167,7 @@ const eliminarTodasLasImagenes = async () => {
       errorMsg = 'No se pudo conectar con el servidor. Verifica tu conexión y que el servidor está funcionando.'
     }
     
-    mostrarMensaje('❌ Error', errorMsg)
+    mostrarMensaje('Error', errorMsg)
   }
 }
 
@@ -2068,7 +2207,7 @@ const confirmarEliminarPorFecha = () => {
     : `todo el año ${eliminarFechaConfig.anio}`
   
   confirmType.value = 'danger'
-  confirmTitle.value = '⚠️ ELIMINAR IMÁGENES POR FECHA'
+  confirmTitle.value = 'ELIMINAR IMÁGENES POR FECHA'
   confirmMessage.value = `¿Estás seguro de que quieres eliminar todas las imágenes de <strong>${periodo}</strong>?
 
 Esta acción NO SE PUEDE DESHACER y eliminará:
@@ -2132,7 +2271,7 @@ const ejecutarEliminarPorFecha = async () => {
     eliminandoImagenesPorFecha.value = false
     showProgressModalFecha.value = false
     
-    mostrarMensaje('❌ Error', error.message || 'Error al eliminar imágenes')
+    mostrarMensaje('Error', error.message || 'Error al eliminar imágenes')
   }
 }
 
@@ -2258,12 +2397,12 @@ const limpiarUsuarioDestino = () => {
 
 const ejecutarTransferencia = async () => {
   if (!usuarioOrigen.value || !usuarioDestino.value) {
-    mostrarMensaje('❌ Error', 'Debes seleccionar ambos usuarios para la transferencia')
+    mostrarMensaje('Error', 'Debes seleccionar ambos usuarios para la transferencia')
     return
   }
   
   if (usuarioOrigen.value.total_actividades === 0 && !incluirAsistencias.value) {
-    mostrarMensaje('❌ Error', 'El usuario origen no tiene actividades para transferir')
+    mostrarMensaje('Error', 'El usuario origen no tiene actividades para transferir')
     return
   }
   
@@ -2307,23 +2446,23 @@ const confirmarTransferenciaFinal = async () => {
     showTransferenciaModal.value = false
     
     const resultado = response.data
-    mostrarMensaje('✅ Transferencia Exitosa', 
+    mostrarMensaje('Transferencia Exitosa', 
       `<div style="text-align: left;">
-        <h4 style="color: #10b981; margin-bottom: 15px;">✅ Actividades Transferidas</h4>
+        <h4 style="color: #10b981; margin-bottom: 15px;">Actividades Transferidas</h4>
         <hr style="margin: 15px 0;">
-        <h5 style="color: #059669;">📤 Usuario Origen:</h5>
+        <h5 style="color: #059669;">Usuario Origen:</h5>
         <p><strong>${resultado.detalles.usuario_origen.nombre}</strong></p>
         <p style="font-size: 12px; color: #666;">${resultado.detalles.usuario_origen.correo}</p>
         <hr style="margin: 15px 0;">
-        <h5 style="color: #0284c7;">📥 Usuario Destino:</h5>
+        <h5 style="color: #0284c7;">Usuario Destino:</h5>
         <p><strong>${resultado.detalles.usuario_destino.nombre}</strong></p>
         <p style="font-size: 12px; color: #666;">${resultado.detalles.usuario_destino.correo}</p>
         <hr style="margin: 15px 0;">
-        <h5 style="color: #7c3aed;">📊 Resumen:</h5>
+        <h5 style="color: #7c3aed;">Resumen:</h5>
         <ul style="margin: 10px 0; padding-left: 20px;">
-          <li><strong>📝 Actividades transferidas:</strong> ${resultado.detalles.actividades_transferidas}</li>
+          <li><strong>Actividades transferidas:</strong> ${resultado.detalles.actividades_transferidas}</li>
           ${resultado.detalles.asistencias_transferidas > 0 ? 
-            `<li><strong>🕐 Asistencias transferidas:</strong> ${resultado.detalles.asistencias_transferidas}</li>` : ''}
+            `<li><strong>Asistencias transferidas:</strong> ${resultado.detalles.asistencias_transferidas}</li>` : ''}
         </ul>
         <hr style="margin: 15px 0;">
         <p style="font-size: 12px; color: #666; margin-top: 15px;">
@@ -2349,7 +2488,7 @@ const confirmarTransferenciaFinal = async () => {
       errorMsg += error.message || 'Error desconocido'
     }
     
-    mostrarMensaje('❌ Error', errorMsg)
+    mostrarMensaje('Error', errorMsg)
   } finally {
     transfiriendo.value = false
     progresoTransferencia.value = 0
@@ -5029,6 +5168,153 @@ const logout = () => {
   border: 1px solid #e5e7eb;
 }
 
+/* Message Modal Styles */
+.message-modal-overlay {
+  z-index: 2000;
+}
+
+.message-modal {
+  max-width: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+  animation: modal-slide-up 0.3s ease-out;
+}
+
+@keyframes modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-modal-header {
+  padding: 24px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.message-modal-header.header-success {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: white;
+}
+
+.message-modal-header.header-error {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  color: white;
+}
+
+.message-modal-header.header-info {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: white;
+}
+
+.message-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: icon-pop 0.4s ease-out 0.1s both;
+}
+
+@keyframes icon-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.message-icon-wrapper svg {
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+.message-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.message-modal-body {
+  padding: 20px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.message-modal-body strong {
+  color: #1f2937;
+}
+
+.message-modal-footer {
+  padding: 16px 24px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-message-ok {
+  padding: 10px 32px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-message-ok.success {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: white;
+}
+
+.btn-message-ok.success:hover {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-message-ok.error {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  color: white;
+}
+
+.btn-message-ok.error:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-message-ok.info {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: white;
+}
+
+.btn-message-ok.info:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
 /* Responsive */
 @media (max-width: 992px) {
   .main-content {
@@ -5477,7 +5763,17 @@ const logout = () => {
 }
 
 .seccion-icon {
-  font-size: 18px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.seccion-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .seccion-icon.origen {
@@ -5979,7 +6275,18 @@ const logout = () => {
 }
 
 .summary-icon {
-  font-size: clamp(18px, 4vw, 22px);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.summary-icon svg {
+  width: 18px;
+  height: 18px;
+  color: #059669;
 }
 
 .summary-text {
@@ -6278,3 +6585,12 @@ const logout = () => {
   }
 }
 </style>
+
+
+
+
+
+
+
+
+

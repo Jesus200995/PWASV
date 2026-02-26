@@ -146,8 +146,12 @@
     <div class="quick-links-wrapper">
       <div class="quick-links-header" @click="quickLinksExpanded = !quickLinksExpanded">
         <div class="header-title-wrapper">
-          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Celular -->
+            <rect x="6" y="2" width="10" height="16" rx="1.5" ry="1.5"/>
+            <line x1="11" y1="16" x2="11.01" y2="16"/>
+            <!-- Cursor/Puntero grande apuntando al centro con animación y borde -->
+            <path class="cursor-pointer" d="M12 5 L12 16 L15.5 12.5 L18 18 L20.5 17 L18 11.5 L23 10.5 Z" fill="currentColor" stroke="#15803d" stroke-width="0.8" stroke-linejoin="miter"/>
           </svg>
           <span class="header-title">Enlaces Rápidos</span>
         </div>
@@ -985,136 +989,87 @@ const onLeave = (el) => {
 /* Links rápidos */
 .quick-links-wrapper {
   margin: 0 10px 10px;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(22, 163, 74, 0.12) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 12px;
-  border: 1.5px solid rgba(74, 222, 128, 0.25);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: transparent;
+  border-radius: 10px;
+  border: none;
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .quick-links-wrapper:hover {
-  border-color: rgba(74, 222, 128, 0.5);
-  box-shadow: 
-    0 6px 16px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: transparent;
 }
 
 .quick-links-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 12px 14px;
+  gap: 10px;
+  padding: 10px 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: rgba(34, 197, 94, 0.08);
-  border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+  background: linear-gradient(135deg, 
+    rgba(34, 197, 94, 0.25) 0%, 
+    rgba(22, 163, 74, 0.35) 100%);
+  border: none;
+  border-radius: 10px;
   user-select: none;
-  min-height: 40px;
+  min-height: 36px;
   position: relative;
   overflow: hidden;
 }
 
 .quick-links-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 60%;
-  height: 60%;
-  background: radial-gradient(
-    ellipse at top left,
-    rgba(139, 195, 74, 0.35) 0%,
-    rgba(139, 195, 74, 0.2) 30%,
-    rgba(139, 195, 74, 0.08) 50%,
-    transparent 70%
-  );
-  pointer-events: none;
-  opacity: 1;
+  display: none;
 }
 
 .quick-links-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 60%;
-  height: 60%;
-  background: radial-gradient(
-    ellipse at bottom right,
-    rgba(139, 195, 74, 0.35) 0%,
-    rgba(139, 195, 74, 0.2) 30%,
-    rgba(139, 195, 74, 0.08) 50%,
-    transparent 70%
-  );
-  pointer-events: none;
-  opacity: 1;
+  display: none;
 }
 
 .header-title-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
   position: relative;
   z-index: 1;
 }
 
 .header-icon {
-  width: 16px;
-  height: 16px;
-  color: #39FF14;
+  width: 18px;
+  height: 18px;
+  color: #39ff14;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 4px rgba(57, 255, 20, 0.6));
-  animation: pulse-glow 2s ease-in-out infinite;
-  margin-top: -1px;
+  margin-top: 0;
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    filter: drop-shadow(0 0 4px rgba(57, 255, 20, 0.6));
-    transform: scale(1);
-  }
-  50% {
-    filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.8));
-    transform: scale(1.05);
-  }
+.cursor-pointer {
+  stroke: #15803d;
+  stroke-width: 0.8;
+  fill: currentColor;
+}
+
+.header-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #39ff14;
+  letter-spacing: 0.4px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 .quick-links-header:hover {
-  background: rgba(34, 197, 94, 0.15);
+  background: linear-gradient(135deg, 
+    rgba(34, 197, 94, 0.4) 0%, 
+    rgba(22, 163, 74, 0.5) 100%);
+  transform: translateY(-1px);
 }
 
 .quick-links-header:active {
   transform: scale(0.98);
-}
-
-.header-title {
-  font-size: 11px;
-  font-weight: 800;
-  background: linear-gradient(
-    90deg,
-    #39FF14 0%,
-    #39FF14 30%,
-    #a7f3d0 50%,
-    #39FF14 70%,
-    #39FF14 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 0.5px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  animation: shimmer-text 3s infinite linear;
-  line-height: 1;
-  display: flex;
-  align-items: center;
 }
 
 @keyframes shimmer-text {

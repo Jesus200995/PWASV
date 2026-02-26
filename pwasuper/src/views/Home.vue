@@ -5854,7 +5854,7 @@ watch([entradaMarcada, salidaMarcada], () => {
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   border: 1px solid rgba(147, 51, 234, 0.15);
   border-radius: 24px;
-  padding: 0.5rem 0 !important;
+  padding: 1rem 0.5rem !important;
   box-shadow: 
     0 8px 32px rgba(147, 51, 234, 0.12),
     0 2px 8px rgba(0, 0, 0, 0.04),

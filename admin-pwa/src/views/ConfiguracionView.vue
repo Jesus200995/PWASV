@@ -21,449 +21,391 @@
       </header>
 
       <div class="page-content">
-        <!-- Sección: Configuración General -->
-        <section class="config-section">
-          <div class="section-glass-container">
-            <div class="section-header">
-              <div class="section-icon settings-section-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="3"/>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                </svg>
-              </div>
-              <div class="section-title">
-                <h2>Configuracion General</h2>
-                <p>Ajustes de API, aplicacion e informacion del sistema</p>
-              </div>
-            </div>
-            
-            <div class="config-grid config-grid-3">
-              <!-- API -->
-              <div class="config-card-modern">
-                <div class="card-header-modern">
-                  <div class="card-icon-modern api-gradient">
+        <div class="two-column-layout">
+          <!-- COLUMNA IZQUIERDA -->
+          <div class="main-column">
+            <!-- Configuración General -->
+            <section class="config-section compact">
+              <div class="section-glass-container compact">
+                <div class="section-header compact">
+                  <div class="section-icon settings-section-icon sm">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                      <polyline points="14,2 14,8 20,8"/>
-                      <line x1="12" y1="18" x2="12" y2="12"/>
-                      <line x1="9" y1="15" x2="15" y2="15"/>
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                     </svg>
                   </div>
-                  <div class="card-title-modern">
-                    <h3>Conexion API</h3>
-                    <span class="card-subtitle">Servidor de datos</span>
+                  <div class="section-title">
+                    <h2>Configuracion General</h2>
                   </div>
                 </div>
-                <div class="card-body-modern">
-                  <div class="form-group-modern">
-                    <label>URL del Servidor</label>
-                    <input v-model="apiConfig.url" type="url" class="form-input-modern" placeholder="https://apipwa.sembrandodatos.com">
-                  </div>
-                  <div class="form-group-modern">
-                    <label>Timeout (segundos)</label>
-                    <input v-model="apiConfig.timeout" type="number" class="form-input-modern" min="5" max="60">
-                  </div>
-                </div>
-                <div class="card-footer-modern">
-                  <button @click="guardarConfigAPI" class="btn-modern btn-modern-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                    Guardar
-                  </button>
-                </div>
-              </div>
-
-              <!-- Aplicacion -->
-              <div class="config-card-modern">
-                <div class="card-header-modern">
-                  <div class="card-icon-modern app-gradient">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                      <line x1="8" y1="21" x2="16" y2="21"/>
-                      <line x1="12" y1="17" x2="12" y2="21"/>
-                    </svg>
-                  </div>
-                  <div class="card-title-modern">
-                    <h3>Aplicacion</h3>
-                    <span class="card-subtitle">Preferencias generales</span>
-                  </div>
-                </div>
-                <div class="card-body-modern">
-                  <div class="form-group-modern">
-                    <label>Nombre</label>
-                    <input v-model="appConfig.name" type="text" class="form-input-modern" placeholder="Sembrando Vida Admin">
-                  </div>
-                  <div class="form-group-modern">
-                    <label>Registros por pagina</label>
-                    <select v-model="appConfig.recordsPerPage" class="form-select-modern">
-                      <option value="10">10</option>
-                      <option value="25">25</option>
-                      <option value="50">50</option>
-                      <option value="100">100</option>
-                    </select>
-                  </div>
-                  <div class="checkbox-group-modern">
-                    <label class="toggle-switch">
-                      <input id="autoRefresh" v-model="appConfig.autoRefresh" type="checkbox">
-                      <span class="toggle-slider"></span>
-                    </label>
-                    <label for="autoRefresh" class="toggle-label">Actualizacion automatica</label>
-                  </div>
-                </div>
-                <div class="card-footer-modern">
-                  <button @click="guardarConfigApp" class="btn-modern btn-modern-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                    Guardar
-                  </button>
-                </div>
-              </div>
-
-              <!-- Sistema -->
-              <div class="config-card-modern">
-                <div class="card-header-modern">
-                  <div class="card-icon-modern info-gradient">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <line x1="12" y1="16" x2="12" y2="12"/>
-                      <line x1="12" y1="8" x2="12.01" y2="8"/>
-                    </svg>
-                  </div>
-                  <div class="card-title-modern">
-                    <h3>Sistema</h3>
-                    <span class="card-subtitle">Informacion del servidor</span>
-                  </div>
-                </div>
-                <div class="card-body-modern">
-                  <div class="info-grid-modern">
-                    <div class="info-row-modern">
-                      <span class="info-label-modern">Version</span>
-                      <span class="info-value-modern">v1.0.0</span>
-                    </div>
-                    <div class="info-row-modern">
-                      <span class="info-label-modern">Actualizacion</span>
-                      <span class="info-value-modern">{{ new Date().toLocaleDateString('es-ES') }}</span>
-                    </div>
-                    <div class="info-row-modern">
-                      <span class="info-label-modern">Estado</span>
-                      <span :class="['status-badge-modern', serverStatus.class]">{{ serverStatus.text }}</span>
-                    </div>
-                    <div class="info-row-modern">
-                      <span class="info-label-modern">Admin</span>
-                      <span class="info-value-modern">{{ adminUser }}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-footer-modern">
-                  <button @click="verificarEstadoServidor" class="btn-modern btn-modern-secondary" :disabled="checking">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                    {{ checking ? 'Verificando...' : 'Verificar' }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Seccion: Gestion de Datos -->
-        <section class="config-section">
-          <div class="section-glass-container">
-            <div class="section-header">
-              <div class="section-icon data-section-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <ellipse cx="12" cy="5" rx="9" ry="3"/>
-                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-                </svg>
-              </div>
-              <div class="section-title">
-                <h2>Gestion de Datos</h2>
-                <p>Exportacion y descarga de informacion del sistema</p>
-              </div>
-            </div>
-            
-            <div class="data-actions-grid">
-              <div class="data-action-card" @click="exportarDatos" :class="{ disabled: exporting }">
-                <div class="data-action-icon blue-gradient">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                  </svg>
-                </div>
-                <div class="data-action-info">
-                  <h4>{{ exporting ? 'Exportando...' : 'Exportar JSON' }}</h4>
-                  <p>Todos los datos en formato JSON</p>
-                </div>
-                <div class="data-action-arrow">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </div>
-
-              <div class="data-action-card" @click="descargarBaseDatos" :class="{ disabled: descargandoBD }">
-                <div class="data-action-icon purple-gradient">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <ellipse cx="12" cy="5" rx="9" ry="3"/>
-                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-                  </svg>
-                </div>
-                <div class="data-action-info">
-                  <h4>{{ descargandoBD ? 'Descargando...' : 'Base de Datos' }}</h4>
-                  <p>Descarga completa de BD</p>
-                </div>
-                <div class="data-action-arrow">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </div>
-
-              <div class="data-action-card" @click="descargarBDRapida" :class="{ disabled: descargandoBDRapida }">
-                <div class="data-action-icon pink-gradient">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                  </svg>
-                </div>
-                <div class="data-action-info">
-                  <h4>{{ descargandoBDRapida ? 'Descargando...' : 'BD Rapida' }}</h4>
-                  <p>Descarga optimizada</p>
-                </div>
-                <div class="data-action-arrow">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </div>
-
-              <div class="data-action-card" @click="descargarRegistrosCSV" :class="{ disabled: descargandoRegistrosCSV }">
-                <div class="data-action-icon orange-gradient">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                  </svg>
-                </div>
-                <div class="data-action-info">
-                  <h4>{{ descargandoRegistrosCSV ? 'Exportando...' : 'Actividades CSV' }}</h4>
-                  <p>Registros en formato CSV</p>
-                </div>
-                <div class="data-action-arrow">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </div>
-
-              <div class="data-action-card" @click="descargarUsuarios" :class="{ disabled: descargandoUsuarios }">
-                <div class="data-action-icon cyan-gradient">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                  </svg>
-                </div>
-                <div class="data-action-info">
-                  <h4>{{ descargandoUsuarios ? 'Descargando...' : 'Exportar Usuarios' }}</h4>
-                  <p>Lista de usuarios registrados</p>
-                </div>
-                <div class="data-action-arrow">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Seccion: Gestion de Imagenes -->
-        <section class="config-section">
-          <div class="section-glass-container">
-            <div class="section-header">
-              <div class="section-icon images-section-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <polyline points="21 15 16 10 5 21"/>
-                </svg>
-              </div>
-              <div class="section-title">
-                <h2>Gestion de Imagenes</h2>
-                <p>Limpieza y administracion de archivos de imagen</p>
-              </div>
-            </div>
-            
-            <div class="images-grid-two-col">
-              <div class="image-card-large" @click="confirmarEliminarImagenes" :class="{ disabled: eliminandoImagenes }">
-                <div class="image-card-header red-accent">
-                  <div class="image-card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="3 6 5 6 21 6"/>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                      <line x1="10" y1="11" x2="10" y2="17"/>
-                      <line x1="14" y1="11" x2="14" y2="17"/>
-                    </svg>
-                  </div>
-                  <span class="image-card-badge destructive">Accion destructiva</span>
-                </div>
-                <div class="image-card-body">
-                  <h4>{{ eliminandoImagenes ? 'Eliminando...' : 'Eliminar Todas las Imagenes' }}</h4>
-                  <p>Elimina todas las imagenes de registros y asistencias del sistema de forma permanente</p>
-                </div>
-                <div class="image-card-footer">
-                  <span class="image-card-action">Ejecutar</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </div>
-
-              <div class="image-card-large" @click="abrirModalEliminarPorFecha" :class="{ disabled: eliminandoImagenesPorFecha }">
-                <div class="image-card-header orange-accent">
-                  <div class="image-card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6"/>
-                      <line x1="8" y1="2" x2="8" y2="6"/>
-                      <line x1="3" y1="10" x2="21" y2="10"/>
-                      <line x1="9" y1="16" x2="15" y2="16"/>
-                    </svg>
-                  </div>
-                  <span class="image-card-badge selective">Selectiva</span>
-                </div>
-                <div class="image-card-body">
-                  <h4>{{ eliminandoImagenesPorFecha ? 'Eliminando...' : 'Eliminar por Periodo' }}</h4>
-                  <p>Selecciona un mes o año especifico para eliminar imagenes de forma controlada</p>
-                </div>
-                <div class="image-card-footer">
-                  <span class="image-card-action">Configurar</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Seccion: Herramientas -->
-        <section class="config-section">
-          <div class="section-glass-container">
-            <div class="section-header">
-              <div class="section-icon tools-section-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                </svg>
-              </div>
-              <div class="section-title">
-                <h2>Herramientas del Sistema</h2>
-                <p>Mantenimiento y utilidades de administracion</p>
-              </div>
-            </div>
-            
-            <div class="tools-grid-modern">
-              <button class="tool-card-modern" @click="limpiarCache">
-                <div class="tool-card-icon amber-gradient">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"/>
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                  </svg>
-                </div>
-                <span class="tool-card-label">Limpiar Cache</span>
-              </button>
-
-              <button class="tool-card-modern" @click="reiniciarContadores">
-                <div class="tool-card-icon green-gradient">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="23 4 23 10 17 10"/>
-                    <polyline points="1 20 1 14 7 14"/>
-                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                  </svg>
-                </div>
-                <span class="tool-card-label">Reiniciar Contadores</span>
-              </button>
-
-              <button class="tool-card-modern" @click="mostrarLogs">
-                <div class="tool-card-icon gray-gradient">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10 9 9 9 8 9"/>
-                  </svg>
-                </div>
-                <span class="tool-card-label">Ver Logs</span>
-              </button>
-
-              <button class="tool-card-modern" @click="abrirModalTransferencia">
-                <div class="tool-card-icon teal-gradient">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="17 1 21 5 17 9"/>
-                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                    <polyline points="7 23 3 19 7 15"/>
-                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-                  </svg>
-                </div>
-                <span class="tool-card-label">Transferir Actividades</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Seccion: Zona Peligrosa (BLOQUEADA) -->
-        <section class="config-section">
-          <div class="section-glass-container danger-glass">
-            <div class="section-header">
-              <div class="section-icon danger-section-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                  <line x1="12" y1="9" x2="12" y2="13"/>
-                  <line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
-              </div>
-              <div class="section-title">
-                <h2>Zona Peligrosa</h2>
-                <p>Acciones destructivas - Seccion bloqueada por seguridad</p>
-              </div>
-            </div>
-            
-            <div class="danger-card-modern">
-              <div class="danger-warning-modern">
-                <svg class="danger-warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-                <div class="danger-warning-text">
-                  <strong>Seccion Bloqueada</strong>
-                  <p>Esta zona esta temporalmente deshabilitada por seguridad. Las funciones de eliminacion masiva no estan disponibles.</p>
-                </div>
-              </div>
-              
-              <div class="danger-buttons-grid">
-                <button class="danger-btn-modern" disabled>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                  </svg>
-                  <span>Eliminar Registros</span>
-                </button>
                 
-                <button class="danger-btn-modern" disabled>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12,6 12,12 16,14"/>
-                  </svg>
-                  <span>Eliminar Asistencias</span>
-                </button>
-              </div>
-              
-              <!-- Overlay de bloqueo -->
-              <div class="blocked-overlay-modern">
-                <div class="blocked-content">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                    <circle cx="12" cy="16" r="1"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                  </svg>
-                  <span>BLOQUEADO</span>
+                <div class="config-cards-row">
+                  <!-- API -->
+                  <div class="config-card-compact">
+                    <div class="card-header-compact">
+                      <div class="card-icon-sm api-gradient">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                          <polyline points="14,2 14,8 20,8"/>
+                          <line x1="12" y1="18" x2="12" y2="12"/>
+                          <line x1="9" y1="15" x2="15" y2="15"/>
+                        </svg>
+                      </div>
+                      <span class="card-label">Conexion API</span>
+                    </div>
+                    <div class="card-body-compact">
+                      <div class="form-row">
+                        <label>URL</label>
+                        <input v-model="apiConfig.url" type="url" class="input-compact" placeholder="https://apipwa.sembrandodatos.com">
+                      </div>
+                      <div class="form-row">
+                        <label>Timeout</label>
+                        <input v-model="apiConfig.timeout" type="number" class="input-compact" min="5" max="60">
+                      </div>
+                    </div>
+                    <button @click="guardarConfigAPI" class="btn-compact btn-primary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                      Guardar
+                    </button>
+                  </div>
+
+                  <!-- Aplicacion -->
+                  <div class="config-card-compact">
+                    <div class="card-header-compact">
+                      <div class="card-icon-sm app-gradient">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                          <line x1="8" y1="21" x2="16" y2="21"/>
+                          <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                      </div>
+                      <span class="card-label">Aplicacion</span>
+                    </div>
+                    <div class="card-body-compact">
+                      <div class="form-row">
+                        <label>Nombre</label>
+                        <input v-model="appConfig.name" type="text" class="input-compact" placeholder="Sembrando Vida Admin">
+                      </div>
+                      <div class="form-row">
+                        <label>Registros</label>
+                        <select v-model="appConfig.recordsPerPage" class="select-compact">
+                          <option value="10">10</option>
+                          <option value="25">25</option>
+                          <option value="50">50</option>
+                          <option value="100">100</option>
+                        </select>
+                      </div>
+                      <div class="toggle-row">
+                        <label class="toggle-sm">
+                          <input v-model="appConfig.autoRefresh" type="checkbox">
+                          <span class="slider-sm"></span>
+                        </label>
+                        <span class="toggle-text">Auto-refresh</span>
+                      </div>
+                    </div>
+                    <button @click="guardarConfigApp" class="btn-compact btn-primary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                      Guardar
+                    </button>
+                  </div>
+
+                  <!-- Sistema -->
+                  <div class="config-card-compact">
+                    <div class="card-header-compact">
+                      <div class="card-icon-sm info-gradient">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="12" y1="16" x2="12" y2="12"/>
+                          <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                      </div>
+                      <span class="card-label">Sistema</span>
+                    </div>
+                    <div class="card-body-compact">
+                      <div class="info-mini">
+                        <span>Version</span><span class="val">v1.0.0</span>
+                      </div>
+                      <div class="info-mini">
+                        <span>Fecha</span><span class="val">{{ new Date().toLocaleDateString('es-ES') }}</span>
+                      </div>
+                      <div class="info-mini">
+                        <span>Estado</span><span :class="['badge-mini', serverStatus.class]">{{ serverStatus.text }}</span>
+                      </div>
+                      <div class="info-mini">
+                        <span>Admin</span><span class="val">{{ adminUser }}</span>
+                      </div>
+                    </div>
+                    <button @click="verificarEstadoServidor" class="btn-compact btn-secondary" :disabled="checking">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                      {{ checking ? 'Verificando...' : 'Verificar' }}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </section>
+
+            <!-- Gestion de Imagenes -->
+            <section class="config-section compact">
+              <div class="section-glass-container compact">
+                <div class="section-header compact">
+                  <div class="section-icon images-section-icon sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <div class="section-title">
+                    <h2>Gestion de Imagenes</h2>
+                  </div>
+                </div>
+                
+                <div class="image-cards-row">
+                  <div class="image-action-card red" @click="confirmarEliminarImagenes" :class="{ disabled: eliminandoImagenes }">
+                    <div class="image-action-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </div>
+                    <div class="image-action-text">
+                      <h4>{{ eliminandoImagenes ? 'Eliminando...' : 'Eliminar Todas' }}</h4>
+                      <p>Elimina todas las imagenes del sistema</p>
+                    </div>
+                    <span class="action-badge red">Destructiva</span>
+                  </div>
+
+                  <div class="image-action-card orange" @click="abrirModalEliminarPorFecha" :class="{ disabled: eliminandoImagenesPorFecha }">
+                    <div class="image-action-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                    </div>
+                    <div class="image-action-text">
+                      <h4>{{ eliminandoImagenesPorFecha ? 'Eliminando...' : 'Por Periodo' }}</h4>
+                      <p>Elimina por mes o año especifico</p>
+                    </div>
+                    <span class="action-badge orange">Selectiva</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Herramientas -->
+            <section class="config-section compact">
+              <div class="section-glass-container compact">
+                <div class="section-header compact">
+                  <div class="section-icon tools-section-icon sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                  </div>
+                  <div class="section-title">
+                    <h2>Herramientas</h2>
+                  </div>
+                </div>
+                
+                <div class="tools-row">
+                  <button class="tool-btn" @click="limpiarCache">
+                    <div class="tool-icon amber">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                      </svg>
+                    </div>
+                    <span>Cache</span>
+                  </button>
+
+                  <button class="tool-btn" @click="reiniciarContadores">
+                    <div class="tool-icon green">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <polyline points="1 20 1 14 7 14"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                      </svg>
+                    </div>
+                    <span>Contadores</span>
+                  </button>
+
+                  <button class="tool-btn" @click="mostrarLogs">
+                    <div class="tool-icon gray">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                    </div>
+                    <span>Logs</span>
+                  </button>
+
+                  <button class="tool-btn" @click="abrirModalTransferencia">
+                    <div class="tool-icon teal">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="17 1 21 5 17 9"/>
+                        <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                        <polyline points="7 23 3 19 7 15"/>
+                        <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                      </svg>
+                    </div>
+                    <span>Transferir</span>
+                  </button>
+                </div>
+              </div>
+            </section>
           </div>
-        </section>
+
+          <!-- COLUMNA DERECHA -->
+          <div class="side-column">
+            <!-- Gestion de Datos -->
+            <section class="config-section compact">
+              <div class="section-glass-container compact">
+                <div class="section-header compact">
+                  <div class="section-icon data-section-icon sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                    </svg>
+                  </div>
+                  <div class="section-title">
+                    <h2>Gestion de Datos</h2>
+                  </div>
+                </div>
+                
+                <div class="data-list">
+                  <div class="data-item" @click="exportarDatos" :class="{ disabled: exporting }">
+                    <div class="data-icon blue">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                    </div>
+                    <div class="data-text">
+                      <h4>{{ exporting ? 'Exportando...' : 'Exportar JSON' }}</h4>
+                      <p>Todos los datos</p>
+                    </div>
+                    <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
+
+                  <div class="data-item" @click="descargarBaseDatos" :class="{ disabled: descargandoBD }">
+                    <div class="data-icon purple">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                      </svg>
+                    </div>
+                    <div class="data-text">
+                      <h4>{{ descargandoBD ? 'Descargando...' : 'Base de Datos' }}</h4>
+                      <p>Descarga completa</p>
+                    </div>
+                    <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
+
+                  <div class="data-item" @click="descargarBDRapida" :class="{ disabled: descargandoBDRapida }">
+                    <div class="data-icon pink">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                      </svg>
+                    </div>
+                    <div class="data-text">
+                      <h4>{{ descargandoBDRapida ? 'Descargando...' : 'BD Rapida' }}</h4>
+                      <p>Descarga optimizada</p>
+                    </div>
+                    <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
+
+                  <div class="data-item" @click="descargarRegistrosCSV" :class="{ disabled: descargandoRegistrosCSV }">
+                    <div class="data-icon orange">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                    </div>
+                    <div class="data-text">
+                      <h4>{{ descargandoRegistrosCSV ? 'Exportando...' : 'Actividades CSV' }}</h4>
+                      <p>Formato CSV</p>
+                    </div>
+                    <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
+
+                  <div class="data-item" @click="descargarUsuarios" :class="{ disabled: descargandoUsuarios }">
+                    <div class="data-icon cyan">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                      </svg>
+                    </div>
+                    <div class="data-text">
+                      <h4>{{ descargandoUsuarios ? 'Descargando...' : 'Usuarios' }}</h4>
+                      <p>Lista registrados</p>
+                    </div>
+                    <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Zona Peligrosa -->
+            <section class="config-section compact">
+              <div class="section-glass-container compact danger-glass">
+                <div class="section-header compact">
+                  <div class="section-icon danger-section-icon sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                      <line x1="12" y1="9" x2="12" y2="13"/>
+                      <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                  </div>
+                  <div class="section-title">
+                    <h2>Zona Peligrosa</h2>
+                  </div>
+                </div>
+                
+                <div class="danger-zone-compact">
+                  <div class="danger-alert">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <p>Seccion bloqueada por seguridad</p>
+                  </div>
+                  
+                  <div class="danger-btns">
+                    <button class="danger-btn-sm" disabled>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      </svg>
+                      Eliminar Registros
+                    </button>
+                    <button class="danger-btn-sm" disabled>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12,6 12,12 16,14"/>
+                      </svg>
+                      Eliminar Asistencias
+                    </button>
+                  </div>
+                  
+                  <div class="blocked-overlay-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <circle cx="12" cy="16" r="1"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <span>BLOQUEADO</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
     </main>    <!-- Modal para mensajes -->
     <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
@@ -2557,18 +2499,38 @@ const logout = () => {
 /* === CONTENT STYLES === */
 .page-content {
   flex: 1;
-  padding: 16px;
-  max-width: 1400px;
+  padding: 12px;
+  max-width: 1600px;
   margin: 0 auto;
   width: 100%;
+}
+
+/* === TWO COLUMN LAYOUT === */
+.two-column-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .two-column-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.main-column, .side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 /* Grid moderno y compacto */
 .config-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .config-grid-3 {
@@ -2666,17 +2628,663 @@ const logout = () => {
 }
 
 .section-title h2 {
-  margin: 0 0 4px 0;
-  font-size: 18px;
-  font-weight: 700;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
   color: #1f2937;
   font-family: 'Inter', sans-serif;
 }
 
 .section-title p {
   margin: 0;
-  font-size: 13px;
+  font-size: 11px;
   color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+/* === COMPACT VARIANTS === */
+.config-section.compact {
+  margin-bottom: 0;
+}
+
+.section-glass-container.compact {
+  padding: 14px 16px;
+  border-radius: 14px;
+}
+
+.section-header.compact {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  gap: 10px;
+}
+
+.section-icon.sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.section-icon.sm svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* === CONFIG CARDS ROW (3 cards horizontal) === */
+.config-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .config-cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.config-card-compact {
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-header-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-icon-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-icon-sm svg {
+  width: 14px;
+  height: 14px;
+}
+
+.card-icon-sm.api-gradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.card-icon-sm.app-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.card-icon-sm.info-gradient {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+}
+
+.card-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  font-family: 'Inter', sans-serif;
+}
+
+.card-body-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.form-row label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-compact, .select-compact {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  background: #f9fafb;
+  box-sizing: border-box;
+}
+
+.input-compact:focus, .select-compact:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.toggle-sm {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  display: inline-block;
+}
+
+.toggle-sm input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-sm {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #e5e7eb;
+  transition: 0.2s;
+  border-radius: 18px;
+}
+
+.slider-sm:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  transition: 0.2s;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.toggle-sm input:checked + .slider-sm {
+  background: #10b981;
+}
+
+.toggle-sm input:checked + .slider-sm:before {
+  transform: translateX(14px);
+}
+
+.toggle-text {
+  font-size: 11px;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: auto;
+}
+
+.btn-compact svg {
+  width: 12px;
+  height: 12px;
+}
+
+.btn-compact.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.btn-compact.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-compact.btn-secondary {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+}
+
+.btn-compact:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Info Mini (para card Sistema) */
+.info-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.info-mini:last-child {
+  border-bottom: none;
+}
+
+.info-mini span:first-child {
+  color: #6b7280;
+}
+
+.info-mini .val {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.badge-mini {
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-mini.status-online {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.badge-mini.status-offline {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* === IMAGE CARDS ROW === */
+.image-cards-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 700px) {
+  .image-cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.image-action-card {
+  background: white;
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.image-action-card.red {
+  border-left: 3px solid #ef4444;
+}
+
+.image-action-card.orange {
+  border-left: 3px solid #f97316;
+}
+
+.image-action-card:hover {
+  transform: translateX(3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.image-action-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.image-action-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.image-action-card.red .image-action-icon {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.image-action-card.orange .image-action-icon {
+  background: rgba(249, 115, 22, 0.1);
+  color: #ea580c;
+}
+
+.image-action-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.image-action-text {
+  flex: 1;
+}
+
+.image-action-text h4 {
+  margin: 0 0 2px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+}
+
+.image-action-text p {
+  margin: 0;
+  font-size: 10px;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+.action-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.action-badge.red {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.action-badge.orange {
+  background: rgba(249, 115, 22, 0.1);
+  color: #ea580c;
+}
+
+/* === TOOLS ROW === */
+.tools-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 700px) {
+  .tools-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.tool-btn {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 10px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tool-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.tool-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tool-icon.amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.tool-icon.green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.tool-icon.gray {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+}
+
+.tool-icon.teal {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  color: white;
+}
+
+.tool-btn span {
+  font-size: 10px;
+  font-weight: 500;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+}
+
+/* === DATA LIST === */
+.data-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.data-item {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.data-item:hover {
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.data-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.data-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.data-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.data-icon.blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.data-icon.purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+}
+
+.data-icon.pink {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: white;
+}
+
+.data-icon.orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+}
+
+.data-icon.cyan {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+}
+
+.data-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.data-text h4 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-text p {
+  margin: 0;
+  font-size: 10px;
+  color: #9ca3af;
+  font-family: 'Inter', sans-serif;
+}
+
+.data-arrow {
+  width: 14px;
+  height: 14px;
+  color: #d1d5db;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.data-item:hover .data-arrow {
+  transform: translateX(2px);
+  color: #9ca3af;
+}
+
+/* === DANGER ZONE COMPACT === */
+.danger-zone-compact {
+  position: relative;
+  padding: 12px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.danger-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.06);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.danger-alert svg {
+  width: 20px;
+  height: 20px;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.danger-alert p {
+  margin: 0;
+  font-size: 11px;
+  color: #991b1b;
+  font-family: 'Inter', sans-serif;
+}
+
+.danger-btns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.danger-btn-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  font-family: 'Inter', sans-serif;
+  cursor: not-allowed;
+}
+
+.danger-btn-sm svg {
+  width: 14px;
+  height: 14px;
+}
+
+.blocked-overlay-sm {
+  position: absolute;
+  inset: 0;
+  background: rgba(107, 114, 128, 0.06);
+  backdrop-filter: blur(1px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 10px;
+}
+
+.blocked-overlay-sm svg {
+  width: 24px;
+  height: 24px;
+  color: #6b7280;
+}
+
+.blocked-overlay-sm span {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 1px;
   font-family: 'Inter', sans-serif;
 }
 

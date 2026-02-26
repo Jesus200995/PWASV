@@ -1124,14 +1124,20 @@
           />
         </div>
 
-        <!-- Paso 5: Descripción (Opcional) -->
+        <!-- Paso 5: Descripción (Obligatorio) -->
         <div class="apple-step-card-purple mb-4">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center">
               <div class="apple-step-number-purple">5</div>
               <h3 class="apple-step-title">Descripción</h3>
             </div>
-            <span class="text-xs text-gray-400 font-medium">Opcional</span>
+            <div v-if="descripcionRegistro.trim()" class="apple-completed-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Completado</span>
+            </div>
+            <span v-else class="text-xs text-red-400 font-medium">* Requerido</span>
           </div>
           
           <textarea
@@ -1146,7 +1152,7 @@
         </div>
 
         <!-- Checklist de progreso estilo Apple naranja -->
-        <div v-if="entradaMarcada && !salidaMarcada && (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()))" 
+        <div v-if="entradaMarcada && !salidaMarcada && (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || !descripcionRegistro.trim())" 
              class="apple-checklist-card mb-4">
           <div class="flex items-center mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1191,11 +1197,20 @@
               </div>
               <span>Categoría</span>
             </div>
+            <!-- Descripción -->
+            <div :class="['apple-checklist-item', descripcionRegistro.trim() ? 'apple-checklist-item-done' : 'apple-checklist-item-pending']">
+              <div :class="['apple-checklist-circle', descripcionRegistro.trim() ? 'apple-checklist-circle-done' : 'apple-checklist-circle-pending']">
+                <svg v-if="descripcionRegistro.trim()" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Descripción</span>
+            </div>
           </div>
         </div>
 
         <!-- Indicador de listo para enviar estilo Apple -->
-        <div v-if="entradaMarcada && !salidaMarcada && latitudRegistro && longitudRegistro && fotoRegistro && tipoActividad && categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim())" 
+        <div v-if="entradaMarcada && !salidaMarcada && latitudRegistro && longitudRegistro && fotoRegistro && tipoActividad && categoriaActividad && (categoriaActividad !== 'Otro' || categoriaActividadOtro.trim()) && descripcionRegistro.trim()" 
              class="apple-ready-card mb-4">
           <div class="flex items-center justify-center">
             <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-2 animate-bounce">
@@ -1210,8 +1225,8 @@
         <!-- Botón enviar -->
         <button
           type="submit"
-          :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || enviando || !entradaMarcada || salidaMarcada"
-          :class="['glass-button-registro w-full', (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || enviando || !entradaMarcada || salidaMarcada) ? 'opacity-50 cursor-not-allowed' : '']"
+          :disabled="!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || !descripcionRegistro.trim() || enviando || !entradaMarcada || salidaMarcada"
+          :class="['glass-button-registro w-full', (!latitudRegistro || !longitudRegistro || !fotoRegistro || !tipoActividad || !categoriaActividad || (categoriaActividad === 'Otro' && !categoriaActividadOtro.trim()) || !descripcionRegistro.trim() || enviando || !entradaMarcada || salidaMarcada) ? 'opacity-50 cursor-not-allowed' : '']"
         >
           <span v-if="enviando" class="flex items-center justify-center">
             <svg
@@ -5674,19 +5689,24 @@ watch([entradaMarcada, salidaMarcada], () => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.apple-checklist-done {
+/* Estados del item del checklist */
+.apple-checklist-done,
+.apple-checklist-item-done {
   background: rgba(48, 209, 88, 0.1);
   color: #30d158;
   border: 1px solid rgba(48, 209, 88, 0.2);
 }
 
-.apple-checklist-pending {
+.apple-checklist-pending,
+.apple-checklist-item-pending {
   background: rgba(142, 142, 147, 0.1);
   color: #8e8e93;
   border: 1px solid rgba(142, 142, 147, 0.15);
 }
 
-.apple-checklist-check {
+/* Círculo de check */
+.apple-checklist-check,
+.apple-checklist-circle {
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -5695,14 +5715,17 @@ watch([entradaMarcada, salidaMarcada], () => {
   justify-content: center;
   margin-right: 0.375rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
-.apple-check-done {
+.apple-check-done,
+.apple-checklist-circle-done {
   background: linear-gradient(180deg, #30d158 0%, #28a745 100%);
   box-shadow: 0 2px 4px rgba(48, 209, 88, 0.3);
 }
 
-.apple-check-pending {
+.apple-check-pending,
+.apple-checklist-circle-pending {
   background: #c7c7cc;
 }
 

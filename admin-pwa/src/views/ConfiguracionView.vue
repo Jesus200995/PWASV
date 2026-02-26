@@ -1971,14 +1971,8 @@ const cerrarProgressModal = () => {
 }
 
 const onProgressCompletado = () => {
-  // El modal se cierra después de unos segundos automáticamente
-  setTimeout(() => {
-    cerrarProgressModal()
-    mostrarMensaje(
-      '✅ Eliminación exitosa',
-      'Todas las imágenes han sido eliminadas correctamente del sistema.'
-    )
-  }, 2000)
+  // No cerrar automáticamente - el usuario debe cerrar manualmente con el botón "Aceptar"
+  eliminandoImagenes.value = false
 }
 
 // ==================== FUNCIONES DE ELIMINAR IMÁGENES POR FECHA ====================
@@ -2081,10 +2075,8 @@ const cerrarProgressModalFecha = () => {
 }
 
 const onProgressFechaCompletado = () => {
-  // El modal se cierra después de unos segundos automáticamente
-  setTimeout(() => {
-    cerrarProgressModalFecha()
-  }, 2000)
+  // No cerrar automáticamente - el usuario debe cerrar manualmente con el botón "Aceptar"
+  eliminandoImagenesPorFecha.value = false
 }
 
 // ==================== FUNCIONES DE TRANSFERENCIA DE ACTIVIDADES ====================

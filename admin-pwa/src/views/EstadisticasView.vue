@@ -19,8 +19,15 @@
             </div>
           </div>
           <div class="header-actions">
-            <button class="btn-refresh" @click="cargarEstadisticas" :disabled="cargando">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div v-if="actualizando" class="updating-indicator">
+              <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 4v6h-6"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+              <span>Actualizando...</span>
+            </div>
+            <button class="btn-refresh" @click="cargarEstadisticas" :disabled="cargando || actualizando">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ 'spin-icon': actualizando }">
                 <path d="M23 4v6h-6"/>
                 <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
               </svg>
@@ -365,7 +372,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Sidebar from '../components/Sidebar.vue';
 import { obtenerEstadisticasDispositivos } from '../services/dispositivosService.js';
@@ -373,21 +380,45 @@ import { obtenerEstadisticasDispositivos } from '../services/dispositivosService
 const router = useRouter();
 const estadisticas = ref(null);
 const cargando = ref(false);
+const actualizando = ref(false);
 const error = ref('');
+const primeraVez = ref(true);
+let intervaloActualizacion = null;
 
-// Cargar estadísticas
+// Cargar estadísticas (reactivo sin recargar página)
 async function cargarEstadisticas() {
-  cargando.value = true;
+  // Solo mostrar loading completo en la primera carga
+  if (primeraVez.value) {
+    cargando.value = true;
+  } else {
+    actualizando.value = true;
+  }
   error.value = '';
   
   try {
-    estadisticas.value = await obtenerEstadisticasDispositivos();
-    console.log('Estadísticas cargadas:', estadisticas.value);
+    const nuevosData = await obtenerEstadisticasDispositivos();
+    // Actualizar de forma reactiva sin reemplazar todo el objeto
+    if (estadisticas.value) {
+      // Actualizar cada propiedad individualmente para reactividad suave
+      estadisticas.value.total_usuarios = nuevosData.total_usuarios;
+      estadisticas.value.por_dispositivo = nuevosData.por_dispositivo;
+      estadisticas.value.por_cargo = nuevosData.por_cargo;
+      estadisticas.value.activos_30_dias = nuevosData.activos_30_dias;
+      estadisticas.value.estado_usuarios = nuevosData.estado_usuarios;
+    } else {
+      estadisticas.value = nuevosData;
+    }
+    console.log('Estadísticas actualizadas:', estadisticas.value);
   } catch (err) {
     console.error('Error al cargar estadísticas:', err);
-    error.value = 'No se pudieron cargar las estadísticas. Por favor, intenta de nuevo.';
+    // Solo mostrar error si es la primera carga
+    if (primeraVez.value) {
+      error.value = 'No se pudieron cargar las estadísticas. Por favor, intenta de nuevo.';
+    }
   } finally {
     cargando.value = false;
+    actualizando.value = false;
+    primeraVez.value = false;
   }
 }
 
@@ -478,8 +509,14 @@ function logout() {
 
 onMounted(() => {
   cargarEstadisticas();
-  const interval = setInterval(() => cargarEstadisticas(), 30000);
-  return () => clearInterval(interval);
+  // Actualizar cada 30 segundos de forma silenciosa
+  intervaloActualizacion = setInterval(() => cargarEstadisticas(), 30000);
+});
+
+onUnmounted(() => {
+  if (intervaloActualizacion) {
+    clearInterval(intervaloActualizacion);
+  }
 });
 </script>
 
@@ -619,6 +656,29 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+.updating-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  border-radius: 8px;
+  color: #86efac;
+  font-size: 11px;
+  font-weight: 500;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* === PAGE CONTENT === */
 .page-content {
   flex: 1;
@@ -748,6 +808,11 @@ onMounted(() => {
   font-weight: 800;
   line-height: 1;
   margin-bottom: 4px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.main-stat-value:hover {
+  transform: scale(1.02);
 }
 
 .main-stat-desc {
@@ -1048,6 +1113,27 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.cargo-compact-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cargo-compact-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.cargo-compact-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  border-radius: 10px;
+}
+
+.cargo-compact-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #7C3AED, #6D28D9);
 }
 
 .cargo-compact-item {

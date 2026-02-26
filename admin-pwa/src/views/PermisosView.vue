@@ -237,20 +237,23 @@
     <!-- Modal Crear/Editar Usuario -->
     <div v-if="mostrarModalCrear || mostrarModalEditar" class="modal-overlay">
       <div class="modal-content modal-usuario" @click.stop>
-        <div class="modal-header">
+        <div class="modal-header" :class="{ 'modal-header-edit': modoEdicion, 'modal-header-create': !modoEdicion }">
           <div class="modal-header-icon">
-            <svg v-if="!modoEdicion" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg v-if="!modoEdicion" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="8.5" cy="7" r="4"/>
               <line x1="20" y1="8" x2="20" y2="14"/>
               <line x1="23" y1="11" x2="17" y2="11"/>
             </svg>
-            <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </div>
-          <h3>{{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario Admin' }}</h3>
+          <div class="modal-header-text">
+            <h3>{{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario Admin' }}</h3>
+            <p class="modal-subtitle">{{ modoEdicion ? 'Editar y modificar permisos del usuario' : 'Crear usuario o administrador con sus permisos' }}</p>
+          </div>
           <button class="btn-close" @click="cerrarModales" aria-label="Cerrar">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/>
@@ -1091,15 +1094,16 @@
       <div class="modal-content modal-confirm" @click.stop>
         <div class="modal-header modal-header-danger">
           <div class="modal-header-icon danger-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 6h18"/>
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-              <line x1="10" y1="11" x2="10" y2="17"/>
-              <line x1="14" y1="11" x2="14" y2="17"/>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
             </svg>
           </div>
-          <h3>Confirmar Eliminación</h3>
+          <div class="modal-header-text">
+            <h3>Confirmar Eliminación</h3>
+            <p class="modal-subtitle">Esta acción es permanente e irreversible</p>
+          </div>
           <button class="btn-close" @click="cancelarEliminar">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/>
@@ -1111,41 +1115,63 @@
         <div class="modal-body">
           <div class="confirm-content">
             <div class="confirm-icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
             </div>
-            <h4>¿Estás seguro de que deseas eliminar este usuario?</h4>
-            <p><strong>Usuario:</strong> {{ usuarioAEliminar?.username }}</p>
-            <p><strong>Rol:</strong> {{ usuarioAEliminar?.rol === 'admin' ? 'Administrador' : 'Usuario' }}</p>
+            <h4>¿Estás seguro de eliminar este usuario?</h4>
+            
+            <div class="user-info-delete">
+              <div class="info-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span class="label">Usuario:</span>
+                <span class="value">{{ usuarioAEliminar?.username }}</span>
+              </div>
+              <div class="info-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+                <span class="label">Rol:</span>
+                <span class="value">{{ usuarioAEliminar?.rol === 'admin' ? 'Administrador' : 'Usuario' }}</span>
+              </div>
+            </div>
             
             <div class="warning-text">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                 <line x1="12" y1="9" x2="12" y2="13"/>
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
-              Esta acción no se puede deshacer. El usuario perderá acceso inmediatamente.
+              <div>
+                <strong>Advertencia:</strong> Esta acción no se puede deshacer. El usuario perderá acceso inmediatamente al sistema.
+              </div>
             </div>
           </div>
 
           <div class="modal-footer">
             <button class="btn-modal btn-cancel" @click="cancelarEliminar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
               </svg>
               Cancelar
             </button>
             <button class="btn-modal btn-delete" @click="eliminarUsuario" :disabled="eliminando">
               <span v-if="eliminando" class="btn-spinner"></span>
-              <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 6h18"/>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
               </svg>
-              {{ eliminando ? 'Eliminando...' : 'Eliminar Usuario' }}
+              {{ eliminando ? 'Eliminando...' : 'Sí, Eliminar Usuario' }}
             </button>
           </div>
         </div>
@@ -1894,11 +1920,11 @@ export default {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(27, 94, 32, 0.95) 0%, rgba(46, 125, 50, 0.98) 100%);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(102, 187, 106, 0.3);
   padding: clamp(6px, 1vw, 8px) clamp(12px, 2vw, 14px);
   border-radius: clamp(12px, 2vw, 14px);
   font-weight: 600;
@@ -1909,7 +1935,8 @@ export default {
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    0 4px 16px rgba(27, 94, 32, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
   font-family: 'Inter', sans-serif;
   white-space: nowrap;
   position: relative;
@@ -1923,7 +1950,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.3) 0%, rgba(56, 142, 60, 0.2) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
   border-radius: inherit;
@@ -1932,8 +1959,10 @@ export default {
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 
-    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
+    0 6px 20px rgba(27, 94, 32, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  border-color: rgba(102, 187, 106, 0.5);
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.98) 0%, rgba(56, 142, 60, 1) 100%);
 }
 
 .btn-primary:hover::before {
@@ -2488,23 +2517,33 @@ export default {
 }
 
 .btn-edit {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  color: #1976d2;
+  background: linear-gradient(135deg, rgba(13, 71, 161, 0.95) 0%, rgba(21, 101, 192, 0.98) 100%);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  border: 1px solid rgba(66, 165, 245, 0.3);
+  box-shadow: 0 4px 16px rgba(13, 71, 161, 0.4);
 }
 
 .btn-edit:hover {
+  background: linear-gradient(135deg, rgba(21, 101, 192, 0.98) 0%, rgba(25, 118, 210, 1) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+  box-shadow: 0 6px 20px rgba(13, 71, 161, 0.6);
+  border-color: rgba(66, 165, 245, 0.5);
 }
 
 .btn-delete {
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-  color: #d32f2f;
+  background: linear-gradient(135deg, rgba(183, 28, 28, 0.95) 0%, rgba(211, 47, 47, 0.98) 100%);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  border: 1px solid rgba(239, 83, 80, 0.3);
+  box-shadow: 0 4px 16px rgba(183, 28, 28, 0.4);
 }
 
 .btn-delete:hover {
+  background: linear-gradient(135deg, rgba(211, 47, 47, 0.98) 0%, rgba(229, 57, 53, 1) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+  box-shadow: 0 6px 20px rgba(183, 28, 28, 0.6);
+  border-color: rgba(239, 83, 80, 0.5);
 }
 
 /* === EMPTY STATE === */
@@ -2582,7 +2621,7 @@ export default {
 }
 
 .modal-confirm {
-  max-width: 480px;
+  max-width: 520px;
 }
 
 .modal-header {
@@ -2590,16 +2629,28 @@ export default {
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid #e8f5e9;
-  background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(27, 94, 32, 0.95) 0%, rgba(46, 125, 50, 0.98) 100%);
+  backdrop-filter: blur(10px);
   flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal Crear - Verde oscuro cristalino */
+.modal-header-create {
+  background: linear-gradient(135deg, rgba(27, 94, 32, 0.95) 0%, rgba(46, 125, 50, 0.98) 100%) !important;
+  border-bottom: 2px solid rgba(102, 187, 106, 0.3) !important;
+}
+
+/* Modal Editar - Azul oscuro cristalino */
+.modal-header-edit {
+  background: linear-gradient(135deg, rgba(13, 71, 161, 0.95) 0%, rgba(25, 118, 210, 0.98) 100%) !important;
+  border-bottom: 2px solid rgba(66, 165, 245, 0.3) !important;
 }
 
 .modal-header-icon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2607,18 +2658,37 @@ export default {
 }
 
 .modal-header-icon svg {
-  color: white;
-  width: 18px;
-  height: 18px;
+  color: #ffffff;
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+.modal-header-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .modal-header h3 {
-  flex: 1;
   font-size: 16px;
-  font-weight: 600;
-  color: #1b5e20;
+  font-weight: 700;
+  color: #ffffff;
   margin: 0;
   font-family: 'Inter', sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+}
+
+.modal-subtitle {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  line-height: 1.3;
 }
 
 .btn-close {
@@ -2631,14 +2701,15 @@ export default {
   justify-content: center;
   border-radius: 10px;
   cursor: pointer;
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .btn-close:hover {
-  background: rgba(211, 47, 47, 0.1);
-  color: #d32f2f;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.1);
 }
 
 .modal-body {
@@ -3815,17 +3886,17 @@ export default {
 }
 
 .btn-submit {
-  /* Forzar verde suave incluso en modo oscuro */
-  background: #4CAF50 !important;
+  background: linear-gradient(135deg, rgba(27, 94, 32, 0.95) 0%, rgba(46, 125, 50, 0.98) 100%) !important;
   border: none;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 16px rgba(27, 94, 32, 0.4);
+  backdrop-filter: blur(10px);
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: #43A047 !important;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.98) 0%, rgba(56, 142, 60, 1) 100%) !important;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 6px 20px rgba(27, 94, 32, 0.5);
 }
 
 .btn-submit:disabled {
@@ -3846,42 +3917,112 @@ export default {
 /* === CONFIRM MODAL === */
 .confirm-content {
   text-align: center;
+  padding: 8px 0;
 }
 
 .confirm-icon {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 16px;
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, rgba(183, 28, 28, 0.1) 0%, rgba(211, 47, 47, 0.15) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #d32f2f;
+  color: #c62828;
+  border: 3px solid rgba(211, 47, 47, 0.2);
+  box-shadow: 0 4px 20px rgba(183, 28, 28, 0.15), inset 0 2px 8px rgba(255, 255, 255, 0.1);
+  animation: pulseDelete 2s ease-in-out infinite;
+}
+
+.confirm-icon svg {
+  filter: drop-shadow(0 2px 4px rgba(183, 28, 28, 0.3));
+}
+
+@keyframes pulseDelete {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 20px rgba(183, 28, 28, 0.15), inset 0 2px 8px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(183, 28, 28, 0.25), inset 0 2px 8px rgba(255, 255, 255, 0.15);
+  }
 }
 
 .confirm-content h4 {
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 12px 0;
+  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
   font-family: 'Inter', sans-serif;
 }
 
-.confirm-content p {
-  color: #666;
+.user-info-delete {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid #dee2e6;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  color: #495057;
   font-size: 14px;
-  margin: 4px 0;
+}
+
+.info-row:not(:last-child) {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.info-row svg {
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.info-row .label {
+  font-weight: 600;
+  color: #495057;
+  min-width: 60px;
+}
+
+.info-row .value {
+  font-weight: 500;
+  color: #212529;
+  flex: 1;
 }
 
 .warning-text {
-  color: #d32f2f;
-  font-weight: 500;
-  margin: 16px 0 0 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #b71c1c;
+  margin: 20px 0 0 0;
   font-size: 13px;
-  padding: 12px;
-  background: #ffebee;
-  border-radius: 8px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(183, 28, 28, 0.08) 0%, rgba(211, 47, 47, 0.12) 100%);
+  border-radius: 12px;
+  border: 2px solid rgba(183, 28, 28, 0.2);
+  text-align: left;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(183, 28, 28, 0.1);
+}
+
+.warning-text strong {
+  font-weight: 700;
+  color: #b71c1c;
+}
+
+.warning-text div {
+  flex: 1;
+  line-height: 1.5;
+  font-weight: 500;
+  color: #c62828;
 }
 
 .btn-danger {
@@ -3912,30 +4053,35 @@ export default {
 
 /* Modal Delete Header */
 .modal-header-danger {
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-  border-bottom-color: #ffcdd2;
+  background: linear-gradient(135deg, rgba(183, 28, 28, 0.95) 0%, rgba(211, 47, 47, 0.98) 100%) !important;
+  border-bottom: 2px solid rgba(239, 83, 80, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
 .modal-header-danger h3 {
-  color: #c62828;
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
-.danger-icon {
-  background: linear-gradient(135deg, #f44336 0%, #c62828 100%) !important;
+.danger-icon svg {
+  color: #ffffff !important;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4)) !important;
 }
 
 /* Delete button */
 .btn-delete {
-  background: #f44336 !important;
+  background: linear-gradient(135deg, rgba(183, 28, 28, 0.95) 0%, rgba(211, 47, 47, 0.98) 100%) !important;
   border: none;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  box-shadow: 0 4px 16px rgba(183, 28, 28, 0.4);
+  backdrop-filter: blur(10px);
 }
 
 .btn-delete:hover:not(:disabled) {
-  background: #d32f2f !important;
+  background: linear-gradient(135deg, rgba(211, 47, 47, 0.98) 0%, rgba(229, 57, 53, 1) 100%) !important;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+  box-shadow: 0 6px 20px rgba(183, 28, 28, 0.5);
 }
 
 .btn-delete:disabled {
@@ -3944,24 +4090,11 @@ export default {
   transform: none;
 }
 
-/* Confirm icon style update */
-.warning-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #c62828;
-  font-weight: 500;
-  margin: 16px 0 0 0;
-  font-size: 13px;
-  padding: 12px;
-  background: #ffebee;
-  border-radius: 8px;
-  border: 1px solid #ffcdd2;
-}
-
+/* Warning text icon */
 .warning-text svg {
   flex-shrink: 0;
-  color: #d32f2f;
+  color: #b71c1c;
+  filter: drop-shadow(0 1px 3px rgba(183, 28, 28, 0.3));
 }
 
 /* === TOAST === */
@@ -4125,8 +4258,8 @@ export default {
   }
   
   .modal-header-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
   }
   
   .form-section {
@@ -4242,6 +4375,11 @@ export default {
   .modal-header-icon {
     width: 32px;
     height: 32px;
+  }
+  
+  .modal-header-icon svg {
+    width: 18px;
+    height: 18px;
   }
   
   .modal-body {

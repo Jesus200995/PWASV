@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col relative">
-    <div class="page-container w-full max-w-lg mx-auto relative z-10 pt-0 pb-1 space-y-2">
+    <div class="page-container w-full max-w-lg mx-auto relative z-10 pt-0 pb-8 space-y-2">
       <!-- Botones de selección de sección -->
       <div v-if="!modoAsistencia" class="glass-card">
         <div class="text-center mb-3">

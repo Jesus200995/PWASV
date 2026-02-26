@@ -14,8 +14,8 @@
               </svg>
             </div>
             <div class="header-text">
-              <h1 class="header-title">Estadísticas de Dispositivos</h1>
-              <p class="header-subtitle">Análisis de plataformas utilizadas por los usuarios</p>
+              <h1 class="header-title">Panel de Estadísticas</h1>
+              <p class="header-subtitle">Usuarios, actividad, dispositivos y distribución de cargos</p>
             </div>
           </div>
           <div class="header-actions">

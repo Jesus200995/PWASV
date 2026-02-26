@@ -959,8 +959,12 @@ async def registrar(
         print(f"📅 ⏰ Usando timestamp actual CDMX: {fecha_hora}")
 
     # Guardar la foto en disco usando el timestamp correcto
+    # ✅ MEJORA: Añadir identificador único (milisegundos + random) para evitar colisiones
+    # si se crean múltiples registros en el mismo segundo
+    import random
+    unique_id = f"{int(datetime.now().timestamp() * 1000) % 100000}_{random.randint(1000, 9999)}"
     ext = os.path.splitext(foto.filename)[1]
-    nombre_archivo = f"{usuario_id}_{timestamp_for_filename}{ext}"
+    nombre_archivo = f"{usuario_id}_{timestamp_for_filename}_{unique_id}{ext}"
     ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
     print(f"📁 Guardando foto como: {nombre_archivo}")
     

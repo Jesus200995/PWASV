@@ -1789,13 +1789,23 @@ async function onFileChange(e) {
   const file = e.target.files[0];
   if (!file) return;
 
+  // IMPORTANTE: Limpiar imagen anterior antes de procesar la nueva
+  // Esto evita que queden referencias a la imagen anterior en memoria
+  foto.value = null;
+  archivoFoto.value = null;
+
   try {
     // Compresión de imagen con calidad media y formato JPG
     console.log('🖼️ Comprimiendo imagen de asistencia...');
+    console.log(`📷 Archivo original: ${file.name}, tamaño: ${(file.size/1024).toFixed(2)}KB`);
+    
     const compressedBlob = await compressImage(file, 1280, 0.6);
     
-    // Convertir el Blob comprimido a un objeto File para mantener compatibilidad
-    const compressedFile = blobToFile(compressedBlob, `${tipoAsistencia.value || 'asistencia'}_${Date.now()}.jpg`);
+    // Generar nombre único con timestamp + random para evitar colisiones
+    const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const compressedFile = blobToFile(compressedBlob, `${tipoAsistencia.value || 'asistencia'}_${uniqueId}.jpg`);
+    
+    console.log(`✅ Imagen comprimida: ${compressedFile.name}, tamaño: ${(compressedFile.size/1024).toFixed(2)}KB`);
     
     // Usar el archivo comprimido
     archivoFoto.value = compressedFile;
@@ -1804,12 +1814,17 @@ async function onFileChange(e) {
     const reader = new FileReader();
     reader.onload = (e2) => {
       foto.value = e2.target.result;
+      console.log(`✅ Vista previa de imagen actualizada`);
     };
     reader.readAsDataURL(compressedBlob);
   } catch (err) {
     console.error('Error al comprimir imagen:', err);
     // Fallback: usar la imagen original sin comprimir
-    archivoFoto.value = file;
+    const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    // Crear un nuevo File con nombre único para evitar caché
+    const newFile = new File([file], `${tipoAsistencia.value || 'asistencia'}_${uniqueId}.jpg`, { type: file.type });
+    archivoFoto.value = newFile;
+    
     const reader = new FileReader();
     reader.onload = (e2) => {
       foto.value = e2.target.result;
@@ -1822,13 +1837,23 @@ async function onFileChangeRegistro(e) {
   const file = e.target.files[0];
   if (!file) return;
 
+  // IMPORTANTE: Limpiar imagen anterior antes de procesar la nueva
+  // Esto evita que queden referencias a la imagen anterior en memoria
+  fotoRegistro.value = null;
+  archivoFotoRegistro.value = null;
+
   try {
     // Compresión de imagen con calidad media y formato JPG
     console.log('🖼️ Comprimiendo imagen de registro...');
+    console.log(`📷 Archivo original: ${file.name}, tamaño: ${(file.size/1024).toFixed(2)}KB`);
+    
     const compressedBlob = await compressImage(file, 1280, 0.6);
     
-    // Convertir el Blob comprimido a un objeto File para mantener compatibilidad
-    const compressedFile = blobToFile(compressedBlob, `actividad_${Date.now()}.jpg`);
+    // Generar nombre único con timestamp + random para evitar colisiones
+    const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const compressedFile = blobToFile(compressedBlob, `actividad_${uniqueId}.jpg`);
+    
+    console.log(`✅ Imagen comprimida: ${compressedFile.name}, tamaño: ${(compressedFile.size/1024).toFixed(2)}KB`);
     
     // Usar el archivo comprimido
     archivoFotoRegistro.value = compressedFile;
@@ -1837,12 +1862,17 @@ async function onFileChangeRegistro(e) {
     const reader = new FileReader();
     reader.onload = (e2) => {
       fotoRegistro.value = e2.target.result;
+      console.log(`✅ Vista previa de imagen actualizada (${fotoRegistro.value.substring(0, 50)}...)`);
     };
     reader.readAsDataURL(compressedBlob);
   } catch (err) {
     console.error('Error al comprimir imagen:', err);
     // Fallback: usar la imagen original sin comprimir
-    archivoFotoRegistro.value = file;
+    const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    // Crear un nuevo File con nombre único para evitar caché
+    const newFile = new File([file], `actividad_${uniqueId}.jpg`, { type: file.type });
+    archivoFotoRegistro.value = newFile;
+    
     const reader = new FileReader();
     reader.onload = (e2) => {
       fotoRegistro.value = e2.target.result;
@@ -1855,15 +1885,19 @@ async function onFileChangeRegistro(e) {
 
 // Funciones para asistencia (entrada/salida)
 function tomarFotoConCamara() {
-  // Usar input específico para cámara
+  // IMPORTANTE: Limpiar el valor del input ANTES de abrir la cámara
+  // Esto fuerza al navegador a disparar el evento @change incluso si selecciona la misma imagen
   if (fileInputCamera.value) {
+    fileInputCamera.value.value = '';
     fileInputCamera.value.click();
   }
 }
 
 function seleccionarDeGaleria() {
-  // Usar input específico para galería
+  // IMPORTANTE: Limpiar el valor del input ANTES de abrir la galería
+  // Esto fuerza al navegador a disparar el evento @change incluso si selecciona la misma imagen
   if (fileInputGallery.value) {
+    fileInputGallery.value.value = '';
     fileInputGallery.value.click();
   }
 }
@@ -1885,8 +1919,10 @@ function eliminarFoto() {
 function tomarFotoConCamaraRegistro() {
   if (!entradaMarcada.value || salidaMarcada.value) return;
   
-  // Usar input específico para cámara en registros
+  // IMPORTANTE: Limpiar el valor del input ANTES de abrir la cámara
+  // Esto fuerza al navegador a disparar el evento @change incluso si selecciona la misma imagen
   if (fileInputCameraRegistro.value) {
+    fileInputCameraRegistro.value.value = '';
     fileInputCameraRegistro.value.click();
   }
 }
@@ -1894,8 +1930,10 @@ function tomarFotoConCamaraRegistro() {
 function seleccionarDeGaleriaRegistro() {
   if (!entradaMarcada.value || salidaMarcada.value) return;
   
-  // Usar input específico para galería en registros
+  // IMPORTANTE: Limpiar el valor del input ANTES de abrir la galería
+  // Esto fuerza al navegador a disparar el evento @change incluso si selecciona la misma imagen
   if (fileInputGalleryRegistro.value) {
+    fileInputGalleryRegistro.value.value = '';
     fileInputGalleryRegistro.value.click();
   }
 }

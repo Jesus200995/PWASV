@@ -74,9 +74,13 @@
                 </svg>
               </div>
               <div class="main-stat-info">
-                <span class="main-stat-label">Total de Usuarios Registrados</span>
-                <span class="main-stat-value">{{ estadisticas.total_usuarios.toLocaleString() }}</span>
-                <span class="main-stat-desc">Usuarios activos en la plataforma</span>
+                <span class="main-stat-label">Usuarios en la Plataforma</span>
+                <div class="main-stat-value-wrapper">
+                  <span class="main-stat-value">{{ usuariosActivos.toLocaleString() }}</span>
+                  <span class="main-stat-divider">/</span>
+                  <span class="main-stat-total">{{ estadisticas.total_usuarios.toLocaleString() }}</span>
+                </div>
+                <span class="main-stat-desc">Activos de {{ estadisticas.total_usuarios.toLocaleString() }} registrados</span>
               </div>
               <div class="main-stat-trend">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -320,11 +324,15 @@
                   <div v-if="estadisticas.activos_30_dias && estadisticas.activos_30_dias.length > 0" class="active-content">
                     <div class="active-summary">
                       <div class="active-stat-box">
-                        <span class="active-big-number">{{ getTotalActivos() }}</span>
+                        <div class="active-number-wrapper">
+                          <span class="active-big-number">{{ usuariosActivos.toLocaleString() }}</span>
+                          <span class="active-divider">/</span>
+                          <span class="active-total-small">{{ estadisticas.total_usuarios.toLocaleString() }}</span>
+                        </div>
                         <span class="active-stat-label">usuarios activos</span>
                       </div>
                       <div class="active-stat-box">
-                        <span class="active-big-percent">{{ ((getTotalActivos() / estadisticas.total_usuarios) * 100).toFixed(1) }}%</span>
+                        <span class="active-big-percent">{{ porcentajeActivos.toFixed(1) }}%</span>
                         <span class="active-stat-label">del total</span>
                       </div>
                     </div>
@@ -372,7 +380,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Sidebar from '../components/Sidebar.vue';
 import { obtenerEstadisticasDispositivos } from '../services/dispositivosService.js';
@@ -384,6 +392,19 @@ const actualizando = ref(false);
 const error = ref('');
 const primeraVez = ref(true);
 let intervaloActualizacion = null;
+
+// Computed para usuarios activos
+const usuariosActivos = computed(() => {
+  if (!estadisticas.value || !estadisticas.value.estado_usuarios) return 0;
+  const activos = estadisticas.value.estado_usuarios.find(e => e.estado === 'Activos');
+  return activos ? activos.cantidad : 0;
+});
+
+// Computed para porcentaje de usuarios activos
+const porcentajeActivos = computed(() => {
+  if (!estadisticas.value || !estadisticas.value.total_usuarios) return 0;
+  return (usuariosActivos.value / estadisticas.value.total_usuarios) * 100;
+});
 
 // Cargar estadísticas (reactivo sin recargar página)
 async function cargarEstadisticas() {
@@ -802,17 +823,39 @@ onUnmounted(() => {
   margin-bottom: 4px;
 }
 
+.main-stat-value-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
 .main-stat-value {
-  display: block;
   font-size: clamp(36px, 6vw, 56px);
   font-weight: 800;
   line-height: 1;
-  margin-bottom: 4px;
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .main-stat-value:hover {
   transform: scale(1.02);
+}
+
+.main-stat-divider {
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 300;
+  opacity: 0.5;
+  margin: 0 2px;
+  transform: rotate(-15deg);
+  display: inline-block;
+}
+
+.main-stat-total {
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 600;
+  opacity: 0.6;
+  position: relative;
+  top: -2px;
 }
 
 .main-stat-desc {
@@ -1263,11 +1306,34 @@ onUnmounted(() => {
   gap: 4px;
 }
 
+.active-number-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
 .active-big-number {
   font-size: clamp(36px, 5vw, 52px);
   font-weight: 800;
   color: #059669;
   line-height: 1;
+}
+
+.active-divider {
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 300;
+  color: #94a3b8;
+  transform: rotate(-15deg);
+  display: inline-block;
+  margin: 0 2px;
+}
+
+.active-total-small {
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 600;
+  color: #94a3b8;
+  position: relative;
+  top: -2px;
 }
 
 .active-big-percent {
@@ -1278,9 +1344,19 @@ onUnmounted(() => {
 }
 
 .active-stat-label {
-  font-size: clamp(11px, 1.5vw, 13px);
-  color: #64748b;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.15));
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 12px;
+  font-size: 10px;
+  color: #047857;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.1);
 }
 
 .active-by-device {

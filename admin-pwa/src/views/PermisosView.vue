@@ -47,7 +47,7 @@
         <!-- Lista de usuarios administrativos -->
         <div v-if="!cargando && !error" class="usuarios-list">
           <div class="list-header">
-            <h2>Usuarios Administrativos ({{ usuariosAdmin.length }})</h2>
+            <h2>Usuarios Administrativos ({{ usuariosFiltrados.length }}<span v-if="busquedaUsuario" class="total-count"> de {{ usuariosAdmin.length }}</span>)</h2>
             <div class="header-filters">
               <select v-model="filtroRol" class="filter-select" @change="aplicarFiltros">
                 <option value="">Todos los roles</option>
@@ -61,6 +61,36 @@
                 </svg>
                 Actualizar
               </button>
+            </div>
+          </div>
+          
+          <!-- Buscador en tiempo real -->
+          <div class="search-bar-container">
+            <div class="search-input-wrapper">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+              <input 
+                type="text" 
+                v-model="busquedaUsuario" 
+                placeholder="Buscar por usuario, nombre, territorio o CURP..."
+                class="search-input"
+              />
+              <button v-if="busquedaUsuario" @click="busquedaUsuario = ''" class="clear-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div v-if="busquedaUsuario && usuariosFiltrados.length === 0" class="search-no-results">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>No se encontraron usuarios con "{{ busquedaUsuario }}"</span>
             </div>
           </div>
 
@@ -191,7 +221,7 @@
             </table>
 
             <!-- Estado vacío -->
-            <div v-if="usuariosFiltrados.length === 0" class="empty-state">
+            <div v-if="usuariosFiltrados.length === 0 && !busquedaUsuario" class="empty-state">
               <div class="empty-icon">👥</div>
               <h3>No hay usuarios administrativos</h3>
               <p>Crea el primer usuario administrativo para gestionar el sistema.</p>
@@ -1161,6 +1191,7 @@ export default {
       // Lista de usuarios admin
       usuariosAdmin: [],
       filtroRol: '',
+      busquedaUsuario: '',
       
       // Modal crear/editar usuario
       mostrarModalCrear: false,
@@ -1275,8 +1306,34 @@ export default {
   
   computed: {
     usuariosFiltrados() {
-      if (!this.filtroRol) return this.usuariosAdmin
-      return this.usuariosAdmin.filter(usuario => usuario.rol === this.filtroRol)
+      let usuarios = this.usuariosAdmin
+      
+      // Aplicar filtro por rol
+      if (this.filtroRol) {
+        usuarios = usuarios.filter(usuario => usuario.rol === this.filtroRol)
+      }
+      
+      // Aplicar búsqueda en tiempo real
+      if (this.busquedaUsuario) {
+        const busqueda = this.busquedaUsuario.toLowerCase().trim()
+        usuarios = usuarios.filter(usuario => {
+          // Buscar en username
+          const matchUsername = usuario.username && usuario.username.toLowerCase().includes(busqueda)
+          
+          // Buscar en nombre completo
+          const matchNombre = usuario.nombre_completo && usuario.nombre_completo.toLowerCase().includes(busqueda)
+          
+          // Buscar en territorio
+          const matchTerritorio = usuario.territorio && usuario.territorio.toLowerCase().includes(busqueda)
+          
+          // Buscar en CURP
+          const matchCurp = usuario.curp && usuario.curp.toLowerCase().includes(busqueda)
+          
+          return matchUsername || matchNombre || matchTerritorio || matchCurp
+        })
+      }
+      
+      return usuarios
     },
     
     // Territorios que ya están asignados a usuarios territoriales
@@ -2034,6 +2091,105 @@ export default {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* === SEARCH BAR === */
+.search-bar-container {
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.search-input-wrapper {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4CAF50;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 44px 12px 44px;
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  background: white;
+  color: #333;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.2);
+  transform: translateY(-1px);
+}
+
+.search-input::placeholder {
+  color: #999;
+  font-weight: 400;
+}
+
+.clear-search {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(244, 67, 54, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #f44336;
+}
+
+.clear-search:hover {
+  background: rgba(244, 67, 54, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.search-no-results {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #F57C00;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-no-results svg {
+  flex-shrink: 0;
+  color: #FF9800;
+}
+
+.total-count {
+  color: #757575;
+  font-weight: 400;
+  font-size: 14px;
 }
 
 /* === USUARIOS TABLE === */

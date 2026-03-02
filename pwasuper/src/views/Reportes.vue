@@ -283,18 +283,15 @@
           <Transition name="apple-fade" mode="out-in">
             <div v-if="reporteExistente" key="generated" class="apple-section-card apple-generated-card">
               <!-- Header de éxito -->
-              <div class="apple-generated-header">
-                <div class="apple-generated-icon-wrap">
-                  <div class="apple-generated-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                  </div>
-                  <div class="apple-generated-ring"></div>
+              <div class="apple-section-header">
+                <div class="apple-section-icon apple-icon-green">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
                 </div>
-                <div class="apple-generated-title-group">
-                  <h2 class="apple-generated-title">Reporte Generado</h2>
-                  <p class="apple-generated-subtitle">{{ mesActual }} {{ anioSeleccionado }}</p>
+                <div>
+                  <h2 class="apple-section-title">Reporte Generado</h2>
+                  <p class="apple-section-subtitle">{{ mesActual }} {{ anioSeleccionado }}</p>
                 </div>
               </div>
 
@@ -368,44 +365,42 @@
             <!-- Firmar y Generar - Cuando NO hay reporte -->
             <div v-else key="generate" class="apple-section-card apple-generate-card">
               <!-- Header con pasos -->
-            <div class="apple-generate-header">
-              <div class="apple-generate-icon-wrap">
-                <div class="apple-generate-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                </div>
+            <div class="apple-section-header">
+              <div class="apple-section-icon apple-icon-green">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
               </div>
-              <div class="apple-generate-title-group">
-                <h2 class="apple-generate-title">Firmar y Generar</h2>
-                <p class="apple-generate-subtitle">Firma, selecciona formato y genera tu reporte</p>
+              <div>
+                <h2 class="apple-section-title">Firmar y Generar</h2>
+                <p class="apple-section-subtitle">Firma, selecciona formato y genera tu reporte</p>
               </div>
             </div>
 
             <!-- Steps Container -->
             <div class="apple-steps-container">
               <!-- Step 1: Firma -->
-              <div class="apple-step-card" :class="{ 'apple-step-completed': tieneFirma }">
-                <div class="apple-step-number" :class="{ 'apple-step-done': tieneFirma }">
-                  <span v-if="!tieneFirma">1</span>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                  </svg>
-                </div>
-                <div class="apple-step-content">
+              <div class="apple-step-card apple-step-firma-layout" :class="{ 'apple-step-completed': tieneFirma }">
+                <div class="apple-firma-header-row">
+                  <div class="apple-step-number" :class="{ 'apple-step-done': tieneFirma }">
+                    <span v-if="!tieneFirma">1</span>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </div>
                   <div class="apple-step-header">
                     <span class="apple-step-title">Tu Firma</span>
                     <span v-if="tieneFirma" class="apple-step-badge apple-badge-success">Listo</span>
                     <span v-else class="apple-step-badge apple-badge-pending">Pendiente</span>
                   </div>
-                  <div class="apple-firma-area">
-                    <FirmaDigital
-                      ref="firmaComponent"
-                      label="Firmar aquí"
-                      @firmado="onFirmaRealizada"
-                      @borrado="onFirmaBorrada"
-                    />
-                  </div>
+                </div>
+                <div class="apple-firma-area-full">
+                  <FirmaDigital
+                    ref="firmaComponent"
+                    label="Firmar aquí"
+                    @firmado="onFirmaRealizada"
+                    @borrado="onFirmaBorrada"
+                  />
                 </div>
               </div>
 
@@ -4816,10 +4811,22 @@ const imgGridWidth = 55;
 .apple-step-card {
   display: flex;
   gap: 0.75rem;
-  padding: 0.875rem;
+  padding: 1.5rem;
   background: rgba(0, 0, 0, 0.03);
   border-radius: 14px;
   transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (max-width: 768px) {
+  .apple-step-card {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .apple-step-card {
+    padding: 0.75rem;
+  }
 }
 
 .apple-step-card.apple-step-completed {
@@ -4852,7 +4859,7 @@ const imgGridWidth = 55;
 
 .apple-step-content {
   flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .apple-step-header {
@@ -4890,7 +4897,44 @@ const imgGridWidth = 55;
 }
 
 .apple-firma-area {
+  margin-top: 0.5rem;
+  margin-left: calc(-0.75rem - 28px - 1.5rem);
+  margin-right: -1.5rem;
+  padding: 0;
+  width: calc(100% + 0.75rem + 28px + 1.5rem + 1.5rem);
+}
+
+/* Layout especial para el step de firma */
+.apple-step-firma-layout {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.apple-firma-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.apple-firma-area-full {
+  width: 100%;
   margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .apple-firma-area {
+    margin-left: calc(-0.75rem - 28px - 1rem);
+    margin-right: -1rem;
+    width: calc(100% + 0.75rem + 28px + 1rem + 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .apple-firma-area {
+    margin-left: calc(-0.75rem - 28px - 0.75rem);
+    margin-right: -0.75rem;
+    width: calc(100% + 0.75rem + 28px + 0.75rem + 0.75rem);
+  }
 }
 
 /* Format Row */

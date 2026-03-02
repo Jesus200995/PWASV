@@ -4914,6 +4914,12 @@ const imgGridWidth = 55;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  width: 100%;
+}
+
+.apple-firma-header-row .apple-step-header {
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .apple-firma-area-full {

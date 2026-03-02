@@ -4139,29 +4139,68 @@ const imgGridWidth = 55;
 
 /* Activity List */
 .apple-activities-container {
-  max-height: 220px;
+  max-height: 280px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  background: #f5f5f7;
+  border-radius: 14px;
+  padding: 0.75rem;
+  margin: -0.5rem 0 0 0;
+}
+
+/* macOS-style Scrollbar */
+.apple-activities-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.apple-activities-container::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.apple-activities-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.apple-activities-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.apple-activities-container::-webkit-scrollbar-thumb:active {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Firefox scrollbar */
+.apple-activities-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
 .apple-activity-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .apple-activity-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  padding: 0.625rem 0.75rem;
+  background: #ffffff;
+  border-radius: 10px;
+  transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .apple-activity-item:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 .apple-activity-date {
@@ -4171,21 +4210,21 @@ const imgGridWidth = 55;
 }
 
 .apple-date-day {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.85);
 }
 
 .apple-date-time {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: rgba(0, 0, 0, 0.5);
 }
 
 .apple-type-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.625rem;
-  font-size: 0.6875rem;
+  padding: 0.1875rem 0.5rem;
+  font-size: 0.625rem;
   font-weight: 600;
   border-radius: 100px;
 }

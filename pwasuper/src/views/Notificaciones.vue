@@ -1,32 +1,30 @@
 <template>
-  <div class="fixed inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 overflow-hidden" style="z-index: 0;">
-    <!-- Elementos decorativos para mejorar el efecto de vidrio -->
-    <div class="absolute inset-0">
-      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
-      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
-      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
+  <div class="apple-notifications-page">
+    <!-- Fondo dinámico Apple -->
+    <div class="apple-dynamic-bg">
+      <div class="apple-gradient-orb apple-orb-1"></div>
+      <div class="apple-gradient-orb apple-orb-2"></div>
+      <div class="apple-gradient-orb apple-orb-3"></div>
     </div>
 
-    <div class="absolute inset-0 overflow-hidden" style="z-index: 1;">
-      <!-- Header fijo de notificaciones -->
-      <div class="fixed top-16 sm:top-20 left-0 right-0 z-20 px-2 sm:px-3 lg:px-4 pt-2 sm:pt-3">
-        <div class="w-full max-w-md mx-auto">
-          <div class="glass-card mb-0 relative">
-            <div class="text-center mb-1 relative py-0.5">
-              <h1 class="text-base font-medium tracking-wide text-emerald-700" style="font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; letter-spacing: 0.025em;">
-                Mis Notificaciones
-              </h1>
-              <!-- Botón de refresh movido al lado derecho -->
+    <div class="apple-notifications-container">
+      <!-- Header fijo estilo Apple -->
+      <div class="apple-header-fixed">
+        <div class="apple-header-content">
+          <div class="apple-header-card">
+            <div class="apple-header-row">
+              <div class="apple-header-title-group">
+                <h1 class="apple-page-title">Notificaciones</h1>
+                <p class="apple-page-subtitle">Mantente al día con tus avisos</p>
+              </div>
               <button 
                 @click="refrescarNotificaciones"
                 :disabled="cargando"
-                class="absolute top-1/2 right-3 transform -translate-y-1/2 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-colors duration-200 group"
-                :class="{ 'cursor-not-allowed opacity-50': cargando }"
-                title="Actualizar notificaciones"
+                class="apple-refresh-btn"
+                :class="{ 'apple-btn-disabled': cargando }"
               >
                 <svg 
-                  class="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors duration-200"
-                  :class="{ 'animate-spin': cargando }"
+                  :class="['apple-refresh-icon', cargando ? 'apple-spinning' : '']"
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -40,254 +38,187 @@
                 </svg>
               </button>
             </div>
-          </div>
-          
-          <!-- Título de notificaciones fijo -->
-          <div class="bg-transparent rounded-xl p-1">
-            <h2 class="text-sm font-medium text-emerald-500/70 mb-1 flex items-center">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+            
+            <!-- Badge contador -->
+            <div v-if="notificacionesFiltradas.length > 0" class="apple-counter-badge">
+              <svg class="apple-badge-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
               </svg>
-              Total de Avisos
-              <span v-if="notificacionesFiltradas.length > 0" class="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                {{ notificacionesFiltradas.length }}
-              </span>
-            </h2>
-            <div class="green-line mb-0"></div>
+              <span class="apple-badge-count">{{ notificacionesFiltradas.length }} avisos</span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Contenido con scroll -->
-      <div class="absolute inset-0 overflow-hidden pt-40 sm:pt-44 pb-2">
-        <div class="page-container w-full max-w-md mx-auto relative z-10 px-2 sm:px-3 lg:px-4 py-1 h-full">
+      <div class="apple-scroll-container">
 
-        <!-- Estado de carga -->
-        <div v-if="cargando" class="glass-card mb-2">
-          <div class="flex items-center justify-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-            <span class="ml-3 text-gray-600 text-sm">Cargando notificaciones...</span>
+        <!-- Estado de carga Apple -->
+        <div v-if="cargando" class="apple-loading-card">
+          <div class="apple-loading-content">
+            <div class="apple-spinner"></div>
+            <span class="apple-loading-text">Cargando notificaciones...</span>
           </div>
         </div>
 
-        <!-- Error de conexión -->
-        <div v-if="error && !cargando" class="glass-card mb-2">
-          <div class="text-center py-6">
-            <div class="text-4xl mb-3">⚠️</div>
-            <h3 class="text-sm font-medium text-gray-800 mb-2">Error de Conexión</h3>
-            <p class="text-xs text-gray-600 mb-4">{{ error }}</p>
-            <button 
-              @click="cargarNotificaciones"
-              class="px-4 py-2 bg-green-500 text-white text-xs rounded-lg hover:bg-green-600 transition-colors"
-            >
+        <!-- Error de conexión Apple -->
+        <div v-if="error && !cargando" class="apple-error-card">
+          <div class="apple-error-content">
+            <div class="apple-error-icon">⚠️</div>
+            <h3 class="apple-error-title">Error de Conexión</h3>
+            <p class="apple-error-message">{{ error }}</p>
+            <button @click="cargarNotificaciones" class="apple-retry-btn">
               Reintentar
             </button>
           </div>
         </div>
 
         <!-- Contenedor de scroll para notificaciones -->
-        <div v-if="!cargando && !error" class="h-full flex flex-col">
-          <!-- Lista de notificaciones con scroll propio -->
-          <div class="flex-1 overflow-y-auto bg-transparent rounded-xl px-2 py-4 notifications-scroll-container">
-            <div v-if="notificacionesFiltradas.length > 0" class="space-y-1">
-            <!-- Contenedor relativo para cada notificación con campanita fuera -->
-            <div v-for="(notificacion, index) in notificacionesFiltradas" 
-                 :key="notificacion.id"
-                 class="relative notification-container">
+        <div v-if="!cargando && !error" class="sf-notifications-list">
+          <!-- Lista de notificaciones -->
+          <div class="sf-notifications-scroll">
+            <div v-if="notificacionesFiltradas.length > 0" class="sf-notification-stack">
               
-              <!-- Campanita vibrante FUERA de la notificación -->
-              <div v-if="!notificacion.leida" class="absolute top-0 right-0 z-50">
-                <div class="notification-bell bg-red-600 rounded-full w-6 h-6 flex items-center justify-center shadow-lg border-2 border-white">
-                  <svg class="bell-icon w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
-                  </svg>
-                </div>
-              </div>
-
-              <!-- Card de notificación -->
-              <div :class="[
-                'enterprise-notification-card group cursor-pointer transition-all duration-300 ease-out rounded-2xl',
-                notificacion.leida 
-                  ? 'notification-read border-l-green-500' 
-                  : 'notification-unread border-l-rose-700'
-              ]"
-              @click="abrirDetalleNotificacion(notificacion)"
+              <!-- NUEVA CARD APPLE STYLE -->
+              <article 
+                v-for="(notificacion, index) in notificacionesFiltradas" 
+                :key="notificacion.id"
+                :class="[
+                  'sf-card',
+                  notificacion.leida ? 'sf-card--read' : 'sf-card--unread'
+                ]"
+                :style="{ animationDelay: `${index * 0.06}s` }"
+                @click="abrirDetalleNotificacion(notificacion)"
               >
-                <!-- Indicador lateral -->
-                <div :class="[
-                  'absolute left-0 top-0 h-full w-1 transition-all duration-300',
-                  notificacion.leida ? 'bg-green-500' : 'bg-gradient-to-b from-white/70 via-rose-500 to-white/70'
-                ]"></div>
+                <!-- Punto de notificación no leída -->
+                <span v-if="!notificacion.leida" class="sf-unread-dot"></span>
                 
-                <div class="flex items-start gap-2.5 px-3 py-4">
-                <!-- Avatar/Icono empresarial más pequeño -->
-                <div class="flex-shrink-0 mt-2">
-                  <div :class="[
-                    'w-8 h-8 rounded-lg flex items-center justify-center shadow-sm border transition-all duration-300 group-hover:scale-105',
-                    notificacion.leida 
-                      ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200 text-green-600' 
-                      : 'bg-gradient-to-br from-white/80 to-rose-400 border-white/40 text-rose-800 shadow-lg'
-                  ]">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                <!-- Contenido de la card -->
+                <div class="sf-card-inner">
+                  
+                  <!-- Icono circular -->
+                  <div :class="['sf-icon-circle', notificacion.leida ? 'sf-icon--read' : 'sf-icon--unread']">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     </svg>
                   </div>
-                </div>
-                
-                <!-- Contenido principal -->
-                <div class="flex-1 min-w-0">
-                  <!-- Header con título y fecha -->
-                  <div class="flex items-start justify-between mb-2">
-                    <div class="flex-1 min-w-0 pr-3">
-                      <h3 :class="[
-                        'text-sm font-semibold leading-tight mb-1 transition-colors duration-200 line-clamp-1',
-                        notificacion.leida ? 'text-gray-700 group-hover:text-gray-900' : 'text-white font-bold'
-                      ]">
+                  
+                  <!-- Bloque de texto -->
+                  <div class="sf-text-block">
+                    
+                    <!-- Fila superior: título + tiempo/badge -->
+                    <div class="sf-top-row">
+                      <h3 :class="['sf-title', notificacion.leida ? 'sf-title--read' : 'sf-title--unread']">
                         {{ notificacion.titulo }}
                       </h3>
-                      <p v-if="notificacion.subtitulo" :class="[
-                        'notification-subtitle text-xs font-medium transition-colors duration-200 line-clamp-1',
-                        notificacion.leida ? 'text-gray-500' : 'text-white/90'
-                      ]">
-                        {{ notificacion.subtitulo }}
-                      </p>
-                    </div>
-                    <div class="flex flex-col items-end flex-shrink-0">
-                      <span :class="[
-                        'notification-date text-xs font-medium transition-colors duration-200',
-                        notificacion.leida ? 'text-gray-400' : 'text-white/85'
-                      ]">
-                        {{ formatearFecha(notificacion.fecha_creacion) }}
-                      </span>
-                      <div :class="[
-                        'text-xs px-2 py-0.5 rounded-full mt-1 font-medium transition-all duration-200',
-                        notificacion.leida 
-                          ? 'bg-green-100 text-green-700 border border-green-200' 
-                          : 'bg-gradient-to-r from-white/80 to-rose-400 text-rose-900 border border-white/50 shadow-md font-bold'
-                      ]">
-                        {{ notificacion.leida ? 'Leída' : 'Nueva' }}
+                      <div class="sf-meta-group">
+                        <time :class="['sf-time', notificacion.leida ? 'sf-time--read' : 'sf-time--unread']">
+                          {{ formatearFecha(notificacion.fecha_creacion) }}
+                        </time>
+                        <span :class="['sf-status-pill', notificacion.leida ? 'sf-pill--read' : 'sf-pill--unread']">
+                          {{ notificacion.leida ? 'Leída' : 'Nueva' }}
+                        </span>
                       </div>
                     </div>
-                  </div>
-                  
-                  <!-- Descripción truncada - solo si hay descripción -->
-                  <div v-if="notificacion.descripcion && notificacion.descripcion.trim()" class="mb-3">
-                    <p :class="[
-                      'text-xs leading-relaxed transition-colors duration-200 line-clamp-2',
-                      notificacion.leida ? 'text-gray-600' : 'text-white/95'
-                    ]">
+                    
+                    <!-- Subtítulo opcional -->
+                    <p v-if="notificacion.subtitulo" :class="['sf-subtitle', notificacion.leida ? 'sf-subtitle--read' : 'sf-subtitle--unread']">
+                      {{ notificacion.subtitulo }}
+                    </p>
+                    
+                    <!-- Descripción -->
+                    <p v-if="notificacion.descripcion && notificacion.descripcion.trim()" 
+                       :class="['sf-description', notificacion.leida ? 'sf-desc--read' : 'sf-desc--unread']">
                       {{ notificacion.descripcion }}
                     </p>
-                  </div>
+                    
+                    <!-- Vista previa de imagen -->
+                    <div v-if="notificacion.tiene_archivo && esImagen(notificacion.archivo_tipo)" 
+                         class="sf-media-preview" 
+                         @click.stop="verNotificacionCompleta(notificacion)">
+                      <img :src="obtenerUrlArchivo(notificacion.id)" 
+                           :alt="notificacion.archivo_nombre"
+                           @error="onImageError"
+                           @load="onImageLoad"
+                           loading="lazy"/>
+                    </div>
+                    
+                    <!-- Vista previa de video -->
+                    <div v-else-if="notificacion.tiene_archivo && esVideo(notificacion.archivo_tipo)" 
+                         class="sf-media-preview sf-video-preview" 
+                         @click.stop="verNotificacionCompleta(notificacion)">
+                      <video :src="obtenerUrlArchivo(notificacion.id)"
+                             muted
+                             preload="metadata"
+                             @loadedmetadata="onVideoLoaded"
+                             @canplay="onVideoLoaded"
+                             @error="onVideoError"/>
+                      <div class="sf-play-btn">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                          <polygon points="9.5,7.5 16.5,12 9.5,16.5"/>
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <!-- Archivo adjunto otro tipo -->
+                    <div v-else-if="notificacion.tiene_archivo" class="sf-attachment">
+                      <span class="sf-attachment-icon">📎</span>
+                      <span class="sf-attachment-name">Archivo adjunto</span>
+                      <span class="sf-attachment-type">{{ notificacion.archivo_tipo }}</span>
+                    </div>
 
-                  <!-- Vista previa de archivo compacta con efecto fade - SOLO para imágenes y videos -->
-                  <div v-if="notificacion.tiene_archivo && (esImagen(notificacion.archivo_tipo) || esVideo(notificacion.archivo_tipo))" class="mb-3">
-                    <div v-if="esImagen(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white overflow-hidden cursor-pointer" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
-                      <div class="absolute inset-0 flex items-center justify-center bg-gray-50 image-placeholder z-5">
-                        <div class="text-gray-400 text-center">
-                          <div class="text-lg mb-1">🖼️</div>
-                          <div class="text-xs font-medium">Cargando...</div>
-                        </div>
-                      </div>
-                      <img 
-                        :src="obtenerUrlArchivo(notificacion.id)" 
-                        :alt="notificacion.archivo_nombre"
-                        class="hover:scale-105 transition-transform duration-300"
-                        @error="onImageError"
-                        @load="onImageLoad"
-                        loading="lazy"
-                        decoding="async"
-                        style="filter: none !important; box-shadow: none !important;"
-                      />
-                    </div>
-                    <div v-else-if="esVideo(notificacion.archivo_tipo)" class="notification-media-preview notification-has-media aspect-video max-w-xs bg-white overflow-hidden cursor-pointer relative" @click.stop="verNotificacionCompleta(notificacion)" style="box-shadow: none !important; border: none !important;">
-                      <div class="absolute inset-0 flex items-center justify-center bg-gray-50 video-placeholder z-5">
-                        <div class="text-gray-400 text-center">
-                          <div class="text-xs font-medium">Cargando...</div>
-                        </div>
-                      </div>
-                      <video 
-                        :src="obtenerUrlArchivo(notificacion.id)"
-                        muted
-                        preload="metadata"
-                        style="pointer-events: none; filter: none !important; box-shadow: none !important;"
-                        @loadedmetadata="onVideoLoaded"
-                        @canplay="onVideoLoaded"
-                        @error="onVideoError"
-                        @loadstart="(event) => setTimeout(() => onVideoFallback(event), 5000)"
-                      >
-                        Tu navegador no soporta video.
-                      </video>
-                      <!-- Icono de play suave desvanecido -->
-                      <div class="absolute inset-0 flex items-center justify-center pointer-events-none video-play-overlay">
-                        <div class="video-play-icon">
-                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="12" fill="rgba(0, 0, 0, 0.25)" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1"/>
-                            <polygon points="10,8 16,12 10,16" fill="white" opacity="0.9"/>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Indicador sutil para archivos adjuntos (PDF, Word, etc.) - SOLO visible si hay archivo que no es imagen o video -->
-                  <div v-if="notificacion.tiene_archivo && !esImagen(notificacion.archivo_tipo) && !esVideo(notificacion.archivo_tipo)" class="mb-3">
-                    <div class="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-md px-3 py-1.5 border border-gray-200">
-                      <span class="text-sm">📎</span>
-                      <span class="font-medium">Archivo adjunto</span>
-                      <span class="text-gray-400">•</span>
-                      <span class="capitalize truncate">{{ notificacion.archivo_tipo }}</span>
-                    </div>
                   </div>
                   
-                  <!-- Botón Ver completo con efecto vidrio líquido - alineado a la derecha -->
-                  <div class="flex justify-end">
-                    <button class="liquid-glass-button group inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 rounded-md transition-all duration-300 relative overflow-hidden ml-auto">
-                      <span class="relative z-10">Ver completo</span>
-                      <svg class="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                      </svg>
-                    </button>
+                  <!-- Chevron derecho -->
+                  <div class="sf-chevron">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
                   </div>
+                  
                 </div>
-              </div>
-              <!-- Fin del card de notificación -->
+                
+              </article>
+              <!-- FIN CARD APPLE STYLE -->
+              
             </div>
-            <!-- Fin del contenedor de notificación -->
+            <!-- Fin sf-notification-stack -->
+
+            <!-- Estado vacío Apple -->
+            <div v-else class="sf-empty-state">
+              <div class="sf-empty-icon">📭</div>
+              <h3 class="sf-empty-title">Sin notificaciones</h3>
+              <p class="sf-empty-message">
+                {{ soloRecientes ? 'No hay notificaciones recientes' : 'No tienes notificaciones por el momento' }}
+              </p>
+              <button 
+                v-if="soloRecientes"
+                @click="toggleSoloRecientes"
+                class="sf-empty-btn"
+              >
+                Ver todas las notificaciones
+              </button>
             </div>
-            <!-- Fin del div con v-if -->
           </div>
+          <!-- Fin del sf-notifications-scroll -->
 
-          <!-- Estado vacío -->
-          <div v-else class="text-center py-8">
-            <div class="text-4xl mb-3">📭</div>
-            <h3 class="text-sm font-medium text-gray-800 mb-2">Sin notificaciones</h3>
-            <p class="text-xs text-gray-600 mb-4">
-              {{ soloRecientes ? 'No hay notificaciones recientes' : 'No tienes notificaciones por el momento' }}
-            </p>
-            <button 
-              v-if="soloRecientes"
-              @click="toggleSoloRecientes"
-              class="text-xs text-green-600 hover:text-green-700"
-            >
-              Ver todas las notificaciones
-            </button>
-          </div>
-          </div>
-
-          <!-- Botón cargar más -->
-          <div v-if="puedeCargarMas" class="text-center mt-3 flex-shrink-0">
+          <!-- Botón cargar más Apple -->
+          <div v-if="puedeCargarMas" class="sf-load-more">
             <button 
               @click="cargarMasNotificaciones"
               :disabled="cargandoMas"
-              class="px-4 py-2 bg-green-500 text-white text-xs rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+              class="sf-load-more-btn"
             >
               {{ cargandoMas ? 'Cargando...' : 'Cargar más' }}
             </button>
           </div>
         </div>
+        <!-- Fin del sf-notifications-list -->
       </div>
+      <!-- Fin del apple-scroll-container -->
     </div>
+    <!-- Fin del apple-notifications-container -->
 
     <!-- Modal de detalle de notificación - Teleportado al body para difuminación correcta -->
     <teleport to="body">
@@ -769,9 +700,8 @@
         </div>
       </div>
     </teleport>
-
-    </div>
   </div>
+  <!-- Fin del apple-notifications-page -->
 </template>
 
 <script setup>
@@ -2013,6 +1943,1001 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+/* ================================================
+   ESTILOS APPLE - NOTIFICACIONES
+   Sistema de Diseño Liquid Glass
+   ================================================ */
+
+/* Página principal */
+.apple-notifications-page {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(145deg, #f5f7fa 0%, #e8ecf3 50%, #f0f4f8 100%);
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Fondo dinámico con orbes */
+.apple-dynamic-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.apple-gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  animation: appleOrbFloat 20s ease-in-out infinite;
+}
+
+.apple-orb-1 {
+  top: 10%;
+  left: 15%;
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(52, 211, 153, 0.3));
+  animation-delay: 0s;
+}
+
+.apple-orb-2 {
+  top: 60%;
+  right: 10%;
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(14, 165, 233, 0.25));
+  animation-delay: -7s;
+}
+
+.apple-orb-3 {
+  bottom: 15%;
+  left: 25%;
+  width: 280px;
+  height: 280px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.35), rgba(16, 185, 129, 0.25));
+  animation-delay: -14s;
+}
+
+@keyframes appleOrbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-20px, 30px) scale(0.95); }
+  75% { transform: translate(20px, 20px) scale(1.02); }
+}
+
+/* Contenedor principal */
+.apple-notifications-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Header fijo */
+.apple-header-fixed {
+  position: fixed;
+  top: 3.75rem;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 0.625rem 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .apple-header-fixed {
+    top: 4.75rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+.apple-header-content {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+/* Card del header */
+.apple-header-card {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 255, 255, 0.85) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 0.875rem;
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  animation: appleFadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes appleFadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.apple-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.apple-header-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.apple-page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+}
+
+.apple-page-subtitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.45);
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+}
+
+/* Botón refresh */
+.apple-refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-refresh-btn:hover {
+  background: rgba(16, 185, 129, 0.2);
+  transform: scale(1.05);
+}
+
+.apple-refresh-btn:active {
+  transform: scale(0.95);
+}
+
+.apple-btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.apple-refresh-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: #059669;
+  transition: transform 0.3s ease;
+}
+
+.apple-spinning {
+  animation: appleSpin 1s linear infinite;
+}
+
+@keyframes appleSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Badge contador */
+.apple-counter-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-badge-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.apple-badge-count {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+}
+
+/* Contenedor de scroll */
+.apple-scroll-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding-top: 12rem;
+  padding-bottom: 1rem;
+}
+
+@media (min-width: 640px) {
+  .apple-scroll-container {
+    padding-top: 13rem;
+  }
+}
+
+/* Loading state */
+.apple-loading-card {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 0 0.75rem;
+}
+
+.apple-loading-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(16, 185, 129, 0.2);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: appleSpin 1s linear infinite;
+}
+
+.apple-loading-text {
+  margin-left: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+}
+
+/* Error state */
+.apple-error-card {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 0 0.75rem;
+}
+
+.apple-error-content {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-error-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.apple-error-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 0.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+}
+
+.apple-error-message {
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+}
+
+.apple-retry-btn {
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.apple-retry-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+/* ================================================
+   SF NOTIFICATIONS - APPLE DESIGN SYSTEM
+   ================================================ */
+
+/* Lista principal */
+.sf-notifications-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 26rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.sf-notifications-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0 1.5rem 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sf-notification-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* Animación de entrada */
+@keyframes sfSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================================
+   CARD PRINCIPAL - SF STYLE
+   ================================================ */
+
+.sf-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 14px;
+  cursor: pointer;
+  animation: sfSlideUp 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
+  transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.sf-card:hover {
+  transform: translateY(-3px) scale(1.008);
+}
+
+.sf-card:active {
+  transform: scale(0.985);
+}
+
+/* CARD NO LEÍDA - Fondo rojo suave */
+.sf-card--unread {
+  background: linear-gradient(145deg, #fff5f5 0%, #fef2f2 100%);
+  border: 1.5px solid rgba(239, 68, 68, 0.2);
+  box-shadow: 
+    0 4px 18px rgba(239, 68, 68, 0.1),
+    0 1px 3px rgba(239, 68, 68, 0.06);
+}
+
+.sf-card--unread:hover {
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 
+    0 10px 35px rgba(239, 68, 68, 0.15),
+    0 4px 12px rgba(239, 68, 68, 0.08);
+}
+
+/* CARD LEÍDA - Fondo verde suave */
+.sf-card--read {
+  background: linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1.5px solid rgba(34, 197, 94, 0.18);
+  box-shadow: 
+    0 3px 12px rgba(34, 197, 94, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.sf-card--read:hover {
+  border-color: rgba(34, 197, 94, 0.32);
+  box-shadow: 
+    0 8px 28px rgba(34, 197, 94, 0.12),
+    0 3px 10px rgba(34, 197, 94, 0.06);
+}
+
+/* ================================================
+   PUNTO DE NO LEÍDA
+   ================================================ */
+
+.sf-unread-dot {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+  z-index: 5;
+  animation: sfPulse 2s ease-in-out infinite;
+}
+
+@keyframes sfPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.85; }
+}
+
+/* ================================================
+   CONTENIDO INTERNO
+   ================================================ */
+
+.sf-card-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 1rem 1rem 1rem 1.125rem;
+}
+
+/* ================================================
+   ICONO CIRCULAR
+   ================================================ */
+
+.sf-icon-circle {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease;
+}
+
+.sf-card:hover .sf-icon-circle {
+  transform: scale(1.06);
+}
+
+.sf-icon--unread {
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
+  color: #dc2626;
+}
+
+.sf-icon--read {
+  background: linear-gradient(145deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.1));
+  color: #16a34a;
+}
+
+/* ================================================
+   BLOQUE DE TEXTO
+   ================================================ */
+
+.sf-text-block {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Fila superior */
+.sf-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Título */
+.sf-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sf-title--unread {
+  color: rgba(0, 0, 0, 0.92);
+}
+
+.sf-title--read {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+/* Tiempo */
+.sf-time {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding-top: 0.125rem;
+}
+
+.sf-time--unread {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.sf-time--read {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Grupo de metadata (fecha + badge) */
+.sf-meta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+/* Status Pill - Estilo Apple */
+.sf-status-pill {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.1875rem 0.4375rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.sf-pill--unread {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 1px 4px rgba(239, 68, 68, 0.3);
+}
+
+.sf-pill--read {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
+/* Subtítulo */
+.sf-subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin: 0.125rem 0 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sf-subtitle--unread {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.sf-subtitle--read {
+  color: rgba(0, 0, 0, 0.42);
+}
+
+/* Descripción */
+.sf-description {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  margin: 0.5rem 0 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sf-desc--unread {
+  color: rgba(0, 0, 0, 0.68);
+}
+
+.sf-desc--read {
+  color: rgba(0, 0, 0, 0.52);
+}
+
+/* ================================================
+   VISTA PREVIA MEDIA
+   ================================================ */
+
+.sf-media-preview {
+  margin-top: 0.75rem;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  max-width: 100%;
+}
+
+.sf-media-preview img,
+.sf-media-preview video {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.sf-media-preview:hover img,
+.sf-media-preview:hover video {
+  transform: scale(1.02);
+}
+
+.sf-video-preview {
+  background: #000;
+}
+
+.sf-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.sf-media-preview:hover .sf-play-btn {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* Archivo adjunto */
+.sf-attachment {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.035);
+  border-radius: 8px;
+}
+
+.sf-attachment-icon {
+  font-size: 0.875rem;
+}
+
+.sf-attachment-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.sf-attachment-type {
+  font-size: 0.6875rem;
+  color: rgba(0, 0, 0, 0.38);
+  margin-left: auto;
+  text-transform: uppercase;
+}
+
+/* ================================================
+   CHEVRON DERECHO
+   ================================================ */
+
+.sf-chevron {
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.25);
+  align-self: center;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sf-card:hover .sf-chevron {
+  transform: translateX(3px);
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* ================================================
+   BADGE DE ESTADO
+   ================================================ */
+
+.sf-badge {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.sf-badge--unread {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+}
+
+.sf-badge--read {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+/* ================================================
+   ESTADO VACÍO
+   ================================================ */
+
+.sf-empty-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+}
+
+.sf-empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.25rem;
+  filter: grayscale(10%);
+}
+
+.sf-empty-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.78);
+  margin: 0 0 0.5rem 0;
+}
+
+.sf-empty-message {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.48);
+  margin: 0 0 1.5rem 0;
+}
+
+.sf-empty-btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #059669;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.sf-empty-btn:hover {
+  background: rgba(5, 150, 105, 0.08);
+  color: #047857;
+}
+
+/* ================================================
+   CARGAR MÁS
+   ================================================ */
+
+.sf-load-more {
+  text-align: center;
+  padding: 1.25rem 0;
+  flex-shrink: 0;
+}
+
+.sf-load-more-btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+.sf-load-more-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+}
+
+.sf-load-more-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.sf-load-more-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ================================================
+   RESPONSIVIDAD APPLE
+   ================================================ */
+
+@media (max-width: 374px) {
+  .apple-header-card {
+    padding: 0.75rem;
+    border-radius: 16px;
+  }
+  
+  .apple-page-title {
+    font-size: 1.125rem;
+  }
+  
+  .apple-refresh-btn {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .apple-refresh-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .apple-notification-card {
+    border-radius: 14px;
+  }
+  
+  .apple-card-content {
+    padding: 0.75rem;
+    padding-left: 1rem;
+    gap: 0.5rem;
+  }
+  
+  .apple-notification-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+  }
+  
+  .apple-notification-icon svg {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .apple-notification-title {
+    font-size: 0.875rem;
+  }
+  
+  .apple-notification-date {
+    font-size: 0.625rem;
+  }
+  
+  .apple-description-text {
+    font-size: 0.75rem;
+  }
+  
+  /* SF Cards responsivo - móvil pequeño */
+  .sf-notifications-list {
+    padding: 0 0.75rem;
+  }
+  
+  .sf-card-inner {
+    padding: 0.875rem;
+    gap: 0.625rem;
+  }
+  
+  .sf-icon-circle {
+    width: 2.125rem;
+    height: 2.125rem;
+  }
+  
+  .sf-icon-circle svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .sf-title {
+    font-size: 0.875rem;
+  }
+  
+  .sf-description {
+    font-size: 0.75rem;
+    -webkit-line-clamp: 2;
+  }
+  
+  .sf-status-pill {
+    font-size: 0.5rem;
+    padding: 0.125rem 0.3125rem;
+  }
+  
+  .sf-meta-group {
+    gap: 0.25rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .apple-header-card {
+    padding: 1.25rem;
+  }
+  
+  .apple-page-title {
+    font-size: 1.375rem;
+  }
+  
+  .apple-page-subtitle {
+    font-size: 0.8125rem;
+  }
+  
+  .apple-notification-stack {
+    gap: 1rem;
+  }
+  
+  .apple-card-content {
+    padding: 1.25rem;
+    padding-left: 1.5rem;
+  }
+  
+  .apple-notification-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 12px;
+  }
+  
+  .apple-notification-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  .apple-notification-title {
+    font-size: 1rem;
+  }
+  
+  /* SF Cards responsivo - tablet/desktop */
+  .sf-notifications-list {
+    max-width: 30rem;
+    padding: 0 1.25rem;
+  }
+  
+  .sf-notification-stack {
+    gap: 1rem;
+  }
+  
+  .sf-card-inner {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+  
+  .sf-icon-circle {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  
+  .sf-icon-circle svg {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .sf-title {
+    font-size: 1rem;
+  }
+  
+  .sf-description {
+    font-size: 0.875rem;
+  }
+  
+  .sf-media-preview img,
+  .sf-media-preview video {
+    max-height: 220px;
+  }
+}
+
+/* ================================================
+   ESTILOS LEGACY (mantener compatibilidad)
+   ================================================ */
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;

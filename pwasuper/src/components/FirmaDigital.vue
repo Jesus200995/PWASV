@@ -64,25 +64,42 @@ export default {
     return {
       isDrawing: false,
       hayFirma: false,
-      canvasWidth: 2400,
-      canvasHeight: 320
+      canvasWidth: 800,
+      canvasHeight: 300
     };
   },
   mounted() {
     this.$nextTick(() => {
-      const canvas = this.$refs.canvas;
-      if (canvas) {
-        // Ajustar resolución del canvas
-        const rect = canvas.getBoundingClientRect();
-        const ctx = canvas.getContext('2d');
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = '#1f2937';
-      }
+      this.ajustarCanvas();
+      window.addEventListener('resize', this.ajustarCanvas);
     });
   },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.ajustarCanvas);
+  },
   methods: {
+    ajustarCanvas() {
+      const canvas = this.$refs.canvas;
+      if (!canvas) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      
+      // Ajustar canvas a su tamaño visual con alta resolución
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      
+      // Actualizar data
+      this.canvasWidth = canvas.width;
+      this.canvasHeight = canvas.height;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#1f2937';
+    },
     iniciarFirma(e) {
       this.isDrawing = true;
       if (!this.hayFirma) {
@@ -93,8 +110,8 @@ export default {
       const rect = canvas.getBoundingClientRect();
       const ctx = canvas.getContext('2d');
       
-      const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-      const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
       
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -107,8 +124,8 @@ export default {
       const rect = canvas.getBoundingClientRect();
       const ctx = canvas.getContext('2d');
       
-      const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-      const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
       
       ctx.lineTo(x, y);
       ctx.stroke();
@@ -127,8 +144,8 @@ export default {
       const ctx = canvas.getContext('2d');
       const touch = e.touches[0];
       
-      const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
-      const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
       
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -143,8 +160,8 @@ export default {
       const ctx = canvas.getContext('2d');
       const touch = e.touches[0];
       
-      const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
-      const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
       
       ctx.lineTo(x, y);
       ctx.stroke();
@@ -155,9 +172,7 @@ export default {
     },
     
     limpiarFirma() {
-      const canvas = this.$refs.canvas;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.ajustarCanvas();
       this.hayFirma = false;
       this.$emit('borrado');
     },

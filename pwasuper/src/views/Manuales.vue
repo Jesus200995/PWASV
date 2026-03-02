@@ -1106,6 +1106,7 @@ onMounted(() => {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  padding-top: env(safe-area-inset-top, 20px);
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
@@ -1122,9 +1123,10 @@ onMounted(() => {
   position: relative;
   width: 100%;
   max-width: 100%;
-  max-height: 94vh;
+  max-height: calc(100vh - env(safe-area-inset-top, 20px) - 44px);
+  margin-top: auto;
   background: #ffffff;
-  border-radius: 24px 24px 0 0;
+  border-radius: 14px 14px 0 0;
   box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
@@ -1135,6 +1137,7 @@ onMounted(() => {
   .apple-modal {
     max-width: 26rem;
     max-height: 88vh;
+    margin-top: 0;
     border-radius: 28px;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
   }

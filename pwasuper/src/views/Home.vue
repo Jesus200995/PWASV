@@ -1349,8 +1349,8 @@
       :message="modalMessage"
       @close="closeSuccessModal"
     />
-    </div>
   </div>
+</div>
 </template>
 
 <script setup>

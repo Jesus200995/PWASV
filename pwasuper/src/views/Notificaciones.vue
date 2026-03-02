@@ -220,485 +220,295 @@
     </div>
     <!-- Fin del apple-notifications-container -->
 
-    <!-- Modal de detalle de notificación - Teleportado al body para difuminación correcta -->
+    <!-- Modal de detalle de notificación - Apple Design System -->
     <teleport to="body">
-      <div v-if="notificacionSeleccionada" 
-           class="fixed inset-0 bg-emerald-900/30 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-40 transition-all duration-500 animate-fade-in-blur"
-           @click="cerrarDetalleNotificacion">
-        
-        <!-- Contenedor del modal con botón de cerrar -->
-        <div class="relative" @click.stop>
+      <Transition name="sf-modal-backdrop">
+        <div v-if="notificacionSeleccionada" 
+             class="sf-modal-overlay"
+             @click="cerrarDetalleNotificacion">
           
-          <!-- Botón de cerrar (-) flotante en esquina superior derecha -->
-          <button 
-            @click="cerrarDetalleNotificacion"
-            class="absolute -top-1 right-1 sm:-top-2 sm:right-0 w-8 h-8 sm:w-9 sm:h-9 bg-emerald-600/90 hover:bg-emerald-700 backdrop-blur-sm text-white rounded-full flex items-center justify-center shadow-xl z-50 transition-all duration-200 transform hover:scale-110 active:scale-95 border border-white/20"
-            style="box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);"
-            title="Cerrar notificación"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4" />
-            </svg>
-          </button>
-          
-          <!-- Modal principal -->
-          <div class="news-modal bg-white rounded-2xl w-full max-w-md sm:max-w-2xl lg:max-w-4xl h-[99vh] sm:h-[88vh] max-h-[99vh] sm:max-h-[700px] overflow-hidden shadow-2xl transform transition-all duration-500 scale-100 flex flex-col animate-modal-open">
-        
-        <!-- Header Profesional tipo Notificación Moderna -->
-        <div class="notification-modal-header relative overflow-hidden flex-shrink-0">
-          <!-- Fondo degradado elegante guinda con verde -->
-          <div class="absolute inset-0 bg-gradient-to-r from-rose-800 via-pink-900 to-emerald-700"></div>
-          <!-- Patrón decorativo sutil (más pequeño) -->
-          <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-0 right-0 w-10 h-10 sm:w-16 sm:h-16 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div class="absolute bottom-0 left-0 w-8 h-8 sm:w-12 sm:h-12 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
-          </div>
-          
-          <div class="relative z-10 px-3 py-2 sm:px-4 sm:py-3">
-            <!-- Barra superior con etiqueta -->
-            <div class="flex items-center justify-start mb-0.5">
-              <div class="flex items-center gap-1">
-                <!-- Icono de notificación -->
-                <div class="w-4 h-4 sm:w-5 sm:h-5 bg-white/20 backdrop-blur-sm rounded-md flex items-center justify-center">
-                  <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                  </svg>
+          <Transition name="sf-modal-content" appear>
+            <article class="sf-modal" @click.stop>
+              
+              <!-- Botón cerrar estilo Apple -->
+              <button 
+                @click="cerrarDetalleNotificacion"
+                class="sf-modal-close"
+                aria-label="Cerrar"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+              
+              <!-- Header del modal -->
+              <header class="sf-modal-header">
+                <div class="sf-modal-header-inner">
+                  
+                  <!-- Icono y meta -->
+                  <div class="sf-modal-meta">
+                    <div class="sf-modal-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                      </svg>
+                    </div>
+                    <span class="sf-modal-label">Notificación</span>
+                    <span class="sf-modal-separator">•</span>
+                    <time class="sf-modal-time">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</time>
+                  </div>
+                  
+                  <!-- Badge de estado -->
+                  <span :class="['sf-modal-badge', notificacionSeleccionada.leida ? 'sf-modal-badge--read' : 'sf-modal-badge--unread']">
+                    <span class="sf-modal-badge-dot"></span>
+                    {{ notificacionSeleccionada.leida ? 'Leída' : 'Nueva' }}
+                  </span>
+                  
                 </div>
-                <div class="flex items-center gap-1 sm:gap-1.5">
-                  <span class="text-[7px] sm:text-[8px] font-bold text-white/85 uppercase tracking-wider">Aviso</span>
-                  <span class="text-[7px] sm:text-[8px] text-white/50">•</span>
-                  <span class="text-[7px] sm:text-[8px] text-white/50">{{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Título Principal y Badge en la misma línea -->
-            <div class="flex items-start justify-between gap-1.5 sm:gap-2">
-              <div class="flex-1 min-w-0">
-                <h1 class="text-sm sm:text-base lg:text-lg font-bold text-white leading-snug whitespace-normal break-words">
-                  {{ notificacionSeleccionada.titulo }}
-                </h1>
-                <p v-if="notificacionSeleccionada.subtitulo" class="text-[10px] sm:text-xs text-white/80 font-normal mt-0.5 italic whitespace-normal break-words line-clamp-2">
+                
+                <!-- Título -->
+                <h1 class="sf-modal-title">{{ notificacionSeleccionada.titulo }}</h1>
+                
+                <!-- Subtítulo -->
+                <p v-if="notificacionSeleccionada.subtitulo" class="sf-modal-subtitle">
                   {{ notificacionSeleccionada.subtitulo }}
                 </p>
-              </div>
+                
+              </header>
               
-              <!-- Badge de estado -->
-              <div :class="[
-                'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-semibold flex-shrink-0 whitespace-nowrap',
-                notificacionSeleccionada.leida 
-                  ? 'bg-green-400/25 text-green-50' 
-                  : 'bg-amber-400/25 text-amber-50'
-              ]">
-                <span :class="[
-                  'w-1 h-1 rounded-full',
-                  notificacionSeleccionada.leida ? 'bg-green-300' : 'bg-amber-300 animate-pulse'
-                ]"></span>
-                <span>{{ notificacionSeleccionada.leida ? 'Leída' : 'Nueva' }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Contenido del Artículo -->
-        <div class="notification-modal-content flex-1 p-4 sm:p-5 overflow-y-auto min-h-0">
-          
-          <!-- Sección de Vista Previa de Actividad (SI EXISTE) -->
-          <div v-if="notificacionSeleccionada.actividad" class="mb-4">
-            <!-- Etiqueta superior compacta -->
-            <div class="flex items-center gap-1.5 mb-1.5">
-              <div :class="[
-                'w-5 h-5 rounded-md flex items-center justify-center shadow-sm',
-                notificacionSeleccionada.actividad.tipo_actividad === 'campo'
-                  ? 'bg-gradient-to-br from-green-500 to-emerald-600'
-                  : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                  ? 'bg-gradient-to-br from-orange-500 to-amber-600'
-                  : 'bg-gradient-to-br from-gray-500 to-gray-600'
-              ]">
-                <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
-                </svg>
-              </div>
-              <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Datos de la actividad</h3>
-            </div>
-            
-            <!-- Card de actividad compacta -->
-            <div :class="[
-              'relative overflow-hidden rounded-lg transition-all duration-300 border shadow-sm',
-              'backdrop-filter backdrop-blur-xl',
-              notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
-                ? 'bg-gradient-to-br from-green-50/80 via-emerald-25/40 to-green-100/60 border-green-200/60' 
-                : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                ? 'bg-gradient-to-br from-orange-50/80 via-amber-25/40 to-orange-100/60 border-orange-200/60'
-                : 'bg-gradient-to-br from-gray-50/80 via-white/60 to-gray-100/40 border-gray-200/60'
-            ]"
-            style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
-              
-              <!-- Efectos decorativos -->
-              <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-50 rounded-lg pointer-events-none"></div>
-              <div v-if="notificacionSeleccionada.actividad.tipo_actividad === 'campo'" class="absolute top-0 right-0 w-10 h-10 bg-gradient-to-bl from-green-400/15 to-transparent rounded-full blur-lg"></div>
-              <div v-else-if="notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'" class="absolute top-0 right-0 w-10 h-10 bg-gradient-to-bl from-orange-400/15 to-transparent rounded-full blur-lg"></div>
-              
-              <!-- Borde superior -->
-              <div :class="[
-                'absolute top-0 left-0 right-0 h-0.5 rounded-t-lg',
-                notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
-                  : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                  ? 'bg-gradient-to-r from-orange-500 to-amber-600'
-                  : 'bg-gradient-to-r from-gray-400 to-gray-600'
-              ]"></div>
-              
-              <div class="relative z-10 p-2">
-                <div class="flex gap-2">
-                  <!-- Foto compacta -->
-                  <div class="w-11 h-11 flex-shrink-0 rounded-md overflow-hidden relative shadow-sm" 
-                       :class="{'cursor-pointer': notificacionSeleccionada.actividad.foto_url}" 
-                       @click="notificacionSeleccionada.actividad.foto_url && verImagen(getActividadFotoUrl(notificacionSeleccionada.actividad.foto_url))">
-                    <img v-if="notificacionSeleccionada.actividad.foto_url" 
-                         :src="getActividadFotoUrl(notificacionSeleccionada.actividad.foto_url)" 
-                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-110" 
-                         alt="Foto" />
-                    <div v-else class="flex justify-center">
-                      <div :class="[
-                        'w-11 h-11 rounded flex items-center justify-center relative shadow-sm border',
-                        notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
-                          ? 'bg-gradient-to-br from-green-100 to-green-50 border-green-200/50' 
-                          : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                          ? 'bg-gradient-to-br from-orange-100 to-orange-50 border-orange-200/50'
-                          : 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200/50'
-                      ]">
-                        <svg xmlns="http://www.w3.org/2000/svg" :class="[
-                          'h-5 w-5',
-                          notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
-                            ? 'text-green-600' 
-                            : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                            ? 'text-orange-600'
-                            : 'text-gray-500'
-                        ]" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+              <!-- Contenido scrolleable -->
+              <div class="sf-modal-body">
+                
+                <!-- Vista previa de actividad (si existe) -->
+                <section v-if="notificacionSeleccionada.actividad" class="sf-activity-card">
+                  <div class="sf-activity-header">
+                    <div :class="['sf-activity-icon', 
+                      notificacionSeleccionada.actividad.tipo_actividad === 'campo' ? 'sf-activity-icon--campo' : 
+                      notificacionSeleccionada.actividad.tipo_actividad === 'gabinete' ? 'sf-activity-icon--gabinete' : 'sf-activity-icon--default'
+                    ]">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/>
+                      </svg>
+                    </div>
+                    <span class="sf-activity-label">Actividad registrada</span>
+                  </div>
+                  
+                  <div class="sf-activity-content">
+                    <!-- Foto -->
+                    <div class="sf-activity-photo"
+                         :class="{ 'sf-activity-photo--clickable': notificacionSeleccionada.actividad.foto_url }"
+                         @click="notificacionSeleccionada.actividad.foto_url && verImagen(getActividadFotoUrl(notificacionSeleccionada.actividad.foto_url))">
+                      <img v-if="notificacionSeleccionada.actividad.foto_url"
+                           :src="getActividadFotoUrl(notificacionSeleccionada.actividad.foto_url)"
+                           alt="Foto actividad"/>
+                      <div v-else class="sf-activity-photo-placeholder">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <rect x="3" y="3" width="18" height="18" rx="2"/>
+                          <circle cx="8.5" cy="8.5" r="1.5"/>
+                          <path d="M21 15l-5-5L5 21"/>
                         </svg>
                       </div>
                     </div>
-                  </div>
-                  
-                  <!-- Información compacta -->
-                  <div class="flex-1 min-w-0 space-y-0.5">
-                    <!-- Fecha y tipo -->
-                    <div class="flex items-start justify-between gap-1">
-                      <div class="flex flex-col">
-                        <p v-if="notificacionSeleccionada.actividad.fecha" class="text-xs font-semibold text-gray-700 leading-tight">
+                    
+                    <!-- Info -->
+                    <div class="sf-activity-info">
+                      <div class="sf-activity-row">
+                        <span v-if="notificacionSeleccionada.actividad.fecha" class="sf-activity-date">
                           {{ formatearFechaActividad(notificacionSeleccionada.actividad.fecha).split(' - ')[0] }}
-                        </p>
-                        <p v-if="notificacionSeleccionada.actividad.categoria_actividad" :class="[
-                          'text-xs font-bold leading-tight',
-                          notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
-                            ? 'text-green-700' 
-                            : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                            ? 'text-orange-700'
-                            : 'text-gray-700'
+                        </span>
+                        <span v-if="notificacionSeleccionada.actividad.tipo_actividad" :class="['sf-activity-type', 
+                          notificacionSeleccionada.actividad.tipo_actividad === 'campo' ? 'sf-activity-type--campo' : 
+                          notificacionSeleccionada.actividad.tipo_actividad === 'gabinete' ? 'sf-activity-type--gabinete' : ''
                         ]">
-                          {{ notificacionSeleccionada.actividad.categoria_actividad }}
-                        </p>
+                          {{ notificacionSeleccionada.actividad.tipo_actividad }}
+                        </span>
                       </div>
-                      <!-- Coordenadas -->
-                      <div v-if="notificacionSeleccionada.actividad.latitud && notificacionSeleccionada.actividad.longitud" :class="[
-                        'text-center bg-white/60 backdrop-blur-sm rounded px-1 py-0.5 border text-[9px] flex-shrink-0',
-                        notificacionSeleccionada.actividad.tipo_actividad === 'campo' 
-                          ? 'border-green-200/60' 
-                          : notificacionSeleccionada.actividad.tipo_actividad === 'gabinete'
-                          ? 'border-orange-200/60'
-                          : 'border-gray-200/60'
-                      ]">
-                        <div class="text-gray-600 font-mono leading-tight">{{ notificacionSeleccionada.actividad.latitud.toFixed(2) }}</div>
-                        <div class="text-gray-600 font-mono leading-tight">{{ notificacionSeleccionada.actividad.longitud.toFixed(2) }}</div>
+                      <p v-if="notificacionSeleccionada.actividad.categoria_actividad" class="sf-activity-category">
+                        {{ notificacionSeleccionada.actividad.categoria_actividad }}
+                      </p>
+                      <p v-if="notificacionSeleccionada.actividad.descripcion" class="sf-activity-desc">
+                        {{ notificacionSeleccionada.actividad.descripcion }}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+                
+                <!-- Descripción/Mensaje -->
+                <section v-if="notificacionSeleccionada.descripcion" class="sf-message-section">
+                  <div class="sf-message-content" v-html="formatearDescripcion(notificacionSeleccionada.descripcion)"></div>
+                </section>
+                
+                <!-- Vista previa de imagen -->
+                <section v-if="notificacionSeleccionada.tiene_archivo && esImagen(notificacionSeleccionada.archivo_tipo)" class="sf-image-section">
+                  <div class="sf-image-container" @click="abrirArchivo(notificacionSeleccionada.id)">
+                    <img 
+                      :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
+                      :alt="notificacionSeleccionada.archivo_nombre"
+                      class="sf-image-preview"
+                      @error="onImageError"
+                      @load="onImageLoad"
+                      loading="eager"
+                    />
+                    <div class="sf-image-overlay">
+                      <div class="sf-image-action">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/>
+                        </svg>
+                        <span>Ampliar imagen</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="sf-image-name">{{ notificacionSeleccionada.archivo_nombre }}</p>
+                </section>
+                
+                <!-- Vista previa de video -->
+                <section v-else-if="notificacionSeleccionada.tiene_archivo && esVideo(notificacionSeleccionada.archivo_tipo)" class="sf-video-section">
+                  <div class="sf-video-container">
+                    <video 
+                      :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
+                      controls
+                      preload="metadata"
+                      class="sf-video-player"
+                    ></video>
+                  </div>
+                  <p class="sf-video-name">{{ notificacionSeleccionada.archivo_nombre }}</p>
+                </section>
+                
+                <!-- Archivo adjunto (otros tipos) -->
+                <section v-else-if="notificacionSeleccionada.tiene_archivo" class="sf-file-section">
+                  <div class="sf-file-card">
+                    <div class="sf-file-icon" :style="{ backgroundColor: obtenerColorTipoArchivo(notificacionSeleccionada.archivo_tipo) }">
+                      <span>{{ obtenerInicialesTipoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
+                    </div>
+                    <div class="sf-file-info">
+                      <h4 class="sf-file-name">{{ notificacionSeleccionada.archivo_nombre }}</h4>
+                      <p class="sf-file-type">{{ notificacionSeleccionada.archivo_tipo.toUpperCase() }}</p>
+                    </div>
+                    
+                    <!-- Botón de descarga -->
+                    <button 
+                      v-if="!notificacionSeleccionada.estadoDescarga"
+                      @click="abrirArchivo(notificacionSeleccionada.id)"
+                      class="sf-download-btn"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                      <span>Descargar</span>
+                    </button>
+                    
+                    <!-- Estado: Descargando -->
+                    <div v-else-if="notificacionSeleccionada.estadoDescarga === 'descargando'" class="sf-download-progress">
+                      <div class="sf-progress-ring">
+                        <svg viewBox="0 0 36 36">
+                          <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" stroke-width="2" opacity="0.2"/>
+                          <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" stroke-width="2" 
+                                  :stroke-dasharray="100" 
+                                  :stroke-dashoffset="100 - (notificacionSeleccionada.progresoDescarga || 0)"
+                                  transform="rotate(-90 18 18)"/>
+                        </svg>
+                        <span>{{ notificacionSeleccionada.progresoDescarga }}%</span>
                       </div>
                     </div>
                     
-                    <!-- Descripción en una línea -->
-                    <p v-if="notificacionSeleccionada.actividad.descripcion" class="text-xs text-gray-700 leading-tight line-clamp-1">
-                      {{ notificacionSeleccionada.actividad.descripcion }}
-                    </p>
+                    <!-- Estado: Completado -->
+                    <div v-else-if="notificacionSeleccionada.estadoDescarga === 'completado'" class="sf-download-complete">
+                      <button @click="verArchivoDescargado()" class="sf-open-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                          <polyline points="15,3 21,3 21,9"/>
+                          <line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                        Abrir
+                      </button>
+                    </div>
+                    
+                    <!-- Estado: Error -->
+                    <button 
+                      v-else-if="notificacionSeleccionada.estadoDescarga === 'error'"
+                      @click="abrirArchivo(notificacionSeleccionada.id)"
+                      class="sf-retry-btn"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 4v6h6M23 20v-6h-6"/>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                      </svg>
+                      Reintentar
+                    </button>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Sección de Descripción/Mensaje - Estilo email empresarial -->
-          <div class="notification-description-section mb-3">
-            <div class="bg-white border-l-4 border-orange-400 pl-4 pr-3 py-3">
-              <div class="notification-description-text text-sm text-gray-700 leading-relaxed [&_p]:mb-0 [&_p+p]:mt-2.5" v-html="formatearDescripcion(notificacionSeleccionada.descripcion)"></div>
-            </div>
-          </div>
-
-          <!-- Sección de Imagen -->
-          <div v-if="notificacionSeleccionada.tiene_archivo && esImagen(notificacionSeleccionada.archivo_tipo)" class="notification-image-section mb-6">
-            <div class="relative overflow-hidden bg-white rounded-xl border border-gray-200 shadow-md">
-              <!-- Placeholder de carga -->
-              <div class="flex items-center justify-center min-h-48 bg-gray-50 image-placeholder">
-                <div class="text-gray-400 text-center">
-                  <div class="w-12 h-12 mx-auto mb-2 bg-gray-200 rounded-full flex items-center justify-center">
-                    <svg class="w-6 h-6 text-gray-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </section>
+                
+                <!-- Enlace externo -->
+                <section v-if="notificacionSeleccionada.enlace_url" class="sf-link-section">
+                  <a :href="notificacionSeleccionada.enlace_url" 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     class="sf-link-card">
+                    <div class="sf-link-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15,3 21,3 21,9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                      </svg>
+                    </div>
+                    <div class="sf-link-info">
+                      <span class="sf-link-label">Abrir enlace externo</span>
+                      <span class="sf-link-url">{{ formatearEnlaceLegible(notificacionSeleccionada.enlace_url) }}</span>
+                    </div>
+                    <svg class="sf-link-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="9,18 15,12 9,6"/>
                     </svg>
-                  </div>
-                  <div class="text-sm font-medium">Cargando imagen...</div>
-                </div>
+                  </a>
+                </section>
+                
               </div>
-              <!-- Imagen real -->
-              <img 
-                :src="obtenerUrlArchivo(notificacionSeleccionada.id)" 
-                :alt="notificacionSeleccionada.archivo_nombre"
-                class="w-full h-auto object-contain cursor-pointer hover:scale-[1.02] transition-transform duration-300 relative z-10 bg-white"
-                @click="abrirArchivo(notificacionSeleccionada.id)"
-                @error="onImageError"
-                @load="onImageLoad"
-                loading="eager"
-                decoding="async"
-              />
-              <!-- Overlay con información del archivo -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent p-4">
-                <div class="flex items-center justify-between">
-                  <p class="text-white text-sm font-medium truncate max-w-[70%]">{{ notificacionSeleccionada.archivo_nombre }}</p>
-                  <span class="text-white/70 text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">Toca para ampliar</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sección de Video -->
-          <div v-else-if="notificacionSeleccionada.tiene_archivo && esVideo(notificacionSeleccionada.archivo_tipo)" class="notification-video-section mb-6">
-            <div class="relative overflow-hidden bg-gray-900 rounded-xl shadow-lg border border-gray-800">
-              <video 
-                :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
-                class="w-full h-auto object-cover"
-                controls
-                preload="metadata"
-                poster=""
-              >
-                <div class="flex items-center justify-center min-h-48 bg-gray-800">
-                  <div class="text-gray-400 text-center">
-                    <div class="text-sm">Tu navegador no soporta video</div>
-                  </div>
-                </div>
-              </video>
-              <!-- Nombre del archivo -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 pointer-events-none">
-                <p class="text-white/80 text-xs font-medium truncate">{{ notificacionSeleccionada.archivo_nombre }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Archivo adjunto -->
-          <!-- Archivo adjunto con sistema de descarga y progreso -->
-          <div v-else-if="notificacionSeleccionada.tiene_archivo" class="news-attachment mb-6">
-            <div class="border border-gray-200 rounded-xl p-4 bg-gradient-to-r from-gray-50 to-white shadow-sm">
               
-              <!-- Información del archivo -->
-              <div class="flex items-center space-x-3 mb-3">
-                <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border-2 border-white"
-                     :style="{ backgroundColor: obtenerColorTipoArchivo(notificacionSeleccionada.archivo_tipo) }">
-                  <span class="text-xs font-bold text-white tracking-wider">{{ obtenerInicialesTipoArchivo(notificacionSeleccionada.archivo_tipo) }}</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-semibold text-gray-800 truncate">{{ notificacionSeleccionada.archivo_nombre }}</h4>
-                  <p class="text-xs text-gray-600 capitalize">{{ notificacionSeleccionada.archivo_tipo }}</p>
-                  <p v-if="notificacionSeleccionada.archivoDescargado" class="text-xs text-green-600 font-medium">
-                    ✅ Archivo listo para ver
-                  </p>
-                </div>
-              </div>
-
-              <!-- Estados del archivo -->
-              <!-- Estado inicial: Sin descarga -->
-              <div v-if="!notificacionSeleccionada.estadoDescarga" class="flex justify-end">
-                <button 
-                  @click="abrirArchivo(notificacionSeleccionada.id)"
-                  class="glass-download-button group relative overflow-hidden px-3 py-1.5 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-95"
-                >
-                  <!-- Fondo con efecto de vidrio líquido -->
-                  <div class="absolute inset-0 bg-gradient-to-br from-blue-400/80 via-blue-500/70 to-blue-600/80 rounded-full backdrop-blur-sm"></div>
-                  
-                  <!-- Efecto de brillo líquido -->
-                  <div class="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-                  
-                  <!-- Contenido del botón -->
-                  <div class="relative flex items-center justify-center space-x-1.5 text-white">
-                    <svg class="w-3.5 h-3.5 transform group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <span class="font-medium text-2xs tracking-wide">Descargar</span>
-                  </div>
-                  
-                  <!-- Sombra interna para efecto 3D -->
-                  <div class="absolute inset-1 rounded-full shadow-inner opacity-30"></div>
-                </button>
-              </div>
-
-              <!-- Estado: Preparando descarga -->
-              <div v-else-if="notificacionSeleccionada.estadoDescarga === 'preparando'" class="space-y-3">
-                <div class="flex items-center justify-center space-x-2 text-blue-600">
-                  <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                  </svg>
-                  <span class="text-sm font-medium">Preparando descarga...</span>
-                </div>
-              </div>
-
-              <!-- Estado: Descargando con barra de progreso -->
-              <div v-else-if="notificacionSeleccionada.estadoDescarga === 'descargando'" class="space-y-3">
-                <div class="flex items-center justify-between text-sm">
-                  <span class="text-blue-600 font-medium">Descargando archivo...</span>
-                  <span class="text-gray-600">{{ notificacionSeleccionada.progresoDescarga }}%</span>
-                </div>
-                
-                <!-- Barra de progreso animada -->
-                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div 
-                    class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
-                    :style="{ width: `${notificacionSeleccionada.progresoDescarga}%` }"
-                  >
-                    <!-- Efecto de brillo en movimiento -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 -skew-x-12 animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Estado: Descarga completada -->
-              <div v-else-if="notificacionSeleccionada.estadoDescarga === 'completado'" class="space-y-3">
-                <div class="flex items-center space-x-2 text-green-600 mb-3">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span class="text-sm font-medium">¡Descarga completada!</span>
-                </div>
-                
-                <!-- Información del archivo descargado -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
-                  <p class="text-xs text-green-800 font-medium">
-                    📁 {{ notificacionSeleccionada.archivoDescargado?.nombre }}
-                  </p>
-                  <p class="text-xs text-green-600 mt-1">
-                    Tipo: {{ notificacionSeleccionada.archivoDescargado?.tipo }}
-                  </p>
-                </div>
-
-                <!-- Botones de acción -->
-                <div class="flex space-x-2 justify-end">
-                  <!-- Botón para ver con app nativa -->
-                  <button 
-                    @click="verArchivoDescargado()"
-                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                    <span>Ver archivo</span>
-                  </button>
-                  
-                  <!-- Botón para descargar de nuevo -->
-                  <button 
-                    @click="abrirArchivo(notificacionSeleccionada.id)"
-                    class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
-                  >
-                    🔄
-                  </button>
-                </div>
-              </div>
-
-              <!-- Estado: Error en descarga -->
-              <div v-else-if="notificacionSeleccionada.estadoDescarga === 'error'" class="space-y-3">
-                <div class="flex items-center space-x-2 text-red-600 mb-3">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-                  </svg>
-                  <span class="text-sm font-medium">Error en la descarga</span>
-                </div>
-                
-                <!-- Mensaje de error -->
-                <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
-                  <p class="text-xs text-red-800">{{ notificacionSeleccionada.errorDescarga }}</p>
-                </div>
-
-                <!-- Botón para reintentar -->
-                <div class="flex justify-end">
-                  <button 
-                    @click="abrirArchivo(notificacionSeleccionada.id)"
-                    class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                    <span>Reintentar descarga</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sección de Enlace -->
-          <div v-if="notificacionSeleccionada.enlace_url" class="notification-link-section mb-6">
-            <a 
-              :href="notificacionSeleccionada.enlace_url" 
-              target="_blank"
-              rel="noopener noreferrer"
-              class="notification-link-card group block"
-            >
-              <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 hover:border-blue-400 hover:shadow-md transition-all duration-300">
-                <div class="flex items-center gap-3">
-                  <!-- Icono de enlace -->
-                  <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                    </svg>
-                  </div>
-                  <!-- Contenido -->
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Abrir enlace</div>
-                    <div class="text-xs text-gray-500 truncate mt-0.5">{{ formatearEnlaceLegible(notificacionSeleccionada.enlace_url) }}</div>
-                  </div>
-                  <!-- Flecha -->
-                  <div class="flex-shrink-0">
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
+              <!-- Footer -->
+              <footer class="sf-modal-footer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12,6 12,12 16,14"/>
+                </svg>
+                <span>Recibido {{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</span>
+              </footer>
+              
+            </article>
+          </Transition>
+          
         </div>
-        
-        <!-- Footer del modal mejorado -->
-        <div class="notification-modal-footer flex-shrink-0 border-t border-gray-200 px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100">
-          <div class="flex items-center justify-center gap-1.5 text-[10px] text-gray-400">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span>Recibido: {{ formatearFecha(notificacionSeleccionada.fecha_creacion) }}</span>
-          </div>
-        </div>
-        </div>
-        </div>
-      </div>
+      </Transition>
     </teleport>
 
-    <!-- Modal para visualizar imagen de actividad -->
+    <!-- Modal para visualizar imagen - Apple Photos Style -->
     <teleport to="body">
-      <div v-if="imagenModalVisible" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-2" @click="imagenModalVisible = false">
-        <div class="relative max-w-full max-h-full">
-          <button @click="imagenModalVisible = false" class="absolute right-1 top-1 bg-black bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-70 transition-opacity z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      <Transition name="sf-image-modal">
+        <div v-if="imagenModalVisible" 
+             class="sf-fullscreen-overlay"
+             @click="imagenModalVisible = false">
+          
+          <!-- Close button - Apple style -->
+          <button class="sf-fullscreen-close" @click.stop="imagenModalVisible = false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
-          <div class="overflow-auto max-h-[90vh]" @click.stop>
-            <img :src="imagenSeleccionada" class="w-full h-auto object-contain max-h-[75vh]" alt="Imagen ampliada" />
+          
+          <!-- Image container - no distortion -->
+          <div class="sf-fullscreen-image-wrap" @click.stop>
+            <img 
+              :src="imagenSeleccionada" 
+              class="sf-fullscreen-image" 
+              alt="Imagen ampliada"
+              @load="(e) => e.target.classList.add('loaded')"
+            />
           </div>
+          
         </div>
-      </div>
+      </Transition>
     </teleport>
   </div>
   <!-- Fin del apple-notifications-page -->
@@ -1815,7 +1625,7 @@ const getActividadFotoUrl = (fotoUrl) => {
   return fotoUrl
 }
 
-// Función para formatear la descripción respetando saltos de línea y formato
+// Función para formatear la descripción respetando TODOS los saltos de línea
 const formatearDescripcion = (texto) => {
   if (!texto) return ''
   
@@ -1832,16 +1642,14 @@ const formatearDescripcion = (texto) => {
   textoFormateado = textoFormateado.replace(/\r\n/g, '\n')
   textoFormateado = textoFormateado.replace(/\r/g, '\n')
   
-  // PASO 2: Colapsar múltiples saltos consecutivos a un solo separador de párrafo
-  // Cualquier combinación de 2+ saltos se convierte en UN separador de párrafo
+  // PASO 2: Convertir múltiples saltos (2+) en separador de párrafo doble
   textoFormateado = textoFormateado.replace(/\n{2,}/g, '{{PARRAFO}}')
   
-  // PASO 3: Eliminar saltos simples dentro del texto (fluir como texto corrido)
-  // Esto es estándar en emails empresariales - saltos simples se ignoran
-  textoFormateado = textoFormateado.replace(/\n/g, ' ')
+  // PASO 3: Convertir saltos simples en <br> para respetar el formato original
+  textoFormateado = textoFormateado.replace(/\n/g, '<br>')
   
-  // PASO 4: Limpiar espacios múltiples que puedan quedar
-  textoFormateado = textoFormateado.replace(/\s{2,}/g, ' ')
+  // PASO 4: Limpiar espacios múltiples (pero NO los <br>)
+  textoFormateado = textoFormateado.replace(/  +/g, ' ')
   
   // PASO 5: Convertir marcadores de párrafo a HTML con espaciado CSS controlado
   textoFormateado = textoFormateado.replace(/\{\{PARRAFO\}\}/g, '</p><p class="mt-3">')
@@ -4137,6 +3945,1030 @@ video::-webkit-media-controls {
   background: linear-gradient(45deg, #15803d, #16a34a);
   box-shadow: 0 4px 8px rgba(34, 197, 94, 0.4);
   transform: translateY(-1px);
+}
+
+/* ================================================
+   SF MODAL - APPLE DESIGN SYSTEM (iOS 17 Style)
+   ================================================ */
+
+/* Apple Spring Animation Keyframes */
+@keyframes sfModalSpring {
+  0% { 
+    opacity: 0;
+    transform: scale(0.85) translateY(30px);
+  }
+  50% { 
+    transform: scale(1.02) translateY(-2px);
+  }
+  75% {
+    transform: scale(0.99) translateY(1px);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes sfModalOut {
+  0% { 
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(0.9) translateY(15px);
+  }
+}
+
+@keyframes sfIconPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes sfShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Backdrop overlay - intenso blur tipo Apple */
+.sf-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Modal container - iOS 17 card style */
+.sf-modal {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  max-height: 88vh;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 22px;
+  box-shadow: 
+    0 30px 70px -10px rgba(0, 0, 0, 0.35),
+    0 15px 35px -5px rgba(0, 0, 0, 0.15),
+    0 0 0 0.5px rgba(255, 255, 255, 0.6) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: sfModalSpring 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  will-change: transform, opacity;
+}
+
+@media (min-width: 640px) {
+  .sf-modal {
+    max-width: 34rem;
+    border-radius: 26px;
+  }
+}
+
+@media (min-width: 768px) {
+  .sf-modal {
+    max-width: 38rem;
+    max-height: 82vh;
+  }
+}
+
+/* Close button - iOS style - positioned outside header-inner */
+.sf-modal-close {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+  z-index: 60;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(120, 120, 128, 0.12);
+  border: none;
+  border-radius: 50%;
+  color: rgba(60, 60, 67, 0.6);
+  cursor: pointer;
+  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-modal-close:hover {
+  background: rgba(120, 120, 128, 0.2);
+  color: rgba(60, 60, 67, 0.85);
+  transform: scale(1.08);
+}
+
+.sf-modal-close:active {
+  transform: scale(0.92);
+  background: rgba(120, 120, 128, 0.25);
+}
+
+/* Modal header - clean Apple style */
+.sf-modal-header {
+  flex-shrink: 0;
+  padding: 1rem 1rem 0.875rem;
+  padding-right: 2.5rem; /* Space for close button */
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 640px) {
+  .sf-modal-header {
+    padding: 1.25rem 1.25rem 1rem;
+    padding-right: 2.75rem;
+  }
+}
+
+.sf-modal-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Meta info */
+.sf-modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Animated notification icon */
+.sf-modal-icon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #34d399, #10b981);
+  border-radius: 7px;
+  color: white;
+  animation: sfIconPulse 2.5s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.sf-modal-icon svg {
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+}
+
+.sf-modal-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.sf-modal-separator {
+  font-size: 0.5rem;
+  color: rgba(0, 0, 0, 0.2);
+}
+
+.sf-modal-time {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.38);
+}
+
+/* Badge - iOS pill style */
+.sf-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 100px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.sf-modal-badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sf-modal-badge--unread {
+  background: linear-gradient(145deg, #fef2f2, #fecaca);
+  color: #dc2626;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.15);
+}
+
+.sf-modal-badge--unread .sf-modal-badge-dot {
+  background: #ef4444;
+  animation: sfPulse 1.5s ease-in-out infinite;
+}
+
+.sf-modal-badge--read {
+  background: linear-gradient(145deg, #ecfdf5, #d1fae5);
+  color: #059669;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.15);
+}
+
+.sf-modal-badge--read .sf-modal-badge-dot {
+  background: #10b981;
+}
+
+/* Title - Apple typography */
+.sf-modal-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  font-size: 1.1875rem;
+  font-weight: 650;
+  letter-spacing: -0.018em;
+  line-height: 1.22;
+  color: rgba(0, 0, 0, 0.9);
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .sf-modal-title {
+    font-size: 1.3125rem;
+  }
+}
+
+/* Subtitle */
+.sf-modal-subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.48);
+  margin: 0.375rem 0 0;
+  line-height: 1.45;
+}
+
+/* Modal body - smooth scroll */
+.sf-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.125rem;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.sf-modal-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sf-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sf-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+}
+
+@media (min-width: 640px) {
+  .sf-modal-body {
+    padding: 1.375rem;
+  }
+}
+
+/* Activity card - iOS card style */
+.sf-activity-card {
+  background: linear-gradient(155deg, #f8fafc, #f1f5f9);
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.sf-activity-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.sf-activity-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+}
+
+.sf-activity-icon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.sf-activity-icon--campo {
+  background: linear-gradient(145deg, #34d399, #10b981);
+}
+
+.sf-activity-icon--gabinete {
+  background: linear-gradient(145deg, #fb923c, #f97316);
+}
+
+.sf-activity-icon--default {
+  background: linear-gradient(145deg, #9ca3af, #6b7280);
+}
+
+.sf-activity-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.sf-activity-content {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Activity photo - no distortion */
+.sf-activity-photo {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+  position: relative;
+}
+
+.sf-activity-photo--clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sf-activity-photo--clickable:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.sf-activity-photo--clickable:hover img {
+  transform: scale(1);
+}
+
+.sf-activity-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-activity-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.2);
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+}
+
+.sf-activity-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sf-activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.sf-activity-date {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.72);
+}
+
+.sf-activity-type {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+}
+
+.sf-activity-type--campo {
+  background: linear-gradient(145deg, #d1fae5, #a7f3d0);
+  color: #047857;
+}
+
+.sf-activity-type--gabinete {
+  background: linear-gradient(145deg, #fed7aa, #fdba74);
+  color: #c2410c;
+}
+
+.sf-activity-category {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.82);
+  margin: 0.125rem 0 0.25rem;
+  line-height: 1.3;
+}
+
+.sf-activity-desc {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.5);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Message section - Apple quote style */
+.sf-message-section {
+  margin-bottom: 1rem;
+}
+
+.sf-message-content {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: rgba(0, 0, 0, 0.75);
+  padding: 1rem 1.125rem;
+  background: linear-gradient(155deg, rgba(245, 247, 250, 0.9), rgba(255, 255, 255, 0.95));
+  border-radius: 14px;
+  border-left: 3px solid transparent;
+  border-image: linear-gradient(180deg, #10b981, #059669) 1;
+  position: relative;
+}
+
+.sf-message-content::before {
+  content: '"';
+  position: absolute;
+  top: 0.5rem;
+  left: 0.75rem;
+  font-family: Georgia, serif;
+  font-size: 2.5rem;
+  color: rgba(16, 185, 129, 0.15);
+  line-height: 1;
+}
+
+.sf-message-content p {
+  margin: 0;
+  text-indent: 1rem;
+}
+
+.sf-message-content p:first-child {
+  text-indent: 1.5rem;
+}
+
+.sf-message-content p + p {
+  margin-top: 0.625rem;
+}
+
+/* Image section - NO distortion, Apple Photos style */
+.sf-image-section {
+  margin-bottom: 1rem;
+}
+
+.sf-image-container {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  max-height: 320px;
+  transition: all 0.2s ease;
+}
+
+.sf-image-container:hover {
+  transform: scale(1.01);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.sf-image-container:active {
+  transform: scale(0.99);
+}
+
+/* Image WITHOUT distortion - maintain aspect ratio */
+.sf-image-preview {
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-image-container:hover .sf-image-preview {
+  transform: scale(1.03);
+}
+
+.sf-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sf-image-container:hover .sf-image-overlay {
+  opacity: 1;
+}
+
+.sf-image-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 100px;
+  color: rgba(0, 0, 0, 0.85);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease;
+}
+
+.sf-image-action:hover {
+  transform: scale(1.03);
+}
+
+.sf-image-name {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0.5rem 0 0;
+  text-align: center;
+}
+
+/* Video section - Apple TV+ style */
+.sf-video-section {
+  margin-bottom: 1rem;
+}
+
+.sf-video-container {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.sf-video-player {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+  background: #000;
+}
+
+.sf-video-name {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0.5rem 0 0;
+  text-align: center;
+}
+
+/* File section - iOS Files app style */
+.sf-file-section {
+  margin-bottom: 1rem;
+}
+
+.sf-file-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.95));
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.sf-file-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.sf-file-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sf-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sf-file-name {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sf-file-type {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0.125rem 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Download button - Apple button style */
+.sf-download-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.875rem;
+  background: linear-gradient(145deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+.sf-download-btn:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.45);
+}
+
+.sf-download-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 1px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Progress indicator - Apple spinner style */
+.sf-download-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sf-progress-ring {
+  position: relative;
+  width: 38px;
+  height: 38px;
+}
+
+.sf-progress-ring svg {
+  transform: rotate(-90deg);
+  filter: drop-shadow(0 1px 2px rgba(59, 130, 246, 0.3));
+}
+
+.sf-progress-ring circle {
+  stroke: #3b82f6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.2s ease;
+}
+
+.sf-progress-ring span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Open button - success state */
+.sf-open-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  background: linear-gradient(145deg, #22c55e, #16a34a);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+}
+
+.sf-open-btn:hover {
+  transform: scale(1.04);
+}
+
+.sf-open-btn:active {
+  transform: scale(0.97);
+}
+
+/* Retry button - error state */
+.sf-retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  background: linear-gradient(145deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+.sf-retry-btn:hover {
+  transform: scale(1.04);
+}
+
+.sf-retry-btn:active {
+  transform: scale(0.97);
+}
+
+/* Link section - Safari style */
+.sf-link-section {
+  margin-bottom: 1rem;
+}
+
+.sf-link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: linear-gradient(155deg, #eff6ff, #f0f9ff);
+  border: 0.5px solid rgba(59, 130, 246, 0.18);
+  border-radius: 14px;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-link-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 18px rgba(59, 130, 246, 0.12);
+  transform: translateY(-2px);
+}
+
+.sf-link-card:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.sf-link-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #3b82f6, #2563eb);
+  border-radius: 10px;
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+.sf-link-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sf-link-label {
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.sf-link-url {
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.65rem;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 0.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sf-link-chevron {
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.25);
+  transition: all 0.15s ease;
+}
+
+.sf-link-card:hover .sf-link-chevron {
+  transform: translateX(4px);
+  color: #3b82f6;
+}
+
+/* Modal footer - subtle Apple style */
+.sf-modal-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.98) 100%);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.65rem;
+  color: rgba(0, 0, 0, 0.35);
+  letter-spacing: 0.01em;
+}
+
+.sf-modal-footer svg {
+  opacity: 0.6;
+}
+
+/* ================================================
+   SF MODAL TRANSITIONS - Apple iOS Speed
+   ================================================ */
+
+/* Backdrop transition - fast */
+.sf-modal-backdrop-enter-active {
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-modal-backdrop-leave-active {
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-modal-backdrop-enter-from,
+.sf-modal-backdrop-leave-to {
+  opacity: 0;
+}
+
+/* Content transition - spring bounce */
+.sf-modal-content-enter-active {
+  transition: none;
+  animation: sfModalSpring 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.sf-modal-content-leave-active {
+  animation: sfModalOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.sf-modal-content-enter-from,
+.sf-modal-content-leave-to {
+  opacity: 0;
+}
+
+/* ================================================
+   SF FULLSCREEN IMAGE MODAL - Apple Photos Style
+   ================================================ */
+
+.sf-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+  padding: 1rem;
+}
+
+.sf-fullscreen-close {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10001;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sf-fullscreen-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
+}
+
+.sf-fullscreen-close:active {
+  transform: scale(0.95);
+}
+
+.sf-fullscreen-image-wrap {
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sf-fullscreen-image {
+  max-width: 100%;
+  max-height: 88vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sf-fullscreen-image.loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Fullscreen image modal transitions */
+.sf-image-modal-enter-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-image-modal-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-image-modal-enter-from {
+  opacity: 0;
+}
+
+.sf-image-modal-enter-from .sf-fullscreen-image {
+  transform: scale(0.85);
+}
+
+.sf-image-modal-leave-to {
+  opacity: 0;
+}
+
+.sf-image-modal-leave-to .sf-fullscreen-image {
+  transform: scale(0.9);
 }
 
 /* =================================

@@ -341,7 +341,7 @@
                 
                 <!-- Vista previa de imagen -->
                 <section v-if="notificacionSeleccionada.tiene_archivo && esImagen(notificacionSeleccionada.archivo_tipo)" class="sf-image-section">
-                  <div class="sf-image-container" @click="abrirArchivo(notificacionSeleccionada.id)">
+                  <div class="sf-image-container" @click="verImagen(obtenerUrlArchivo(notificacionSeleccionada.id))">
                     <img 
                       :src="obtenerUrlArchivo(notificacionSeleccionada.id)"
                       :alt="notificacionSeleccionada.archivo_nombre"
@@ -359,7 +359,6 @@
                       </div>
                     </div>
                   </div>
-                  <p class="sf-image-name">{{ notificacionSeleccionada.archivo_nombre }}</p>
                 </section>
                 
                 <!-- Vista previa de video -->
@@ -4490,44 +4489,45 @@ video::-webkit-media-controls {
 }
 
 .sf-image-container:hover .sf-image-preview {
-  transform: scale(1.03);
+  transform: scale(1.02);
 }
 
 .sf-image-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+  background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.5) 100%);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 1rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  padding: 0.875rem;
+  opacity: 1;
+  transition: all 0.2s ease;
 }
 
 .sf-image-container:hover .sf-image-overlay {
-  opacity: 1;
+  background: linear-gradient(180deg, transparent 30%, rgba(0, 0, 0, 0.65) 100%);
 }
 
 .sf-image-action {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  gap: 0.4rem;
+  padding: 0.4rem 0.875rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 100px;
-  color: rgba(0, 0, 0, 0.85);
+  color: rgba(0, 0, 0, 0.8);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-  transition: transform 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.15s ease;
 }
 
-.sf-image-action:hover {
-  transform: scale(1.03);
+.sf-image-container:hover .sf-image-action {
+  transform: scale(1.04);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
 .sf-image-name {
@@ -4896,24 +4896,29 @@ video::-webkit-media-controls {
   top: 1rem;
   right: 1rem;
   z-index: 10001;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
+.sf-fullscreen-close svg {
+  width: 20px;
+  height: 20px;
+}
+
 .sf-fullscreen-close:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.1);
 }
 
 .sf-fullscreen-close:active {

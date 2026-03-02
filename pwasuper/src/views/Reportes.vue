@@ -144,36 +144,40 @@
       </Transition>
     </Teleport>
 
-    <div class="apple-scroll-container">
-      <div class="apple-content-wrapper">
-        <div class="apple-sections-container">
-          <!-- Header Compacto Apple Style -->
-          <div class="apple-compact-header">
-            <div class="apple-compact-row">
-              <div class="apple-compact-title-group">
-                <h1 class="apple-compact-title">Reportes</h1>
-                <p class="apple-compact-subtitle">{{ mesActual }} {{ anioSeleccionado }}</p>
+    <!-- Header Fijo Apple Style -->
+    <div class="apple-header-fixed">
+      <div class="apple-header-content">
+        <div class="apple-compact-header">
+          <div class="apple-compact-row">
+            <div class="apple-compact-title-group">
+              <h1 class="apple-compact-title">Reportes</h1>
+              <p class="apple-compact-subtitle">{{ mesActual }} {{ anioSeleccionado }}</p>
+            </div>
+            <div class="apple-compact-right">
+              <!-- Status Stack (dos columnas apiladas) -->
+              <div class="apple-status-stack">
+                <div class="apple-status-pill apple-pill-sm" :class="reporteExistente ? 'apple-pill-blue' : 'apple-pill-gray'">
+                  <div class="apple-pill-dot"></div>
+                  <span>{{ reporteExistente ? 'Generado' : 'Sin generar' }}</span>
+                </div>
+                <div class="apple-status-pill apple-pill-sm" :class="reporteExistente ? (estadoReporte === 'Firmado' ? 'apple-pill-green' : 'apple-pill-amber') : 'apple-pill-muted'">
+                  <div class="apple-pill-dot"></div>
+                  <span>{{ reporteExistente ? estadoReporte : 'Sin firmar' }}</span>
+                </div>
               </div>
-              <div class="apple-compact-right">
-                <!-- Status Stack (dos columnas apiladas) -->
-                <div class="apple-status-stack">
-                  <div class="apple-status-pill apple-pill-sm" :class="reporteExistente ? 'apple-pill-blue' : 'apple-pill-gray'">
-                    <div class="apple-pill-dot"></div>
-                    <span>{{ reporteExistente ? 'Generado' : 'Sin generar' }}</span>
-                  </div>
-                  <div class="apple-status-pill apple-pill-sm" :class="reporteExistente ? (estadoReporte === 'Firmado' ? 'apple-pill-green' : 'apple-pill-amber') : 'apple-pill-muted'">
-                    <div class="apple-pill-dot"></div>
-                    <span>{{ reporteExistente ? estadoReporte : 'Sin firmar' }}</span>
-                  </div>
-                </div>
-                <div class="apple-stat-badge">
-                  <span class="apple-badge-value">{{ estadisticas.totalActividades }}</span>
-                  <span class="apple-badge-label">Actividades</span>
-                </div>
+              <div class="apple-stat-badge">
+                <span class="apple-badge-value">{{ estadisticas.totalActividades }}</span>
+                <span class="apple-badge-label">Actividades</span>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="apple-scroll-container">
+      <div class="apple-content-wrapper">
+        <div class="apple-sections-container">
           <!-- Selector de Período Apple -->
           <div class="apple-section-card">
             <div class="apple-section-header">
@@ -3403,7 +3407,7 @@ const imgGridWidth = 55;
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
+  background: linear-gradient(180deg, #f0fdf4 0%, #ecfdf5 50%, #f0fdf4 100%);
 }
 
 /* Dynamic Background */
@@ -3417,34 +3421,34 @@ const imgGridWidth = 55;
 .apple-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.5;
+  filter: blur(70px);
+  opacity: 0.6;
   animation: appleOrbFloat 20s ease-in-out infinite;
 }
 
 .apple-orb-1 {
   width: 300px;
   height: 300px;
-  top: -100px;
-  right: -50px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(99, 102, 241, 0.3));
+  top: 10%;
+  right: 15%;
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.4), rgba(16, 185, 129, 0.3));
 }
 
 .apple-orb-2 {
   width: 250px;
   height: 250px;
-  bottom: 20%;
-  left: -80px;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(5, 150, 105, 0.25));
+  top: 50%;
+  left: 10%;
+  background: linear-gradient(135deg, rgba(110, 231, 183, 0.35), rgba(52, 211, 153, 0.2));
   animation-delay: -7s;
 }
 
 .apple-orb-3 {
-  width: 200px;
-  height: 200px;
-  top: 40%;
-  right: 10%;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(139, 92, 246, 0.2));
+  width: 280px;
+  height: 280px;
+  bottom: 15%;
+  left: 25%;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.35), rgba(16, 185, 129, 0.25));
   animation-delay: -14s;
 }
 
@@ -3491,6 +3495,13 @@ const imgGridWidth = 55;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding-top: 5.5rem;
+}
+
+@media (min-width: 640px) {
+  .apple-sections-container {
+    padding-top: 6rem;
+  }
 }
 
 /* Header Card */
@@ -3579,6 +3590,31 @@ const imgGridWidth = 55;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.5);
   margin-top: 0.125rem;
+}
+
+/* ================================================
+   APPLE HEADER FIJO - STICKY TOP
+   ================================================ */
+
+.apple-header-fixed {
+  position: fixed;
+  top: 3.75rem;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 0.625rem 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .apple-header-fixed {
+    top: 4.75rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+.apple-header-content {
+  max-width: 28rem;
+  margin: 0 auto;
 }
 
 /* ================================================

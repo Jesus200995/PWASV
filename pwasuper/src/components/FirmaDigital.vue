@@ -64,42 +64,50 @@ export default {
     return {
       isDrawing: false,
       hayFirma: false,
-      canvasWidth: 800,
-      canvasHeight: 300
+      canvasWidth: 700,
+      canvasHeight: 200
     };
   },
   mounted() {
     this.$nextTick(() => {
-      this.ajustarCanvas();
-      window.addEventListener('resize', this.ajustarCanvas);
+      this.inicializarCanvas();
     });
   },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.ajustarCanvas);
-  },
   methods: {
-    ajustarCanvas() {
+    inicializarCanvas() {
       const canvas = this.$refs.canvas;
       if (!canvas) return;
       
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      
-      // Ajustar canvas a su tamaño visual con alta resolución
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      
-      // Actualizar data
-      this.canvasWidth = canvas.width;
-      this.canvasHeight = canvas.height;
-      
       const ctx = canvas.getContext('2d');
-      ctx.scale(dpr, dpr);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.lineWidth = 3;
       ctx.strokeStyle = '#1f2937';
     },
+    
+    getCoords(e, isTouch = false) {
+      const canvas = this.$refs.canvas;
+      const rect = canvas.getBoundingClientRect();
+      
+      let clientX, clientY;
+      if (isTouch) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      
+      // Calcular proporción entre tamaño real del canvas y tamaño visual
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    },
+    
     iniciarFirma(e) {
       this.isDrawing = true;
       if (!this.hayFirma) {
@@ -107,11 +115,8 @@ export default {
         this.$emit('firmado');
       }
       const canvas = this.$refs.canvas;
-      const rect = canvas.getBoundingClientRect();
       const ctx = canvas.getContext('2d');
-      
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const { x, y } = this.getCoords(e);
       
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -121,11 +126,8 @@ export default {
       if (!this.isDrawing) return;
       
       const canvas = this.$refs.canvas;
-      const rect = canvas.getBoundingClientRect();
       const ctx = canvas.getContext('2d');
-      
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const { x, y } = this.getCoords(e);
       
       ctx.lineTo(x, y);
       ctx.stroke();
@@ -140,12 +142,8 @@ export default {
       }
       
       const canvas = this.$refs.canvas;
-      const rect = canvas.getBoundingClientRect();
       const ctx = canvas.getContext('2d');
-      const touch = e.touches[0];
-      
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
+      const { x, y } = this.getCoords(e, true);
       
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -156,12 +154,8 @@ export default {
       if (!this.isDrawing) return;
       
       const canvas = this.$refs.canvas;
-      const rect = canvas.getBoundingClientRect();
       const ctx = canvas.getContext('2d');
-      const touch = e.touches[0];
-      
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
+      const { x, y } = this.getCoords(e, true);
       
       ctx.lineTo(x, y);
       ctx.stroke();
@@ -172,7 +166,10 @@ export default {
     },
     
     limpiarFirma() {
-      this.ajustarCanvas();
+      const canvas = this.$refs.canvas;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.inicializarCanvas();
       this.hayFirma = false;
       this.$emit('borrado');
     },
@@ -226,7 +223,9 @@ export default {
 .apple-firma-canvas-wrapper {
   position: relative;
   width: 100%;
-  min-height: 220px;
+  aspect-ratio: 3.5 / 1;
+  min-height: 180px;
+  max-height: 280px;
   border-radius: 14px;
   overflow: hidden;
   background: #ffffff;
@@ -251,7 +250,7 @@ export default {
 .apple-firma-canvas {
   display: block;
   width: 100%;
-  min-height: 220px;
+  height: 100%;
   cursor: crosshair;
   touch-action: none;
   background: #ffffff;
@@ -339,11 +338,8 @@ export default {
 @media (max-width: 768px) {
   .apple-firma-canvas-wrapper {
     border-radius: 12px;
-    min-height: 200px;
-  }
-  
-  .apple-firma-canvas {
-    min-height: 200px;
+    aspect-ratio: 3 / 1;
+    min-height: 150px;
   }
   
   .apple-firma-label {
@@ -362,20 +358,14 @@ export default {
 
 @media (min-width: 769px) {
   .apple-firma-canvas-wrapper {
-    min-height: 190px;
-  }
-  
-  .apple-firma-canvas {
-    min-height: 190px;
+    aspect-ratio: 3.5 / 1;
+    min-height: 180px;
   }
 }
 
 @media (min-width: 1024px) {
   .apple-firma-canvas-wrapper {
-    min-height: 200px;
-  }
-  
-  .apple-firma-canvas {
+    aspect-ratio: 4 / 1;
     min-height: 200px;
   }
 }

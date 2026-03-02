@@ -90,30 +90,17 @@
                   </div>
                 </div>
 
-                <!-- Aviso Apple Style -->
-                <div class="apple-modal-notice">
-                  <div class="apple-modal-notice-icon">
+                <!-- Confirmación de firma realizada -->
+                <div class="apple-modal-confirmed">
+                  <div class="apple-confirmed-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                     </svg>
                   </div>
-                  <p class="apple-modal-notice-text">
-                    Al firmar certificas que la información es verídica y autorizas su envío.
+                  <p class="apple-confirmed-text">
+                    Tu firma digital ha sido registrada. Al continuar, autorizas el envío del reporte.
                   </p>
                 </div>
-
-                <!-- Checkbox Apple Style -->
-                <label class="apple-modal-checkbox" :class="{ 'apple-modal-checkbox-checked': confirmarFirma }">
-                  <div class="apple-checkbox-indicator">
-                    <svg v-if="confirmarFirma" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                    </svg>
-                  </div>
-                  <input type="checkbox" v-model="confirmarFirma" class="sr-only" />
-                  <span class="apple-checkbox-text">
-                    He revisado el reporte y autorizo la descarga con mi firma digital
-                  </span>
-                </label>
               </div>
 
               <!-- Footer con botones Apple -->
@@ -127,9 +114,9 @@
                 </button>
                 <button
                   @click.stop.prevent="confirmarYDescargar"
-                  :disabled="!confirmarFirma || procesandoDescarga"
+                  :disabled="procesandoDescarga"
                   class="apple-modal-btn apple-modal-btn-primary"
-                  :class="{ 'apple-modal-btn-disabled': !confirmarFirma || procesandoDescarga }"
+                  :class="{ 'apple-modal-btn-disabled': procesandoDescarga }"
                 >
                   <div v-if="procesandoDescarga" class="apple-modal-btn-spinner"></div>
                   <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -292,116 +279,202 @@
             </div>
           </div>
 
-          <!-- Firma Digital Apple -->
-          <div class="apple-section-card">
-            <div class="apple-section-header">
-              <div class="apple-section-icon apple-icon-purple">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                </svg>
-              </div>
-              <div>
-                <h2 class="apple-section-title">Firma</h2>
-                <p class="apple-section-subtitle">Autentica tu reporte</p>
-              </div>
-            </div>
-            <FirmaDigital
-              ref="firmaComponent"
-              label="Firmar aquí"
-            />
-          </div>
-
-          <!-- Opciones de Descarga Apple -->
-          <div class="apple-section-card">
-            <div class="apple-section-header">
-              <div class="apple-section-icon apple-icon-green">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-              </div>
-              <div>
-                <h2 class="apple-section-title">Descargar</h2>
-                <p class="apple-section-subtitle">Genera tu reporte</p>
-              </div>
-            </div>
-
-            <!-- User Info Card Apple -->
-            <div class="apple-user-info-card">
-              <div class="apple-user-row">
-                <span class="apple-info-label">Nombre</span>
-                <span class="apple-info-value">{{ usuarioInfo.nombre }}</span>
-              </div>
-              <div class="apple-user-row">
-                <span class="apple-info-label">Cargo</span>
-                <span class="apple-info-value">{{ usuarioInfo.cargo || 'N/A' }}</span>
-              </div>
-              <div class="apple-user-row">
-                <span class="apple-info-label">Correo</span>
-                <span class="apple-info-value apple-info-small">{{ usuarioInfo.correo }}</span>
-              </div>
-            </div>
-
-            <!-- Format Options Apple -->
-            <div class="apple-format-options">
-              <label class="apple-format-option" :class="{ 'apple-format-selected': formatoSeleccionado === 'pdf' }">
-                <input type="radio" v-model="formatoSeleccionado" value="pdf" class="sr-only" />
-                <div class="apple-format-radio">
-                  <div class="apple-format-check"></div>
+          <!-- Estado del Reporte: Ya Generado -->
+          <Transition name="apple-fade" mode="out-in">
+            <div v-if="reporteExistente" key="generated" class="apple-section-card apple-generated-card">
+              <!-- Header de éxito -->
+              <div class="apple-generated-header">
+                <div class="apple-generated-icon-wrap">
+                  <div class="apple-generated-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  <div class="apple-generated-ring"></div>
                 </div>
-                <div class="apple-format-icon apple-format-pdf">
+                <div class="apple-generated-title-group">
+                  <h2 class="apple-generated-title">Reporte Generado</h2>
+                  <p class="apple-generated-subtitle">{{ mesActual }} {{ anioSeleccionado }}</p>
+                </div>
+              </div>
+
+              <!-- Info del reporte generado -->
+              <div class="apple-generated-info">
+                <div class="apple-generated-row">
+                  <div class="apple-generated-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Fecha de generación</span>
+                  </div>
+                  <span class="apple-generated-value">{{ formatearFechaReporte(reporteExistente.fecha_generacion) }}</span>
+                </div>
+                <div class="apple-generated-row">
+                  <div class="apple-generated-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Estado de firma</span>
+                  </div>
+                  <div class="apple-status-pill apple-pill-sm" :class="reporteExistente.firmado_territorial ? 'apple-pill-green' : 'apple-pill-blue'">
+                    <div class="apple-pill-dot"></div>
+                    <span>{{ reporteExistente.firmado_territorial ? 'Firmado' : 'Pendiente' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mensaje informativo -->
+              <div class="apple-info-box">
+                <div class="apple-info-box-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div class="apple-info-box-content">
+                  <p class="apple-info-box-title">¿Necesitas generar uno nuevo?</p>
+                  <p class="apple-info-box-text" v-if="!reporteExistente.firmado_territorial">
+                    Puedes eliminar este reporte desde el historial y generar uno nuevo con la información actualizada.
+                  </p>
+                  <p class="apple-info-box-text" v-else>
+                    Este reporte ya fue firmado por tu Territorial. Contacta con él para solicitar la eliminación y poder generar uno nuevo.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Acciones -->
+              <div class="apple-generated-actions">
+                <button 
+                  v-if="!reporteExistente.firmado_territorial"
+                  @click="scrollToHistorial"
+                  class="apple-action-btn apple-action-secondary"
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                  <span>Ir al Historial</span>
+                </button>
+                <button 
+                  v-else
+                  class="apple-action-btn apple-action-contact"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                  </svg>
+                  <span>Contactar Territorial</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Firmar y Generar - Cuando NO hay reporte -->
+            <div v-else key="generate" class="apple-section-card apple-generate-card">
+              <!-- Header con pasos -->
+            <div class="apple-generate-header">
+              <div class="apple-generate-icon-wrap">
+                <div class="apple-generate-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>
                 </div>
-                <div class="apple-format-text">
-                  <span class="apple-format-name">PDF</span>
-                  <span class="apple-format-desc">Con tabla y firma</span>
-                </div>
-              </label>
-              <label class="apple-format-option" :class="{ 'apple-format-selected': formatoSeleccionado === 'csv' }">
-                <input type="radio" v-model="formatoSeleccionado" value="csv" class="sr-only" />
-                <div class="apple-format-radio">
-                  <div class="apple-format-check"></div>
-                </div>
-                <div class="apple-format-icon apple-format-csv">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </div>
+              <div class="apple-generate-title-group">
+                <h2 class="apple-generate-title">Firmar y Generar</h2>
+                <p class="apple-generate-subtitle">Firma, selecciona formato y genera tu reporte</p>
+              </div>
+            </div>
+
+            <!-- Steps Container -->
+            <div class="apple-steps-container">
+              <!-- Step 1: Firma -->
+              <div class="apple-step-card" :class="{ 'apple-step-completed': tieneFirma }">
+                <div class="apple-step-number" :class="{ 'apple-step-done': tieneFirma }">
+                  <span v-if="!tieneFirma">1</span>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                   </svg>
                 </div>
-                <div class="apple-format-text">
-                  <span class="apple-format-name">CSV</span>
-                  <span class="apple-format-desc">Para Excel</span>
+                <div class="apple-step-content">
+                  <div class="apple-step-header">
+                    <span class="apple-step-title">Tu Firma</span>
+                    <span v-if="tieneFirma" class="apple-step-badge apple-badge-success">Listo</span>
+                    <span v-else class="apple-step-badge apple-badge-pending">Pendiente</span>
+                  </div>
+                  <div class="apple-firma-area">
+                    <FirmaDigital
+                      ref="firmaComponent"
+                      label="Firmar aquí"
+                      @firmado="onFirmaRealizada"
+                      @borrado="onFirmaBorrada"
+                    />
+                  </div>
                 </div>
-              </label>
+              </div>
+
+              <!-- Step 2: Formato -->
+              <div class="apple-step-card" :class="{ 'apple-step-active': tieneFirma }">
+                <div class="apple-step-number" :class="{ 'apple-step-done': tieneFirma }">
+                  <span>2</span>
+                </div>
+                <div class="apple-step-content">
+                  <div class="apple-step-header">
+                    <span class="apple-step-title">Formato</span>
+                  </div>
+                  <div class="apple-format-row">
+                    <label class="apple-format-chip" :class="{ 'apple-chip-active': formatoSeleccionado === 'pdf' }">
+                      <input type="radio" v-model="formatoSeleccionado" value="pdf" class="sr-only" />
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                      <span>PDF</span>
+                    </label>
+                    <label class="apple-format-chip" :class="{ 'apple-chip-active': formatoSeleccionado === 'csv' }">
+                      <input type="radio" v-model="formatoSeleccionado" value="csv" class="sr-only" />
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                      <span>CSV</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- Warning Banner Apple -->
-            <div v-if="reporteExistente" class="apple-warning-banner">
-              <div class="apple-warning-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-              </div>
-              <div class="apple-warning-content">
-                <p class="apple-warning-title">El reporte de {{ mesActual }} {{ anioSeleccionado }} ya está generado</p>
-                <p class="apple-warning-text">Solo se puede generar un reporte por mes. Si necesitas generarlo nuevamente, primero elimina el existente desde el historial.</p>
+            <!-- Info del firmante compacta -->
+            <div class="apple-signer-strip">
+              <div class="apple-signer-avatar-sm">{{ iniciales }}</div>
+              <div class="apple-signer-details">
+                <span class="apple-signer-name-sm">{{ usuarioInfo.nombre }}</span>
+                <span class="apple-signer-meta">{{ mesActual }} {{ anioSeleccionado }} · {{ actividades.length }} actividades</span>
               </div>
             </div>
 
-            <!-- Generate Button Apple -->
+            <!-- Warning si ya existe -->
+            <div v-if="reporteExistente" class="apple-inline-warning">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              <span>Ya existe un reporte de este mes</span>
+            </div>
+
+            <!-- Botón principal unificado -->
             <button
               @click="iniciarDescarga"
-              :disabled="cargando || generandoReporte || actividades.length === 0 || reporteExistente || verificandoReporte"
-              class="apple-btn-primary apple-btn-generate"
-              :class="{ 'apple-btn-disabled': cargando || generandoReporte || actividades.length === 0 || reporteExistente || verificandoReporte }"
+              :disabled="cargando || generandoReporte || actividades.length === 0 || reporteExistente || verificandoReporte || !tieneFirma"
+              class="apple-btn-generate-unified"
+              :class="{ 
+                'apple-btn-ready': tieneFirma && actividades.length > 0 && !reporteExistente,
+                'apple-btn-disabled': cargando || generandoReporte || actividades.length === 0 || reporteExistente || verificandoReporte || !tieneFirma 
+              }"
             >
               <div v-if="verificandoReporte || generandoReporte" class="apple-btn-spinner"></div>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-              </svg>
-              <span>{{ verificandoReporte ? 'Verificando...' : (generandoReporte ? 'Generando...' : (reporteExistente ? 'Reporte ya generado' : 'Generar Reporte')) }}</span>
+              <template v-else>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+              </template>
+              <span>{{ getBotonTexto }}</span>
             </button>
           </div>
+          </Transition>
 
           <!-- Historial de Reportes Apple -->
           <div class="apple-section-card">
@@ -658,6 +731,8 @@ export default {
       mostrarModalFirma: false,
       confirmarFirma: false,
       procesandoDescarga: false,
+      // Estado de la firma digital
+      tieneFirma: false,
       // Estado de descarga de reportes del historial
       descargandoReporte: null,
       // Estado de visualización de reportes del historial
@@ -699,6 +774,15 @@ export default {
       if (this.actividades.length === 0) return 'Sin datos';
       if (this.$refs.firmaComponent?.hayFirma) return 'Firmado';
       return 'Sin firmar';
+    },
+    // Texto dinámico del botón de generar
+    getBotonTexto() {
+      if (this.verificandoReporte) return 'Verificando...';
+      if (this.generandoReporte) return 'Generando...';
+      if (this.reporteExistente) return 'Reporte ya generado';
+      if (this.actividades.length === 0) return 'Sin actividades';
+      if (!this.tieneFirma) return 'Firma primero';
+      return 'Firmar y Generar';
     },
     // Obtener iniciales del usuario
     iniciales() {
@@ -798,6 +882,12 @@ export default {
     async cambiarPeriodo() {
       // Limpiar estado de reporte existente
       this.reporteExistente = null;
+      
+      // Limpiar firma al cambiar de período
+      this.tieneFirma = false;
+      if (this.$refs.firmaComponent) {
+        this.$refs.firmaComponent.limpiarFirma();
+      }
       
       // Solo filtrar si ya tenemos actividades cargadas
       if (this.todasLasActividades && this.todasLasActividades.length > 0) {
@@ -899,14 +989,8 @@ export default {
       }
 
       // Verificar si hay firma
-      if (!this.$refs.firmaComponent?.hayFirma) {
+      if (!this.tieneFirma || !this.$refs.firmaComponent?.hayFirma) {
         alert('Por favor, firma el reporte antes de descargarlo');
-        // Hacer scroll al componente de firma
-        const firmaSection = document.querySelector('.glass-card:has([ref="firmaComponent"])') || 
-                            document.querySelectorAll('.glass-card')[3];
-        if (firmaSection) {
-          firmaSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
         return;
       }
 
@@ -943,8 +1027,8 @@ export default {
         this.verificandoReporte = false;
       }
 
-      // Mostrar modal de confirmación
-      this.confirmarFirma = false;
+      // Mostrar modal de confirmación rápida
+      this.confirmarFirma = true; // Ya está firmado, auto-confirmar
       this.mostrarModalFirma = true;
     },
 
@@ -952,6 +1036,46 @@ export default {
     cerrarModalFirma() {
       this.mostrarModalFirma = false;
       this.confirmarFirma = false;
+    },
+
+    // Callback cuando se realiza una firma
+    onFirmaRealizada() {
+      this.tieneFirma = true;
+      console.log('✅ Firma realizada');
+    },
+
+    // Callback cuando se borra la firma
+    onFirmaBorrada() {
+      this.tieneFirma = false;
+      console.log('🗑️ Firma borrada');
+    },
+
+    // Scroll suave al historial de reportes
+    scrollToHistorial() {
+      // Buscar la sección de historial y hacer scroll
+      setTimeout(() => {
+        const historialSection = document.querySelector('.apple-reports-list, .apple-section-card:has(.apple-icon-amber)');
+        if (historialSection) {
+          historialSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+      }, 100);
+    },
+
+    // Formatear fecha de generación del reporte
+    formatearFechaReporte(fecha) {
+      if (!fecha) return 'Fecha no disponible';
+      const date = new Date(fecha);
+      const options = { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      return date.toLocaleDateString('es-MX', options);
     },
 
     // Confirmar y proceder con la descarga - NO CIERRA EL MODAL HASTA TERMINAR
@@ -3665,7 +3789,7 @@ const imgGridWidth = 55;
   font-size: 1.375rem;
   font-weight: 700;
   letter-spacing: -0.025em;
-  color: rgba(0, 0, 0, 0.88);
+  color: #7D1D3F;
   margin: 0;
 }
 
@@ -4317,6 +4441,545 @@ const imgGridWidth = 55;
   background: linear-gradient(145deg, #9ca3af, #6b7280);
   cursor: not-allowed;
   box-shadow: none;
+}
+
+/* ================================================
+   UNIFIED GENERATE CARD - FIRMAR Y GENERAR
+   ================================================ */
+
+/* ================================================
+   REPORTE YA GENERADO - CARD DE ESTADO
+   ================================================ */
+
+.apple-generated-card {
+  background: #ffffff;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-shadow: 
+    0 4px 20px rgba(16, 185, 129, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.apple-generated-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.apple-generated-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-generated-icon {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #10b981, #059669);
+  border-radius: 16px;
+  color: white;
+  z-index: 2;
+  box-shadow: 
+    0 4px 16px rgba(16, 185, 129, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  animation: icon-success-pulse 2s ease-in-out infinite;
+}
+
+@keyframes icon-success-pulse {
+  0%, 100% { 
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), 0 2px 6px rgba(0, 0, 0, 0.1);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 6px 24px rgba(16, 185, 129, 0.55), 0 3px 8px rgba(0, 0, 0, 0.08);
+    transform: scale(1.02);
+  }
+}
+
+.apple-generated-ring {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  animation: ring-pulse 2.5s ease-out infinite;
+}
+
+@keyframes ring-pulse {
+  0% { 
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+.apple-generated-title-group {
+  flex: 1;
+}
+
+.apple-generated-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #065f46;
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+
+.apple-generated-subtitle {
+  font-size: 0.875rem;
+  color: #059669;
+  margin: 0;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.apple-generated-info {
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.apple-generated-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.625rem 0;
+}
+
+.apple-generated-row:not(:last-child) {
+  border-bottom: 1px solid rgba(16, 185, 129, 0.08);
+}
+
+.apple-generated-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.apple-generated-label svg {
+  color: #10b981;
+}
+
+.apple-generated-value {
+  color: #1f2937;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Status Pills Small */
+.apple-pill-sm {
+  font-size: 0.6875rem;
+  padding: 0.25rem 0.625rem;
+}
+
+.apple-pill-sm .apple-pill-dot {
+  width: 5px;
+  height: 5px;
+}
+
+/* Info Box */
+.apple-info-box {
+  display: flex;
+  gap: 0.875rem;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+}
+
+.apple-info-box-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.15);
+  border-radius: 8px;
+  color: #3b82f6;
+}
+
+.apple-info-box-content {
+  flex: 1;
+}
+
+.apple-info-box-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1e40af;
+  margin: 0 0 0.375rem 0;
+}
+
+.apple-info-box-text {
+  font-size: 0.8125rem;
+  color: #3b82f6;
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 450;
+}
+
+/* Actions del reporte generado */
+.apple-generated-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.apple-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  font-family: inherit;
+}
+
+.apple-action-secondary {
+  background: linear-gradient(145deg, 
+    rgba(251, 146, 60, 0.15) 0%, 
+    rgba(251, 146, 60, 0.1) 100%);
+  color: #c2410c;
+  border: 1px solid rgba(251, 146, 60, 0.25);
+}
+
+.apple-action-secondary:hover {
+  background: linear-gradient(145deg, 
+    rgba(251, 146, 60, 0.25) 0%, 
+    rgba(251, 146, 60, 0.18) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 146, 60, 0.2);
+}
+
+.apple-action-secondary:active {
+  transform: translateY(0);
+}
+
+.apple-action-contact {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.15) 0%, 
+    rgba(139, 92, 246, 0.1) 100%);
+  color: #6d28d9;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+.apple-action-contact:hover {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.25) 0%, 
+    rgba(139, 92, 246, 0.18) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.apple-action-contact:active {
+  transform: translateY(0);
+}
+
+/* Fade transition for cards */
+.apple-fade-enter-active,
+.apple-fade-leave-active {
+  transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.apple-fade-enter-from,
+.apple-fade-leave-to {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+}
+
+.apple-fade-enter-to,
+.apple-fade-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ================================================
+   GENERATE CARD STYLES
+   ================================================ */
+
+.apple-generate-card {
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 255, 255, 0.88) 100%);
+}
+
+.apple-generate-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.apple-generate-icon-wrap {
+  position: relative;
+}
+
+.apple-generate-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #10b981, #059669);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.apple-generate-title-group {
+  flex: 1;
+}
+
+.apple-generate-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.88);
+  margin: 0;
+}
+
+.apple-generate-subtitle {
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.45);
+  margin: 0.125rem 0 0;
+}
+
+/* Steps Container */
+.apple-steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.apple-step-card {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.apple-step-card.apple-step-completed {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.apple-step-card.apple-step-active {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.apple-step-number {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.apple-step-number.apple-step-done {
+  background: linear-gradient(145deg, #10b981, #059669);
+  color: white;
+}
+
+.apple-step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.apple-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.apple-step-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.apple-step-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 100px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.apple-badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+.apple-badge-pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.apple-firma-area {
+  margin-top: 0.25rem;
+}
+
+/* Format Row */
+.apple-format-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.apple-format-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  background: rgba(0, 0, 0, 0.04);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.apple-format-chip:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.apple-format-chip.apple-chip-active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+
+/* Signer Strip */
+.apple-signer-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.apple-signer-avatar-sm {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #6366f1, #4f46e5);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.apple-signer-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.apple-signer-name-sm {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-signer-meta {
+  display: block;
+  font-size: 0.6875rem;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* Inline Warning */
+.apple-inline-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 10px;
+  color: #b45309;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+
+/* Unified Generate Button */
+.apple-btn-generate-unified {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(145deg, #9ca3af, #6b7280);
+  border: none;
+  border-radius: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: white;
+  cursor: not-allowed;
+  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: none;
+}
+
+.apple-btn-generate-unified.apple-btn-ready {
+  background: linear-gradient(145deg, #10b981, #059669);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+}
+
+.apple-btn-generate-unified.apple-btn-ready:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.apple-btn-generate-unified.apple-btn-ready:active {
+  transform: scale(0.98) translateY(0);
 }
 
 .apple-btn-spinner {
@@ -5000,6 +5663,43 @@ const imgGridWidth = 55;
 .apple-modal-notice-text {
   font-size: 0.8125rem;
   color: #92400e;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Confirmación de firma realizada */
+.apple-modal-confirmed {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 14px;
+}
+
+.apple-confirmed-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #10b981, #059669);
+  border-radius: 50%;
+  color: white;
+  flex-shrink: 0;
+  animation: checkPop 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.apple-confirmed-text {
+  font-size: 0.8125rem;
+  color: #047857;
   line-height: 1.5;
   margin: 0;
 }

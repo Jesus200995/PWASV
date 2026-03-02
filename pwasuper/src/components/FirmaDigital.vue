@@ -82,7 +82,10 @@ export default {
   methods: {
     iniciarFirma(e) {
       this.isDrawing = true;
-      this.hayFirma = true;
+      if (!this.hayFirma) {
+        this.hayFirma = true;
+        this.$emit('firmado');
+      }
       const canvas = this.$refs.canvas;
       const rect = canvas.getBoundingClientRect();
       const ctx = canvas.getContext('2d');
@@ -111,7 +114,10 @@ export default {
     iniciarFirmaTouch(e) {
       e.preventDefault();
       this.isDrawing = true;
-      this.hayFirma = true;
+      if (!this.hayFirma) {
+        this.hayFirma = true;
+        this.$emit('firmado');
+      }
       
       const canvas = this.$refs.canvas;
       const rect = canvas.getBoundingClientRect();
@@ -150,6 +156,7 @@ export default {
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       this.hayFirma = false;
+      this.$emit('borrado');
     },
     
     obtenerFirmaBase64() {

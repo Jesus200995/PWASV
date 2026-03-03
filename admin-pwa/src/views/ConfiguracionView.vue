@@ -2683,10 +2683,19 @@ const cancelarConfirmTransferencia = () => {
 
 // ============= FUNCIONES PARA ESTADÍSTICAS DE REPORTES PDF =============
 
-const abrirModalEstadisticasReportes = async () => {
+const abrirModalEstadisticasReportes = () => {
   if (generandoEstadisticasPDF.value) return
   
-  // Cargar territorios disponibles
+  // Abrir modal inmediatamente
+  showEstadisticasReportesModal.value = true
+  
+  // Cargar territorios en segundo plano si no están cargados
+  if (territoriosDisponibles.value.length === 0) {
+    cargarTerritoriosDisponibles()
+  }
+}
+
+const cargarTerritoriosDisponibles = async () => {
   try {
     const token = localStorage.getItem('admin_token')
     const response = await axios.get(`${apiConfig.url}/usuarios`, {
@@ -2704,8 +2713,6 @@ const abrirModalEstadisticasReportes = async () => {
   } catch (error) {
     console.error('Error cargando territorios:', error)
   }
-  
-  showEstadisticasReportesModal.value = true
 }
 
 const cerrarModalEstadisticasReportes = () => {
@@ -7351,13 +7358,17 @@ const logout = () => {
   box-shadow: 0 2px 8px rgba(125, 29, 63, 0.3);
 }
 
-/* Overlay del modal */
+/* ========================================
+   MODAL APPLE iOS 18 - ULTRA FLUIDO
+   ======================================== */
+
+/* Overlay con blur premium */
 .apple-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7365,67 +7376,76 @@ const logout = () => {
   padding: 20px;
 }
 
-/* Modal principal */
+/* Modal con glassmorphism sutil */
 .apple-stats-modal {
-  background: #ffffff;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border-radius: 24px;
   width: 100%;
-  max-width: 480px;
-  max-height: 90vh;
+  max-width: 440px;
+  max-height: 85vh;
   overflow: hidden;
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 32px 64px -16px rgba(0, 0, 0, 0.2),
+    0 0 0 0.5px rgba(255, 255, 255, 0.8) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
+  will-change: transform, opacity;
 }
 
-/* Header del modal */
+/* Header minimalista */
 .apple-stats-header {
-  background: linear-gradient(135deg, #7D1D3F 0%, #9C2952 50%, #7D1D3F 100%);
+  background: linear-gradient(160deg, #7D1D3F 0%, #A82255 100%);
   color: white;
-  padding: 24px 24px 20px;
+  padding: 28px 24px 24px;
   text-align: center;
   position: relative;
 }
 
 .apple-stats-icon {
-  width: 56px;
-  height: 56px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+  width: 52px;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 12px;
+  margin: 0 auto 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .apple-stats-icon svg {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   stroke: white;
+  stroke-width: 1.8;
 }
 
 .apple-stats-header h3 {
-  margin: 0 0 4px;
-  font-size: 20px;
+  margin: 0 0 6px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
 }
 
 .apple-stats-subtitle {
   margin: 0;
   font-size: 14px;
-  opacity: 0.85;
+  opacity: 0.8;
   font-weight: 400;
+  letter-spacing: -0.1px;
 }
 
 .apple-close-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
   border: none;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
@@ -7433,54 +7453,61 @@ const logout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+              background 0.15s ease;
 }
 
 .apple-close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.08);
+}
+
+.apple-close-btn:active {
+  transform: scale(0.95);
 }
 
 .apple-close-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   stroke: white;
 }
 
-/* Body del modal */
+/* Body ultra limpio */
 .apple-stats-body {
-  padding: 20px 24px;
+  padding: 24px;
   overflow-y: auto;
   flex: 1;
 }
 
-/* Grupos de campos */
+/* Grupos de campos refinados */
 .apple-field-group {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .apple-field-label {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  color: #374151;
+  color: #6b7280;
   margin-bottom: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
 }
 
 .apple-field-label svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   stroke: #7D1D3F;
+  stroke-width: 2.2;
 }
 
-/* Selectores en fila */
+/* Selectores premium */
 .apple-selectors-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .apple-select-wrapper {
@@ -7494,28 +7521,29 @@ const logout = () => {
 
 .apple-select {
   width: 100%;
-  padding: 14px 40px 14px 16px;
+  padding: 14px 42px 14px 16px;
   font-size: 15px;
   font-weight: 500;
   color: #1f2937;
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 14px;
+  background: #f8f9fa;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
-  transition: all 0.2s ease;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
 }
 
 .apple-select:hover {
-  border-color: #d1d5db;
-  background: #f3f4f6;
+  background: #f1f3f4;
 }
 
 .apple-select:focus {
   outline: none;
+  background: #fff;
   border-color: #7D1D3F;
-  box-shadow: 0 0 0 4px rgba(125, 29, 63, 0.1);
+  box-shadow: 0 0 0 3px rgba(125, 29, 63, 0.12);
 }
 
 .apple-select-arrow {
@@ -7523,10 +7551,15 @@ const logout = () => {
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke: #9ca3af;
   pointer-events: none;
+  transition: transform 0.15s ease;
+}
+
+.apple-select:focus + .apple-select-arrow {
+  stroke: #7D1D3F;
 }
 
 /* Toggle buttons grupo */
@@ -7575,55 +7608,58 @@ const logout = () => {
   stroke: white;
 }
 
-/* Preview card */
+/* Preview card elegante */
 .apple-preview-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: linear-gradient(135deg, #fdf2f4 0%, #fce8ec 100%);
-  border: 1px solid rgba(125, 29, 63, 0.1);
-  border-radius: 14px;
-  margin-top: 8px;
+  gap: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(125, 29, 63, 0.04) 0%, rgba(125, 29, 63, 0.08) 100%);
+  border: 1px solid rgba(125, 29, 63, 0.08);
+  border-radius: 12px;
+  margin-top: 4px;
 }
 
 .apple-preview-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #7D1D3F 0%, #9C2952 100%);
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(145deg, #7D1D3F 0%, #A82255 100%);
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(125, 29, 63, 0.25);
 }
 
 .apple-preview-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   stroke: white;
+  stroke-width: 1.8;
 }
 
 .apple-preview-text h4 {
-  margin: 0 0 4px;
+  margin: 0 0 3px;
   font-size: 14px;
   font-weight: 600;
-  color: #7D1D3F;
+  color: #1f2937;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
 }
 
 .apple-preview-text p {
   margin: 0;
   font-size: 12px;
   color: #6b7280;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
-/* Footer del modal */
+/* Footer minimalista */
 .apple-stats-footer {
   display: flex;
-  gap: 12px;
-  padding: 16px 24px 24px;
-  border-top: 1px solid #f3f4f6;
+  gap: 10px;
+  padding: 18px 24px 24px;
+  background: rgba(249, 250, 251, 0.6);
 }
 
 .apple-btn-secondary,
@@ -7633,38 +7669,48 @@ const logout = () => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 20px;
+  padding: 14px 18px;
   font-size: 15px;
   font-weight: 600;
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
 }
 
 .apple-btn-secondary {
   color: #374151;
-  background: #f3f4f6;
+  background: #e5e7eb;
 }
 
 .apple-btn-secondary:hover:not(:disabled) {
-  background: #e5e7eb;
+  background: #d1d5db;
+}
+
+.apple-btn-secondary:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .apple-btn-primary {
   color: white;
-  background: linear-gradient(135deg, #7D1D3F 0%, #9C2952 100%);
-  box-shadow: 0 4px 12px rgba(125, 29, 63, 0.3);
+  background: linear-gradient(145deg, #7D1D3F 0%, #A82255 100%);
+  box-shadow: 0 4px 14px rgba(125, 29, 63, 0.35);
 }
 
 .apple-btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(125, 29, 63, 0.4);
+  box-shadow: 0 6px 20px rgba(125, 29, 63, 0.45);
+  filter: brightness(1.05);
+}
+
+.apple-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(125, 29, 63, 0.3);
 }
 
 .apple-btn-primary:disabled,
 .apple-btn-secondary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
 }
@@ -7674,24 +7720,31 @@ const logout = () => {
   height: 18px;
 }
 
-/* Spinner para botón */
+/* Spinner elegante */
 .apple-spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
   border-top-color: white;
   border-radius: 50%;
-  animation: apple-spin 0.8s linear infinite;
+  animation: apple-spin 0.6s linear infinite;
 }
 
 @keyframes apple-spin {
   to { transform: rotate(360deg); }
 }
 
-/* Animaciones del modal */
-.modal-fade-enter-active,
+/* ========================================
+   ANIMACIONES ULTRA FLUIDAS iOS 18
+   ======================================== */
+
+/* Overlay - aparece instantáneo */
+.modal-fade-enter-active {
+  transition: opacity 0.15s ease-out;
+}
+
 .modal-fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.12s ease-in;
 }
 
 .modal-fade-enter-from,
@@ -7699,66 +7752,71 @@ const logout = () => {
   opacity: 0;
 }
 
+/* Modal - spring animation ultrarrápida */
 .modal-scale-enter-active {
-  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.1),
+              opacity 0.15s ease-out;
 }
 
 .modal-scale-leave-active {
-  transition: all 0.25s ease-in;
+  transition: transform 0.12s ease-in,
+              opacity 0.1s ease-in;
 }
 
 .modal-scale-enter-from {
   opacity: 0;
-  transform: scale(0.9) translateY(20px);
+  transform: scale(0.92);
 }
 
 .modal-scale-leave-to {
   opacity: 0;
-  transform: scale(0.95) translateY(10px);
+  transform: scale(0.96);
 }
 
-/* Responsive para el modal de estadísticas */
+/* Responsive refinado */
 @media (max-width: 520px) {
   .apple-stats-modal {
     max-width: 100%;
     max-height: 100vh;
-    border-radius: 0;
-    margin: 0;
+    border-radius: 20px 20px 0 0;
+    margin-top: auto;
   }
   
   .apple-modal-overlay {
     padding: 0;
+    align-items: flex-end;
   }
   
   .apple-stats-header {
-    padding: 20px 16px 16px;
+    padding: 24px 20px 20px;
   }
   
   .apple-stats-icon {
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
   }
   
   .apple-stats-icon svg {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
   }
   
   .apple-stats-header h3 {
-    font-size: 18px;
+    font-size: 20px;
   }
   
   .apple-stats-body {
-    padding: 16px;
+    padding: 20px;
   }
   
   .apple-selectors-row {
     flex-direction: column;
+    gap: 8px;
   }
   
   .apple-toggle-btn {
-    padding: 10px 12px;
-    font-size: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
   }
   
   .apple-toggle-btn svg {
@@ -7767,22 +7825,38 @@ const logout = () => {
   }
   
   .apple-stats-footer {
-    padding: 12px 16px 20px;
+    padding: 16px 20px 28px;
+    gap: 8px;
   }
   
   .apple-btn-secondary,
   .apple-btn-primary {
-    padding: 12px 16px;
-    font-size: 14px;
+    padding: 14px 16px;
+    font-size: 15px;
+    border-radius: 14px;
+  }
+  
+  /* Modal sube desde abajo en móvil */
+  .modal-scale-enter-from {
+    transform: translateY(100%);
+  }
+  
+  .modal-scale-leave-to {
+    transform: translateY(30%);
+    opacity: 0;
+  }
+  
+  .modal-scale-enter-active {
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1),
+                opacity 0.15s ease-out;
+  }
+  
+  .modal-scale-leave-active {
+    transition: transform 0.2s ease-in,
+                opacity 0.15s ease-in;
   }
 }
 </style>
-
-
-
-
-
-
 
 
 

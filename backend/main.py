@@ -2842,11 +2842,12 @@ async def obtener_estadisticas_reportes_pdf(
         }
         
         # Query para obtener territorios con técnicos
+        # IMPORTANTE: %% escapa el % para que psycopg2 no lo interprete como placeholder
         query_territorios = """
             SELECT 
                 u.territorio,
-                COUNT(DISTINCT CASE WHEN UPPER(COALESCE(u.cargo, '')) LIKE '%SOCIAL%' THEN u.id END) as tecnicos_social,
-                COUNT(DISTINCT CASE WHEN UPPER(COALESCE(u.cargo, '')) LIKE '%PRODUCTIVO%' THEN u.id END) as tecnicos_productivo,
+                COUNT(DISTINCT CASE WHEN UPPER(COALESCE(u.cargo, '')) LIKE '%%SOCIAL%%' THEN u.id END) as tecnicos_social,
+                COUNT(DISTINCT CASE WHEN UPPER(COALESCE(u.cargo, '')) LIKE '%%PRODUCTIVO%%' THEN u.id END) as tecnicos_productivo,
                 COUNT(DISTINCT u.id) as total_tecnicos
             FROM usuarios u
             WHERE u.territorio IS NOT NULL 

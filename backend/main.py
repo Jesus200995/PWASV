@@ -425,6 +425,63 @@ class DispositivoUpdate(BaseModel):
 
 # ==================== FIN MODELOS NOTIFICACIONES ====================
 
+# ==================== ENDPOINT PROXY PARA IMÁGENES (SOLUCIONA CORS EN MÓVILES) ====================
+
+@app.get("/fotos-base64/{nombre_archivo:path}")
+async def obtener_foto_base64(nombre_archivo: str):
+    """
+    Endpoint proxy para obtener imágenes como base64.
+    Soluciona problemas de CORS en dispositivos móviles (iOS Safari, Android).
+    """
+    try:
+        # Construir ruta segura
+        ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
+        
+        # Validar que el archivo exista y esté dentro de FOTOS_DIR
+        ruta_absoluta = os.path.abspath(ruta_archivo)
+        ruta_base = os.path.abspath(FOTOS_DIR)
+        
+        if not ruta_absoluta.startswith(ruta_base):
+            raise HTTPException(status_code=403, detail="Acceso denegado")
+        
+        if not os.path.exists(ruta_archivo):
+            raise HTTPException(status_code=404, detail="Imagen no encontrada")
+        
+        # Leer archivo y convertir a base64
+        with open(ruta_archivo, "rb") as f:
+            contenido = f.read()
+        
+        # Detectar tipo MIME
+        extension = os.path.splitext(nombre_archivo)[1].lower()
+        mime_types = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.gif': 'image/gif',
+            '.webp': 'image/webp',
+            '.bmp': 'image/bmp'
+        }
+        mime_type = mime_types.get(extension, 'image/jpeg')
+        
+        # Convertir a base64 con prefijo data URI
+        base64_data = base64.b64encode(contenido).decode('utf-8')
+        data_uri = f"data:{mime_type};base64,{base64_data}"
+        
+        return {
+            "success": True,
+            "data": data_uri,
+            "mime_type": mime_type,
+            "size_bytes": len(contenido)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error obteniendo foto base64: {e}")
+        raise HTTPException(status_code=500, detail=f"Error procesando imagen: {str(e)}")
+
+# ==================== FIN ENDPOINT PROXY IMÁGENES ====================
+
 # Montar carpeta de fotos para servir estáticamente
 app.mount("/fotos", StaticFiles(directory="fotos"), name="fotos")
 

@@ -2270,18 +2270,125 @@ export default {
     },
 
     // Método auxiliar para cargar imagen como Base64
+    // Mejorado para dispositivos móviles (iOS/Android) usando proxy del backend
     async cargarImagenComoBase64(url) {
+      console.log(`🔄 Iniciando carga de imagen: ${url}`);
+      
+      // Obtener URL base del API
+      const currentApiUrl = apiService.getCurrentApiUrl();
+      
+      // Verificar si es una URL de foto del servidor (para usar el proxy)
+      const esFotoDelServidor = url && (
+        url.includes('/fotos/') || 
+        url.includes(currentApiUrl)
+      );
+      
+      if (esFotoDelServidor) {
+        // MÉTODO 1: Usar proxy del backend (mejor para dispositivos móviles)
+        try {
+          // Extraer solo el nombre del archivo de la URL completa
+          // Ejemplo: https://api.example.com/fotos/archivo.jpg -> archivo.jpg
+          let nombreArchivo = url;
+          
+          // Si es una URL completa, extraer la parte después de /fotos/
+          if (url.includes('/fotos/')) {
+            nombreArchivo = url.split('/fotos/').pop();
+          }
+          
+          console.log(`📥 Usando proxy para imagen: ${nombreArchivo}`);
+          
+          const proxyUrl = `${currentApiUrl}/fotos-base64/${nombreArchivo}`;
+          const response = await api.get(proxyUrl, { timeout: 30000 });
+          
+          if (response.success && response.data) {
+            console.log(`✅ Imagen cargada vía proxy (${(response.size_bytes / 1024).toFixed(2)} KB)`);
+            
+            // Obtener dimensiones de la imagen
+            return new Promise((resolve, reject) => {
+              const img = new Image();
+              img.onload = () => {
+                resolve({
+                  data: response.data,
+                  dimensions: {
+                    width: img.width,
+                    height: img.height
+                  }
+                });
+              };
+              img.onerror = () => {
+                // Devolver sin dimensiones si falla
+                resolve({
+                  data: response.data,
+                  dimensions: { width: 800, height: 600 }
+                });
+              };
+              img.src = response.data;
+            });
+          }
+        } catch (proxyError) {
+          console.warn('⚠️ Error usando proxy, intentando métodos alternativos:', proxyError.message);
+        }
+      }
+      
+      // MÉTODO 2: Usar fetch con blob (más compatible que Image con CORS)
+      try {
+        console.log('📥 Intentando cargar imagen con fetch/blob...');
+        const response = await fetch(url, {
+          mode: 'cors',
+          credentials: 'omit',
+          headers: {
+            'Accept': 'image/*'
+          }
+        });
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64data = reader.result;
+              
+              // Obtener dimensiones
+              const img = new Image();
+              img.onload = () => {
+                console.log(`✅ Imagen cargada con fetch/blob (${(blob.size / 1024).toFixed(2)} KB)`);
+                resolve({
+                  data: base64data,
+                  dimensions: {
+                    width: img.width,
+                    height: img.height
+                  }
+                });
+              };
+              img.onerror = () => {
+                resolve({
+                  data: base64data,
+                  dimensions: { width: 800, height: 600 }
+                });
+              };
+              img.src = base64data;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (fetchError) {
+        console.warn('⚠️ Error con fetch/blob, intentando método Image:', fetchError.message);
+      }
+      
+      // MÉTODO 3: Método tradicional con Image (fallback)
       return new Promise((resolve, reject) => {
         const img = new Image();
         
         // Configurar CORS
         img.crossOrigin = 'anonymous';
         
-        // Timeout
+        // Timeout extendido para conexiones móviles lentas
         const timeoutId = setTimeout(() => {
           console.warn(`⏱️ Timeout cargando imagen: ${url}`);
           reject(new Error('Timeout al cargar imagen'));
-        }, 15000); // 15 segundos
+        }, 30000); // 30 segundos para móviles
         
         img.onload = () => {
           clearTimeout(timeoutId);
@@ -2339,7 +2446,6 @@ export default {
           reject(new Error(`Error cargando imagen: ${url}`));
         };
         
-        console.log(`🔄 Iniciando carga de imagen: ${url}`);
         img.src = url;
       });
     },

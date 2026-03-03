@@ -1002,41 +1002,6 @@
                 </div>
               </div>
 
-              <!-- Toggle: Por territorio o individual -->
-              <div class="apple-field-group">
-                <label class="apple-field-label">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                  </svg>
-                  Tipo de Reporte
-                </label>
-                <div class="apple-toggle-group">
-                  <button 
-                    @click="estadisticasConfig.agruparPor = 'territorio'" 
-                    :class="['apple-toggle-btn', { active: estadisticasConfig.agruparPor === 'territorio' }]"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                      <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                    Por Territorio
-                  </button>
-                  <button 
-                    @click="estadisticasConfig.agruparPor = 'individual'" 
-                    :class="['apple-toggle-btn', { active: estadisticasConfig.agruparPor === 'individual' }]"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    Individual
-                  </button>
-                </div>
-              </div>
-
               <!-- Preview del reporte -->
               <div class="apple-preview-card">
                 <div class="apple-preview-icon">
@@ -1176,8 +1141,7 @@ const territoriosDisponibles = ref([])
 const estadisticasConfig = reactive({
   mes: '',
   anio: new Date().getFullYear(),
-  territorio: '',
-  agruparPor: 'territorio' // 'territorio' o 'individual'
+  territorio: ''
 })
 
 // Años disponibles para estadísticas (últimos 5 años)
@@ -1201,7 +1165,7 @@ const previewTextoEstadisticas = computed(() => {
     texto += ' - Todos los territorios'
   }
   
-  texto += estadisticasConfig.agruparPor === 'individual' ? ' (Detalle individual)' : ' (Resumen por territorio)'
+  texto += ' (Resumen por territorio)'
   return texto
 })
 
@@ -2762,7 +2726,7 @@ const generarPDFEstadisticas = async () => {
     if (estadisticasConfig.mes) params.append('mes', estadisticasConfig.mes)
     params.append('anio', estadisticasConfig.anio)
     if (estadisticasConfig.territorio) params.append('territorio', estadisticasConfig.territorio)
-    params.append('agrupar_por', estadisticasConfig.agruparPor)
+    params.append('agrupar_por', 'territorio')
     
     // Llamar al endpoint para obtener estadísticas
     const response = await axios.get(

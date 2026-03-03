@@ -2808,6 +2808,186 @@ async def obtener_estadisticas_reportes_admin():
         print(f"❌ Error obteniendo estadísticas: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+
+@app.get("/reportes/admin/estadisticas-pdf")
+async def obtener_estadisticas_reportes_pdf(
+    mes: str = None,
+    anio: int = None,
+    territorio: str = None,
+    agrupar_por: str = "territorio"  # "territorio" o "individual"
+):
+    """
+    Obtener estadísticas detalladas de reportes para generar PDF.
+    Incluye:
+    - Total de técnicos (TECNICO SOCIAL y TECNICO PRODUCTIVO) por territorio
+    - Total de reportes generados en el período
+    - Cuántos reportes están firmados vs pendientes
+    """
+    try:
+        print(f"📊 [ADMIN] Obteniendo estadísticas para PDF...")
+        print(f"   Filtros: mes={mes}, anio={anio}, territorio={territorio}, agrupar_por={agrupar_por}")
+        
+        resultado = {
+            "periodo": {
+                "mes": mes,
+                "anio": anio
+            },
+            "territorios": [],
+            "resumen_general": {
+                "total_tecnicos_social": 0,
+                "total_tecnicos_productivo": 0,
+                "total_reportes": 0,
+                "reportes_firmados": 0,
+                "reportes_pendientes": 0
+            }
+        }
+        
+        # Obtener lista de territorios
+        territorio_filter = ""
+        territorio_params = []
+        if territorio:
+            territorio_filter = "AND u.territorio = %s"
+            territorio_params = [territorio]
+        
+        # Query para obtener estadísticas por territorio
+        query_territorios = f"""
+            SELECT 
+                u.territorio,
+                -- Contar técnicos sociales
+                COUNT(DISTINCT CASE WHEN UPPER(u.cargo) LIKE '%TECNICO%SOCIAL%' OR UPPER(u.cargo) = 'TECNICO SOCIAL' THEN u.id END) as tecnicos_social,
+                -- Contar técnicos productivos
+                COUNT(DISTINCT CASE WHEN UPPER(u.cargo) LIKE '%TECNICO%PRODUCTIVO%' OR UPPER(u.cargo) = 'TECNICO PRODUCTIVO' THEN u.id END) as tecnicos_productivo,
+                -- Total de técnicos (ambos tipos)
+                COUNT(DISTINCT CASE WHEN UPPER(u.cargo) LIKE '%TECNICO%' THEN u.id END) as total_tecnicos
+            FROM usuarios u
+            WHERE u.territorio IS NOT NULL 
+            AND u.territorio != ''
+            AND u.activo = TRUE
+            {territorio_filter}
+            GROUP BY u.territorio
+            ORDER BY u.territorio
+        """
+        
+        cursor.execute(query_territorios, territorio_params)
+        territorios_data = cursor.fetchall()
+        
+        # Para cada territorio, obtener estadísticas de reportes
+        for t in territorios_data:
+            territorio_nombre = t[0]
+            tecnicos_social = t[1] or 0
+            tecnicos_productivo = t[2] or 0
+            total_tecnicos = t[3] or 0
+            
+            # Query para reportes del territorio
+            reportes_query = """
+                SELECT 
+                    COUNT(r.id) as total_reportes,
+                    COUNT(CASE WHEN COALESCE(r.firmado_supervisor, false) = true THEN 1 END) as firmados,
+                    COUNT(CASE WHEN COALESCE(r.firmado_supervisor, false) = false THEN 1 END) as pendientes
+                FROM reportes_generados r
+                LEFT JOIN usuarios u ON r.usuario_id = u.id
+                WHERE u.territorio = %s
+            """
+            reportes_params = [territorio_nombre]
+            
+            if mes:
+                reportes_query += " AND r.mes = %s"
+                reportes_params.append(mes)
+            if anio:
+                reportes_query += " AND r.anio = %s"
+                reportes_params.append(anio)
+            
+            cursor.execute(reportes_query, reportes_params)
+            reportes_stats = cursor.fetchone()
+            
+            territorio_info = {
+                "nombre": territorio_nombre,
+                "tecnicos_social": tecnicos_social,
+                "tecnicos_productivo": tecnicos_productivo,
+                "total_tecnicos": total_tecnicos,
+                "reportes_total": reportes_stats[0] or 0,
+                "reportes_firmados": reportes_stats[1] or 0,
+                "reportes_pendientes": reportes_stats[2] or 0
+            }
+            
+            # Si se agrupa por individual, obtener lista de técnicos
+            if agrupar_por == "individual":
+                query_tecnicos = """
+                    SELECT 
+                        u.id,
+                        u.nombre_completo,
+                        u.cargo,
+                        u.correo,
+                        (SELECT COUNT(*) FROM reportes_generados r WHERE r.usuario_id = u.id
+                """
+                tecnicos_params = [territorio_nombre]
+                
+                if mes:
+                    query_tecnicos += " AND r.mes = %s"
+                    tecnicos_params.append(mes)
+                if anio:
+                    query_tecnicos += " AND r.anio = %s"
+                    tecnicos_params.append(anio)
+                
+                query_tecnicos += """) as total_reportes,
+                        (SELECT COUNT(*) FROM reportes_generados r WHERE r.usuario_id = u.id AND COALESCE(r.firmado_supervisor, false) = true
+                """
+                
+                if mes:
+                    query_tecnicos += " AND r.mes = %s"
+                    tecnicos_params.append(mes)
+                if anio:
+                    query_tecnicos += " AND r.anio = %s"
+                    tecnicos_params.append(anio)
+                
+                query_tecnicos += f""") as reportes_firmados
+                    FROM usuarios u
+                    WHERE u.territorio = %s
+                    AND UPPER(u.cargo) LIKE '%TECNICO%'
+                    AND u.activo = TRUE
+                    ORDER BY u.nombre_completo
+                """
+                tecnicos_params.append(territorio_nombre)
+                
+                cursor.execute(query_tecnicos, tecnicos_params)
+                tecnicos_list = cursor.fetchall()
+                
+                territorio_info["tecnicos"] = [
+                    {
+                        "id": tec[0],
+                        "nombre": tec[1],
+                        "cargo": tec[2],
+                        "correo": tec[3],
+                        "reportes_total": tec[4] or 0,
+                        "reportes_firmados": tec[5] or 0,
+                        "reportes_pendientes": (tec[4] or 0) - (tec[5] or 0)
+                    }
+                    for tec in tecnicos_list
+                ]
+            
+            resultado["territorios"].append(territorio_info)
+            
+            # Acumular resumen general
+            resultado["resumen_general"]["total_tecnicos_social"] += tecnicos_social
+            resultado["resumen_general"]["total_tecnicos_productivo"] += tecnicos_productivo
+            resultado["resumen_general"]["total_reportes"] += reportes_stats[0] or 0
+            resultado["resumen_general"]["reportes_firmados"] += reportes_stats[1] or 0
+            resultado["resumen_general"]["reportes_pendientes"] += reportes_stats[2] or 0
+        
+        print(f"✅ [ADMIN] Estadísticas PDF generadas: {len(resultado['territorios'])} territorios")
+        
+        return {
+            "success": True,
+            "data": resultado
+        }
+        
+    except Exception as e:
+        print(f"❌ Error obteniendo estadísticas PDF: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
 # Nuevo endpoint para obtener usuarios (para el panel de administración)
 @app.get("/usuarios")
 async def obtener_usuarios(territorio: str = None):

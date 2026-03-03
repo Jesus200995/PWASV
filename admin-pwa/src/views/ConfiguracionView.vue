@@ -348,6 +348,24 @@
                     </div>
                     <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                   </div>
+
+                  <!-- NUEVO: Estadísticas de Reportes PDF -->
+                  <div class="data-item" @click="abrirModalEstadisticasReportes" :class="{ disabled: generandoEstadisticasPDF }">
+                    <div class="data-icon guinda">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <path d="M9 13h6"/>
+                        <path d="M9 17h3"/>
+                        <path d="M9 9h1"/>
+                      </svg>
+                    </div>
+                    <div class="data-text">
+                      <h4>{{ generandoEstadisticasPDF ? 'Generando...' : 'Reportes PDF' }}</h4>
+                      <p>Estadísticas mensuales</p>
+                    </div>
+                    <svg class="data-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
                 </div>
               </div>
             </section>
@@ -892,6 +910,167 @@
         </Transition>
       </div>
     </Transition>
+
+    <!-- Modal Estadísticas de Reportes PDF - Diseño Apple iOS 17 -->
+    <Transition name="modal-fade">
+      <div v-if="showEstadisticasReportesModal" class="apple-modal-overlay" @click="cerrarModalEstadisticasReportes">
+        <Transition name="modal-scale">
+          <div class="apple-stats-modal" @click.stop>
+            <!-- Header con gradiente guinda -->
+            <div class="apple-stats-header">
+              <div class="apple-stats-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <path d="M16 13H8"/>
+                  <path d="M16 17H8"/>
+                  <path d="M10 9H8"/>
+                </svg>
+              </div>
+              <h3>Estadísticas de Reportes</h3>
+              <p class="apple-stats-subtitle">Genera un PDF con el resumen mensual</p>
+              <button @click="cerrarModalEstadisticasReportes" class="apple-close-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Contenido del modal -->
+            <div class="apple-stats-body">
+              <!-- Selector de período -->
+              <div class="apple-field-group">
+                <label class="apple-field-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  Período
+                </label>
+                <div class="apple-selectors-row">
+                  <div class="apple-select-wrapper">
+                    <select v-model="estadisticasConfig.mes" class="apple-select">
+                      <option value="">Todos los meses</option>
+                      <option value="Enero">Enero</option>
+                      <option value="Febrero">Febrero</option>
+                      <option value="Marzo">Marzo</option>
+                      <option value="Abril">Abril</option>
+                      <option value="Mayo">Mayo</option>
+                      <option value="Junio">Junio</option>
+                      <option value="Julio">Julio</option>
+                      <option value="Agosto">Agosto</option>
+                      <option value="Septiembre">Septiembre</option>
+                      <option value="Octubre">Octubre</option>
+                      <option value="Noviembre">Noviembre</option>
+                      <option value="Diciembre">Diciembre</option>
+                    </select>
+                    <svg class="apple-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                  <div class="apple-select-wrapper">
+                    <select v-model="estadisticasConfig.anio" class="apple-select">
+                      <option v-for="year in aniosDisponiblesStats" :key="year" :value="year">{{ year }}</option>
+                    </select>
+                    <svg class="apple-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selector de territorio -->
+              <div class="apple-field-group">
+                <label class="apple-field-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  Territorio
+                </label>
+                <div class="apple-select-wrapper full">
+                  <select v-model="estadisticasConfig.territorio" class="apple-select">
+                    <option value="">Todos los territorios</option>
+                    <option v-for="ter in territoriosDisponibles" :key="ter" :value="ter">{{ ter }}</option>
+                  </select>
+                  <svg class="apple-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Toggle: Por territorio o individual -->
+              <div class="apple-field-group">
+                <label class="apple-field-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  Tipo de Reporte
+                </label>
+                <div class="apple-toggle-group">
+                  <button 
+                    @click="estadisticasConfig.agruparPor = 'territorio'" 
+                    :class="['apple-toggle-btn', { active: estadisticasConfig.agruparPor === 'territorio' }]"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    Por Territorio
+                  </button>
+                  <button 
+                    @click="estadisticasConfig.agruparPor = 'individual'" 
+                    :class="['apple-toggle-btn', { active: estadisticasConfig.agruparPor === 'individual' }]"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Individual
+                  </button>
+                </div>
+              </div>
+
+              <!-- Preview del reporte -->
+              <div class="apple-preview-card">
+                <div class="apple-preview-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                </div>
+                <div class="apple-preview-text">
+                  <h4>PDF de Estadísticas</h4>
+                  <p>{{ previewTextoEstadisticas }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer con botones -->
+            <div class="apple-stats-footer">
+              <button @click="cerrarModalEstadisticasReportes" class="apple-btn-secondary" :disabled="generandoEstadisticasPDF">
+                Cancelar
+              </button>
+              <button @click="generarPDFEstadisticas" class="apple-btn-primary" :disabled="generandoEstadisticasPDF">
+                <svg v-if="!generandoEstadisticasPDF" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span v-else class="apple-spinner"></span>
+                {{ generandoEstadisticasPDF ? 'Generando...' : 'Descargar PDF' }}
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -988,6 +1167,42 @@ const periodoTextoPreview = computed(() => {
     return `${meses[eliminarFechaConfig.mes - 1]} ${eliminarFechaConfig.anio}`
   }
   return `Todo el año ${eliminarFechaConfig.anio}`
+})
+
+// ============= VARIABLES PARA ESTADÍSTICAS DE REPORTES PDF =============
+const showEstadisticasReportesModal = ref(false)
+const generandoEstadisticasPDF = ref(false)
+const territoriosDisponibles = ref([])
+const estadisticasConfig = reactive({
+  mes: '',
+  anio: new Date().getFullYear(),
+  territorio: '',
+  agruparPor: 'territorio' // 'territorio' o 'individual'
+})
+
+// Años disponibles para estadísticas (últimos 5 años)
+const aniosDisponiblesStats = computed(() => {
+  const currentYear = new Date().getFullYear()
+  return Array.from({ length: 6 }, (_, i) => currentYear - i)
+})
+
+// Preview del texto de estadísticas
+const previewTextoEstadisticas = computed(() => {
+  let texto = ''
+  if (estadisticasConfig.mes) {
+    texto = `${estadisticasConfig.mes} ${estadisticasConfig.anio}`
+  } else {
+    texto = `Todo el año ${estadisticasConfig.anio}`
+  }
+  
+  if (estadisticasConfig.territorio) {
+    texto += ` - ${estadisticasConfig.territorio}`
+  } else {
+    texto += ' - Todos los territorios'
+  }
+  
+  texto += estadisticasConfig.agruparPor === 'individual' ? ' (Detalle individual)' : ' (Resumen por territorio)'
+  return texto
 })
 
 // Variables para el modal de progreso
@@ -2501,6 +2716,310 @@ const cancelarConfirmTransferencia = () => {
 }
 
 // ==================== FIN FUNCIONES DE TRANSFERENCIA ====================
+
+// ============= FUNCIONES PARA ESTADÍSTICAS DE REPORTES PDF =============
+
+const abrirModalEstadisticasReportes = async () => {
+  if (generandoEstadisticasPDF.value) return
+  
+  // Cargar territorios disponibles
+  try {
+    const token = localStorage.getItem('admin_token')
+    const response = await axios.get(`${apiConfig.url}/usuarios`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    
+    if (response.data) {
+      const usuarios = Array.isArray(response.data) ? response.data : (response.data.usuarios || [])
+      const territoriosSet = new Set()
+      usuarios.forEach(u => {
+        if (u.territorio) territoriosSet.add(u.territorio)
+      })
+      territoriosDisponibles.value = Array.from(territoriosSet).sort()
+    }
+  } catch (error) {
+    console.error('Error cargando territorios:', error)
+  }
+  
+  showEstadisticasReportesModal.value = true
+}
+
+const cerrarModalEstadisticasReportes = () => {
+  if (generandoEstadisticasPDF.value) return
+  showEstadisticasReportesModal.value = false
+}
+
+const generarPDFEstadisticas = async () => {
+  if (generandoEstadisticasPDF.value) return
+  
+  generandoEstadisticasPDF.value = true
+  
+  try {
+    const token = localStorage.getItem('admin_token')
+    
+    // Construir parámetros
+    const params = new URLSearchParams()
+    if (estadisticasConfig.mes) params.append('mes', estadisticasConfig.mes)
+    params.append('anio', estadisticasConfig.anio)
+    if (estadisticasConfig.territorio) params.append('territorio', estadisticasConfig.territorio)
+    params.append('agrupar_por', estadisticasConfig.agruparPor)
+    
+    // Llamar al endpoint para obtener estadísticas
+    const response = await axios.get(
+      `${apiConfig.url}/reportes/admin/estadisticas-pdf?${params.toString()}`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    )
+    
+    if (response.data.success) {
+      // Generar PDF con los datos recibidos
+      await generarPDFEstadisticasLocal(response.data.data)
+      
+      mostrarMensaje('Éxito', 'PDF de estadísticas generado y descargado correctamente.')
+      cerrarModalEstadisticasReportes()
+    } else {
+      throw new Error('No se pudieron obtener las estadísticas')
+    }
+    
+  } catch (error) {
+    console.error('Error generando PDF:', error)
+    mostrarMensaje('Error', `No se pudo generar el PDF: ${error.message}`)
+  } finally {
+    generandoEstadisticasPDF.value = false
+  }
+}
+
+// Función para generar el PDF localmente con diseño Apple
+const generarPDFEstadisticasLocal = async (data) => {
+  // Importar jsPDF dinámicamente
+  const { jsPDF } = await import('jspdf')
+  
+  const doc = new jsPDF('p', 'mm', 'a4')
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const pageHeight = doc.internal.pageSize.getHeight()
+  const margin = 15
+  let y = margin
+  
+  // Colores
+  const colorGuinda = [125, 29, 63] // #7D1D3F
+  const colorVerde = [76, 175, 80] // #4CAF50
+  const colorGris = [100, 100, 100]
+  const colorGrisClaro = [180, 180, 180]
+  
+  // === HEADER ===
+  // Fondo del header
+  doc.setFillColor(...colorGuinda)
+  doc.roundedRect(margin, y, pageWidth - 2 * margin, 35, 4, 4, 'F')
+  
+  // Título
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(18)
+  doc.setTextColor(255, 255, 255)
+  doc.text('ESTADÍSTICAS DE REPORTES', pageWidth / 2, y + 12, { align: 'center' })
+  
+  // Subtítulo
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(11)
+  const periodoTexto = data.periodo.mes 
+    ? `${data.periodo.mes} ${data.periodo.anio}` 
+    : `Año ${data.periodo.anio}`
+  doc.text(`Período: ${periodoTexto}`, pageWidth / 2, y + 22, { align: 'center' })
+  
+  // Fecha de generación
+  doc.setFontSize(9)
+  const fechaGen = new Date().toLocaleDateString('es-MX', { 
+    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+  })
+  doc.text(`Generado: ${fechaGen}`, pageWidth / 2, y + 30, { align: 'center' })
+  
+  y += 45
+  
+  // === RESUMEN GENERAL ===
+  doc.setFillColor(245, 245, 245)
+  doc.roundedRect(margin, y, pageWidth - 2 * margin, 28, 3, 3, 'F')
+  
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(12)
+  doc.setTextColor(...colorGuinda)
+  doc.text('RESUMEN GENERAL', margin + 5, y + 8)
+  
+  // Stats en fila
+  const statsY = y + 18
+  const colWidth = (pageWidth - 2 * margin) / 5
+  
+  const resumen = data.resumen_general
+  const stats = [
+    { label: 'Tec. Social', value: resumen.total_tecnicos_social },
+    { label: 'Tec. Productivo', value: resumen.total_tecnicos_productivo },
+    { label: 'Total Reportes', value: resumen.total_reportes },
+    { label: 'Firmados', value: resumen.reportes_firmados, color: colorVerde },
+    { label: 'Pendientes', value: resumen.reportes_pendientes, color: [255, 152, 0] }
+  ]
+  
+  stats.forEach((stat, i) => {
+    const x = margin + colWidth * i + colWidth / 2
+    
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(16)
+    doc.setTextColor(...(stat.color || colorGuinda))
+    doc.text(String(stat.value), x, statsY, { align: 'center' })
+    
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(...colorGris)
+    doc.text(stat.label, x, statsY + 5, { align: 'center' })
+  })
+  
+  y += 38
+  
+  // === DETALLE POR TERRITORIO ===
+  data.territorios.forEach((territorio, index) => {
+    // Verificar si necesitamos nueva página
+    if (y > pageHeight - 60) {
+      doc.addPage()
+      y = margin
+    }
+    
+    // Header del territorio
+    doc.setFillColor(...colorGuinda)
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 10, 2, 2, 'F')
+    
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(255, 255, 255)
+    doc.text(territorio.nombre || 'Sin territorio', margin + 5, y + 7)
+    
+    // Stats del territorio a la derecha
+    doc.setFontSize(9)
+    const statsText = `Tec. Social: ${territorio.tecnicos_social} | Tec. Productivo: ${territorio.tecnicos_productivo} | Reportes: ${territorio.reportes_total} (${territorio.reportes_firmados} firmados)`
+    doc.text(statsText, pageWidth - margin - 5, y + 7, { align: 'right' })
+    
+    y += 14
+    
+    // Barra de progreso de reportes
+    const barWidth = pageWidth - 2 * margin - 10
+    const barHeight = 6
+    const porcentajeFirmados = territorio.reportes_total > 0 
+      ? (territorio.reportes_firmados / territorio.reportes_total) 
+      : 0
+    
+    // Fondo de la barra
+    doc.setFillColor(230, 230, 230)
+    doc.roundedRect(margin + 5, y, barWidth, barHeight, 2, 2, 'F')
+    
+    // Barra de firmados (verde)
+    if (porcentajeFirmados > 0) {
+      doc.setFillColor(...colorVerde)
+      doc.roundedRect(margin + 5, y, barWidth * porcentajeFirmados, barHeight, 2, 2, 'F')
+    }
+    
+    // Porcentaje
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.setTextColor(...colorGris)
+    doc.text(`${Math.round(porcentajeFirmados * 100)}% firmados`, margin + 5 + barWidth + 2, y + 5)
+    
+    y += 12
+    
+    // Si tiene detalle individual, mostrar tabla de técnicos
+    if (territorio.tecnicos && territorio.tecnicos.length > 0) {
+      // Header de tabla
+      doc.setFillColor(250, 250, 250)
+      doc.rect(margin + 5, y, pageWidth - 2 * margin - 10, 7, 'F')
+      
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(8)
+      doc.setTextColor(...colorGris)
+      
+      const cols = [margin + 8, margin + 80, margin + 130, margin + 155]
+      doc.text('Nombre', cols[0], y + 5)
+      doc.text('Cargo', cols[1], y + 5)
+      doc.text('Reportes', cols[2], y + 5)
+      doc.text('Estado', cols[3], y + 5)
+      
+      y += 9
+      
+      // Filas de técnicos
+      territorio.tecnicos.forEach((tecnico, tecIdx) => {
+        if (y > pageHeight - 20) {
+          doc.addPage()
+          y = margin
+        }
+        
+        // Alternar fondo
+        if (tecIdx % 2 === 0) {
+          doc.setFillColor(252, 252, 252)
+          doc.rect(margin + 5, y - 3, pageWidth - 2 * margin - 10, 8, 'F')
+        }
+        
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(8)
+        doc.setTextColor(60, 60, 60)
+        
+        // Nombre truncado si es muy largo
+        let nombre = tecnico.nombre || 'Sin nombre'
+        if (nombre.length > 35) nombre = nombre.substring(0, 32) + '...'
+        doc.text(nombre, cols[0], y + 2)
+        
+        // Cargo truncado
+        let cargo = tecnico.cargo || '-'
+        if (cargo.length > 20) cargo = cargo.substring(0, 17) + '...'
+        doc.text(cargo, cols[1], y + 2)
+        
+        // Reportes
+        doc.text(`${tecnico.reportes_total}`, cols[2], y + 2)
+        
+        // Estado (badge)
+        const estadoX = cols[3]
+        const estaFirmado = tecnico.reportes_total > 0 && tecnico.reportes_firmados === tecnico.reportes_total
+        
+        if (tecnico.reportes_total > 0) {
+          if (estaFirmado) {
+            doc.setFillColor(...colorVerde)
+            doc.setTextColor(255, 255, 255)
+          } else {
+            doc.setFillColor(255, 193, 7)
+            doc.setTextColor(60, 60, 60)
+          }
+          doc.roundedRect(estadoX - 2, y - 2, 25, 6, 1, 1, 'F')
+          doc.setFontSize(7)
+          doc.text(estaFirmado ? 'Firmado' : 'Pendiente', estadoX + 10, y + 2, { align: 'center' })
+        } else {
+          doc.setTextColor(...colorGrisClaro)
+          doc.text('Sin reporte', estadoX, y + 2)
+        }
+        
+        y += 8
+      })
+      
+      y += 5
+    } else {
+      y += 5
+    }
+  })
+  
+  // === FOOTER ===
+  const footerY = pageHeight - 10
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  doc.setTextColor(...colorGrisClaro)
+  doc.text('Sembrando Vida - Sistema de Administración', pageWidth / 2, footerY, { align: 'center' })
+  
+  // Número de página en todas las páginas
+  const totalPages = doc.internal.getNumberOfPages()
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(...colorGrisClaro)
+    doc.text(`Página ${i} de ${totalPages}`, pageWidth - margin, pageHeight - 10, { align: 'right' })
+  }
+  
+  // Descargar
+  const filename = `Estadisticas_Reportes_${estadisticasConfig.anio}${estadisticasConfig.mes ? '_' + estadisticasConfig.mes : ''}.pdf`
+  doc.save(filename)
+}
+
+// ============= FIN FUNCIONES ESTADÍSTICAS DE REPORTES PDF =============
 
 const logout = () => {
   // No usar confirm(), el modal se maneja en el Sidebar
@@ -6582,6 +7101,441 @@ const logout = () => {
     width: 40px;
     height: 40px;
     font-size: 18px;
+  }
+}
+
+/* ============================================================================
+   ESTILOS PARA MODAL DE ESTADÍSTICAS DE REPORTES - APPLE DESIGN SYSTEM iOS 17
+   ============================================================================ */
+
+/* Icono guinda para el botón en la lista */
+.data-icon.guinda {
+  background: linear-gradient(135deg, #7D1D3F 0%, #9C2952 100%);
+}
+
+/* Overlay del modal */
+.apple-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+/* Modal principal */
+.apple-stats-modal {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header del modal */
+.apple-stats-header {
+  background: linear-gradient(135deg, #7D1D3F 0%, #9C2952 50%, #7D1D3F 100%);
+  color: white;
+  padding: 24px 24px 20px;
+  text-align: center;
+  position: relative;
+}
+
+.apple-stats-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.apple-stats-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke: white;
+}
+
+.apple-stats-header h3 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.apple-stats-subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+.apple-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.apple-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.apple-close-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: white;
+}
+
+/* Body del modal */
+.apple-stats-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Grupos de campos */
+.apple-field-group {
+  margin-bottom: 20px;
+}
+
+.apple-field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.apple-field-label svg {
+  width: 16px;
+  height: 16px;
+  stroke: #7D1D3F;
+}
+
+/* Selectores en fila */
+.apple-selectors-row {
+  display: flex;
+  gap: 12px;
+}
+
+.apple-select-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.apple-select-wrapper.full {
+  flex: 1;
+}
+
+.apple-select {
+  width: 100%;
+  padding: 14px 40px 14px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1f2937;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: all 0.2s ease;
+}
+
+.apple-select:hover {
+  border-color: #d1d5db;
+  background: #f3f4f6;
+}
+
+.apple-select:focus {
+  outline: none;
+  border-color: #7D1D3F;
+  box-shadow: 0 0 0 4px rgba(125, 29, 63, 0.1);
+}
+
+.apple-select-arrow {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  stroke: #9ca3af;
+  pointer-events: none;
+}
+
+/* Toggle buttons grupo */
+.apple-toggle-group {
+  display: flex;
+  gap: 8px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 14px;
+}
+
+.apple-toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.apple-toggle-btn:hover {
+  color: #374151;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.apple-toggle-btn.active {
+  color: white;
+  background: linear-gradient(135deg, #7D1D3F 0%, #9C2952 100%);
+  box-shadow: 0 4px 12px rgba(125, 29, 63, 0.3);
+}
+
+.apple-toggle-btn.active svg {
+  stroke: white;
+}
+
+/* Preview card */
+.apple-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fdf2f4 0%, #fce8ec 100%);
+  border: 1px solid rgba(125, 29, 63, 0.1);
+  border-radius: 14px;
+  margin-top: 8px;
+}
+
+.apple-preview-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #7D1D3F 0%, #9C2952 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.apple-preview-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+}
+
+.apple-preview-text h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #7D1D3F;
+}
+
+.apple-preview-text p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Footer del modal */
+.apple-stats-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.apple-btn-secondary,
+.apple-btn-primary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-btn-secondary {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.apple-btn-secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.apple-btn-primary {
+  color: white;
+  background: linear-gradient(135deg, #7D1D3F 0%, #9C2952 100%);
+  box-shadow: 0 4px 12px rgba(125, 29, 63, 0.3);
+}
+
+.apple-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(125, 29, 63, 0.4);
+}
+
+.apple-btn-primary:disabled,
+.apple-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.apple-btn-primary svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Spinner para botón */
+.apple-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: apple-spin 0.8s linear infinite;
+}
+
+@keyframes apple-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Animaciones del modal */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-scale-enter-active {
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-scale-leave-active {
+  transition: all 0.25s ease-in;
+}
+
+.modal-scale-enter-from {
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+}
+
+.modal-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+}
+
+/* Responsive para el modal de estadísticas */
+@media (max-width: 520px) {
+  .apple-stats-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+  
+  .apple-modal-overlay {
+    padding: 0;
+  }
+  
+  .apple-stats-header {
+    padding: 20px 16px 16px;
+  }
+  
+  .apple-stats-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .apple-stats-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .apple-stats-header h3 {
+    font-size: 18px;
+  }
+  
+  .apple-stats-body {
+    padding: 16px;
+  }
+  
+  .apple-selectors-row {
+    flex-direction: column;
+  }
+  
+  .apple-toggle-btn {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  
+  .apple-toggle-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .apple-stats-footer {
+    padding: 12px 16px 20px;
+  }
+  
+  .apple-btn-secondary,
+  .apple-btn-primary {
+    padding: 12px 16px;
+    font-size: 14px;
   }
 }
 </style>

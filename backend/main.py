@@ -2869,6 +2869,9 @@ async def obtener_estadisticas_reportes_pdf(
         
         # Para cada territorio
         for t in territorios_data:
+            if not t or len(t) < 4:
+                continue
+                
             territorio_nombre = t[0]
             tecnicos_social = t[1] or 0
             tecnicos_productivo = t[2] or 0
@@ -2895,9 +2898,13 @@ async def obtener_estadisticas_reportes_pdf(
             
             reportes_stats = ejecutar_consulta_segura(reportes_query, reportes_params, 'one')
             
-            total_reportes = (reportes_stats[0] if reportes_stats else 0) or 0
-            firmados = (reportes_stats[1] if reportes_stats else 0) or 0
-            pendientes = (reportes_stats[2] if reportes_stats else 0) or 0
+            total_reportes = 0
+            firmados = 0
+            pendientes = 0
+            if reportes_stats and len(reportes_stats) >= 3:
+                total_reportes = reportes_stats[0] or 0
+                firmados = reportes_stats[1] or 0
+                pendientes = reportes_stats[2] or 0
             
             territorio_info = {
                 "nombre": territorio_nombre,
@@ -2930,6 +2937,9 @@ async def obtener_estadisticas_reportes_pdf(
                     territorio_info["tecnicos"] = []
                     if tecnicos_list:
                         for tec in tecnicos_list:
+                            if not tec or len(tec) < 4:
+                                continue
+                                
                             usuario_id = tec[0]
                             
                             # Query separada para contar reportes de este técnico
@@ -2942,16 +2952,25 @@ async def obtener_estadisticas_reportes_pdf(
                             """
                             params_reportes = [usuario_id]
                             
+                            # Añadir filtros de forma segura
+                            filtros_extra = []
                             if mes:
-                                query_reportes_tec = query_reportes_tec.replace("WHERE usuario_id = %s", "WHERE usuario_id = %s AND mes = %s")
+                                filtros_extra.append("mes = %s")
                                 params_reportes.append(mes)
                             if anio:
-                                query_reportes_tec += " AND anio = %s"
+                                filtros_extra.append("anio = %s")
                                 params_reportes.append(anio)
                             
+                            if filtros_extra:
+                                query_reportes_tec = query_reportes_tec.rstrip() + " AND " + " AND ".join(filtros_extra)
+                            
                             rep_stats = ejecutar_consulta_segura(query_reportes_tec, params_reportes, 'one')
-                            rep_total = (rep_stats[0] if rep_stats else 0) or 0
-                            rep_firmados = (rep_stats[1] if rep_stats else 0) or 0
+                            
+                            rep_total = 0
+                            rep_firmados = 0
+                            if rep_stats and len(rep_stats) >= 2:
+                                rep_total = rep_stats[0] or 0
+                                rep_firmados = rep_stats[1] or 0
                             
                             territorio_info["tecnicos"].append({
                                 "id": usuario_id,
@@ -2963,7 +2982,9 @@ async def obtener_estadisticas_reportes_pdf(
                                 "reportes_pendientes": rep_total - rep_firmados
                             })
                 except Exception as e_tec:
+                    import traceback
                     print(f"⚠️ Error obteniendo técnicos para {territorio_nombre}: {e_tec}")
+                    print(traceback.format_exc())
                     territorio_info["tecnicos"] = []
             
             resultado["territorios"].append(territorio_info)

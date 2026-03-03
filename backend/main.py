@@ -2861,7 +2861,12 @@ async def obtener_estadisticas_reportes_pdf(
         
         query_territorios += " GROUP BY u.territorio ORDER BY u.territorio"
         
-        territorios_data = ejecutar_consulta_segura(query_territorios, params_territorios if params_territorios else None, 'all')
+        print(f"🔍 Query territorios: {query_territorios}")
+        print(f"🔍 Params: {params_territorios}")
+        
+        territorios_data = ejecutar_consulta_segura(query_territorios, tuple(params_territorios) if params_territorios else None, 'all')
+        
+        print(f"🔍 Territorios encontrados: {len(territorios_data) if territorios_data else 0}")
         
         if not territorios_data:
             print("⚠️ No se encontraron territorios")
@@ -2896,7 +2901,9 @@ async def obtener_estadisticas_reportes_pdf(
                 reportes_query += " AND r.anio = %s"
                 reportes_params.append(anio)
             
-            reportes_stats = ejecutar_consulta_segura(reportes_query, reportes_params, 'one')
+            print(f"🔍 Query reportes: params={reportes_params}")
+            reportes_stats = ejecutar_consulta_segura(reportes_query, tuple(reportes_params), 'one')
+            print(f"🔍 Reportes stats: {reportes_stats}")
             
             total_reportes = 0
             firmados = 0
@@ -2932,7 +2939,7 @@ async def obtener_estadisticas_reportes_pdf(
                         ORDER BY u.nombre_completo
                     """
                     
-                    tecnicos_list = ejecutar_consulta_segura(query_tecnicos, [territorio_nombre], 'all')
+                    tecnicos_list = ejecutar_consulta_segura(query_tecnicos, (territorio_nombre,), 'all')
                     
                     territorio_info["tecnicos"] = []
                     if tecnicos_list:
@@ -2964,7 +2971,7 @@ async def obtener_estadisticas_reportes_pdf(
                             if filtros_extra:
                                 query_reportes_tec = query_reportes_tec.rstrip() + " AND " + " AND ".join(filtros_extra)
                             
-                            rep_stats = ejecutar_consulta_segura(query_reportes_tec, params_reportes, 'one')
+                            rep_stats = ejecutar_consulta_segura(query_reportes_tec, tuple(params_reportes), 'one')
                             
                             rep_total = 0
                             rep_firmados = 0

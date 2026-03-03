@@ -2864,7 +2864,8 @@ async def obtener_estadisticas_reportes_pdf(
         print(f"🔍 Query territorios: {query_territorios}")
         print(f"🔍 Params: {params_territorios}")
         
-        territorios_data = ejecutar_consulta_segura(query_territorios, tuple(params_territorios) if params_territorios else None, 'all')
+        params_to_use = tuple(params_territorios) if params_territorios else None
+        territorios_data = ejecutar_consulta_segura(query_territorios, params_to_use, 'all')
         
         print(f"🔍 Territorios encontrados: {len(territorios_data) if territorios_data else 0}")
         
@@ -2902,7 +2903,8 @@ async def obtener_estadisticas_reportes_pdf(
                 reportes_params.append(anio)
             
             print(f"🔍 Query reportes: params={reportes_params}")
-            reportes_stats = ejecutar_consulta_segura(reportes_query, tuple(reportes_params), 'one')
+            report_params_tuple = tuple(reportes_params) if reportes_params else None
+            reportes_stats = ejecutar_consulta_segura(reportes_query, report_params_tuple, 'one')
             print(f"🔍 Reportes stats: {reportes_stats}")
             
             total_reportes = 0
@@ -2971,7 +2973,8 @@ async def obtener_estadisticas_reportes_pdf(
                             if filtros_extra:
                                 query_reportes_tec = query_reportes_tec.rstrip() + " AND " + " AND ".join(filtros_extra)
                             
-                            rep_stats = ejecutar_consulta_segura(query_reportes_tec, tuple(params_reportes), 'one')
+                            rep_params_tuple = tuple(params_reportes) if params_reportes else None
+                            rep_stats = ejecutar_consulta_segura(query_reportes_tec, rep_params_tuple, 'one')
                             
                             rep_total = 0
                             rep_firmados = 0

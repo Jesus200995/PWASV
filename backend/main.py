@@ -2911,40 +2911,60 @@ async def obtener_estadisticas_reportes_pdf(
             
             # Si se agrupa por individual, obtener lista de técnicos
             if agrupar_por == "individual":
-                # Construir filtros para subqueries
-                filtro_mes = f"AND r.mes = '{mes}'" if mes else ""
-                filtro_anio = f"AND r.anio = {anio}" if anio else ""
-                
-                query_tecnicos = f"""
-                    SELECT 
-                        u.id,
-                        u.nombre_completo,
-                        COALESCE(u.cargo, '-'),
-                        COALESCE(u.correo, '-'),
-                        (SELECT COUNT(*) FROM reportes_generados r WHERE r.usuario_id = u.id {filtro_mes} {filtro_anio}),
-                        (SELECT COUNT(*) FROM reportes_generados r WHERE r.usuario_id = u.id AND COALESCE(r.firmado_supervisor, false) = true {filtro_mes} {filtro_anio})
-                    FROM usuarios u
-                    WHERE u.territorio = %s
-                    AND COALESCE(u.activo, true) = TRUE
-                    ORDER BY u.nombre_completo
-                """
-                
-                tecnicos_list = ejecutar_consulta_segura(query_tecnicos, [territorio_nombre], 'all')
-                
-                territorio_info["tecnicos"] = []
-                if tecnicos_list:
-                    for tec in tecnicos_list:
-                        rep_total = tec[4] or 0
-                        rep_firmados = tec[5] or 0
-                        territorio_info["tecnicos"].append({
-                            "id": tec[0],
-                            "nombre": tec[1] or "Sin nombre",
-                            "cargo": tec[2] or "-",
-                            "correo": tec[3] or "-",
-                            "reportes_total": rep_total,
-                            "reportes_firmados": rep_firmados,
-                            "reportes_pendientes": rep_total - rep_firmados
-                        })
+                try:
+                    # Query más simple para técnicos
+                    query_tecnicos = """
+                        SELECT 
+                            u.id,
+                            u.nombre_completo,
+                            COALESCE(u.cargo, '-') as cargo,
+                            COALESCE(u.correo, '-') as correo
+                        FROM usuarios u
+                        WHERE u.territorio = %s
+                        AND COALESCE(u.activo, true) = TRUE
+                        ORDER BY u.nombre_completo
+                    """
+                    
+                    tecnicos_list = ejecutar_consulta_segura(query_tecnicos, [territorio_nombre], 'all')
+                    
+                    territorio_info["tecnicos"] = []
+                    if tecnicos_list:
+                        for tec in tecnicos_list:
+                            usuario_id = tec[0]
+                            
+                            # Query separada para contar reportes de este técnico
+                            query_reportes_tec = """
+                                SELECT 
+                                    COUNT(*) as total,
+                                    COUNT(CASE WHEN COALESCE(firmado_supervisor, false) = true THEN 1 END) as firmados
+                                FROM reportes_generados
+                                WHERE usuario_id = %s
+                            """
+                            params_reportes = [usuario_id]
+                            
+                            if mes:
+                                query_reportes_tec = query_reportes_tec.replace("WHERE usuario_id = %s", "WHERE usuario_id = %s AND mes = %s")
+                                params_reportes.append(mes)
+                            if anio:
+                                query_reportes_tec += " AND anio = %s"
+                                params_reportes.append(anio)
+                            
+                            rep_stats = ejecutar_consulta_segura(query_reportes_tec, params_reportes, 'one')
+                            rep_total = (rep_stats[0] if rep_stats else 0) or 0
+                            rep_firmados = (rep_stats[1] if rep_stats else 0) or 0
+                            
+                            territorio_info["tecnicos"].append({
+                                "id": usuario_id,
+                                "nombre": tec[1] or "Sin nombre",
+                                "cargo": tec[2] or "-",
+                                "correo": tec[3] or "-",
+                                "reportes_total": rep_total,
+                                "reportes_firmados": rep_firmados,
+                                "reportes_pendientes": rep_total - rep_firmados
+                            })
+                except Exception as e_tec:
+                    print(f"⚠️ Error obteniendo técnicos para {territorio_nombre}: {e_tec}")
+                    territorio_info["tecnicos"] = []
             
             resultado["territorios"].append(territorio_info)
             
@@ -2962,11 +2982,14 @@ async def obtener_estadisticas_reportes_pdf(
             "data": resultado
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"❌ Error obteniendo estadísticas PDF: {e}")
         import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+        error_trace = traceback.format_exc()
+        print(f"❌ Error obteniendo estadísticas PDF: {e}")
+        print(f"📋 Traceback:\n{error_trace}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e) or type(e).__name__} - {error_trace[:200]}")
 
 
 # Nuevo endpoint para obtener usuarios (para el panel de administración)

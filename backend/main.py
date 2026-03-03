@@ -2831,6 +2831,7 @@ async def obtener_estadisticas_reportes_pdf(
                 "mes": mes,
                 "anio": anio
             },
+            "territorio_filtro": territorio,  # Territorio seleccionado para filtrar
             "territorios": [],
             "resumen_general": {
                 "total_tecnicos_social": 0,
@@ -2927,8 +2928,43 @@ async def obtener_estadisticas_reportes_pdf(
                 "total_personal": total_personal,
                 "reportes_total": total_reportes,
                 "reportes_firmados": firmados,
-                "reportes_pendientes": pendientes
+                "reportes_pendientes": pendientes,
+                "datos_por_mes": []
             }
+            
+            # Si no hay mes especificado, obtener datos por cada mes del año
+            if not mes and anio:
+                meses_orden = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                              'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+                
+                for mes_nombre in meses_orden:
+                    query_mes = """
+                        SELECT 
+                            COUNT(r.id) as total_reportes,
+                            COUNT(CASE WHEN COALESCE(r.firmado_supervisor, false) = true THEN 1 END) as firmados,
+                            COUNT(CASE WHEN COALESCE(r.firmado_supervisor, false) = false THEN 1 END) as pendientes
+                        FROM reportes_generados r
+                        INNER JOIN usuarios u ON r.usuario_id = u.id
+                        WHERE u.territorio = %s AND r.mes = %s AND r.anio = %s
+                    """
+                    stats_mes = ejecutar_consulta_segura(query_mes, (territorio_nombre, mes_nombre, anio), 'one')
+                    
+                    mes_total = 0
+                    mes_firmados = 0
+                    mes_pendientes = 0
+                    if stats_mes and len(stats_mes) >= 3:
+                        mes_total = stats_mes[0] or 0
+                        mes_firmados = stats_mes[1] or 0
+                        mes_pendientes = stats_mes[2] or 0
+                    
+                    # Solo agregar el mes si tiene reportes
+                    if mes_total > 0:
+                        territorio_info["datos_por_mes"].append({
+                            "mes": mes_nombre,
+                            "reportes_total": mes_total,
+                            "reportes_firmados": mes_firmados,
+                            "reportes_pendientes": mes_pendientes
+                        })
             
             # Si se agrupa por individual, obtener lista de técnicos
             if agrupar_por == "individual":

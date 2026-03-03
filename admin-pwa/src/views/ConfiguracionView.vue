@@ -2818,7 +2818,7 @@ const generarPDFEstadisticasLocal = async (data) => {
   // ===================== HEADER PRINCIPAL =====================
   // Fondo gradiente simulado
   doc.setFillColor(...colors.guinda)
-  doc.rect(0, 0, pageWidth, 42, 'F')
+  doc.rect(0, 0, pageWidth, 48, 'F')
   doc.setFillColor(...colors.guindaClaro)
   doc.rect(0, 0, pageWidth, 3, 'F')
   
@@ -2828,13 +2828,22 @@ const generarPDFEstadisticasLocal = async (data) => {
   doc.setTextColor(255, 255, 255)
   doc.text('ESTADÍSTICAS DE REPORTES', margin, 18)
   
+  // Territorio seleccionado (si hay)
+  if (data.territorio_filtro) {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(14)
+    doc.setTextColor(255, 220, 180)  // Dorado claro
+    doc.text(`Territorio: ${data.territorio_filtro}`, margin, 28)
+  }
+  
   // Subtítulo con período
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
+  doc.setTextColor(255, 255, 255)
   const periodoTexto = data.periodo.mes 
     ? `Período: ${data.periodo.mes} ${data.periodo.anio}` 
-    : `Período: Año ${data.periodo.anio}`
-  doc.text(periodoTexto, margin, 28)
+    : `Período: Año completo ${data.periodo.anio}`
+  doc.text(periodoTexto, margin, data.territorio_filtro ? 36 : 28)
   
   // Fecha de generación (verde suave)
   doc.setFontSize(9)
@@ -2842,9 +2851,9 @@ const generarPDFEstadisticasLocal = async (data) => {
   const fechaGen = new Date().toLocaleDateString('es-MX', { 
     year: 'numeric', month: 'long', day: 'numeric'
   })
-  doc.text(`Generado: ${fechaGen}`, margin, 36)
+  doc.text(`Generado: ${fechaGen}`, margin, data.territorio_filtro ? 43 : 36)
   
-  y = 52
+  y = 56
   
   // ===================== TARJETAS DE RESUMEN =====================
   const resumen = data.resumen_general
@@ -3079,6 +3088,106 @@ const generarPDFEstadisticasLocal = async (data) => {
   })
   
   y += 8
+  
+  // ===================== TABLAS POR MES (si es todo el año y hay territorio específico) =====================
+  const territorioConMeses = data.territorios.find(t => t.datos_por_mes && t.datos_por_mes.length > 0)
+  
+  if (territorioConMeses && !data.periodo.mes) {
+    y += 5
+    
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(...colors.guinda)
+    doc.text('DETALLE MENSUAL', margin, y)
+    y += 8
+    
+    // Encabezados para tabla de meses
+    const mesColWidths = [50, 40, 40, 40]  // Mes, Reportes, Firmados, Pendientes
+    const mesTableWidth = mesColWidths.reduce((a, b) => a + b, 0)
+    const mesHeaders = ['Mes', 'Reportes', 'Firmados', 'Pendientes']
+    
+    // Header de tabla
+    doc.setFillColor(...colors.guinda)
+    doc.rect(margin, y, mesTableWidth, 8, 'F')
+    
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.setTextColor(255, 255, 255)
+    
+    let mesHeaderX = margin
+    mesHeaders.forEach((header, i) => {
+      doc.text(header, mesHeaderX + mesColWidths[i] / 2, y + 5.5, { align: 'center' })
+      mesHeaderX += mesColWidths[i]
+    })
+    y += 8
+    
+    // Filas de datos por mes
+    territorioConMeses.datos_por_mes.forEach((mesDato, index) => {
+      // Nueva página si se necesita
+      if (y > pageHeight - 20) {
+        doc.addPage()
+        y = margin
+        
+        // Repetir header
+        doc.setFillColor(...colors.guinda)
+        doc.rect(margin, y, mesTableWidth, 8, 'F')
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(8)
+        doc.setTextColor(255, 255, 255)
+        
+        let hX = margin
+        mesHeaders.forEach((header, i) => {
+          doc.text(header, hX + mesColWidths[i] / 2, y + 5.5, { align: 'center' })
+          hX += mesColWidths[i]
+        })
+        y += 8
+      }
+      
+      const isEven = index % 2 === 0
+      const mesRowHeight = 7
+      
+      // Fondo alternado
+      doc.setFillColor(isEven ? 252 : 245, isEven ? 252 : 245, isEven ? 255 : 250)
+      doc.rect(margin, y, mesTableWidth, mesRowHeight, 'F')
+      
+      // Borde inferior
+      doc.setDrawColor(230, 230, 230)
+      doc.setLineWidth(0.1)
+      doc.line(margin, y + mesRowHeight, margin + mesTableWidth, y + mesRowHeight)
+      
+      const mesDataY = y + mesRowHeight / 2 + 2
+      let mesCellX = margin
+      
+      // Mes
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(8)
+      doc.setTextColor(...colors.negro)
+      doc.text(mesDato.mes, mesCellX + mesColWidths[0] / 2, mesDataY, { align: 'center' })
+      mesCellX += mesColWidths[0]
+      
+      // Reportes
+      doc.setFont('helvetica', 'normal')
+      doc.text(String(mesDato.reportes_total), mesCellX + mesColWidths[1] / 2, mesDataY, { align: 'center' })
+      mesCellX += mesColWidths[1]
+      
+      // Firmados (verde)
+      doc.setTextColor(...colors.verde)
+      doc.text(String(mesDato.reportes_firmados), mesCellX + mesColWidths[2] / 2, mesDataY, { align: 'center' })
+      mesCellX += mesColWidths[2]
+      
+      // Pendientes
+      if (mesDato.reportes_pendientes > 0) {
+        doc.setTextColor(...colors.naranja)
+      } else {
+        doc.setTextColor(...colors.grisClaro)
+      }
+      doc.text(String(mesDato.reportes_pendientes), mesCellX + mesColWidths[3] / 2, mesDataY, { align: 'center' })
+      
+      y += mesRowHeight
+    })
+    
+    y += 8
+  }
   
   // ===================== BARRA DE PROGRESO GENERAL =====================
   if (y < pageHeight - 30) {

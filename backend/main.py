@@ -2835,20 +2835,22 @@ async def obtener_estadisticas_reportes_pdf(
             "resumen_general": {
                 "total_tecnicos_social": 0,
                 "total_tecnicos_productivo": 0,
+                "total_facilitadores": 0,
                 "total_reportes": 0,
                 "reportes_firmados": 0,
                 "reportes_pendientes": 0
             }
         }
         
-        # Query para obtener territorios con técnicos
+        # Query para obtener territorios con técnicos y facilitadores
         # IMPORTANTE: %% escapa el % para que psycopg2 no lo interprete como placeholder
         query_territorios = """
             SELECT 
                 u.territorio,
                 COUNT(DISTINCT CASE WHEN UPPER(COALESCE(u.cargo, '')) LIKE '%%SOCIAL%%' THEN u.id END) as tecnicos_social,
                 COUNT(DISTINCT CASE WHEN UPPER(COALESCE(u.cargo, '')) LIKE '%%PRODUCTIVO%%' THEN u.id END) as tecnicos_productivo,
-                COUNT(DISTINCT u.id) as total_tecnicos
+                COUNT(DISTINCT CASE WHEN UPPER(COALESCE(u.cargo, '')) LIKE '%%FACILITADOR%%' THEN u.id END) as facilitadores,
+                COUNT(DISTINCT u.id) as total_personal
             FROM usuarios u
             WHERE u.territorio IS NOT NULL 
             AND u.territorio != ''
@@ -2876,13 +2878,14 @@ async def obtener_estadisticas_reportes_pdf(
         
         # Para cada territorio
         for t in territorios_data:
-            if not t or len(t) < 4:
+            if not t or len(t) < 5:
                 continue
                 
             territorio_nombre = t[0]
             tecnicos_social = t[1] or 0
             tecnicos_productivo = t[2] or 0
-            total_tecnicos = t[3] or 0
+            facilitadores = t[3] or 0
+            total_personal = t[4] or 0
             
             # Query para reportes del territorio
             reportes_query = """
@@ -2920,7 +2923,8 @@ async def obtener_estadisticas_reportes_pdf(
                 "nombre": territorio_nombre,
                 "tecnicos_social": tecnicos_social,
                 "tecnicos_productivo": tecnicos_productivo,
-                "total_tecnicos": total_tecnicos,
+                "facilitadores": facilitadores,
+                "total_personal": total_personal,
                 "reportes_total": total_reportes,
                 "reportes_firmados": firmados,
                 "reportes_pendientes": pendientes
@@ -3003,6 +3007,7 @@ async def obtener_estadisticas_reportes_pdf(
             # Acumular resumen general
             resultado["resumen_general"]["total_tecnicos_social"] += tecnicos_social
             resultado["resumen_general"]["total_tecnicos_productivo"] += tecnicos_productivo
+            resultado["resumen_general"]["total_facilitadores"] += facilitadores
             resultado["resumen_general"]["total_reportes"] += total_reportes
             resultado["resumen_general"]["reportes_firmados"] += firmados
             resultado["resumen_general"]["reportes_pendientes"] += pendientes

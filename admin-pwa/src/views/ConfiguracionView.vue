@@ -2851,7 +2851,7 @@ const generarPDFEstadisticasLocal = async (data) => {
   const cardWidth = (pageWidth - 2 * margin - 8) / 3
   const cardHeight = 28
   
-  // Tarjeta 1: Técnicos
+  // Tarjeta 1: Personal
   doc.setFillColor(...colors.grisMuyClaro)
   doc.roundedRect(margin, y, cardWidth, cardHeight, 3, 3, 'F')
   doc.setDrawColor(...colors.guinda)
@@ -2861,15 +2861,15 @@ const generarPDFEstadisticasLocal = async (data) => {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(20)
   doc.setTextColor(...colors.guinda)
-  const totalTecnicos = resumen.total_tecnicos_social + resumen.total_tecnicos_productivo
-  doc.text(String(totalTecnicos), margin + 8, y + 12)
+  const totalPersonal = resumen.total_tecnicos_social + resumen.total_tecnicos_productivo + (resumen.total_facilitadores || 0)
+  doc.text(String(totalPersonal), margin + 8, y + 12)
   
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
   doc.setTextColor(...colors.gris)
-  doc.text('TÉCNICOS TOTALES', margin + 8, y + 19)
-  doc.setFontSize(7)
-  doc.text(`Social: ${resumen.total_tecnicos_social} | Productivo: ${resumen.total_tecnicos_productivo}`, margin + 8, y + 24)
+  doc.text('PERSONAL TOTAL', margin + 8, y + 19)
+  doc.setFontSize(6.5)
+  doc.text(`Social: ${resumen.total_tecnicos_social} | Prod: ${resumen.total_tecnicos_productivo} | Fac: ${resumen.total_facilitadores || 0}`, margin + 8, y + 24)
   
   // Tarjeta 2: Reportes
   const card2X = margin + cardWidth + 4
@@ -2933,18 +2933,18 @@ const generarPDFEstadisticasLocal = async (data) => {
   // Encabezado de tabla
   const tableX = margin
   const tableWidth = pageWidth - 2 * margin
-  const colWidths = [48, 22, 28, 22, 22, 22, 22]  // Territorio, Tec.Social, Tec.Prod, Total Téc, Reportes, Firmados, Pendientes
+  const colWidths = [40, 18, 22, 20, 18, 20, 22, 26]  // Territorio, Tec.Social, Tec.Prod, Facilit., Total, Reportes, Firmados, Pendientes
   
   // Header de tabla con fondo guinda
   doc.setFillColor(...colors.guinda)
   doc.rect(tableX, y, tableWidth, 8, 'F')
   
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(8)
+  doc.setFontSize(7)
   doc.setTextColor(255, 255, 255)
   
   let headerX = tableX
-  const headers = ['Territorio', 'Tec. Social', 'Tec. Prod.', 'Total Téc.', 'Reportes', 'Firmados', 'Pendientes']
+  const headers = ['Territorio', 'T. Social', 'T. Prod.', 'Facilit.', 'Total', 'Reportes', 'Firmados', 'Pendientes']
   headers.forEach((header, i) => {
     doc.text(header, headerX + 3, y + 5.5)
     headerX += colWidths[i]
@@ -2963,7 +2963,7 @@ const generarPDFEstadisticasLocal = async (data) => {
       doc.setFillColor(...colors.guinda)
       doc.rect(tableX, y, tableWidth, 8, 'F')
       doc.setFont('helvetica', 'bold')
-      doc.setFontSize(8)
+      doc.setFontSize(7)
       doc.setTextColor(255, 255, 255)
       
       let hX = tableX
@@ -2976,7 +2976,7 @@ const generarPDFEstadisticasLocal = async (data) => {
     
     // Calcular si el nombre necesita múltiples líneas
     const nombreCompleto = territorio.nombre || 'Sin territorio'
-    const maxCharsPerLine = 22
+    const maxCharsPerLine = 18
     const nombreLineas = []
     
     if (nombreCompleto.length > maxCharsPerLine) {
@@ -3036,30 +3036,36 @@ const generarPDFEstadisticasLocal = async (data) => {
     
     // Técnicos Social
     doc.setFont('helvetica', 'normal')
+    doc.setFontSize(7.5)
     doc.setTextColor(...colors.gris)
-    doc.text(String(territorio.tecnicos_social), cellX + 11, dataY, { align: 'center' })
+    doc.text(String(territorio.tecnicos_social), cellX + colWidths[1] / 2, dataY, { align: 'center' })
     cellX += colWidths[1]
     
     // Técnicos Productivo
-    doc.text(String(territorio.tecnicos_productivo), cellX + 14, dataY, { align: 'center' })
+    doc.text(String(territorio.tecnicos_productivo), cellX + colWidths[2] / 2, dataY, { align: 'center' })
     cellX += colWidths[2]
     
-    // Total Técnicos (Social + Productivo)
-    const totalTecnicosTerritorio = territorio.tecnicos_social + territorio.tecnicos_productivo
-    doc.setTextColor(...colors.guinda)
-    doc.setFont('helvetica', 'bold')
-    doc.text(String(totalTecnicosTerritorio), cellX + 11, dataY, { align: 'center' })
+    // Facilitadores
+    doc.text(String(territorio.facilitadores || 0), cellX + colWidths[3] / 2, dataY, { align: 'center' })
     cellX += colWidths[3]
     
-    // Total Reportes
-    doc.setTextColor(...colors.negro)
-    doc.text(String(territorio.reportes_total), cellX + 11, dataY, { align: 'center' })
+    // Total (Social + Productivo + Facilitadores)
+    const totalPersonalTerritorio = territorio.tecnicos_social + territorio.tecnicos_productivo + (territorio.facilitadores || 0)
+    doc.setTextColor(...colors.guinda)
+    doc.setFont('helvetica', 'bold')
+    doc.text(String(totalPersonalTerritorio), cellX + colWidths[4] / 2, dataY, { align: 'center' })
     cellX += colWidths[4]
+    
+    // Total Reportes
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(...colors.negro)
+    doc.text(String(territorio.reportes_total), cellX + colWidths[5] / 2, dataY, { align: 'center' })
+    cellX += colWidths[5]
     
     // Firmados (verde)
     doc.setTextColor(...colors.verde)
-    doc.text(String(territorio.reportes_firmados), cellX + 11, dataY, { align: 'center' })
-    cellX += colWidths[5]
+    doc.text(String(territorio.reportes_firmados), cellX + colWidths[6] / 2, dataY, { align: 'center' })
+    cellX += colWidths[6]
     
     // Pendientes (naranja/rojo)
     if (territorio.reportes_pendientes > 0) {
@@ -3067,7 +3073,7 @@ const generarPDFEstadisticasLocal = async (data) => {
     } else {
       doc.setTextColor(...colors.grisClaro)
     }
-    doc.text(String(territorio.reportes_pendientes), cellX + 11, dataY, { align: 'center' })
+    doc.text(String(territorio.reportes_pendientes), cellX + colWidths[7] / 2, dataY, { align: 'center' })
     
     y += rowHeight
   })

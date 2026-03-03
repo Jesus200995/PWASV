@@ -2788,233 +2788,475 @@ const generarPDFEstadisticas = async () => {
   }
 }
 
-// Función para generar el PDF localmente con diseño Apple
+// Función para generar el PDF localmente con diseño profesional
 const generarPDFEstadisticasLocal = async (data) => {
-  // Importar jsPDF dinámicamente
   const { jsPDF } = await import('jspdf')
   
   const doc = new jsPDF('p', 'mm', 'a4')
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
-  const margin = 15
+  const margin = 12
   let y = margin
   
-  // Colores
-  const colorGuinda = [125, 29, 63] // #7D1D3F
-  const colorVerde = [76, 175, 80] // #4CAF50
-  const colorGris = [100, 100, 100]
-  const colorGrisClaro = [180, 180, 180]
+  // Colores institucionales
+  const colors = {
+    guinda: [125, 29, 63],
+    guindaClaro: [156, 41, 82],
+    verde: [46, 125, 50],
+    verdeClaro: [76, 175, 80],
+    naranja: [245, 124, 0],
+    naranjaClaro: [255, 167, 38],
+    gris: [97, 97, 97],
+    grisClaro: [158, 158, 158],
+    grisMuyClaro: [245, 245, 245],
+    blanco: [255, 255, 255],
+    negro: [33, 33, 33]
+  }
   
-  // === HEADER ===
-  // Fondo del header
-  doc.setFillColor(...colorGuinda)
-  doc.roundedRect(margin, y, pageWidth - 2 * margin, 35, 4, 4, 'F')
+  // Función auxiliar para dibujar celdas de tabla
+  const drawTableCell = (x, y, width, height, text, options = {}) => {
+    const { 
+      fill = null, 
+      textColor = colors.negro, 
+      fontSize = 8, 
+      fontStyle = 'normal',
+      align = 'left',
+      border = false,
+      borderColor = colors.grisClaro
+    } = options
+    
+    if (fill) {
+      doc.setFillColor(...fill)
+      doc.rect(x, y, width, height, 'F')
+    }
+    
+    if (border) {
+      doc.setDrawColor(...borderColor)
+      doc.setLineWidth(0.2)
+      doc.rect(x, y, width, height, 'S')
+    }
+    
+    doc.setFont('helvetica', fontStyle)
+    doc.setFontSize(fontSize)
+    doc.setTextColor(...textColor)
+    
+    const textX = align === 'center' ? x + width / 2 : (align === 'right' ? x + width - 2 : x + 2)
+    doc.text(String(text), textX, y + height / 2 + fontSize / 4, { align })
+  }
   
-  // Título
+  // ===================== HEADER PRINCIPAL =====================
+  // Fondo gradiente simulado
+  doc.setFillColor(...colors.guinda)
+  doc.rect(0, 0, pageWidth, 42, 'F')
+  doc.setFillColor(...colors.guindaClaro)
+  doc.rect(0, 0, pageWidth, 3, 'F')
+  
+  // Logo/Icono decorativo
+  doc.setFillColor(255, 255, 255, 0.2)
+  doc.circle(pageWidth - 25, 21, 15, 'F')
+  
+  // Título principal
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(18)
+  doc.setFontSize(22)
   doc.setTextColor(255, 255, 255)
-  doc.text('ESTADÍSTICAS DE REPORTES', pageWidth / 2, y + 12, { align: 'center' })
+  doc.text('ESTADÍSTICAS DE REPORTES', margin, 18)
   
-  // Subtítulo
+  // Subtítulo con período
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
   const periodoTexto = data.periodo.mes 
-    ? `${data.periodo.mes} ${data.periodo.anio}` 
-    : `Año ${data.periodo.anio}`
-  doc.text(`Período: ${periodoTexto}`, pageWidth / 2, y + 22, { align: 'center' })
+    ? `Período: ${data.periodo.mes} ${data.periodo.anio}` 
+    : `Período: Año ${data.periodo.anio}`
+  doc.text(periodoTexto, margin, 28)
   
   // Fecha de generación
   doc.setFontSize(9)
+  doc.setTextColor(255, 255, 255, 0.8)
   const fechaGen = new Date().toLocaleDateString('es-MX', { 
-    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+    year: 'numeric', month: 'long', day: 'numeric'
   })
-  doc.text(`Generado: ${fechaGen}`, pageWidth / 2, y + 30, { align: 'center' })
+  doc.text(`Generado: ${fechaGen}`, margin, 36)
   
-  y += 45
+  // Decoración derecha
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(28)
+  doc.setTextColor(255, 255, 255, 0.15)
+  doc.text('SV', pageWidth - 30, 28)
   
-  // === RESUMEN GENERAL ===
-  doc.setFillColor(245, 245, 245)
-  doc.roundedRect(margin, y, pageWidth - 2 * margin, 28, 3, 3, 'F')
+  y = 52
+  
+  // ===================== TARJETAS DE RESUMEN =====================
+  const resumen = data.resumen_general
+  const cardWidth = (pageWidth - 2 * margin - 8) / 3
+  const cardHeight = 28
+  
+  // Tarjeta 1: Técnicos
+  doc.setFillColor(...colors.grisMuyClaro)
+  doc.roundedRect(margin, y, cardWidth, cardHeight, 3, 3, 'F')
+  doc.setDrawColor(...colors.guinda)
+  doc.setLineWidth(0.8)
+  doc.line(margin, y, margin, y + cardHeight)
   
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.setTextColor(...colorGuinda)
-  doc.text('RESUMEN GENERAL', margin + 5, y + 8)
+  doc.setFontSize(20)
+  doc.setTextColor(...colors.guinda)
+  const totalTecnicos = resumen.total_tecnicos_social + resumen.total_tecnicos_productivo
+  doc.text(String(totalTecnicos), margin + 8, y + 12)
   
-  // Stats en fila
-  const statsY = y + 18
-  const colWidth = (pageWidth - 2 * margin) / 5
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  doc.setTextColor(...colors.gris)
+  doc.text('TÉCNICOS TOTALES', margin + 8, y + 19)
+  doc.setFontSize(7)
+  doc.text(`Social: ${resumen.total_tecnicos_social} | Productivo: ${resumen.total_tecnicos_productivo}`, margin + 8, y + 24)
   
-  const resumen = data.resumen_general
-  const stats = [
-    { label: 'Tec. Social', value: resumen.total_tecnicos_social },
-    { label: 'Tec. Productivo', value: resumen.total_tecnicos_productivo },
-    { label: 'Total Reportes', value: resumen.total_reportes },
-    { label: 'Firmados', value: resumen.reportes_firmados, color: colorVerde },
-    { label: 'Pendientes', value: resumen.reportes_pendientes, color: [255, 152, 0] }
-  ]
+  // Tarjeta 2: Reportes
+  const card2X = margin + cardWidth + 4
+  doc.setFillColor(...colors.grisMuyClaro)
+  doc.roundedRect(card2X, y, cardWidth, cardHeight, 3, 3, 'F')
+  doc.setDrawColor(...colors.verde)
+  doc.line(card2X, y, card2X, y + cardHeight)
   
-  stats.forEach((stat, i) => {
-    const x = margin + colWidth * i + colWidth / 2
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(20)
+  doc.setTextColor(...colors.verde)
+  doc.text(String(resumen.total_reportes), card2X + 8, y + 12)
+  
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  doc.setTextColor(...colors.gris)
+  doc.text('REPORTES GENERADOS', card2X + 8, y + 19)
+  doc.setFontSize(7)
+  const porcFirmados = resumen.total_reportes > 0 
+    ? Math.round((resumen.reportes_firmados / resumen.total_reportes) * 100) 
+    : 0
+  doc.text(`${porcFirmados}% completados`, card2X + 8, y + 24)
+  
+  // Tarjeta 3: Estado de firmas
+  const card3X = card2X + cardWidth + 4
+  doc.setFillColor(...colors.grisMuyClaro)
+  doc.roundedRect(card3X, y, cardWidth, cardHeight, 3, 3, 'F')
+  
+  // Mini barras de estado
+  const miniBarY = y + 8
+  const miniBarWidth = cardWidth - 16
+  
+  // Barra firmados
+  doc.setFillColor(...colors.verdeClaro)
+  doc.roundedRect(card3X + 8, miniBarY, miniBarWidth * 0.5, 5, 1, 1, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(7)
+  doc.setTextColor(...colors.verde)
+  doc.text(`${resumen.reportes_firmados} Firmados`, card3X + 8, miniBarY + 10)
+  
+  // Barra pendientes
+  doc.setFillColor(...colors.naranjaClaro)
+  doc.roundedRect(card3X + 8 + miniBarWidth * 0.55, miniBarY, miniBarWidth * 0.45, 5, 1, 1, 'F')
+  doc.setTextColor(...colors.naranja)
+  doc.text(`${resumen.reportes_pendientes} Pendientes`, card3X + 8 + miniBarWidth * 0.55, miniBarY + 10)
+  
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  doc.setTextColor(...colors.gris)
+  doc.text('ESTADO DE FIRMAS', card3X + 8, y + 24)
+  
+  y += cardHeight + 10
+  
+  // ===================== TABLA PRINCIPAL POR TERRITORIO =====================
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(11)
+  doc.setTextColor(...colors.guinda)
+  doc.text('DETALLE POR TERRITORIO', margin, y)
+  y += 6
+  
+  // Encabezado de tabla
+  const tableX = margin
+  const tableWidth = pageWidth - 2 * margin
+  const colWidths = [55, 25, 30, 25, 25, 25]  // Territorio, Tec.Social, Tec.Prod, Total, Reportes, Firmados, Pendientes
+  
+  // Header de tabla con fondo guinda
+  doc.setFillColor(...colors.guinda)
+  doc.rect(tableX, y, tableWidth, 8, 'F')
+  
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(8)
+  doc.setTextColor(255, 255, 255)
+  
+  let headerX = tableX
+  const headers = ['Territorio', 'Tec. Social', 'Tec. Productivo', 'Reportes', 'Firmados', 'Pendientes']
+  headers.forEach((header, i) => {
+    doc.text(header, headerX + 3, y + 5.5)
+    headerX += colWidths[i]
+  })
+  
+  y += 8
+  
+  // Filas de datos
+  data.territorios.forEach((territorio, index) => {
+    // Nueva página si se necesita
+    if (y > pageHeight - 35) {
+      doc.addPage()
+      y = margin
+      
+      // Repetir header de tabla
+      doc.setFillColor(...colors.guinda)
+      doc.rect(tableX, y, tableWidth, 8, 'F')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(8)
+      doc.setTextColor(255, 255, 255)
+      
+      let hX = tableX
+      headers.forEach((header, i) => {
+        doc.text(header, hX + 3, y + 5.5)
+        hX += colWidths[i]
+      })
+      y += 8
+    }
+    
+    const rowHeight = 7
+    const isEven = index % 2 === 0
+    
+    // Fondo alternado
+    doc.setFillColor(isEven ? 252 : 245, isEven ? 252 : 245, isEven ? 255 : 250)
+    doc.rect(tableX, y, tableWidth, rowHeight, 'F')
+    
+    // Borde inferior sutil
+    doc.setDrawColor(230, 230, 230)
+    doc.setLineWidth(0.1)
+    doc.line(tableX, y + rowHeight, tableX + tableWidth, y + rowHeight)
+    
+    // Datos de la fila
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(...colors.negro)
+    
+    let cellX = tableX
+    
+    // Nombre territorio (truncado)
+    let nombreTer = territorio.nombre || 'Sin territorio'
+    if (nombreTer.length > 28) nombreTer = nombreTer.substring(0, 25) + '...'
+    doc.setFont('helvetica', 'bold')
+    doc.text(nombreTer, cellX + 3, y + 5)
+    cellX += colWidths[0]
+    
+    // Técnicos Social
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(...colors.gris)
+    doc.text(String(territorio.tecnicos_social), cellX + 12, y + 5, { align: 'center' })
+    cellX += colWidths[1]
+    
+    // Técnicos Productivo
+    doc.text(String(territorio.tecnicos_productivo), cellX + 15, y + 5, { align: 'center' })
+    cellX += colWidths[2]
+    
+    // Total Reportes
+    doc.setTextColor(...colors.negro)
+    doc.setFont('helvetica', 'bold')
+    doc.text(String(territorio.reportes_total), cellX + 12, y + 5, { align: 'center' })
+    cellX += colWidths[3]
+    
+    // Firmados (verde)
+    doc.setTextColor(...colors.verde)
+    doc.text(String(territorio.reportes_firmados), cellX + 12, y + 5, { align: 'center' })
+    cellX += colWidths[4]
+    
+    // Pendientes (naranja/rojo)
+    if (territorio.reportes_pendientes > 0) {
+      doc.setTextColor(...colors.naranja)
+    } else {
+      doc.setTextColor(...colors.grisClaro)
+    }
+    doc.text(String(territorio.reportes_pendientes), cellX + 12, y + 5, { align: 'center' })
+    
+    y += rowHeight
+  })
+  
+  y += 8
+  
+  // ===================== BARRA DE PROGRESO GENERAL =====================
+  if (y < pageHeight - 30) {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(...colors.gris)
+    doc.text('PROGRESO DE FIRMAS', margin, y)
+    y += 5
+    
+    const barWidth = pageWidth - 2 * margin
+    const barHeight = 10
+    const porcentaje = resumen.total_reportes > 0 
+      ? resumen.reportes_firmados / resumen.total_reportes 
+      : 0
+    
+    // Fondo de barra
+    doc.setFillColor(230, 230, 230)
+    doc.roundedRect(margin, y, barWidth, barHeight, 2, 2, 'F')
+    
+    // Barra de progreso verde
+    if (porcentaje > 0) {
+      const gradientWidth = barWidth * porcentaje
+      doc.setFillColor(...colors.verdeClaro)
+      doc.roundedRect(margin, y, gradientWidth, barHeight, 2, 2, 'F')
+    }
+    
+    // Texto del porcentaje centrado
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(porcentaje > 0.5 ? 255 : 97, porcentaje > 0.5 ? 255 : 97, porcentaje > 0.5 ? 255 : 97)
+    doc.text(`${Math.round(porcentaje * 100)}% Completado`, pageWidth / 2, y + 7, { align: 'center' })
+    
+    y += barHeight + 10
+  }
+  
+  // ===================== DETALLE INDIVIDUAL (si aplica) =====================
+  const territoriosConTecnicos = data.territorios.filter(t => t.tecnicos && t.tecnicos.length > 0)
+  
+  if (territoriosConTecnicos.length > 0) {
+    doc.addPage()
+    y = margin
+    
+    // Header de página de detalle
+    doc.setFillColor(...colors.guinda)
+    doc.rect(0, 0, pageWidth, 25, 'F')
     
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(16)
-    doc.setTextColor(...(stat.color || colorGuinda))
-    doc.text(String(stat.value), x, statsY, { align: 'center' })
-    
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(8)
-    doc.setTextColor(...colorGris)
-    doc.text(stat.label, x, statsY + 5, { align: 'center' })
-  })
-  
-  y += 38
-  
-  // === DETALLE POR TERRITORIO ===
-  data.territorios.forEach((territorio, index) => {
-    // Verificar si necesitamos nueva página
-    if (y > pageHeight - 60) {
-      doc.addPage()
-      y = margin
-    }
-    
-    // Header del territorio
-    doc.setFillColor(...colorGuinda)
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 10, 2, 2, 'F')
-    
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(11)
     doc.setTextColor(255, 255, 255)
-    doc.text(territorio.nombre || 'Sin territorio', margin + 5, y + 7)
+    doc.text('DETALLE POR TÉCNICO', margin, 16)
     
-    // Stats del territorio a la derecha
-    doc.setFontSize(9)
-    const statsText = `Tec. Social: ${territorio.tecnicos_social} | Tec. Productivo: ${territorio.tecnicos_productivo} | Reportes: ${territorio.reportes_total} (${territorio.reportes_firmados} firmados)`
-    doc.text(statsText, pageWidth - margin - 5, y + 7, { align: 'right' })
+    y = 35
     
-    y += 14
-    
-    // Barra de progreso de reportes
-    const barWidth = pageWidth - 2 * margin - 10
-    const barHeight = 6
-    const porcentajeFirmados = territorio.reportes_total > 0 
-      ? (territorio.reportes_firmados / territorio.reportes_total) 
-      : 0
-    
-    // Fondo de la barra
-    doc.setFillColor(230, 230, 230)
-    doc.roundedRect(margin + 5, y, barWidth, barHeight, 2, 2, 'F')
-    
-    // Barra de firmados (verde)
-    if (porcentajeFirmados > 0) {
-      doc.setFillColor(...colorVerde)
-      doc.roundedRect(margin + 5, y, barWidth * porcentajeFirmados, barHeight, 2, 2, 'F')
-    }
-    
-    // Porcentaje
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(8)
-    doc.setTextColor(...colorGris)
-    doc.text(`${Math.round(porcentajeFirmados * 100)}% firmados`, margin + 5 + barWidth + 2, y + 5)
-    
-    y += 12
-    
-    // Si tiene detalle individual, mostrar tabla de técnicos
-    if (territorio.tecnicos && territorio.tecnicos.length > 0) {
-      // Header de tabla
-      doc.setFillColor(250, 250, 250)
-      doc.rect(margin + 5, y, pageWidth - 2 * margin - 10, 7, 'F')
+    territoriosConTecnicos.forEach((territorio) => {
+      // Verificar espacio
+      if (y > pageHeight - 50) {
+        doc.addPage()
+        y = margin
+      }
+      
+      // Título del territorio
+      doc.setFillColor(...colors.grisMuyClaro)
+      doc.roundedRect(margin, y, tableWidth, 8, 2, 2, 'F')
+      doc.setDrawColor(...colors.guinda)
+      doc.setLineWidth(0.5)
+      doc.line(margin, y, margin, y + 8)
       
       doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10)
+      doc.setTextColor(...colors.guinda)
+      doc.text(territorio.nombre || 'Sin territorio', margin + 5, y + 6)
+      
+      // Stats rápidos a la derecha
+      doc.setFont('helvetica', 'normal')
       doc.setFontSize(8)
-      doc.setTextColor(...colorGris)
+      doc.setTextColor(...colors.gris)
+      doc.text(`${territorio.tecnicos.length} técnicos`, pageWidth - margin - 5, y + 6, { align: 'right' })
       
-      const cols = [margin + 8, margin + 80, margin + 130, margin + 155]
-      doc.text('Nombre', cols[0], y + 5)
-      doc.text('Cargo', cols[1], y + 5)
-      doc.text('Reportes', cols[2], y + 5)
-      doc.text('Estado', cols[3], y + 5)
+      y += 12
       
-      y += 9
+      // Header de sub-tabla
+      const subColWidths = [70, 50, 25, 35]
+      doc.setFillColor(240, 240, 245)
+      doc.rect(margin + 5, y, tableWidth - 10, 6, 'F')
+      
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(7)
+      doc.setTextColor(...colors.gris)
+      
+      let subX = margin + 5
+      const subHeaders = ['Nombre del Técnico', 'Cargo', 'Reportes', 'Estado']
+      subHeaders.forEach((h, i) => {
+        doc.text(h, subX + 2, y + 4)
+        subX += subColWidths[i]
+      })
+      
+      y += 7
       
       // Filas de técnicos
-      territorio.tecnicos.forEach((tecnico, tecIdx) => {
-        if (y > pageHeight - 20) {
+      territorio.tecnicos.forEach((tecnico, tIdx) => {
+        if (y > pageHeight - 15) {
           doc.addPage()
           y = margin
         }
         
-        // Alternar fondo
-        if (tecIdx % 2 === 0) {
-          doc.setFillColor(252, 252, 252)
-          doc.rect(margin + 5, y - 3, pageWidth - 2 * margin - 10, 8, 'F')
+        const rowH = 6
+        
+        // Fondo alternado
+        if (tIdx % 2 === 0) {
+          doc.setFillColor(252, 252, 255)
+          doc.rect(margin + 5, y, tableWidth - 10, rowH, 'F')
         }
         
         doc.setFont('helvetica', 'normal')
-        doc.setFontSize(8)
-        doc.setTextColor(60, 60, 60)
+        doc.setFontSize(7)
         
-        // Nombre truncado si es muy largo
+        let tX = margin + 5
+        
+        // Nombre
         let nombre = tecnico.nombre || 'Sin nombre'
-        if (nombre.length > 35) nombre = nombre.substring(0, 32) + '...'
-        doc.text(nombre, cols[0], y + 2)
+        if (nombre.length > 38) nombre = nombre.substring(0, 35) + '...'
+        doc.setTextColor(...colors.negro)
+        doc.text(nombre, tX + 2, y + 4)
+        tX += subColWidths[0]
         
-        // Cargo truncado
+        // Cargo
         let cargo = tecnico.cargo || '-'
-        if (cargo.length > 20) cargo = cargo.substring(0, 17) + '...'
-        doc.text(cargo, cols[1], y + 2)
+        if (cargo.length > 25) cargo = cargo.substring(0, 22) + '...'
+        doc.setTextColor(...colors.gris)
+        doc.text(cargo, tX + 2, y + 4)
+        tX += subColWidths[1]
         
         // Reportes
-        doc.text(`${tecnico.reportes_total}`, cols[2], y + 2)
+        doc.setTextColor(...colors.negro)
+        doc.setFont('helvetica', 'bold')
+        doc.text(String(tecnico.reportes_total), tX + 12, y + 4, { align: 'center' })
+        tX += subColWidths[2]
         
-        // Estado (badge)
-        const estadoX = cols[3]
-        const estaFirmado = tecnico.reportes_total > 0 && tecnico.reportes_firmados === tecnico.reportes_total
-        
+        // Estado con badge
         if (tecnico.reportes_total > 0) {
-          if (estaFirmado) {
-            doc.setFillColor(...colorVerde)
-            doc.setTextColor(255, 255, 255)
-          } else {
-            doc.setFillColor(255, 193, 7)
-            doc.setTextColor(60, 60, 60)
-          }
-          doc.roundedRect(estadoX - 2, y - 2, 25, 6, 1, 1, 'F')
-          doc.setFontSize(7)
-          doc.text(estaFirmado ? 'Firmado' : 'Pendiente', estadoX + 10, y + 2, { align: 'center' })
+          const firmado = tecnico.reportes_firmados >= tecnico.reportes_total
+          
+          doc.setFillColor(firmado ? ...colors.verdeClaro : ...colors.naranjaClaro)
+          doc.roundedRect(tX + 2, y + 1, 28, 4, 1, 1, 'F')
+          
+          doc.setFont('helvetica', 'bold')
+          doc.setFontSize(6)
+          doc.setTextColor(firmado ? 255 : 60, firmado ? 255 : 60, firmado ? 255 : 60)
+          doc.text(firmado ? 'FIRMADO' : 'PENDIENTE', tX + 16, y + 4, { align: 'center' })
         } else {
-          doc.setTextColor(...colorGrisClaro)
-          doc.text('Sin reporte', estadoX, y + 2)
+          doc.setFont('helvetica', 'normal')
+          doc.setFontSize(7)
+          doc.setTextColor(...colors.grisClaro)
+          doc.text('Sin reporte', tX + 2, y + 4)
         }
         
-        y += 8
+        y += rowH
       })
       
-      y += 5
-    } else {
-      y += 5
-    }
-  })
+      y += 8
+    })
+  }
   
-  // === FOOTER ===
-  const footerY = pageHeight - 10
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(8)
-  doc.setTextColor(...colorGrisClaro)
-  doc.text('Sembrando Vida - Sistema de Administración', pageWidth / 2, footerY, { align: 'center' })
-  
-  // Número de página en todas las páginas
+  // ===================== FOOTER EN TODAS LAS PÁGINAS =====================
   const totalPages = doc.internal.getNumberOfPages()
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i)
+    
+    // Línea decorativa
+    doc.setDrawColor(...colors.guinda)
+    doc.setLineWidth(0.5)
+    doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12)
+    
+    // Texto del footer
     doc.setFont('helvetica', 'normal')
-    doc.setFontSize(8)
-    doc.setTextColor(...colorGrisClaro)
-    doc.text(`Página ${i} de ${totalPages}`, pageWidth - margin, pageHeight - 10, { align: 'right' })
+    doc.setFontSize(7)
+    doc.setTextColor(...colors.grisClaro)
+    doc.text('Sembrando Vida | Sistema de Administración de Reportes', margin, pageHeight - 7)
+    
+    // Número de página
+    doc.setFont('helvetica', 'bold')
+    doc.text(`Página ${i} de ${totalPages}`, pageWidth - margin, pageHeight - 7, { align: 'right' })
   }
   
-  // Descargar
+  // Descargar PDF
   const filename = `Estadisticas_Reportes_${estadisticasConfig.anio}${estadisticasConfig.mes ? '_' + estadisticasConfig.mes : ''}.pdf`
   doc.save(filename)
 }

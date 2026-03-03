@@ -7110,7 +7110,9 @@ const logout = () => {
 
 /* Icono guinda para el botón en la lista */
 .data-icon.guinda {
-  background: linear-gradient(135deg, #7D1D3F 0%, #9C2952 100%);
+  background: linear-gradient(135deg, #9C2952 0%, #7D1D3F 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(125, 29, 63, 0.3);
 }
 
 /* Overlay del modal */

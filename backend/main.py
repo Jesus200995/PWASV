@@ -2912,44 +2912,29 @@ async def obtener_estadisticas_reportes_pdf(
             
             # Si se agrupa por individual, obtener lista de técnicos
             if agrupar_por == "individual":
-                query_tecnicos = """
+                # Construir condiciones de filtro para las subqueries
+                filtro_periodo = ""
+                if mes:
+                    filtro_periodo += f" AND r.mes = '{mes}'"
+                if anio:
+                    filtro_periodo += f" AND r.anio = {anio}"
+                
+                query_tecnicos = f"""
                     SELECT 
                         u.id,
                         u.nombre_completo,
                         u.cargo,
                         u.correo,
-                        (SELECT COUNT(*) FROM reportes_generados r WHERE r.usuario_id = u.id
-                """
-                tecnicos_params = [territorio_nombre]
-                
-                if mes:
-                    query_tecnicos += " AND r.mes = %s"
-                    tecnicos_params.append(mes)
-                if anio:
-                    query_tecnicos += " AND r.anio = %s"
-                    tecnicos_params.append(anio)
-                
-                query_tecnicos += """) as total_reportes,
-                        (SELECT COUNT(*) FROM reportes_generados r WHERE r.usuario_id = u.id AND COALESCE(r.firmado_supervisor, false) = true
-                """
-                
-                if mes:
-                    query_tecnicos += " AND r.mes = %s"
-                    tecnicos_params.append(mes)
-                if anio:
-                    query_tecnicos += " AND r.anio = %s"
-                    tecnicos_params.append(anio)
-                
-                query_tecnicos += f""") as reportes_firmados
+                        (SELECT COUNT(*) FROM reportes_generados r WHERE r.usuario_id = u.id {filtro_periodo}) as total_reportes,
+                        (SELECT COUNT(*) FROM reportes_generados r WHERE r.usuario_id = u.id AND COALESCE(r.firmado_supervisor, false) = true {filtro_periodo}) as reportes_firmados
                     FROM usuarios u
                     WHERE u.territorio = %s
                     AND UPPER(u.cargo) LIKE '%TECNICO%'
                     AND u.activo = TRUE
                     ORDER BY u.nombre_completo
                 """
-                tecnicos_params.append(territorio_nombre)
                 
-                cursor.execute(query_tecnicos, tecnicos_params)
+                cursor.execute(query_tecnicos, [territorio_nombre])
                 tecnicos_list = cursor.fetchall()
                 
                 territorio_info["tecnicos"] = [

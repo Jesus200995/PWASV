@@ -50,6 +50,7 @@ export function useRealtimeStats(options = {}) {
 
   /**
    * Obtiene estadísticas del endpoint optimizado
+   * Usa /estadisticas/rapidas (público, sin autenticación)
    */
   const fetchStats = async (force = false) => {
     // Verificar caché si está habilitado
@@ -66,53 +67,44 @@ export function useRealtimeStats(options = {}) {
     abortController = new AbortController();
 
     try {
-      const territorioFilter = authService.getTerritorioFilter();
-      let url = `${API_URL}/estadisticas`;
+      // 1. Obtener estadísticas de asistencias (endpoint público)
+      const urlAsistencias = `${API_URL}/estadisticas/rapidas`;
       
-      if (territorioFilter) {
-        url += `?territorio=${encodeURIComponent(territorioFilter)}`;
-      }
-
       console.time('⚡ Fetch stats');
       
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-        },
-        signal: abortController.signal
-      });
+      const [responseAsistencias, responseRegistros] = await Promise.all([
+        fetch(urlAsistencias, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: abortController.signal
+        }),
+        // 2. Obtener conteo de registros
+        fetch(`${API_URL}/registros?limit=1`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: abortController.signal
+        })
+      ]);
 
       console.timeEnd('⚡ Fetch stats');
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      if (!responseAsistencias.ok) {
+        throw new Error(`Error ${responseAsistencias.status}: ${responseAsistencias.statusText}`);
       }
 
-      const data = await response.json();
-      let newStats = data.estadisticas;
+      const dataAsistencias = await responseAsistencias.json();
+      const dataRegistros = responseRegistros.ok ? await responseRegistros.json() : { total: 0 };
       
-      // Normalizar estructura - asegurar que siempre tenga los campos correctos
-      if (newStats) {
-        // Extraer todos los campos disponibles (asistencias y registros)
-        newStats = {
-          asistencias_hoy: newStats.asistencias_hoy || 0,
-          usuarios_presentes: newStats.usuarios_presentes || 0,
-          total_asistencias: newStats.total_asistencias || 0,
-          registros_hoy: newStats.registros_hoy || 0,
-          total_registros: newStats.total_registros || 0
-        };
-      } else {
-        // Si no hay datos, inicializar en 0
-        newStats = {
-          asistencias_hoy: 0,
-          usuarios_presentes: 0,
-          total_asistencias: 0,
-          registros_hoy: 0,
-          total_registros: 0
-        };
-      }
+      const statsAsistencias = dataAsistencias.estadisticas || {};
+      
+      // Normalizar estructura combinando ambas fuentes
+      const newStats = {
+        asistencias_hoy: statsAsistencias.asistencias_hoy || 0,
+        usuarios_presentes: statsAsistencias.usuarios_presentes || 0,
+        total_asistencias: statsAsistencias.total_asistencias || 0,
+        registros_hoy: dataRegistros.registros_hoy || 0,
+        total_registros: dataRegistros.total || 0
+      };
 
       // Actualizar caché
       if (enableCache) {

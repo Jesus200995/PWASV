@@ -1183,7 +1183,7 @@ export default {
 
 .apple-table-wrapper {
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   flex: 1;
   max-height: 100%;
 }
@@ -1219,59 +1219,55 @@ export default {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--apple-gray-1);
-  border-bottom: 1px solid var(--apple-gray-2);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: #E8F5E9;
+  border-bottom: 1px solid #C8E6C9;
 }
 
 .apple-table th {
-  padding: 12px 16px;
+  padding: 16px 20px;
   text-align: left;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--apple-gray-5);
+  font-size: 12px;
+  font-weight: 600;
+  color: #2E7D32;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  background: linear-gradient(to bottom, #F8F9FA 0%, #F1F3F5 100%);
+  letter-spacing: 0.8px;
+  background: #E8F5E9;
   white-space: nowrap;
   position: sticky;
   top: 0;
-}
-
-.apple-table th:first-child {
-  border-top-left-radius: 20px;
+  border-bottom: 1px solid #C8E6C9;
+  border-right: 1px solid #C8E6C9;
 }
 
 .apple-table th:last-child {
-  border-top-right-radius: 20px;
+  border-right: none;
 }
 
 .apple-table-row {
-  border-bottom: 1px solid #E5E7EB;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 1px solid #F0F0F0;
+  transition: all 0.15s ease;
   background: white;
 }
 
 .apple-table-row:nth-child(even) {
-  background: linear-gradient(to right, #FAFBFC 0%, #F8F9FA 100%);
+  background: #FAFAFA;
 }
 
 .apple-table-row:hover {
-  background: rgba(0, 122, 255, 0.04);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transform: scale(1.001);
+  background: #F5F5F7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .apple-table td {
-  padding: 14px 16px;
+  padding: 16px 20px;
   font-size: 13px;
-  color: var(--apple-text);
-  border-left: 3px solid transparent;
-  transition: border-color 0.2s;
+  color: #1D1D1F;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
 }
 
 .apple-table-row:hover td:first-child {
-  border-left-color: #007AFF;
+  border-left-color: #0071E3;
 }
 
 /* ==================== TABLE CELLS ==================== */
@@ -1284,7 +1280,7 @@ export default {
 .apple-avatar {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  background: linear-gradient(135deg, #66BB6A 0%, #81C784 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1293,7 +1289,7 @@ export default {
   font-size: 14px;
   font-weight: 700;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(102, 187, 106, 0.25);
 }
 
 .apple-avatar svg {
@@ -1305,18 +1301,18 @@ export default {
 }
 
 .apple-user-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--apple-text);
 }
 
 .apple-user-role {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--apple-gray-4);
 }
 
 .apple-email {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--apple-gray-4);
   font-style: italic;
 }
@@ -1324,9 +1320,9 @@ export default {
 .apple-date-badge,
 .apple-time-badge {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1438,7 +1434,7 @@ export default {
 .apple-pagination-btn {
   width: 40px;
   height: 40px;
-  background: var(--apple-gray-1);
+  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
   border: none;
   border-radius: 10px;
   display: flex;
@@ -1446,22 +1442,27 @@ export default {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
 }
 
 .apple-pagination-btn:hover:not(:disabled) {
-  background: var(--apple-gray-2);
+  background: linear-gradient(135deg, #7CB342 0%, #689F38 100%);
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+  transform: translateY(-1px);
 }
 
 .apple-pagination-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .apple-pagination-btn svg {
   width: 20px;
   height: 20px;
-  stroke: var(--apple-text);
-  stroke-width: 2;
+  stroke: white;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .apple-pagination-numbers {
@@ -1483,12 +1484,13 @@ export default {
 }
 
 .apple-pagination-number:hover {
-  background: var(--apple-gray-1);
+  background: #E8F5E9;
 }
 
 .apple-pagination-number.active {
-  background: var(--apple-blue);
+  background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
 }
 
 /* ==================== STATES ==================== */
@@ -1642,6 +1644,15 @@ export default {
   .apple-page-header {
     padding: 16px 24px;
   }
+  
+  .apple-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .apple-table {
+    min-width: 900px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1655,7 +1666,7 @@ export default {
   }
   
   .apple-page-header {
-    padding: 12px 24px;
+    padding: 12px 20px;
   }
   
   .apple-header-wrapper {
@@ -1665,20 +1676,52 @@ export default {
   }
   
   .apple-page-title {
-    font-size: 24px;
+    font-size: 18px;
   }
   
   .apple-stats-grid {
     grid-template-columns: 1fr;
   }
   
+  .apple-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 16px;
+  }
+  
+  .apple-table-wrapper {
+    overflow-x: auto;
+  }
+  
   .apple-table {
-    font-size: 12px;
+    min-width: 1000px;
+    font-size: 11px;
   }
   
   .apple-table th,
   .apple-table td {
-    padding: 12px;
+    padding: 10px 12px;
+  }
+  
+  .apple-pagination {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+  
+  .apple-pagination-btn,
+  .apple-pagination-number {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .apple-search-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .apple-filter-controls {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 </style>

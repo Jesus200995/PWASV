@@ -1021,8 +1021,9 @@ export default {
   overflow-x: auto;
   flex: 1;
   max-height: 100%;
-  -webkit-overflow-scrolling: auto;
-  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
   scroll-behavior: smooth;
 }
 
@@ -1485,9 +1486,9 @@ export default {
   
   .apple-table-container {
     overflow-x: auto;
-    -webkit-overflow-scrolling: auto;
+    -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    touch-action: pan-x pan-y;
+    overscroll-behavior-y: auto;
   }
   
   .apple-table {
@@ -1525,16 +1526,17 @@ export default {
   
   .apple-table-container {
     overflow-x: auto;
-    -webkit-overflow-scrolling: auto;
+    -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
     border-radius: 16px;
-    touch-action: pan-x pan-y;
   }
   
   .apple-table-wrapper {
     overflow-x: auto;
-    -webkit-overflow-scrolling: auto;
-    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
   }
   
   .apple-table {

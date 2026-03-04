@@ -29,7 +29,9 @@ export function useRealtimeStats(options = {}) {
   const stats = ref({
     asistencias_hoy: 0,
     usuarios_presentes: 0,
-    total_asistencias: 0
+    total_asistencias: 0,
+    registros_hoy: 0,
+    total_registros: 0
   });
   
   const isLoading = ref(false);
@@ -65,38 +67,24 @@ export function useRealtimeStats(options = {}) {
 
     try {
       const territorioFilter = authService.getTerritorioFilter();
-      let url = `${API_URL}/estadisticas/rapidas`;
+      let url = `${API_URL}/estadisticas`;
       
       if (territorioFilter) {
         url += `?territorio=${encodeURIComponent(territorioFilter)}`;
       }
 
-      console.time('⚡ Fetch stats rápidas');
+      console.time('⚡ Fetch stats');
       
-      let response = await fetch(url, {
+      const response = await fetch(url, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        signal: abortController.signal,
-        priority: 'high'
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        },
+        signal: abortController.signal
       });
 
-      console.timeEnd('⚡ Fetch stats rápidas');
-
-      // Fallback al endpoint antiguo si el nuevo no existe
-      if (!response.ok && response.status === 404) {
-        console.log('⚠️ Endpoint /rapidas no disponible, usando /estadisticas');
-        url = `${API_URL}/estadisticas`;
-        if (territorioFilter) {
-          url += `?territorio=${encodeURIComponent(territorioFilter)}`;
-        }
-        
-        response = await fetch(url, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: abortController.signal,
-          priority: 'high'
-        });
-      }
+      console.timeEnd('⚡ Fetch stats');
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -107,18 +95,22 @@ export function useRealtimeStats(options = {}) {
       
       // Normalizar estructura - asegurar que siempre tenga los campos correctos
       if (newStats) {
-        // Si viene del endpoint /estadisticas (antiguo)
+        // Extraer todos los campos disponibles (asistencias y registros)
         newStats = {
           asistencias_hoy: newStats.asistencias_hoy || 0,
           usuarios_presentes: newStats.usuarios_presentes || 0,
-          total_asistencias: newStats.total_asistencias || 0
+          total_asistencias: newStats.total_asistencias || 0,
+          registros_hoy: newStats.registros_hoy || 0,
+          total_registros: newStats.total_registros || 0
         };
       } else {
         // Si no hay datos, inicializar en 0
         newStats = {
           asistencias_hoy: 0,
           usuarios_presentes: 0,
-          total_asistencias: 0
+          total_asistencias: 0,
+          registros_hoy: 0,
+          total_registros: 0
         };
       }
 
@@ -172,11 +164,13 @@ export function useRealtimeStats(options = {}) {
       const newStats = await fetchStats(force);
       
       if (newStats) {
-        // Actualizar con los nuevos valores
+        // Actualizar con los nuevos valores (asistencias y registros)
         stats.value = {
           asistencias_hoy: newStats.asistencias_hoy || 0,
           usuarios_presentes: newStats.usuarios_presentes || 0,
-          total_asistencias: newStats.total_asistencias || 0
+          total_asistencias: newStats.total_asistencias || 0,
+          registros_hoy: newStats.registros_hoy || 0,
+          total_registros: newStats.total_registros || 0
         };
         
         lastUpdate.value = new Date();

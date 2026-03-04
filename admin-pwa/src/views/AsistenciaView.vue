@@ -46,7 +46,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value">{{ formatNumber(totalAsistenciasHoy) }}</div>
+                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(totalAsistenciasHoy) }}</div>
                 <div class="apple-stat-label">Hoy</div>
               </div>
             </div>
@@ -59,7 +59,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value">{{ formatNumber(usuariosPresentes) }}</div>
+                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(usuariosPresentes) }}</div>
                 <div class="apple-stat-label">Presentes</div>
               </div>
             </div>
@@ -74,7 +74,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value">{{ formatNumber(totalAsistencias) }}</div>
+                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(totalAsistencias) }}</div>
                 <div class="apple-stat-label">Total</div>
               </div>
             </div>
@@ -379,12 +379,14 @@ export default {
     const {
       stats: realtimeStats,
       isLoading: statsLoading,
-      refresh: refreshStats
+      refresh: refreshStats,
+      startPolling,
+      stopPolling
     } = useRealtimeStats({
       pollingInterval: 5000, // Actualizar cada 5 segundos
       enableCache: true,
       cacheTTL: 5000,
-      enablePolling: false // Deshabilitado por defecto - solo refresh manual
+      enablePolling: true // Habilitado para actualización automática
     })
 
     // Animaciones suaves para los contadores (Apple-style)
@@ -481,6 +483,10 @@ export default {
     }
   },
   async mounted() {
+    // El polling ya se inicia automáticamente por el composable
+    // Solo necesitamos cargar las asistencias
+    console.log('✅ Componente montado, stats se actualizarán automáticamente')
+    
     // Precargar datos en segundo plano para performance Apple-style
     AsistenciasService.precargarDatos()
     await this.cargarAsistencias()
@@ -493,9 +499,6 @@ export default {
       
       try {
         console.time('⚡ Carga total de asistencias')
-        
-        // Refrescar estadísticas en tiempo real (Apple-style)
-        await this.refreshStats()
         
         const asistencias = await AsistenciasService.obtenerAsistenciasConUsuarios(this.registrosCargados)
         
@@ -751,6 +754,7 @@ export default {
     }
   },
   beforeUnmount() {
+    // El polling se detiene automáticamente por el composable en onUnmounted
     // Limpiar al desmontar el componente
     AsistenciasService.limpiarCache()
   }
@@ -870,7 +874,7 @@ export default {
     #2E7D32 50%, 
     #1B5E20 100%);
   border-bottom: none;
-  padding: 12px 20px;
+  padding: 10px 16px;
   box-shadow: none;
   border-radius: 28px 28px 0 0;
   border: 2px solid #8BC34A;
@@ -886,12 +890,12 @@ export default {
 .apple-header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .apple-icon-circle {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   border-radius: 50%;
@@ -904,15 +908,15 @@ export default {
 }
 
 .apple-icon-circle svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   stroke: white;
   stroke-width: 2.5;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .apple-page-title {
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 700;
   color: white;
   margin: 0;
@@ -921,15 +925,15 @@ export default {
 }
 
 .apple-page-subtitle {
-  font-size: 11px;
+  font-size: 10px;
   color: rgba(255, 255, 255, 0.85);
   margin: 2px 0 0 0;
   font-weight: 500;
 }
 
 .apple-refresh-button {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -953,8 +957,8 @@ export default {
 }
 
 .apple-refresh-button svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   stroke: white;
   stroke-width: 2;
   fill: none;
@@ -980,7 +984,7 @@ export default {
 .apple-stats-section {
   background: white;
   border-radius: 0 0 28px 28px;
-  padding: 24px 20px 20px 20px;
+  padding: 18px 16px 16px 16px;
   margin-bottom: 0;
   box-shadow: none;
   border: 2px solid #8BC34A;
@@ -990,18 +994,18 @@ export default {
 
 .apple-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .apple-stat-card {
   background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
-  border-radius: 16px;
-  padding: 18px;
+  border-radius: 14px;
+  padding: 14px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -1013,8 +1017,8 @@ export default {
 }
 
 .apple-stat-icon {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1036,15 +1040,15 @@ export default {
 }
 
 .apple-stat-icon svg {
-  width: 19px;
-  height: 19px;
+  width: 16px;
+  height: 16px;
   stroke: white;
   stroke-width: 2.5;
   fill: none;
 }
 
 .apple-stat-value {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--apple-text);
   line-height: 1;
@@ -1065,7 +1069,7 @@ export default {
 }
 
 .apple-stat-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--apple-gray-4);
   font-weight: 600;
   text-transform: uppercase;
@@ -1075,14 +1079,14 @@ export default {
 /* ==================== SEARCH & FILTERS INSIDE STATS ==================== */
 .apple-search-section {
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  padding-top: 16px;
+  padding-top: 12px;
   margin-top: 4px;
 }
 
 .apple-search-row {
   display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 10px;
   align-items: center;
 }
 
@@ -1093,11 +1097,11 @@ export default {
 
 .apple-search-icon {
   position: absolute;
-  left: 14px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   stroke: #007AFF;
   stroke-width: 2.5;
   pointer-events: none;
@@ -1106,20 +1110,21 @@ export default {
 
 .apple-search-input {
   width: 100%;
-  height: 44px;
-  padding: 0 44px 0 44px;
+  height: 38px;
+  padding: 0 40px 0 40px;
   border: 1.5px solid transparent;
-  border-radius: 22px;
-  background: var(--apple-gray-1);
-  font-size: 13px;
+  border-radius: 19px;
+  background: #f5f5f7;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--apple-text);
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
   transition: all 0.25s ease;
 }
 
 .apple-search-input::placeholder {
-  color: var(--apple-gray-4);
-  font-size: 13px;
+  color: #86868b;
+  font-size: 12px;
 }
 
 .apple-search-input:hover {
@@ -1144,11 +1149,11 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 18px;
+  padding: 8px 14px;
   background: white;
   border: 1.5px solid var(--apple-gray-3);
-  border-radius: 18px;
-  font-size: 13px;
+  border-radius: 16px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1157,8 +1162,8 @@ export default {
 }
 
 .apple-filter-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   stroke-width: 2;
 }
 
@@ -1199,8 +1204,8 @@ export default {
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: var(--apple-gray-3);
   border: none;
   border-radius: 50%;
@@ -1217,8 +1222,8 @@ export default {
 }
 
 .apple-clear-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke: white;
   stroke-width: 2.5;
 }
@@ -1232,12 +1237,12 @@ export default {
 .apple-filter-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 16px;
+  gap: 5px;
+  padding: 7px 12px;
   background: var(--apple-gray-1);
   border: 2px solid transparent;
-  border-radius: 24px;
-  font-size: 12px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--apple-text);
   cursor: pointer;
@@ -1247,8 +1252,8 @@ export default {
 }
 
 .apple-filter-chip svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   stroke-width: 2;
 }
 

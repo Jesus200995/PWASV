@@ -21,7 +21,7 @@
           
           <button @click="cargarAsistencias" class="apple-refresh-button" :disabled="loading">
             <svg :class="{ 'apple-spin': loading }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M4 12a8 8 0 0 1 8-8V0m0 0l3 3m-3-3L9 3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
         </div>
@@ -226,40 +226,40 @@
                 </tr>
               </tbody>
             </table>
+          </div>
 
-            <!-- ================== PAGINATION APPLE STYLE ================== -->
-            <div v-if="totalPaginas > 1" class="apple-pagination">
+          <!-- ================== PAGINATION APPLE STYLE ================== -->
+          <div v-if="totalPaginas > 1" class="apple-pagination">
+            <button 
+              @click="irAPagina(paginaActual - 1)" 
+              :disabled="paginaActual === 1"
+              class="apple-pagination-btn"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+            <div class="apple-pagination-numbers">
               <button 
-                @click="irAPagina(paginaActual - 1)" 
-                :disabled="paginaActual === 1"
-                class="apple-pagination-btn"
+                v-for="pagina in paginasVisibles" 
+                :key="pagina"
+                @click="irAPagina(pagina)"
+                :class="['apple-pagination-number', { 'active': paginaActual === pagina }]"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-
-              <div class="apple-pagination-numbers">
-                <button 
-                  v-for="pagina in paginasVisibles" 
-                  :key="pagina"
-                  @click="irAPagina(pagina)"
-                  :class="['apple-pagination-number', { 'active': paginaActual === pagina }]"
-                >
-                  {{ pagina }}
-                </button>
-              </div>
-
-              <button 
-                @click="irAPagina(paginaActual + 1)" 
-                :disabled="paginaActual === totalPaginas"
-                class="apple-pagination-btn"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                {{ pagina }}
               </button>
             </div>
+
+            <button 
+              @click="irAPagina(paginaActual + 1)" 
+              :disabled="paginaActual === totalPaginas"
+              class="apple-pagination-btn"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -643,6 +643,7 @@ export default {
   width: calc(100vw - 220px);
   overflow-x: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 16px 0 16px;
 }
 
 /* ==================== HEADER ==================== */
@@ -651,12 +652,14 @@ export default {
     #388E3C 0%, 
     #2E7D32 50%, 
     #1B5E20 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 12px 24px;
+  border-bottom: none;
+  padding: 12px 20px;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  border-radius: 28px 28px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .apple-header-wrapper {
@@ -672,8 +675,8 @@ export default {
 }
 
 .apple-icon-circle {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   border-radius: 50%;
@@ -686,15 +689,15 @@ export default {
 }
 
 .apple-icon-circle svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke: white;
   stroke-width: 2.5;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .apple-page-title {
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 700;
   color: white;
   margin: 0;
@@ -703,15 +706,15 @@ export default {
 }
 
 .apple-page-subtitle {
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.85);
   margin: 2px 0 0 0;
   font-weight: 500;
 }
 
 .apple-refresh-button {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -725,7 +728,7 @@ export default {
 
 .apple-refresh-button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.25);
-  transform: rotate(90deg);
+  transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -735,10 +738,11 @@ export default {
 }
 
 .apple-refresh-button svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke: white;
-  stroke-width: 2.5;
+  stroke-width: 2;
+  fill: none;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
@@ -753,16 +757,19 @@ export default {
 
 /* ==================== CONTENT ==================== */
 .apple-content-wrapper {
-  padding: 24px;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 /* ==================== STATS SECTION WITH SEARCH ==================== */
 .apple-stats-section {
   background: white;
-  border-radius: 20px;
-  padding: 16px;
+  border-radius: 0 0 28px 28px;
+  padding: 24px 20px 20px 20px;
   margin-bottom: 16px;
-  box-shadow: var(--apple-shadow);
+  margin-top: -1px;
+  border-top: none;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
 }
 
 .apple-stats-grid {
@@ -993,20 +1000,52 @@ export default {
   box-shadow: var(--apple-shadow);
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.04);
+  max-height: calc(100vh - 340px);
+  display: flex;
+  flex-direction: column;
 }
 
 .apple-table-wrapper {
-  overflow-x: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  max-height: 100%;
+}
+
+/* Scrollbar estilo Apple */
+.apple-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+  background-clip: content-box;
 }
 
 .apple-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
 }
 
 .apple-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background: var(--apple-gray-1);
   border-bottom: 1px solid var(--apple-gray-2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .apple-table th {
@@ -1017,6 +1056,9 @@ export default {
   color: var(--apple-gray-5);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
 }
 
 .apple-table th:first-child {
@@ -1195,8 +1237,12 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 20px;
+  padding: 16px 20px;
   border-top: 1px solid var(--apple-gray-2);
+  background: white;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
 }
 
 .apple-pagination-btn {

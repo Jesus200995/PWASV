@@ -73,21 +73,46 @@ export function useRealtimeStats(options = {}) {
 
       console.time('⚡ Fetch stats rápidas');
       
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         signal: abortController.signal,
-        priority: 'high' // Prioridad alta para responsividad
+        priority: 'high'
       });
 
       console.timeEnd('⚡ Fetch stats rápidas');
+
+      // Fallback al endpoint antiguo si el nuevo no existe
+      if (!response.ok && response.status === 404) {
+        console.log('⚠️ Endpoint /rapidas no disponible, usando /estadisticas');
+        url = `${API_URL}/estadisticas`;
+        if (territorioFilter) {
+          url += `?territorio=${encodeURIComponent(territorioFilter)}`;
+        }
+        
+        response = await fetch(url, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: abortController.signal,
+          priority: 'high'
+        });
+      }
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
-      const newStats = data.estadisticas;
+      let newStats = data.estadisticas;
+      
+      // Normalizar estructura si viene del endpoint antiguo
+      if (newStats && !newStats.asistencias_hoy && newStats.total_asistencias !== undefined) {
+        newStats = {
+          asistencias_hoy: newStats.asistencias_hoy || 0,
+          usuarios_presentes: newStats.usuarios_presentes || 0,
+          total_asistencias: newStats.total_asistencias || 0
+        };
+      }
 
       // Actualizar caché
       if (enableCache) {

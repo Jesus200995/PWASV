@@ -240,326 +240,188 @@
         </div>
       </div>  <!-- Close apple-sticky-wrapper -->
 
-      <div class="page-content">
-
-        <!-- Tabla de registros -->
-        <div class="registros-section">
-          <div v-if="loading && registros.length === 0" class="loading-container">
-            <div class="spinner-large"></div>
+      <div class="apple-content-wrapper">
+        <!-- ================== TABLE APPLE STYLE ================== -->
+        <div class="apple-table-container">
+          <div v-if="loading && registros.length === 0" class="apple-loading">
+            <div class="apple-spinner"></div>
             <p>Cargando registros...</p>
           </div>
-          
-          <div v-else-if="error" class="error-container">
+
+          <div v-else-if="error" class="apple-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" stroke-width="2"/>
+              <line x1="12" y1="8" x2="12" y2="12" stroke-width="2" stroke-linecap="round"/>
+              <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2" stroke-linecap="round"/>
+            </svg>
             <p>{{ error }}</p>
-            <button @click="cargarRegistros" class="retry-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                <path d="M3 3v5h5"></path>
-                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
-                <path d="M21 21v-5h-5"></path>
-              </svg>
-              Reintentar
-            </button>
+            <button @click="cargarRegistros" class="apple-retry-btn">Reintentar</button>
           </div>
-            <div v-else-if="registrosFiltrados.length === 0" class="empty-state">
-            <div class="empty-icon">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="4"/>
-                <path d="M7 17v-6m5 6V7m5 10v-3"/>
-              </svg>
-            </div>
+
+          <div v-else-if="registrosFiltrados.length === 0" class="apple-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" stroke-width="2"/>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke-width="2" stroke-linecap="round"/>
+              <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2" stroke-linecap="round"/>
+              <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2" stroke-linecap="round"/>
+            </svg>
             <h3>No hay registros</h3>
             <p v-if="filtroUsuario">No se encontraron registros para {{ usuariosDisponibles.find(u => u.id.toString() === filtroUsuario.toString())?.nombre_completo || `Usuario ${filtroUsuario}` }}</p>
-            <p v-else>Aún no se han creado registros en la aplicación.</p>
+            <p v-else>No se encontraron registros con los filtros aplicados</p>
           </div>
           
-          <div v-else class="table-container">
-            <!-- Información de carga optimizada -->
-            <div class="load-info">
-              <div class="load-status">
-                <span class="load-icon">⚡</span>
-                <span class="load-text">
-                  Mostrando {{ registros.length.toLocaleString('es') }} registros cargados
-                  <template v-if="totalRegistrosServidor > registros.length">
-                    de {{ totalRegistrosServidor.toLocaleString('es') }} totales
-                  </template>
-                </span>
-                <button 
-                  v-if="totalRegistrosServidor > registros.length && !cargandoMas" 
-                  @click="cargarMasRegistros"
-                  class="load-more-btn"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14m-7-7l7 7 7-7"/>
-                  </svg>
-                  Cargar más
-                </button>
-                <span v-if="cargandoMas" class="loading-more">
-                  <svg class="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    <path d="M9 12l2 2 4-4"/>
-                  </svg>
-                  Cargando...
-                </span>
-              </div>
-            </div>
-            <!-- 
-            <div class="registros-info">
-              <div class="registros-total">
-                <div class="registros-icon">📊</div>
-                <div class="registros-text">
-                  Página <span class="highlight">{{ paginaActual }}</span> de <span class="highlight">{{ totalPaginas }}</span>
-                  • {{ registrosFiltrados.length.toLocaleString('es') }} {{ registrosFiltrados.length === 1 ? 'registro' : 'registros' }} 
-                  <template v-if="registrosFiltrados.length !== registros.length">
-                    de <span class="highlight">{{ registros.length.toLocaleString('es') }}</span> totales
-                  </template>
-                </div>
-                <div class="registros-summary" v-if="registros.length > 0">
-                  <span class="registros-badge" title="Registros con fotografía">
-                    <i class="fas fa-camera"></i> {{ (registros.filter(r => r.foto_url).length / registros.length * 100).toFixed(0) }}%
-                  </span>
-                  <span class="registros-badge" title="Usuarios únicos">
-                    <i class="fas fa-users"></i> {{ [...new Set(registros.map(r => r.usuario_id))].length }}
-                  </span>
-                  <span class="registros-badge pagination-badge" title="Registros por página">
-                    <i class="fas fa-list"></i> {{ registrosPorPagina }}/pág
-                  </span>
-                </div>
-              </div>
-            </div>
-            -->
-            <table class="registros-table">
+          <div v-else class="apple-table-wrapper">
+            <table class="apple-table">
               <thead>
                 <tr>
-                  <th class="col-id">ID</th>
-                  <th class="col-usuario">Usuario</th>
-                  <th class="col-foto">Foto</th>
-                  <th class="col-tipo">Tipo</th>
-                  <th class="col-ubicacion">Ubicación</th>
-                  <th class="col-descripcion">Descripción</th>
-                  <th class="col-fecha">Fecha</th>
-                  <th class="col-acciones">Acciones</th>
+                  <th>ID</th>
+                  <th>Usuario</th>
+                  <th>Foto</th>
+                  <th>Tipo</th>
+                  <th>Ubicación</th>
+                  <th>Descripción</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>                <tr v-for="registro in registrosPaginados" :key="registro.id">
-                  <td class="col-id">#{{ registro.id }}</td>
-                  <td class="col-usuario">
-                    <div class="usuario-info">
-                      <div class="usuario-avatar">
+              <tbody>
+                <tr v-for="registro in registrosPaginados" :key="registro.id" class="apple-table-row">
+                  <td>
+                    <span class="apple-id-badge">#{{ registro.id }}</span>
+                  </td>
+                  <td>
+                    <div class="apple-user-cell">
+                      <div class="apple-avatar">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                          <circle cx="12" cy="7" r="4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="12" cy="7" r="4" stroke-width="2.5"/>
                         </svg>
                       </div>
-                      <div class="usuario-text">
-                        <strong>{{ registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}` }}</strong>
-                        <small>{{ registro.usuario?.correo || 'No disponible' }}</small>
+                      <div class="apple-user-info">
+                        <div class="apple-user-name">{{ registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}` }}</div>
+                        <div class="apple-user-role">{{ registro.usuario?.correo || 'No disponible' }}</div>
                       </div>
                     </div>
                   </td>
-                  <td class="col-foto">
+                  <td>
                     <img 
                       v-if="registro.foto_url" 
                       :src="`${API_URL}/${registro.foto_url}`"
                       alt="Foto" 
-                      class="foto-mini"
+                      class="apple-photo-thumb"
                       @click="abrirFotoCompleta(registro.foto_url)"
                     >
-                    <span v-else class="no-foto">Sin foto</span>
+                    <span v-else class="apple-no-data">—</span>
                   </td>
-                  <td class="col-tipo">
-                    <span :class="['tipo-badge', getTipoClass(registro.tipo_actividad)]">
+                  <td>
+                    <span :class="['apple-tipo-badge', getTipoClass(registro.tipo_actividad)]">
                       {{ getTipoLabel(registro.tipo_actividad) }}
                     </span>
                   </td>
-                  <td class="col-ubicacion ubicacion">
-                    {{ parseFloat(registro.latitud).toFixed(4) }},<br>
-                    {{ parseFloat(registro.longitud).toFixed(4) }}
+                  <td>
+                    <button 
+                      v-if="registro.latitud && registro.longitud"
+                      @click="abrirMapa(registro)" 
+                      class="apple-location-btn"
+                      title="Ver mapa"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2"/>
+                        <circle cx="12" cy="10" r="3" stroke-width="2"/>
+                      </svg>
+                    </button>
+                    <span v-else class="apple-no-data">—</span>
                   </td>
-                  <td class="col-descripcion descripcion">
-                    {{ truncateText(registro.descripcion || 'Sin descripción', 40) }}
+                  <td>
+                    <span class="apple-descripcion">{{ truncateText(registro.descripcion || 'Sin descripción', 40) }}</span>
                   </td>
-                  <td class="col-fecha fecha">
-                    <div class="fecha-hora-container">
-                      <div class="hora-display">{{ formatFechaCompacta(registro.fecha_hora).hora }}</div>
-                      <div class="fecha-display">{{ formatFechaCompacta(registro.fecha_hora).fecha }}</div>
+                  <td>
+                    <div class="apple-fecha-cell">
+                      <span class="apple-time-badge">{{ formatFechaCompacta(registro.fecha_hora).hora }}</span>
+                      <span class="apple-date-badge">{{ formatFechaCompacta(registro.fecha_hora).fecha }}</span>
                     </div>
                   </td>
-                  <td class="col-acciones">
-                    <div class="actions-container">
-                      <div class="action-container">
-                        <button @click="verDetalles(registro)" class="btn-ver" title="Ver detalles del registro">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        </button>
-                        <span class="btn-label">Detalles</span>
-                      </div>
-                      <div v-if="puedeNotificarRegistros" class="action-container">
-                        <button @click="abrirModalNotificar(registro)" class="btn-notificar" title="Enviar notificación sobre esta actividad">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                          </svg>
-                        </button>
-                        <span class="btn-label-notificar">Notificar</span>
-                      </div>
-                      <div v-if="puedeEliminarRegistros" class="action-container">
-                        <button @click="abrirModalEditar(registro)" class="btn-editar" title="Editar registro">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                          </svg>
-                        </button>
-                        <span class="btn-label-editar">Editar</span>
-                      </div>
-                      <div v-if="puedeEliminarRegistros" class="action-container">
-                        <button @click="confirmarEliminarRegistro(registro)" class="btn-eliminar" title="Eliminar registro">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                          </svg>
-                        </button>
-                        <span class="btn-label-eliminar">Eliminar</span>
-                      </div>
+                  <td>
+                    <div class="apple-actions">
+                      <button @click="verDetalles(registro)" class="apple-action-btn view" title="Ver detalles">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
+                          <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                        </svg>
+                      </button>
+                      <button v-if="puedeNotificarRegistros" @click="abrirModalNotificar(registro)" class="apple-action-btn notify" title="Notificar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2"/>
+                          <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2"/>
+                        </svg>
+                      </button>
+                      <button v-if="puedeEliminarRegistros" @click="abrirModalEditar(registro)" class="apple-action-btn edit" title="Editar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/>
+                        </svg>
+                      </button>
+                      <button v-if="puedeEliminarRegistros" @click="confirmarEliminarRegistro(registro)" class="apple-action-btn delete" title="Eliminar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <polyline points="3 6 5 6 21 6" stroke-width="2"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="2"/>
+                        </svg>
+                      </button>
                     </div>
                   </td>
                 </tr>
               </tbody>
             </table>
-            
-            <!-- Componente de Paginación -->
-            <div v-if="totalPaginas > 1" class="pagination-container">
-              <div class="pagination-info">
-                <span class="pagination-text">
-                  Mostrando <strong>{{ indiceInicio + 1 }}</strong> a <strong>{{ Math.min(indiceFin, registrosFiltrados.length) }}</strong> 
-                  de <strong>{{ registrosFiltrados.length }}</strong> registros
-                </span>
-                <div class="pagination-selector">
-                  <label for="itemsPorPagina" class="pagination-label">Registros por página:</label>
-                  <select 
-                    id="itemsPorPagina" 
-                    v-model="registrosPorPagina" 
-                    @change="cambiarRegistrosPorPagina"
-                    class="pagination-select"
-                  >
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                    <option value="200">200</option>
-                  </select>
-                </div>
-              </div>
-              
-              <nav class="pagination-nav" aria-label="Navegación de páginas">
-                <!-- Botón Primera Página -->
+          </div>
+
+          <!-- ================== PAGINATION APPLE STYLE ================== -->
+          <div v-if="totalPaginas > 1" class="apple-pagination">
+            <div class="apple-pagination-controls">
+              <button 
+                @click="irAPagina(paginaActual - 1)" 
+                :disabled="paginaActual === 1"
+                class="apple-pagination-btn"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              <div class="apple-pagination-numbers">
                 <button 
-                  @click="irAPagina(1)" 
-                  :disabled="paginaActual === 1"
-                  class="pagination-btn pagination-first"
-                  title="Primera página"
+                  v-for="pagina in paginasVisibles" 
+                  :key="pagina"
+                  @click="irAPagina(pagina)"
+                  :class="['apple-pagination-number', { 'active': paginaActual === pagina }]"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="11 17 6 12 11 7"></polyline>
-                    <polyline points="18 17 13 12 18 7"></polyline>
-                  </svg>
-                </button>
-                
-                <!-- Botón Página Anterior -->
-                <button 
-                  @click="irAPagina(paginaActual - 1)" 
-                  :disabled="paginaActual === 1"
-                  class="pagination-btn pagination-prev"
-                  title="Página anterior"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                  </svg>
-                  <span class="pagination-btn-text">Anterior</span>
-                </button>
-                
-                <!-- Números de Página -->
-                <div class="pagination-numbers">
-                  <!-- Página 1 siempre visible si hay más de 1 página -->
-                  <button 
-                    v-if="mostrarPagina(1)"
-                    @click="irAPagina(1)"
-                    :class="['pagination-number', { active: paginaActual === 1 }]"
-                  >
-                    1
-                  </button>
-                  
-                  <!-- Puntos suspensivos iniciales -->
-                  <span v-if="paginaActual > 4" class="pagination-ellipsis">...</span>
-                  
-                  <!-- Páginas del rango visible -->
-                  <button 
-                    v-for="pagina in paginasVisibles" 
-                    :key="pagina"
-                    @click="irAPagina(pagina)"
-                    :class="['pagination-number', { active: paginaActual === pagina }]"
-                  >
-                    {{ pagina }}
-                  </button>
-                  
-                  <!-- Puntos suspensivos finales -->
-                  <span v-if="paginaActual < totalPaginas - 3" class="pagination-ellipsis">...</span>
-                  
-                  <!-- Última página siempre visible si hay más de 1 página -->
-                  <button 
-                    v-if="mostrarPagina(totalPaginas) && totalPaginas > 1"
-                    @click="irAPagina(totalPaginas)"
-                    :class="['pagination-number', { active: paginaActual === totalPaginas }]"
-                  >
-                    {{ totalPaginas }}
-                  </button>
-                </div>
-                
-                <!-- Botón Página Siguiente -->
-                <button 
-                  @click="irAPagina(paginaActual + 1)" 
-                  :disabled="paginaActual === totalPaginas"
-                  class="pagination-btn pagination-next"
-                  title="Página siguiente"
-                >
-                  <span class="pagination-btn-text">Siguiente</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </button>
-                
-                <!-- Botón Última Página -->
-                <button 
-                  @click="irAPagina(totalPaginas)" 
-                  :disabled="paginaActual === totalPaginas"
-                  class="pagination-btn pagination-last"
-                  title="Última página"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="13 17 18 12 13 7"></polyline>
-                    <polyline points="6 17 11 12 6 7"></polyline>
-                  </svg>
-                </button>
-              </nav>
-              
-              <!-- Navegación rápida -->
-              <div class="pagination-jump">
-                <label for="jumpToPage" class="pagination-label">Ir a página:</label>
-                <input 
-                  id="jumpToPage"
-                  type="number" 
-                  v-model.number="paginaSalto"
-                  @keyup.enter="saltarAPagina"
-                  :min="1" 
-                  :max="totalPaginas"
-                  class="pagination-input"
-                  placeholder="Nº"
-                >
-                <button @click="saltarAPagina" class="pagination-jump-btn" title="Ir a página">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M5 12h14m-7-7 7 7-7 7"/>
-                  </svg>
+                  {{ pagina }}
                 </button>
               </div>
+
+              <button 
+                @click="irAPagina(paginaActual + 1)" 
+                :disabled="paginaActual === totalPaginas"
+                class="apple-pagination-btn"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
             </div>
+            
+            <!-- ================== LOAD MORE BUTTON ================== -->
+            <button 
+              v-if="totalRegistrosServidor > registros.length"
+              @click="cargarMasRegistros" 
+              :disabled="cargandoMas"
+              class="apple-load-more-btn"
+            >
+              <svg v-if="!cargandoMas" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="apple-load-more-icon">
+                <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div v-else class="apple-load-more-spinner"></div>
+              <span>{{ cargandoMas ? 'Cargando...' : 'Cargar más' }}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -4152,6 +4014,565 @@ const logout = () => {
   accent-color: #8BC34A;
 }
 
+/* ====================== APPLE CONTENT WRAPPER ====================== */
+.apple-content-wrapper {
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* ====================== APPLE TABLE CONTAINER ====================== */
+.apple-table-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  max-height: calc(100vh - 340px);
+  display: flex;
+  flex-direction: column;
+}
+
+.apple-table-wrapper {
+  overflow-y: auto;
+  overflow-x: auto;
+  flex: 1;
+  max-height: 100%;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar estilo Apple */
+.apple-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+  background-clip: content-box;
+}
+
+/* ====================== APPLE TABLE ====================== */
+.apple-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.apple-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #E8F5E9;
+  border-bottom: 1px solid #C8E6C9;
+}
+
+.apple-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #2E7D32;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: #E8F5E9;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #C8E6C9;
+  border-right: 1px solid #C8E6C9;
+}
+
+.apple-table th:last-child {
+  border-right: none;
+}
+
+.apple-table-row {
+  border-bottom: 1px solid #F0F0F0;
+  transition: all 0.15s ease;
+  background: white;
+}
+
+.apple-table-row:nth-child(even) {
+  background: #FAFAFA;
+}
+
+.apple-table-row:hover {
+  background: #F5F5F7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-table td {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #1D1D1F;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+  vertical-align: middle;
+}
+
+.apple-table-row:hover td:first-child {
+  border-left-color: #8BC34A;
+}
+
+/* ====================== APPLE TABLE CELLS ====================== */
+.apple-id-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.apple-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.apple-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #66BB6A 0%, #81C784 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(102, 187, 106, 0.25);
+}
+
+.apple-avatar svg {
+  width: 22px;
+  height: 22px;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.apple-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1D1D1F;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-user-role {
+  font-size: 11px;
+  color: #86868b;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-photo-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid rgba(139, 195, 74, 0.2);
+}
+
+.apple-photo-thumb:hover {
+  transform: scale(1.1);
+  border-color: #8BC34A;
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3);
+}
+
+.apple-tipo-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.apple-tipo-badge.siembra {
+  background: rgba(52, 199, 89, 0.1);
+  color: #34C759;
+}
+
+.apple-tipo-badge.riego {
+  background: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+}
+
+.apple-tipo-badge.cosecha {
+  background: rgba(255, 149, 0, 0.1);
+  color: #FF9500;
+}
+
+.apple-tipo-badge.otro {
+  background: rgba(175, 82, 222, 0.1);
+  color: #AF52DE;
+}
+
+.apple-location-btn {
+  min-width: 36px;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  border: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+}
+
+.apple-location-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(0, 122, 255, 0.4);
+  background: linear-gradient(135deg, #0051D5 0%, #4AB8F1 100%);
+}
+
+.apple-location-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-descripcion {
+  font-size: 12px;
+  color: #86868b;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-fecha-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-time-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(52, 199, 89, 0.1);
+  color: #34C759;
+}
+
+.apple-date-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+}
+
+.apple-no-data {
+  color: #86868b;
+  font-size: 14px;
+}
+
+/* ====================== APPLE ACTIONS ====================== */
+.apple-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.apple-action-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.apple-action-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: white;
+  stroke-width: 2;
+  fill: none;
+}
+
+.apple-action-btn.view {
+  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+}
+
+.apple-action-btn.view:hover {
+  background: linear-gradient(135deg, #7CB342 0%, #689F38 100%);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+}
+
+.apple-action-btn.notify {
+  background: linear-gradient(135deg, #E65100 0%, #D84315 100%);
+}
+
+.apple-action-btn.notify:hover {
+  background: linear-gradient(135deg, #D84315 0%, #BF360C 100%);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.4);
+}
+
+.apple-action-btn.edit {
+  background: linear-gradient(135deg, #6366f1 0%, #5558e3 100%);
+}
+
+.apple-action-btn.edit:hover {
+  background: linear-gradient(135deg, #5558e3 0%, #4f46e5 100%);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.apple-action-btn.delete {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.apple-action-btn.delete:hover {
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+/* ====================== APPLE PAGINATION ====================== */
+.apple-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid #C8E6C9;
+  background: #E8F5E9;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+
+.apple-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-pagination-btn {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+}
+
+.apple-pagination-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7CB342 0%, #689F38 100%);
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+  transform: translateY(-1px);
+}
+
+.apple-pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.apple-pagination-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  stroke-width: 2.5;
+}
+
+.apple-pagination-numbers {
+  display: flex;
+  gap: 4px;
+}
+
+.apple-pagination-number {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1D1D1F;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apple-pagination-number:hover {
+  background: rgba(139, 195, 74, 0.15);
+}
+
+.apple-pagination-number.active {
+  background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+}
+
+/* ====================== APPLE LOAD MORE BUTTON ====================== */
+.apple-load-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+  white-space: nowrap;
+}
+
+.apple-load-more-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7CB342 0%, #689F38 100%);
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+  transform: translateY(-1px);
+}
+
+.apple-load-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.apple-load-more-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.5;
+}
+
+.apple-load-more-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: apple-spin 0.8s linear infinite;
+}
+
+@keyframes apple-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ====================== APPLE STATES ====================== */
+.apple-loading,
+.apple-error,
+.apple-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  text-align: center;
+}
+
+.apple-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #E8F5E9;
+  border-top-color: #8BC34A;
+  border-radius: 50%;
+  animation: apple-spin 0.8s linear infinite;
+  margin-bottom: 24px;
+}
+
+.apple-loading p,
+.apple-error p,
+.apple-empty p {
+  font-size: 14px;
+  color: #86868b;
+  margin-top: 12px;
+}
+
+.apple-error svg,
+.apple-empty svg {
+  width: 64px;
+  height: 64px;
+  stroke: #8BC34A;
+  stroke-width: 1.5;
+  margin-bottom: 16px;
+}
+
+.apple-empty h3,
+.apple-error h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin: 0 0 8px 0;
+}
+
+.apple-retry-btn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+}
+
+.apple-retry-btn:hover {
+  background: linear-gradient(135deg, #7CB342 0%, #689F38 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+}
+
 .page-header {
   display: none; /* Ocultar header antiguo */
 }
@@ -4329,6 +4750,13 @@ const logout = () => {
   to { transform: rotate(360deg); }
 }
 
+/* Responsive 1024px - Tablets */
+@media (max-width: 1024px) {
+  .apple-content-wrapper {
+    padding: 24px 24px;
+  }
+}
+
 /* Responsive improvements for smaller screens */
 @media (max-width: 768px) {
   .page-header {
@@ -4496,6 +4924,68 @@ const logout = () => {
     gap: 10px;
   }
   
+  /* Apple Table Responsive */
+  .apple-content-wrapper {
+    padding: 16px;
+  }
+  
+  .apple-table-container {
+    max-height: calc(100vh - 380px);
+    border-radius: 16px;
+  }
+  
+  .apple-table th,
+  .apple-table td {
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+  
+  .apple-avatar {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .apple-avatar svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .apple-user-name {
+    font-size: 12px;
+  }
+  
+  .apple-user-role {
+    font-size: 10px;
+  }
+  
+  .apple-action-btn {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .apple-action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .apple-pagination {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .apple-pagination-btn,
+  .apple-pagination-number {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .apple-load-more-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
   .main-content {
     padding: 6px 12px 0 12px;
   }
@@ -4711,6 +5201,162 @@ const logout = () => {
     font-size: 12px;
   }
   
+  /* Apple Table Mobile */
+  .apple-content-wrapper {
+    padding: 12px;
+  }
+  
+  .apple-table-container {
+    max-height: calc(100vh - 420px);
+    border-radius: 12px;
+  }
+  
+  .apple-table th,
+  .apple-table td {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+  
+  .apple-table th {
+    font-size: 9px;
+    letter-spacing: 0.5px;
+  }
+  
+  .apple-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .apple-avatar svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .apple-user-cell {
+    gap: 8px;
+  }
+  
+  .apple-user-name {
+    font-size: 11px;
+  }
+  
+  .apple-user-role {
+    font-size: 9px;
+  }
+  
+  .apple-id-badge {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+  
+  .apple-photo-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+  
+  .apple-tipo-badge {
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+  
+  .apple-location-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+  
+  .apple-location-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .apple-descripcion {
+    font-size: 10px;
+    max-width: 100px;
+  }
+  
+  .apple-fecha-cell {
+    gap: 2px;
+  }
+  
+  .apple-time-badge,
+  .apple-date-badge {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+  
+  .apple-actions {
+    gap: 4px;
+  }
+  
+  .apple-action-btn {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .apple-action-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .apple-pagination {
+    padding: 8px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .apple-pagination-controls {
+    gap: 4px;
+  }
+  
+  .apple-pagination-btn,
+  .apple-pagination-number {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+  
+  .apple-pagination-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .apple-load-more-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+  
+  .apple-loading,
+  .apple-error,
+  .apple-empty {
+    padding: 40px 20px;
+  }
+  
+  .apple-spinner {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .apple-error svg,
+  .apple-empty svg {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .apple-empty h3,
+  .apple-error h3 {
+    font-size: 16px;
+  }
+  
+  .apple-loading p,
+  .apple-error p,
+  .apple-empty p {
+    font-size: 12px;
+  }
+
   .main-content {
     padding: 4px 8px 0 8px;
   }

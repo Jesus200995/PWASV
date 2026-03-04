@@ -312,22 +312,23 @@ export default {
     } = useRealtimeStats({
       pollingInterval: 5000, // Actualizar cada 5 segundos
       enableCache: true,
-      cacheTTL: 5000
+      cacheTTL: 5000,
+      enablePolling: false // Deshabilitado por defecto - solo refresh manual
     })
 
     // Animaciones suaves para los contadores (Apple-style)
     const { displayValue: animatedHoy } = useAnimatedNumber(
-      computed(() => realtimeStats.value.asistencias_hoy),
+      computed(() => realtimeStats.value?.asistencias_hoy || 0),
       { duration: 800 }
     )
 
     const { displayValue: animatedPresentes } = useAnimatedNumber(
-      computed(() => realtimeStats.value.usuarios_presentes),
+      computed(() => realtimeStats.value?.usuarios_presentes || 0),
       { duration: 800 }
     )
 
     const { displayValue: animatedTotal } = useAnimatedNumber(
-      computed(() => realtimeStats.value.total_asistencias),
+      computed(() => realtimeStats.value?.total_asistencias || 0),
       { duration: 800 }
     )
 

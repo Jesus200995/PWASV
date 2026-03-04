@@ -105,12 +105,20 @@ export function useRealtimeStats(options = {}) {
       const data = await response.json();
       let newStats = data.estadisticas;
       
-      // Normalizar estructura si viene del endpoint antiguo
-      if (newStats && !newStats.asistencias_hoy && newStats.total_asistencias !== undefined) {
+      // Normalizar estructura - asegurar que siempre tenga los campos correctos
+      if (newStats) {
+        // Si viene del endpoint /estadisticas (antiguo)
         newStats = {
           asistencias_hoy: newStats.asistencias_hoy || 0,
           usuarios_presentes: newStats.usuarios_presentes || 0,
           total_asistencias: newStats.total_asistencias || 0
+        };
+      } else {
+        // Si no hay datos, inicializar en 0
+        newStats = {
+          asistencias_hoy: 0,
+          usuarios_presentes: 0,
+          total_asistencias: 0
         };
       }
 
@@ -176,6 +184,13 @@ export function useRealtimeStats(options = {}) {
       }
     } catch (err) {
       console.error('❌ Error al actualizar stats:', err);
+      error.value = err.message;
+      
+      // Si falla muchas veces, detener polling
+      if (retryCount >= maxRetries) {
+        console.warn('⚠️ Demasiados errores, deteniendo polling automático');
+        stopPolling();
+      }
     } finally {
       isLoading.value = false;
     }

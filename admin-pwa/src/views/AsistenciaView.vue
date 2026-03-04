@@ -29,69 +29,95 @@
 
       <div class="apple-content-wrapper">
         <!-- ================== STATS CARDS APPLE STYLE ================== -->
-        <div class="apple-stats-grid">
-          <div class="apple-stat-card">
-            <div class="apple-stat-icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-              </svg>
+        <div class="apple-stats-section">
+          <div class="apple-stats-grid">
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ formatNumber(totalAsistenciasHoy) }}</div>
+                <div class="apple-stat-label">Hoy</div>
+              </div>
             </div>
-            <div class="apple-stat-content">
-              <div class="apple-stat-value">{{ totalAsistenciasHoy }}</div>
-              <div class="apple-stat-label">Hoy</div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ formatNumber(usuariosPresentes) }}</div>
+                <div class="apple-stat-label">Presentes</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ formatNumber(totalAsistencias) }}</div>
+                <div class="apple-stat-label">Total</div>
+              </div>
             </div>
           </div>
 
-          <div class="apple-stat-card">
-            <div class="apple-stat-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
+          <!-- ================== SEARCH & FILTERS INSIDE STATS ================== -->
+          <div class="apple-search-section">
+          <div class="apple-search-row">
+            <div class="apple-search-container">
+              <svg class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="11" cy="11" r="8" stroke-width="2.5"/>
+                <path d="m21 21-4.35-4.35" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
+              <input 
+                v-model="searchTerm" 
+                @input="filtrarAsistencias"
+                type="text" 
+                placeholder="Buscar por nombre, correo, cargo..." 
+                class="apple-search-input"
+              >
+              <button v-if="searchTerm" @click="limpiarBusqueda" class="apple-clear-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <line x1="15" y1="9" x2="9" y2="15" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="9" y1="9" x2="15" y2="15" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </button>
             </div>
-            <div class="apple-stat-content">
-              <div class="apple-stat-value">{{ usuariosPresentes }}</div>
-              <div class="apple-stat-label">Presentes</div>
-            </div>
-          </div>
 
-          <div class="apple-stat-card">
-            <div class="apple-stat-icon purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
+            <div class="apple-filter-controls">
+              <button 
+                @click="limpiarFiltros" 
+                class="apple-filter-btn reset"
+                title="Limpiar filtros"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M3 6h18M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Limpiar</span>
+              </button>
+              <button 
+                @click="exportarCSV" 
+                class="apple-filter-btn export"
+                title="Exportar a CSV"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Exportar</span>
+              </button>
             </div>
-            <div class="apple-stat-content">
-              <div class="apple-stat-value">{{ totalAsistencias }}</div>
-              <div class="apple-stat-label">Total</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ================== SEARCH & FILTERS APPLE STYLE ================== -->
-        <div class="apple-search-section">
-          <div class="apple-search-container">
-            <svg class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="11" cy="11" r="8" stroke-width="2"/>
-              <path d="m21 21-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <input 
-              v-model="searchTerm" 
-              @input="filtrarAsistencias"
-              type="text" 
-              placeholder="Buscar asistencias..." 
-              class="apple-search-input"
-            >
-            <button v-if="searchTerm" @click="limpiarBusqueda" class="apple-clear-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                <line x1="15" y1="9" x2="9" y2="15" stroke-width="2" stroke-linecap="round"/>
-                <line x1="9" y1="9" x2="15" y2="15" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </button>
           </div>
 
           <div class="apple-quick-filters">
@@ -101,9 +127,28 @@
               @click="seleccionarFechaRapida(filter.value)" 
               :class="['apple-filter-chip', { 'active': filtroRapido === filter.value }]"
             >
-              {{ filter.label }}
+              <svg v-if="filter.value === 'hoy'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                <path d="M12 6v6l4 2" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <svg v-else-if="filter.value === 'ayer'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3 3v5h5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg v-else-if="filter.value === 'semana'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                <line x1="16" y1="2" x2="16" y2="6" stroke-width="2" stroke-linecap="round"/>
+                <line x1="8" y1="2" x2="8" y2="6" stroke-width="2" stroke-linecap="round"/>
+                <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+              </svg>
+              <span>{{ filter.label }}</span>
             </button>
           </div>
+        </div>
         </div>
 
         <!-- ================== TABLE APPLE STYLE ================== -->
@@ -526,6 +571,46 @@ export default {
       this.filtrarAsistencias()
     },
     
+    limpiarFiltros() {
+      this.searchTerm = ''
+      this.filtroRapido = ''
+      this.filtrarAsistencias()
+    },
+    
+    exportarCSV() {
+      try {
+        // Preparar datos para exportar (asistencias filtradas)
+        const datos = this.asistenciasFiltradas.map(asistencia => ({
+          'Fecha': this.formatearFecha(asistencia.fecha),
+          'Usuario': asistencia.usuario?.nombre || 'N/A',
+          'Email': asistencia.usuario?.email || 'N/A',
+          'Cargo': asistencia.usuario?.cargo || 'N/A',
+          'Presente': asistencia.presente ? 'Sí' : 'No',
+          'Distancia': asistencia.distancia_metros ? `${asistencia.distancia_metros}m` : 'N/A',
+          'Territorio': asistencia.usuario?.territorio || 'N/A'
+        }))
+        
+        // Convertir a CSV
+        const headers = Object.keys(datos[0]).join(',')
+        const rows = datos.map(row => Object.values(row).join(','))
+        const csv = [headers, ...rows].join('\\n')
+        
+        // Descargar archivo
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+        const link = document.createElement('a')
+        const url = URL.createObjectURL(blob)
+        link.setAttribute('href', url)
+        link.setAttribute('download', `asistencias_${new Date().toISOString().split('T')[0]}.csv`)
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } catch (error) {
+        console.error('Error al exportar CSV:', error)
+        alert('Error al exportar el archivo CSV')
+      }
+    },
+    
     irAPagina(numeroPagina) {
       if (numeroPagina >= 1 && numeroPagina <= this.totalPaginas) {
         this.paginaActual = numeroPagina
@@ -544,6 +629,11 @@ export default {
     
     formatearHora(hora) {
       return AsistenciasService.formatearHora(hora)
+    },
+    
+    formatNumber(num) {
+      if (!num && num !== 0) return '0'
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     },
     
     obtenerIniciales(nombre) {
@@ -761,19 +851,27 @@ export default {
 
 /* ==================== CONTENT ==================== */
 .apple-content-wrapper {
-  padding: 24px;
+  padding: 16px;
 }
 
-/* ==================== STATS CARDS ==================== */
+/* ==================== STATS SECTION WITH SEARCH ==================== */
+.apple-stats-section {
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--apple-shadow);
+}
+
 .apple-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .apple-stat-card {
-  background: white;
+  background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
   border-radius: 16px;
   padding: 18px;
   display: flex;
@@ -813,20 +911,21 @@ export default {
 }
 
 .apple-stat-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 19px;
+  height: 19px;
   stroke: white;
   stroke-width: 2.5;
   fill: none;
 }
 
 .apple-stat-value {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--apple-text);
   line-height: 1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
+  letter-spacing: -0.3px;
 }
 
 /* Animación sutil cuando el contador se actualiza (Apple-style) */
@@ -841,57 +940,133 @@ export default {
 }
 
 .apple-stat-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--apple-gray-4);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* ==================== SEARCH & FILTERS ==================== */
+/* ==================== SEARCH & FILTERS INSIDE STATS ==================== */
 .apple-search-section {
-  background: white;
-  border-radius: var(--apple-radius);
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: var(--apple-shadow);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 16px;
+  margin-top: 4px;
+}
+
+.apple-search-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: center;
 }
 
 .apple-search-container {
   position: relative;
-  margin-bottom: 16px;
+  flex: 1;
 }
 
 .apple-search-icon {
   position: absolute;
-  left: 16px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
-  stroke: var(--apple-gray-4);
+  width: 20px;
+  height: 20px;
+  stroke: #007AFF;
   stroke-width: 2.5;
   pointer-events: none;
+  z-index: 1;
 }
 
 .apple-search-input {
   width: 100%;
-  height: 48px;
-  padding: 0 48px 0 48px;
-  border: 2px solid transparent;
-  border-radius: 12px;
+  height: 44px;
+  padding: 0 44px 0 44px;
+  border: 1.5px solid transparent;
+  border-radius: 22px;
   background: var(--apple-gray-1);
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--apple-text);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s ease;
+}
+
+.apple-search-input::placeholder {
+  color: var(--apple-gray-4);
+  font-size: 13px;
+}
+
+.apple-search-input:hover {
+  background: rgba(0, 122, 255, 0.04);
+  border-color: rgba(0, 122, 255, 0.08);
 }
 
 .apple-search-input:focus {
   outline: none;
-  border-color: var(--apple-blue);
+  border-color: rgba(0, 122, 255, 0.2);
   background: white;
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.05);
+}
+
+.apple-filter-controls {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.apple-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: white;
+  border: 1.5px solid var(--apple-gray-3);
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.apple-filter-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+.apple-filter-btn.reset {
+  color: #FF3B30;
+  border-color: rgba(255, 59, 48, 0.2);
+}
+
+.apple-filter-btn.reset:hover {
+  background: rgba(255, 59, 48, 0.08);
+  border-color: #FF3B30;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 59, 48, 0.2);
+}
+
+.apple-filter-btn.reset svg {
+  stroke: #FF3B30;
+}
+
+.apple-filter-btn.export {
+  color: #34C759;
+  border-color: rgba(52, 199, 89, 0.2);
+}
+
+.apple-filter-btn.export:hover {
+  background: rgba(52, 199, 89, 0.08);
+  border-color: #34C759;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(52, 199, 89, 0.2);
+}
+
+.apple-filter-btn.export svg {
+  stroke: #34C759;
 }
 
 .apple-clear-btn {
@@ -930,32 +1105,60 @@ export default {
 }
 
 .apple-filter-chip {
-  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
   background: var(--apple-gray-1);
-  border: none;
-  border-radius: 20px;
-  font-size: 14px;
+  border: 2px solid transparent;
+  border-radius: 24px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--apple-text);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-filter-chip svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
 }
 
 .apple-filter-chip:hover {
-  background: var(--apple-gray-2);
+  background: rgba(0, 122, 255, 0.1);
+  border-color: rgba(0, 122, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.15);
 }
 
 .apple-filter-chip.active {
-  background: var(--apple-blue);
-  color: white;
+  background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+  border-color: #007AFF;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.apple-filter-chip.active span {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.apple-filter-chip.active svg {
+  stroke: white !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 /* ==================== TABLE ==================== */
 .apple-table-container {
   background: white;
-  border-radius: var(--apple-radius);
+  border-radius: 20px;
   box-shadow: var(--apple-shadow);
   overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .apple-table-wrapper {
@@ -973,28 +1176,50 @@ export default {
 }
 
 .apple-table th {
-  padding: 16px 20px;
+  padding: 12px 16px;
   text-align: left;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--apple-gray-5);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  background: linear-gradient(to bottom, #F8F9FA 0%, #F1F3F5 100%);
+}
+
+.apple-table th:first-child {
+  border-top-left-radius: 20px;
+}
+
+.apple-table th:last-child {
+  border-top-right-radius: 20px;
 }
 
 .apple-table-row {
-  border-bottom: 1px solid var(--apple-gray-2);
-  transition: background 0.2s;
+  border-bottom: 1px solid #E5E7EB;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+}
+
+.apple-table-row:nth-child(even) {
+  background: linear-gradient(to right, #FAFBFC 0%, #F8F9FA 100%);
 }
 
 .apple-table-row:hover {
-  background: rgba(0, 122, 255, 0.03);
+  background: rgba(0, 122, 255, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transform: scale(1.001);
 }
 
 .apple-table td {
-  padding: 16px 20px;
-  font-size: 14px;
+  padding: 14px 16px;
+  font-size: 13px;
   color: var(--apple-text);
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.apple-table-row:hover td:first-child {
+  border-left-color: #007AFF;
 }
 
 /* ==================== TABLE CELLS ==================== */

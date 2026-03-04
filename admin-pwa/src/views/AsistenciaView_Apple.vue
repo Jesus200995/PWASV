@@ -29,50 +29,51 @@
 
       <div class="apple-content-wrapper">
         <!-- ================== STATS CARDS APPLE STYLE ================== -->
-        <div class="apple-stats-grid">
-          <div class="apple-stat-card">
-            <div class="apple-stat-icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-              </svg>
+        <div class="apple-stats-section">
+          <div class="apple-stats-grid">
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ formatNumber(totalAsistenciasHoy) }}</div>
+                <div class="apple-stat-label">Hoy</div>
+              </div>
             </div>
-            <div class="apple-stat-content">
-              <div class="apple-stat-value">{{ totalAsistenciasHoy }}</div>
-              <div class="apple-stat-label">Hoy</div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ formatNumber(usuariosPresentes) }}</div>
+                <div class="apple-stat-label">Presentes</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ formatNumber(totalAsistencias) }}</div>
+                <div class="apple-stat-label">Total</div>
+              </div>
             </div>
           </div>
 
-          <div class="apple-stat-card">
-            <div class="apple-stat-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-              </svg>
-            </div>
-            <div class="apple-stat-content">
-              <div class="apple-stat-value">{{ usuariosPresentes }}</div>
-              <div class="apple-stat-label">Presentes</div>
-            </div>
-          </div>
-
-          <div class="apple-stat-card">
-            <div class="apple-stat-icon purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-            </div>
-            <div class="apple-stat-content">
-              <div class="apple-stat-value">{{ totalAsistencias }}</div>
-              <div class="apple-stat-label">Total</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ================== SEARCH & FILTERS APPLE STYLE ================== -->
-        <div class="apple-search-section">
+          <!-- ================== SEARCH & FILTERS INSIDE STATS ================== -->
+          <div class="apple-search-section">
           <div class="apple-search-container">
             <svg class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <circle cx="11" cy="11" r="8" stroke-width="2"/>
@@ -104,6 +105,7 @@
               {{ filter.label }}
             </button>
           </div>
+        </div>
         </div>
 
         <!-- ================== TABLE APPLE STYLE ================== -->
@@ -537,6 +539,11 @@ export default {
       return AsistenciasService.formatearHora(hora)
     },
     
+    formatNumber(num) {
+      if (!num && num !== 0) return '0'
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    },
+    
     obtenerIniciales(nombre) {
       if (!nombre) return '??'
       return nombre.split(' ')
@@ -749,17 +756,25 @@ export default {
   padding: 24px;
 }
 
-/* ==================== STATS CARDS ==================== */
+/* ==================== STATS SECTION WITH SEARCH ==================== */
+.apple-stats-section {
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--apple-shadow);
+}
+
 .apple-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .apple-stat-card {
-  background: white;
-  border-radius: 16px;
+  background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
+  border-radius: 14px;
   padding: 18px;
   display: flex;
   align-items: center;
@@ -775,13 +790,13 @@ export default {
 }
 
 .apple-stat-icon {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
   flex-shrink: 0;
 }
 
@@ -798,20 +813,21 @@ export default {
 }
 
 .apple-stat-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 19px;
+  height: 19px;
   stroke: white;
   stroke-width: 2.5;
   fill: none;
 }
 
 .apple-stat-value {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--apple-text);
   line-height: 1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
+  letter-spacing: -0.3px;
 }
 
 /* Animación sutil cuando el contador se actualiza (Apple-style) */
@@ -826,20 +842,18 @@ export default {
 }
 
 .apple-stat-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--apple-gray-4);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* ==================== SEARCH & FILTERS ==================== */
+/* ==================== SEARCH & FILTERS INSIDE STATS ==================== */
 .apple-search-section {
-  background: white;
-  border-radius: var(--apple-radius);
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: var(--apple-shadow);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 16px;
+  margin-top: 4px;
 }
 
 .apple-search-container {
@@ -861,22 +875,32 @@ export default {
 
 .apple-search-input {
   width: 100%;
-  height: 48px;
-  padding: 0 48px 0 48px;
-  border: 2px solid transparent;
-  border-radius: 12px;
+  height: 44px;
+  padding: 0 44px 0 44px;
+  border: 1.5px solid transparent;
+  border-radius: 22px;
   background: var(--apple-gray-1);
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--apple-text);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s ease;
+}
+
+.apple-search-input::placeholder {
+  color: var(--apple-gray-4);
+  font-size: 13px;
+}
+
+.apple-search-input:hover {
+  background: rgba(0, 122, 255, 0.04);
+  border-color: rgba(0, 122, 255, 0.08);
 }
 
 .apple-search-input:focus {
   outline: none;
-  border-color: var(--apple-blue);
+  border-color: rgba(0, 122, 255, 0.2);
   background: white;
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.05);
 }
 
 .apple-clear-btn {
@@ -915,32 +939,60 @@ export default {
 }
 
 .apple-filter-chip {
-  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
   background: var(--apple-gray-1);
-  border: none;
-  border-radius: 20px;
-  font-size: 14px;
+  border: 2px solid transparent;
+  border-radius: 24px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--apple-text);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-filter-chip svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
 }
 
 .apple-filter-chip:hover {
-  background: var(--apple-gray-2);
+  background: rgba(0, 122, 255, 0.1);
+  border-color: rgba(0, 122, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.15);
 }
 
 .apple-filter-chip.active {
-  background: var(--apple-blue);
-  color: white;
+  background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+  border-color: #007AFF;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.apple-filter-chip.active span {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.apple-filter-chip.active svg {
+  stroke: white !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 /* ==================== TABLE ==================== */
 .apple-table-container {
   background: white;
-  border-radius: var(--apple-radius);
+  border-radius: 20px;
   box-shadow: var(--apple-shadow);
   overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .apple-table-wrapper {
@@ -965,6 +1017,14 @@ export default {
   color: var(--apple-gray-5);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.apple-table th:first-child {
+  border-top-left-radius: 20px;
+}
+
+.apple-table th:last-child {
+  border-top-right-radius: 20px;
 }
 
 .apple-table-row {

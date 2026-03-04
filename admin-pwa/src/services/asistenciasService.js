@@ -453,6 +453,15 @@ class AsistenciasService {
       throw error;
     }
   }
+
+  /**
+   * Precarga datos en segundo plano para mejorar rendimiento
+   * (Método placeholder para compatibilidad)
+   */
+  precargarDatos() {
+    console.log('📦 Precargando datos de asistencias en segundo plano...');
+    // La precarga se hace de forma lazy cuando se solicitan los datos
+  }
 }
 
 export default new AsistenciasService();

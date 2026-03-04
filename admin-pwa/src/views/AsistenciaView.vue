@@ -46,7 +46,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(totalAsistenciasHoy) }}</div>
+                <div class="apple-stat-value">{{ formatNumber(totalAsistenciasHoy) }}</div>
                 <div class="apple-stat-label">Hoy</div>
               </div>
             </div>
@@ -59,7 +59,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(usuariosPresentes) }}</div>
+                <div class="apple-stat-value">{{ formatNumber(usuariosPresentes) }}</div>
                 <div class="apple-stat-label">Presentes</div>
               </div>
             </div>
@@ -74,7 +74,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(totalAsistencias) }}</div>
+                <div class="apple-stat-value">{{ formatNumber(totalAsistencias) }}</div>
                 <div class="apple-stat-label">Total</div>
               </div>
             </div>
@@ -379,14 +379,12 @@ export default {
     const {
       stats: realtimeStats,
       isLoading: statsLoading,
-      refresh: refreshStats,
-      startPolling,
-      stopPolling
+      refresh: refreshStats
     } = useRealtimeStats({
       pollingInterval: 5000, // Actualizar cada 5 segundos
       enableCache: true,
       cacheTTL: 5000,
-      enablePolling: true // Habilitado para actualización automática
+      enablePolling: false // Deshabilitado por defecto - solo refresh manual
     })
 
     // Animaciones suaves para los contadores (Apple-style)
@@ -483,10 +481,6 @@ export default {
     }
   },
   async mounted() {
-    // El polling ya se inicia automáticamente por el composable
-    // Solo necesitamos cargar las asistencias
-    console.log('✅ Componente montado, stats se actualizarán automáticamente')
-    
     // Precargar datos en segundo plano para performance Apple-style
     AsistenciasService.precargarDatos()
     await this.cargarAsistencias()
@@ -499,6 +493,9 @@ export default {
       
       try {
         console.time('⚡ Carga total de asistencias')
+        
+        // Refrescar estadísticas en tiempo real (Apple-style)
+        await this.refreshStats()
         
         const asistencias = await AsistenciasService.obtenerAsistenciasConUsuarios(this.registrosCargados)
         
@@ -754,7 +751,6 @@ export default {
     }
   },
   beforeUnmount() {
-    // El polling se detiene automáticamente por el composable en onUnmounted
     // Limpiar al desmontar el componente
     AsistenciasService.limpiarCache()
   }

@@ -48,7 +48,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(actividadesHoy) }}</div>
+                <div class="apple-stat-value">{{ actividadesHoy }}</div>
                 <div class="apple-stat-label">Hoy</div>
               </div>
             </div>
@@ -61,7 +61,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(totalActividades) }}</div>
+                <div class="apple-stat-value">{{ totalActividades }}</div>
                 <div class="apple-stat-label">Total</div>
               </div>
             </div>
@@ -1323,7 +1323,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import * as XLSX from 'xlsx'
@@ -1331,8 +1331,6 @@ import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
 import authService from '../services/authService.js'
 import notificacionesService from '../services/notificacionesService.js'
-import { useRealtimeStats } from '../composables/useRealtimeStats.js'
-import { useAnimatedNumber } from '../composables/useAnimatedNumber.js'
 
 const router = useRouter()
 
@@ -1461,35 +1459,9 @@ const cargarMasRegistros = async () => {
   }
 }
 
-// ====================== ESTADÍSTICAS EN TIEMPO REAL (APPLE-STYLE) ======================
-// Sistema de polling inteligente con caché y animaciones fluidas
-const {
-  stats: realtimeStats,
-  isLoading: statsLoading,
-  refresh: refreshStats,
-  startPolling,
-  stopPolling
-} = useRealtimeStats({
-  pollingInterval: 5000, // Actualizar cada 5 segundos
-  enableCache: true,
-  cacheTTL: 5000,
-  enablePolling: true // Habilitado para actualización automática
-})
-
-// Valores reactivos para los contadores (sin animación, valores brutos)
-const actividadesHoyRaw = computed(() => realtimeStats.value?.registros_hoy || 0)
-const totalActividadesRaw = computed(() => realtimeStats.value?.total_registros || 0)
-
-// Animaciones Apple-style para los contadores (transiciones suaves de 800ms)
-const { displayValue: actividadesHoy } = useAnimatedNumber(actividadesHoyRaw, { 
-  duration: 800,
-  decimals: 0 
-})
-
-const { displayValue: totalActividades } = useAnimatedNumber(totalActividadesRaw, { 
-  duration: 800,
-  decimals: 0 
-})
+// Variables para contadores de estadísticas
+const actividadesHoy = ref('-')
+const totalActividades = ref('-')
 
 // Variables computadas para filtros
 const maxDate = ref(new Date().toISOString().split('T')[0])
@@ -1595,13 +1567,6 @@ const paginasVisibles = computed(() => {
   return paginas
 })
 
-// ====================== FUNCIONES UTILITARIAS ======================
-// Formatear números con separadores de miles (Apple-style)
-const formatNumber = (num) => {
-  if (!num && num !== 0) return '0'
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-}
-
 const mostrarPagina = (numeroPagina) => {
   if (numeroPagina === 1) {
     return totalPaginas.value > 1 && (paginaActual.value <= 4 || numeroPagina === 1)
@@ -1614,9 +1579,6 @@ const mostrarPagina = (numeroPagina) => {
 
 onMounted(() => {
   cargarRegistros()
-  
-  // El polling ya se inicia automáticamente por el composable
-  console.log('✅ Componente RegistrosView montado, polling activo')
   
   // Escuchar cambios de conexión
   window.addEventListener('online', () => {
@@ -1655,10 +1617,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // El polling se detiene automáticamente por el composable
   window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('user-session-updated', actualizarPermisosUsuario)
-  console.log('🛝 Componente RegistrosView desmontado')
 })
 
 const cargarRegistros = async () => {
@@ -1742,8 +1702,8 @@ const cargarRegistros = async () => {
     // Aplicar filtros iniciales
     filtrarRegistros()
     
-    // Las estadísticas se actualizan automáticamente via polling
-    console.log('✅ Registros cargados, stats polling activo')
+    // Calcular estadísticas
+    calcularEstadisticas()
     
   } catch (err) {
     console.error('Error al cargar registros:', err)
@@ -3869,19 +3829,6 @@ const logout = () => {
   margin-bottom: 4px;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
   letter-spacing: -0.3px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-}
-
-/* Animación sutil cuando el contador se actualiza (Apple-style) */
-.apple-stat-value.updating {
-  animation: counter-pulse 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes counter-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
 }
 
 .apple-stat-label {

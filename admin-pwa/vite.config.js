@@ -5,7 +5,15 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     port: 3001,
-    host: true
+    host: true,
+    proxy: {
+      '/api': {
+        target: 'https://apipwa.sembrandodatos.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false
+      }
+    }
   },
   build: {
     outDir: 'dist',

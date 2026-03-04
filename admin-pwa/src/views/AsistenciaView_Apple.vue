@@ -241,35 +241,51 @@
 
           <!-- ================== PAGINATION APPLE STYLE ================== -->
           <div v-if="totalPaginas > 1" class="apple-pagination">
-            <button 
-              @click="irAPagina(paginaActual - 1)" 
-              :disabled="paginaActual === 1"
-              class="apple-pagination-btn"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-
-            <div class="apple-pagination-numbers">
+            <div class="apple-pagination-controls">
               <button 
-                v-for="pagina in paginasVisibles" 
-                :key="pagina"
-                @click="irAPagina(pagina)"
-                :class="['apple-pagination-number', { 'active': paginaActual === pagina }]"
+                @click="irAPagina(paginaActual - 1)" 
+                :disabled="paginaActual === 1"
+                class="apple-pagination-btn"
               >
-                {{ pagina }}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              <div class="apple-pagination-numbers">
+                <button 
+                  v-for="pagina in paginasVisibles" 
+                  :key="pagina"
+                  @click="irAPagina(pagina)"
+                  :class="['apple-pagination-number', { 'active': paginaActual === pagina }]"
+                >
+                  {{ pagina }}
+                </button>
+              </div>
+
+              <button 
+                @click="irAPagina(paginaActual + 1)" 
+                :disabled="paginaActual === totalPaginas"
+                class="apple-pagination-btn"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
               </button>
             </div>
-
+            
+            <!-- ================== LOAD MORE BUTTON ================== -->
             <button 
-              @click="irAPagina(paginaActual + 1)" 
-              :disabled="paginaActual === totalPaginas"
-              class="apple-pagination-btn"
+              v-if="hayMasRegistros && asistencias.length > 0"
+              @click="cargarMasAsistencias" 
+              :disabled="cargandoMas"
+              class="apple-load-more-btn"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg v-if="!cargandoMas" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="apple-load-more-icon">
+                <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
+              <div v-else class="apple-load-more-spinner"></div>
+              <span>{{ cargandoMas ? 'Cargando...' : 'Cargar más' }}</span>
             </button>
           </div>
         </div>
@@ -381,7 +397,12 @@ export default {
         { label: 'Ayer', value: 'ayer' },
         { label: 'Esta semana', value: 'semana' },
         { label: 'Este mes', value: 'mes' }
-      ]
+      ],
+      // Carga incremental
+      registrosCargados: 200,
+      registrosPorCarga: 200,
+      cargandoMas: false,
+      hayMasRegistros: true
     }
   },
   computed: {
@@ -424,6 +445,7 @@ export default {
     async cargarAsistencias() {
       this.loading = true
       this.error = null
+      this.registrosCargados = 200
       
       try {
         console.time('⚡ Carga total de asistencias')
@@ -431,9 +453,10 @@ export default {
         // Refrescar estadísticas en tiempo real (Apple-style)
         await this.refreshStats()
         
-        const asistencias = await AsistenciasService.obtenerAsistenciasConUsuarios(200)
+        const asistencias = await AsistenciasService.obtenerAsistenciasConUsuarios(this.registrosCargados)
         
         this.asistencias = asistencias
+        this.hayMasRegistros = asistencias.length === this.registrosCargados
         this.filtrarAsistencias()
         
         console.timeEnd('⚡ Carga total de asistencias')
@@ -443,6 +466,30 @@ export default {
         this.error = 'Error al cargar las asistencias. Por favor, intenta de nuevo.'
       } finally {
         this.loading = false
+      }
+    },
+    
+    async cargarMasAsistencias() {
+      if (this.cargandoMas || !this.hayMasRegistros) return
+      
+      this.cargandoMas = true
+      
+      try {
+        this.registrosCargados += this.registrosPorCarga
+        console.log(`📥 Cargando más asistencias... Total: ${this.registrosCargados}`)
+        
+        const asistencias = await AsistenciasService.obtenerAsistenciasConUsuarios(this.registrosCargados)
+        
+        this.asistencias = asistencias
+        this.hayMasRegistros = asistencias.length === this.registrosCargados
+        this.filtrarAsistencias()
+        
+        console.log(`✅ ${asistencias.length} asistencias totales cargadas`)
+      } catch (error) {
+        console.error('Error al cargar más asistencias:', error)
+        this.error = 'Error al cargar más registros. Por favor, intenta de nuevo.'
+      } finally {
+        this.cargandoMas = false
       }
     },
     
@@ -1321,14 +1368,20 @@ export default {
 .apple-pagination {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 16px;
   padding: 10px 16px;
   border-top: 1px solid #C8E6C9;
   background: #E8F5E9;
   position: sticky;
   bottom: 0;
   z-index: 5;
+}
+
+.apple-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .apple-pagination-btn {
@@ -1391,6 +1444,60 @@ export default {
   background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+}
+
+/* ==================== LOAD MORE BUTTON ==================== */
+.apple-load-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+  white-space: nowrap;
+}
+
+.apple-load-more-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7CB342 0%, #689F38 100%);
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+  transform: translateY(-1px);
+}
+
+.apple-load-more-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+}
+
+.apple-load-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.apple-load-more-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.5;
+}
+
+.apple-load-more-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: apple-spin 0.8s linear infinite;
+}
+
+@keyframes apple-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ==================== STATES ==================== */

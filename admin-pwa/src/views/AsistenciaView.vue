@@ -3,31 +3,32 @@
     <Sidebar @logout="logout" />
     
     <main class="apple-main-content">
-      <!-- ================== HEADER APPLE STYLE ================== -->
-      <header class="apple-page-header">
-        <div class="apple-header-wrapper">
-          <div class="apple-header-left">
-            <div class="apple-icon-circle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                <path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- ================== STICKY WRAPPER FOR HEADER + STATS ================== -->
+      <div class="apple-sticky-wrapper">
+        <!-- ================== HEADER APPLE STYLE ================== -->
+        <header class="apple-page-header">
+          <div class="apple-header-wrapper">
+            <div class="apple-header-left">
+              <div class="apple-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div>
+                <h1 class="apple-page-title">Asistencias</h1>
+                <p class="apple-page-subtitle">{{ totalAsistencias.toLocaleString() }} registros</p>
+              </div>
+            </div>
+            
+            <button @click="cargarAsistencias" class="apple-refresh-button" :disabled="loading">
+              <svg :class="{ 'apple-spin': loading }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-            </div>
-            <div>
-              <h1 class="apple-page-title">Asistencias</h1>
-              <p class="apple-page-subtitle">{{ totalAsistencias.toLocaleString() }} registros</p>
-            </div>
+            </button>
           </div>
-          
-          <button @click="cargarAsistencias" class="apple-refresh-button" :disabled="loading">
-            <svg :class="{ 'apple-spin': loading }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
-      </header>
+        </header>
 
-      <div class="apple-content-wrapper">
         <!-- ================== STATS CARDS APPLE STYLE ================== -->
         <div class="apple-stats-section">
           <div class="apple-stats-grid">
@@ -150,7 +151,9 @@
           </div>
         </div>
         </div>
+      </div>  <!-- Close apple-sticky-wrapper -->
 
+      <div class="apple-content-wrapper">
         <!-- ================== TABLE APPLE STYLE ================== -->
         <div class="apple-table-container">
           <div v-if="loading && asistencias.length === 0" class="apple-loading">
@@ -744,6 +747,14 @@ export default {
   padding: 8px 16px 0 16px;
 }
 
+/* ==================== STICKY WRAPPER ==================== */
+.apple-sticky-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 20px;
+}
+
 /* ==================== HEADER ==================== */
 .apple-page-header {
   background: linear-gradient(135deg, 
@@ -752,12 +763,9 @@ export default {
     #1B5E20 100%);
   border-bottom: none;
   padding: 12px 20px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
   border-radius: 28px 28px 0 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid #8BC34A;
   border-bottom: none;
 }
 
@@ -865,9 +873,9 @@ export default {
   background: white;
   border-radius: 0 0 28px 28px;
   padding: 24px 20px 20px 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  margin-bottom: 0;
+  box-shadow: none;
+  border: 2px solid #8BC34A;
   border-top: none;
   margin-top: -1px;
 }

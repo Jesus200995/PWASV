@@ -3,8 +3,10 @@
     <Sidebar @logout="logout" />
     
     <main class="apple-main-content">
-      <!-- ================== HEADER APPLE STYLE ================== -->
-      <header class="apple-page-header">
+      <!-- ================== STICKY WRAPPER FOR HEADER + STATS ================== -->
+      <div class="apple-sticky-wrapper">
+        <!-- ================== HEADER APPLE STYLE ================== -->
+        <header class="apple-page-header">
         <div class="apple-header-wrapper">
           <div class="apple-header-left">
             <div class="apple-icon-circle">
@@ -107,7 +109,9 @@
           </div>
         </div>
         </div>
+      </div>  <!-- Close apple-sticky-wrapper -->
 
+      <div class="apple-content-wrapper">
         <!-- ================== TABLE APPLE STYLE ================== -->
         <div class="apple-table-container">
           <div v-if="loading && asistencias.length === 0" class="apple-loading">
@@ -646,6 +650,14 @@ export default {
   padding: 8px 16px 0 16px;
 }
 
+/* ==================== STICKY WRAPPER ==================== */
+.apple-sticky-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 20px;
+}
+
 /* ==================== HEADER ==================== */
 .apple-page-header {
   background: linear-gradient(135deg, 
@@ -654,12 +666,10 @@ export default {
     #1B5E20 100%);
   border-bottom: none;
   padding: 12px 20px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
   border-radius: 28px 28px 0 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid #8BC34A;
+  border-bottom: none;
 }
 
 .apple-header-wrapper {
@@ -766,10 +776,11 @@ export default {
   background: white;
   border-radius: 0 0 28px 28px;
   padding: 24px 20px 20px 20px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
   margin-top: -1px;
   border-top: none;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
+  border: 2px solid #8BC34A;
 }
 
 .apple-stats-grid {

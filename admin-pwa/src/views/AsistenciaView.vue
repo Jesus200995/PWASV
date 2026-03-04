@@ -1186,6 +1186,9 @@ export default {
   overflow-x: auto;
   flex: 1;
   max-height: 100%;
+  -webkit-overflow-scrolling: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
 }
 
 /* Scrollbar estilo Apple */
@@ -1685,12 +1688,16 @@ export default {
   
   .apple-table-container {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: auto;
+    overscroll-behavior-x: contain;
     border-radius: 16px;
+    touch-action: pan-x pan-y;
   }
   
   .apple-table-wrapper {
     overflow-x: auto;
+    -webkit-overflow-scrolling: auto;
+    overscroll-behavior: contain;
   }
   
   .apple-table {

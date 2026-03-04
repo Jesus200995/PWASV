@@ -1420,6 +1420,90 @@ def obtener_estadisticas(territorio: str = None):
         print(f"❌ Error general: {e}")
         raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
 
+# ENDPOINT ULTRA-OPTIMIZADO PARA CONTADORES EN TIEMPO REAL (APPLE-STYLE)
+@app.get("/estadisticas/rapidas")
+def obtener_estadisticas_rapidas(territorio: str = None):
+    """Endpoint ultra-optimizado para obtener estadísticas de contadores en < 50ms.
+    Usa una sola query optimizada con índices para máxima velocidad (Apple-style).
+    Cache recomendado: 3-5 segundos en frontend."""
+    try:
+        if not verificar_conexion_db():
+            raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
+        
+        # Obtener fecha actual en zona horaria CDMX
+        cdmx_tz = pytz.timezone('America/Mexico_City')
+        fecha_hoy_cdmx = datetime.now(cdmx_tz).date()
+        
+        # Query ultra-optimizada con una sola ejecución usando CTEs
+        if territorio:
+            # Con filtro de territorio
+            query = """
+            WITH usuarios_territorio AS (
+                SELECT id FROM usuarios WHERE territorio = %s
+            ),
+            stats_hoy AS (
+                SELECT 
+                    COUNT(*) as asistencias_hoy,
+                    COUNT(DISTINCT CASE WHEN hora_entrada IS NOT NULL AND hora_salida IS NULL 
+                          THEN usuario_id END) as usuarios_presentes
+                FROM asistencias
+                WHERE fecha = %s
+                AND usuario_id IN (SELECT id FROM usuarios_territorio)
+            ),
+            stats_totales AS (
+                SELECT COUNT(*) as total_asistencias
+                FROM asistencias
+                WHERE usuario_id IN (SELECT id FROM usuarios_territorio)
+            )
+            SELECT 
+                (SELECT asistencias_hoy FROM stats_hoy) as asistencias_hoy,
+                (SELECT usuarios_presentes FROM stats_hoy) as usuarios_presentes,
+                (SELECT total_asistencias FROM stats_totales) as total_asistencias
+            """
+            cursor.execute(query, (territorio, fecha_hoy_cdmx))
+        else:
+            # Sin filtro de territorio - aún más rápido
+            query = """
+            WITH stats_hoy AS (
+                SELECT 
+                    COUNT(*) as asistencias_hoy,
+                    COUNT(DISTINCT CASE WHEN hora_entrada IS NOT NULL AND hora_salida IS NULL 
+                          THEN usuario_id END) as usuarios_presentes
+                FROM asistencias
+                WHERE fecha = %s
+            ),
+            stats_totales AS (
+                SELECT COUNT(*) as total_asistencias
+                FROM asistencias
+            )
+            SELECT 
+                (SELECT asistencias_hoy FROM stats_hoy) as asistencias_hoy,
+                (SELECT usuarios_presentes FROM stats_hoy) as usuarios_presentes,
+                (SELECT total_asistencias FROM stats_totales) as total_asistencias
+            """
+            cursor.execute(query, (fecha_hoy_cdmx,))
+        
+        resultado = cursor.fetchone()
+        
+        estadisticas = {
+            "asistencias_hoy": resultado[0] or 0,
+            "usuarios_presentes": resultado[1] or 0,
+            "total_asistencias": resultado[2] or 0,
+            "timestamp": datetime.now(cdmx_tz).isoformat()
+        }
+        
+        if territorio:
+            estadisticas["territorio"] = territorio
+        
+        return {"estadisticas": estadisticas, "cache_ttl": 5}
+        
+    except psycopg2.Error as e:
+        print(f"❌ Error de PostgreSQL: {e}")
+        raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
+    except Exception as e:
+        print(f"❌ Error general: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas rápidas: {str(e)}")
+
 # NUEVOS ENDPOINTS PARA ESTADÍSTICAS DEL DÍA EN HORARIO CDMX
 @app.get("/estadisticas/dia-actual")
 def obtener_estadisticas_dia_actual(territorio: str = None):

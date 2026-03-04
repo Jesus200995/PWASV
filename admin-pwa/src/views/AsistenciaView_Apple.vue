@@ -403,10 +403,8 @@ export default {
       return paginas
     }
   },
-  async mounted() {
-    // Precargar datos en segundo plano para performance Apple-style
-    AsistenciasService.precargarDatos()
-    await this.cargarAsistencias()
+  mounted() {
+    this.cargarAsistencias()
   },
   methods: {
     async cargarAsistencias() {
@@ -444,8 +442,7 @@ export default {
         
         const response = await fetch(url, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          priority: 'high'
+          headers: { 'Content-Type': 'application/json' }
         })
         
         if (!response.ok) throw new Error(`Error ${response.status}`)
@@ -528,12 +525,6 @@ export default {
     irAPagina(numeroPagina) {
       if (numeroPagina >= 1 && numeroPagina <= this.totalPaginas) {
         this.paginaActual = numeroPagina
-        
-        // Scroll suave al inicio (Apple-style)
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        })
       }
     },
     
@@ -595,16 +586,10 @@ export default {
     },
     
     logout() {
-      // Limpiar caché al cerrar sesión
-      AsistenciasService.limpiarCache()
       localStorage.removeItem('admin_token')
       localStorage.removeItem('admin_user')
       this.$router.push('/login')
     }
-  },
-  beforeUnmount() {
-    // Limpiar al desmontar el componente
-    AsistenciasService.limpiarCache()
   }
 }
 </script>
@@ -1234,7 +1219,7 @@ export default {
 .apple-loading p,
 .apple-error p,
 .apple-empty p {
-  fontSize: 16px;
+  font-size: 16px;
   color: var(--apple-gray-4);
   margin-top: 12px;
 }

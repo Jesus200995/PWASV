@@ -1,5 +1,12 @@
 <template>
   <div class="apple-asistencia-container">
+    <!-- Apple Dynamic Background -->
+    <div class="apple-dynamic-bg">
+      <div class="apple-orb apple-orb-1"></div>
+      <div class="apple-orb apple-orb-2"></div>
+      <div class="apple-orb apple-orb-3"></div>
+    </div>
+    
     <Sidebar @logout="logout" />
     
     <main class="apple-main-content">
@@ -635,10 +642,62 @@ export default {
 .apple-asistencia-container {
   display: flex;
   min-height: 100vh;
-  background: var(--apple-gray-1);
+  background: linear-gradient(180deg, #f0fdf4 0%, #ecfdf5 50%, #f0fdf4 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dynamic Background */
+.apple-dynamic-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.apple-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.6;
+  animation: appleOrbFloat 20s ease-in-out infinite;
+}
+
+.apple-orb-1 {
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  right: 15%;
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.4), rgba(102, 187, 106, 0.3));
+}
+
+.apple-orb-2 {
+  width: 250px;
+  height: 250px;
+  top: 50%;
+  left: 10%;
+  background: linear-gradient(135deg, rgba(165, 214, 167, 0.35), rgba(129, 199, 132, 0.2));
+  animation-delay: -7s;
+}
+
+.apple-orb-3 {
+  width: 280px;
+  height: 280px;
+  bottom: 15%;
+  left: 25%;
+  background: linear-gradient(135deg, rgba(102, 187, 106, 0.35), rgba(76, 175, 80, 0.25));
+  animation-delay: -14s;
+}
+
+@keyframes appleOrbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(20px, -30px) scale(1.05); }
+  50% { transform: translate(-10px, 20px) scale(0.95); }
+  75% { transform: translate(30px, 10px) scale(1.02); }
 }
 
 .apple-main-content {
@@ -648,6 +707,8 @@ export default {
   overflow-x: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 8px 16px 0 16px;
+  position: relative;
+  z-index: 1;
 }
 
 /* ==================== STICKY WRAPPER ==================== */
@@ -1262,20 +1323,20 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 16px 20px;
-  border-top: 1px solid var(--apple-gray-2);
-  background: white;
+  padding: 10px 16px;
+  border-top: 1px solid #C8E6C9;
+  background: #E8F5E9;
   position: sticky;
   bottom: 0;
   z-index: 5;
 }
 
 .apple-pagination-btn {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1297,8 +1358,8 @@ export default {
 }
 
 .apple-pagination-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   stroke: white;
   stroke-width: 2.5;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
@@ -1310,12 +1371,12 @@ export default {
 }
 
 .apple-pagination-number {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: transparent;
   border: none;
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--apple-text);
   cursor: pointer;

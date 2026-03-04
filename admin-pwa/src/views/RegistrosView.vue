@@ -1,246 +1,327 @@
 <template>
   <div class="registros-container">
-    <!-- Apple Dynamic Background -->
-    <div class="apple-dynamic-bg">
-      <div class="apple-orb apple-orb-1"></div>
-      <div class="apple-orb apple-orb-2"></div>
-      <div class="apple-orb apple-orb-3"></div>
-    </div>
-    
     <Sidebar @logout="logout" />
     
-    <main class="main-content">
-      <!-- ================== STICKY WRAPPER FOR HEADER + STATS ================== -->
-      <div class="apple-sticky-wrapper">
-        <!-- ================== HEADER APPLE STYLE ================== -->
-        <header class="apple-page-header">
-          <div class="apple-header-wrapper">
-            <div class="apple-header-left">
-              <div class="apple-icon-circle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <polyline points="14,2 14,8 20,8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="16" y1="13" x2="8" y2="13" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="16" y1="17" x2="8" y2="17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <div>
-                <h1 class="apple-page-title">Registros</h1>
-                <p class="apple-page-subtitle">{{ registros.length.toLocaleString() }} registros totales</p>
-              </div>
-            </div>
-            
-            <button @click="cargarRegistros" class="apple-refresh-button" :disabled="loading">
-              <svg :class="{ 'apple-spin': loading }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <main class="main-content">      <header class="page-header">
+        <div class="header-content">
+          <div class="header-main">
+            <div class="header-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
               </svg>
+            </div>
+            <div class="header-text">
+              <h1 class="header-title">Gestión de Registros</h1>
+              <p class="header-subtitle">Administra todos los registros de usuarios en la aplicación</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button @click="cargarRegistros" class="refresh-btn" :disabled="loading">
+              <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+              {{ loading ? 'Cargando...' : 'Actualizar' }}
             </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <!-- ================== STATS CARDS APPLE STYLE ================== -->
-        <div class="apple-stats-section">
-          <div class="apple-stats-grid">
-            <div class="apple-stat-card">
-              <div class="apple-stat-icon blue">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              </div>
-              <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(actividadesHoy) }}</div>
-                <div class="apple-stat-label">Hoy</div>
-              </div>
-            </div>
-
-            <div class="apple-stat-card">
-              <div class="apple-stat-icon green">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
-                  <circle cx="9" cy="7" r="4" stroke-width="2"/>
-                </svg>
-              </div>
-              <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(totalActividades) }}</div>
-                <div class="apple-stat-label">Total</div>
-              </div>
-            </div>
-
-            <div class="apple-stat-card">
-              <div class="apple-stat-icon purple">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-              </div>
-              <div class="apple-stat-content">
-                <div class="apple-stat-value">{{ registrosFiltrados.length }}</div>
-                <div class="apple-stat-label">Filtrados</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ================== SEARCH & FILTERS INSIDE STATS ================== -->
-          <div class="apple-search-section">
-            <div class="apple-search-row">
-              <div class="apple-search-container">
-                <svg class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <circle cx="11" cy="11" r="8" stroke-width="2.5"/>
-                  <path d="m21 21-4.35-4.35" stroke-width="2.5" stroke-linecap="round"/>
+      <div class="page-content">
+        <!-- Panel de filtros avanzados -->
+        <div class="advanced-filters">
+          <!-- Filtros principales -->
+          <div class="filters-main">
+            <!-- Contenedor izquierdo con filtros -->
+            <div class="filters-left">
+              <!-- Barra de búsqueda -->
+              <div class="search-box">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
                 </svg>
                 <input 
                   v-model="searchTerm" 
-                  @input="buscarEnTiempoReal"
                   type="text" 
-                  placeholder="Buscar por CURP, correo, nombre, descripción..." 
-                  class="apple-search-input"
+                  placeholder="Buscar por CURP, correo, nombre, descripción o ubicación..." 
+                  class="search-input"
+                  @input="buscarEnTiempoReal"
                 >
-                <button v-if="searchTerm && !buscandoUsuario" @click="limpiarBusqueda" class="apple-clear-btn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                    <line x1="15" y1="9" x2="9" y2="15" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="9" y1="9" x2="15" y2="15" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                </button>
-                <span v-if="buscandoUsuario" class="apple-search-loading">
-                  <svg class="apple-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                <span v-if="buscandoUsuario" class="search-loading">
+                  <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
                   </svg>
                 </span>
+                <button v-if="searchTerm && !buscandoUsuario" @click="limpiarBusqueda" class="clear-search-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               </div>
-
-              <div class="apple-filter-controls">
-                <button 
-                  @click="limpiarTodosFiltros" 
-                  class="apple-filter-btn reset"
-                  title="Limpiar filtros"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M3 6h18M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  <span>Limpiar</span>
-                </button>
-                <button 
-                  @click="mostrarFiltrosAvanzados = !mostrarFiltrosAvanzados" 
-                  class="apple-filter-btn"
-                  :class="{ active: mostrarFiltrosAvanzados }"
-                  title="Filtros avanzados"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  <span>Filtros</span>
-                </button>
-                <button 
-                  @click="exportarRegistros('csv')" 
-                  class="apple-filter-btn export"
-                  title="Exportar a CSV"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  <span>CSV</span>
-                </button>
+              
+              <!-- Filtro de rango de fecha con datepickers -->
+              <div class="date-range-filter">
+                <div class="date-picker-container">
+                  <label class="date-label">Desde:</label>
+                  <input 
+                    type="date" 
+                    v-model="filtroFechaInicio" 
+                    class="date-input" 
+                    :max="filtroFechaFin || maxDate"
+                    @change="filtrarRegistros"
+                  >
+                </div>
+                <div class="date-picker-container">
+                  <label class="date-label">Hasta:</label>
+                  <input 
+                    type="date" 
+                    v-model="filtroFechaFin" 
+                    class="date-input" 
+                    :min="filtroFechaInicio"
+                    :max="maxDate"
+                    @change="filtrarRegistros"
+                  >
+                </div>
+                
+                <!-- Selectores rápidos de fecha -->
+                <div class="quick-date-filters">
+                  <button 
+                    @click="seleccionarFechaRapida('hoy')" 
+                    :class="['quick-date-btn', filtroRapido === 'hoy' ? 'active' : '']"
+                  >
+                    Hoy
+                  </button>
+                  <button 
+                    @click="seleccionarFechaRapida('ayer')" 
+                    :class="['quick-date-btn', filtroRapido === 'ayer' ? 'active' : '']"
+                  >
+                    Ayer
+                  </button>
+                  <button 
+                    @click="seleccionarFechaRapida('semana')" 
+                    :class="['quick-date-btn', filtroRapido === 'semana' ? 'active' : '']"
+                  >
+                    Esta semana
+                  </button>
+                  <button 
+                    @click="seleccionarFechaRapida('mes')" 
+                    :class="['quick-date-btn', filtroRapido === 'mes' ? 'active' : '']"
+                  >
+                    Este mes
+                  </button>
+                  <button 
+                    v-if="hayFiltrosFechas" 
+                    @click="limpiarFiltrosFechas" 
+                    class="clear-date-btn"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Limpiar
+                  </button>
+                </div>
               </div>
             </div>
-
-            <!-- Quick Date Filters -->
-            <div class="apple-quick-filters">
-              <button 
-                @click="seleccionarFechaRapida('hoy')" 
-                :class="['apple-filter-chip', { 'active': filtroRapido === 'hoy' }]"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                  <path d="M12 6v6l4 2" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <span>Hoy</span>
-              </button>
-              <button 
-                @click="seleccionarFechaRapida('ayer')" 
-                :class="['apple-filter-chip', { 'active': filtroRapido === 'ayer' }]"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M3 3v5h5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span>Ayer</span>
-              </button>
-              <button 
-                @click="seleccionarFechaRapida('semana')" 
-                :class="['apple-filter-chip', { 'active': filtroRapido === 'semana' }]"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="8" y1="2" x2="8" y2="6" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
-                </svg>
-                <span>Esta semana</span>
-              </button>
-              <button 
-                @click="seleccionarFechaRapida('mes')" 
-                :class="['apple-filter-chip', { 'active': filtroRapido === 'mes' }]"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
-                  <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
-                </svg>
-                <span>Este mes</span>
-              </button>
-            </div>
-
-            <!-- Filtros Avanzados Expandibles -->
-            <div v-if="mostrarFiltrosAvanzados" class="apple-advanced-filters">
-              <div class="advanced-grid">
-                <div class="filter-item">
-                  <label>Usuario</label>
-                  <select v-model="filtroUsuario" @change="filtrarRegistros">
-                    <option value="">Todos</option>
-                    <option v-for="usuario in usuariosUnicos" :key="usuario.id" :value="usuario.id">
-                      {{ usuario.nombre_completo }}
-                    </option>
-                  </select>
+            
+            <!-- Contadores de estadísticas en el lado derecho -->
+            <div class="filters-right">
+              <div class="visor-stats-compact">
+                <div class="compact-stat-card">
+                  <div class="compact-stat-icon">
+                    <!-- Icono de calendario/actividades hoy -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" 
+                            fill="#4CAF50"/>
+                      <circle cx="12" cy="6" r="2" fill="#66BB6A" opacity="0.8"/>
+                      <path d="M16 11h2v2h-2zm0 3h2v2h-2z" fill="#4CAF50" opacity="0.6"/>
+                    </svg>
+                  </div>
+                  <div class="compact-stat-info">
+                    <div class="compact-stat-value">{{ actividadesHoy }}</div>
+                    <div class="compact-stat-label">Actividades hoy</div>
+                  </div>
                 </div>
-                <div class="filter-item">
-                  <label>Tipo</label>
-                  <select v-model="filtroTipoActividad" @change="filtrarRegistros">
-                    <option value="">Todos</option>
-                    <option value="campo">Campo</option>
-                    <option value="gabinete">Gabinete</option>
-                  </select>
+                
+                <div class="compact-stat-card">
+                  <div class="compact-stat-icon">
+                    <!-- Icono de estadísticas/total actividades -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" 
+                            fill="#4CAF50"/>
+                      <circle cx="5" cy="19" r="2" fill="#66BB6A" opacity="0.7"/>
+                      <circle cx="12" cy="12" r="1.5" fill="#4CAF50" opacity="0.8"/>
+                      <circle cx="19" cy="5" r="1.5" fill="#43A047"/>
+                    </svg>
+                  </div>
+                  <div class="compact-stat-info">
+                    <div class="compact-stat-value">{{ totalActividades }}</div>
+                    <div class="compact-stat-label">Total actividades</div>
+                  </div>
                 </div>
-                <div class="filter-item">
-                  <label>Desde</label>
-                  <input type="date" v-model="filtroFechaInicio" @change="filtrarRegistros" :max="filtroFechaFin || maxDate">
-                </div>
-                <div class="filter-item">
-                  <label>Hasta</label>
-                  <input type="date" v-model="filtroFechaFin" @change="filtrarRegistros" :min="filtroFechaInicio" :max="maxDate">
-                </div>
-              </div>
-              <div class="filter-checkboxes">
-                <label class="checkbox-label">
-                  <input type="checkbox" v-model="filtroConFoto" @change="filtrarRegistros">
-                  <span>Con foto</span>
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" v-model="filtroSinFoto" @change="filtrarRegistros">
-                  <span>Sin foto</span>
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" v-model="filtroConDescripcion" @change="filtrarRegistros">
-                  <span>Con descripción</span>
-                </label>
               </div>
             </div>
           </div>
-        </div>
-      </div>  <!-- Close apple-sticky-wrapper -->
+          
+          <!-- Filtros adicionales y acciones (expandibles) -->
+          <div class="filters-advanced" v-show="mostrarFiltrosAvanzados">
+            <div class="advanced-filters-grid">
+              <!-- Filtro por ordenamiento -->
+              <div class="filter-group">
+                <label class="filter-label">Ordenar por</label>
+                <div class="sort-options">
+                  <button 
+                    @click="ordenarPor('id')"
+                    :class="['sort-btn', { active: campoOrdenamiento === 'id' }]"
+                    title="Ordenar por ID"
+                  >
+                    ID
+                    <svg v-if="campoOrdenamiento === 'id'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                      <path v-else d="m7 9 5-5 5 5"/>
+                    </svg>
+                  </button>
+                  <button 
+                    @click="ordenarPor('usuario')"
+                    :class="['sort-btn', { active: campoOrdenamiento === 'usuario' }]"
+                    title="Ordenar por Usuario"
+                  >
+                    Usuario
+                    <svg v-if="campoOrdenamiento === 'usuario'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                      <path v-else d="m7 9 5-5 5 5"/>
+                    </svg>
+                  </button>
+                  <button 
+                    @click="ordenarPor('tipo')"
+                    :class="['sort-btn', { active: campoOrdenamiento === 'tipo' }]"
+                    title="Ordenar por Tipo"
+                  >
+                    Tipo
+                    <svg v-if="campoOrdenamiento === 'tipo'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                      <path v-else d="m7 9 5-5 5 5"/>
+                    </svg>
+                  </button>
+                  <button 
+                    @click="ordenarPor('fecha')"
+                    :class="['sort-btn', { active: campoOrdenamiento === 'fecha' }]"
+                    title="Ordenar por Fecha"
+                  >
+                    Fecha
+                    <svg v-if="campoOrdenamiento === 'fecha'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path v-if="direccionOrdenamiento === 'asc'" d="m7 15 5 5 5-5"/>
+                      <path v-else d="m7 9 5-5 5 5"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Filtro por usuario -->
+              <div class="filter-group">
+                <label class="filter-label">Usuario</label>
+                <select v-model="filtroUsuario" @change="filtrarRegistros" class="filter-select">
+                  <option value="">Todos los usuarios</option>
+                  <option v-for="usuario in usuariosUnicos" :key="usuario.id" :value="usuario.id">
+                    {{ usuario.nombre_completo }}
+                  </option>
+                </select>
+              </div>
 
-      <div class="page-content">
+              <!-- Filtro por tipo de actividad -->
+              <div class="filter-group">
+                <label class="filter-label">Tipo de Actividad</label>
+                <select v-model="filtroTipoActividad" @change="filtrarRegistros" class="filter-select">
+                  <option value="">Todos los tipos</option>
+                  <option value="campo">Campo</option>
+                  <option value="gabinete">Gabinete</option>
+                </select>
+              </div>
+
+              <!-- Filtro por estado de foto -->
+              <div class="filter-group">
+                <label class="filter-label">Estado de Foto</label>
+                <div class="filter-options">
+                  <label class="checkbox-option">
+                    <input type="checkbox" v-model="filtroConFoto" @change="filtrarRegistros">
+                    <span>Con foto</span>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" v-model="filtroSinFoto" @change="filtrarRegistros">
+                    <span>Sin foto</span>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" v-model="filtroConDescripcion" @change="filtrarRegistros">
+                    <span>Con descripción</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="advanced-actions">
+              <button @click="exportarRegistros('csv')" class="export-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Exportar CSV
+              </button>
+              <button @click="exportarRegistros('excel')" class="export-btn excel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Exportar Excel
+              </button>
+              <button @click="imprimirRegistros" class="export-btn print">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Imprimir
+              </button>
+            </div>
+          </div>
+          
+          <!-- Botón para mostrar/ocultar filtros avanzados -->
+          <button @click="mostrarFiltrosAvanzados = !mostrarFiltrosAvanzados" class="toggle-filters-btn">
+            {{ mostrarFiltrosAvanzados ? 'Ocultar filtros avanzados' : 'Mostrar filtros avanzados' }}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 :style="{ transform: mostrarFiltrosAvanzados ? 'rotate(180deg)' : 'rotate(0deg)' }">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          
+          <!-- Resumen de filtros activos -->
+          <div v-if="filtrosActivos.length > 0" class="active-filters">
+            <span class="active-filters-label">Filtros activos:</span>
+            <div class="active-filter-tags">
+              <div v-for="(filtro, index) in filtrosActivos" :key="index" class="filter-tag">
+                {{ filtro.label }}
+                <button @click="quitarFiltro(filtro.tipo, filtro.valor)" class="remove-filter">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              <button @click="limpiarTodosFiltros" class="clear-all-filters">
+                Limpiar todos
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- Tabla de registros -->
         <div class="registros-section">
@@ -345,16 +426,8 @@
                   <td class="col-id">#{{ registro.id }}</td>
                   <td class="col-usuario">
                     <div class="usuario-info">
-                      <div class="usuario-avatar">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                          <circle cx="12" cy="7" r="4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                      </div>
-                      <div class="usuario-text">
-                        <strong>{{ registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}` }}</strong>
-                        <small>{{ registro.usuario?.correo || 'No disponible' }}</small>
-                      </div>
+                      <strong>{{ registro.usuario?.nombre_completo || `Usuario ${registro.usuario_id}` }}</strong>
+                      <small>{{ registro.usuario?.correo || 'No disponible' }}</small>
                     </div>
                   </td>
                   <td class="col-foto">
@@ -1323,7 +1396,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import * as XLSX from 'xlsx'
@@ -1331,8 +1404,6 @@ import Sidebar from '../components/Sidebar.vue'
 import { usuariosService } from '../services/usuariosService.js'
 import authService from '../services/authService.js'
 import notificacionesService from '../services/notificacionesService.js'
-import { useRealtimeStats } from '../composables/useRealtimeStats.js'
-import { useAnimatedNumber } from '../composables/useAnimatedNumber.js'
 
 const router = useRouter()
 
@@ -1461,35 +1532,9 @@ const cargarMasRegistros = async () => {
   }
 }
 
-// ====================== ESTADÍSTICAS EN TIEMPO REAL (APPLE-STYLE) ======================
-// Sistema de polling inteligente con caché y animaciones fluidas
-const {
-  stats: realtimeStats,
-  isLoading: statsLoading,
-  refresh: refreshStats,
-  startPolling,
-  stopPolling
-} = useRealtimeStats({
-  pollingInterval: 5000, // Actualizar cada 5 segundos
-  enableCache: true,
-  cacheTTL: 5000,
-  enablePolling: true // Habilitado para actualización automática
-})
-
-// Valores reactivos para los contadores (sin animación, valores brutos)
-const actividadesHoyRaw = computed(() => realtimeStats.value?.registros_hoy || 0)
-const totalActividadesRaw = computed(() => realtimeStats.value?.total_registros || 0)
-
-// Animaciones Apple-style para los contadores (transiciones suaves de 800ms)
-const { displayValue: actividadesHoy } = useAnimatedNumber(actividadesHoyRaw, { 
-  duration: 800,
-  decimals: 0 
-})
-
-const { displayValue: totalActividades } = useAnimatedNumber(totalActividadesRaw, { 
-  duration: 800,
-  decimals: 0 
-})
+// Variables para contadores de estadísticas
+const actividadesHoy = ref('-')
+const totalActividades = ref('-')
 
 // Variables computadas para filtros
 const maxDate = ref(new Date().toISOString().split('T')[0])
@@ -1595,13 +1640,6 @@ const paginasVisibles = computed(() => {
   return paginas
 })
 
-// ====================== FUNCIONES UTILITARIAS ======================
-// Formatear números con separadores de miles (Apple-style)
-const formatNumber = (num) => {
-  if (!num && num !== 0) return '0'
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-}
-
 const mostrarPagina = (numeroPagina) => {
   if (numeroPagina === 1) {
     return totalPaginas.value > 1 && (paginaActual.value <= 4 || numeroPagina === 1)
@@ -1614,9 +1652,6 @@ const mostrarPagina = (numeroPagina) => {
 
 onMounted(() => {
   cargarRegistros()
-  
-  // El polling ya se inicia automáticamente por el composable
-  console.log('✅ Componente RegistrosView montado, polling activo')
   
   // Escuchar cambios de conexión
   window.addEventListener('online', () => {
@@ -1655,10 +1690,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // El polling se detiene automáticamente por el composable
   window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('user-session-updated', actualizarPermisosUsuario)
-  console.log('🛝 Componente RegistrosView desmontado')
 })
 
 const cargarRegistros = async () => {
@@ -1742,8 +1775,8 @@ const cargarRegistros = async () => {
     // Aplicar filtros iniciales
     filtrarRegistros()
     
-    // Las estadísticas se actualizan automáticamente via polling
-    console.log('✅ Registros cargados, stats polling activo')
+    // Calcular estadísticas
+    calcularEstadisticas()
     
   } catch (err) {
     console.error('Error al cargar registros:', err)
@@ -3604,609 +3637,34 @@ const logout = () => {
   min-height: 100vh;
   width: 100%;
   overflow: hidden;
-  background: linear-gradient(180deg, #f0fdf4 0%, #ecfdf5 50%, #f0fdf4 100%);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  position: relative;
-}
-
-/* Apple Dynamic Background */
-.apple-dynamic-bg {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.apple-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.6;
-  animation: appleOrbFloat 20s ease-in-out infinite;
-}
-
-.apple-orb-1 {
-  width: 300px;
-  height: 300px;
-  top: 10%;
-  right: 15%;
-  background: linear-gradient(135deg, rgba(139, 195, 74, 0.4), rgba(102, 187, 106, 0.3));
-}
-
-.apple-orb-2 {
-  width: 250px;
-  height: 250px;
-  top: 50%;
-  left: 10%;
-  background: linear-gradient(135deg, rgba(165, 214, 167, 0.35), rgba(129, 199, 132, 0.2));
-  animation-delay: -7s;
-}
-
-.apple-orb-3 {
-  width: 280px;
-  height: 280px;
-  bottom: 15%;
-  left: 25%;
-  background: linear-gradient(135deg, rgba(102, 187, 106, 0.35), rgba(76, 175, 80, 0.25));
-  animation-delay: -14s;
-}
-
-@keyframes appleOrbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(20px, -30px) scale(1.05); }
-  50% { transform: translate(-10px, 20px) scale(0.95); }
-  75% { transform: translate(30px, 10px) scale(1.02); }
 }
 
 .main-content {
   flex: 1;
   margin-left: min(220px, 18vw);
   width: calc(100vw - min(220px, 18vw));
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
   min-height: 100vh;
   position: relative;
   box-sizing: border-box;
   overflow-x: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 8px 16px 0 16px;
-  z-index: 1;
-}
-
-/* ====================== APPLE STICKY WRAPPER ====================== */
-.apple-sticky-wrapper {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: transparent;
-  margin-bottom: 20px;
-}
-
-/* ====================== APPLE PAGE HEADER ====================== */
-.apple-page-header {
-  background: linear-gradient(135deg, #388E3C 0%, #2E7D32 50%, #1B5E20 100%);
-  color: white;
-  border-radius: 28px 28px 0 0;
-  border: 2px solid #8BC34A;
-  border-bottom: none;
-  padding: 10px 16px;
-  box-shadow: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.apple-header-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 100%;
-}
-
-.apple-header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.apple-icon-circle {
-  width: 28px;
-  height: 28px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  flex-shrink: 0;
-}
-
-.apple-icon-circle svg {
-  width: 14px;
-  height: 14px;
-  color: white;
-  stroke-width: 2.5;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-}
-
-.apple-page-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 0;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-  letter-spacing: -0.3px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-
-.apple-page-subtitle {
-  font-size: 10px;
-  margin: 2px 0 0 0;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-}
-
-.apple-refresh-button {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.apple-refresh-button svg {
-  width: 14px;
-  height: 14px;
-  stroke-width: 2;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-}
-
-.apple-refresh-button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.apple-refresh-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.apple-spin {
-  animation: apple-spin-animation 1s linear infinite;
-}
-
-@keyframes apple-spin-animation {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* ====================== APPLE STATS SECTION ====================== */
-.apple-stats-section {
-  background: white;
-  border-radius: 0 0 28px 28px;
-  border: 2px solid #8BC34A;
-  border-top: none;
-  padding: 18px 16px 16px 16px;
-  box-shadow: none;
-  margin-top: -1px;
-}
-
-.apple-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.apple-stat-card {
-  background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
-  border-radius: 14px;
-  padding: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-}
-
-.apple-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-.apple-stat-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.apple-stat-icon.blue {
-  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
-}
-
-.apple-stat-icon.green {
-  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
-}
-
-.apple-stat-icon.purple {
-  background: linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%);
-}
-
-.apple-stat-icon svg {
-  width: 16px;
-  height: 16px;
-  color: white;
-  stroke: white;
-  stroke-width: 2.5;
-  fill: none;
-}
-
-.apple-stat-content {
-  flex: 1;
-}
-
-.apple-stat-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1d1d1f;
-  line-height: 1;
-  margin-bottom: 4px;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-  letter-spacing: -0.3px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-}
-
-/* Animación sutil cuando el contador se actualiza (Apple-style) */
-.apple-stat-value.updating {
-  animation: counter-pulse 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes counter-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.apple-stat-label {
-  font-size: 10px;
-  color: #86868b;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-}
-
-/* ====================== APPLE SEARCH SECTION ====================== */
-.apple-search-section {
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  padding-top: 12px;
-  margin-top: 4px;
-}
-
-.apple-search-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.apple-search-container {
-  flex: 1;
-  min-width: 280px;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.apple-search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
-  color: #007AFF;
-  stroke: #007AFF;
-  stroke-width: 2.5;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.apple-search-input {
-  width: 100%;
-  height: 38px;
-  border-radius: 19px;
-  border: 1.5px solid transparent;
-  background: #f5f5f7;
-  padding: 0 40px 0 40px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-  transition: all 0.25s ease;
-}
-
-.apple-search-input::placeholder {
-  color: #86868b;
-  font-size: 12px;
-}
-
-.apple-search-input:hover {
-  background: rgba(0, 122, 255, 0.04);
-  border-color: rgba(0, 122, 255, 0.08);
-}
-
-.apple-search-input:focus {
-  outline: none;
-  background: white;
-  border-color: rgba(0, 122, 255, 0.2);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.05);
-}
-
-.apple-clear-btn {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #d1d1d6;
-  border: none;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  padding: 0;
-}
-
-.apple-clear-btn svg {
-  width: 16px;
-  height: 16px;
-  stroke: white;
-  stroke-width: 2.5;
-}
-
-.apple-clear-btn:hover {
-  background: #86868b;
-  transform: translateY(-50%) scale(1.1);
-}
-
-.apple-search-loading {
-  position: absolute;
-  right: 14px;
-}
-
-.apple-filter-controls {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  flex-shrink: 0;
-}
-
-.apple-filter-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 16px;
-  border: 1.5px solid #d1d1d6;
-  background: white;
-  color: #1d1d1f;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-}
-
-.apple-filter-btn svg {
-  width: 15px;
-  height: 15px;
-  stroke-width: 2;
-}
-
-.apple-filter-btn:hover {
-  background: #f5f5f7;
-  border-color: #d1d1d6;
-}
-
-.apple-filter-btn.active {
-  background: linear-gradient(135deg, #8BC34A, #7CB342);
-  color: white;
-  border-color: #8BC34A;
-}
-
-.apple-filter-btn.reset {
-  color: #FF3B30;
-  border-color: rgba(255, 59, 48, 0.2);
-}
-
-.apple-filter-btn.reset svg {
-  stroke: #FF3B30;
-}
-
-.apple-filter-btn.reset:hover {
-  background: rgba(255, 59, 48, 0.08);
-  border-color: #FF3B30;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(255, 59, 48, 0.2);
-}
-
-.apple-filter-btn.export {
-  color: #34C759;
-  border-color: rgba(52, 199, 89, 0.2);
-}
-
-.apple-filter-btn.export svg {
-  stroke: #34C759;
-}
-
-.apple-filter-btn.export:hover {
-  background: rgba(52, 199, 89, 0.08);
-  border-color: #34C759;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(52, 199, 89, 0.2);
-}
-
-/* ====================== APPLE QUICK FILTERS ====================== */
-.apple-quick-filters {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.apple-filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 12px;
-  border-radius: 20px;
-  border: 2px solid transparent;
-  background: #f5f5f7;
-  color: #1d1d1f;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-}
-
-.apple-filter-chip svg {
-  width: 13px;
-  height: 13px;
-  stroke-width: 2;
-}
-
-.apple-filter-chip:hover {
-  background: rgba(0, 122, 255, 0.1);
-  border-color: rgba(0, 122, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.15);
-}
-
-.apple-filter-chip.active {
-  background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
-  color: white;
-  border-color: #007AFF;
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
-  transform: translateY(-2px);
-}
-
-.apple-filter-chip.active span {
-  color: white !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.apple-filter-chip.active svg {
-  stroke: white !important;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-}
-
-/* ====================== APPLE ADVANCED FILTERS ====================== */
-.apple-advanced-filters {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.advanced-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filter-item label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #86868b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-}
-
-.filter-item select,
-.filter-item input[type="date"] {
-  height: 42px;
-  border-radius: 12px;
-  border: 1.5px solid #e5e5e5;
-  background: #f5f5f7;
-  padding: 0 14px;
-  font-size: 13px;
-  color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.filter-item select:focus,
-.filter-item input[type="date"]:focus {
-  outline: none;
-  background: white;
-  border-color: #8BC34A;
-  box-shadow: 0 0 0 4px rgba(139, 195, 74, 0.1);
-}
-
-.filter-checkboxes {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-  transition: color 0.2s ease;
-}
-
-.checkbox-label:hover {
-  color: #8BC34A;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  accent-color: #8BC34A;
 }
 
 .page-header {
-  display: none; /* Ocultar header antiguo */
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  color: white;
+  padding: clamp(0.3rem, 0.8vw, 0.5rem);
+  box-shadow: 
+    0 4px 16px rgba(76, 175, 80, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  box-sizing: border-box;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
 }
 
 .page-header::before {
@@ -4443,114 +3901,10 @@ const logout = () => {
     padding: 6px 16px;
   }
   
-  /* Filtros más compactos en tablets - DEPRECATED (usando Apple design) */
+  /* Filtros más compactos en tablets */
   .advanced-filters {
-    display: none; /* Ocultar diseño antiguo */
-  }
-  
-  /* Apple Design Responsive */
-  .apple-sticky-wrapper {
-    margin-bottom: 16px;
-  }
-  
-  .apple-page-header {
-    padding: 10px 16px;
-    border-radius: 24px 24px 0 0;
-  }
-  
-  .apple-header-left {
-    gap: 10px;
-  }
-  
-  .apple-icon-circle {
-    width: 28px;
-    height: 28px;
-  }
-  
-  .apple-icon-circle svg {
-    width: 14px;
-    height: 14px;
-  }
-  
-  .apple-page-title {
-    font-size: 16px;
-  }
-  
-  .apple-page-subtitle {
-    font-size: 10px;
-  }
-  
-  .apple-refresh-button {
-    width: 28px;
-    height: 28px;
-  }
-  
-  .apple-refresh-button svg {
-    width: 14px;
-    height: 14px;
-  }
-  
-  .apple-stats-section {
-    padding: 20px 16px 16px 16px;
-    border-radius: 0 0 24px 24px;
-  }
-  
-  .apple-stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  
-  .apple-stat-card {
-    padding: 14px;
-    gap: 10px;
-    border-radius: 14px;
-  }
-  
-  .apple-stat-icon {
-    width: 38px;
-    height: 38px;
-  }
-  
-  .apple-stat-icon svg {
-    width: 17px;
-    height: 17px;
-  }
-  
-  .apple-stat-value {
-    font-size: 20px;
-  }
-  
-  .apple-stat-label {
-    font-size: 10px;
-  }
-  
-  .apple-search-row {
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  
-  .apple-search-input {
-    height: 40px;
-    font-size: 12px;
-  }
-  
-  .apple-filter-btn {
-    padding: 8px 14px;
-    font-size: 12px;
-  }
-  
-  .apple-filter-chip {
-    padding: 7px 12px;
-    font-size: 11px;
-  }
-  
-  .advanced-grid {
-    gap: 10px;
-  }
-  
-  .main-content {
-    padding: 6px 12px 0 12px;
+    padding: 0.3rem 0.4rem;
+    margin-bottom: 0.3rem;
   }
   
   .filters-main {
@@ -4597,175 +3951,7 @@ const logout = () => {
 
 @media (max-width: 480px) {
   .page-header {
-    display: none;
-  }
-  
-  .advanced-filters {
-    display: none;
-  }
-  
-  /* Apple Design Mobile */
-  .apple-sticky-wrapper {
-    margin-bottom: 12px;
-  }
-  
-  .apple-page-header {
-    padding: 8px 12px;
-    border-radius: 20px 20px 0 0;
-  }
-  
-  .apple-header-left {
-    gap: 8px;
-  }
-  
-  .apple-icon-circle {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .apple-icon-circle svg {
-    width: 12px;
-    height: 12px;
-  }
-  
-  .apple-page-title {
-    font-size: 14px;
-  }
-  
-  .apple-page-subtitle {
-    font-size: 9px;
-  }
-  
-  .apple-refresh-button {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .apple-refresh-button svg {
-    width: 12px;
-    height: 12px;
-  }
-  
-  .apple-stats-section {
-    padding: 16px 12px 12px 12px;
-    border-radius: 0 0 20px 20px;
-  }
-  
-  .apple-stats-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  
-  .apple-stat-card {
-    padding: 12px;
-    gap: 10px;
-    border-radius: 12px;
-  }
-  
-  .apple-stat-icon {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .apple-stat-icon svg {
-    width: 15px;
-    height: 15px;
-  }
-  
-  .apple-stat-value {
-    font-size: 18px;
-  }
-  
-  .apple-stat-label {
-    font-size: 9px;
-  }
-  
-  .apple-search-section {
-    padding-top: 12px;
-  }
-  
-  .apple-search-row {
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-  
-  .apple-search-container {
-    min-width: 100%;
-  }
-  
-  .apple-search-input {
-    height: 38px;
-    font-size: 12px;
-    padding: 0 38px 0 38px;
-  }
-  
-  .apple-search-icon {
-    width: 16px;
-    height: 16px;
-    left: 12px;
-  }
-  
-  .apple-clear-btn {
-    width: 28px;
-    height: 28px;
-  }
-  
-  .apple-clear-btn svg {
-    width: 14px;
-    height: 14px;
-  }
-  
-  .apple-filter-controls {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .apple-filter-btn {
-    flex: 1;
-    justify-content: center;
-    padding: 8px;
-    font-size: 0;
-  }
-  
-  .apple-filter-btn svg {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .apple-filter-btn span {
-    display: none;
-  }
-  
-  .apple-quick-filters {
-    gap: 6px;
-  }
-  
-  .apple-filter-chip {
-    padding: 6px 10px;
-    font-size: 10px;
-    gap: 4px;
-  }
-  
-  .apple-filter-chip svg {
-    width: 12px;
-    height: 12px;
-  }
-  
-  .advanced-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  
-  .filter-item select,
-  .filter-item input[type="date"] {
-    height: 38px;
-    font-size: 12px;
-  }
-  
-  .main-content {
-    padding: 4px 8px 0 8px;
+    padding: 0.25rem 0.4rem;
   }
   
   .header-content {
@@ -5967,14 +5153,10 @@ const logout = () => {
 .table-container {
   overflow-x: auto;
   animation: fadeInUp 0.6s ease-out 0.2s both;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: clamp(8px, 2vw, 12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   background: white;
   box-sizing: border-box;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  overscroll-behavior-y: auto;
-  scroll-behavior: smooth;
 }
 
 @keyframes fadeInUp {
@@ -5996,35 +5178,32 @@ const logout = () => {
 }
 
 .registros-table th {
-  background: #E8F5E9;
-  padding: 16px 20px;
-  text-align: left;
-  font-weight: 600;
-  color: #2E7D32;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f8f0 100%);
+  padding: clamp(6px, 1.5vw, 10px) clamp(4px, 1vw, 8px);
+  text-align: center;
+  font-weight: 700;
+  color: #4CAF50;
   text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.8px;
+  font-size: clamp(8px, 1.8vw, 10px);
+  letter-spacing: 0.3px;
   position: sticky;
   top: 0;
   z-index: 10;
-  border-bottom: 1px solid #C8E6C9;
+  border-bottom: 1px solid rgba(224, 224, 224, 0.6);
   white-space: nowrap;
-  border-right: none;
 }
 
 .registros-table td {
-  padding: 16px 20px;
-  border-bottom: 1px solid #F0F0F0;
-  font-size: 13px;
+  padding: clamp(6px, 1.5vw, 10px) clamp(4px, 1vw, 8px);
+  border-bottom: 1px solid rgba(224, 224, 224, 0.6);
+  font-size: clamp(10px, 1.8vw, 12px);
   transition: all 0.3s ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 0;
-  text-align: left;
+  text-align: center;
   vertical-align: middle;
-  background: white;
-  border-right: none;
 }
 
 .registros-table tbody tr {
@@ -6032,13 +5211,14 @@ const logout = () => {
   position: relative;
 }
 
-.registros-table tbody tr:nth-child(even) td {
-  background: #FAFAFA;
+.registros-table tbody tr:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.02) 100%);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.1);
 }
 
 .registros-table tbody tr:hover td {
-  background: #F5F5F7 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-bottom-color: rgba(76, 175, 80, 0.2);
 }
 
 .foto-mini {
@@ -6084,72 +5264,34 @@ const logout = () => {
 
 .usuario-info {
   display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.usuario-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #66BB6A 0%, #81C784 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(102, 187, 106, 0.25);
-  transition: all 0.3s ease;
-}
-
-.usuario-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.35);
-}
-
-.usuario-avatar svg {
-  width: 20px;
-  height: 20px;
-  stroke: white;
-  stroke-width: 2;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-}
-
-.usuario-text {
-  display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  gap: clamp(0.5px, 0.3vh, 1px);
 }
 
 .usuario-info strong {
-  font-size: 13px;
-  color: #1D1D1F;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: clamp(10px, 2.2vw, 12px);
+  color: #2c3e50;
 }
 
 .usuario-info small {
-  font-size: 11px;
-  color: #8E8E93;
-  font-weight: 400;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: clamp(8px, 1.8vw, 10px);
+  color: #666;
+  font-style: italic;
 }
 
 .btn-ver {
   width: 32px;
   height: 32px;
   padding: 0;
-  background: linear-gradient(135deg, #8BC34A, #7CB342);
+  background: linear-gradient(135deg, #4CAF50, #43A047);
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6157,25 +5299,35 @@ const logout = () => {
 }
 
 .btn-ver::before {
-  display: none;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-ver:hover::before {
+  left: 100%;
 }
 
 .btn-ver:hover {
-  background: linear-gradient(135deg, #7CB342, #689F38);
+  background: linear-gradient(135deg, #43A047, #388E3C);
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
 .btn-ver:active {
   transform: scale(1.05);
-  box-shadow: 0 3px 10px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
 }
 
 .btn-ver svg {
   width: 16px;
   height: 16px;
   transition: all 0.3s ease;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .btn-ver:hover svg {
@@ -8860,13 +8012,13 @@ const logout = () => {
 .pagination-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: 0;
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
-  border: none;
-  box-shadow: none;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.08);
   animation: fadeInUp 0.4s ease-out;
 }
 
@@ -8876,115 +8028,116 @@ const logout = () => {
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  padding: 12px 16px;
-  background: #E8F5E9;
-  border-top: 1px solid #C8E6C9;
 }
 
 .pagination-text {
-  color: #2E7D32;
-  font-size: 13px;
-  font-weight: 600;
+  color: #4b5563;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .pagination-text strong {
-  color: #1B5E20;
+  color: #4CAF50;
   font-weight: 700;
 }
 
 .pagination-selector {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .pagination-label {
-  color: #2E7D32;
-  font-size: 12px;
-  font-weight: 600;
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .pagination-select {
-  padding: 6px 12px;
-  border: 1px solid #C8E6C9;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(209, 213, 219, 0.6);
   border-radius: 8px;
   background: white;
-  color: #2E7D32;
-  font-size: 13px;
-  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 70px;
 }
 
 .pagination-select:hover {
-  border-color: #8BC34A;
-  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.2);
+  border-color: rgba(76, 175, 80, 0.4);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
 }
 
 .pagination-select:focus {
   outline: none;
-  border-color: #8BC34A;
-  box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.15);
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
 }
 
 .pagination-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: #E8F5E9;
-  border-top: 1px solid #C8E6C9;
+  gap: 0.25rem;
   flex-wrap: wrap;
 }
 
 .pagination-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-size: 13px;
+  gap: 0.375rem;
+  padding: 0.625rem 1rem;
+  background: white;
+  border: 1px solid rgba(209, 213, 219, 0.6);
+  border-radius: 10px;
+  color: #6b7280;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
   user-select: none;
-  min-height: 32px;
+  min-height: 44px;
 }
 
 .pagination-btn::before {
-  display: none;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.pagination-btn:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #7CB342 0%, #689F38 100%);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border-color: #4CAF50;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
 }
 
 .pagination-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
 }
 
 .pagination-btn:disabled {
-  background: #C8E6C9;
-  color: #81C784;
+  background: #f9fafb;
+  color: #d1d5db;
   cursor: not-allowed;
-  box-shadow: none;
-  opacity: 0.5;
-}
-
-.pagination-btn svg {
-  width: 16px;
-  height: 16px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  border-color: #e5e7eb;
 }
 
 .pagination-btn-text {
@@ -8994,14 +8147,14 @@ const logout = () => {
 
 .pagination-first,
 .pagination-last {
-  padding: 8px;
+  padding: 0.625rem 0.75rem;
 }
 
 .pagination-numbers {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin: 0;
+  gap: 0.25rem;
+  margin: 0 0.5rem;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -9010,34 +8163,54 @@ const logout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  color: #2E7D32;
-  font-size: 13px;
-  font-weight: 600;
+  background: white;
+  border: 1px solid rgba(209, 213, 219, 0.6);
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
   user-select: none;
 }
 
 .pagination-number::before {
-  display: none;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.15), transparent);
+  transition: left 0.4s ease;
+}
+
+.pagination-number:hover:not(.active)::before {
+  left: 100%;
 }
 
 .pagination-number:hover:not(.active) {
-  background: rgba(139, 195, 74, 0.15);
-  color: #1B5E20;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+  border-color: rgba(76, 175, 80, 0.4);
+  color: #4CAF50;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.2);
 }
 
 .pagination-number.active {
-  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border-color: #4CAF50;
   color: white;
-  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(76, 175, 80, 0.4),
+    0 3px 10px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   cursor: default;
 }
 
@@ -9045,10 +8218,10 @@ const logout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  color: #81C784;
-  font-size: 16px;
+  width: 44px;
+  height: 44px;
+  color: #9ca3af;
+  font-size: 1.25rem;
   font-weight: 700;
   user-select: none;
   letter-spacing: 0.1em;

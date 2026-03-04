@@ -46,7 +46,13 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(totalAsistenciasHoy) }}</div>
+                <div class="apple-stat-value-wrapper">
+                  <transition name="counter-slide" mode="out-in">
+                    <div :key="totalAsistenciasHoy" class="apple-stat-value" :class="{ 'updating': statsLoading }">
+                      {{ formatNumber(totalAsistenciasHoy) }}
+                    </div>
+                  </transition>
+                </div>
                 <div class="apple-stat-label">Hoy</div>
               </div>
             </div>
@@ -59,7 +65,13 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(usuariosPresentes) }}</div>
+                <div class="apple-stat-value-wrapper">
+                  <transition name="counter-slide" mode="out-in">
+                    <div :key="usuariosPresentes" class="apple-stat-value" :class="{ 'updating': statsLoading }">
+                      {{ formatNumber(usuariosPresentes) }}
+                    </div>
+                  </transition>
+                </div>
                 <div class="apple-stat-label">Presentes</div>
               </div>
             </div>
@@ -74,7 +86,13 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value" :class="{ 'updating': statsLoading }">{{ formatNumber(totalAsistencias) }}</div>
+                <div class="apple-stat-value-wrapper">
+                  <transition name="counter-slide" mode="out-in">
+                    <div :key="totalAsistencias" class="apple-stat-value" :class="{ 'updating': statsLoading }">
+                      {{ formatNumber(totalAsistencias) }}
+                    </div>
+                  </transition>
+                </div>
                 <div class="apple-stat-label">Total</div>
               </div>
             </div>
@@ -389,20 +407,20 @@ export default {
       enablePolling: true // Habilitado para actualización automática
     })
 
-    // Animaciones suaves para los contadores (Apple-style)
-    const { displayValue: animatedHoy } = useAnimatedNumber(
+    // Animaciones Apple-style slide para los contadores
+    const animatedHoy = useAnimatedNumber(
       computed(() => realtimeStats.value?.asistencias_hoy || 0),
-      { duration: 800 }
+      { duration: 400 }
     )
 
-    const { displayValue: animatedPresentes } = useAnimatedNumber(
+    const animatedPresentes = useAnimatedNumber(
       computed(() => realtimeStats.value?.usuarios_presentes || 0),
-      { duration: 800 }
+      { duration: 400 }
     )
 
-    const { displayValue: animatedTotal } = useAnimatedNumber(
+    const animatedTotal = useAnimatedNumber(
       computed(() => realtimeStats.value?.total_asistencias || 0),
-      { duration: 800 }
+      { duration: 400 }
     )
 
     return {
@@ -1047,25 +1065,57 @@ export default {
   fill: none;
 }
 
+/* Wrapper para transiciones de contador (Apple-style) */
+.apple-stat-value-wrapper {
+  position: relative;
+  overflow: hidden;
+  height: 22px; /* Altura fija para evitar saltos */
+  display: flex;
+  align-items: center;
+}
+
 .apple-stat-value {
   font-size: 18px;
   font-weight: 700;
   color: var(--apple-text);
   line-height: 1;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
+  margin-bottom: 0;
   letter-spacing: -0.3px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  white-space: nowrap;
 }
 
-/* Animación sutil cuando el contador se actualiza (Apple-style) */
+/* Transición de deslizamiento vertical (Apple Numbers style) */
+.counter-slide-enter-active,
+.counter-slide-leave-active {
+  transition: all 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: absolute;
+  width: 100%;
+}
+
+.counter-slide-enter-from {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.counter-slide-enter-to {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.counter-slide-leave-from {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.counter-slide-leave-to {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+/* Animación adicional cuando está actualizando */
 .apple-stat-value.updating {
-  animation: counter-pulse 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes counter-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  color: #007AFF;
 }
 
 .apple-stat-label {

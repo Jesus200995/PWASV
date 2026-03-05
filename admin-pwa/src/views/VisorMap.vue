@@ -2983,14 +2983,14 @@ watch(filtroTipo, () => {
 
 /* ====================== APPLE CONTROL PANEL ====================== */
 .apple-control-panel {
-  width: 260px;
-  min-width: 220px;
+  width: 240px;
+  min-width: 200px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
   border: 1px solid rgba(139, 195, 74, 0.2);
-  padding: 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -3009,8 +3009,8 @@ watch(filtroTipo, () => {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 12px;
+  gap: 10px;
+  padding-top: 10px;
   /* Scrollbar Firefox */
   scrollbar-width: thin;
   scrollbar-color: #8BC34A rgba(139, 195, 74, 0.1);
@@ -3039,29 +3039,29 @@ watch(filtroTipo, () => {
 .apple-panel-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 0 16px 0;
+  gap: 8px;
+  padding: 0 0 12px 0;
   border-bottom: 1px solid rgba(139, 195, 74, 0.15);
 }
 
 .apple-panel-icon {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .apple-panel-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   stroke: white;
 }
 
 .apple-panel-title {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   color: #2E7D32;
   margin: 0;
@@ -3071,23 +3071,23 @@ watch(filtroTipo, () => {
 /* ====================== APPLE PANEL SECTIONS ====================== */
 .apple-panel-section {
   background: rgba(248, 250, 252, 0.8);
-  border-radius: 14px;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 10px;
   border: 1px solid rgba(139, 195, 74, 0.1);
 }
 
 .apple-section-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .apple-section-header.clickable {
   cursor: pointer;
-  padding: 4px;
-  margin: -4px;
-  border-radius: 8px;
+  padding: 3px;
+  margin: -3px;
+  border-radius: 6px;
   transition: background 0.2s ease;
 }
 
@@ -3097,7 +3097,7 @@ watch(filtroTipo, () => {
 
 .apple-section-header h4 {
   flex: 1;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
   color: #333;
   margin: 0;
@@ -3106,17 +3106,17 @@ watch(filtroTipo, () => {
 }
 
 .apple-section-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .apple-section-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   stroke: white;
 }
 
@@ -3130,10 +3130,10 @@ watch(filtroTipo, () => {
 .apple-status-badge {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 10px;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 9px;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -3144,8 +3144,8 @@ watch(filtroTipo, () => {
 }
 
 .apple-pulse {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   background: #34C759;
   border-radius: 50%;
   animation: apple-pulse-animation 2s ease-in-out infinite;
@@ -3159,48 +3159,48 @@ watch(filtroTipo, () => {
 .apple-status-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 6px 10px;
   background: rgba(76, 175, 80, 0.08);
-  border-radius: 10px;
+  border-radius: 8px;
   color: #2E7D32;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
 .apple-status-info svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   stroke: #4CAF50;
 }
 
 .apple-error-message {
-  padding: 10px;
+  padding: 8px;
   background: rgba(255, 59, 48, 0.1);
-  border-radius: 10px;
+  border-radius: 8px;
   color: #FF3B30;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .apple-retry-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 6px 12px;
+  gap: 5px;
+  margin-top: 6px;
+  padding: 5px 10px;
   background: #FF3B30;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 11px;
+  border-radius: 6px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .apple-retry-btn svg {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   stroke: white;
 }
 
@@ -3211,11 +3211,11 @@ watch(filtroTipo, () => {
 
 /* Toggle Button */
 .apple-toggle-btn {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background: rgba(139, 195, 74, 0.1);
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3224,8 +3224,8 @@ watch(filtroTipo, () => {
 }
 
 .apple-toggle-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   stroke: #666;
   transition: transform 0.3s ease;
 }
@@ -3238,21 +3238,21 @@ watch(filtroTipo, () => {
 .apple-filter-controls {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-top: 8px;
+  gap: 8px;
+  padding-top: 6px;
 }
 
 .apple-filter-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .apple-filter-label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 5px;
+  font-size: 10px;
   font-weight: 600;
   color: #666;
   text-transform: uppercase;
@@ -3265,20 +3265,20 @@ watch(filtroTipo, () => {
 
 .apple-select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: white;
   border: 1px solid rgba(139, 195, 74, 0.3);
-  border-radius: 10px;
-  font-size: 12px;
+  border-radius: 8px;
+  font-size: 11px;
   font-weight: 500;
   color: #333;
   cursor: pointer;
   transition: all 0.2s ease;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238BC34A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238BC34A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 35px;
+  background-position: right 10px center;
+  padding-right: 30px;
 }
 
 .apple-select:hover {
@@ -3295,16 +3295,16 @@ watch(filtroTipo, () => {
 .apple-stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .apple-stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 8px;
+  padding: 8px 6px;
   background: white;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
 }
@@ -3315,18 +3315,18 @@ watch(filtroTipo, () => {
 }
 
 .apple-stat-icon {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .apple-stat-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   stroke: white;
 }
 
@@ -3338,7 +3338,7 @@ watch(filtroTipo, () => {
 .apple-stat-icon.gold { background: linear-gradient(135deg, #FFD700, #FFC107); }
 
 .apple-stat-value {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   color: #333;
   line-height: 1;
@@ -3351,29 +3351,29 @@ watch(filtroTipo, () => {
 .apple-stat-value.gold { color: #B8860B; }
 
 .apple-stat-label {
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 600;
   color: #999;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
 /* ====================== APPLE LEGEND GRID ====================== */
 .apple-legend-grid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .apple-legend-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .apple-legend-title {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   color: #666;
   text-transform: uppercase;
@@ -3383,14 +3383,14 @@ watch(filtroTipo, () => {
 .apple-legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 11px;
+  gap: 6px;
+  font-size: 10px;
   color: #555;
 }
 
 .apple-color-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -3405,20 +3405,20 @@ watch(filtroTipo, () => {
 .apple-help-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .apple-help-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 11px;
+  gap: 6px;
+  font-size: 10px;
   color: #666;
 }
 
 .apple-help-item svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   stroke: #8BC34A;
   flex-shrink: 0;
 }

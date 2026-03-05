@@ -2,25 +2,34 @@
   <div class="configuracion-container">
     <Sidebar @logout="logout" />
     
+    <!-- Apple Dynamic Background -->
+    <div class="apple-dynamic-bg">
+      <div class="apple-orb apple-orb-1"></div>
+      <div class="apple-orb apple-orb-2"></div>
+      <div class="apple-orb apple-orb-3"></div>
+    </div>
+    
     <main class="main-content">
-      <header class="page-header">
-        <div class="header-content">
-          <div class="header-main">
-            <div class="header-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-              </svg>
+      <!-- Apple Sticky Header -->
+      <header class="apple-page-header">
+        <div class="apple-header-wrapper">
+          <div class="apple-header-center">
+            <div class="apple-title-group">
+              <div class="apple-icon-mini">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+              </div>
+              <span class="apple-title-divider">|</span>
+              <h1 class="apple-page-title">CONFIGURACIÓN DEL SISTEMA</h1>
             </div>
-            <div class="header-text">
-              <h1 class="header-title">Configuración del Sistema</h1>
-              <p class="header-subtitle">Administra las configuraciones generales de la aplicación</p>
-            </div>
+            <p class="apple-page-subtitle">Administra las configuraciones generales de la aplicación</p>
           </div>
         </div>
       </header>
 
-      <div class="page-content">
+      <div class="apple-page-content">
         <div class="two-column-layout">
           <!-- COLUMNA IZQUIERDA -->
           <div class="main-column">
@@ -3390,12 +3399,73 @@ const logout = () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+/* ============================================
+   APPLE DESIGN SYSTEM - ConfiguracionView
+   ============================================ */
+
 .configuracion-container {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  background: linear-gradient(180deg, #f5f7fa 0%, #e8f5e8 50%, #f0f4f0 100%);
+  position: relative;
+  overflow: hidden;
 }
 
+/* === APPLE DYNAMIC BACKGROUND === */
+.apple-dynamic-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.apple-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: float-orb 20s ease-in-out infinite;
+}
+
+.apple-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.4) 0%, transparent 70%);
+  top: -100px;
+  right: 10%;
+  animation-delay: 0s;
+}
+
+.apple-orb-2 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(33, 150, 243, 0.3) 0%, transparent 70%);
+  bottom: 10%;
+  left: 5%;
+  animation-delay: -7s;
+}
+
+.apple-orb-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(156, 39, 176, 0.25) 0%, transparent 70%);
+  top: 40%;
+  right: 25%;
+  animation-delay: -14s;
+}
+
+@keyframes float-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(20px, 10px) scale(1.02); }
+}
+
+/* === MAIN CONTENT === */
 .main-content {
   flex: 1;
   margin-left: min(220px, 18vw);
@@ -3405,120 +3475,97 @@ const logout = () => {
   flex-direction: column;
   min-height: 100vh;
   position: relative;
+  z-index: 1;
   box-sizing: border-box;
   overflow-x: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* === HEADER STYLES === */
-.page-header {
+/* === APPLE PAGE HEADER === */
+.apple-page-header {
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
   color: white;
-  padding: clamp(0.3rem, 0.8vw, 0.5rem);
-  box-shadow: 
-    0 4px 16px rgba(76, 175, 80, 0.15);
+  padding: 16px 24px;
   position: sticky;
-  top: 0;
+  top: 12px;
   z-index: 100;
-  width: 100%;
-  box-sizing: border-box;
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
+  margin: 12px 16px 0;
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(76, 175, 80, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.page-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
-  z-index: 1;
-}
-
-.header-content {
+.apple-header-wrapper {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  max-width: 100%;
-  margin: 0;
-  gap: clamp(0.25rem, 0.8vw, 0.5rem);
-  flex-wrap: wrap;
-  width: 100%;
-  position: relative;
-  z-index: 2;
 }
 
-.header-main {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.5rem, 1.2vw, 0.8rem);
-  flex: 1;
-  min-width: 140px;
-  margin-left: clamp(0.3rem, 1vw, 0.6rem);
+.apple-header-center {
+  text-align: center;
 }
 
-.header-icon {
-  width: clamp(28px, 3vw, 32px);
-  height: clamp(28px, 3vw, 32px);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
+.apple-title-group {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
+  gap: 12px;
+  margin-bottom: 4px;
 }
 
-.header-icon svg {
-  width: clamp(14px, 2.5vw, 16px);
-  height: clamp(14px, 2.5vw, 16px);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-  z-index: 1;
-  position: relative;
+.apple-icon-mini {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.header-text {
-  flex: 1;
+.apple-icon-mini svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
 }
 
-.header-title {
-  font-size: clamp(14px, 2.5vw, 16px);
+.apple-title-divider {
+  font-size: 20px;
+  opacity: 0.5;
+  font-weight: 300;
+}
+
+.apple-page-title {
+  font-size: 18px;
   font-weight: 700;
-  margin: 0 0 clamp(1px, 0.3vw, 2px) 0;
-  background: linear-gradient(135deg, #ffffff 0%, #e8f5e8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  letter-spacing: 1px;
   font-family: 'Inter', sans-serif;
-  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.header-subtitle {
-  font-size: clamp(9px, 1.8vw, 11px);
-  opacity: 0.9;
+.apple-page-subtitle {
+  font-size: 12px;
+  opacity: 0.85;
   margin: 0;
   font-weight: 400;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   font-family: 'Inter', sans-serif;
-  line-height: 1.3;
 }
 
 /* === CONTENT STYLES === */
-.page-content {
+.apple-page-content {
   flex: 1;
-  padding: 12px;
+  padding: 16px;
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* === TWO COLUMN LAYOUT === */

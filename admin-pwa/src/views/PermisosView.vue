@@ -2,101 +2,223 @@
   <div class="permisos-container">
     <Sidebar @logout="logout" />
     
+    <!-- Apple Dynamic Background -->
+    <div class="apple-dynamic-bg">
+      <div class="apple-orb apple-orb-1"></div>
+      <div class="apple-orb apple-orb-2"></div>
+      <div class="apple-orb apple-orb-3"></div>
+    </div>
+    
     <main class="main-content">
-      <header class="page-header">
-        <div class="header-content">
-          <div class="header-main">
-            <div class="header-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
+      <!-- ================== STICKY WRAPPER FOR HEADER + FILTERS ================== -->
+      <div class="apple-sticky-wrapper">
+        <!-- Apple Sticky Header -->
+        <header class="apple-page-header">
+          <div class="apple-header-wrapper">
+            <div class="apple-header-center">
+              <div class="apple-title-group">
+                <div class="apple-icon-mini">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+                <span class="apple-title-divider">|</span>
+                <h1 class="apple-page-title">PERMISOS ADMINISTRATIVOS</h1>
+              </div>
+              <p class="apple-page-subtitle">Gestiona los usuarios y permisos del panel de administración</p>
             </div>
-            <div class="header-text">
-              <h1 class="header-title">Permisos Administrativos</h1>
-              <p class="header-subtitle">Gestiona los usuarios y permisos del panel de administración</p>
-            </div>
-          </div>
-          <div class="header-actions">
-            <button class="btn-primary" @click="mostrarModalCrear = true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14"/>
-                <path d="M5 12h14"/>
+            
+            <button @click="cargarUsuariosAdmin" class="apple-refresh-button" :disabled="cargando">
+              <svg :class="{ 'apple-spin': cargando }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              Nuevo Usuario Admin
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div class="page-content">
+        <!-- ================== STATS SECTION WITH FILTERS ================== -->
+        <div class="apple-stats-section">
+          <div class="apple-stats-grid">
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ usuariosAdmin.length }}</div>
+                <div class="apple-stat-label">Total</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ usuariosAdmin.filter(u => u.rol === 'admin').length }}</div>
+                <div class="apple-stat-label">Admins</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ usuariosAdmin.filter(u => u.es_territorial).length }}</div>
+                <div class="apple-stat-label">Territoriales</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================== SEARCH & FILTERS INSIDE STATS ================== -->
+          <div class="apple-search-section">
+            <div class="apple-search-row">
+              <div class="apple-search-container">
+                <svg class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="11" cy="11" r="8" stroke-width="2.5"/>
+                  <path d="m21 21-4.35-4.35" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <input 
+                  type="text" 
+                  v-model="busquedaUsuario" 
+                  placeholder="Buscar por usuario, nombre, territorio o CURP..."
+                  class="apple-search-input"
+                />
+                <button v-if="busquedaUsuario" @click="busquedaUsuario = ''" class="apple-clear-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" stroke-linecap="round"/>
+                    <line x1="6" y1="6" x2="18" y2="18" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="apple-filter-controls">
+                <button 
+                  @click="busquedaUsuario = ''; filtroRol = ''; filtroTerritorial = false" 
+                  class="apple-filter-btn reset"
+                  title="Limpiar filtros"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                  </svg>
+                  <span>Limpiar</span>
+                </button>
+                <button 
+                  @click="mostrarModalCrear = true" 
+                  class="apple-filter-btn create"
+                  title="Crear nuevo admin"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  <span>Nuevo Admin</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="apple-quick-filters">
+              <button 
+                @click="filtroRol = ''; filtroTerritorial = false" 
+                :class="['apple-filter-chip', { 'active': filtroRol === '' && !filtroTerritorial }]"
+              >
+                <div class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <span>Todos</span>
+              </button>
+              <button 
+                @click="filtroRol = 'admin'; filtroTerritorial = false" 
+                :class="['apple-filter-chip', { 'active': filtroRol === 'admin' }]"
+              >
+                <div class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </div>
+                <span>Admins</span>
+              </button>
+              <button 
+                @click="filtroRol = 'user'; filtroTerritorial = false" 
+                :class="['apple-filter-chip', { 'active': filtroRol === 'user' }]"
+              >
+                <div class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+                <span>Usuarios</span>
+              </button>
+              <button 
+                @click="filtroTerritorial = !filtroTerritorial; if(filtroTerritorial) filtroRol = ''" 
+                :class="['apple-filter-chip', { 'active': filtroTerritorial }]"
+              >
+                <div class="chip-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                </div>
+                <span>Territoriales</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>  <!-- Close apple-sticky-wrapper -->
+
+      <div class="apple-content-wrapper">
         <!-- Mensaje de carga -->
-        <div v-if="cargando" class="loading-state">
-          <div class="loading-spinner"></div>
+        <div v-if="cargando" class="apple-loading">
+          <div class="apple-spinner"></div>
           <p>Cargando usuarios administrativos...</p>
         </div>
 
         <!-- Mensaje de error -->
-        <div v-if="error && !cargando" class="error-state">
-          <div class="error-icon">⚠️</div>
-          <h3>Error al cargar usuarios administrativos</h3>
+        <div v-else-if="error" class="apple-error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+            <line x1="12" y1="8" x2="12" y2="12" stroke-width="2" stroke-linecap="round"/>
+            <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2" stroke-linecap="round"/>
+          </svg>
           <p>{{ error }}</p>
-          <button class="btn-secondary" @click="cargarUsuariosAdmin">Reintentar</button>
+          <button @click="cargarUsuariosAdmin" class="apple-retry-btn">Reintentar</button>
         </div>
 
-        <!-- Lista de usuarios administrativos -->
-        <div v-if="!cargando && !error" class="usuarios-list">
-          <div class="list-header">
-            <h2>Usuarios Administrativos ({{ usuariosFiltrados.length }}<span v-if="busquedaUsuario" class="total-count"> de {{ usuariosAdmin.length }}</span>)</h2>
-            <div class="header-filters">
-              <select v-model="filtroRol" class="filter-select" @change="aplicarFiltros">
-                <option value="">Todos los roles</option>
-                <option value="admin">Admin</option>
-                <option value="user">Usuario</option>
-              </select>
-              <button class="btn-refresh" @click="cargarUsuariosAdmin" :disabled="cargando">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M23 4v6h-6"/>
-                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-                </svg>
-                Actualizar
-              </button>
-            </div>
-          </div>
-          
-          <!-- Buscador en tiempo real -->
-          <div class="search-bar-container">
-            <div class="search-input-wrapper">
-              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
-              </svg>
-              <input 
-                type="text" 
-                v-model="busquedaUsuario" 
-                placeholder="Buscar por usuario, nombre, territorio o CURP..."
-                class="search-input"
-              />
-              <button v-if="busquedaUsuario" @click="busquedaUsuario = ''" class="clear-search">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-            <div v-if="busquedaUsuario && usuariosFiltrados.length === 0" class="search-no-results">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              <span>No se encontraron usuarios con "{{ busquedaUsuario }}"</span>
-            </div>
-          </div>
+        <!-- Empty state -->
+        <div v-else-if="usuariosFiltrados.length === 0" class="apple-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+            <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke-width="2" stroke-linecap="round"/>
+            <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2" stroke-linecap="round"/>
+            <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <h3>No hay usuarios</h3>
+          <p v-if="busquedaUsuario">No se encontraron usuarios con "{{ busquedaUsuario }}"</p>
+          <p v-else>No hay usuarios administrativos registrados</p>
+        </div>
 
-          <!-- Tabla de usuarios administrativos -->
-          <div class="usuarios-table-container">
-            <table class="usuarios-table">
+        <!-- ================== TABLE APPLE STYLE ================== -->
+        <div v-else class="apple-table-container">
+          <div class="apple-table-wrapper">
+            <table class="apple-table">
               <thead>
                 <tr>
                   <th>Usuario</th>
@@ -108,28 +230,31 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="usuario in usuariosFiltrados" :key="usuario.id" class="usuario-row">
-                  <td class="name-cell">
-                    <div class="user-info">
-                      <div class="user-avatar">
-                        {{ usuario.username.charAt(0).toUpperCase() }}
+                <tr v-for="usuario in usuariosPaginados" :key="usuario.id" class="apple-table-row">
+                  <td>
+                    <div class="apple-user-cell">
+                      <div class="apple-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="12" cy="7" r="4" stroke-width="2.5"/>
+                        </svg>
                       </div>
-                      <div class="user-details">
-                        <div class="user-name">{{ usuario.username }}</div>
-                        <div class="user-supervisor">ID: {{ usuario.id }}</div>
+                      <div class="apple-user-info">
+                        <div class="apple-user-name">{{ usuario.username }}</div>
+                        <div class="apple-user-id">ID: {{ usuario.id }}</div>
                       </div>
                     </div>
                   </td>
-                  <td class="info-personal-cell">
-                    <div class="info-personal">
-                      <div class="info-item nombre-completo" v-if="usuario.nombre_completo">
+                  <td>
+                    <div class="apple-info-personal">
+                      <div class="apple-info-item nombre" v-if="usuario.nombre_completo">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                           <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        <span>{{ usuario.nombre_completo }}</span>
+                        <span class="nombre-text">{{ usuario.nombre_completo }}</span>
                       </div>
-                      <div class="info-item curp" v-if="usuario.curp">
+                      <div class="apple-info-item curp" v-if="usuario.curp">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <rect x="3" y="4" width="18" height="16" rx="2"/>
                           <line x1="7" y1="8" x2="17" y2="8"/>
@@ -137,81 +262,91 @@
                         </svg>
                         <span class="curp-text">{{ usuario.curp }}</span>
                       </div>
-                      <div class="info-item cargo" v-if="usuario.cargo">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-                          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-                        </svg>
-                        <span>{{ usuario.cargo }}</span>
+                      <div class="apple-info-item cargo" v-if="usuario.cargo">
+                        <span class="cargo-badge">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                          </svg>
+                          {{ usuario.cargo }}
+                        </span>
                       </div>
-                      <div class="info-empty" v-if="!usuario.nombre_completo && !usuario.curp && !usuario.cargo">
-                        <span class="text-muted">Sin información</span>
-                      </div>
+                      <span v-if="!usuario.nombre_completo && !usuario.curp && !usuario.cargo" class="apple-no-data">Sin información</span>
                     </div>
                   </td>
-                  <td class="rol-cell">
-                    <span class="rol-badge" :class="usuario.rol">
-                      <svg v-if="usuario.rol === 'admin'" class="rol-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                  <td>
+                    <span :class="['apple-rol-badge', usuario.rol === 'admin' ? 'admin' : 'user']">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path v-if="usuario.rol === 'admin'" d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <template v-else>
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="12" cy="7" r="4" stroke-width="2"/>
+                        </template>
                       </svg>
-                      <svg v-else class="rol-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                      </svg>
-                      <span class="rol-text">{{ usuario.rol === 'admin' ? 'Administrador' : 'Usuario' }}</span>
+                      {{ usuario.rol === 'admin' ? 'Admin' : 'Usuario' }}
                     </span>
                   </td>
-                  <td class="territorio-cell">
-                    <span v-if="usuario.es_territorial" class="territorio-badge territorial">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
+                  <td>
+                    <span v-if="usuario.es_territorial" class="apple-territorio-badge territorial">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="10" r="3" stroke-width="2"/>
                       </svg>
                       {{ usuario.territorio || 'Sin asignar' }}
                     </span>
-                    <span v-else class="territorio-badge general">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M2 12h20"/>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    <span v-else class="apple-territorio-badge general">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12h20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                       General
                     </span>
                   </td>
-                  <td class="status-cell">
-                    <span class="status-badge" :class="usuario.activo !== false ? 'status-active' : 'status-inactive'">
-                      <svg v-if="usuario.activo !== false" class="status-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                      <svg v-else class="status-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                  <td>
+                    <span :class="['apple-status-badge', usuario.activo !== false ? 'activo' : 'inactivo']">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polyline v-if="usuario.activo !== false" points="20 6 9 17 4 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <template v-else>
+                          <circle cx="12" cy="12" r="10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </template>
                       </svg>
                       {{ usuario.activo !== false ? 'Activo' : 'Inactivo' }}
                     </span>
                   </td>
-                  <td class="actions-cell">
-                    <div class="action-buttons">
+                  <td>
+                    <div class="apple-actions">
                       <button 
-                        class="btn-action btn-edit" 
+                        class="apple-action-btn view" 
+                        @click="verPermisosUsuario(usuario)"
+                        title="Ver permisos"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
+                          <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                        </svg>
+                      </button>
+                      <button 
+                        class="apple-action-btn edit" 
                         @click="editarUsuario(usuario)"
                         title="Editar usuario"
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                          <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="2"/>
+                          <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/>
                         </svg>
                       </button>
                       <button 
                         v-if="usuario.username !== 'admin'"
-                        class="btn-action btn-delete" 
+                        class="apple-action-btn delete" 
                         @click="confirmarEliminar(usuario)"
                         title="Eliminar usuario"
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M3 6h18"/>
-                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <polyline points="3,6 5,6 21,6" stroke-width="2"/>
+                          <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" stroke-width="2"/>
+                          <line x1="10" y1="11" x2="10" y2="17" stroke-width="2"/>
+                          <line x1="14" y1="11" x2="14" y2="17" stroke-width="2"/>
                         </svg>
                       </button>
                     </div>
@@ -219,15 +354,46 @@
                 </tr>
               </tbody>
             </table>
-
-            <!-- Estado vacío -->
-            <div v-if="usuariosFiltrados.length === 0 && !busquedaUsuario" class="empty-state">
-              <div class="empty-icon">👥</div>
-              <h3>No hay usuarios administrativos</h3>
-              <p>Crea el primer usuario administrativo para gestionar el sistema.</p>
-              <button class="btn-primary" @click="mostrarModalCrear = true">
-                Crear Primer Usuario Admin
+          </div>
+          
+          <!-- ================== PAGINATION APPLE STYLE ================== -->
+          <div v-if="totalPaginas > 1" class="apple-pagination">
+            <div class="apple-pagination-controls">
+              <button 
+                @click="irAPagina(paginaActual - 1)" 
+                :disabled="paginaActual === 1"
+                class="apple-pagination-btn"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
               </button>
+
+              <div class="apple-pagination-numbers">
+                <template v-for="pagina in paginasVisibles" :key="pagina">
+                  <span v-if="pagina === '...'" class="apple-pagination-ellipsis">...</span>
+                  <button 
+                    v-else
+                    @click="irAPagina(pagina)"
+                    :class="['apple-pagination-number', { 'active': paginaActual === pagina }]"
+                  >
+                    {{ pagina }}
+                  </button>
+                </template>
+              </div>
+
+              <button 
+                @click="irAPagina(paginaActual + 1)" 
+                :disabled="paginaActual === totalPaginas"
+                class="apple-pagination-btn"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="apple-pagination-info">
+              <span>{{ (paginaActual - 1) * usuariosPorPagina + 1 }}-{{ Math.min(paginaActual * usuariosPorPagina, usuariosFiltrados.length) }} de {{ usuariosFiltrados.length }}</span>
             </div>
           </div>
         </div>
@@ -1217,7 +1383,12 @@ export default {
       // Lista de usuarios admin
       usuariosAdmin: [],
       filtroRol: '',
+      filtroTerritorial: false,
       busquedaUsuario: '',
+      
+      // Paginación
+      paginaActual: 1,
+      usuariosPorPagina: 10,
       
       // Modal crear/editar usuario
       mostrarModalCrear: false,
@@ -1339,6 +1510,11 @@ export default {
         usuarios = usuarios.filter(usuario => usuario.rol === this.filtroRol)
       }
       
+      // Aplicar filtro por territorial
+      if (this.filtroTerritorial) {
+        usuarios = usuarios.filter(usuario => usuario.es_territorial === true)
+      }
+      
       // Aplicar búsqueda en tiempo real
       if (this.busquedaUsuario) {
         const busqueda = this.busquedaUsuario.toLowerCase().trim()
@@ -1360,6 +1536,43 @@ export default {
       }
       
       return usuarios
+    },
+    
+    // Paginación
+    usuariosPaginados() {
+      const inicio = (this.paginaActual - 1) * this.usuariosPorPagina
+      const fin = inicio + this.usuariosPorPagina
+      return this.usuariosFiltrados.slice(inicio, fin)
+    },
+    
+    totalPaginas() {
+      return Math.ceil(this.usuariosFiltrados.length / this.usuariosPorPagina)
+    },
+    
+    paginasVisibles() {
+      const paginas = []
+      const total = this.totalPaginas
+      const actual = this.paginaActual
+      
+      // Siempre mostrar primera página
+      paginas.push(1)
+      
+      // Páginas intermedias
+      const inicio = Math.max(2, actual - 1)
+      const fin = Math.min(total - 1, actual + 1)
+      
+      if (inicio > 2) paginas.push('...')
+      
+      for (let i = inicio; i <= fin; i++) {
+        if (!paginas.includes(i)) paginas.push(i)
+      }
+      
+      if (fin < total - 1) paginas.push('...')
+      
+      // Siempre mostrar última página si hay más de 1
+      if (total > 1 && !paginas.includes(total)) paginas.push(total)
+      
+      return paginas
     },
     
     // Territorios que ya están asignados a usuarios territoriales
@@ -1393,12 +1606,32 @@ export default {
     }
   },
   
+  watch: {
+    // Resetear paginación cuando cambian los filtros
+    busquedaUsuario() {
+      this.paginaActual = 1
+    },
+    filtroRol() {
+      this.paginaActual = 1
+    },
+    filtroTerritorial() {
+      this.paginaActual = 1
+    }
+  },
+  
   mounted() {
     this.configurarEventosConexion()
     this.cargarUsuariosAdmin()
   },
   
   methods: {
+    // Paginación
+    irAPagina(numeroPagina) {
+      if (typeof numeroPagina === 'number' && numeroPagina >= 1 && numeroPagina <= this.totalPaginas) {
+        this.paginaActual = numeroPagina
+      }
+    },
+    
     configurarEventosConexion() {
       window.addEventListener('online', () => {
         this.isOnline = true
@@ -1482,6 +1715,13 @@ export default {
     aplicarFiltros() {
       // Los filtros se aplican automáticamente a través del computed usuariosFiltrados
       console.log('🔍 Filtro aplicado:', this.filtroRol)
+    },
+
+    // ==================== VER PERMISOS ====================
+    
+    verPermisosUsuario(usuario) {
+      // Abrir en modo edición para ver los permisos
+      this.editarUsuario(usuario)
     },
 
     // ==================== CREAR/EDITAR USUARIO ADMIN ====================
@@ -1790,117 +2030,1756 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+/* ====================== CSS VARIABLES ====================== */
+:root {
+  --apple-blue: #007AFF;
+  --apple-green: #34C759;
+  --apple-red: #FF3B30;
+  --apple-orange: #FF9500;
+  --apple-purple: #AF52DE;
+  --apple-text: #1D1D1F;
+  --apple-text-secondary: #86868B;
+  --apple-gray-1: #F5F5F7;
+  --apple-gray-2: #E8E8ED;
+  --apple-gray-3: #D2D2D7;
+  --apple-gray-4: #C7C7CC;
+  --apple-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --apple-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* ====================== BASE LAYOUT ====================== */
 .permisos-container {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
-}
-
-.main-content {
-  flex: 1;
-  margin-left: min(220px, 18vw);
-  width: calc(100vw - min(220px, 18vw));
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  background: linear-gradient(180deg, #f5f7fa 0%, #e8f5e8 50%, #f0f4f0 100%);
   position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
-
-/* === HEADER STYLES === */
-.page-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
-  color: white;
-  padding: clamp(0.3rem, 0.8vw, 0.5rem);
-  box-shadow: 
-    0 4px 16px rgba(76, 175, 80, 0.15);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: 100%;
-  box-sizing: border-box;
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
 
-.page-header::before {
-  content: '';
-  position: absolute;
+/* ====================== APPLE DYNAMIC BACKGROUND ====================== */
+.apple-dynamic-bg {
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.apple-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: float-orb 20s ease-in-out infinite;
+}
+
+.apple-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.4) 0%, transparent 70%);
+  top: -100px;
+  right: 10%;
+  animation-delay: 0s;
+}
+
+.apple-orb-2 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(33, 150, 243, 0.3) 0%, transparent 70%);
+  bottom: 10%;
+  left: 5%;
+  animation-delay: -7s;
+}
+
+.apple-orb-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(156, 39, 176, 0.25) 0%, transparent 70%);
+  top: 40%;
+  right: 25%;
+  animation-delay: -14s;
+}
+
+@keyframes float-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(20px, 10px) scale(1.02); }
+}
+
+/* ====================== MAIN CONTENT ====================== */
+.main-content {
+  flex: 1;
+  margin-left: min(220px, 18vw);
+  width: calc(100vw - min(220px, 18vw));
+  min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 100%;
-  margin: 0;
-  gap: clamp(0.25rem, 0.8vw, 0.5rem);
-  flex-wrap: wrap;
-  width: 100%;
+/* ====================== STICKY WRAPPER ====================== */
+.apple-sticky-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 12px 16px 0;
+}
+
+/* ====================== APPLE PAGE HEADER ====================== */
+.apple-page-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  color: white;
+  border-radius: 20px 20px 0 0;
+  padding: 16px 24px;
   position: relative;
-  z-index: 2;
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);
 }
 
-.header-main {
+.apple-header-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.apple-header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-title-group {
   display: flex;
   align-items: center;
-  gap: clamp(0.5rem, 1.2vw, 0.8rem);
-  flex: 1;
-  min-width: 140px;
-  margin-left: clamp(0.3rem, 1vw, 0.6rem);
+  gap: 12px;
 }
 
-.header-icon {
-  width: clamp(28px, 3vw, 32px);
-  height: clamp(28px, 3vw, 32px);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+.apple-icon-mini {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.apple-icon-mini svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  stroke-width: 2;
+}
+
+.apple-title-divider {
+  font-size: 20px;
+  opacity: 0.5;
+  font-weight: 300;
+}
+
+.apple-page-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: 1px;
+  font-family: 'Inter', sans-serif;
+}
+
+.apple-page-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  font-weight: 400;
+}
+
+.apple-refresh-button {
+  position: absolute;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.header-icon svg {
-  width: clamp(14px, 2.5vw, 16px);
-  height: clamp(14px, 2.5vw, 16px);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-  z-index: 1;
-  position: relative;
+.apple-refresh-button svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
 }
 
-.header-text {
+.apple-refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.apple-refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.apple-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ====================== STATS SECTION ====================== */
+.apple-stats-section {
+  background: white;
+  border-radius: 0 0 20px 20px;
+  padding: 16px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-top: none;
+}
+
+.apple-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.apple-stat-card {
+  background: var(--apple-gray-1);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.apple-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.apple-stat-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-stat-icon.blue {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+}
+
+.apple-stat-icon.green {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+}
+
+.apple-stat-icon.purple {
+  background: linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%);
+}
+
+.apple-stat-content {
   flex: 1;
 }
 
-.header-title {
-  font-size: clamp(14px, 2.5vw, 16px);
+.apple-stat-value {
+  font-size: 22px;
   font-weight: 700;
-  margin: 0 0 clamp(1px, 0.3vw, 2px) 0;
-  background: linear-gradient(135deg, #ffffff 0%, #e8f5e8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--apple-text);
+  line-height: 1;
+}
+
+.apple-stat-label {
+  font-size: 11px;
+  color: var(--apple-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* ====================== SEARCH SECTION ====================== */
+.apple-search-section {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 14px;
+  margin-top: 6px;
+}
+
+.apple-search-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.apple-search-container {
+  position: relative;
+  flex: 1;
+}
+
+.apple-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  stroke: var(--apple-blue);
+  pointer-events: none;
+}
+
+.apple-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 44px;
+  border: 1.5px solid transparent;
+  border-radius: 20px;
+  background: var(--apple-gray-1);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--apple-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  transition: all 0.25s ease;
+}
+
+.apple-search-input::placeholder {
+  color: var(--apple-text-secondary);
+}
+
+.apple-search-input:hover {
+  background: rgba(0, 122, 255, 0.04);
+  border-color: rgba(0, 122, 255, 0.08);
+}
+
+.apple-search-input:focus {
+  outline: none;
+  border-color: rgba(0, 122, 255, 0.2);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.05);
+}
+
+.apple-clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  background: var(--apple-gray-3);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apple-clear-btn:hover {
+  background: var(--apple-gray-4);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.apple-clear-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: white;
+}
+
+.apple-filter-controls {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.apple-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: white;
+  border: 1.5px solid var(--apple-gray-3);
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.apple-filter-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.apple-filter-btn.reset {
+  color: #FF3B30;
+  border-color: rgba(255, 59, 48, 0.2);
+  background: white;
+}
+
+.apple-filter-btn.reset:hover {
+  background: rgba(255, 59, 48, 0.08);
+  border-color: #FF3B30;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 59, 48, 0.2);
+}
+
+.apple-filter-btn.reset svg {
+  stroke: #FF3B30;
+}
+
+.apple-filter-btn.create {
+  color: white;
+  background: linear-gradient(135deg, #34C759 0%, #248A3D 100%);
+  border-color: #34C759;
+  box-shadow: 0 3px 10px rgba(52, 199, 89, 0.3);
+}
+
+.apple-filter-btn.create:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.4);
+}
+
+.apple-filter-btn.create svg {
+  stroke: white;
+}
+
+/* ====================== QUICK FILTERS ====================== */
+.apple-quick-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--apple-gray-1);
+  border: 2px solid transparent;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--apple-text);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-filter-chip .chip-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.apple-filter-chip .chip-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: #86868b;
+  stroke-width: 2.5;
+  transition: all 0.3s ease;
+}
+
+.apple-filter-chip span {
+  color: var(--apple-text);
+  transition: all 0.3s ease;
+}
+
+.apple-filter-chip:hover {
+  background: rgba(0, 122, 255, 0.1);
+  border-color: rgba(0, 122, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.15);
+}
+
+.apple-filter-chip:hover .chip-icon svg {
+  stroke: #007AFF;
+}
+
+.apple-filter-chip:hover span {
+  color: #007AFF;
+}
+
+.apple-filter-chip.active {
+  background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+  border-color: #007AFF;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.apple-filter-chip.active .chip-icon svg {
+  stroke: white !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.apple-filter-chip.active span {
+  color: white !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  font-family: 'Inter', sans-serif;
+}
+
+/* ====================== CONTENT WRAPPER ====================== */
+.apple-content-wrapper {
+  padding: 16px;
+}
+
+/* ====================== LOADING, ERROR, EMPTY STATES ====================== */
+.apple-loading,
+.apple-error,
+.apple-empty {
+  background: white;
+  border-radius: 20px;
+  padding: 60px 20px;
+  text-align: center;
+  box-shadow: var(--apple-shadow);
+}
+
+.apple-loading svg,
+.apple-error svg,
+.apple-empty svg {
+  width: 48px;
+  height: 48px;
+  stroke: var(--apple-text-secondary);
+  margin-bottom: 16px;
+}
+
+.apple-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--apple-gray-2);
+  border-top: 3px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.apple-loading p,
+.apple-error p,
+.apple-empty p {
+  color: var(--apple-text-secondary);
+  font-size: 14px;
+  margin: 8px 0 0;
+}
+
+.apple-empty h3 {
+  color: var(--apple-text);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.apple-retry-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 16px;
+}
+
+.apple-retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+}
+
+/* ====================== TABLE CONTAINER ====================== */
+.apple-table-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: var(--apple-shadow);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  max-height: calc(100vh - 380px);
+  display: flex;
+  flex-direction: column;
+}
+
+.apple-table-wrapper {
+  overflow-y: auto;
+  overflow-x: auto;
+  flex: 1;
+  max-height: 100%;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.apple-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ====================== APPLE PAGINATION ====================== */
+.apple-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-top: 1px solid #C8E6C9;
+  background: #E8F5E9;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+
+.apple-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-pagination-btn {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #34C759 0%, #248A3D 100%);
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+}
+
+.apple-pagination-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #248A3D 0%, #1B6D30 100%);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4);
+  transform: translateY(-1px);
+}
+
+.apple-pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.apple-pagination-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.apple-pagination-numbers {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.apple-pagination-number {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--apple-text);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apple-pagination-number:hover {
+  background: rgba(52, 199, 89, 0.15);
+}
+
+.apple-pagination-number.active {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4);
+}
+
+.apple-pagination-ellipsis {
+  padding: 0 4px;
+  color: var(--apple-text-secondary);
+  font-weight: 600;
+}
+
+.apple-pagination-info {
+  font-size: 12px;
+  color: var(--apple-text-secondary);
+  font-weight: 500;
+}
+
+/* ====================== TABLE ====================== */
+.apple-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #E8F5E9;
+}
+
+.apple-table th {
+  padding: 16px 18px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2E7D32;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: #E8F5E9;
+  white-space: nowrap;
+  border-bottom: 1px solid #C8E6C9;
+  border-right: 1px solid #C8E6C9;
+}
+
+.apple-table th:last-child {
+  border-right: none;
+}
+
+.apple-table-row {
+  border-bottom: 1px solid #F0F0F0;
+  transition: all 0.15s ease;
+  background: white;
+}
+
+.apple-table-row:nth-child(even) {
+  background: #FAFAFA;
+}
+
+.apple-table-row:hover {
+  background: #F5F5F7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-table td {
+  padding: 14px 18px;
+  font-size: 13px;
+  color: var(--apple-text);
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.apple-table-row:hover td:first-child {
+  border-left-color: #4CAF50;
+}
+
+/* ====================== TABLE CELLS ====================== */
+.apple-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.apple-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #66BB6A 0%, #81C784 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(102, 187, 106, 0.25);
+}
+
+.apple-avatar svg {
+  width: 22px;
+  height: 22px;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-user-info {
+  flex: 1;
+}
+
+.apple-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
   line-height: 1.2;
 }
+
+.apple-user-id {
+  font-size: 11px;
+  color: #86868b;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.apple-info-personal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.apple-info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.apple-info-item svg {
+  flex-shrink: 0;
+}
+
+.apple-info-item.nombre {
+  margin-bottom: 2px;
+}
+
+.apple-info-item.nombre svg {
+  stroke: #007AFF;
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.5;
+}
+
+.nombre-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.2px;
+}
+
+.apple-info-item.curp svg {
+  stroke: #8E8E93;
+  width: 12px;
+  height: 12px;
+}
+
+.curp-text {
+  font-family: 'SF Mono', SFMono-Regular, Menlo, Monaco, 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: #86868b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.apple-info-item.cargo {
+  margin-top: 2px;
+}
+
+.cargo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(52, 199, 89, 0.12);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #34C759;
+  letter-spacing: 0.2px;
+}
+
+.cargo-badge svg {
+  stroke: #34C759;
+  flex-shrink: 0;
+}
+
+.apple-no-data {
+  color: var(--apple-text-secondary);
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* ====================== BADGES ====================== */
+.apple-rol-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.apple-rol-badge svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-rol-badge.admin {
+  background: rgba(255, 149, 0, 0.12);
+  color: #FF9500;
+}
+
+.apple-rol-badge.admin svg {
+  stroke: #FF9500;
+}
+
+.apple-rol-badge.user {
+  background: rgba(0, 122, 255, 0.12);
+  color: #007AFF;
+}
+
+.apple-rol-badge.user svg {
+  stroke: #007AFF;
+}
+
+.apple-territorio-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.apple-territorio-badge svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.apple-territorio-badge.territorial {
+  background: rgba(175, 82, 222, 0.12);
+  color: #AF52DE;
+}
+
+.apple-territorio-badge.territorial svg {
+  stroke: #AF52DE;
+}
+
+.apple-territorio-badge.general {
+  background: rgba(142, 142, 147, 0.12);
+  color: #8E8E93;
+}
+
+.apple-territorio-badge.general svg {
+  stroke: #8E8E93;
+}
+
+.apple-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.apple-status-badge svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}
+
+.apple-status-badge.activo {
+  background: rgba(52, 199, 89, 0.15);
+  color: #34C759;
+}
+
+.apple-status-badge.activo svg {
+  stroke: #34C759;
+}
+
+.apple-status-badge.inactivo {
+  background: rgba(255, 59, 48, 0.15);
+  color: #FF3B30;
+}
+
+.apple-status-badge.inactivo svg {
+  stroke: #FF3B30;
+}
+
+/* ====================== APPLE ACTIONS ====================== */
+.apple-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.apple-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.apple-action-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-action-btn.view {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+}
+
+.apple-action-btn.view svg {
+  stroke: white;
+}
+
+.apple-action-btn.view:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+.apple-action-btn.edit {
+  background: linear-gradient(135deg, #FF9500 0%, #FFCC00 100%);
+}
+
+.apple-action-btn.edit svg {
+  stroke: white;
+}
+
+.apple-action-btn.edit:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+}
+
+.apple-action-btn.delete {
+  background: linear-gradient(135deg, #FF3B30 0%, #FF6961 100%);
+}
+
+.apple-action-btn.delete svg {
+  stroke: white;
+}
+
+.apple-action-btn.delete:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+}
+
+/* ====================== RESPONSIVE ====================== */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .apple-sticky-wrapper {
+    padding: 10px 12px 0;
+  }
+
+  .apple-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .apple-stat-card {
+    padding: 10px;
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .apple-stat-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .apple-stat-value {
+    font-size: 18px;
+  }
+
+  .apple-search-row {
+    flex-wrap: wrap;
+  }
+
+  .apple-filter-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .apple-filter-btn span {
+    display: none;
+  }
+
+  .apple-filter-btn {
+    padding: 12px;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    justify-content: center;
+  }
+
+  .apple-filter-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .apple-sticky-wrapper {
+    padding: 8px 10px 0;
+  }
+
+  .apple-page-header {
+    padding: 12px 16px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .apple-page-title {
+    font-size: 14px;
+  }
+
+  .apple-page-subtitle {
+    font-size: 10px;
+  }
+
+  .apple-refresh-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .apple-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .apple-stat-card {
+    padding: 8px;
+  }
+
+  .apple-stat-value {
+    font-size: 16px;
+  }
+
+  .apple-stat-label {
+    font-size: 9px;
+  }
+
+  .apple-quick-filters {
+    gap: 8px;
+  }
+
+  .apple-filter-chip {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .apple-filter-chip .chip-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .apple-filter-chip .chip-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .apple-table th,
+  .apple-table td {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+
+  .apple-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .apple-avatar svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .nombre-text {
+    font-size: 12px;
+  }
+
+  .curp-text {
+    font-size: 10px;
+  }
+
+  .cargo-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .apple-sticky-wrapper {
+    padding: 6px 8px 0;
+  }
+
+  .apple-page-header {
+    padding: 10px 12px;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .apple-icon-mini {
+    width: 26px;
+    height: 26px;
+  }
+
+  .apple-icon-mini svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .apple-page-title {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .apple-stats-section {
+    padding: 10px 12px;
+  }
+
+  .apple-stat-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .apple-stat-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .apple-stat-value {
+    font-size: 14px;
+  }
+
+  .apple-search-input {
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .apple-filter-chip span {
+    display: none;
+  }
+
+  .apple-filter-chip {
+    padding: 10px;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+  }
+
+  .apple-filter-chip .chip-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .apple-filter-chip .chip-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .apple-filter-btn span {
+    display: none;
+  }
+
+  .apple-filter-btn {
+    padding: 10px;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+  }
+
+  .apple-table-container {
+    max-height: calc(100vh - 340px);
+  }
+
+  .apple-table th,
+  .apple-table td {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+
+  .apple-rol-badge,
+  .apple-territorio-badge,
+  .apple-status-badge {
+    padding: 4px 8px;
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .apple-rol-badge svg,
+  .apple-territorio-badge svg,
+  .apple-status-badge svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .apple-action-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .apple-action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .apple-info-personal {
+    gap: 4px;
+  }
+
+  .nombre-text {
+    font-size: 11px;
+  }
+
+  .curp-text {
+    font-size: 9px;
+  }
+
+  .cargo-badge {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
+
+  .cargo-badge svg {
+    width: 9px;
+    height: 9px;
+  }
+}
+
+/* ====================== OLD MODAL STYLES BELOW ====================== */
+
+.apple-error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.apple-error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.apple-btn-secondary {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.apple-btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ====================== APPLE PERMISOS LIST ====================== */
+.apple-permisos-list {
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.apple-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.apple-list-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple-list-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-count-badge {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.apple-filter-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.apple-select {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apple-select:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.apple-refresh-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apple-refresh-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: #4CAF50;
+  stroke-width: 2;
+}
+
+.apple-refresh-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  transform: scale(1.05);
+}
+
+.apple-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ====================== APPLE SEARCH BAR ====================== */
+.apple-search-bar {
+  margin-bottom: 16px;
+}
+
+.apple-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.apple-search-icon {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  stroke: #86868b;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.apple-search-input {
+  width: 100%;
+  padding: 12px 40px 12px 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #f5f5f7;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+  transition: all 0.2s ease;
+}
+
+.apple-search-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.apple-search-input::placeholder {
+  color: #86868b;
+}
+
+.apple-clear-btn {
+  position: absolute;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apple-clear-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke: #666;
+  stroke-width: 2;
+}
+
+.apple-clear-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.apple-no-results {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: #86868b;
+  font-size: 13px;
+}
+
+.apple-no-results svg {
+  width: 18px;
+  height: 18px;
+  stroke: #86868b;
+  stroke-width: 2;
+}
+
+/* ====================== APPLE TABLE ====================== */
+.apple-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.apple-table-container::-webkit-scrollbar-track {
+  background: #f5f5f7;
+  border-radius: 3px;
+}
+
+.apple-table-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  border-radius: 3px;
+}
+
+.apple-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-table thead tr {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+}
+
+.apple-table th {
+  color: #2E7D32;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 14px 16px;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(76, 175, 80, 0.2);
+  border-right: 1px solid rgba(76, 175, 80, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.apple-table th:last-child {
+  border-right: none;
+}
+
+.apple-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  vertical-align: middle;
+  font-size: 13px;
+  color: #1d1d1f;
+}
+
+.apple-table-row {
+  transition: all 0.2s ease;
+}
+
+.apple-table-row:hover {
+  background: linear-gradient(135deg, #f8fffe 0%, #f0fff4 100%);
+  border-left: 3px solid #4CAF50;
+}
+
+/* ====================== APPLE RESPONSIVE ====================== */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 8px 12px 0 12px;
+  }
+
+  .apple-page-header {
+    border-radius: 16px;
+    padding: 12px 16px;
+  }
+
+  .apple-filter-btn {
+    position: static;
+    margin-top: 10px;
+  }
+
+  .apple-header-wrapper {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 6px 10px 0 10px;
+  }
+  
+  .apple-page-header {
+    border-radius: 14px;
+    padding: 10px 14px;
+  }
+
+  .apple-page-title {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .apple-page-subtitle {
+    font-size: 10px;
+  }
+
+  .apple-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .apple-filter-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .apple-table th,
+  .apple-table td {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 4px 6px 0 6px;
+  }
+
+  .apple-page-header {
+    border-radius: 12px;
+    padding: 8px 10px;
+  }
+
+  .apple-title-group {
+    gap: 6px;
+  }
+
+  .apple-icon-mini {
+    width: 18px;
+    height: 18px;
+  }
+
+  .apple-icon-mini svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .apple-page-title {
+    font-size: 12px;
+  }
+
+  .apple-table th,
+  .apple-table td {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+}
+
+/* ====================== EXISTING STYLES FOR TABLE CELLS ====================== */
 
 .header-subtitle {
   font-size: clamp(9px, 1.8vw, 11px);

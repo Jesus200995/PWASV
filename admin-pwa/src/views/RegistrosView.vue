@@ -3506,7 +3506,7 @@ const logout = () => {
 
 /* ====================== APPLE PAGE HEADER ====================== */
 .apple-page-header {
-  background: linear-gradient(135deg, #388E3C 0%, #2E7D32 50%, #1B5E20 100%);
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
   color: white;
   border-radius: 28px 28px 0 0;
   border: 2px solid #8BC34A;

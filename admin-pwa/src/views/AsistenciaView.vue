@@ -989,10 +989,7 @@ export default {
 
 /* ==================== HEADER ==================== */
 .apple-page-header {
-  background: linear-gradient(135deg, 
-    #388E3C 0%, 
-    #2E7D32 50%, 
-    #1B5E20 100%);
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
   border-bottom: none;
   padding: 14px 20px;
   border-radius: 28px 28px 0 0;

@@ -159,7 +159,7 @@
               <div class="apple-quick-filters">
                 <button 
                   @click="setPeriodo('dia')"
-                  :class="['apple-filter-chip', { active: filtros.periodo === 'dia' }]"
+                  :class="['apple-period-chip', { active: filtros.periodo === 'dia' }]"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
@@ -171,7 +171,7 @@
                 </button>
                 <button 
                   @click="setPeriodo('semana')"
-                  :class="['apple-filter-chip', { active: filtros.periodo === 'semana' }]"
+                  :class="['apple-period-chip', { active: filtros.periodo === 'semana' }]"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
@@ -180,8 +180,20 @@
                   <span>Semana</span>
                 </button>
                 <button 
+                  @click="setPeriodo('mes')"
+                  :class="['apple-period-chip', { active: filtros.periodo === 'mes' }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                    <line x1="9" y1="2" x2="9" y2="6" stroke-width="2"/>
+                    <line x1="15" y1="2" x2="15" y2="6" stroke-width="2"/>
+                  </svg>
+                  <span>Mes</span>
+                </button>
+                <button 
                   @click="setPeriodo('año')"
-                  :class="['apple-filter-chip', { active: filtros.periodo === 'año' }]"
+                  :class="['apple-period-chip', { active: filtros.periodo === 'año' }]"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <circle cx="12" cy="12" r="10" stroke-width="2"/>
@@ -191,7 +203,7 @@
                 </button>
                 <button 
                   @click="setPeriodo('todo')"
-                  :class="['apple-filter-chip', { active: filtros.periodo === 'todo' }]"
+                  :class="['apple-period-chip', { active: filtros.periodo === 'todo' }]"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" stroke-width="2"/>
@@ -201,81 +213,78 @@
                 </button>
               </div>
 
-              <!-- Selector de fecha según período -->
-              <div v-if="filtros.periodo === 'dia'" class="apple-filter-group">
-                <label class="apple-filter-label">
+              <!-- Selectores pill según período -->
+              <div class="apple-filter-pill-row">
+                <div v-if="filtros.periodo === 'dia'" :class="['apple-filter-pill', { active: filtros.fechaEspecifica }]">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                     <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
                     <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
                     <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
                   </svg>
-                  Fecha:
-                </label>
-                <input
-                  type="date"
-                  v-model="filtros.fechaEspecifica"
-                  @change="aplicarFiltros"
-                  class="apple-date-input"
-                >
-              </div>
+                  <input
+                    type="date"
+                    v-model="filtros.fechaEspecifica"
+                    class="apple-pill-date"
+                  >
+                </div>
 
-              <div v-if="filtros.periodo === 'semana'" class="apple-filter-group">
-                <label class="apple-filter-label">
+                <div v-if="filtros.periodo === 'semana'" :class="['apple-filter-pill', { active: filtros.semanaEspecifica }]">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                     <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
                   </svg>
-                  Semana:
-                </label>
-                <input
-                  type="week"
-                  v-model="filtros.semanaEspecifica"
-                  @change="aplicarFiltros"
-                  class="apple-date-input"
-                >
-              </div>
+                  <input
+                    type="week"
+                    v-model="filtros.semanaEspecifica"
+                    class="apple-pill-date"
+                  >
+                </div>
 
-              <div v-if="filtros.periodo === 'año'" class="apple-filter-group">
-                <label class="apple-filter-label">
+                <div v-if="filtros.periodo === 'mes'" :class="['apple-filter-pill', { active: filtros.mesEspecifico }]">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                  </svg>
+                  <input
+                    type="month"
+                    v-model="filtros.mesEspecifico"
+                    class="apple-pill-date"
+                  >
+                </div>
+
+                <div v-if="filtros.periodo === 'año'" :class="['apple-filter-pill', { active: filtros.añoEspecifico }]">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <circle cx="12" cy="12" r="10" stroke-width="2"/>
                     <path d="M12 6v6l4 2" stroke-width="2"/>
                   </svg>
-                  Año:
-                </label>
-                <select
-                  v-model="filtros.añoEspecifico"
-                  @change="aplicarFiltros"
-                  class="apple-select"
-                >
-                  <option v-for="año in añosDisponibles" :key="año" :value="año">
-                    {{ año }}
-                  </option>
-                </select>
-              </div>
+                  <select v-model="filtros.añoEspecifico" class="apple-pill-select">
+                    <option v-for="año in añosDisponibles" :key="año" :value="año">{{ año }}</option>
+                  </select>
+                </div>
 
-              <div class="apple-filter-group">
-                <label class="apple-filter-label">
+                <div :class="['apple-filter-pill', { active: filtros.tipo }]">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" stroke-width="2"/>
                   </svg>
-                  Tipo:
-                </label>
-                <select
-                  v-model="filtros.tipo"
-                  @change="aplicarFiltros"
-                  class="apple-select"
-                >
-                  <option value="">Todos</option>
-                  <option value="entrada">Entrada</option>
-                  <option value="salida">Salida</option>
-                  <option value="actividad">Actividad</option>
-                </select>
+                  <select v-model="filtros.tipo" class="apple-pill-select">
+                    <option value="">Tipo</option>
+                    <option value="entrada">Entrada</option>
+                    <option value="salida">Salida</option>
+                    <option value="actividad">Actividad</option>
+                  </select>
+                </div>
+
+                <div :class="['apple-filter-pill', { active: ordenAscendente }]" @click="toggleOrden">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M3 6h18M6 12h12M9 18h6" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  <span class="apple-pill-label">{{ ordenAscendente ? 'Antiguo → Reciente' : 'Reciente → Antiguo' }}</span>
+                </div>
               </div>
 
-              <div v-if="historial.length > 0" class="apple-count-badge">
-                {{ historial.length }}
+              <div v-if="historialOrdenado.length > 0" class="apple-count-badge">
+                {{ historialOrdenado.length }}
               </div>
             </div>
           </div>
@@ -347,7 +356,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="registro in historial" :key="registro.id" class="apple-table-row">
+                <tr v-for="registro in historialOrdenado" :key="registro.id" class="apple-table-row">
                   <td>
                     <span :class="['apple-origen-badge', registro.origen]">
                       {{ formatearOrigen(registro.origen) }}
@@ -725,12 +734,16 @@ export default {
     
     // Filtros
     const filtros = ref({
-      periodo: 'todo', // 'dia', 'semana', 'año', 'todo'
+      periodo: 'todo', // 'dia', 'semana', 'mes', 'año', 'todo'
       fechaEspecifica: new Date().toISOString().split('T')[0],
       semanaEspecifica: '',
+      mesEspecifico: new Date().toISOString().slice(0, 7), // formato YYYY-MM
       añoEspecifico: new Date().getFullYear(),
       tipo: '' // '', 'entrada', 'salida', 'actividad'
     })
+    
+    // Orden de resultados
+    const ordenAscendente = ref(true) // true = antiguo a reciente, false = reciente a antiguo
 
     // Modal de detalles
     const modalDetalles = ref({
@@ -750,6 +763,23 @@ export default {
         years.push(i)
       }
       return years
+    })
+
+    // Historial ordenado por fecha
+    const historialOrdenado = computed(() => {
+      if (!historial.value || historial.value.length === 0) return []
+      
+      const copia = [...historial.value]
+      return copia.sort((a, b) => {
+        const fechaA = new Date(a.fecha_hora || a.fecha || a.timestamp || 0)
+        const fechaB = new Date(b.fecha_hora || b.fecha || b.timestamp || 0)
+        
+        if (ordenAscendente.value) {
+          return fechaA - fechaB // Antiguo a reciente
+        } else {
+          return fechaB - fechaA // Reciente a antiguo
+        }
+      })
     })
 
     // Admin user
@@ -869,6 +899,15 @@ export default {
           }
           break
           
+        case 'mes':
+          if (filtros.value.mesEspecifico) {
+            const [year, month] = filtros.value.mesEspecifico.split('-')
+            const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate()
+            filtrosAPI.fechaInicio = `${year}-${month}-01`
+            filtrosAPI.fechaFin = `${year}-${month}-${lastDay.toString().padStart(2, '0')}`
+          }
+          break
+          
         case 'año':
           filtrosAPI.fechaInicio = `${filtros.value.añoEspecifico}-01-01`
           filtrosAPI.fechaFin = `${filtros.value.añoEspecifico}-12-31`
@@ -924,12 +963,19 @@ export default {
           const semana = getWeekNumber(fechaActual)
           filtros.value.semanaEspecifica = `${año}-W${semana.toString().padStart(2, '0')}`
           break
+        case 'mes':
+          filtros.value.mesEspecifico = new Date().toISOString().slice(0, 7)
+          break
         case 'año':
           filtros.value.añoEspecifico = new Date().getFullYear()
           break
       }
       
       aplicarFiltros()
+    }
+    
+    const toggleOrden = () => {
+      ordenAscendente.value = !ordenAscendente.value
     }
 
     const getWeekNumber = (date) => {
@@ -945,6 +991,19 @@ export default {
         cargarHistorial()
       }
     }
+    
+    // Watcher para filtros reactivos (excepto período que tiene su propio handler)
+    watch([
+      () => filtros.value.fechaEspecifica,
+      () => filtros.value.semanaEspecifica,
+      () => filtros.value.mesEspecifico,
+      () => filtros.value.añoEspecifico,
+      () => filtros.value.tipo
+    ], () => {
+      if (usuarioSeleccionado.value) {
+        aplicarFiltros()
+      }
+    }, { deep: false })
 
     const actualizarHistorial = () => {
       if (usuarioSeleccionado.value) {
@@ -1490,12 +1549,14 @@ export default {
       usuarios,
       usuarioSeleccionado,
       historial,
+      historialOrdenado,
       resumen,
       usuarioActual,
       filtros,
       modalDetalles,
       añosDisponibles,
       adminUser,
+      ordenAscendente,
       
       // Lightbox
       showLightbox,
@@ -1532,6 +1593,7 @@ export default {
       // Métodos de filtros
       setPeriodo,
       aplicarFiltros,
+      toggleOrden,
       
       // Métodos de formato
       formatearOrigen,
@@ -2217,17 +2279,190 @@ export default {
 .apple-unified-filters {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 /* ====================== APPLE QUICK FILTERS ====================== */
 .apple-quick-filters {
   display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ====================== APPLE PERIOD CHIPS ====================== */
+.apple-period-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 50px;
+  border: 1.5px solid #e5e5e5;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  color: #374151;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-period-chip svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+  transition: stroke 0.2s ease;
+}
+
+.apple-period-chip:hover {
+  border-color: #007AFF;
+  background: linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.12);
+}
+
+.apple-period-chip:hover svg {
+  stroke: #007AFF;
+}
+
+.apple-period-chip.active {
+  background: linear-gradient(145deg, #007AFF 0%, #0056CC 100%);
+  color: white;
+  border-color: #007AFF;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+.apple-period-chip.active span {
+  color: white !important;
+}
+
+.apple-period-chip.active svg {
+  stroke: white !important;
+}
+
+/* ====================== APPLE FILTER PILL ROW ====================== */
+.apple-filter-pill-row {
+  display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
+/* ====================== APPLE FILTER PILLS ====================== */
+.apple-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px 0 12px;
+  height: 36px;
+  border-radius: 50px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1.5px solid #e5e5e5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.apple-filter-pill:hover {
+  border-color: #007AFF;
+  background: linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.apple-filter-pill:focus-within {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.apple-filter-pill svg {
+  width: 15px;
+  height: 15px;
+  stroke: #86868b;
+  stroke-width: 2;
+  flex-shrink: 0;
+  transition: stroke 0.2s ease;
+}
+
+.apple-filter-pill:hover svg {
+  stroke: #007AFF;
+}
+
+.apple-filter-pill.active {
+  background: linear-gradient(145deg, #e8f4ff 0%, #d6eaff 100%);
+  border-color: #007AFF;
+}
+
+.apple-filter-pill.active svg {
+  stroke: #007AFF;
+}
+
+.apple-pill-date {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0 12px 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  cursor: pointer;
+  outline: none;
+  min-width: 100px;
+}
+
+.apple-pill-date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.apple-pill-date::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.apple-pill-select {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0 28px 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  cursor: pointer;
+  outline: none;
+  min-width: 60px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.apple-pill-select option {
+  padding: 12px;
+  font-size: 14px;
+  background: white;
+  color: #1d1d1f;
+}
+
+.apple-pill-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
+  padding-right: 12px;
+  white-space: nowrap;
+}
+
+.apple-filter-pill.active .apple-pill-select,
+.apple-filter-pill.active .apple-pill-date,
+.apple-filter-pill.active .apple-pill-label {
+  color: #0056CC;
+  font-weight: 600;
+}
+
+/* ====================== LEGACY APPLE FILTER CHIP (para compatibilidad) ====================== */
 .apple-filter-chip {
   display: inline-flex;
   align-items: center;

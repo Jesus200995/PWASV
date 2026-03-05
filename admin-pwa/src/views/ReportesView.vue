@@ -1,455 +1,479 @@
 <template>
   <div class="reportes-container">
+    <!-- Apple Dynamic Background -->
+    <div class="apple-dynamic-bg">
+      <div class="apple-orb apple-orb-1"></div>
+      <div class="apple-orb apple-orb-2"></div>
+      <div class="apple-orb apple-orb-3"></div>
+    </div>
+    
     <Sidebar @logout="logout" />
     
     <main class="main-content">
-      <header class="page-header">
-        <div class="header-content">
-          <div class="header-main">
-            <div class="header-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10"/>
-                <line x1="12" y1="20" x2="12" y2="4"/>
-                <line x1="6" y1="20" x2="6" y2="14"/>
-              </svg>
+      <!-- ================== STICKY WRAPPER FOR HEADER + STATS ================== -->
+      <div class="apple-sticky-wrapper">
+        <!-- ================== HEADER APPLE STYLE ================== -->
+        <header class="apple-page-header">
+          <div class="apple-header-wrapper">
+            <div class="apple-header-center">
+              <div class="apple-title-group">
+                <div class="apple-icon-mini">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="18" y1="20" x2="18" y2="10" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="12" y1="20" x2="12" y2="4" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="6" y1="20" x2="6" y2="14" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <span class="apple-title-divider">|</span>
+                <h1 class="apple-page-title">REPORTES</h1>
+              </div>
+              <p class="apple-page-subtitle">Firma y gestiona los reportes de los usuarios</p>
             </div>
-            <div class="header-text">
-              <h1 class="header-title">Gestión de Reportes</h1>
-              <p class="header-subtitle">Firma y gestiona los reportes de los usuarios</p>
-            </div>
-          </div>
-          <div class="header-actions">
-            <button @click="cargarReportes" class="refresh-btn" :disabled="loading">
-              <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <polyline points="1 20 1 14 7 14"></polyline>
-                <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            
+            <button @click="cargarReportes" class="apple-refresh-button" :disabled="loading">
+              <svg :class="{ 'apple-spin': loading }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              {{ loading ? 'Cargando...' : 'Actualizar' }}
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div class="page-content">
-        <!-- Título del territorio (solo para admins territoriales) -->
-        <div v-if="territorioUsuario" class="territorio-banner">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          <span>Reportes de {{ territorioUsuario }}</span>
-        </div>
-
-        <!-- Barra de acciones para firma masiva -->
-        <div v-if="reportesSeleccionados.length > 0" class="firma-actions-bar">
-          <div class="firma-actions-info">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 12l2 2 4-4"/>
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-            </svg>
-            <span><strong>{{ reportesSeleccionados.length }}</strong> reportes seleccionados</span>
-          </div>
-          <div class="firma-actions-buttons">
-            <button @click="deseleccionarTodos" class="btn-deselect">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-              Deseleccionar
-            </button>
-            <button @click="abrirModalFirma" class="btn-firmar-seleccionados">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 19l7-7 3 3-7 7-3-3z"/>
-                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
-                <path d="M2 2l7.586 7.586"/>
-              </svg>
-              Firmar Seleccionados ({{ reportesSeleccionados.length }})
-            </button>
-          </div>
-        </div>
-
-        <!-- Filtros -->
-        <div class="filters-section">
-          <div class="filters-card">
-            <div class="filters-header">
-              <h3>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        <!-- ================== STATS + FILTERS SECTION ================== -->
+        <div class="apple-stats-section">
+          <!-- Stats Cards Apple Style -->
+          <div class="apple-stats-grid">
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
                 </svg>
-                Filtros de Búsqueda
-              </h3>
-              <!-- Botones de acciones masivas -->
-              <div class="header-actions-buttons">
-                <!-- Botón firmar todos los pendientes del período seleccionado -->
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ estadisticas.totalReportes }}</div>
+                <div class="apple-stat-label">Total</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-width="2"/>
+                  <polyline points="22 4 12 14.01 9 11.01" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ reportesFirmados.length }}</div>
+                <div class="apple-stat-label">Firmados</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <polyline points="12 6 12 12 16 14" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ reportesPendientes.length }}</div>
+                <div class="apple-stat-label">Pendientes</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                  <circle cx="9" cy="7" r="4" stroke-width="2"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-width="2"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ estadisticas.usuariosConReportes }}</div>
+                <div class="apple-stat-label">Usuarios</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================== SEARCH & FILTERS ================== -->
+          <div class="apple-search-section">
+            <div class="apple-search-row">
+              <div class="apple-search-container">
+                <svg class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="11" cy="11" r="8" stroke-width="2.5"/>
+                  <path d="m21 21-4.35-4.35" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <input 
+                  v-model="filtros.busqueda" 
+                  type="text" 
+                  placeholder="Buscar por nombre, correo, CURP o territorio..." 
+                  class="apple-search-input"
+                >
+                <button v-if="filtros.busqueda" @click="limpiarBusquedaReportes" class="apple-clear-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <line x1="15" y1="9" x2="9" y2="15" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="9" y1="9" x2="15" y2="15" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="apple-filter-controls">
                 <button 
                   v-if="reportesPendientesFiltrados.length > 0" 
                   @click="seleccionarTodosPendientes" 
-                  class="btn-firmar-todos"
+                  class="apple-filter-btn primary"
+                  title="Seleccionar todos los pendientes"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 11l3 3L22 4"/>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 11l3 3L22 4" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke-width="2"/>
                   </svg>
-                  Seleccionar Todos Pendientes ({{ reportesPendientesFiltrados.length }})
+                  <span>Seleccionar Pendientes ({{ reportesPendientesFiltrados.length }})</span>
                 </button>
-
-                <!-- Botón descargar reportes -->
                 <button 
                   @click="abrirModalDescarga" 
-                  class="btn-descargar-reportes"
+                  class="apple-filter-btn export"
                   title="Descargar reportes en ZIP"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  Descargar Reportes
+                  <span>Descargar</span>
                 </button>
               </div>
             </div>
-            
-            <div class="filters-grid">
-              <div class="filter-group search-group full-width">
-                <label for="search-input" class="filter-label">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
+
+            <!-- Unified Filter Row -->
+            <div class="apple-unified-filters">
+              <div class="apple-quick-filters">
+                <button 
+                  @click="filtros.estadoFirma = ''" 
+                  :class="['apple-filter-chip', { 'active': filtros.estadoFirma === '' }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"/>
+                    <polyline points="14 2 14 8 20 8" stroke-width="2"/>
                   </svg>
-                  Búsqueda General
-                </label>
-                <div class="search-input-wrapper">
-                  <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
+                  <span>Todos</span>
+                </button>
+                <button 
+                  @click="filtros.estadoFirma = 'firmado'" 
+                  :class="['apple-filter-chip', { 'active': filtros.estadoFirma === 'firmado' }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-width="2"/>
+                    <polyline points="22 4 12 14.01 9 11.01" stroke-width="2"/>
                   </svg>
-                  <input 
-                    id="search-input"
-                    v-model="filtros.busqueda" 
-                    type="text" 
-                    placeholder="Nombre de usuario, correo electrónico, CURP o territorio" 
-                    class="search-input"
-                  >
-                  <transition name="fade-quick">
-                    <button v-if="filtros.busqueda" @click="limpiarBusquedaReportes" class="clear-search-btn" title="Limpiar búsqueda">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
-                  </transition>
-                  <span v-if="filtros.busqueda && reportesFiltrados.length > 0" class="search-results-count">
-                    {{ reportesFiltrados.length }} {{ reportesFiltrados.length === 1 ? 'resultado' : 'resultados' }}
-                  </span>
-                </div>
+                  <span>Firmados</span>
+                </button>
+                <button 
+                  @click="filtros.estadoFirma = 'pendiente'" 
+                  :class="['apple-filter-chip', { 'active': filtros.estadoFirma === 'pendiente' }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <polyline points="12 6 12 12 16 14" stroke-width="2"/>
+                  </svg>
+                  <span>Pendientes</span>
+                </button>
               </div>
 
-              <div class="filter-group">
-                <label for="filter-mes" class="filter-label">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
+              <div class="apple-filter-group">
+                <label class="apple-filter-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
                   </svg>
-                  Mes
+                  Mes:
                 </label>
-                <select id="filter-mes" v-model="filtros.mes" @change="cargarReportes" class="filter-select">
-                  <option value="">Todos los meses</option>
+                <select v-model="filtros.mes" @change="cargarReportes" class="apple-select">
+                  <option value="">Todos</option>
                   <option v-for="mes in meses" :key="mes.value" :value="mes.value">{{ mes.label }}</option>
                 </select>
               </div>
 
-              <div class="filter-group">
-                <label for="filter-anio" class="filter-label">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
+              <div class="apple-filter-group">
+                <label class="apple-filter-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
                   </svg>
-                  Año
+                  Año:
                 </label>
-                <select id="filter-anio" v-model="filtros.anio" @change="cargarReportes" class="filter-select">
-                  <option value="">Todos los años</option>
+                <select v-model="filtros.anio" @change="cargarReportes" class="apple-select">
+                  <option value="">Todos</option>
                   <option v-for="anio in anios" :key="anio" :value="anio">{{ anio }}</option>
                 </select>
               </div>
 
-              <div class="filter-group" v-if="!territorioUsuario">
-                <label for="filter-territorio" class="filter-label">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
+              <div v-if="!territorioUsuario" class="apple-filter-group">
+                <label class="apple-filter-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2"/>
+                    <circle cx="12" cy="10" r="3" stroke-width="2"/>
                   </svg>
-                  Territorio
+                  Territorio:
                 </label>
-                <select id="filter-territorio" v-model="filtros.territorio" @change="cargarReportes" class="filter-select">
-                  <option value="">Todos los territorios</option>
+                <select v-model="filtros.territorio" @change="cargarReportes" class="apple-select">
+                  <option value="">Todos</option>
                   <option v-for="territorio in territorios" :key="territorio" :value="territorio">{{ territorio }}</option>
                 </select>
               </div>
 
-              <div class="filter-group">
-                <label for="filter-estado" class="filter-label">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                  </svg>
-                  Estado de Firma
-                </label>
-                <select id="filter-estado" v-model="filtros.estadoFirma" class="filter-select">
-                  <option value="">Todos los estados</option>
-                  <option value="pendiente">Pendientes de firma</option>
-                  <option value="firmado">Firmados</option>
-                </select>
-              </div>
-
-              <div class="filter-group filter-actions">
-                <label class="filter-label-invisible">Acciones</label>
-                <button @click="limpiarFiltros" class="clear-filters-btn" title="Limpiar todos los filtros">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 6h18"/>
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                    <line x1="10" y1="11" x2="10" y2="17"/>
-                    <line x1="14" y1="11" x2="14" y2="17"/>
-                  </svg>
-                  Limpiar Filtros
-                </button>
-              </div>
-            </div>
-
-            <!-- Estadísticas Compactas -->
-            <div class="stats-compact">
-              <div class="stat-compact total">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
+              <button @click="limpiarFiltros" class="apple-clear-filters-btn" title="Limpiar filtros">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" stroke-width="2" stroke-linecap="round"/>
                 </svg>
-                <div class="stat-compact-info">
-                  <span class="stat-compact-value">{{ estadisticas.totalReportes }}</span>
-                  <span class="stat-compact-label">Total Reportes</span>
-                </div>
-              </div>
-              
-              <div class="stat-compact firmados">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 12l2 2 4-4"/>
-                  <circle cx="12" cy="12" r="10"/>
-                </svg>
-                <div class="stat-compact-info">
-                  <span class="stat-compact-value">{{ reportesFirmados.length }}</span>
-                  <span class="stat-compact-label">Firmados</span>
-                </div>
-              </div>
-              
-              <div class="stat-compact pendientes">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                <div class="stat-compact-info">
-                  <span class="stat-compact-value">{{ reportesPendientes.length }}</span>
-                  <span class="stat-compact-label">Pendientes</span>
-                </div>
-              </div>
-              
-              <div class="stat-compact usuarios">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                <div class="stat-compact-info">
-                  <span class="stat-compact-value">{{ estadisticas.usuariosConReportes }}</span>
-                  <span class="stat-compact-label">Usuarios Activos</span>
-                </div>
-              </div>
+                <span>Limpiar</span>
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Lista de Reportes -->
-        <div class="reportes-section">
-          <div class="reportes-card">
-            <div class="reportes-header">
-              <h3>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+      <!-- ================== CONTENT WRAPPER ================== -->
+      <div class="apple-content-wrapper">
+        <!-- Título del territorio (solo para admins territoriales) -->
+        <div v-if="territorioUsuario" class="apple-territorio-banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2"/>
+            <circle cx="12" cy="10" r="3" stroke-width="2"/>
+          </svg>
+          <span>Reportes de {{ territorioUsuario }}</span>
+        </div>
+
+        <!-- Barra de acciones para firma masiva Apple Style -->
+        <transition name="apple-slide">
+          <div v-if="reportesSeleccionados.length > 0" class="apple-firma-bar">
+            <div class="apple-firma-info">
+              <div class="apple-firma-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M9 12l2 2 4-4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <rect x="3" y="3" width="18" height="18" rx="3" stroke-width="2"/>
                 </svg>
-                Reportes Generados
-              </h3>
-              <div class="reportes-count">
-                <span class="count-badge">{{ reportesFiltrados.length }}</span>
-                <span class="count-text">de {{ totalReportes }}</span>
               </div>
+              <span><strong>{{ reportesSeleccionados.length }}</strong> reportes seleccionados</span>
             </div>
-
-            <div v-if="loading" class="loading-state">
-              <div class="spinner"></div>
-              <p>Cargando reportes...</p>
+            <div class="apple-firma-actions">
+              <button @click="deseleccionarTodos" class="apple-btn-deselect">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <line x1="18" y1="6" x2="6" y2="18" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="6" y1="6" x2="18" y2="18" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span>Deseleccionar</span>
+              </button>
+              <button @click="abrirModalFirma" class="apple-btn-firmar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 19l7-7 3 3-7 7-3-3z" stroke-width="2"/>
+                  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" stroke-width="2"/>
+                </svg>
+                <span>Firmar Seleccionados ({{ reportesSeleccionados.length }})</span>
+              </button>
             </div>
+          </div>
+        </transition>
 
-            <div v-else-if="reportesFiltrados.length === 0" class="empty-state">
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-              <h4 class="empty-title">No hay reportes</h4>
-              <p class="empty-subtitle">{{ filtrosActivos ? 'No se encontraron reportes con los filtros aplicados' : 'Aún no se han generado reportes' }}</p>
-            </div>
+        <!-- ================== TABLE CONTAINER ================== -->
+        <div class="apple-table-container">
+          <div v-if="loading" class="apple-loading">
+            <div class="apple-spinner"></div>
+            <p>Cargando reportes...</p>
+          </div>
 
-            <div v-else class="reportes-table-container">
-              <table class="reportes-table">
-                <thead>
-                  <tr>
-                    <th class="th-checkbox">
-                      <input 
-                        type="checkbox" 
-                        :checked="todosSeleccionados && reportesPendientesFiltrados.length > 0"
-                        :indeterminate="algunosSeleccionados"
-                        @change="toggleSeleccionarTodos"
-                        :disabled="reportesPendientesFiltrados.length === 0"
-                        class="checkbox-header"
-                        title="Seleccionar todos los pendientes"
-                      >
-                    </th>
-                    <th class="th-estado">Estado</th>
-                    <th class="th-usuario">Usuario</th>
-                    <th class="th-territorio">Territorio</th>
-                    <th class="th-reporte">Reporte</th>
-                    <th class="th-periodo">Período</th>
-                    <th class="th-fecha">Fecha</th>
-                    <th class="th-acciones">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="reporte in reportesPaginados" :key="reporte.id" 
-                      :class="{ 'row-firmado': reporte.firmado_supervisor, 'row-seleccionado': reportesSeleccionados.includes(reporte.id) }">
-                    <td class="td-checkbox">
-                      <input 
-                        v-if="!reporte.firmado_supervisor"
-                        type="checkbox"
-                        :checked="reportesSeleccionados.includes(reporte.id)"
-                        @change="toggleSeleccion(reporte)"
-                        class="checkbox-row"
-                        title="Seleccionar para firmar"
-                      >
-                    </td>
-                    <td class="td-estado">
-                      <div v-if="reporte.firmado_supervisor" class="estado-badge firmado" :title="'Firmado por ' + reporte.nombre_supervisor">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                          <path d="M9 12l2 2 4-4"/>
-                          <circle cx="12" cy="12" r="10"/>
+          <div v-else-if="reportesFiltrados.length === 0" class="apple-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="1.5"/>
+              <polyline points="14 2 14 8 20 8" stroke-width="1.5"/>
+              <line x1="16" y1="13" x2="8" y2="13" stroke-width="1.5"/>
+              <line x1="16" y1="17" x2="8" y2="17" stroke-width="1.5"/>
+            </svg>
+            <h3>No hay reportes</h3>
+            <p>{{ filtrosActivos ? 'No se encontraron reportes con los filtros aplicados' : 'Aún no se han generado reportes' }}</p>
+          </div>
+
+          <div v-else class="apple-table-wrapper">
+            <table class="apple-table">
+              <thead>
+                <tr>
+                  <th class="th-checkbox">
+                    <input 
+                      type="checkbox" 
+                      :checked="todosSeleccionados && reportesPendientesFiltrados.length > 0"
+                      :indeterminate="algunosSeleccionados"
+                      @change="toggleSeleccionarTodos"
+                      :disabled="reportesPendientesFiltrados.length === 0"
+                      class="apple-checkbox"
+                      title="Seleccionar todos los pendientes"
+                    >
+                  </th>
+                  <th>Estado</th>
+                  <th>Usuario</th>
+                  <th>Territorio</th>
+                  <th>Reporte</th>
+                  <th>Período</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="reporte in reportesPaginados" :key="reporte.id" 
+                    class="apple-table-row"
+                    :class="{ 'apple-row-firmado': reporte.firmado_supervisor, 'apple-row-seleccionado': reportesSeleccionados.includes(reporte.id) }">
+                  <td class="td-checkbox">
+                    <input 
+                      v-if="!reporte.firmado_supervisor"
+                      type="checkbox"
+                      :checked="reportesSeleccionados.includes(reporte.id)"
+                      @change="toggleSeleccion(reporte)"
+                      class="apple-checkbox"
+                      title="Seleccionar para firmar"
+                    >
+                  </td>
+                  <td>
+                    <div v-if="reporte.firmado_supervisor" class="apple-status-badge firmado" :title="'Firmado por ' + reporte.nombre_supervisor">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M9 12l2 2 4-4" stroke-width="2.5"/>
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                      </svg>
+                      <span>Firmado</span>
+                    </div>
+                    <div v-else class="apple-status-badge pendiente">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        <polyline points="12 6 12 12 16 14" stroke-width="2"/>
+                      </svg>
+                      <span>Pendiente</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="apple-user-cell">
+                      <div class="apple-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="12" cy="7" r="4" stroke-width="2.5"/>
                         </svg>
-                        <span>Firmado</span>
                       </div>
-                      <div v-else class="estado-badge pendiente">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        <span>Pendiente</span>
+                      <div class="apple-user-info">
+                        <div class="apple-user-name">{{ reporte.usuario?.nombre_completo || 'Usuario desconocido' }}</div>
+                        <div class="apple-user-role">{{ reporte.usuario?.correo || '-' }}</div>
                       </div>
-                    </td>
-                    <td class="td-usuario">
-                      <div class="usuario-cell">
-                        <div class="usuario-avatar">{{ obtenerIniciales(reporte.usuario?.nombre_completo) }}</div>
-                        <div class="usuario-info">
-                          <span class="usuario-nombre">{{ reporte.usuario?.nombre_completo || 'Usuario desconocido' }}</span>
-                          <span class="usuario-correo">{{ reporte.usuario?.correo || '-' }}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="td-territorio">
-                      <span class="territorio-badge">{{ reporte.usuario?.territorio || 'Sin territorio' }}</span>
-                    </td>
-                    <td class="td-reporte">
-                      <span class="reporte-nombre">{{ reporte.nombre_reporte }}</span>
-                      <span v-if="reporte.firmado_supervisor" class="firma-info">
+                    </div>
+                  </td>
+                  <td>
+                    <span :class="['apple-territorio-badge', `territorio-${obtenerColorTerritorio(reporte.usuario?.territorio)}`]">{{ reporte.usuario?.territorio || 'Sin territorio' }}</span>
+                  </td>
+                  <td>
+                    <div class="apple-reporte-info">
+                      <span class="apple-reporte-nombre">{{ reporte.nombre_reporte }}</span>
+                      <span v-if="reporte.firmado_supervisor" class="apple-firma-label">
                         Firmado por {{ reporte.nombre_supervisor }}
                       </span>
-                    </td>
-                    <td class="td-periodo">
-                      <span class="periodo-badge">{{ reporte.mes }} {{ reporte.anio }}</span>
-                    </td>
-                    <td class="td-fecha">
-                      <span class="fecha-text">{{ formatearFecha(reporte.fecha_generacion) }}</span>
-                      <span v-if="reporte.firmado_supervisor && reporte.fecha_firma_supervisor" class="fecha-firma">
+                    </div>
+                  </td>
+                  <td>
+                    <span class="apple-periodo-badge">{{ reporte.mes }} {{ reporte.anio }}</span>
+                  </td>
+                  <td>
+                    <div class="apple-fecha-info">
+                      <span class="apple-fecha-text">{{ formatearFecha(reporte.fecha_generacion) }}</span>
+                      <span v-if="reporte.firmado_supervisor && reporte.fecha_firma_supervisor" class="apple-fecha-firma">
                         Firmado: {{ formatearFecha(reporte.fecha_firma_supervisor) }}
                       </span>
-                    </td>
-                    <td class="td-acciones">
-                      <div class="acciones-buttons">
-                        <!-- Botón firmar individual (solo si no está firmado) -->
-                        <button 
-                          v-if="!reporte.firmado_supervisor" 
-                          @click="abrirModalFirmaIndividual(reporte)" 
-                          class="btn-action btn-sign" 
-                          title="Firmar reporte"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 19l7-7 3 3-7 7-3-3z"/>
-                            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
-                          </svg>
-                        </button>
-                        <!-- Botón Ver (SIEMPRE VISIBLE) -->
-                        <button @click="verReporte(reporte)" :disabled="viendoReporte === reporte.id" class="btn-action btn-view" title="Ver reporte">
-                          <svg v-if="viendoReporte !== reporte.id" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                          </svg>
-                          <div v-else class="spinner-mini"></div>
-                        </button>
-                        <button v-if="reporte.tiene_pdf || reporte.datos_reporte" @click="descargarReporte(reporte)" :disabled="descargandoReporte === reporte.id" class="btn-action btn-download" title="Descargar">
-                          <svg v-if="descargandoReporte !== reporte.id" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                          </svg>
-                          <div v-else class="spinner-mini"></div>
-                        </button>
-                        <span v-if="!reporte.tiene_pdf && !reporte.datos_reporte && reporte.tipo === 'PDF'" class="no-pdf-badge" title="PDF no disponible">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                          </svg>
-                        </span>
-                        <!-- Botón eliminar - SIEMPRE VISIBLE (se puede eliminar incluso si está firmado) -->
-                        <button 
-                          @click="confirmarEliminacion(reporte)" 
-                          :disabled="eliminandoReporte === reporte.id" 
-                          class="btn-action btn-delete" 
-                          :title="reporte.firmado_supervisor ? 'Eliminar reporte firmado' : 'Eliminar reporte'"
-                        >
-                          <svg v-if="eliminandoReporte !== reporte.id" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                          </svg>
-                          <div v-else class="spinner-mini"></div>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="apple-actions">
+                      <!-- Botón firmar individual -->
+                      <button 
+                        v-if="!reporte.firmado_supervisor" 
+                        @click="abrirModalFirmaIndividual(reporte)" 
+                        class="apple-action-btn sign" 
+                        title="Firmar reporte"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M12 19l7-7 3 3-7 7-3-3z" stroke-width="2"/>
+                          <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" stroke-width="2"/>
+                        </svg>
+                      </button>
+                      <!-- Botón Ver -->
+                      <button @click="verReporte(reporte)" :disabled="viendoReporte === reporte.id" class="apple-action-btn view" title="Ver reporte">
+                        <svg v-if="viendoReporte !== reporte.id" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/>
+                        </svg>
+                        <div v-else class="apple-spinner-mini"></div>
+                      </button>
+                      <!-- Botón Descargar -->
+                      <button v-if="reporte.tiene_pdf || reporte.datos_reporte" @click="descargarReporte(reporte)" :disabled="descargandoReporte === reporte.id" class="apple-action-btn download" title="Descargar">
+                        <svg v-if="descargandoReporte !== reporte.id" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2"/>
+                          <polyline points="7 10 12 15 17 10" stroke-width="2"/>
+                          <line x1="12" y1="15" x2="12" y2="3" stroke-width="2"/>
+                        </svg>
+                        <div v-else class="apple-spinner-mini"></div>
+                      </button>
+                      <!-- Botón eliminar -->
+                      <button 
+                        @click="confirmarEliminacion(reporte)" 
+                        :disabled="eliminandoReporte === reporte.id" 
+                        class="apple-action-btn delete" 
+                        :title="reporte.firmado_supervisor ? 'Eliminar reporte firmado' : 'Eliminar reporte'"
+                      >
+                        <svg v-if="eliminandoReporte !== reporte.id" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <polyline points="3 6 5 6 21 6" stroke-width="2"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="2"/>
+                        </svg>
+                        <div v-else class="apple-spinner-mini"></div>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-            <div v-if="reportesFiltrados.length > 0" class="pagination-container">
-              <div class="pagination-info">
-                Mostrando {{ (paginaActual - 1) * porPagina + 1 }} - {{ Math.min(paginaActual * porPagina, reportesFiltrados.length) }} de {{ reportesFiltrados.length }}
+          <!-- Paginación Apple Style -->
+          <div v-if="totalPaginas > 1" class="apple-pagination">
+            <div class="apple-pagination-controls">
+              <button 
+                @click="paginaActual = paginaActual - 1" 
+                :disabled="paginaActual === 1"
+                class="apple-pagination-btn"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              <div class="apple-pagination-numbers">
+                <button 
+                  v-for="pagina in paginasVisibles" 
+                  :key="pagina"
+                  @click="paginaActual = pagina"
+                  :class="['apple-pagination-number', { 'active': paginaActual === pagina }]"
+                >
+                  {{ pagina }}
+                </button>
               </div>
-              <div class="pagination-controls">
-                <button @click="paginaActual = 1" :disabled="paginaActual === 1" class="pagination-btn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
-                </button>
-                <button @click="paginaActual--" :disabled="paginaActual === 1" class="pagination-btn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <span class="pagination-pages">Página {{ paginaActual }} de {{ totalPaginas }}</span>
-                <button @click="paginaActual++" :disabled="paginaActual === totalPaginas" class="pagination-btn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-                <button @click="paginaActual = totalPaginas" :disabled="paginaActual === totalPaginas" class="pagination-btn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
-                </button>
-              </div>
+
+              <button 
+                @click="paginaActual = paginaActual + 1" 
+                :disabled="paginaActual === totalPaginas"
+                class="apple-pagination-btn"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="apple-pagination-info">
+              Mostrando {{ (paginaActual - 1) * porPagina + 1 }} - {{ Math.min(paginaActual * porPagina, reportesFiltrados.length) }} de {{ reportesFiltrados.length }}
             </div>
           </div>
         </div>
@@ -807,6 +831,47 @@ const router = useRouter()
 // Obtener territorio del usuario admin actual (si es territorial)
 const territorioUsuario = ref(authService.getTerritorioFilter())
 
+// Función para obtener el color del territorio
+const obtenerColorTerritorio = (territorio) => {
+  if (!territorio) return 'gray'
+  
+  const coloresTerritorio = {
+    "Acapulco - Centro - Norte - Tierra Caliente": "blue",
+    "Acayucan": "emerald",
+    "Balancán": "violet",
+    "Chihuahua / Sonora": "orange",
+    "Colima": "cyan",
+    "Comalcalco": "rose",
+    "Córdoba": "amber",
+    "Costa Chica - Montaña": "teal",
+    "Costa Grande - Sierra": "indigo",
+    "Durango / Zacatecas": "lime",
+    "Hidalgo": "pink",
+    "Istmo": "sky",
+    "Michoacán": "red",
+    "Mixteca": "green",
+    "Morelos": "purple",
+    "Nayarit / Jalisco": "yellow",
+    "Ocosingo": "fuchsia",
+    "Palenque": "slate",
+    "Papantla": "zinc",
+    "Pichucalco": "stone",
+    "Puebla": "coral",
+    "San Luis Potosí": "mint",
+    "Sinaloa": "navy",
+    "Tamaulipas": "gold",
+    "Tantoyuca": "crimson",
+    "Tapachula": "forest",
+    "Teapa": "plum",
+    "Tlaxcala / Estado de México": "bronze",
+    "Tzucacab / Opb": "ocean",
+    "Xpujil": "wine",
+    "Oficinas Centrales": "charcoal"
+  }
+  
+  return coloresTerritorio[territorio] || 'gray'
+}
+
 const loading = ref(false)
 const reportes = ref([])
 const totalReportes = ref(0)
@@ -973,6 +1038,27 @@ const reportesPaginados = computed(() => {
 })
 
 const totalPaginas = computed(() => Math.ceil(reportesFiltrados.value.length / porPagina.value) || 1)
+
+// Computed para páginas visibles en paginación
+const paginasVisibles = computed(() => {
+  const total = totalPaginas.value
+  const actual = paginaActual.value
+  const visibles = []
+  
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) visibles.push(i)
+  } else {
+    if (actual <= 3) {
+      visibles.push(1, 2, 3, 4, 5)
+    } else if (actual >= total - 2) {
+      visibles.push(total - 4, total - 3, total - 2, total - 1, total)
+    } else {
+      visibles.push(actual - 2, actual - 1, actual, actual + 1, actual + 2)
+    }
+  }
+  
+  return visibles
+})
 
 const filtrosActivos = computed(() => 
   filtros.value.busqueda || filtros.value.mes || filtros.value.anio || filtros.value.territorio || filtros.value.tipo
@@ -1504,524 +1590,1649 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ====================== APPLE DESIGN SYSTEM ====================== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-.reportes-container { display: flex; min-height: 100vh; background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%); }
+/* ====================== APPLE DYNAMIC BACKGROUND ====================== */
+.apple-dynamic-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
+}
 
-.main-content { flex: 1; margin-left: min(220px, 18vw); width: calc(100vw - min(220px, 18vw)); background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%); min-height: 100vh; position: relative; box-sizing: border-box; overflow-x: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.apple-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  animation: apple-float 20s ease-in-out infinite;
+}
 
-.page-header { background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%); color: white; padding: clamp(0.3rem, 0.8vw, 0.5rem); box-shadow: 0 4px 16px rgba(76, 175, 80, 0.15); position: sticky; top: 0; z-index: 100; width: 100%; box-sizing: border-box; backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; }
+.apple-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(139, 195, 74, 0.4) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  animation-delay: 0s;
+}
 
-.page-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat; z-index: 1; }
+.apple-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(102, 187, 106, 0.35) 0%, transparent 70%);
+  bottom: 20%;
+  left: -50px;
+  animation-delay: -7s;
+}
 
-.header-content { display: flex; justify-content: space-between; align-items: center; max-width: 100%; margin: 0; gap: clamp(0.25rem, 0.8vw, 0.5rem); flex-wrap: wrap; width: 100%; position: relative; z-index: 2; }
+.apple-orb-3 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(129, 199, 132, 0.3) 0%, transparent 70%);
+  top: 40%;
+  right: 20%;
+  animation-delay: -14s;
+}
 
-.header-main { display: flex; align-items: center; gap: clamp(0.5rem, 1.2vw, 0.8rem); flex: 1; min-width: 140px; margin-left: clamp(0.3rem, 1vw, 0.6rem); }
+@keyframes apple-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(20px, -30px) scale(1.05); }
+  50% { transform: translate(-10px, 20px) scale(0.95); }
+  75% { transform: translate(30px, 10px) scale(1.02); }
+}
 
-.header-icon { width: clamp(28px, 3vw, 32px); height: clamp(28px, 3vw, 32px); background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1); position: relative; overflow: hidden; }
-
-.header-icon svg { width: clamp(14px, 2.5vw, 16px); height: clamp(14px, 2.5vw, 16px); filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)); z-index: 1; position: relative; flex-shrink: 0; }
-
-.header-text { flex: 1; min-width: 120px; }
-
-.header-title { font-size: clamp(14px, 2.5vw, 16px); font-weight: 700; margin: 0 0 clamp(1px, 0.3vw, 2px) 0; background: linear-gradient(135deg, #ffffff 0%, #e8f5e8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); font-family: 'Inter', sans-serif; line-height: 1.2; }
-
-.header-subtitle { font-size: clamp(9px, 1.8vw, 11px); opacity: 0.9; margin: 0; font-weight: 400; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); font-family: 'Inter', sans-serif; line-height: 1.3; }
-
-.header-actions { display: flex; gap: clamp(0.2rem, 0.5vw, 0.4rem); align-items: center; margin-right: clamp(0.3rem, 1vw, 0.6rem); }
-
-.refresh-btn { display: flex; align-items: center; gap: clamp(3px, 0.5vw, 5px); padding: clamp(4px, 0.8vw, 6px) clamp(8px, 1.2vw, 10px); background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: white; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 6px; font-size: clamp(10px, 1.8vw, 12px); font-weight: 600; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-family: 'Inter', sans-serif; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1); }
-
-.refresh-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.3); transform: translateY(-1px); }
-
-.refresh-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
-.refresh-icon { width: 16px; height: 16px; }
-
-.refresh-icon.spinning { animation: spin 1s linear infinite; }
-
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.page-content { padding: clamp(12px, 2vw, 24px); max-width: 1600px; margin: 0 auto; }
-
-/* Banner de territorio (solo para admins territoriales) */
-.territorio-banner {
-  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
-  color: white;
-  padding: 14px 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
+/* ====================== CONTAINER ====================== */
+.reportes-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  font-family: 'Inter', sans-serif;
-  font-size: clamp(14px, 2vw, 16px);
-  font-weight: 600;
-  text-align: center;
-}
-
-.territorio-banner svg {
-  width: 18px;
-  height: 18px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-}
-
-/* Compact stats dentro de filtros */
-.stats-compact {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: clamp(8px, 1vw, 12px);
-  padding: clamp(10px, 1.2vw, 14px) clamp(12px, 1.5vw, 16px);
-  margin-top: clamp(10px, 1.2vw, 14px);
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
-  border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.stat-compact {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(8px, 1vw, 12px);
-  padding: clamp(10px, 1.2vw, 12px) clamp(12px, 1.4vw, 14px);
-  background: white;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: default;
-  position: relative;
+  min-height: 100vh;
+  width: 100%;
   overflow: hidden;
 }
 
-.stat-compact::before {
-  content: '';
-  position: absolute;
+.main-content {
+  flex: 1;
+  margin-left: min(220px, 18vw);
+  width: calc(100vw - min(220px, 18vw));
+  min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 16px 0 16px;
+  z-index: 1;
+}
+
+/* ====================== APPLE STICKY WRAPPER ====================== */
+.apple-sticky-wrapper {
+  position: sticky;
   top: 0;
-  left: 0;
-  bottom: 0;
-  width: 3px;
-  background: currentColor;
-  opacity: 0;
-  transition: opacity 0.25s ease;
+  z-index: 100;
+  background: transparent;
+  margin-bottom: 20px;
 }
 
-.stat-compact:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: currentColor;
+/* ====================== APPLE PAGE HEADER ====================== */
+.apple-page-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  color: white;
+  border-radius: 28px 28px 0 0;
+  border: 2px solid #8BC34A;
+  border-bottom: none;
+  padding: 14px 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.stat-compact:hover::before {
-  opacity: 1;
+.apple-header-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
 }
 
-.stat-compact.total { color: #4CAF50; }
-.stat-compact.firmados { color: #22c55e; }
-.stat-compact.pendientes { color: #f59e0b; }
-.stat-compact.usuarios { color: #9C27B0; }
-
-.stat-compact svg {
-  width: clamp(18px, 2vw, 22px);
-  height: clamp(18px, 2vw, 22px);
-  flex-shrink: 0;
-  stroke-width: 2.2;
-  color: currentColor;
-  transition: all 0.25s ease;
-  opacity: 0.9;
-}
-
-.stat-compact:hover svg {
-  transform: scale(1.15);
-  opacity: 1;
-}
-
-.stat-compact-info {
+.apple-header-center {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   align-items: center;
-  text-align: center;
+  gap: 4px;
 }
 
-.stat-compact-value {
-  font-size: clamp(1.1rem, 1.5vw, 1.3rem);
-  font-weight: 700;
-  color: #1a1a1a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-.stat-compact-label {
-  font-size: clamp(0.68rem, 0.85vw, 0.72rem);
-  font-weight: 500;
-  color: #6b7280;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  line-height: 1.2;
-}
-
-@media (max-width: 768px) {
-  .stats-compact {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .stats-compact {
-    grid-template-columns: 1fr;
-  }
-}
-
-.filters-section { margin-bottom: clamp(16px, 2vw, 24px); }
-
-.filters-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0, 0, 0, 0.05); overflow: hidden; }
-
-.filters-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  gap: 16px; 
-  flex-wrap: wrap;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); 
-  padding: 16px 20px; 
-  border-bottom: 1px solid rgba(34, 197, 94, 0.15); 
-}
-
-.filters-header h3 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: clamp(0.9rem, 1.3vw, 1rem); font-weight: 600; color: #15803d; font-family: 'Inter', sans-serif; }
-
-.filters-header svg { color: #16a34a; }
-
-.filters-grid { 
-  display: grid; 
-  grid-template-columns: 1fr 1fr 1fr 1fr auto; 
-  gap: clamp(10px, 1.3vw, 14px); 
-  padding: clamp(12px, 1.5vw, 16px);
-  align-items: end;
-}
-
-.filter-group { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 6px; 
-}
-
-.filter-group.full-width {
-  grid-column: 1 / -1;
-  margin-bottom: 6px;
-}
-
-.filter-group.filter-actions {
-  display: flex;
-  align-items: flex-end;
-}
-
-.filter-label {
+.apple-title-group {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: clamp(0.68rem, 0.95vw, 0.75rem); 
-  font-weight: 600; 
-  color: #374151; 
-  font-family: 'Inter', sans-serif;
-  letter-spacing: -0.01em;
+  gap: 10px;
 }
 
-.filter-label-invisible {
+.apple-icon-mini {
+  width: 22px;
+  height: 22px;
   display: flex;
-  opacity: 0;
-  pointer-events: none;
-  font-size: clamp(0.68rem, 0.95vw, 0.75rem);
-  margin-bottom: 6px;
+  align-items: center;
+  justify-content: center;
 }
 
-.filter-label svg {
-  color: #16a34a;
-  opacity: 0.85;
-  flex-shrink: 0;
-}
-
-.filter-select { 
-  padding: clamp(7px, 0.9vw, 9px) clamp(10px, 1.2vw, 12px); 
-  border: 1.5px solid #e5e7eb; 
-  border-radius: 8px; 
-  font-size: clamp(0.7rem, 1vw, 0.78rem); 
-  font-family: 'Inter', sans-serif; 
-  background: white; 
-  cursor: pointer; 
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #374151;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.filter-select:hover {
-  border-color: #4CAF50;
-  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.12);
-}
-
-.filter-select:focus { 
-  outline: none; 
-  border-color: #4CAF50; 
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-}
-
-.search-group { grid-column: span 2; }
-
-.search-input-wrapper { position: relative; }
-
-.search-icon { 
-  position: absolute; 
-  left: 16px; 
-  top: 50%; 
-  transform: translateY(-50%); 
-  color: #16a34a;
+.apple-icon-mini svg {
   width: 18px;
   height: 18px;
-  z-index: 1;
-  pointer-events: none;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 2;
 }
 
-.search-input { 
-  width: 100%; 
-  padding: clamp(10px, 1.2vw, 12px) clamp(44px, 5vw, 48px) clamp(10px, 1.2vw, 12px) clamp(48px, 5.5vw, 52px);
-  border: 1.5px solid rgba(76, 175, 80, 0.2);
-  border-radius: 50px; 
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  font-size: clamp(0.75rem, 1.1vw, 0.85rem); 
-  font-family: 'Inter', sans-serif; 
-  color: #2d3748;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-sizing: border-box;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+.apple-title-divider {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 18px;
+  font-weight: 300;
 }
 
-.search-input:hover {
-  border-color: rgba(76, 175, 80, 0.4);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+.apple-page-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
 }
 
-.search-input:focus { 
-  outline: none; 
-  border-color: #4CAF50; 
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.18), 0 0 0 3px rgba(76, 175, 80, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.9);
-  transform: translateY(-1px);
+.apple-page-subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
 }
 
-.search-input::placeholder {
-  color: rgba(107, 114, 128, 0.6);
-}
-
-.clear-search-btn {
+.apple-refresh-button {
   position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(239, 68, 68, 0.1);
-  border: none;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0;
-  z-index: 2;
+  transition: all 0.2s ease;
+  color: white;
 }
 
-.clear-search-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  transform: translateY(-50%) scale(1.1);
+.apple-refresh-button svg {
+  width: 14px;
+  height: 14px;
+  stroke: white;
+  stroke-width: 2;
 }
 
-.clear-search-btn:active {
-  transform: translateY(-50%) scale(0.95);
+.apple-refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
 }
 
-.clear-search-btn svg {
-  width: 11px;
-  height: 11px;
-  color: #ef4444;
+.apple-refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.search-results-count {
+.apple-spin {
+  animation: apple-spin-animation 1s linear infinite;
+}
+
+@keyframes apple-spin-animation {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ====================== APPLE STATS SECTION ====================== */
+.apple-stats-section {
+  background: white;
+  border-radius: 0 0 28px 28px;
+  border: 2px solid #8BC34A;
+  border-top: none;
+  padding: 18px 16px 16px 16px;
+  box-shadow: none;
+  margin-top: -1px;
+}
+
+.apple-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.apple-stat-card {
+  background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.apple-stat-icon.blue {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+}
+
+.apple-stat-icon.green {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+}
+
+.apple-stat-icon.orange {
+  background: linear-gradient(135deg, #FF9500 0%, #FFCC00 100%);
+}
+
+.apple-stat-icon.purple {
+  background: linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%);
+}
+
+.apple-stat-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-stat-content {
+  flex: 1;
+}
+
+.apple-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1;
+  margin-bottom: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-stat-label {
+  font-size: 10px;
+  color: #86868b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+/* ====================== APPLE SEARCH SECTION ====================== */
+.apple-search-section {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.apple-search-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.apple-search-container {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.apple-search-icon {
   position: absolute;
-  right: 50px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: clamp(0.7rem, 1vw, 0.78rem);
-  color: #16a34a;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  background: rgba(220, 252, 231, 0.8);
-  padding: 4px 10px;
-  border-radius: 12px;
-  white-space: nowrap;
+  width: 18px;
+  height: 18px;
+  stroke: #007AFF;
+  stroke-width: 2.5;
+  pointer-events: none;
   z-index: 1;
 }
 
-.fade-quick-enter-active, .fade-quick-leave-active {
-  transition: opacity 0.15s ease;
+.apple-search-input {
+  width: 100%;
+  height: 38px;
+  border-radius: 19px;
+  border: 1.5px solid transparent;
+  background: #f5f5f7;
+  padding: 0 40px 0 40px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  transition: all 0.25s ease;
 }
 
-.fade-quick-enter-from, .fade-quick-leave-to {
-  opacity: 0;
+.apple-search-input::placeholder {
+  color: #86868b;
+  font-size: 12px;
 }
 
-.filter-actions { display: flex; align-items: flex-end; }
+.apple-search-input:hover {
+  background: rgba(0, 122, 255, 0.04);
+  border-color: rgba(0, 122, 255, 0.08);
+}
 
-.clear-filters-btn { 
-  display: flex; 
-  align-items: center; 
+.apple-search-input:focus {
+  outline: none;
+  background: white;
+  border-color: rgba(0, 122, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.05);
+}
+
+.apple-clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #d1d1d6;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 7px; 
-  padding: clamp(7px, 0.9vw, 9px) clamp(16px, 1.8vw, 20px); 
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-  color: #dc2626; 
-  border: 1.5px solid #fecaca; 
-  border-radius: 8px; 
-  font-size: clamp(0.7rem, 1vw, 0.78rem); 
-  font-weight: 600; 
-  cursor: pointer; 
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
-  font-family: 'Inter', sans-serif;
-  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.08);
-  white-space: nowrap;
-  min-width: 150px;
+  transition: all 0.2s ease;
+  padding: 0;
 }
 
-.clear-filters-btn:hover { 
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border-color: #dc2626; 
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.18);
+.apple-clear-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: white;
+  stroke-width: 2.5;
 }
 
-.clear-filters-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.12);
+.apple-clear-btn:hover {
+  background: #86868b;
+  transform: translateY(-50%) scale(1.1);
 }
 
-.clear-filters-btn svg {
+/* ====================== APPLE FILTER CONTROLS ====================== */
+.apple-filter-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
   flex-shrink: 0;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.clear-filters-btn:hover svg {
-  transform: scale(1.1) rotate(-5deg);
+.apple-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 16px;
+  border: 1.5px solid #d1d1d6;
+  background: white;
+  color: #1d1d1f;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
 }
 
-.reportes-section { margin-bottom: 24px; }
+.apple-filter-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2;
+}
 
-.reportes-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0, 0, 0, 0.05); overflow: hidden; }
+.apple-filter-btn:hover {
+  background: #f5f5f7;
+  border-color: #d1d1d6;
+  transform: translateY(-2px);
+}
 
-.reportes-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: clamp(12px, 1.5vw, 16px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+.apple-filter-btn.primary {
+  background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+  color: white;
+  border-color: #007AFF;
+}
 
-.reportes-header h3 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: clamp(0.9rem, 1.3vw, 1rem); font-weight: 600; color: #15803d; font-family: 'Inter', sans-serif; }
+.apple-filter-btn.primary svg {
+  stroke: white;
+}
 
-.reportes-header svg { color: #16a34a; }
+.apple-filter-btn.primary:hover {
+  background: linear-gradient(135deg, #0056B3 0%, #4030A0 100%);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
 
-.reportes-count { display: flex; align-items: center; gap: 6px; }
+.apple-filter-btn.export {
+  color: #34C759;
+  border-color: rgba(52, 199, 89, 0.2);
+}
 
-.count-badge { background: linear-gradient(135deg, #4CAF50, #2E7D32); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; font-family: 'Inter', sans-serif; }
+.apple-filter-btn.export svg {
+  stroke: #34C759;
+}
 
-.count-text { font-size: 0.75rem; color: #666; font-family: 'Inter', sans-serif; }
+.apple-filter-btn.export:hover {
+  background: rgba(52, 199, 89, 0.08);
+  border-color: #34C759;
+}
 
-.loading-state, .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: #666; }
+/* ====================== APPLE UNIFIED FILTERS ====================== */
+.apple-unified-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
 
-.spinner { width: 40px; height: 40px; border: 3px solid rgba(76, 175, 80, 0.2); border-top-color: #4CAF50; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+.apple-quick-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-.empty-state svg { color: #d1d5db; margin-bottom: 16px; }
+.apple-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
 
-.empty-title { font-size: 1.1rem; font-weight: 600; color: #374151; margin: 0 0 8px; font-family: 'Inter', sans-serif; }
+.apple-filter-chip svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2;
+}
 
-.empty-subtitle { font-size: 0.85rem; color: #6b7280; margin: 0; text-align: center; font-family: 'Inter', sans-serif; }
+.apple-filter-chip:hover {
+  background: rgba(0, 122, 255, 0.1);
+  border-color: rgba(0, 122, 255, 0.2);
+  transform: translateY(-2px);
+}
 
-.reportes-table-container { overflow-x: auto; }
+.apple-filter-chip.active {
+  background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+  color: white;
+  border-color: #007AFF;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+  transform: translateY(-2px);
+}
 
-.reportes-table { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; }
+.apple-filter-chip.active svg {
+  stroke: white !important;
+}
 
-.reportes-table thead { background: #f9fafb; position: sticky; top: 0; }
+.apple-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-.reportes-table th { padding: clamp(10px, 1.2vw, 14px) clamp(8px, 1vw, 12px); text-align: left; font-size: clamp(0.65rem, 1vw, 0.75rem); font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
+.apple-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
 
-.reportes-table td { padding: clamp(10px, 1.2vw, 14px) clamp(8px, 1vw, 12px); font-size: clamp(0.7rem, 1.1vw, 0.85rem); color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+.apple-filter-label svg {
+  width: 14px;
+  height: 14px;
+  stroke: #86868b;
+  stroke-width: 2;
+}
 
-.reportes-table tbody tr { transition: background 0.15s; }
+.apple-select {
+  height: 34px;
+  border-radius: 10px;
+  border: 1.5px solid #e5e5e5;
+  background: #f5f5f7;
+  padding: 0 28px 0 12px;
+  font-size: 12px;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
 
-.reportes-table tbody tr:hover { background: #f9fafb; }
+.apple-select:hover {
+  border-color: #d1d1d6;
+  background-color: white;
+}
 
-.usuario-cell { display: flex; align-items: center; gap: 10px; }
+.apple-select:focus {
+  outline: none;
+  border-color: #8BC34A;
+  box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.1);
+}
 
-.usuario-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #4CAF50, #2E7D32); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; flex-shrink: 0; }
+.apple-clear-filters-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255, 59, 48, 0.3);
+  background: rgba(255, 59, 48, 0.08);
+  color: #FF3B30;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
 
-.usuario-info { display: flex; flex-direction: column; min-width: 0; }
+.apple-clear-filters-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: #FF3B30;
+  stroke-width: 2;
+}
 
-.usuario-nombre { font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.apple-clear-filters-btn:hover {
+  background: rgba(255, 59, 48, 0.15);
+  border-color: #FF3B30;
+  transform: translateY(-2px);
+}
 
-.usuario-correo { font-size: 0.7rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ====================== APPLE CONTENT WRAPPER ====================== */
+.apple-content-wrapper {
+  padding: 0;
+  overflow-x: hidden;
+}
 
-.territorio-badge { display: inline-block; padding: 4px 10px; background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0369a1; border-radius: 6px; font-size: 0.7rem; font-weight: 500; white-space: nowrap; }
+/* ====================== APPLE TERRITORIO BANNER ====================== */
+.apple-territorio-banner {
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
 
-.reporte-nombre { font-weight: 500; color: #374151; }
+.apple-territorio-banner svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+}
 
-.periodo-badge { display: inline-block; padding: 4px 10px; background: linear-gradient(135deg, #f3e8ff, #e9d5ff); color: #7c3aed; border-radius: 6px; font-size: 0.7rem; font-weight: 500; white-space: nowrap; }
+/* ====================== APPLE FIRMA BAR ====================== */
+.apple-firma-bar {
+  background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+  border-radius: 16px;
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0, 122, 255, 0.25);
+}
 
-.tipo-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
+.apple-firma-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
 
-.tipo-badge.pdf { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #dc2626; }
+.apple-firma-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-.tipo-badge.csv { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #16a34a; }
+.apple-firma-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+}
 
-.fecha-text { color: #6b7280; font-size: 0.75rem; white-space: nowrap; }
+.apple-firma-actions {
+  display: flex;
+  gap: 8px;
+}
 
-.acciones-buttons { display: flex; gap: 6px; }
+.apple-btn-deselect {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
 
-.btn-action { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+.apple-btn-deselect svg {
+  width: 14px;
+  height: 14px;
+  stroke: white;
+}
 
-.btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+.apple-btn-deselect:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
 
-.btn-view { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+.apple-btn-firmar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: none;
+  background: white;
+  color: #007AFF;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
 
-.btn-view:hover:not(:disabled) { background: #dcfce7; transform: translateY(-1px); }
+.apple-btn-firmar svg {
+  width: 14px;
+  height: 14px;
+  stroke: #007AFF;
+}
 
-.btn-download { background: #eff6ff; border-color: #93c5fd; color: #2563eb; }
+.apple-btn-firmar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
 
-.btn-download:hover:not(:disabled) { background: #dbeafe; transform: translateY(-1px); }
+/* Transition */
+.apple-slide-enter-active,
+.apple-slide-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-.btn-delete { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+.apple-slide-enter-from,
+.apple-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
 
-.btn-delete:hover:not(:disabled) { background: #fee2e2; transform: translateY(-1px); }
+/* ====================== APPLE TABLE ====================== */
+.apple-table-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  max-height: calc(100vh - 380px);
+  display: flex;
+  flex-direction: column;
+}
 
-.no-pdf-badge { color: #9ca3af; }
+.apple-table-wrapper {
+  overflow-y: auto;
+  overflow-x: auto;
+  flex: 1;
+  max-height: 100%;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  scroll-behavior: smooth;
+}
 
-.spinner-mini { width: 14px; height: 14px; border: 2px solid rgba(0, 0, 0, 0.1); border-top-color: currentColor; border-radius: 50%; animation: spin 0.8s linear infinite; }
+.apple-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
 
-.spinner-mini.white { border-color: rgba(255, 255, 255, 0.3); border-top-color: white; }
+.apple-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
 
-.pagination-container { display: flex; justify-content: space-between; align-items: center; padding: clamp(12px, 1.5vw, 16px); border-top: 1px solid #f3f4f6; flex-wrap: wrap; gap: 12px; }
+.apple-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
 
-.pagination-info { font-size: clamp(0.7rem, 1.1vw, 0.8rem); color: #6b7280; font-family: 'Inter', sans-serif; }
+.apple-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+  background-clip: content-box;
+}
 
-.pagination-controls { display: flex; align-items: center; gap: 8px; }
+.apple-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
 
-.pagination-btn { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid #d1d5db; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: #374151; }
+.apple-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #E8F5E9;
+  border-bottom: 1px solid #C8E6C9;
+}
 
-.pagination-btn:hover:not(:disabled) { background: #f3f4f6; border-color: #4CAF50; color: #4CAF50; }
+.apple-table th {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2E7D32;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: #E8F5E9;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #C8E6C9;
+  border-right: 1px solid #C8E6C9;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
 
-.pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.apple-table th:last-child {
+  border-right: none;
+}
 
-.pagination-pages { font-size: 0.8rem; color: #374151; font-weight: 500; padding: 0 12px; font-family: 'Inter', sans-serif; }
+.apple-table-row {
+  border-bottom: 1px solid #F0F0F0;
+  transition: all 0.15s ease;
+  background: white;
+}
 
+.apple-table-row:nth-child(even) {
+  background: #FAFAFA;
+}
+
+.apple-table-row:hover {
+  background: #F5F5F7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-table-row.apple-row-firmado {
+  background: rgba(52, 199, 89, 0.05);
+}
+
+.apple-table-row.apple-row-seleccionado {
+  background: rgba(0, 122, 255, 0.08);
+  border-left: 3px solid #007AFF;
+}
+
+.apple-table td {
+  padding: 16px 20px;
+  font-size: 13px;
+  color: #1D1D1F;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-table-row:hover td:first-child {
+  border-left-color: #8BC34A;
+}
+
+.th-checkbox,
+.td-checkbox {
+  width: 40px;
+  text-align: center;
+}
+
+.apple-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #8BC34A;
+  cursor: pointer;
+}
+
+/* ====================== APPLE STATUS BADGE ====================== */
+.apple-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.apple-status-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+.apple-status-badge.firmado {
+  background: rgba(52, 199, 89, 0.1);
+  color: #34C759;
+}
+
+.apple-status-badge.firmado svg {
+  stroke: #34C759;
+}
+
+.apple-status-badge.pendiente {
+  background: rgba(255, 149, 0, 0.1);
+  color: #FF9500;
+}
+
+.apple-status-badge.pendiente svg {
+  stroke: #FF9500;
+}
+
+/* ====================== APPLE USER CELL ====================== */
+.apple-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.apple-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #66BB6A 0%, #81C784 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(102, 187, 106, 0.25);
+}
+
+.apple-avatar svg {
+  width: 22px;
+  height: 22px;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.apple-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.apple-user-role {
+  font-size: 11px;
+  color: #86868b;
+  font-style: italic;
+}
+
+/* ====================== APPLE BADGES ====================== */
+/* ====================== APPLE TERRITORIO BADGE ====================== */
+.apple-territorio-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.apple-territorio-badge.territorio-blue {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.15) 0%, rgba(0, 102, 204, 0.12) 100%);
+  color: #007AFF;
+  border: 1px solid rgba(0, 122, 255, 0.2);
+}
+
+.apple-territorio-badge.territorio-emerald {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.12) 100%);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.apple-territorio-badge.territorio-violet {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.12) 100%);
+  color: #7C3AED;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.apple-territorio-badge.territorio-orange {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.12) 100%);
+  color: #EA580C;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.apple-territorio-badge.territorio-cyan {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(8, 145, 178, 0.12) 100%);
+  color: #0891B2;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.apple-territorio-badge.territorio-rose {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(225, 29, 72, 0.12) 100%);
+  color: #E11D48;
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.apple-territorio-badge.territorio-amber {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.12) 100%);
+  color: #D97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.apple-territorio-badge.territorio-teal {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.12) 100%);
+  color: #0D9488;
+  border: 1px solid rgba(20, 184, 166, 0.2);
+}
+
+.apple-territorio-badge.territorio-indigo {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.12) 100%);
+  color: #4F46E5;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.apple-territorio-badge.territorio-lime {
+  background: linear-gradient(135deg, rgba(132, 204, 22, 0.15) 0%, rgba(101, 163, 13, 0.12) 100%);
+  color: #65A30D;
+  border: 1px solid rgba(132, 204, 22, 0.2);
+}
+
+.apple-territorio-badge.territorio-pink {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(219, 39, 119, 0.12) 100%);
+  color: #DB2777;
+  border: 1px solid rgba(236, 72, 153, 0.2);
+}
+
+.apple-territorio-badge.territorio-sky {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(2, 132, 199, 0.12) 100%);
+  color: #0284C7;
+  border: 1px solid rgba(14, 165, 233, 0.2);
+}
+
+.apple-territorio-badge.territorio-gray {
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.15) 0%, rgba(75, 85, 99, 0.12) 100%);
+  color: #4B5563;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.apple-territorio-badge.territorio-red {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.12) 100%);
+  color: #DC2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.apple-territorio-badge.territorio-green {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(22, 163, 74, 0.12) 100%);
+  color: #16A34A;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.apple-territorio-badge.territorio-purple {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(147, 51, 234, 0.12) 100%);
+  color: #9333EA;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.apple-territorio-badge.territorio-yellow {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.18) 0%, rgba(202, 138, 4, 0.15) 100%);
+  color: #B45309;
+  border: 1px solid rgba(234, 179, 8, 0.25);
+}
+
+.apple-territorio-badge.territorio-fuchsia {
+  background: linear-gradient(135deg, rgba(217, 70, 239, 0.15) 0%, rgba(192, 38, 211, 0.12) 100%);
+  color: #C026D3;
+  border: 1px solid rgba(217, 70, 239, 0.2);
+}
+
+.apple-territorio-badge.territorio-slate {
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.15) 0%, rgba(71, 85, 105, 0.12) 100%);
+  color: #475569;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.apple-territorio-badge.territorio-zinc {
+  background: linear-gradient(135deg, rgba(113, 113, 122, 0.15) 0%, rgba(82, 82, 91, 0.12) 100%);
+  color: #52525B;
+  border: 1px solid rgba(113, 113, 122, 0.2);
+}
+
+.apple-territorio-badge.territorio-stone {
+  background: linear-gradient(135deg, rgba(120, 113, 108, 0.15) 0%, rgba(87, 83, 78, 0.12) 100%);
+  color: #57534E;
+  border: 1px solid rgba(120, 113, 108, 0.2);
+}
+
+.apple-territorio-badge.territorio-coral {
+  background: linear-gradient(135deg, rgba(251, 113, 133, 0.15) 0%, rgba(244, 63, 94, 0.12) 100%);
+  color: #E11D48;
+  border: 1px solid rgba(251, 113, 133, 0.2);
+}
+
+.apple-territorio-badge.territorio-mint {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.15) 0%, rgba(16, 185, 129, 0.12) 100%);
+  color: #059669;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.apple-territorio-badge.territorio-navy {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.18) 0%, rgba(30, 64, 175, 0.15) 100%);
+  color: #1E3A8A;
+  border: 1px solid rgba(30, 58, 138, 0.25);
+}
+
+.apple-territorio-badge.territorio-gold {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(245, 158, 11, 0.15) 100%);
+  color: #B45309;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+.apple-territorio-badge.territorio-crimson {
+  background: linear-gradient(135deg, rgba(190, 18, 60, 0.15) 0%, rgba(159, 18, 57, 0.12) 100%);
+  color: #9F1239;
+  border: 1px solid rgba(190, 18, 60, 0.2);
+}
+
+.apple-territorio-badge.territorio-forest {
+  background: linear-gradient(135deg, rgba(21, 128, 61, 0.15) 0%, rgba(22, 101, 52, 0.12) 100%);
+  color: #166534;
+  border: 1px solid rgba(21, 128, 61, 0.2);
+}
+
+.apple-territorio-badge.territorio-plum {
+  background: linear-gradient(135deg, rgba(126, 34, 206, 0.15) 0%, rgba(107, 33, 168, 0.12) 100%);
+  color: #7E22CE;
+  border: 1px solid rgba(126, 34, 206, 0.2);
+}
+
+.apple-territorio-badge.territorio-bronze {
+  background: linear-gradient(135deg, rgba(180, 83, 9, 0.18) 0%, rgba(146, 64, 14, 0.15) 100%);
+  color: #92400E;
+  border: 1px solid rgba(180, 83, 9, 0.25);
+}
+
+.apple-territorio-badge.territorio-ocean {
+  background: linear-gradient(135deg, rgba(3, 105, 161, 0.15) 0%, rgba(7, 89, 133, 0.12) 100%);
+  color: #0369A1;
+  border: 1px solid rgba(3, 105, 161, 0.2);
+}
+
+.apple-territorio-badge.territorio-wine {
+  background: linear-gradient(135deg, rgba(136, 19, 55, 0.15) 0%, rgba(157, 23, 77, 0.12) 100%);
+  color: #881337;
+  border: 1px solid rgba(136, 19, 55, 0.2);
+}
+
+.apple-territorio-badge.territorio-charcoal {
+  background: linear-gradient(135deg, rgba(38, 38, 38, 0.15) 0%, rgba(23, 23, 23, 0.12) 100%);
+  color: #262626;
+  border: 1px solid rgba(38, 38, 38, 0.2);
+}
+
+.apple-periodo-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  background: rgba(175, 82, 222, 0.1);
+  color: #AF52DE;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.apple-reporte-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.apple-reporte-nombre {
+  font-weight: 600;
+  color: #1d1d1f;
+  font-size: 13px;
+}
+
+.apple-firma-label {
+  font-size: 11px;
+  color: #34C759;
+  font-weight: 500;
+}
+
+.apple-fecha-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.apple-fecha-text {
+  display: inline-block;
+  padding: 5px 10px;
+  background: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.apple-fecha-firma {
+  font-size: 11px;
+  color: #86868b;
+}
+
+/* ====================== APPLE ACTIONS ====================== */
+.apple-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.apple-action-btn {
+  min-width: 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-action-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+  fill: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.apple-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.apple-action-btn.sign {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+}
+
+.apple-action-btn.sign svg {
+  stroke: white;
+}
+
+.apple-action-btn.sign:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(0, 122, 255, 0.4);
+  background: linear-gradient(135deg, #0051D5 0%, #4AB8F1 100%);
+}
+
+.apple-action-btn.view {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.25);
+}
+
+.apple-action-btn.view svg {
+  stroke: white;
+}
+
+.apple-action-btn.view:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(52, 199, 89, 0.4);
+  background: linear-gradient(135deg, #28A745 0%, #2ECC40 100%);
+}
+
+.apple-action-btn.download {
+  background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
+  box-shadow: 0 2px 8px rgba(88, 86, 214, 0.25);
+}
+
+.apple-action-btn.download svg {
+  stroke: white;
+}
+
+.apple-action-btn.download:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(88, 86, 214, 0.4);
+  background: linear-gradient(135deg, #4030A0 0%, #9030C0 100%);
+}
+
+.apple-action-btn.delete {
+  background: linear-gradient(135deg, #FF3B30 0%, #FF453A 100%);
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.25);
+}
+
+.apple-action-btn.delete svg {
+  stroke: white;
+}
+
+.apple-action-btn.delete:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(255, 59, 48, 0.4);
+  background: linear-gradient(135deg, #D93025 0%, #EA4335 100%);
+}
+
+.apple-spinner-mini {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: apple-spin-animation 0.8s linear infinite;
+}
+
+/* ====================== APPLE LOADING & EMPTY ====================== */
+.apple-loading,
+.apple-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #86868b;
+  text-align: center;
+}
+
+.apple-loading svg,
+.apple-empty svg {
+  width: 60px;
+  height: 60px;
+  stroke: #d1d1d6;
+  margin-bottom: 16px;
+}
+
+.apple-loading h3,
+.apple-empty h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0 0 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-loading p,
+.apple-empty p {
+  font-size: 13px;
+  color: #86868b;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(139, 195, 74, 0.2);
+  border-top-color: #8BC34A;
+  border-radius: 50%;
+  animation: apple-spin-animation 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+/* ====================== APPLE PAGINATION ====================== */
+.apple-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid #C8E6C9;
+  background: #E8F5E9;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+
+.apple-pagination-info {
+  font-size: 12px;
+  color: #2E7D32;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-pagination-btn {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+}
+
+.apple-pagination-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7CB342 0%, #689F38 100%);
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+  transform: translateY(-1px);
+}
+
+.apple-pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.apple-pagination-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.apple-pagination-numbers {
+  display: flex;
+  gap: 4px;
+}
+
+.apple-pagination-number {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-pagination-number:hover {
+  background: rgba(139, 195, 74, 0.15);
+}
+
+.apple-pagination-number.active {
+  background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+}
+
+/* ====================== RESPONSIVE DESIGN ====================== */
+@media (max-width: 1024px) {
+  .apple-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apple-unified-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .apple-filter-group {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .apple-container {
+    padding: 12px;
+  }
+  
+  .apple-page-header {
+    padding: clamp(14px, 2.5vw, 18px);
+    border-radius: 24px 24px 0 0;
+  }
+  
+  .apple-stats-section {
+    padding: 14px 12px 12px 12px;
+    border-radius: 0 0 24px 24px;
+  }
+  
+  .apple-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .apple-stat-card {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .apple-stat-icon {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .apple-stat-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .apple-stat-value {
+    font-size: 14px;
+  }
+  
+  .apple-stat-label {
+    font-size: 9px;
+  }
+  
+  .apple-search-row {
+    flex-direction: column;
+  }
+  
+  .apple-search-container {
+    min-width: 100%;
+  }
+  
+  .apple-filter-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .apple-quick-filters {
+    flex-wrap: wrap;
+  }
+  
+  .apple-filter-chip {
+    flex: 1;
+    justify-content: center;
+    min-width: 80px;
+  }
+  
+  .apple-table-container {
+    max-height: calc(100vh - 450px);
+  }
+  
+  .apple-table th,
+  .apple-table td {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+  
+  .th-territorio,
+  .td-territorio,
+  .th-periodo,
+  .td-periodo {
+    display: none;
+  }
+  
+  .apple-user-cell {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .apple-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .apple-avatar svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .apple-action-btn {
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+  }
+  
+  .apple-action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .apple-pagination {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .apple-pagination-numbers {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .apple-orb-1, .apple-orb-2, .apple-orb-3 {
+    opacity: 0.4;
+  }
+  
+  .apple-firma-bar {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .apple-firma-actions {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .apple-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  
+  .apple-stat-card {
+    padding: 8px;
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+  }
+  
+  .apple-header-title {
+    font-size: clamp(1rem, 4vw, 1.2rem);
+  }
+  
+  .apple-refresh-btn {
+    width: 34px;
+    height: 34px;
+  }
+  
+  .apple-table th,
+  .apple-table td {
+    padding: 8px 6px;
+    font-size: 10px;
+  }
+  
+  .th-checkbox,
+  .td-checkbox {
+    width: 30px;
+  }
+  
+  .apple-checkbox {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .apple-actions {
+    gap: 4px;
+  }
+  
+  .apple-action-btn {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .apple-filter-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+/* ====================== MODALS ====================== */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 1000; }
 
 .modal-container { background: white; border-radius: 16px; max-width: 420px; width: 100%; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); overflow: hidden; animation: modalSlideIn 0.3s ease-out; }
@@ -2071,22 +3282,6 @@ onMounted(() => {
 .modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
 
 .modal-fade-enter-from .modal-container, .modal-fade-leave-to .modal-container { transform: scale(0.95) translateY(10px); }
-
-@media (max-width: 1200px) { .main-content { margin-left: min(200px, 16vw); width: calc(100vw - min(200px, 16vw)); } }
-
-@media (max-width: 1024px) { .main-content { margin-left: 200px; width: calc(100vw - 200px); } .stats-grid { grid-template-columns: repeat(2, 1fr); } .filters-grid { grid-template-columns: 1fr 1fr 1fr; } .search-group { grid-column: span 3; } .full-width { grid-column: span 3; } .filter-actions { grid-column: span 3; } .clear-filters-btn { width: 100%; } }
-
-@media (max-width: 768px) and (orientation: landscape) { .main-content { margin-left: 160px; width: calc(100vw - 160px); } }
-
-@media (max-width: 992px) { .main-content { margin-left: 200px; width: calc(100vw - 200px); } }
-
-@media (min-width: 481px) and (max-width: 768px) { .main-content { margin-left: 250px; width: calc(100vw - 250px); } }
-
-@media (max-width: 768px) { .main-content { margin-left: 240px; width: calc(100vw - 240px); } .header-content { flex-direction: column; align-items: flex-start; gap: 12px; } .header-main { width: 100%; } .header-actions { width: 100%; justify-content: flex-end; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .filters-grid { grid-template-columns: 1fr 1fr; } .search-group { grid-column: span 2; } .full-width { grid-column: 1 / -1; } .filter-actions { grid-column: span 2; } .clear-filters-btn { width: 100%; } .reportes-table th, .reportes-table td { padding: 8px 6px; font-size: 0.7rem; } .usuario-avatar { width: 28px; height: 28px; font-size: 0.6rem; } .modal-container { max-width: 90%; } .modal-header { padding: 14px; gap: 12px; } .modal-icon { width: 38px; height: 38px; min-width: 38px; } .modal-icon svg { width: 18px; height: 18px; max-width: 18px; max-height: 18px; } .modal-body { padding: 14px; } .modal-footer { padding: 12px 14px; } .modal-title-container h3 { font-size: 1rem; } .modal-title-container p { font-size: 0.75rem; } .search-results-count { font-size: 0.68rem; right: 44px; padding: 3px 8px; } }
-
-@media (max-width: 480px) { .main-content { margin-left: 60px; width: calc(100vw - 60px); } .page-content { padding: 8px; } .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; } .stat-card { padding: 8px 10px; } .stat-icon { width: 32px; height: 32px; min-width: 32px; } .stat-icon svg { width: 16px; height: 16px; max-width: 16px; max-height: 16px; } .stat-value { font-size: 1rem; } .stat-label { font-size: 0.65rem; } .pagination-container { flex-direction: column; text-align: center; } .filters-grid { grid-template-columns: 1fr; gap: 10px; } .filter-actions { grid-column: span 1; } .clear-filters-btn { width: 100%; min-width: unset; } .th-territorio, .td-territorio { display: none; } .btn-action { width: 28px; height: 28px; } .modal-overlay { padding: 12px; } .modal-container { max-width: 95%; } .modal-header { padding: 12px; gap: 10px; flex-wrap: wrap; } .modal-icon { width: 36px; height: 36px; min-width: 36px; } .modal-icon svg { width: 16px; height: 16px; } .modal-body { padding: 12px; } .modal-body p { font-size: 0.8rem; } .modal-footer { padding: 12px; flex-direction: column; gap: 8px; } .btn-cancel, .btn-delete-confirm { width: 100%; padding: 11px 16px; font-size: 0.85rem; } .modal-title-container h3 { font-size: 0.95rem; } .modal-title-container p { font-size: 0.7rem; } .reporte-eliminar-info { padding: 10px; } .reporte-eliminar-info strong { font-size: 0.85rem; } }
-
-@media (max-width: 360px) { .main-content { margin-left: 60px; width: calc(100vw - 60px); } .header-title { font-size: 1rem !important; } .stats-grid { grid-template-columns: 1fr; } }
 
 /* ==========================================
    ESTILOS PARA SISTEMA DE FIRMAS

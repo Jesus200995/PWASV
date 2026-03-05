@@ -2,64 +2,62 @@
   <div class="estadisticas-container">
     <Sidebar @logout="logout" />
     
+    <!-- Apple Dynamic Background -->
+    <div class="apple-dynamic-bg">
+      <div class="apple-orb apple-orb-1"></div>
+      <div class="apple-orb apple-orb-2"></div>
+      <div class="apple-orb apple-orb-3"></div>
+    </div>
+    
     <main class="main-content">
-      <header class="page-header">
-        <div class="header-content">
-          <div class="header-main">
-            <div class="header-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 20V10"/>
-                <path d="M12 20V4"/>
-                <path d="M6 20v-6"/>
-              </svg>
+      <!-- Apple Sticky Header -->
+      <header class="apple-page-header">
+        <div class="apple-header-wrapper">
+          <div class="apple-header-center">
+            <div class="apple-title-group">
+              <div class="apple-icon-mini">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M18 20V10"/>
+                  <path d="M12 20V4"/>
+                  <path d="M6 20v-6"/>
+                </svg>
+              </div>
+              <span class="apple-title-divider">|</span>
+              <h1 class="apple-page-title">PANEL DE ESTADÍSTICAS</h1>
             </div>
-            <div class="header-text">
-              <h1 class="header-title">Panel de Estadísticas</h1>
-              <p class="header-subtitle">Usuarios, actividad, dispositivos y distribución de cargos</p>
-            </div>
+            <p class="apple-page-subtitle">Usuarios, actividad, dispositivos y distribución de cargos</p>
           </div>
-          <div class="header-actions">
-            <div v-if="actualizando" class="updating-indicator">
-              <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 4v6h-6"/>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-              </svg>
-              <span>Actualizando...</span>
-            </div>
-            <button class="btn-refresh" @click="cargarEstadisticas" :disabled="cargando || actualizando">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ 'spin-icon': actualizando }">
-                <path d="M23 4v6h-6"/>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-              </svg>
-              Actualizar
-            </button>
-          </div>
+          <button 
+            class="apple-refresh-button" 
+            @click="cargarEstadisticas" 
+            :disabled="cargando || actualizando"
+            title="Actualizar"
+          >
+            <svg :class="{ 'apple-spin': actualizando }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M23 4v6h-6"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+          </button>
         </div>
       </header>
 
-      <div class="page-content">
+      <div class="apple-page-content">
         <!-- Loading -->
-        <div v-if="cargando" class="loading-state">
-          <div class="loading-spinner"></div>
+        <div v-if="cargando" class="apple-loading-state">
+          <div class="apple-loading-spinner"></div>
           <p>Cargando estadísticas...</p>
         </div>
 
         <!-- Error -->
-        <div v-if="error && !cargando" class="error-state">
-          <div class="error-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </div>
+        <div v-if="error && !cargando" class="apple-error-state">
+          <div class="apple-error-icon">⚠️</div>
           <h3>Error al cargar estadísticas</h3>
           <p>{{ error }}</p>
-          <button class="btn-secondary" @click="cargarEstadisticas">Reintentar</button>
+          <button class="apple-btn-secondary" @click="cargarEstadisticas">Reintentar</button>
         </div>
 
         <!-- Estadísticas -->
-        <div v-if="!cargando && !error && estadisticas" class="stats-wrapper">
+        <div v-if="!cargando && !error && estadisticas" class="apple-stats-wrapper">
           
           <!-- Tarjeta Principal -->
           <section class="main-stat-card animate-fade-in">
@@ -542,7 +540,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* === ANIMATIONS === */
+/* ====================== APPLE ANIMATIONS ====================== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -572,6 +570,13 @@ onUnmounted(() => {
   to { transform: rotate(360deg); }
 }
 
+@keyframes apple-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(-30px, -20px) scale(1.02); }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
   opacity: 0;
@@ -582,155 +587,480 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-/* === CONTAINER === */
+/* ====================== BASE LAYOUT ====================== */
 .estadisticas-container {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  position: relative;
+  overflow: hidden;
 }
 
+/* ====================== APPLE DYNAMIC BACKGROUND ====================== */
+.apple-dynamic-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.apple-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.4;
+  animation: apple-float 20s ease-in-out infinite;
+}
+
+.apple-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(139, 195, 74, 0.2) 100%);
+  top: -100px;
+  right: -100px;
+  animation-delay: 0s;
+}
+
+.apple-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.15) 0%, rgba(90, 200, 250, 0.1) 100%);
+  bottom: -50px;
+  left: 10%;
+  animation-delay: -7s;
+}
+
+.apple-orb-3 {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, rgba(175, 82, 222, 0.15) 0%, rgba(191, 90, 242, 0.1) 100%);
+  top: 40%;
+  right: 20%;
+  animation-delay: -14s;
+}
+
+/* ====================== MAIN CONTENT ====================== */
 .main-content {
   flex: 1;
   margin-left: min(220px, 18vw);
   width: calc(100vw - min(220px, 18vw));
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  transition: all 0.3s ease;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 16px 0 16px;
+  z-index: 1;
 }
 
-/* === HEADER === */
-.page-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-  color: white;
-  padding: clamp(0.4rem, 1vw, 0.6rem) clamp(1rem, 2vw, 1.5rem);
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+/* ====================== APPLE STICKY WRAPPER ====================== */
+.apple-sticky-wrapper {
   position: sticky;
   top: 0;
   z-index: 100;
+  background: transparent;
+  margin-bottom: 20px;
 }
 
-.header-content {
+/* ====================== APPLE PAGE HEADER ====================== */
+.apple-page-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  color: white;
+  border-radius: 20px;
+  border: 2px solid #8BC34A;
+  padding: 14px 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: sticky;
+  top: 8px;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+  margin-bottom: 16px;
+}
+
+.apple-header-wrapper {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  position: relative;
 }
 
-.header-main {
+.apple-header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-title-group {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 10px;
 }
 
-.header-icon {
-  width: 36px;
-  height: 36px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 10px;
+.apple-icon-mini {
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.header-icon svg {
-  width: 20px;
-  height: 20px;
+.apple-icon-mini svg {
+  width: 18px;
+  height: 18px;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 2;
 }
 
-.header-title {
-  font-size: clamp(14px, 2.5vw, 18px);
+.apple-title-divider {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 18px;
+  font-weight: 300;
+}
+
+.apple-page-title {
+  font-size: 18px;
   font-weight: 700;
+  color: white;
   margin: 0;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
 }
 
-.header-subtitle {
-  font-size: clamp(10px, 1.5vw, 12px);
-  opacity: 0.9;
-  margin: 2px 0 0;
+.apple-page-subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
-.btn-refresh {
+.apple-refresh-button {
+  position: absolute;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 10px;
-  color: white;
-  font-weight: 600;
-  font-size: 12px;
+  justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  color: white;
 }
 
-.btn-refresh:hover:not(:disabled) {
-  background: rgba(255,255,255,0.3);
-  transform: translateY(-2px);
+.apple-refresh-button svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
 }
 
-.btn-refresh:disabled {
+.apple-refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.apple-refresh-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.updating-indicator {
+.apple-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ====================== APPLE STATS SECTION ====================== */
+.apple-stats-section {
+  background: white;
+  border-radius: 0 0 28px 28px;
+  border: 2px solid #8BC34A;
+  border-top: none;
+  padding: 18px 16px 16px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  margin-top: -1px;
+}
+
+.apple-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.apple-stat-card {
+  background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.apple-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon.blue {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+}
+
+.apple-stat-icon.green {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+}
+
+.apple-stat-icon.purple {
+  background: linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%);
+}
+
+.apple-stat-icon svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-stat-content {
+  flex: 1;
+}
+
+.apple-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1;
+  margin-bottom: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  letter-spacing: -0.3px;
+}
+
+.apple-stat-label {
+  font-size: 10px;
+  color: #86868b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ====================== APPLE SEARCH SECTION ====================== */
+.apple-search-section {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.apple-actions-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.apple-list-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple-list-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-count-badge {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.apple-filter-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.apple-updating-indicator {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  border-radius: 8px;
-  color: #86efac;
+  background: rgba(52, 199, 89, 0.1);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+  border-radius: 10px;
+  color: #34C759;
   font-size: 11px;
-  font-weight: 500;
-  animation: pulse 1.5s ease-in-out infinite;
+  font-weight: 600;
 }
 
-.spin-icon {
-  animation: spin 1s linear infinite;
+.apple-updating-indicator svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* ====================== APPLE PAGE CONTENT ====================== */
+.apple-page-content {
+  padding: 0;
 }
 
-/* === PAGE CONTENT === */
-.page-content {
-  flex: 1;
-  padding: clamp(16px, 2.5vw, 24px);
-}
-
-.stats-wrapper {
+.apple-stats-wrapper {
   display: flex;
   flex-direction: column;
   gap: clamp(16px, 2.5vw, 24px);
 }
 
-/* === LOADING/ERROR === */
-.loading-state, .error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
+/* ====================== APPLE LOADING & ERROR STATES ====================== */
+.apple-loading-state {
   text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
-.loading-spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #e0e0e0;
-  border-top-color: #4CAF50;
+.apple-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e8f5e8;
+  border-top: 3px solid #4CAF50;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
 }
 
+.apple-error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.apple-error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.apple-btn-secondary {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.apple-btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ====================== APPLE RESPONSIVE STYLES ====================== */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 8px 12px 0 12px;
+  }
+
+  .apple-page-header {
+    border-radius: 16px;
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 6px 10px 0 10px;
+  }
+  
+  .apple-page-header {
+    border-radius: 14px;
+    padding: 10px 14px;
+  }
+
+  .apple-page-title {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .apple-page-subtitle {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 4px 6px 0 6px;
+  }
+
+  .apple-page-header {
+    border-radius: 12px;
+    padding: 8px 10px;
+  }
+
+  .apple-title-group {
+    gap: 6px;
+  }
+
+  .apple-icon-mini {
+    width: 18px;
+    height: 18px;
+  }
+
+  .apple-icon-mini svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .apple-page-title {
+    font-size: 12px;
+  }
+
+  .apple-refresh-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .apple-refresh-button svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* ====================== EXISTING STATS CARDS STYLES ====================== */
 .error-icon {
   width: 64px;
   height: 64px;

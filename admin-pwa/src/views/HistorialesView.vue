@@ -1790,43 +1790,40 @@ export default {
 }
 
 .apple-stat-card {
-  background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
-  border-radius: 14px;
+  background: #f8f9fa;
+  border-radius: 12px;
   padding: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
 }
 
 .apple-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background: #f0f1f3;
 }
 
 .apple-stat-icon {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .apple-stat-icon.blue {
-  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  background: #007AFF;
 }
 
 .apple-stat-icon.green {
-  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+  background: #34C759;
 }
 
 .apple-stat-icon.purple {
-  background: linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%);
+  background: #AF52DE;
 }
 
 .apple-stat-icon.orange {
@@ -1929,8 +1926,7 @@ export default {
 .apple-search-input:focus {
   outline: none;
   background: white;
-  border-color: rgba(0, 122, 255, 0.2);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.05);
+  border-color: #007AFF;
 }
 
 .apple-clear-btn {
@@ -2234,16 +2230,15 @@ export default {
   align-items: center;
   gap: 5px;
   padding: 7px 12px;
-  border-radius: 20px;
-  border: 2px solid transparent;
-  background: #f5f5f7;
-  color: #1d1d1f;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #374151;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
 }
 
@@ -2254,18 +2249,14 @@ export default {
 }
 
 .apple-filter-chip:hover {
-  background: rgba(0, 122, 255, 0.1);
-  border-color: rgba(0, 122, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.15);
+  background: #f3f4f6;
+  border-color: #d1d5db;
 }
 
 .apple-filter-chip.active {
-  background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+  background: #007AFF;
   color: white;
   border-color: #007AFF;
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
-  transform: translateY(-2px);
 }
 
 .apple-filter-chip.active span {
@@ -2334,7 +2325,6 @@ export default {
 .apple-select:focus {
   outline: none;
   border-color: #8BC34A;
-  box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.1);
 }
 
 .apple-count-badge {
@@ -2345,12 +2335,11 @@ export default {
   height: 24px;
   padding: 0 8px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+  background: #8BC34A;
   color: white;
   font-size: 11px;
   font-weight: 700;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-  box-shadow: 0 2px 6px rgba(139, 195, 74, 0.3);
 }
 
 /* ====================== APPLE CONTENT WRAPPER ====================== */
@@ -2362,10 +2351,9 @@ export default {
 /* ====================== APPLE TABLE CONTAINER ====================== */
 .apple-table-container {
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid #e5e7eb;
   max-height: calc(100vh - 340px);
   display: flex;
   flex-direction: column;
@@ -2440,18 +2428,17 @@ export default {
 }
 
 .apple-table-row {
-  border-bottom: 1px solid #F0F0F0;
+  border-bottom: 1px solid #e5e7eb;
   transition: all 0.15s ease;
   background: white;
 }
 
 .apple-table-row:nth-child(even) {
-  background: #FAFAFA;
+  background: #f9fafb;
 }
 
 .apple-table-row:hover {
-  background: #F5F5F7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: #f3f4f6;
 }
 
 .apple-table-row:hover td:first-child {
@@ -2538,14 +2525,13 @@ export default {
 .apple-action-btn {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .apple-action-btn svg {
@@ -2555,7 +2541,7 @@ export default {
 }
 
 .apple-action-btn.view {
-  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  background: #007AFF;
   color: white;
 }
 
@@ -2564,8 +2550,8 @@ export default {
 }
 
 .apple-action-btn.view:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+  background: #0056b3;
+  transform: scale(1.05);
 }
 
 .apple-no-details {
@@ -5181,15 +5167,9 @@ export default {
 <style>
 .apple-search-dropdown-portal {
   position: fixed;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 14px;
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.15),
-    0 8px 25px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.04);
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   max-height: 340px;
   overflow-y: auto;
   z-index: 999999;
@@ -5285,18 +5265,17 @@ export default {
 
 /* Avatar */
 .apple-search-dropdown-portal .apple-dropdown-avatar {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #007AFF, #5856D6);
+  background: #007AFF;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
 }
 
 /* Info container */

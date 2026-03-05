@@ -278,38 +278,84 @@ class UsuariosService {
         return [];
       }
       
-      // Filtrar usuarios localmente
-      const terminoLower = termino.toLowerCase().trim();
-      console.log('🔎 Filtrando usuarios con término:', terminoLower);
+      // Normalizar término de búsqueda (quitar acentos y convertir a minúsculas)
+      const normalizarTexto = (texto) => {
+        return (texto || '').toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .trim();
+      };
       
-      const usuariosFiltrados = todosLosUsuarios.filter(usuario => {
-        const nombreCompleto = (usuario.nombre_completo || '').toLowerCase();
-        const correo = (usuario.correo || '').toLowerCase();
-        const curp = (usuario.curp || '').toLowerCase();
-        const cargo = (usuario.cargo || '').toLowerCase();
+      const terminoNormalizado = normalizarTexto(termino);
+      const palabrasBusqueda = terminoNormalizado.split(/\s+/).filter(p => p.length > 0);
+      console.log('🔎 Palabras de búsqueda:', palabrasBusqueda);
+      
+      // Filtrar y puntuar usuarios
+      const usuariosConPuntaje = todosLosUsuarios.map(usuario => {
+        const nombreCompleto = normalizarTexto(usuario.nombre_completo);
+        const correo = normalizarTexto(usuario.correo);
+        const curp = normalizarTexto(usuario.curp);
+        const cargo = normalizarTexto(usuario.cargo);
         
-        const coincide = nombreCompleto.includes(terminoLower) || 
-                        correo.includes(terminoLower) || 
-                        curp.includes(terminoLower) ||
-                        cargo.includes(terminoLower);
-                        
-        if (coincide) {
-          console.log('✅ Usuario coincidente:', {
-            id: usuario.id,
-            nombre: nombreCompleto,
-            correo: correo,
-            curp: curp
-          });
+        let puntaje = 0;
+        let coincide = false;
+        
+        // Búsqueda exacta al inicio tiene mayor prioridad
+        if (nombreCompleto.startsWith(terminoNormalizado)) {
+          puntaje += 100;
+          coincide = true;
         }
         
-        return coincide;
+        // Coincidencia exacta en CURP (muy importante)
+        if (curp && curp.startsWith(terminoNormalizado)) {
+          puntaje += 90;
+          coincide = true;
+        }
+        
+        // Coincidencia exacta en correo
+        if (correo && correo.startsWith(terminoNormalizado)) {
+          puntaje += 80;
+          coincide = true;
+        }
+        
+        // Buscar todas las palabras del término
+        const todasPalabrasCoinciden = palabrasBusqueda.every(palabra => {
+          return nombreCompleto.includes(palabra) || 
+                 correo.includes(palabra) || 
+                 curp.includes(palabra) ||
+                 cargo.includes(palabra);
+        });
+        
+        if (todasPalabrasCoinciden && palabrasBusqueda.length > 0) {
+          puntaje += 50;
+          coincide = true;
+        }
+        
+        // Coincidencia parcial en cualquier campo
+        if (!coincide && (
+          nombreCompleto.includes(terminoNormalizado) || 
+          correo.includes(terminoNormalizado) || 
+          curp.includes(terminoNormalizado) ||
+          cargo.includes(terminoNormalizado)
+        )) {
+          puntaje += 20;
+          coincide = true;
+        }
+        
+        return { usuario, puntaje, coincide };
       });
+      
+      // Filtrar y ordenar por puntaje
+      const usuariosFiltrados = usuariosConPuntaje
+        .filter(item => item.coincide)
+        .sort((a, b) => b.puntaje - a.puntaje)
+        .map(item => item.usuario);
 
       console.log(`✅ Encontrados ${usuariosFiltrados.length} usuarios que coinciden con "${termino}"`);
       
-      // Limitar resultados a 10 para mejor rendimiento
-      const resultadosLimitados = usuariosFiltrados.slice(0, 10);
-      console.log(`📋 Devolviendo ${resultadosLimitados.length} usuarios (limitado a 10)`);
+      // Limitar resultados a 15 para mejor rendimiento pero más opciones
+      const resultadosLimitados = usuariosFiltrados.slice(0, 15);
+      console.log(`📋 Devolviendo ${resultadosLimitados.length} usuarios (limitado a 15)`);
       
       return resultadosLimitados;
       

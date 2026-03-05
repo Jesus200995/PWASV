@@ -15,17 +15,18 @@
         <!-- ================== HEADER APPLE STYLE ================== -->
         <header class="apple-page-header">
           <div class="apple-header-wrapper">
-            <div class="apple-header-left">
-              <div class="apple-icon-circle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                  <path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+            <div class="apple-header-center">
+              <div class="apple-title-group">
+                <div class="apple-icon-mini">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <span class="apple-title-divider">|</span>
+                <h1 class="apple-page-title">ASISTENCIAS</h1>
               </div>
-              <div>
-                <h1 class="apple-page-title">Asistencias</h1>
-                <p class="apple-page-subtitle">{{ totalAsistencias.toLocaleString() }} registros</p>
-              </div>
+              <p class="apple-page-subtitle">Control de registros de entrada y salida</p>
             </div>
             
             <button @click="cargarAsistencias" class="apple-refresh-button" :disabled="loading">
@@ -993,8 +994,7 @@ export default {
     #2E7D32 50%, 
     #1B5E20 100%);
   border-bottom: none;
-  padding: 10px 16px;
-  box-shadow: none;
+  padding: 14px 20px;
   border-radius: 28px 28px 0 0;
   border: 2px solid #8BC34A;
   border-bottom: none;
@@ -1002,72 +1002,79 @@ export default {
 
 .apple-header-wrapper {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  position: relative;
 }
 
-.apple-header-left {
+.apple-header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-title-group {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.apple-icon-circle {
-  width: 28px;
-  height: 28px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 50%;
+.apple-icon-mini {
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  flex-shrink: 0;
 }
 
-.apple-icon-circle svg {
-  width: 14px;
-  height: 14px;
-  stroke: white;
-  stroke-width: 2.5;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+.apple-icon-mini svg {
+  width: 18px;
+  height: 18px;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 2;
+}
+
+.apple-title-divider {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 18px;
+  font-weight: 300;
 }
 
 .apple-page-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: white;
   margin: 0;
-  letter-spacing: -0.3px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
 }
 
 .apple-page-subtitle {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 2px 0 0 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
   font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 .apple-refresh-button {
-  width: 28px;
-  height: 28px;
+  position: absolute;
+  right: 0;
+  width: 32px;
+  height: 32px;
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 }
 
 .apple-refresh-button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .apple-refresh-button:disabled {

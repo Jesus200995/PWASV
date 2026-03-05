@@ -811,6 +811,127 @@
           </div>
         </Transition>
       </Teleport>
+
+      <!-- Apple Mini Modal de Carga -->
+      <Teleport to="body">
+        <Transition name="apple-mini-modal">
+          <div v-if="mostrarMiniModalCarga" class="apple-mini-modal-overlay">
+            <div class="apple-mini-modal">
+              <!-- Anillo de progreso con porcentaje real -->
+              <div class="apple-mini-modal-spinner">
+                <svg class="apple-progress-ring" viewBox="0 0 100 100">
+                  <circle class="apple-ring-bg" cx="50" cy="50" r="42"/>
+                  <circle 
+                    class="apple-ring-progress-real" 
+                    cx="50" cy="50" r="42"
+                    :style="{ strokeDashoffset: 264 - (264 * Math.min(miniModalProgreso, 100) / 100) }"
+                  />
+                </svg>
+                <div class="apple-mini-modal-percent">
+                  {{ Math.round(Math.min(miniModalProgreso, 100)) }}<span>%</span>
+                </div>
+              </div>
+              
+              <!-- Info del reporte -->
+              <div class="apple-mini-modal-content">
+                <div class="apple-mini-modal-action">
+                  <div class="apple-mini-modal-action-icon" :class="miniModalTipo">
+                    <svg v-if="miniModalTipo === 'ver'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
+                      <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                    </svg>
+                    <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2"/>
+                      <polyline points="7 10 12 15 17 10" stroke-width="2"/>
+                      <line x1="12" y1="15" x2="12" y2="3" stroke-width="2"/>
+                    </svg>
+                  </div>
+                  <span>{{ miniModalTitulo }}</span>
+                </div>
+                
+                <div class="apple-mini-modal-user">
+                  <div class="apple-mini-modal-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                      <circle cx="12" cy="7" r="4" stroke-width="2"/>
+                    </svg>
+                  </div>
+                  <div class="apple-mini-modal-user-info">
+                    <h4>{{ miniModalUsuario }}</h4>
+                    <p>{{ miniModalPeriodo }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Barra de progreso inferior -->
+              <div class="apple-mini-modal-progress-bar">
+                <div class="apple-mini-modal-progress-fill" :style="{ width: Math.min(miniModalProgreso, 100) + '%' }"></div>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
+
+      <!-- Modal de Confirmación de Descarga Exitosa (Apple Style) -->
+      <Teleport to="body">
+        <Transition name="apple-success-modal">
+          <div v-if="mostrarModalDescargaExitosa" class="apple-success-overlay" @click.self="cerrarModalDescargaExitosa">
+            <div class="apple-success-modal">
+              <!-- Animación de check -->
+              <div class="apple-success-check">
+                <svg class="apple-check-circle" viewBox="0 0 100 100">
+                  <circle class="apple-check-bg" cx="50" cy="50" r="45"/>
+                  <circle class="apple-check-ring" cx="50" cy="50" r="45"/>
+                  <path class="apple-check-mark" d="M30 50 L45 65 L70 35" />
+                </svg>
+              </div>
+              
+              <!-- Contenido -->
+              <div class="apple-success-content">
+                <h3>¡Descarga Completada!</h3>
+                <p class="apple-success-filename">{{ descargaExitosaInfo.nombre }}</p>
+              </div>
+              
+              <!-- Info del usuario -->
+              <div class="apple-success-info">
+                <div class="apple-success-user">
+                  <div class="apple-success-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                      <circle cx="12" cy="7" r="4" stroke-width="2"/>
+                    </svg>
+                  </div>
+                  <div class="apple-success-user-details">
+                    <span class="apple-success-user-name">{{ descargaExitosaInfo.usuario }}</span>
+                    <span class="apple-success-user-period">{{ descargaExitosaInfo.periodo }}</span>
+                  </div>
+                </div>
+                
+                <div class="apple-success-status" :class="descargaExitosaInfo.firmado ? 'firmado' : 'pendiente'">
+                  <svg v-if="descargaExitosaInfo.firmado" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 12l2 2 4-4" stroke-width="2.5"/>
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  </svg>
+                  <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <polyline points="12 6 12 12 16 14" stroke-width="2"/>
+                  </svg>
+                  <span>{{ descargaExitosaInfo.firmado ? 'Firmado' : 'Pendiente' }}</span>
+                </div>
+              </div>
+              
+              <!-- Botón cerrar -->
+              <button @click="cerrarModalDescargaExitosa" class="apple-success-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M5 12h14" stroke-width="2.5" stroke-linecap="round"/>
+                  <path d="M12 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Continuar</span>
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
     </main>
   </div>
 </template>
@@ -880,6 +1001,25 @@ const territorios = ref([])
 const viendoReporte = ref(null)
 const descargandoReporte = ref(null)
 const eliminandoReporte = ref(null)
+
+// Mini modal de carga estilo Apple
+const mostrarMiniModalCarga = ref(false)
+const miniModalTipo = ref('ver') // 'ver' o 'descargar'
+const miniModalTitulo = ref('')
+const miniModalMensaje = ref('')
+const miniModalNombreReporte = ref('')
+const miniModalUsuario = ref('')
+const miniModalPeriodo = ref('')
+const miniModalProgreso = ref(0) // 0-100
+
+// Modal de confirmación de descarga Apple
+const mostrarModalDescargaExitosa = ref(false)
+const descargaExitosaInfo = ref({
+  nombre: '',
+  usuario: '',
+  periodo: '',
+  firmado: false
+})
 
 const mostrarModalEliminar = ref(false)
 const reporteAEliminar = ref(null)
@@ -1115,13 +1255,37 @@ async function cargarEstadisticas() {
 
 async function verReporte(reporte) {
   viendoReporte.value = reporte.id
+  
+  // Mostrar mini modal Apple con info completa
+  miniModalTipo.value = 'ver'
+  miniModalTitulo.value = 'Abriendo Reporte'
+  miniModalNombreReporte.value = reporte.nombre_reporte
+  miniModalUsuario.value = reporte.usuario?.nombre_completo || 'Usuario'
+  miniModalPeriodo.value = `${reporte.mes} ${reporte.anio}`
+  miniModalProgreso.value = 0
+  mostrarMiniModalCarga.value = true
+  
+  // Simular progreso de apertura
+  const intervalo = setInterval(() => {
+    if (miniModalProgreso.value < 90) {
+      miniModalProgreso.value += Math.random() * 15 + 5
+    }
+  }, 150)
+  
   try {
     await reportesService.verReporte(reporte.id)
+    miniModalProgreso.value = 100
   } catch (error) {
     console.error('Error al ver reporte:', error)
     alert('No se pudo abrir el reporte: ' + error.message)
   } finally {
-    viendoReporte.value = null
+    clearInterval(intervalo)
+    // Pequeño delay para animación fluida
+    setTimeout(() => {
+      mostrarMiniModalCarga.value = false
+      viendoReporte.value = null
+      miniModalProgreso.value = 0
+    }, 400)
   }
 }
 
@@ -1133,10 +1297,28 @@ async function descargarReporte(reporte) {
 
   console.log(`📥 Descargando reporte: ${reporte.nombre_reporte}`)
   descargandoReporte.value = reporte.id
+  
+  // Mostrar mini modal Apple con info completa
+  miniModalTipo.value = 'descargar'
+  miniModalTitulo.value = 'Descargando'
+  miniModalNombreReporte.value = reporte.nombre_reporte
+  miniModalUsuario.value = reporte.usuario?.nombre_completo || 'Usuario'
+  miniModalPeriodo.value = `${reporte.mes} ${reporte.anio}`
+  miniModalProgreso.value = 0
+  mostrarMiniModalCarga.value = true
+  
+  // Progreso: 0-30% obtener datos
+  const intervaloInicial = setInterval(() => {
+    if (miniModalProgreso.value < 30) {
+      miniModalProgreso.value += Math.random() * 8 + 2
+    }
+  }, 100)
 
   try {
     // Obtener datos del reporte desde el servidor
     const response = await reportesService.obtenerReporte(reporte.id)
+    clearInterval(intervaloInicial)
+    miniModalProgreso.value = 35
     
     if (!response.success) {
       throw new Error('No se pudo obtener el reporte')
@@ -1147,6 +1329,14 @@ async function descargarReporte(reporte) {
     // Generar PDF desde datos estructurados
     if (reporteData.datos_reporte) {
       console.log('📄 Generando PDF desde datos estructurados...')
+      miniModalProgreso.value = 50
+      
+      // Progreso: 50-90% generar PDF
+      const intervaloPDF = setInterval(() => {
+        if (miniModalProgreso.value < 85) {
+          miniModalProgreso.value += Math.random() * 10 + 3
+        }
+      }, 120)
       
       // Generar PDF con las firmas disponibles
       const pdfBase64 = await generarPDFDesdesDatos(
@@ -1156,14 +1346,22 @@ async function descargarReporte(reporte) {
         reporteData.nombre_supervisor
       )
       
+      clearInterval(intervaloPDF)
+      miniModalProgreso.value = 95
+      
       // Descargar el PDF
       descargarPDFBase64(pdfBase64, reporte.nombre_reporte)
+      miniModalProgreso.value = 100
       
       console.log('✅ Reporte generado y descargado exitosamente')
       
-      alert(reporteData.firmado_supervisor 
-        ? `${reporte.nombre_reporte} descargado (firmado por supervisor)` 
-        : `${reporte.nombre_reporte} descargado (pendiente de autorización)`)
+      // Guardar info para modal de confirmación
+      descargaExitosaInfo.value = {
+        nombre: reporte.nombre_reporte,
+        usuario: reporte.usuario?.nombre_completo || 'Usuario',
+        periodo: `${reporte.mes} ${reporte.anio}`,
+        firmado: reporteData.firmado_supervisor
+      }
     } else {
       throw new Error('El reporte no tiene datos disponibles para generar el PDF')
     }
@@ -1178,7 +1376,19 @@ async function descargarReporte(reporte) {
     
     alert(mensaje)
   } finally {
-    descargandoReporte.value = null
+    // Pequeño delay para animación fluida, luego mostrar modal de confirmación
+    setTimeout(() => {
+      mostrarMiniModalCarga.value = false
+      descargandoReporte.value = null
+      miniModalProgreso.value = 0
+      
+      // Si fue exitoso, mostrar modal de confirmación
+      if (descargaExitosaInfo.value.nombre) {
+        setTimeout(() => {
+          mostrarModalDescargaExitosa.value = true
+        }, 200)
+      }
+    }, 400)
   }
 }
 
@@ -1387,6 +1597,11 @@ async function confirmarFirma() {
 function cerrarModalExito() {
   mostrarModalExito.value = false
   resultadoFirma.value = { exitosos: 0, fallidos: 0 }
+}
+
+function cerrarModalDescargaExitosa() {
+  mostrarModalDescargaExitosa.value = false
+  descargaExitosaInfo.value = { nombre: '', usuario: '', periodo: '', firmado: false }
 }
 
 // Funciones para descarga de reportes
@@ -3186,10 +3401,27 @@ onMounted(() => {
   }
   
   .apple-stat-card {
-    padding: 8px;
+    padding: 10px;
     flex-direction: column;
     text-align: center;
-    gap: 4px;
+    gap: 6px;
+    border-radius: 16px;
+  }
+  
+  .apple-stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  
+  .apple-stat-value {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  
+  .apple-stat-label {
+    font-size: 10px;
+    letter-spacing: 0.02em;
   }
   
   .apple-header-title {
@@ -3201,34 +3433,117 @@ onMounted(() => {
     height: 34px;
   }
   
+  /* Tabla responsiva estilo Apple - Cards en móvil */
+  .apple-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
   .apple-table th,
   .apple-table td {
-    padding: 8px 6px;
-    font-size: 10px;
+    padding: 10px 8px;
+    font-size: 11px;
   }
   
   .th-checkbox,
   .td-checkbox {
-    width: 30px;
+    width: 32px;
+    padding: 8px 4px !important;
   }
   
   .apple-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+  }
+  
+  /* Botones de acción mejorados para móvil */
+  .apple-actions {
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  
+  .apple-action-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 10px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .apple-action-btn:active {
+    transform: scale(0.92);
+  }
+  
+  .apple-action-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+  
+  .apple-filter-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+  
+  .apple-filter-controls {
+    gap: 8px;
+  }
+  
+  .apple-filter-btn span {
+    display: none;
+  }
+  
+  .apple-filter-btn svg {
+    margin: 0;
+  }
+  
+  /* User cell compacto */
+  .apple-user-cell {
+    min-width: 120px;
+  }
+  
+  .apple-user-name {
+    font-size: 12px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .apple-user-role {
+    display: none;
+  }
+  
+  /* Status badge compacto */
+  .apple-status-badge span {
+    display: none;
+  }
+  
+  .apple-status-badge {
+    padding: 6px;
+    min-width: auto;
+  }
+  
+  .apple-status-badge svg {
     width: 16px;
     height: 16px;
   }
   
-  .apple-actions {
-    gap: 4px;
+  /* Territorio badge compacto */
+  .apple-territorio-badge {
+    font-size: 9px;
+    padding: 4px 8px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
-  .apple-action-btn {
-    width: 26px;
-    height: 26px;
-  }
-  
-  .apple-filter-btn {
-    padding: 6px 10px;
-    font-size: 11px;
+  /* Periodo badge compact */
+  .apple-periodo-badge {
+    font-size: 10px;
+    padding: 4px 8px;
   }
 }
 
@@ -4778,6 +5093,651 @@ onMounted(() => {
     width: 100%;
     padding: 12px;
     font-size: 0.85rem;
+  }
+}
+
+/* ====================== APPLE MINI MODAL DE CARGA ====================== */
+.apple-mini-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.apple-mini-modal {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 28px;
+  padding: 28px 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 
+    0 30px 60px -15px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  min-width: 280px;
+  max-width: 340px;
+  animation: apple-modal-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+@keyframes apple-modal-bounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(25px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.apple-mini-modal-spinner {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-progress-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.apple-ring-bg {
+  fill: none;
+  stroke: #f0f0f5;
+  stroke-width: 6;
+}
+
+.apple-ring-progress-real {
+  fill: none;
+  stroke: url(#green-gradient);
+  stroke: #34C759;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 264;
+  stroke-dashoffset: 264;
+  transition: stroke-dashoffset 0.3s ease-out;
+}
+
+.apple-mini-modal-percent {
+  position: absolute;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.apple-mini-modal-percent span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #86868b;
+  margin-left: 1px;
+}
+
+.apple-mini-modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.apple-mini-modal-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f1f3 100%);
+  border-radius: 20px;
+}
+
+.apple-mini-modal-action-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-mini-modal-action-icon.ver {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+}
+
+.apple-mini-modal-action-icon.descargar {
+  background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
+}
+
+.apple-mini-modal-action-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: white;
+  stroke-width: 2.5;
+}
+
+.apple-mini-modal-action span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.apple-mini-modal-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 16px;
+  width: 100%;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.apple-mini-modal-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.apple-mini-modal-avatar svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+  stroke-width: 2;
+}
+
+.apple-mini-modal-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.apple-mini-modal-user-info h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-mini-modal-user-info p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #007AFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+}
+
+.apple-mini-modal-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #e5e7eb;
+}
+
+.apple-mini-modal-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34C759 0%, #30D158 50%, #32D74B 100%);
+  transition: width 0.25s ease-out;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Transición del mini modal Apple */
+.apple-mini-modal-enter-active {
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.apple-mini-modal-leave-active {
+  transition: all 0.25s ease-out;
+}
+
+.apple-mini-modal-enter-from {
+  opacity: 0;
+}
+
+.apple-mini-modal-enter-from .apple-mini-modal {
+  transform: scale(0.85) translateY(25px);
+}
+
+.apple-mini-modal-leave-to {
+  opacity: 0;
+}
+
+.apple-mini-modal-leave-to .apple-mini-modal {
+  transform: scale(0.95) translateY(-15px);
+}
+
+/* Responsive del mini modal */
+@media (max-width: 480px) {
+  .apple-mini-modal {
+    padding: 24px 20px 16px;
+    min-width: 260px;
+    max-width: 300px;
+    border-radius: 24px;
+  }
+  
+  .apple-mini-modal-spinner {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .apple-mini-modal-percent {
+    font-size: 24px;
+  }
+  
+  .apple-mini-modal-percent span {
+    font-size: 12px;
+  }
+  
+  .apple-mini-modal-action {
+    padding: 6px 12px;
+  }
+  
+  .apple-mini-modal-action-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .apple-mini-modal-action-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .apple-mini-modal-action span {
+    font-size: 12px;
+  }
+  
+  .apple-mini-modal-user {
+    padding: 10px 12px;
+  }
+  
+  .apple-mini-modal-avatar {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .apple-mini-modal-avatar svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .apple-mini-modal-user-info h4 {
+    font-size: 14px;
+  }
+  
+  .apple-mini-modal-user-info p {
+    font-size: 12px;
+  }
+}
+
+/* ====================== APPLE SUCCESS MODAL (Descarga Exitosa) ====================== */
+.apple-success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 20px;
+}
+
+.apple-success-modal {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 28px;
+  padding: 32px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 
+    0 30px 60px -15px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  min-width: 300px;
+  max-width: 360px;
+  animation: apple-success-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes apple-success-bounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.apple-success-check {
+  width: 90px;
+  height: 90px;
+  position: relative;
+}
+
+.apple-check-circle {
+  width: 100%;
+  height: 100%;
+}
+
+.apple-check-bg {
+  fill: none;
+  stroke: #e8f5e9;
+  stroke-width: 4;
+}
+
+.apple-check-ring {
+  fill: none;
+  stroke: #34C759;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 283;
+  animation: apple-ring-draw 0.6s ease-out 0.1s forwards;
+  transform-origin: center;
+  transform: rotate(-90deg);
+}
+
+@keyframes apple-ring-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.apple-check-mark {
+  fill: none;
+  stroke: #34C759;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: apple-check-draw 0.4s ease-out 0.5s forwards;
+}
+
+@keyframes apple-check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.apple-success-content {
+  text-align: center;
+}
+
+.apple-success-content h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.apple-success-filename {
+  margin: 0;
+  font-size: 14px;
+  color: #34C759;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+  padding: 6px 14px;
+  background: rgba(52, 199, 89, 0.1);
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.apple-success-info {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f1f3 100%);
+  border-radius: 16px;
+}
+
+.apple-success-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.apple-success-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.apple-success-avatar svg {
+  width: 22px;
+  height: 22px;
+  stroke: white;
+  stroke-width: 2;
+}
+
+.apple-success-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.apple-success-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-success-user-period {
+  font-size: 12px;
+  font-weight: 500;
+  color: #007AFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+}
+
+.apple-success-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.apple-success-status.firmado {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+}
+
+.apple-success-status.pendiente {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+  color: #856404;
+}
+
+.apple-success-status svg {
+  width: 16px;
+  height: 16px;
+}
+
+.apple-success-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(52, 199, 89, 0.35);
+}
+
+.apple-success-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(52, 199, 89, 0.45);
+  background: linear-gradient(135deg, #28A745 0%, #2ECC40 100%);
+}
+
+.apple-success-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+}
+
+.apple-success-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.5;
+}
+
+/* Transición del modal de éxito */
+.apple-success-modal-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.apple-success-modal-leave-active {
+  transition: all 0.25s ease-out;
+}
+
+.apple-success-modal-enter-from {
+  opacity: 0;
+}
+
+.apple-success-modal-enter-from .apple-success-modal {
+  transform: scale(0.8) translateY(30px);
+}
+
+.apple-success-modal-leave-to {
+  opacity: 0;
+}
+
+.apple-success-modal-leave-to .apple-success-modal {
+  transform: scale(0.95) translateY(-15px);
+}
+
+/* Responsive del modal de éxito */
+@media (max-width: 480px) {
+  .apple-success-modal {
+    padding: 24px 20px 20px;
+    min-width: 280px;
+    max-width: 320px;
+    border-radius: 24px;
+  }
+  
+  .apple-success-check {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .apple-success-content h3 {
+    font-size: 18px;
+  }
+  
+  .apple-success-filename {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+  
+  .apple-success-info {
+    padding: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .apple-success-user {
+    justify-content: center;
+  }
+  
+  .apple-success-status {
+    justify-content: center;
+  }
+  
+  .apple-success-avatar {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .apple-success-avatar svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .apple-success-user-name {
+    font-size: 13px;
+  }
+  
+  .apple-success-user-period {
+    font-size: 11px;
+  }
+  
+  .apple-success-btn {
+    padding: 12px 20px;
+    font-size: 15px;
   }
 }
 

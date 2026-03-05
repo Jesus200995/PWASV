@@ -104,12 +104,17 @@ export function useAnimatedNumber(targetValue, options = {}) {
 
   // Watch para cambios en targetValue
   watch(targetValue, (newValue, oldValue) => {
-    // Si es el primer valor, establecer sin animación
-    if (oldValue === undefined || displayValue.value === 0) {
-      setValue(newValue);
-    } else {
-      animateTo(newValue);
+    // Si el displayValue actual es 0, establecer directo sin animación (entrada inicial)
+    // Esto evita la animación de "0 a X" al cargar la página
+    if (displayValue.value === 0) {
+      displayValue.value = newValue;
+      return;
     }
+    // Solo animar si el valor es diferente
+    if (newValue === displayValue.value) {
+      return;
+    }
+    animateTo(newValue);
   }, { immediate: true });
 
   return {

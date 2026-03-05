@@ -40,7 +40,7 @@
 
         <!-- ================== STATS + FILTERS SECTION ================== -->
         <div class="apple-stats-section">
-          <!-- Stats Cards Apple Style -->
+          <!-- Stats Cards Apple Style - Contadores Animados en Tiempo Real -->
           <div class="apple-stats-grid">
             <div class="apple-stat-card">
               <div class="apple-stat-icon blue">
@@ -50,7 +50,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value">{{ estadisticas.totalReportes }}</div>
+                <div class="apple-stat-value">{{ displayTotal }}</div>
                 <div class="apple-stat-label">Total</div>
               </div>
             </div>
@@ -63,7 +63,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value">{{ reportesFirmados.length }}</div>
+                <div class="apple-stat-value">{{ displayFirmados }}</div>
                 <div class="apple-stat-label">Firmados</div>
               </div>
             </div>
@@ -76,7 +76,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value">{{ reportesPendientes.length }}</div>
+                <div class="apple-stat-value">{{ displayPendientes }}</div>
                 <div class="apple-stat-label">Pendientes</div>
               </div>
             </div>
@@ -91,7 +91,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value">{{ estadisticas.usuariosConReportes }}</div>
+                <div class="apple-stat-value">{{ displayUsuarios }}</div>
                 <div class="apple-stat-label">Usuarios</div>
               </div>
             </div>
@@ -937,7 +937,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '../components/Sidebar.vue'
 import FirmaDigitalAdmin from '../components/FirmaDigitalAdmin.vue'
@@ -946,6 +946,7 @@ import authService from '../services/authService'
 import { generarPDFDesdesDatos } from '../utils/pdfGenerator'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
+import { useAnimatedNumber } from '../composables/useAnimatedNumber'
 
 const router = useRouter()
 
@@ -998,6 +999,37 @@ const reportes = ref([])
 const totalReportes = ref(0)
 const territorios = ref([])
 
+// ====================== CONTADORES ANIMADOS APPLE-STYLE ======================
+// Refs target para los valores reales de la BD
+const statsTarget = ref({
+  totalReportes: 0,
+  firmados: 0,
+  pendientes: 0,
+  usuarios: 0
+})
+
+// Composables para animación fluida de cada contador
+const { displayValue: displayTotal } = useAnimatedNumber(
+  computed(() => statsTarget.value.totalReportes),
+  { duration: 1200, decimals: 0 }
+)
+const { displayValue: displayFirmados } = useAnimatedNumber(
+  computed(() => statsTarget.value.firmados),
+  { duration: 1200, decimals: 0 }
+)
+const { displayValue: displayPendientes } = useAnimatedNumber(
+  computed(() => statsTarget.value.pendientes),
+  { duration: 1200, decimals: 0 }
+)
+const { displayValue: displayUsuarios } = useAnimatedNumber(
+  computed(() => statsTarget.value.usuarios),
+  { duration: 1200, decimals: 0 }
+)
+
+// Intervalo de actualización en tiempo real
+let statsPollingInterval = null
+const POLLING_INTERVAL = 10000 // 10 segundos
+
 const viendoReporte = ref(null)
 const descargandoReporte = ref(null)
 const eliminandoReporte = ref(null)
@@ -1048,6 +1080,8 @@ const progresoDescarga = ref({ actual: 0, total: 0, mensaje: '' })
 
 const estadisticas = ref({
   totalReportes: 0,
+  reportesFirmados: 0,
+  reportesPendientes: 0,
   reportesMes: 0,
   porTipo: {},
   usuariosConReportes: 0,
@@ -1127,6 +1161,29 @@ const reportesFiltrados = computed(() => {
 // Computed para reportes firmados y pendientes
 const reportesFirmados = computed(() => reportes.value.filter(r => r.firmado_supervisor))
 const reportesPendientes = computed(() => reportes.value.filter(r => !r.firmado_supervisor))
+
+// ====================== ACTUALIZACIÓN DE STATS TARGET ======================
+// Watcher para actualizar statsTarget cuando cambian las estadísticas del backend
+watch(estadisticas, () => {
+  // Usar datos exactos del backend
+  const newTotal = estadisticas.value.totalReportes || 0
+  const newFirmados = estadisticas.value.reportesFirmados || 0
+  const newPendientes = estadisticas.value.reportesPendientes || 0
+  const newUsuarios = estadisticas.value.usuariosConReportes || 0
+  
+  // Solo actualizar si hay cambios (evita re-animaciones innecesarias)
+  if (statsTarget.value.totalReportes !== newTotal ||
+      statsTarget.value.firmados !== newFirmados ||
+      statsTarget.value.pendientes !== newPendientes ||
+      statsTarget.value.usuarios !== newUsuarios) {
+    statsTarget.value = {
+      totalReportes: newTotal,
+      firmados: newFirmados,
+      pendientes: newPendientes,
+      usuarios: newUsuarios
+    }
+  }
+}, { deep: true, immediate: true })
 const reportesPendientesFiltrados = computed(() => reportesFiltrados.value.filter(r => !r.firmado_supervisor))
 
 // Computed para conteo de reportes según filtros de descarga
@@ -1242,6 +1299,8 @@ async function cargarEstadisticas() {
     if (response.success) {
       estadisticas.value = {
         totalReportes: response.estadisticas.total_reportes || 0,
+        reportesFirmados: response.estadisticas.reportes_firmados || 0,
+        reportesPendientes: response.estadisticas.reportes_pendientes || 0,
         reportesMes: response.estadisticas.reportes_mes_actual || 0,
         porTipo: response.estadisticas.por_tipo || {},
         usuariosConReportes: response.estadisticas.usuarios_con_reportes || 0,
@@ -1798,9 +1857,67 @@ function logout() {
   router.push('/login')
 }
 
+// ====================== POLLING EN TIEMPO REAL APPLE-STYLE ======================
+async function actualizarEstadisticasEnVivo() {
+  try {
+    // Actualizar estadísticas de la BD sin mostrar loading
+    const response = await reportesService.obtenerEstadisticas()
+    if (response.success) {
+      estadisticas.value = {
+        totalReportes: response.estadisticas.total_reportes || 0,
+        reportesFirmados: response.estadisticas.reportes_firmados || 0,
+        reportesPendientes: response.estadisticas.reportes_pendientes || 0,
+        reportesMes: response.estadisticas.reportes_mes_actual || 0,
+        porTipo: response.estadisticas.por_tipo || {},
+        usuariosConReportes: response.estadisticas.usuarios_con_reportes || 0,
+        porTerritorio: response.estadisticas.por_territorio || {}
+      }
+    }
+    
+    // También actualizar lista de reportes silenciosamente
+    const reportesResp = await reportesService.obtenerTodosReportes({ limite: 1000 })
+    if (reportesResp.success) {
+      reportes.value = reportesResp.reportes || []
+    }
+  } catch (error) {
+    // Silenciar errores de polling para no molestar al usuario
+    console.warn('⚠️ Polling estadísticas fallido:', error.message)
+  }
+}
+
+function iniciarPollingEstadisticas() {
+  // Limpiar intervalo existente
+  if (statsPollingInterval) {
+    clearInterval(statsPollingInterval)
+  }
+  
+  // Configurar nuevo intervalo
+  statsPollingInterval = setInterval(() => {
+    actualizarEstadisticasEnVivo()
+  }, POLLING_INTERVAL)
+  
+  console.log('🔄 Polling de estadísticas iniciado (cada ' + POLLING_INTERVAL/1000 + 's)')
+}
+
+function detenerPollingEstadisticas() {
+  if (statsPollingInterval) {
+    clearInterval(statsPollingInterval)
+    statsPollingInterval = null
+    console.log('⏹️ Polling de estadísticas detenido')
+  }
+}
+
 onMounted(() => {
   cargarReportes()
   cargarEstadisticas()
+  
+  // Iniciar actualización en tiempo real
+  iniciarPollingEstadisticas()
+})
+
+onUnmounted(() => {
+  // Limpiar polling al salir de la vista
+  detenerPollingEstadisticas()
 })
 </script>
 
@@ -2085,6 +2202,10 @@ onMounted(() => {
   line-height: 1;
   margin-bottom: 4px;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  /* Números de ancho fijo para evitar saltos durante la animación */
+  font-variant-numeric: tabular-nums;
+  /* Ancho mínimo para estabilidad */
+  min-width: 2ch;
 }
 
 .apple-stat-label {

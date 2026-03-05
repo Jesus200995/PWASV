@@ -2888,6 +2888,14 @@ async def obtener_estadisticas_reportes_admin():
         cursor.execute("SELECT COUNT(*) FROM reportes_generados")
         total_reportes = cursor.fetchone()[0]
         
+        # Reportes firmados
+        cursor.execute("SELECT COUNT(*) FROM reportes_generados WHERE COALESCE(firmado_supervisor, false) = true")
+        reportes_firmados = cursor.fetchone()[0]
+        
+        # Reportes pendientes (sin firmar)
+        cursor.execute("SELECT COUNT(*) FROM reportes_generados WHERE COALESCE(firmado_supervisor, false) = false")
+        reportes_pendientes = cursor.fetchone()[0]
+        
         # Reportes este mes
         cursor.execute("""
             SELECT COUNT(*) FROM reportes_generados 
@@ -2931,12 +2939,14 @@ async def obtener_estadisticas_reportes_admin():
         """)
         por_mes = {r[0]: r[1] for r in cursor.fetchall()}
         
-        print(f"✅ [ADMIN] Estadísticas obtenidas")
+        print(f"✅ [ADMIN] Estadísticas obtenidas - Total: {total_reportes}, Firmados: {reportes_firmados}, Pendientes: {reportes_pendientes}, Usuarios: {usuarios_con_reportes}")
         
         return {
             "success": True,
             "estadisticas": {
                 "total_reportes": total_reportes,
+                "reportes_firmados": reportes_firmados,
+                "reportes_pendientes": reportes_pendientes,
                 "reportes_mes_actual": reportes_mes,
                 "por_tipo": por_tipo,
                 "usuarios_con_reportes": usuarios_con_reportes,

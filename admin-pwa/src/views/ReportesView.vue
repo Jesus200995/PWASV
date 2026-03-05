@@ -181,56 +181,54 @@
                 </button>
               </div>
 
-              <div class="apple-filter-group">
-                <label class="apple-filter-label">
+              <div class="apple-filter-pill-group">
+                <div :class="['apple-filter-pill', { 'active': filtros.mes }]">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                     <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
                     <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
                     <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
                   </svg>
-                  Mes:
-                </label>
-                <select v-model="filtros.mes" @change="cargarReportes" class="apple-select">
-                  <option value="">Todos</option>
-                  <option v-for="mes in meses" :key="mes.value" :value="mes.value">{{ mes.label }}</option>
-                </select>
-              </div>
+                  <select v-model="filtros.mes" class="apple-pill-select">
+                    <option value="">Mes</option>
+                    <option v-for="mes in meses" :key="mes.value" :value="mes.value">{{ mes.label }}</option>
+                  </select>
+                </div>
 
-              <div class="apple-filter-group">
-                <label class="apple-filter-label">
+                <div :class="['apple-filter-pill', { 'active': filtros.anio }]">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                     <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
                     <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
                   </svg>
-                  Año:
-                </label>
-                <select v-model="filtros.anio" @change="cargarReportes" class="apple-select">
-                  <option value="">Todos</option>
-                  <option v-for="anio in anios" :key="anio" :value="anio">{{ anio }}</option>
-                </select>
-              </div>
+                  <select v-model="filtros.anio" class="apple-pill-select">
+                    <option value="">Año</option>
+                    <option v-for="anio in anios" :key="anio" :value="anio">{{ anio }}</option>
+                  </select>
+                </div>
 
-              <div v-if="!territorioUsuario" class="apple-filter-group">
-                <label class="apple-filter-label">
+                <div v-if="!territorioUsuario" :class="['apple-filter-pill', { 'active': filtros.territorio }]">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2"/>
                     <circle cx="12" cy="10" r="3" stroke-width="2"/>
                   </svg>
-                  Territorio:
-                </label>
-                <select v-model="filtros.territorio" @change="cargarReportes" class="apple-select">
-                  <option value="">Todos</option>
-                  <option v-for="territorio in territorios" :key="territorio" :value="territorio">{{ territorio }}</option>
-                </select>
+                  <select v-model="filtros.territorio" class="apple-pill-select">
+                    <option value="">Territorio</option>
+                    <option v-for="territorio in territorios" :key="territorio" :value="territorio">{{ territorio }}</option>
+                  </select>
+                </div>
               </div>
 
-              <button @click="limpiarFiltros" class="apple-clear-filters-btn" title="Limpiar filtros">
+              <button 
+                v-if="hayFiltrosActivos" 
+                @click="limpiarFiltros" 
+                class="apple-clear-pill" 
+                title="Limpiar filtros"
+              >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="18" y1="6" x2="6" y2="18" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="6" y1="6" x2="18" y2="18" stroke-width="2.5" stroke-linecap="round"/>
                 </svg>
-                <span>Limpiar</span>
               </button>
             </div>
           </div>
@@ -1143,6 +1141,27 @@ const reportesFiltrados = computed(() => {
     })
   }
   
+  // Filtro por mes
+  if (filtros.value.mes) {
+    resultado = resultado.filter(r => {
+      const mesReporte = r.mes || r.nombre_reporte?.match(/Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre/)?.[0]
+      return mesReporte === filtros.value.mes
+    })
+  }
+  
+  // Filtro por año
+  if (filtros.value.anio) {
+    resultado = resultado.filter(r => {
+      const anioReporte = r.anio || r.nombre_reporte?.match(/\d{4}/)?.[0]
+      return anioReporte == filtros.value.anio
+    })
+  }
+  
+  // Filtro por territorio
+  if (filtros.value.territorio) {
+    resultado = resultado.filter(r => r.usuario?.territorio === filtros.value.territorio)
+  }
+  
   // Filtro por tipo de reporte
   if (filtros.value.tipo) {
     resultado = resultado.filter(r => r.tipo === filtros.value.tipo)
@@ -1162,14 +1181,49 @@ const reportesFiltrados = computed(() => {
 const reportesFirmados = computed(() => reportes.value.filter(r => r.firmado_supervisor))
 const reportesPendientes = computed(() => reportes.value.filter(r => !r.firmado_supervisor))
 
+// Computed para detectar si hay filtros activos
+const hayFiltrosActivos = computed(() => {
+  return filtros.value.busqueda || 
+         filtros.value.mes || 
+         filtros.value.anio || 
+         filtros.value.territorio || 
+         filtros.value.tipo ||
+         filtros.value.estadoFirma
+})
+
+// Computed para contadores basádos en reportes filtrados
+const contadoresFiltrados = computed(() => {
+  const datos = reportesFiltrados.value
+  const firmados = datos.filter(r => r.firmado_supervisor).length
+  const pendientes = datos.filter(r => !r.firmado_supervisor).length
+  const usuarios = new Set(datos.map(r => r.usuario_id || r.usuario?.id)).size
+  
+  return {
+    total: datos.length,
+    firmados,
+    pendientes,
+    usuarios
+  }
+})
+
 // ====================== ACTUALIZACIÓN DE STATS TARGET ======================
-// Watcher para actualizar statsTarget cuando cambian las estadísticas del backend
-watch(estadisticas, () => {
-  // Usar datos exactos del backend
-  const newTotal = estadisticas.value.totalReportes || 0
-  const newFirmados = estadisticas.value.reportesFirmados || 0
-  const newPendientes = estadisticas.value.reportesPendientes || 0
-  const newUsuarios = estadisticas.value.usuariosConReportes || 0
+// Watcher para actualizar statsTarget - usa filtrados si hay filtros, o backend si no
+watch([estadisticas, contadoresFiltrados, hayFiltrosActivos], () => {
+  let newTotal, newFirmados, newPendientes, newUsuarios
+  
+  if (hayFiltrosActivos.value) {
+    // Usar datos filtrados localmente
+    newTotal = contadoresFiltrados.value.total
+    newFirmados = contadoresFiltrados.value.firmados
+    newPendientes = contadoresFiltrados.value.pendientes
+    newUsuarios = contadoresFiltrados.value.usuarios
+  } else {
+    // Usar datos exactos del backend
+    newTotal = estadisticas.value.totalReportes || 0
+    newFirmados = estadisticas.value.reportesFirmados || 0
+    newPendientes = estadisticas.value.reportesPendientes || 0
+    newUsuarios = estadisticas.value.usuariosConReportes || 0
+  }
   
   // Solo actualizar si hay cambios (evita re-animaciones innecesarias)
   if (statsTarget.value.totalReportes !== newTotal ||
@@ -2435,87 +2489,132 @@ onUnmounted(() => {
   stroke: white !important;
 }
 
-.apple-filter-group {
+/* ====================== APPLE FILTER PILLS ====================== */
+.apple-filter-pill-group {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
-.apple-filter-label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #86868b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-}
-
-.apple-filter-label svg {
-  width: 14px;
-  height: 14px;
-  stroke: #86868b;
-  stroke-width: 2;
-}
-
-.apple-select {
-  height: 34px;
-  border-radius: 10px;
-  border: 1.5px solid #e5e5e5;
-  background: #f5f5f7;
-  padding: 0 28px 0 12px;
-  font-size: 12px;
-  color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-}
-
-.apple-select:hover {
-  border-color: #d1d1d6;
-  background-color: white;
-}
-
-.apple-select:focus {
-  outline: none;
-  border-color: #8BC34A;
-  box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.1);
-}
-
-.apple-clear-filters-btn {
+.apple-filter-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 12px;
-  border-radius: 12px;
+  padding: 0 4px 0 12px;
+  height: 36px;
+  border-radius: 50px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1.5px solid #e5e5e5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+.apple-filter-pill:hover {
+  border-color: #8BC34A;
+  background: linear-gradient(145deg, #ffffff 0%, #f5f8f3 100%);
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.15);
+  transform: translateY(-1px);
+}
+
+.apple-filter-pill:focus-within {
+  border-color: #8BC34A;
+  box-shadow: 0 0 0 4px rgba(139, 195, 74, 0.12);
+}
+
+.apple-filter-pill svg {
+  width: 15px;
+  height: 15px;
+  stroke: #86868b;
+  stroke-width: 2;
+  flex-shrink: 0;
+  transition: stroke 0.2s ease;
+}
+
+.apple-filter-pill:hover svg {
+  stroke: #8BC34A;
+}
+
+.apple-pill-select {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0 28px 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  cursor: pointer;
+  outline: none;
+  min-width: 70px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: color 0.2s ease;
+}
+
+.apple-pill-select:hover {
+  color: #8BC34A;
+}
+
+.apple-pill-select option {
+  padding: 12px;
+  font-size: 14px;
+  background: white;
+  color: #1d1d1f;
+}
+
+/* Pill activo cuando tiene valor seleccionado */
+.apple-filter-pill.active {
+  background: linear-gradient(145deg, #f0f8e8 0%, #e8f5e0 100%);
+  border-color: #8BC34A;
+}
+
+.apple-filter-pill.active svg {
+  stroke: #8BC34A;
+}
+
+.apple-filter-pill.active .apple-pill-select {
+  color: #558B2F;
+  font-weight: 600;
+}
+
+.apple-clear-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   border: 1.5px solid rgba(255, 59, 48, 0.3);
   background: rgba(255, 59, 48, 0.08);
   color: #FF3B30;
-  font-size: 11px;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
-.apple-clear-filters-btn svg {
-  width: 14px;
-  height: 14px;
+.apple-clear-pill svg {
+  width: 16px;
+  height: 16px;
   stroke: #FF3B30;
-  stroke-width: 2;
 }
 
-.apple-clear-filters-btn:hover {
-  background: rgba(255, 59, 48, 0.15);
+.apple-clear-pill:hover {
+  background: #FF3B30;
   border-color: #FF3B30;
-  transform: translateY(-2px);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+}
+
+.apple-clear-pill:hover svg {
+  stroke: white;
+}
+
+.apple-clear-pill:active {
+  transform: scale(0.95);
 }
 
 /* ====================== APPLE CONTENT WRAPPER ====================== */

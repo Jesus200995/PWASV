@@ -1,73 +1,130 @@
 <template>
   <div class="manuales-container">
+    <!-- Apple Dynamic Background -->
+    <div class="apple-dynamic-bg">
+      <div class="apple-orb apple-orb-1"></div>
+      <div class="apple-orb apple-orb-2"></div>
+      <div class="apple-orb apple-orb-3"></div>
+    </div>
+    
     <Sidebar @logout="logout" />
     
     <main class="main-content">
-      <header class="page-header">
-        <div class="header-content">
-          <div class="header-main">
-            <div class="header-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                <circle cx="12" cy="10" r="2"/>
-                <path d="M12 14v3"/>
-              </svg>
+      <!-- ================== STICKY WRAPPER FOR HEADER + STATS ================== -->
+      <div class="apple-sticky-wrapper">
+        <!-- ================== HEADER APPLE STYLE ================== -->
+        <header class="apple-page-header">
+          <div class="apple-header-wrapper">
+            <div class="apple-header-center">
+              <div class="apple-title-group">
+                <div class="apple-icon-mini">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <span class="apple-title-divider">|</span>
+                <h1 class="apple-page-title">MANUALES</h1>
+              </div>
+              <p class="apple-page-subtitle">Gestiona manuales, guías y documentos</p>
             </div>
-            <div class="header-text">
-              <h1 class="header-title">Centro de Manuales</h1>
-              <p class="header-subtitle">Gestiona manuales, guías y documentos para los usuarios</p>
-            </div>
-          </div>
-          <div v-if="puedeCrearManuales" class="header-actions">
-            <button class="btn-primary" @click="mostrarModalCrear = true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14"/>
-                <path d="M5 12h14"/>
+            
+            <button @click="cargarManuales" class="apple-refresh-button" :disabled="cargando">
+              <svg :class="{ 'apple-spin': cargando }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              Nuevo Manual
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div class="page-content">
+        <!-- ================== STATS CARDS APPLE STYLE ================== -->
+        <div class="apple-stats-section">
+          <div class="apple-stats-grid">
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ manuales.length }}</div>
+                <div class="apple-stat-label">Total Manuales</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ totalLecturas }}</div>
+                <div class="apple-stat-label">Total Lecturas</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"/>
+                  <polyline points="14 2 14 8 20 8" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ manualesConArchivo }}</div>
+                <div class="apple-stat-label">Con Archivos</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================== ACTIONS INSIDE STATS ================== -->
+          <div class="apple-search-section">
+            <div class="apple-actions-row">
+              <div class="apple-list-info">
+                <span class="apple-list-title">Manuales Publicados</span>
+                <span class="apple-count-badge">{{ manuales.length }}</span>
+              </div>
+              
+              <div class="apple-filter-controls" v-if="puedeCrearManuales">
+                <button 
+                  @click="mostrarModalCrear = true" 
+                  class="apple-filter-btn create"
+                  title="Nuevo Manual"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Nuevo Manual</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="apple-page-content">
         <!-- Mensaje de carga -->
-        <div v-if="cargando" class="loading-state">
-          <div class="loading-spinner"></div>
+        <div v-if="cargando" class="apple-loading-state">
+          <div class="apple-loading-spinner"></div>
           <p>Cargando manuales...</p>
         </div>
 
         <!-- Mensaje de error -->
-        <div v-if="error && !cargando" class="error-state">
-          <div class="error-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </div>
+        <div v-if="error && !cargando" class="apple-error-state">
+          <div class="apple-error-icon">⚠️</div>
           <h3>Error al cargar manuales</h3>
           <p>{{ error }}</p>
-          <button class="btn-secondary" @click="cargarManuales">Reintentar</button>
+          <button class="apple-btn-secondary" @click="cargarManuales">Reintentar</button>
         </div>
 
         <!-- Lista de manuales -->
-        <div v-if="!cargando && !error" class="manuales-list">
-          <div class="list-header">
-            <h2>Manuales Publicados ({{ manuales.length }})</h2>
-            <button class="btn-refresh" @click="cargarManuales" :disabled="cargando">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 4v6h-6"/>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-              </svg>
-              Actualizar
-            </button>
-          </div>
-
-          <!-- Tabla de manuales -->
-          <div class="table-container">
-            <table class="manuales-table">
+        <div v-if="!cargando && !error" class="apple-manuales-list">
+          <!-- Tabla de manuales estilo Apple -->
+          <div class="apple-table-container">
+            <table class="apple-table">
               <thead>
                 <tr>
                   <th>Título</th>
@@ -80,94 +137,92 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="manual in manuales" :key="manual.id" class="manual-row">
-                  <td class="title-cell">
-                    <div class="title-content">
-                      <span class="manual-title">{{ manual.titulo }}</span>
-                    </div>
+                <tr v-for="manual in manuales" :key="manual.id" class="apple-table-row">
+                  <td class="apple-title-cell">
+                    <span class="apple-manual-title">{{ manual.titulo }}</span>
                   </td>
-                  <td class="subtitle-cell">
-                    <span v-if="manual.subtitulo" class="manual-subtitle">{{ manual.subtitulo }}</span>
-                    <span v-else class="no-subtitle">—</span>
+                  <td>
+                    <span v-if="manual.subtitulo" class="apple-manual-subtitle">{{ manual.subtitulo }}</span>
+                    <span v-else class="apple-no-data">—</span>
                   </td>
-                  <td class="content-cell">
-                    <div class="content-badges">
-                      <span v-if="manual.archivo_nombre" class="badge badge-pdf" title="Documento adjunto">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <td>
+                    <div class="apple-content-badges">
+                      <span v-if="manual.archivo_nombre" class="apple-badge badge-pdf" title="Documento adjunto">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                           <polyline points="14 2 14 8 20 8"/>
                         </svg>
                         PDF
                       </span>
-                      <span v-if="manual.imagen_nombre" class="badge badge-img" title="Imagen adjunta">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <span v-if="manual.imagen_nombre" class="apple-badge badge-img" title="Imagen adjunta">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <rect x="3" y="3" width="18" height="18" rx="2"/>
                           <circle cx="8.5" cy="8.5" r="1.5"/>
                           <polyline points="21 15 16 10 5 21"/>
                         </svg>
                         IMG
                       </span>
-                      <span v-if="manual.video_nombre" class="badge badge-video" title="Video adjunto">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <span v-if="manual.video_nombre" class="apple-badge badge-video" title="Video adjunto">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <polygon points="23 7 16 12 23 17 23 7"/>
-                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                          <rect x="1" y="5" width="15" height="14" rx="2"/>
                         </svg>
                         VIDEO
                       </span>
-                      <span v-if="manual.enlace_url" class="badge badge-url" title="Enlace externo">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <span v-if="manual.enlace_url" class="apple-badge badge-url" title="Enlace externo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                           <polyline points="15 3 21 3 21 9"/>
                           <line x1="10" y1="14" x2="21" y2="3"/>
                         </svg>
                         URL
                       </span>
-                      <span v-if="!manual.archivo_nombre && !manual.imagen_nombre && !manual.video_nombre && !manual.enlace_url" class="badge badge-text">
-                        Solo texto
+                      <span v-if="!manual.archivo_nombre && !manual.imagen_nombre && !manual.video_nombre && !manual.enlace_url" class="apple-badge badge-text">
+                        Texto
                       </span>
                     </div>
                   </td>
-                  <td class="recipients-cell">
-                    <span class="recipients-badge" :class="{ 'all-users': manual.enviado_a_todos }">
+                  <td>
+                    <span :class="['apple-recipients-badge', { 'all-users': manual.enviado_a_todos }]">
                       {{ manual.destinatarios_texto }}
                     </span>
                   </td>
-                  <td class="reads-cell">
-                    <span class="reads-badge">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <td>
+                    <span class="apple-reads-badge">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                         <circle cx="12" cy="12" r="3"/>
                       </svg>
                       {{ manual.total_lecturas }}
                     </span>
                   </td>
-                  <td class="date-cell">
-                    <span class="manual-date">{{ formatearFecha(manual.fecha_creacion) }}</span>
+                  <td>
+                    <span class="apple-date-badge">{{ formatearFecha(manual.fecha_creacion) }}</span>
                   </td>
-                  <td class="actions-cell">
-                    <div class="action-buttons">
-                      <button class="btn-action btn-view" @click="verDetalle(manual)" title="Ver detalle">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <td>
+                    <div class="apple-actions">
+                      <button class="apple-action-btn view" @click="verDetalle(manual)" title="Ver detalle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                           <circle cx="12" cy="12" r="3"/>
                         </svg>
                       </button>
-                      <button class="btn-action btn-stats" @click="verEstadisticas(manual)" title="Ver estadísticas">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <button class="apple-action-btn stats" @click="verEstadisticas(manual)" title="Ver estadísticas">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M3 3v18h18"/>
                           <path d="M18 17V9"/>
                           <path d="M13 17V5"/>
                           <path d="M8 17v-3"/>
                         </svg>
                       </button>
-                      <button v-if="puedeEliminar" class="btn-action btn-edit" @click="abrirModalEditar(manual)" title="Editar">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <button v-if="puedeEliminar" class="apple-action-btn edit" @click="abrirModalEditar(manual)" title="Editar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                       </button>
-                      <button v-if="puedeEliminar" class="btn-action btn-delete" @click="confirmarEliminar(manual)" title="Eliminar">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <button v-if="puedeEliminar" class="apple-action-btn delete" @click="confirmarEliminar(manual)" title="Eliminar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M3 6h18"/>
                           <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
                           <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
@@ -180,11 +235,11 @@
             </table>
 
             <!-- Estado vacío -->
-            <div v-if="manuales.length === 0" class="empty-state">
-              <div class="empty-icon">📚</div>
+            <div v-if="manuales.length === 0" class="apple-empty-state">
+              <div class="apple-empty-icon">📚</div>
               <h3>No hay manuales</h3>
               <p>Crea tu primer manual para compartir información con los usuarios.</p>
-              <button v-if="puedeCrearManuales" class="btn-primary" @click="mostrarModalCrear = true">
+              <button v-if="puedeCrearManuales" class="apple-btn-primary" @click="mostrarModalCrear = true">
                 Crear Primer Manual
               </button>
             </div>
@@ -1223,6 +1278,15 @@ export default {
       return userPermisos.value?.manuales_acciones === true
     })
     
+    // Stats computadas
+    const totalLecturas = computed(() => {
+      return manuales.value.reduce((sum, m) => sum + (m.total_lecturas || 0), 0)
+    })
+    
+    const manualesConArchivo = computed(() => {
+      return manuales.value.filter(m => m.archivo_nombre || m.imagen_nombre || m.video_nombre).length
+    })
+    
     // Usuarios filtrados
     const usuariosFiltrados = computed(() => {
       if (!busquedaUsuario.value) return usuarios.value
@@ -1684,6 +1748,8 @@ export default {
       puedeCrearManuales,
       puedeEliminar,
       usuariosFiltrados,
+      totalLecturas,
+      manualesConArchivo,
       cargarManuales,
       handleArchivoChange,
       handleImagenChange,
@@ -1727,61 +1793,971 @@ export default {
 </script>
 
 <style scoped>
+/* ====================== BASE LAYOUT ====================== */
 .manuales-container {
   display: flex;
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  position: relative;
+  overflow: hidden;
 }
 
+/* ====================== APPLE DYNAMIC BACKGROUND ====================== */
+.apple-dynamic-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.apple-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.4;
+  animation: apple-float 20s ease-in-out infinite;
+}
+
+.apple-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(139, 195, 74, 0.2) 100%);
+  top: -100px;
+  right: -100px;
+  animation-delay: 0s;
+}
+
+.apple-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.15) 0%, rgba(90, 200, 250, 0.1) 100%);
+  bottom: -50px;
+  left: 10%;
+  animation-delay: -7s;
+}
+
+.apple-orb-3 {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, rgba(175, 82, 222, 0.15) 0%, rgba(191, 90, 242, 0.1) 100%);
+  top: 40%;
+  right: 20%;
+  animation-delay: -14s;
+}
+
+@keyframes apple-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(-30px, -20px) scale(1.02); }
+}
+
+/* ====================== MAIN CONTENT ====================== */
 .main-content {
   flex: 1;
   margin-left: min(220px, 18vw);
   width: calc(100vw - min(220px, 18vw));
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
   position: relative;
   box-sizing: border-box;
   overflow-x: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* === HEADER STYLES === */
-.page-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
-  color: white;
-  padding: clamp(0.3rem, 0.8vw, 0.5rem);
-  box-shadow: 
-    0 2px 8px rgba(76, 175, 80, 0.3),
-    0 4px 16px rgba(76, 175, 80, 0.15);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: 100%;
-  box-sizing: border-box;
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.page-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  padding: 8px 16px 0 16px;
   z-index: 1;
 }
 
-.header-content {
+/* ====================== APPLE STICKY WRAPPER ====================== */
+.apple-sticky-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: transparent;
+  margin-bottom: 20px;
+}
+
+/* ====================== APPLE PAGE HEADER ====================== */
+.apple-page-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  color: white;
+  border-radius: 28px 28px 0 0;
+  border: 2px solid #8BC34A;
+  border-bottom: none;
+  padding: 14px 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-header-wrapper {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  max-width: 100%;
+  position: relative;
+}
+
+.apple-header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple-icon-mini {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-icon-mini svg {
+  width: 18px;
+  height: 18px;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 2;
+}
+
+.apple-title-divider {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 18px;
+  font-weight: 300;
+}
+
+.apple-page-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
   margin: 0;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.apple-page-subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.apple-refresh-button {
+  position: absolute;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.apple-refresh-button svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.apple-refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.apple-spin {
+  animation: apple-spin-animation 1s linear infinite;
+}
+
+@keyframes apple-spin-animation {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ====================== APPLE STATS SECTION ====================== */
+.apple-stats-section {
+  background: white;
+  border-radius: 0 0 28px 28px;
+  border: 2px solid #8BC34A;
+  border-top: none;
+  padding: 18px 16px 16px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  margin-top: -1px;
+}
+
+.apple-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.apple-stat-card {
+  background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.apple-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon.blue {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+}
+
+.apple-stat-icon.green {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+}
+
+.apple-stat-icon.purple {
+  background: linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%);
+}
+
+.apple-stat-icon svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-stat-content {
+  flex: 1;
+}
+
+.apple-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1;
+  margin-bottom: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  letter-spacing: -0.3px;
+}
+
+.apple-stat-label {
+  font-size: 10px;
+  color: #86868b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ====================== APPLE SEARCH SECTION ====================== */
+.apple-search-section {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.apple-actions-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.apple-list-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple-list-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-count-badge {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ====================== APPLE FILTER CONTROLS ====================== */
+.apple-filter-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.apple-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-filter-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-filter-btn.create {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.apple-filter-btn.create:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+/* ====================== APPLE PAGE CONTENT ====================== */
+.apple-page-content {
+  padding: 0;
+}
+
+/* ====================== APPLE LOADING & ERROR STATES ====================== */
+.apple-loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.apple-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e8f5e8;
+  border-top: 3px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.apple-error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.apple-error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.apple-btn-secondary {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.apple-btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ====================== APPLE MANUALES LIST ====================== */
+.apple-manuales-list {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  overflow: hidden;
+}
+
+/* ====================== APPLE TABLE ====================== */
+.apple-table-container {
+  overflow-x: auto;
+}
+
+.apple-table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.apple-table-container::-webkit-scrollbar-track {
+  background: #f5f5f7;
+  border-radius: 3px;
+}
+
+.apple-table-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  border-radius: 3px;
+}
+
+.apple-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-table thead tr {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+}
+
+.apple-table th {
+  color: #2E7D32;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 14px 16px;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(76, 175, 80, 0.2);
+  border-right: 1px solid rgba(76, 175, 80, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.apple-table th:last-child {
+  border-right: none;
+}
+
+.apple-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  vertical-align: middle;
+  font-size: 13px;
+  color: #1d1d1f;
+}
+
+.apple-table-row {
+  transition: all 0.2s ease;
+}
+
+.apple-table-row:hover {
+  background: linear-gradient(135deg, #f8fffe 0%, #f0fff4 100%);
+  border-left: 3px solid #4CAF50;
+}
+
+/* ====================== APPLE TABLE CELLS ====================== */
+.apple-title-cell {
+  min-width: 150px;
+}
+
+.apple-manual-title {
+  font-weight: 600;
+  color: #1d1d1f;
+  font-size: 13px;
+}
+
+.apple-manual-subtitle {
+  color: #666;
+  font-size: 12px;
+}
+
+.apple-no-data {
+  color: #999;
+  font-size: 12px;
+}
+
+/* ====================== APPLE CONTENT BADGES ====================== */
+.apple-content-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.apple-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.apple-badge svg {
+  width: 10px;
+  height: 10px;
+}
+
+.apple-badge.badge-pdf {
+  background: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+}
+
+.apple-badge.badge-img {
+  background: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+}
+
+.apple-badge.badge-video {
+  background: rgba(175, 82, 222, 0.1);
+  color: #AF52DE;
+}
+
+.apple-badge.badge-url {
+  background: rgba(52, 199, 89, 0.1);
+  color: #34C759;
+}
+
+.apple-badge.badge-text {
+  background: rgba(142, 142, 147, 0.1);
+  color: #8E8E93;
+}
+
+/* ====================== APPLE RECIPIENTS & READS BADGES ====================== */
+.apple-recipients-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(175, 82, 222, 0.1);
+  color: #AF52DE;
+  border: 1px solid rgba(175, 82, 222, 0.2);
+}
+
+.apple-recipients-badge.all-users {
+  background: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+  border: 1px solid rgba(0, 122, 255, 0.2);
+}
+
+.apple-reads-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(52, 199, 89, 0.1);
+  color: #34C759;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.apple-reads-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.apple-date-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(0, 122, 255, 0.08);
+  color: #007AFF;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ====================== APPLE ACTIONS ====================== */
+.apple-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.apple-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.apple-action-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-action-btn.view {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+  color: white;
+}
+
+.apple-action-btn.view svg {
+  stroke: white;
+}
+
+.apple-action-btn.view:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4);
+}
+
+.apple-action-btn.stats {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  color: white;
+}
+
+.apple-action-btn.stats svg {
+  stroke: white;
+}
+
+.apple-action-btn.stats:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+.apple-action-btn.edit {
+  background: linear-gradient(135deg, #FF9500 0%, #FFCC00 100%);
+  color: white;
+}
+
+.apple-action-btn.edit svg {
+  stroke: white;
+}
+
+.apple-action-btn.edit:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+}
+
+.apple-action-btn.delete {
+  background: linear-gradient(135deg, #FF3B30 0%, #FF6961 100%);
+  color: white;
+}
+
+.apple-action-btn.delete svg {
+  stroke: white;
+}
+
+.apple-action-btn.delete:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+}
+
+/* ====================== APPLE EMPTY STATE ====================== */
+.apple-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.apple-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.apple-empty-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+}
+
+.apple-empty-state p {
+  font-size: 14px;
+  color: #86868b;
+  margin-bottom: 20px;
+}
+
+.apple-btn-primary {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.apple-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+/* ====================== APPLE RESPONSIVE STYLES ====================== */
+@media (max-width: 1200px) {
+  .apple-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 8px 12px 0 12px;
+  }
+  
+  .apple-sticky-wrapper {
+    margin-bottom: 16px;
+  }
+
+  .apple-page-header {
+    border-radius: 20px 20px 0 0;
+    padding: 12px 16px;
+  }
+
+  .apple-stats-section {
+    border-radius: 0 0 20px 20px;
+    padding: 14px 12px 12px 12px;
+  }
+  
+  .apple-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .apple-stat-card {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .apple-stat-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .apple-stat-value {
+    font-size: 14px;
+  }
+
+  .apple-actions-row {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .apple-filter-controls {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 6px 10px 0 10px;
+  }
+  
+  .apple-page-header {
+    border-radius: 16px 16px 0 0;
+    padding: 10px 14px;
+  }
+
+  .apple-page-title {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .apple-page-subtitle {
+    font-size: 10px;
+  }
+
+  .apple-stats-section {
+    border-radius: 0 0 16px 16px;
+    padding: 12px 10px 10px 10px;
+  }
+  
+  .apple-stats-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+  
+  .apple-stat-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px 6px;
+    gap: 6px;
+  }
+
+  .apple-stat-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .apple-stat-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .apple-stat-value {
+    font-size: 13px;
+  }
+
+  .apple-stat-label {
+    font-size: 9px;
+  }
+
+  .apple-manuales-list {
+    border-radius: 16px;
+  }
+
+  .apple-table th,
+  .apple-table td {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+
+  .apple-action-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .apple-action-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 4px 6px 0 6px;
+  }
+
+  .apple-page-header {
+    border-radius: 12px 12px 0 0;
+    padding: 8px 10px;
+  }
+
+  .apple-title-group {
+    gap: 6px;
+  }
+
+  .apple-icon-mini {
+    width: 18px;
+    height: 18px;
+  }
+
+  .apple-icon-mini svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .apple-page-title {
+    font-size: 12px;
+  }
+
+  .apple-stats-section {
+    border-radius: 0 0 12px 12px;
+    padding: 10px 8px 8px 8px;
+  }
+
+  .apple-stats-grid {
+    gap: 4px;
+  }
+
+  .apple-stat-card {
+    padding: 8px 4px;
+    border-radius: 10px;
+  }
+
+  .apple-stat-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .apple-stat-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .apple-stat-value {
+    font-size: 12px;
+  }
+
+  .apple-stat-label {
+    font-size: 8px;
+  }
+
+  .apple-refresh-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .apple-refresh-button svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .apple-manuales-list {
+    border-radius: 12px;
+  }
+
+  .apple-table th,
+  .apple-table td {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+
+  .apple-actions {
+    gap: 4px;
+  }
+
+  .apple-action-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .apple-action-btn svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* ====================== OLD STYLES KEPT FOR MODALS ====================== */
+.page-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  color: white;
   gap: clamp(0.25rem, 0.8vw, 0.5rem);
   flex-wrap: wrap;
   width: 100%;

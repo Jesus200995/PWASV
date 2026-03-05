@@ -1,95 +1,158 @@
 <template>
   <div class="notificaciones-container">
+    <!-- Apple Dynamic Background -->
+    <div class="apple-dynamic-bg">
+      <div class="apple-orb apple-orb-1"></div>
+      <div class="apple-orb apple-orb-2"></div>
+      <div class="apple-orb apple-orb-3"></div>
+    </div>
+    
     <Sidebar @logout="logout" />
     
     <main class="main-content">
-      <header class="page-header">
-        <div class="header-content">
-          <div class="header-main">
-            <div class="header-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                <circle :cx="tabActual === 'grupales' ? '18' : '12'" :cy="tabActual === 'grupales' ? '6' : '12'" :r="tabActual === 'grupales' ? '3' : '2'" :fill="tabActual === 'grupales' ? '#ff4757' : 'currentColor'" :opacity="tabActual === 'grupales' ? '0.9' : '1'"/>
-                <circle v-if="tabActual === 'grupales'" cx="18" cy="6" r="1.5" fill="#ffffff" opacity="0.8"/>
-              </svg>
+      <!-- ================== STICKY WRAPPER FOR HEADER + STATS + FILTERS ================== -->
+      <div class="apple-sticky-wrapper">
+        <!-- ================== HEADER APPLE STYLE ================== -->
+        <header class="apple-page-header">
+          <div class="apple-header-wrapper">
+            <div class="apple-header-center">
+              <div class="apple-title-group">
+                <div class="apple-icon-mini">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <span class="apple-title-divider">|</span>
+                <h1 class="apple-page-title">NOTIFICACIONES</h1>
+              </div>
+              <p class="apple-page-subtitle">{{ tabActual === 'grupales' ? 'Notificaciones masivas a todos los usuarios' : 'Notificaciones personalizadas' }}</p>
             </div>
-            <div class="header-text">
-              <h1 class="header-title">Sistema de Notificaciones</h1>
-              <p class="header-subtitle">{{ tabActual === 'grupales' ? 'Envía notificaciones masivas a todos los usuarios del sistema' : 'Envía notificaciones personalizadas a usuarios específicos' }}</p>
-            </div>
-          </div>
-          <div v-if="puedeCrearNotificaciones" class="header-actions">
-            <button class="btn-primary" @click="abrirModalCrear">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14"/>
-                <path d="M5 12h14"/>
+            
+            <button @click="cargarNotificaciones" class="apple-refresh-button" :disabled="cargando">
+              <svg :class="{ 'apple-spin': cargando }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              Nueva Notificación
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div class="page-content">
-        <!-- Tabs de navegación -->
-        <div class="tabs-container">
-          <button 
-            :class="['tab-button', { 'active': tabActual === 'grupales' }]"
-            @click="cambiarTab('grupales')"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            Notificaciones Grupales
-            <span v-if="tabActual === 'grupales'" class="tab-badge">{{ notificaciones.length }}</span>
-          </button>
-          <button 
-            :class="['tab-button', { 'active': tabActual === 'individuales' }]"
-            @click="cambiarTab('individuales')"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="12" cy="8" r="4"/>
-              <path d="M12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/>
-            </svg>
-            Notificaciones Individuales
-            <span v-if="tabActual === 'individuales'" class="tab-badge">{{ notificaciones.length }}</span>
-          </button>
+        <!-- ================== STATS CARDS APPLE STYLE ================== -->
+        <div class="apple-stats-section">
+          <div class="apple-stats-grid">
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ notificaciones.length }}</div>
+                <div class="apple-stat-label">Total</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                  <circle cx="9" cy="7" r="4" stroke-width="2"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-width="2"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ tabActual === 'grupales' ? 'Grupales' : 'Individuales' }}</div>
+                <div class="apple-stat-label">Tipo Activo</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="20 6 9 17 4 12" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">Enviadas</div>
+                <div class="apple-stat-label">Estado</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================== TABS + ACTIONS INSIDE STATS ================== -->
+          <div class="apple-search-section">
+            <div class="apple-tabs-row">
+              <div class="apple-tabs-container">
+                <button 
+                  :class="['apple-tab-button', { 'active': tabActual === 'grupales' }]"
+                  @click="cambiarTab('grupales')"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                    <circle cx="9" cy="7" r="4" stroke-width="2"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-width="2"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"/>
+                  </svg>
+                  <span>Grupales</span>
+                  <span class="apple-tab-badge">{{ tabActual === 'grupales' ? notificaciones.length : '' }}</span>
+                </button>
+                <button 
+                  :class="['apple-tab-button', { 'active': tabActual === 'individuales' }]"
+                  @click="cambiarTab('individuales')"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="8" r="4" stroke-width="2"/>
+                    <path d="M12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z" stroke-width="2"/>
+                  </svg>
+                  <span>Individuales</span>
+                  <span class="apple-tab-badge">{{ tabActual === 'individuales' ? notificaciones.length : '' }}</span>
+                </button>
+              </div>
+
+              <div class="apple-filter-controls" v-if="puedeCrearNotificaciones">
+                <button 
+                  @click="abrirModalCrear" 
+                  class="apple-filter-btn create"
+                  title="Nueva Notificación"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Nueva</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        
+      </div>
+
+      <div class="apple-page-content">
         <!-- Mensaje de carga -->
-        <div v-if="cargando" class="loading-state">
-          <div class="loading-spinner"></div>
+        <div v-if="cargando" class="apple-loading-state">
+          <div class="apple-loading-spinner"></div>
           <p>Cargando notificaciones...</p>
         </div>
 
         <!-- Mensaje de error -->
-        <div v-if="error && !cargando" class="error-state">
-          <div class="error-icon">⚠️</div>
+        <div v-if="error && !cargando" class="apple-error-state">
+          <div class="apple-error-icon">⚠️</div>
           <h3>Error al cargar notificaciones</h3>
           <p>{{ error }}</p>
-          <button class="btn-secondary" @click="cargarNotificaciones">Reintentar</button>
+          <button class="apple-btn-secondary" @click="cargarNotificaciones">Reintentar</button>
         </div>
 
         <!-- Lista de notificaciones -->
-        <div v-if="!cargando && !error" class="notificaciones-list">
-          <div class="list-header">
-            <h2>{{ tabActual === 'grupales' ? 'Notificaciones Enviadas a Todos' : 'Notificaciones Individuales' }} ({{ notificaciones.length }})</h2>
-            <button class="btn-refresh" @click="cargarNotificaciones" :disabled="cargando">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 4v6h-6"/>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-              </svg>
-              Actualizar
-            </button>
+        <div v-if="!cargando && !error" class="apple-notificaciones-list">
+          <div class="apple-list-header">
+            <h2>{{ tabActual === 'grupales' ? 'Notificaciones Grupales' : 'Notificaciones Individuales' }}</h2>
+            <span class="apple-count-badge">{{ notificaciones.length }}</span>
           </div>
 
-          <!-- Tabla de notificaciones -->
-          <div class="notifications-table-container">
-            <table class="notifications-table">
+          <!-- Tabla de notificaciones estilo Apple -->
+          <div class="apple-table-container">
+            <table class="apple-table">
               <thead>
                 <tr>
                   <th>Título</th>
@@ -101,61 +164,61 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="notificacion in notificaciones" :key="notificacion.id" class="notification-row">
-                  <td class="title-cell">
-                    <div class="title-content">
-                      <span class="notification-title">{{ notificacion.titulo }}</span>
-                      <span v-if="notificacion.archivo_nombre" class="attachment-badge">
+                <tr v-for="notificacion in notificaciones" :key="notificacion.id" class="apple-table-row">
+                  <td class="apple-title-cell">
+                    <div class="apple-title-content">
+                      <span class="apple-notification-title">{{ notificacion.titulo }}</span>
+                      <span v-if="notificacion.archivo_nombre" class="apple-attachment-badge">
                         📎 {{ notificacion.archivo_nombre }}
                       </span>
                     </div>
                   </td>
-                  <td class="subtitle-cell">
-                    <span v-if="notificacion.subtitulo" class="notification-subtitle">
+                  <td class="apple-subtitle-cell">
+                    <span v-if="notificacion.subtitulo" class="apple-notification-subtitle">
                       {{ notificacion.subtitulo }}
                     </span>
-                    <span v-else class="no-subtitle">Sin subtítulo</span>
+                    <span v-else class="apple-no-subtitle">Sin subtítulo</span>
                   </td>
-                  <td class="recipients-cell">
-                    <span class="recipients-badge" :class="{ 'all-users': notificacion.enviada_a_todos }">
+                  <td>
+                    <span :class="['apple-recipients-badge', { 'all-users': notificacion.enviada_a_todos }]">
                       {{ notificacion.destinatarios_texto }}
                     </span>
                   </td>
-                  <td class="date-cell">
-                    <span class="notification-date">{{ formatearFecha(notificacion.fecha_envio) }}</span>
+                  <td>
+                    <span class="apple-date-badge">{{ formatearFecha(notificacion.fecha_envio) }}</span>
                   </td>
-                  <td class="status-cell">
-                    <span class="status-badge status-sent">Enviada</span>
+                  <td>
+                    <span class="apple-status-badge enviada">Enviada</span>
                   </td>
-                  <td class="actions-cell">
-                    <div class="action-buttons">
+                  <td>
+                    <div class="apple-actions">
                       <button 
-                        class="btn-action btn-view" 
+                        class="apple-action-btn view" 
                         @click="verDetalle(notificacion)"
                         title="Ver detalle"
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                           <circle cx="12" cy="12" r="3"/>
                         </svg>
                       </button>
                       <button 
                         v-if="puedeVerAcciones"
-                        class="btn-action btn-edit" 
+                        class="apple-action-btn edit" 
                         @click="editarNotificacion(notificacion)"
                         title="Editar notificación"
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                       </button>
                       <button 
-                        class="btn-action btn-stats" 
+                        class="apple-action-btn stats" 
                         @click="verEstadisticas(notificacion)"
                         title="Ver estadísticas de lectura"
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M3 3v18h18"/>
                           <path d="M18 17V9"/>
                           <path d="M13 17V5"/>
@@ -164,11 +227,11 @@
                       </button>
                       <button 
                         v-if="puedeVerAcciones"
-                        class="btn-action btn-delete" 
+                        class="apple-action-btn delete" 
                         @click="confirmarEliminar(notificacion)"
                         title="Eliminar notificación"
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M3 6h18"/>
                           <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
                           <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
@@ -181,11 +244,11 @@
             </table>
 
             <!-- Estado vacío -->
-            <div v-if="notificaciones.length === 0" class="empty-state">
-              <div class="empty-icon">📢</div>
+            <div v-if="notificaciones.length === 0" class="apple-empty-state">
+              <div class="apple-empty-icon">📢</div>
               <h3>No hay notificaciones grupales</h3>
               <p>Crea tu primera notificación grupal para comunicarte con todos los usuarios del sistema.</p>
-              <button class="btn-primary" @click="mostrarModalCrear = true">
+              <button class="apple-btn-primary" @click="mostrarModalCrear = true">
                 Crear Primera Notificación Grupal
               </button>
             </div>
@@ -1631,27 +1694,772 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+/* ====================== BASE LAYOUT ====================== */
 .notificaciones-container {
   display: flex;
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  position: relative;
+  overflow: hidden;
 }
 
+/* ====================== APPLE DYNAMIC BACKGROUND ====================== */
+.apple-dynamic-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.apple-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.4;
+  animation: apple-float 20s ease-in-out infinite;
+}
+
+.apple-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(139, 195, 74, 0.2) 100%);
+  top: -100px;
+  right: -100px;
+  animation-delay: 0s;
+}
+
+.apple-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.15) 0%, rgba(90, 200, 250, 0.1) 100%);
+  bottom: -50px;
+  left: 10%;
+  animation-delay: -7s;
+}
+
+.apple-orb-3 {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, rgba(175, 82, 222, 0.15) 0%, rgba(191, 90, 242, 0.1) 100%);
+  top: 40%;
+  right: 20%;
+  animation-delay: -14s;
+}
+
+@keyframes apple-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(-30px, -20px) scale(1.02); }
+}
+
+/* ====================== MAIN CONTENT ====================== */
 .main-content {
   flex: 1;
   margin-left: min(220px, 18vw);
   width: calc(100vw - min(220px, 18vw));
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
   position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
   overflow-x: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 16px 0 16px;
+  z-index: 1;
 }
 
-/* === HEADER STYLES === */
+/* ====================== APPLE STICKY WRAPPER ====================== */
+.apple-sticky-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: transparent;
+  margin-bottom: 20px;
+}
+
+/* ====================== APPLE PAGE HEADER ====================== */
+.apple-page-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
+  color: white;
+  border-radius: 28px 28px 0 0;
+  border: 2px solid #8BC34A;
+  border-bottom: none;
+  padding: 14px 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-header-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.apple-header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple-icon-mini {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-icon-mini svg {
+  width: 18px;
+  height: 18px;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 2;
+}
+
+.apple-title-divider {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 18px;
+  font-weight: 300;
+}
+
+.apple-page-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.apple-page-subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.apple-refresh-button {
+  position: absolute;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.apple-refresh-button svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.apple-refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.apple-spin {
+  animation: apple-spin-animation 1s linear infinite;
+}
+
+@keyframes apple-spin-animation {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ====================== APPLE STATS SECTION ====================== */
+.apple-stats-section {
+  background: white;
+  border-radius: 0 0 28px 28px;
+  border: 2px solid #8BC34A;
+  border-top: none;
+  padding: 18px 16px 16px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  margin-top: -1px;
+}
+
+.apple-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.apple-stat-card {
+  background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.apple-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon.blue {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+}
+
+.apple-stat-icon.green {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+}
+
+.apple-stat-icon.purple {
+  background: linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%);
+}
+
+.apple-stat-icon svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-stat-content {
+  flex: 1;
+}
+
+.apple-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1;
+  margin-bottom: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  letter-spacing: -0.3px;
+}
+
+.apple-stat-label {
+  font-size: 10px;
+  color: #86868b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ====================== APPLE SEARCH SECTION (TABS) ====================== */
+.apple-search-section {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.apple-tabs-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.apple-tabs-container {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.apple-tab-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  background: #f5f5f7;
+  color: #86868b;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-tab-button svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+.apple-tab-button:hover {
+  background: rgba(0, 122, 255, 0.08);
+  color: #007AFF;
+}
+
+.apple-tab-button.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border-color: #2E7D32;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.apple-tab-button.active svg {
+  stroke: white;
+}
+
+.apple-tab-badge {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+}
+
+.apple-tab-button.active .apple-tab-badge {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ====================== APPLE FILTER CONTROLS ====================== */
+.apple-filter-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.apple-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-filter-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-filter-btn.create {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.apple-filter-btn.create:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+/* ====================== APPLE PAGE CONTENT ====================== */
+.apple-page-content {
+  padding: 0;
+}
+
+/* ====================== APPLE LOADING & ERROR STATES ====================== */
+.apple-loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.apple-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e8f5e8;
+  border-top: 3px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.apple-error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.apple-error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.apple-btn-secondary {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.apple-btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ====================== APPLE NOTIFICATIONS LIST ====================== */
+.apple-notificaciones-list {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  overflow: hidden;
+}
+
+.apple-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.apple-list-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2E7D32;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-count-badge {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ====================== APPLE TABLE ====================== */
+.apple-table-container {
+  overflow-x: auto;
+}
+
+.apple-table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.apple-table-container::-webkit-scrollbar-track {
+  background: #f5f5f7;
+  border-radius: 3px;
+}
+
+.apple-table-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  border-radius: 3px;
+}
+
+.apple-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-table thead tr {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+}
+
+.apple-table th {
+  color: #2E7D32;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 14px 16px;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(76, 175, 80, 0.2);
+  border-right: 1px solid rgba(76, 175, 80, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.apple-table th:last-child {
+  border-right: none;
+}
+
+.apple-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  vertical-align: middle;
+  font-size: 13px;
+  color: #1d1d1f;
+}
+
+.apple-table-row {
+  transition: all 0.2s ease;
+}
+
+.apple-table-row:hover {
+  background: linear-gradient(135deg, #f8fffe 0%, #f0fff4 100%);
+  border-left: 3px solid #4CAF50;
+}
+
+/* ====================== APPLE TABLE CELLS ====================== */
+.apple-title-cell {
+  min-width: 180px;
+}
+
+.apple-title-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.apple-notification-title {
+  font-weight: 600;
+  color: #1d1d1f;
+  font-size: 13px;
+}
+
+.apple-attachment-badge {
+  font-size: 11px;
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 2px 8px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.apple-subtitle-cell {
+  max-width: 200px;
+}
+
+.apple-notification-subtitle {
+  color: #666;
+  font-size: 12px;
+}
+
+.apple-no-subtitle {
+  color: #999;
+  font-style: italic;
+  font-size: 11px;
+}
+
+.apple-recipients-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(175, 82, 222, 0.1);
+  color: #AF52DE;
+  border: 1px solid rgba(175, 82, 222, 0.2);
+}
+
+.apple-recipients-badge.all-users {
+  background: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+  border: 1px solid rgba(0, 122, 255, 0.2);
+}
+
+.apple-date-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(0, 122, 255, 0.08);
+  color: #007AFF;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.apple-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.apple-status-badge.enviada {
+  background: rgba(52, 199, 89, 0.15);
+  color: #34C759;
+}
+
+/* ====================== APPLE ACTIONS ====================== */
+.apple-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.apple-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.apple-action-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-action-btn.view {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+  color: white;
+}
+
+.apple-action-btn.view svg {
+  stroke: white;
+}
+
+.apple-action-btn.view:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4);
+}
+
+.apple-action-btn.edit {
+  background: linear-gradient(135deg, #FF9500 0%, #FFCC00 100%);
+  color: white;
+}
+
+.apple-action-btn.edit svg {
+  stroke: white;
+}
+
+.apple-action-btn.edit:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+}
+
+.apple-action-btn.stats {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  color: white;
+}
+
+.apple-action-btn.stats svg {
+  stroke: white;
+}
+
+.apple-action-btn.stats:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+.apple-action-btn.delete {
+  background: linear-gradient(135deg, #FF3B30 0%, #FF6961 100%);
+  color: white;
+}
+
+.apple-action-btn.delete svg {
+  stroke: white;
+}
+
+.apple-action-btn.delete:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+}
+
+/* ====================== APPLE EMPTY STATE ====================== */
+.apple-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.apple-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.apple-empty-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+}
+
+.apple-empty-state p {
+  font-size: 14px;
+  color: #86868b;
+  margin-bottom: 20px;
+}
+
+.apple-btn-primary {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.apple-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+/* ====================== OLD HEADER STYLES (KEEP FOR COMPATIBILITY) ====================== */
 .page-header {
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #2E7D32 100%);
   color: white;
@@ -4233,5 +5041,265 @@ export default {
   width: 40px;
   height: 40px;
   margin: 0 auto 16px;
+}
+
+/* ====================== APPLE RESPONSIVE STYLES ====================== */
+@media (max-width: 1200px) {
+  .apple-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 8px 12px 0 12px;
+  }
+  
+  .apple-sticky-wrapper {
+    margin-bottom: 16px;
+  }
+
+  .apple-page-header {
+    border-radius: 20px 20px 0 0;
+    padding: 12px 16px;
+  }
+
+  .apple-stats-section {
+    border-radius: 0 0 20px 20px;
+    padding: 14px 12px 12px 12px;
+  }
+  
+  .apple-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .apple-stat-card {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .apple-stat-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .apple-stat-value {
+    font-size: 14px;
+  }
+
+  .apple-tabs-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .apple-tabs-container {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .apple-filter-controls {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 6px 10px 0 10px;
+  }
+  
+  .apple-page-header {
+    border-radius: 16px 16px 0 0;
+    padding: 10px 14px;
+  }
+
+  .apple-page-title {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .apple-page-subtitle {
+    font-size: 10px;
+  }
+
+  .apple-stats-section {
+    border-radius: 0 0 16px 16px;
+    padding: 12px 10px 10px 10px;
+  }
+  
+  .apple-stats-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+  
+  .apple-stat-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px 6px;
+    gap: 6px;
+  }
+
+  .apple-stat-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .apple-stat-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .apple-stat-value {
+    font-size: 13px;
+  }
+
+  .apple-stat-label {
+    font-size: 9px;
+  }
+
+  .apple-tabs-container {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .apple-tab-button {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 12px;
+  }
+
+  .apple-notificaciones-list {
+    border-radius: 16px;
+  }
+
+  .apple-list-header {
+    padding: 12px 14px;
+  }
+
+  .apple-list-header h2 {
+    font-size: 14px;
+  }
+
+  .apple-table th,
+  .apple-table td {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+
+  .apple-action-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .apple-action-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 4px 6px 0 6px;
+  }
+
+  .apple-page-header {
+    border-radius: 12px 12px 0 0;
+    padding: 8px 10px;
+  }
+
+  .apple-title-group {
+    gap: 6px;
+  }
+
+  .apple-icon-mini {
+    width: 18px;
+    height: 18px;
+  }
+
+  .apple-icon-mini svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .apple-page-title {
+    font-size: 12px;
+  }
+
+  .apple-stats-section {
+    border-radius: 0 0 12px 12px;
+    padding: 10px 8px 8px 8px;
+  }
+
+  .apple-stats-grid {
+    gap: 4px;
+  }
+
+  .apple-stat-card {
+    padding: 8px 4px;
+    border-radius: 10px;
+  }
+
+  .apple-stat-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .apple-stat-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .apple-stat-value {
+    font-size: 12px;
+  }
+
+  .apple-stat-label {
+    font-size: 8px;
+  }
+
+  .apple-refresh-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .apple-refresh-button svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .apple-notificaciones-list {
+    border-radius: 12px;
+  }
+
+  .apple-list-header {
+    padding: 10px 12px;
+  }
+
+  .apple-list-header h2 {
+    font-size: 12px;
+  }
+
+  .apple-table th,
+  .apple-table td {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+
+  .apple-actions {
+    gap: 4px;
+  }
+
+  .apple-action-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .apple-action-btn svg {
+    width: 10px;
+    height: 10px;
+  }
 }
 </style>

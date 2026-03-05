@@ -1584,59 +1584,59 @@ export default {
 
 /* ==================== APPLE DESIGN SYSTEM ==================== */
 
-/* Dynamic Background */
+/* ====================== APPLE DYNAMIC BACKGROUND ====================== */
 .apple-dynamic-bg {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
 }
 
 .apple-orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.4;
-  animation: floatOrb 20s ease-in-out infinite;
+  opacity: 0.6;
+  animation: apple-float 20s ease-in-out infinite;
 }
 
-.apple-orb.apple-orb-1 {
+.apple-orb-1 {
   width: 400px;
   height: 400px;
-  background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
+  background: radial-gradient(circle, rgba(139, 195, 74, 0.4) 0%, transparent 70%);
   top: -100px;
   right: -100px;
   animation-delay: 0s;
 }
 
-.apple-orb.apple-orb-2 {
+.apple-orb-2 {
   width: 300px;
   height: 300px;
-  background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
-  bottom: -50px;
+  background: radial-gradient(circle, rgba(102, 187, 106, 0.35) 0%, transparent 70%);
+  bottom: 20%;
   left: -50px;
   animation-delay: -7s;
 }
 
-.apple-orb.apple-orb-3 {
-  width: 250px;
-  height: 250px;
-  background: linear-gradient(135deg, #66BB6A 0%, #AED581 100%);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.apple-orb-3 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(129, 199, 132, 0.3) 0%, transparent 70%);
+  top: 40%;
+  right: 20%;
   animation-delay: -14s;
 }
 
-@keyframes floatOrb {
+@keyframes apple-float {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(30px, -30px) scale(1.05); }
-  50% { transform: translate(-20px, 20px) scale(0.95); }
-  75% { transform: translate(20px, 10px) scale(1.02); }
+  25% { transform: translate(20px, -30px) scale(1.05); }
+  50% { transform: translate(-10px, 20px) scale(0.95); }
+  75% { transform: translate(30px, 10px) scale(1.02); }
 }
 
 /* ====================== MAIN CONTENT ====================== */
@@ -2414,35 +2414,56 @@ export default {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: linear-gradient(135deg, #FAFBFC 0%, #F5F5F7 100%);
+  background: #E8F5E9;
+  border-bottom: 1px solid #C8E6C9;
 }
 
 .apple-table th {
   padding: 14px 16px;
   text-align: left;
   font-size: 11px;
-  font-weight: 700;
-  color: #86868b;
+  font-weight: 600;
+  color: #2E7D32;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+  letter-spacing: 0.8px;
+  background: #E8F5E9;
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #C8E6C9;
+  border-right: 1px solid #C8E6C9;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
 }
 
-.apple-table tbody tr {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+.apple-table th:last-child {
+  border-right: none;
 }
 
-.apple-table tbody tr:hover {
-  background: linear-gradient(135deg, rgba(139, 195, 74, 0.04) 0%, rgba(102, 187, 106, 0.02) 100%);
+.apple-table-row {
+  border-bottom: 1px solid #F0F0F0;
+  transition: all 0.15s ease;
+  background: white;
+}
+
+.apple-table-row:nth-child(even) {
+  background: #FAFAFA;
+}
+
+.apple-table-row:hover {
+  background: #F5F5F7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-table-row:hover td:first-child {
+  border-left-color: #8BC34A;
 }
 
 .apple-table td {
   padding: 14px 16px;
   font-size: 13px;
-  color: #1d1d1f;
+  color: #1D1D1F;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
   vertical-align: middle;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
 }
@@ -2511,37 +2532,40 @@ export default {
 /* ====================== APPLE ACTIONS ====================== */
 .apple-actions {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .apple-action-btn {
   width: 32px;
   height: 32px;
+  border-radius: 50%;
   border: none;
-  border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  padding: 0;
-}
-
-.apple-action-btn.view {
-  background: rgba(139, 195, 74, 0.15);
-  color: #689F38;
-}
-
-.apple-action-btn.view:hover {
-  background: #8BC34A;
-  color: white;
-  transform: scale(1.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .apple-action-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-action-btn.view {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  color: white;
+}
+
+.apple-action-btn.view svg {
+  stroke: white;
+}
+
+.apple-action-btn.view:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
 }
 
 .apple-no-details {

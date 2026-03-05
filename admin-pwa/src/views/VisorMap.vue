@@ -61,9 +61,12 @@
             <h3 class="apple-panel-title">Controles</h3>
           </div>
           
-          <!-- Estado Section -->
-          <div class="apple-panel-section">
-            <div class="apple-section-header">
+          <!-- Apple Panel Content - Scrollable Wrapper -->
+          <div class="apple-panel-content">
+            
+            <!-- Estado Section -->
+            <div class="apple-panel-section">
+              <div class="apple-section-header">
               <div class="apple-section-icon estado">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"/>
@@ -304,6 +307,8 @@
               </div>
             </div>
           </div>
+          
+          </div><!-- Close apple-panel-content -->
         </div>
         
         <!-- ================== MAPA WRAPPER ================== -->
@@ -2988,21 +2993,54 @@ watch(filtroTipo, () => {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
+  gap: 0;
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+  max-height: 100%;
 }
 
 .apple-control-panel:hover {
   box-shadow: 0 8px 35px rgba(0, 0, 0, 0.12);
 }
 
+/* ====================== APPLE PANEL CONTENT ====================== */
+.apple-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+  /* Scrollbar Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #8BC34A rgba(139, 195, 74, 0.1);
+}
+
+/* Scrollbar Webkit (Chrome, Safari, Edge) */
+.apple-panel-content::-webkit-scrollbar {
+  width: 3px;
+}
+
+.apple-panel-content::-webkit-scrollbar-track {
+  background: rgba(139, 195, 74, 0.1);
+  border-radius: 10px;
+}
+
+.apple-panel-content::-webkit-scrollbar-thumb {
+  background: #8BC34A;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.apple-panel-content::-webkit-scrollbar-thumb:hover {
+  background: #7CB342;
+}
+
 .apple-panel-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-bottom: 12px;
+  padding: 0 0 16px 0;
   border-bottom: 1px solid rgba(139, 195, 74, 0.15);
 }
 
@@ -3279,7 +3317,7 @@ watch(filtroTipo, () => {
 .apple-stat-icon {
   width: 28px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;

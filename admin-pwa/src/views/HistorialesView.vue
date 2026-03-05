@@ -1,223 +1,252 @@
 <template>
   <div class="historiales-container">
+    <!-- Apple Dynamic Background -->
+    <div class="apple-dynamic-bg">
+      <div class="apple-orb apple-orb-1"></div>
+      <div class="apple-orb apple-orb-2"></div>
+      <div class="apple-orb apple-orb-3"></div>
+    </div>
+    
     <Sidebar @logout="logout" />
     
     <main class="main-content">
-      <header class="page-header">
-        <div class="header-content">
-          <div class="header-main">
-            <div class="header-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
+      <!-- ================== STICKY WRAPPER FOR HEADER + STATS ================== -->
+      <div class="apple-sticky-wrapper">
+        <!-- ================== HEADER APPLE STYLE ================== -->
+        <header class="apple-page-header">
+          <div class="apple-header-wrapper">
+            <div class="apple-header-left">
+              <div class="apple-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <polyline points="12 6 12 12 16 14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div>
+                <h1 class="apple-page-title">Gestión de Historiales</h1>
+                <p class="apple-page-subtitle">Consulta el historial completo de actividades</p>
+              </div>
             </div>
-            <div class="header-text">
-              <h1 class="header-title">Gestión de Historiales</h1>
-              <p class="header-subtitle">Consulta y gestiona el historial completo de actividades de los usuarios</p>
-            </div>
-          </div>
-          <div class="header-actions">
-            <button @click="actualizarHistorial" class="refresh-btn" :disabled="loading">
-              <svg class="refresh-icon" :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <polyline points="1 20 1 14 7 14"></polyline>
-                <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            
+            <button @click="actualizarHistorial" class="apple-refresh-button" :disabled="loading">
+              <svg :class="{ 'apple-spin': loading }" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              {{ loading ? 'Cargando...' : 'Actualizar' }}
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div class="page-content">
-        <!-- Buscador de Usuario -->
-        <div class="user-selection-section">
-          <div class="selection-card">
-            <div class="selection-header">
-              <h3>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
+        <!-- ================== STATS + SEARCH SECTION ================== -->
+        <div class="apple-stats-section">
+          <!-- Stats Cards cuando hay usuario seleccionado -->
+          <div v-if="usuarioSeleccionado && resumen" class="apple-stats-grid">
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M9 12l2 2 4-4"/>
+                  <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
                 </svg>
-                Buscar Usuario
-              </h3>
-            </div>
-            <div class="user-search-container">
-              <div class="search-input-wrapper">
-                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <input 
-                  v-model="terminoBusqueda" 
-                  type="text" 
-                  placeholder="Buscar por nombre, correo o CURP..." 
-                  class="search-input"
-                  @input="buscarUsuarios"
-                  @focus="mostrarResultados = true"
-                  @blur="setTimeout(() => mostrarResultados = false, 150)"
-                >
-                <button v-if="terminoBusqueda" @click="limpiarBusqueda" class="clear-search-btn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ resumen.estadisticas.total_registros }}</div>
+                <div class="apple-stat-label">Total</div>
               </div>
             </div>
-            
-            <!-- Resultados de búsqueda - Dropdown flotante independiente -->
-            <div v-if="mostrarResultados && terminoBusqueda.length > 0" class="search-results-dropdown">
-              <div v-if="buscandoUsuarios" class="loading-search">
-                <div class="spinner-small"></div>
-                <span>Buscando...</span>
-              </div>
-              <div v-else-if="terminoBusqueda.length < 2" class="need-more-chars">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 8v4m0 4h.01"></path>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <line x1="12" y1="19" x2="12" y2="5" stroke-width="2"/>
+                  <polyline points="5,12 12,5 19,12" stroke-width="2"/>
                 </svg>
-                <p>Escribe al menos 2 caracteres para buscar</p>
               </div>
-              <div v-else-if="usuariosFiltrados.length === 0" class="no-results">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <p>No se encontraron usuarios</p>
-              </div>
-              <div v-else class="results-list">
-                <div 
-                  v-for="usuario in usuariosFiltrados" 
-                  :key="usuario.id" 
-                  :class="['result-item', { active: usuarioSeleccionado === usuario.id.toString() }]"
-                  @click="seleccionarUsuario(usuario)"
-                >
-                  <div class="user-avatar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                  </div>
-                  <div class="user-info">
-                    <div class="user-name">{{ usuario.nombre_completo }}</div>
-                    <div class="user-details">
-                      <span class="user-email">{{ usuario.correo }}</span>
-                      <span v-if="usuario.curp" class="user-curp">• {{ usuario.curp }}</span>
-                    </div>
-                    <div v-if="usuario.cargo" class="user-cargo">{{ usuario.cargo }}</div>
-                  </div>
-                </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ resumen.estadisticas.entradas }}</div>
+                <div class="apple-stat-label">Entradas</div>
               </div>
             </div>
-            
-            <!-- Usuario seleccionado -->
-            <div v-if="usuarioActual" class="selected-user">
-              <div class="selected-user-header">
-                <h4>Usuario Seleccionado:</h4>
-                <button @click="limpiarSeleccion" class="clear-selection-btn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                  Limpiar selección
-                </button>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <line x1="12" y1="5" x2="12" y2="19" stroke-width="2"/>
+                  <polyline points="19,12 12,19 5,12" stroke-width="2"/>
+                </svg>
               </div>
-              <div class="selected-user-card">
-                <div class="selected-user-avatar">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <div class="selected-user-info">
-                  <div class="selected-user-name">{{ usuarioActual.nombre_completo }}</div>
-                  <div class="selected-user-email">{{ usuarioActual.correo }}</div>
-                  <div v-if="usuarioActual.curp" class="selected-user-curp">CURP: {{ usuarioActual.curp }}</div>
-                  <div v-if="usuarioActual.cargo" class="selected-user-cargo">{{ usuarioActual.cargo }}</div>
-                </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ resumen.estadisticas.salidas }}</div>
+                <div class="apple-stat-label">Salidas</div>
+              </div>
+            </div>
+
+            <div class="apple-stat-card">
+              <div class="apple-stat-icon orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                  <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="apple-stat-content">
+                <div class="apple-stat-value">{{ resumen.estadisticas.actividades }}</div>
+                <div class="apple-stat-label">Actividades</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Filtros y Controles - Solo visible si hay usuario seleccionado -->
-        <div v-if="usuarioSeleccionado" class="filters-section">
-          <div class="filters-card">
-            <div class="filters-header">
-              <h3>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          <!-- ================== SEARCH & FILTERS INSIDE STATS ================== -->
+          <div class="apple-search-section">
+            <div class="apple-search-row">
+              <div class="apple-search-container" ref="searchContainer">
+                <svg class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="11" cy="11" r="8" stroke-width="2.5"/>
+                  <path d="m21 21-4.35-4.35" stroke-width="2.5" stroke-linecap="round"/>
                 </svg>
-                Filtros de Búsqueda
-              </h3>
-            </div>
-            
-            <div class="filters-grid">
-              <!-- Filtros por fecha -->
-              <div class="filter-group">
-                <label>Tipo de período:</label>
-                <div class="period-buttons">
-                  <button 
-                    @click="setPeriodo('dia')"
-                    :class="['period-btn', { active: filtros.periodo === 'dia' }]"
-                  >
-                    Día
-                  </button>
-                  <button 
-                    @click="setPeriodo('semana')"
-                    :class="['period-btn', { active: filtros.periodo === 'semana' }]"
-                  >
-                    Semana
-                  </button>
-                  <button 
-                    @click="setPeriodo('año')"
-                    :class="['period-btn', { active: filtros.periodo === 'año' }]"
-                  >
-                    Año
-                  </button>
-                  <button 
-                    @click="setPeriodo('todo')"
-                    :class="['period-btn', { active: filtros.periodo === 'todo' }]"
-                  >
-                    Todo
-                  </button>
-                </div>
+                <input 
+                  ref="searchInput"
+                  v-model="terminoBusqueda" 
+                  @input="onSearchInput"
+                  @focus="abrirDropdown"
+                  @blur="cerrarDropdownConDelay"
+                  type="text" 
+                  placeholder="Buscar usuario por nombre, correo o CURP..." 
+                  class="apple-search-input"
+                >
+                <button v-if="terminoBusqueda" @click="limpiarBusqueda" class="apple-clear-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <line x1="15" y1="9" x2="9" y2="15" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="9" y1="9" x2="15" y2="15" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </button>
               </div>
 
-              <!-- Selector de fecha específica (solo para día) -->
-              <div v-if="filtros.periodo === 'dia'" class="filter-group">
-                <label for="fecha-especifica">Fecha:</label>
+              <!-- Usuario seleccionado badge -->
+              <div v-if="usuarioActual" class="apple-selected-badge">
+                <div class="apple-selected-avatar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+                <span class="apple-selected-name">{{ usuarioActual.nombre_completo }}</span>
+                <button @click="limpiarSeleccion" class="apple-remove-btn" title="Limpiar selección">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="apple-filter-controls">
+                <button 
+                  v-if="usuarioSeleccionado && historial.length > 0"
+                  @click="exportarExcel" 
+                  class="apple-filter-btn export"
+                  :disabled="exportando"
+                  title="Exportar a Excel"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>{{ exportando ? 'Exportando...' : 'Excel' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Unified Filter Row - Período + Fecha + Tipo -->
+            <div v-if="usuarioSeleccionado" class="apple-unified-filters">
+              <div class="apple-quick-filters">
+                <button 
+                  @click="setPeriodo('dia')"
+                  :class="['apple-filter-chip', { active: filtros.periodo === 'dia' }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                  </svg>
+                  <span>Día</span>
+                </button>
+                <button 
+                  @click="setPeriodo('semana')"
+                  :class="['apple-filter-chip', { active: filtros.periodo === 'semana' }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                  </svg>
+                  <span>Semana</span>
+                </button>
+                <button 
+                  @click="setPeriodo('año')"
+                  :class="['apple-filter-chip', { active: filtros.periodo === 'año' }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke-width="2"/>
+                  </svg>
+                  <span>Año</span>
+                </button>
+                <button 
+                  @click="setPeriodo('todo')"
+                  :class="['apple-filter-chip', { active: filtros.periodo === 'todo' }]"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" stroke-width="2"/>
+                    <path d="M9 12l2 2 4-4" stroke-width="2"/>
+                  </svg>
+                  <span>Todo</span>
+                </button>
+              </div>
+
+              <!-- Selector de fecha según período -->
+              <div v-if="filtros.periodo === 'dia'" class="apple-filter-group">
+                <label class="apple-filter-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                  </svg>
+                  Fecha:
+                </label>
                 <input
-                  id="fecha-especifica"
                   type="date"
                   v-model="filtros.fechaEspecifica"
                   @change="aplicarFiltros"
-                  class="date-input"
+                  class="apple-date-input"
                 >
               </div>
 
-              <!-- Selector de semana (solo para semana) -->
-              <div v-if="filtros.periodo === 'semana'" class="filter-group">
-                <label for="semana-especifica">Semana:</label>
+              <div v-if="filtros.periodo === 'semana'" class="apple-filter-group">
+                <label class="apple-filter-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                  </svg>
+                  Semana:
+                </label>
                 <input
-                  id="semana-especifica"
                   type="week"
                   v-model="filtros.semanaEspecifica"
                   @change="aplicarFiltros"
-                  class="date-input"
+                  class="apple-date-input"
                 >
               </div>
 
-              <!-- Selector de año (solo para año) -->
-              <div v-if="filtros.periodo === 'año'" class="filter-group">
-                <label for="año-especifico">Año:</label>
+              <div v-if="filtros.periodo === 'año'" class="apple-filter-group">
+                <label class="apple-filter-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke-width="2"/>
+                  </svg>
+                  Año:
+                </label>
                 <select
-                  id="año-especifico"
                   v-model="filtros.añoEspecifico"
                   @change="aplicarFiltros"
-                  class="year-select"
+                  class="apple-select"
                 >
                   <option v-for="año in añosDisponibles" :key="año" :value="año">
                     {{ año }}
@@ -225,224 +254,137 @@
                 </select>
               </div>
 
-              <!-- Filtro por tipo -->
-              <div class="filter-group">
-                <label for="tipo-filtro">Tipo de actividad:</label>
+              <div class="apple-filter-group">
+                <label class="apple-filter-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" stroke-width="2"/>
+                  </svg>
+                  Tipo:
+                </label>
                 <select
-                  id="tipo-filtro"
                   v-model="filtros.tipo"
                   @change="aplicarFiltros"
-                  class="type-select"
+                  class="apple-select"
                 >
-                  <option value="">Todos los tipos</option>
+                  <option value="">Todos</option>
                   <option value="entrada">Entrada</option>
                   <option value="salida">Salida</option>
                   <option value="actividad">Actividad</option>
                 </select>
               </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Estadísticas Rápidas -->
-        <div v-if="usuarioSeleccionado && resumen" class="stats-section">
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon total">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 12l2 2 4-4"></path>
-                  <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
-                </svg>
-              </div>
-              <div class="stat-content">
-                <div class="stat-number">{{ resumen.estadisticas.total_registros }}</div>
-                <div class="stat-label">Total Registros</div>
-              </div>
-            </div>
-
-            <div class="stat-card">
-              <div class="stat-icon entrada">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="19" x2="12" y2="5"></line>
-                  <polyline points="5,12 12,5 19,12"></polyline>
-                </svg>
-              </div>
-              <div class="stat-content">
-                <div class="stat-number">{{ resumen.estadisticas.entradas }}</div>
-                <div class="stat-label">Entradas</div>
-              </div>
-            </div>
-
-            <div class="stat-card">
-              <div class="stat-icon salida">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <polyline points="19,12 12,19 5,12"></polyline>
-                </svg>
-              </div>
-              <div class="stat-content">
-                <div class="stat-number">{{ resumen.estadisticas.salidas }}</div>
-                <div class="stat-label">Salidas</div>
-              </div>
-            </div>
-
-            <div class="stat-card">
-              <div class="stat-icon actividad">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
-                </svg>
-              </div>
-              <div class="stat-content">
-                <div class="stat-number">{{ resumen.estadisticas.actividades }}</div>
-                <div class="stat-label">Actividades</div>
+              <div v-if="historial.length > 0" class="apple-count-badge">
+                {{ historial.length }}
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Historial -->
-        <div v-if="usuarioSeleccionado" class="historial-section">
-          <div class="historial-header">
-            <h3>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      <!-- ================== CONTENT WRAPPER ================== -->
+      <div class="apple-content-wrapper">
+        <!-- Estado cuando no hay usuario seleccionado -->
+        <div v-if="!usuarioSeleccionado" class="apple-welcome-section">
+          <div class="apple-welcome-card">
+            <div class="apple-welcome-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
               </svg>
-              Historial de {{ usuarioActual?.nombre || 'Usuario' }}
-            </h3>
-            <div class="historial-actions">
-              <span v-if="historial.length > 0" class="record-count">
-                {{ historial.length }} registro(s) encontrado(s)
-              </span>
-              <button 
-                v-if="historial.length > 0"
-                @click="exportarExcel" 
-                class="export-btn"
-                :disabled="exportando"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14,2 14,8 20,8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="21"></line>
-                  <line x1="8" y1="13" x2="16" y2="21"></line>
-                </svg>
-                {{ exportando ? 'Exportando...' : 'Exportar Excel' }}
-              </button>
+            </div>
+            <h2>Buscar Historial de Usuario</h2>
+            <p>Utiliza el buscador superior para encontrar y seleccionar un usuario.</p>
+            <div class="apple-welcome-hint">
+              <span class="apple-hint-icon">💡</span>
+              <span>Puedes buscar por nombre, correo o CURP</span>
             </div>
           </div>
+        </div>
 
-          <!-- Loading -->
-          <div v-if="loading" class="loading-container">
-            <div class="spinner-large"></div>
+        <!-- Tabla de historial -->
+        <div v-else class="apple-table-container">
+          <div v-if="loading && historial.length === 0" class="apple-loading">
+            <div class="apple-spinner"></div>
             <p>Cargando historial...</p>
           </div>
 
-          <!-- Error -->
-          <div v-else-if="error" class="error-container">
-            <div class="error-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
-            </div>
+          <div v-else-if="error" class="apple-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" stroke-width="2"/>
+              <line x1="15" y1="9" x2="9" y2="15" stroke-width="2" stroke-linecap="round"/>
+              <line x1="9" y1="9" x2="15" y2="15" stroke-width="2" stroke-linecap="round"/>
+            </svg>
             <h3>Error al cargar el historial</h3>
             <p>{{ error }}</p>
-            <button @click="cargarHistorial" class="retry-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                <path d="M3 3v5h5"></path>
-                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
-                <path d="M21 21v-5h-5"></path>
+            <button @click="cargarHistorial" class="apple-retry-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
               </svg>
               Reintentar
             </button>
           </div>
 
-          <!-- Sin registros -->
-          <div v-else-if="historial.length === 0" class="empty-state">
-            <div class="empty-icon">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
+          <div v-else-if="historial.length === 0" class="apple-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+              <polyline points="12 6 12 12 16 14" stroke-width="2"/>
+            </svg>
             <h3>No hay registros</h3>
             <p>No se encontraron registros para los filtros seleccionados.</p>
           </div>
 
-          <!-- Tabla de historial -->
-          <div v-else class="historial-table-container">
-            <div class="table-wrapper">
-              <table class="historial-table">
-                <thead>
-                  <tr>
-                    <th>Origen</th>
-                    <th>Tipo</th>
-                    <th>Descripción</th>
-                    <th>Fecha</th>
-                    <th>Hora</th>
-                    <th>Detalles</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="registro in historial" :key="registro.id" class="registro-row">
-                    <td class="origen-cell">
-                      <span :class="['origen-badge', registro.origen]">
-                        {{ formatearOrigen(registro.origen) }}
-                      </span>
-                    </td>
-                    <td class="tipo-cell">
-                      <span :class="['tipo-badge', registro.tipo]">
-                        {{ formatearTipo(registro.tipo) }}
-                      </span>
-                    </td>
-                    <td class="descripcion-cell">
-                      {{ registro.descripcion || 'Sin descripción' }}
-                    </td>
-                    <td class="fecha-cell">
-                      {{ formatearFecha(registro.fecha) }}
-                    </td>
-                    <td class="hora-cell">
-                      {{ formatearHora(registro.hora) }}
-                    </td>
-                    <td class="detalles-cell">
-                      <div v-if="registro.detalles" class="action-container">
-                        <button @click="mostrarDetalles(registro)" class="btn-ver" title="Ver detalles del registro">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                          </svg>
-                        </button>
-                        <span class="btn-label">Detalles</span>
-                      </div>
-                      <span v-else class="no-details">Sin detalles</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estado inicial -->
-        <div v-else-if="!mostrarResultados || usuariosFiltrados.length === 0" class="welcome-section">
-          <div class="modern-welcome-card">
-            <div class="glass-background"></div>
-            <div class="welcome-content">
-              <div class="welcome-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
-              </div>
-              <h2>Buscar Historial de Usuario</h2>
-              <p>Utiliza el buscador superior para encontrar y seleccionar un usuario.</p>
-              <div class="modern-divider"></div>
-              <div class="search-hint">
-                <span class="hint-icon">💡</span>
-                <span>Puedes buscar por nombre, correo o CURP</span>
-              </div>
-            </div>
+          <div v-else class="apple-table-wrapper">
+            <table class="apple-table">
+              <thead>
+                <tr>
+                  <th>Origen</th>
+                  <th>Tipo</th>
+                  <th>Descripción</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="registro in historial" :key="registro.id" class="apple-table-row">
+                  <td>
+                    <span :class="['apple-origen-badge', registro.origen]">
+                      {{ formatearOrigen(registro.origen) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span :class="['apple-tipo-badge', registro.tipo]">
+                      {{ formatearTipo(registro.tipo) }}
+                    </span>
+                  </td>
+                  <td class="apple-descripcion-cell">
+                    {{ registro.descripcion || 'Sin descripción' }}
+                  </td>
+                  <td class="apple-fecha-cell">
+                    {{ formatearFecha(registro.fecha) }}
+                  </td>
+                  <td class="apple-hora-cell">
+                    {{ formatearHora(registro.hora) }}
+                  </td>
+                  <td>
+                    <div class="apple-actions">
+                      <button 
+                        v-if="registro.detalles" 
+                        @click="mostrarDetalles(registro)" 
+                        class="apple-action-btn view" 
+                        title="Ver detalles"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
+                          <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                        </svg>
+                      </button>
+                      <span v-else class="apple-no-details">-</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -661,6 +603,54 @@
       </div>
     </div>
 
+    <!-- DROPDOWN DE BÚSQUEDA - TELEPORT AL BODY -->
+    <Teleport to="body">
+      <Transition name="apple-dropdown">
+        <div 
+          v-if="mostrarResultados && terminoBusqueda.length > 0" 
+          class="apple-search-dropdown-portal"
+          :style="dropdownStyle"
+          @mousedown.prevent
+        >
+          <div v-if="buscandoUsuarios" class="apple-dropdown-loading">
+            <div class="apple-spinner-mini"></div>
+            <span>Buscando...</span>
+          </div>
+          <div v-else-if="terminoBusqueda.length < 2" class="apple-dropdown-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4m0 4h.01"/>
+            </svg>
+            <span>Escribe al menos 2 caracteres</span>
+          </div>
+          <div v-else-if="usuariosFiltrados.length === 0" class="apple-dropdown-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <span>No se encontraron usuarios</span>
+          </div>
+          <div v-else class="apple-dropdown-results">
+            <div 
+              v-for="usuario in usuariosFiltrados" 
+              :key="usuario.id" 
+              :class="['apple-dropdown-item', { active: usuarioSeleccionado === usuario.id.toString() }]"
+              @click="seleccionarUsuarioDesdeDropdown(usuario)"
+            >
+              <div class="apple-dropdown-avatar">
+                {{ getInitials(usuario.nombre_completo) }}
+              </div>
+              <div class="apple-dropdown-info">
+                <div class="apple-dropdown-name">{{ usuario.nombre_completo }}</div>
+                <div class="apple-dropdown-email">{{ usuario.correo || 'Sin correo' }}</div>
+                <div v-if="usuario.cargo" class="apple-dropdown-cargo">{{ usuario.cargo }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Lightbox para ver foto en pantalla completa -->
     <Teleport to="body" v-if="showLightbox">
       <div class="lightbox-overlay" @click="cerrarLightbox">
@@ -717,6 +707,20 @@ export default {
     const buscandoUsuarios = ref(false)
     const mostrarResultados = ref(false)
     const timeoutBusqueda = ref(null)
+    
+    // Dropdown posición (para Teleport)
+    const searchContainer = ref(null)
+    const searchInput = ref(null)
+    const dropdownPosition = ref({ top: 0, left: 0, width: 0 })
+    
+    // Estilo del dropdown calculado
+    const dropdownStyle = computed(() => ({
+      position: 'fixed',
+      top: `${dropdownPosition.value.top}px`,
+      left: `${dropdownPosition.value.left}px`,
+      width: `${dropdownPosition.value.width}px`,
+      zIndex: 99999
+    }))
     
     // Filtros
     const filtros = ref({
@@ -999,6 +1003,48 @@ export default {
           buscandoUsuarios.value = false
         }
       }, 300)
+    }
+
+    // Métodos para dropdown con Teleport
+    const actualizarPosicionDropdown = () => {
+      if (searchContainer.value) {
+        const rect = searchContainer.value.getBoundingClientRect()
+        dropdownPosition.value = {
+          top: rect.bottom + 8,
+          left: rect.left,
+          width: rect.width
+        }
+      }
+    }
+
+    const abrirDropdown = () => {
+      actualizarPosicionDropdown()
+      mostrarResultados.value = true
+    }
+
+    const cerrarDropdownConDelay = () => {
+      setTimeout(() => {
+        mostrarResultados.value = false
+      }, 180)
+    }
+
+    const onSearchInput = () => {
+      actualizarPosicionDropdown()
+      buscarUsuarios()
+    }
+
+    const getInitials = (name) => {
+      if (!name) return '?'
+      const words = name.trim().split(' ')
+      if (words.length >= 2) {
+        return (words[0][0] + words[1][0]).toUpperCase()
+      }
+      return name.substring(0, 2).toUpperCase()
+    }
+
+    const seleccionarUsuarioDesdeDropdown = (usuario) => {
+      mostrarResultados.value = false
+      seleccionarUsuario(usuario)
     }
 
     const limpiarBusqueda = () => {
@@ -1460,6 +1506,17 @@ export default {
       buscandoUsuarios,
       mostrarResultados,
       
+      // Dropdown Teleport
+      searchContainer,
+      searchInput,
+      dropdownStyle,
+      dropdownPosition,
+      abrirDropdown,
+      cerrarDropdownConDelay,
+      onSearchInput,
+      getInitials,
+      seleccionarUsuarioDesdeDropdown,
+      
       // Métodos principales
       cargarHistorial,
       actualizarHistorial,
@@ -1525,10 +1582,1314 @@ export default {
   position: relative;
 }
 
+/* ==================== APPLE DESIGN SYSTEM ==================== */
+
+/* Dynamic Background */
+.apple-dynamic-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.apple-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  animation: floatOrb 20s ease-in-out infinite;
+}
+
+.apple-orb.apple-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
+  top: -100px;
+  right: -100px;
+  animation-delay: 0s;
+}
+
+.apple-orb.apple-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+  bottom: -50px;
+  left: -50px;
+  animation-delay: -7s;
+}
+
+.apple-orb.apple-orb-3 {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, #66BB6A 0%, #AED581 100%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -14s;
+}
+
+@keyframes floatOrb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(20px, 10px) scale(1.02); }
+}
+
+/* ====================== MAIN CONTENT ====================== */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin-left: min(220px, 18vw);
+  width: calc(100vw - min(220px, 18vw));
+  min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 16px 0 16px;
+  z-index: 1;
+}
+
+/* ====================== APPLE STICKY WRAPPER ====================== */
+.apple-sticky-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: transparent;
+  margin-bottom: 20px;
+}
+
+/* ====================== APPLE PAGE HEADER ====================== */
+.apple-page-header {
+  background: linear-gradient(135deg, #388E3C 0%, #2E7D32 50%, #1B5E20 100%);
+  color: white;
+  border-radius: 28px 28px 0 0;
+  border: 2px solid #8BC34A;
+  border-bottom: none;
+  padding: 10px 16px;
+  box-shadow: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+}
+
+.apple-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple-icon-circle {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.apple-icon-circle svg {
+  width: 14px;
+  height: 14px;
+  color: white;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.apple-page-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  letter-spacing: -0.3px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.apple-page-subtitle {
+  font-size: 10px;
+  margin: 2px 0 0 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-refresh-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-refresh-button svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.apple-refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.apple-refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.apple-spin {
+  animation: apple-spin-animation 1s linear infinite;
+}
+
+@keyframes apple-spin-animation {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ====================== APPLE STATS SECTION ====================== */
+.apple-stats-section {
+  background: white;
+  border-radius: 0 0 28px 28px;
+  border: 2px solid #8BC34A;
+  border-top: none;
+  padding: 18px 16px 16px 16px;
+  box-shadow: none;
+  margin-top: -1px;
+}
+
+.apple-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.apple-stat-card {
+  background: linear-gradient(135deg, #FAFBFC 0%, #F8F9FA 100%);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.apple-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apple-stat-icon.blue {
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+}
+
+.apple-stat-icon.green {
+  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+}
+
+.apple-stat-icon.purple {
+  background: linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%);
+}
+
+.apple-stat-icon.orange {
+  background: linear-gradient(135deg, #FF9500 0%, #FFCC00 100%);
+}
+
+.apple-stat-icon svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.apple-stat-content {
+  flex: 1;
+}
+
+.apple-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1;
+  margin-bottom: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  letter-spacing: -0.3px;
+}
+
+.apple-stat-label {
+  font-size: 10px;
+  color: #86868b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+/* ====================== APPLE SEARCH SECTION ====================== */
+.apple-search-section {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.apple-search-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.apple-search-container {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.apple-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #007AFF;
+  stroke: #007AFF;
+  stroke-width: 2.5;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.apple-search-input {
+  width: 100%;
+  height: 38px;
+  border-radius: 19px;
+  border: 1.5px solid transparent;
+  background: #f5f5f7;
+  padding: 0 40px 0 40px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  transition: all 0.25s ease;
+}
+
+.apple-search-input::placeholder {
+  color: #86868b;
+  font-size: 12px;
+}
+
+.apple-search-input:hover {
+  background: rgba(0, 122, 255, 0.04);
+  border-color: rgba(0, 122, 255, 0.08);
+}
+
+.apple-search-input:focus {
+  outline: none;
+  background: white;
+  border-color: rgba(0, 122, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.05);
+}
+
+.apple-clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #d1d1d6;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.apple-clear-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: white;
+  stroke-width: 2.5;
+}
+
+.apple-clear-btn:hover {
+  background: #86868b;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* ====================== APPLE SEARCH DROPDOWN ====================== */
+.apple-search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 1000;
+  animation: dropdownSlide 0.2s ease;
+}
+
+@keyframes dropdownSlide {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.apple-dropdown-loading,
+.apple-dropdown-hint,
+.apple-dropdown-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  color: #86868b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.apple-dropdown-loading svg,
+.apple-dropdown-hint svg,
+.apple-dropdown-empty svg {
+  width: 18px;
+  height: 18px;
+  stroke: #86868b;
+}
+
+.apple-spinner-mini {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0, 122, 255, 0.2);
+  border-top-color: #007AFF;
+  border-radius: 50%;
+  animation: apple-spin-animation 0.8s linear infinite;
+}
+
+.apple-dropdown-results {
+  padding: 8px 0;
+}
+
+.apple-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.apple-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.apple-dropdown-item:hover {
+  background: rgba(0, 122, 255, 0.06);
+}
+
+.apple-dropdown-item.active {
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.1) 0%, rgba(102, 187, 106, 0.05) 100%);
+}
+
+.apple-dropdown-avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.apple-dropdown-avatar svg {
+  width: 18px;
+  height: 18px;
+  color: white;
+  stroke: white;
+}
+
+.apple-dropdown-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.apple-dropdown-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 2px;
+}
+
+.apple-dropdown-email {
+  font-size: 11px;
+  color: #86868b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-dropdown-cargo {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  background: rgba(139, 195, 74, 0.15);
+  color: #558B2F;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* ====================== APPLE SELECTED BADGE ====================== */
+.apple-selected-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.15) 0%, rgba(102, 187, 106, 0.1) 100%);
+  border: 1.5px solid rgba(139, 195, 74, 0.3);
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.apple-selected-avatar {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-selected-avatar svg {
+  width: 12px;
+  height: 12px;
+  color: white;
+  stroke: white;
+}
+
+.apple-selected-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #558B2F;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-remove-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.1);
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.apple-remove-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke: #ef4444;
+}
+
+.apple-remove-btn:hover {
+  background: #ef4444;
+}
+
+.apple-remove-btn:hover svg {
+  stroke: white;
+}
+
+/* ====================== APPLE FILTER CONTROLS ====================== */
+.apple-filter-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.apple-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 16px;
+  border: 1.5px solid #d1d1d6;
+  background: white;
+  color: #1d1d1f;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-filter-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2;
+}
+
+.apple-filter-btn:hover {
+  background: #f5f5f7;
+  border-color: #d1d1d6;
+}
+
+.apple-filter-btn.export {
+  color: #34C759;
+  border-color: rgba(52, 199, 89, 0.2);
+}
+
+.apple-filter-btn.export svg {
+  stroke: #34C759;
+}
+
+.apple-filter-btn.export:hover {
+  background: rgba(52, 199, 89, 0.08);
+  border-color: #34C759;
+}
+
+.apple-filter-btn.export:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ====================== APPLE UNIFIED FILTERS ====================== */
+.apple-unified-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ====================== APPLE QUICK FILTERS ====================== */
+.apple-quick-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.apple-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-filter-chip svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2;
+}
+
+.apple-filter-chip:hover {
+  background: rgba(0, 122, 255, 0.1);
+  border-color: rgba(0, 122, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.15);
+}
+
+.apple-filter-chip.active {
+  background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+  color: white;
+  border-color: #007AFF;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.apple-filter-chip.active span {
+  color: white !important;
+}
+
+.apple-filter-chip.active svg {
+  stroke: white !important;
+}
+
+.apple-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-filter-label svg {
+  width: 14px;
+  height: 14px;
+  stroke: #86868b;
+  stroke-width: 2;
+}
+
+.apple-date-input,
+.apple-select {
+  height: 34px;
+  border-radius: 10px;
+  border: 1.5px solid #e5e5e5;
+  background: #f5f5f7;
+  padding: 0 12px;
+  font-size: 12px;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.apple-select {
+  padding: 0 28px 0 12px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.apple-date-input:hover,
+.apple-select:hover {
+  border-color: #d1d1d6;
+  background-color: white;
+}
+
+.apple-date-input:focus,
+.apple-select:focus {
+  outline: none;
+  border-color: #8BC34A;
+  box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.1);
+}
+
+.apple-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  box-shadow: 0 2px 6px rgba(139, 195, 74, 0.3);
+}
+
+/* ====================== APPLE CONTENT WRAPPER ====================== */
+.apple-content-wrapper {
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* ====================== APPLE TABLE CONTAINER ====================== */
+.apple-table-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  max-height: calc(100vh - 340px);
+  display: flex;
+  flex-direction: column;
+}
+
+.apple-table-wrapper {
+  overflow-y: auto;
+  overflow-x: auto;
+  flex: 1;
+  max-height: 100%;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  scroll-behavior: smooth;
+}
+
+.apple-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.apple-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+  background-clip: content-box;
+}
+
+/* ====================== APPLE TABLE ====================== */
+.apple-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.apple-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(135deg, #FAFBFC 0%, #F5F5F7 100%);
+}
+
+.apple-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-table tbody tr {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.apple-table tbody tr:hover {
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.04) 0%, rgba(102, 187, 106, 0.02) 100%);
+}
+
+.apple-table td {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #1d1d1f;
+  vertical-align: middle;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+/* ====================== APPLE BADGES ====================== */
+.apple-origen-badge,
+.apple-tipo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.apple-origen-badge {
+  background: rgba(139, 195, 74, 0.15);
+  color: #558B2F;
+}
+
+.apple-origen-badge.web {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+}
+
+.apple-origen-badge.app {
+  background: rgba(139, 195, 74, 0.15);
+  color: #558B2F;
+}
+
+.apple-origen-badge.sistema {
+  background: rgba(107, 114, 128, 0.15);
+  color: #4b5563;
+}
+
+.apple-tipo-badge.entrada {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+
+.apple-tipo-badge.salida {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.apple-tipo-badge.actividad {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+}
+
+.apple-descripcion-cell {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-fecha-cell,
+.apple-hora-cell {
+  white-space: nowrap;
+  color: #86868b;
+  font-size: 12px;
+}
+
+/* ====================== APPLE ACTIONS ====================== */
+.apple-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-action-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.apple-action-btn.view {
+  background: rgba(139, 195, 74, 0.15);
+  color: #689F38;
+}
+
+.apple-action-btn.view:hover {
+  background: #8BC34A;
+  color: white;
+  transform: scale(1.05);
+}
+
+.apple-action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.apple-no-details {
+  color: #d1d1d6;
+  font-size: 12px;
+}
+
+/* ====================== APPLE LOADING/ERROR/EMPTY ====================== */
+.apple-loading,
+.apple-error,
+.apple-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.apple-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(139, 195, 74, 0.2);
+  border-top-color: #8BC34A;
+  border-radius: 50%;
+  animation: apple-spin-animation 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+.apple-loading p,
+.apple-error p,
+.apple-empty p {
+  color: #86868b;
+  font-size: 14px;
+  margin: 8px 0 0 0;
+}
+
+.apple-error svg,
+.apple-empty svg {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+}
+
+.apple-error svg {
+  color: #ef4444;
+  stroke: #ef4444;
+}
+
+.apple-empty svg {
+  color: #8BC34A;
+  stroke: #8BC34A;
+}
+
+.apple-error h3,
+.apple-empty h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+.apple-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apple-retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+}
+
+.apple-retry-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ====================== APPLE WELCOME SECTION ====================== */
+.apple-welcome-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.apple-welcome-card {
+  background: white;
+  border-radius: 28px;
+  padding: 48px;
+  text-align: center;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.apple-welcome-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.15) 0%, rgba(102, 187, 106, 0.1) 100%);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.apple-welcome-icon svg {
+  width: 40px;
+  height: 40px;
+  color: #8BC34A;
+  stroke: #8BC34A;
+}
+
+.apple-welcome-card h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0 0 12px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-welcome-card p {
+  color: #86868b;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.apple-welcome-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(139, 195, 74, 0.1);
+  padding: 12px 20px;
+  border-radius: 12px;
+  color: #558B2F;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.apple-hint-icon {
+  font-size: 16px;
+}
+
+/* ====================== RESPONSIVE STYLES ====================== */
+@media (max-width: 1024px) {
+  .apple-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apple-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .apple-search-container {
+    min-width: 100%;
+  }
+  
+  .apple-filter-controls {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  
+  .apple-unified-filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 8px;
+  }
+  
+  .apple-page-header {
+    border-radius: 20px 20px 0 0;
+    padding: 8px 12px;
+  }
+  
+  .apple-stats-section {
+    border-radius: 0 0 20px 20px;
+    padding: 14px 12px 12px 12px;
+  }
+  
+  .apple-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  
+  .apple-stat-card {
+    padding: 10px 8px;
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
+  }
+  
+  .apple-stat-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .apple-stat-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .apple-stat-value {
+    font-size: 14px;
+  }
+  
+  .apple-stat-label {
+    font-size: 8px;
+  }
+  
+  .apple-search-input {
+    height: 36px;
+    font-size: 11px;
+  }
+  
+  .apple-filter-chip {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+  
+  .apple-filter-chip svg {
+    width: 11px;
+    height: 11px;
+  }
+  
+  .apple-table-container {
+    max-height: calc(100vh - 380px);
+    border-radius: 16px;
+  }
+  
+  .apple-table th,
+  .apple-table td {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+  
+  .apple-descripcion-cell {
+    max-width: 120px;
+  }
+  
+  .apple-welcome-card {
+    padding: 32px 24px;
+  }
+  
+  .apple-welcome-icon {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .apple-welcome-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .apple-welcome-card h2 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .apple-page-header {
+    padding: 6px 10px;
+  }
+  
+  .apple-icon-circle {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .apple-icon-circle svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .apple-page-title {
+    font-size: 14px;
+  }
+  
+  .apple-page-subtitle {
+    font-size: 9px;
+  }
+  
+  .apple-refresh-button {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .apple-refresh-button svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .apple-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .apple-quick-filters {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .apple-filter-group {
+    width: 100%;
+  }
+  
+  .apple-date-input,
+  .apple-select {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .apple-selected-badge {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .apple-selected-name {
+    max-width: none;
+    flex: 1;
+  }
+}
+
+/* ==================== END APPLE DESIGN SYSTEM ==================== */
+
+/* ====================== OLD STYLES (KEPT FOR COMPATIBILITY) ====================== */
+
+.page-header {
   margin-left: min(220px, 18vw);
   width: calc(100vw - min(220px, 18vw));
   background: linear-gradient(135deg, #f8f9fa 0%, #f0fff0 100%);
@@ -3788,6 +5149,196 @@ export default {
   .main-content {
     margin-left: 180px;
     width: calc(100vw - 180px);
+  }
+}
+</style>
+
+<!-- Estilos GLOBALES para el dropdown portal (Teleport al body) -->
+<style>
+.apple-search-dropdown-portal {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.15),
+    0 8px 25px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  max-height: 340px;
+  overflow-y: auto;
+  z-index: 999999;
+  transform-origin: top center;
+}
+
+.apple-search-dropdown-portal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.apple-search-dropdown-portal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.apple-search-dropdown-portal::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+/* Loading state */
+.apple-search-dropdown-portal .apple-dropdown-loading {
+  padding: 20px 16px;
+  text-align: center;
+  color: #007AFF;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.apple-search-dropdown-portal .apple-spinner-mini {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #007AFF;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin-dropdown 0.8s linear infinite;
+}
+
+/* Hint state */
+.apple-search-dropdown-portal .apple-dropdown-hint,
+.apple-search-dropdown-portal .apple-dropdown-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: #8e8e93;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-hint svg,
+.apple-search-dropdown-portal .apple-dropdown-empty svg {
+  width: 28px;
+  height: 28px;
+  opacity: 0.5;
+}
+
+/* Results container */
+.apple-search-dropdown-portal .apple-dropdown-results {
+  padding: 6px 0;
+}
+
+/* Individual item */
+.apple-search-dropdown-portal .apple-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.apple-search-dropdown-portal .apple-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-item:hover {
+  background: rgba(0, 122, 255, 0.08);
+}
+
+.apple-search-dropdown-portal .apple-dropdown-item:active {
+  background: rgba(0, 122, 255, 0.15);
+  transform: scale(0.99);
+}
+
+.apple-search-dropdown-portal .apple-dropdown-item.active {
+  background: rgba(0, 122, 255, 0.12);
+}
+
+/* Avatar */
+.apple-search-dropdown-portal .apple-dropdown-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #007AFF, #5856D6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+}
+
+/* Info container */
+.apple-search-dropdown-portal .apple-dropdown-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-name {
+  font-weight: 600;
+  color: #1d1d1f;
+  font-size: 14px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-email {
+  font-size: 12px;
+  color: #8e8e93;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-cargo {
+  font-size: 11px;
+  color: #007AFF;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+@keyframes spin-dropdown {
+  to { transform: rotate(360deg); }
+}
+
+/* Animaciones de entrada/salida */
+.apple-dropdown-enter-active {
+  animation: dropdownEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.apple-dropdown-leave-active {
+  animation: dropdownLeave 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes dropdownEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdownLeave {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
   }
 }
 </style>

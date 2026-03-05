@@ -83,14 +83,17 @@
           <!-- ================== SEARCH & FILTERS INSIDE STATS ================== -->
           <div class="apple-search-section">
           <div class="apple-search-row">
-            <div class="apple-search-container">
+            <div class="apple-search-container" ref="searchContainer">
               <svg class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="11" cy="11" r="8" stroke-width="2.5"/>
                 <path d="m21 21-4.35-4.35" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
               <input 
+                ref="searchInput"
                 v-model="searchTerm" 
-                @input="filtrarAsistencias"
+                @input="onSearchInput"
+                @focus="abrirDropdown"
+                @blur="cerrarDropdownConDelay"
                 type="text" 
                 placeholder="Buscar por nombre, correo, cargo..." 
                 class="apple-search-input"
@@ -355,6 +358,52 @@
       :tipo="tipoMapa"
       @cerrar="cerrarMapaModal"
     />
+
+    <!-- DROPDOWN DE BÚSQUEDA - TELEPORT AL BODY -->
+    <Teleport to="body">
+      <Transition name="apple-dropdown">
+        <div 
+          v-if="mostrarDropdown && searchTerm.length > 0" 
+          class="apple-search-dropdown-portal"
+          :style="dropdownStyle"
+          @mousedown.prevent
+        >
+          <div v-if="searchTerm.length < 2" class="apple-dropdown-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4m0 4h.01"/>
+            </svg>
+            <span>Escribe al menos 2 caracteres</span>
+          </div>
+          <div v-else-if="resultadosBusqueda.length === 0" class="apple-dropdown-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <span>No se encontraron resultados</span>
+          </div>
+          <div v-else class="apple-dropdown-results">
+            <div 
+              v-for="resultado in resultadosBusqueda" 
+              :key="resultado.id" 
+              class="apple-dropdown-item"
+              @click="seleccionarResultado(resultado)"
+            >
+              <div class="apple-dropdown-avatar">
+                {{ getInitials(resultado.nombre_usuario) }}
+              </div>
+              <div class="apple-dropdown-info">
+                <div class="apple-dropdown-name">{{ resultado.nombre_usuario }}</div>
+                <div class="apple-dropdown-email">{{ resultado.correo_usuario || 'Sin correo' }}</div>
+              </div>
+              <div class="apple-dropdown-badge" :class="resultado.presente ? 'presente' : 'ausente'">
+                {{ resultado.presente ? 'Presente' : 'Ausente' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -444,10 +493,40 @@ export default {
       registrosCargados: 200,
       registrosPorCarga: 200,
       cargandoMas: false,
-      hayMasRegistros: true
+      hayMasRegistros: true,
+      // Dropdown de búsqueda Apple
+      mostrarDropdown: false,
+      dropdownPosition: { top: 0, left: 0, width: 0 }
     }
   },
   computed: {
+    // Estilo del dropdown posicionado
+    dropdownStyle() {
+      return {
+        position: 'fixed',
+        top: `${this.dropdownPosition.top}px`,
+        left: `${this.dropdownPosition.left}px`,
+        width: `${this.dropdownPosition.width}px`,
+        zIndex: 99999
+      }
+    },
+    // Resultados de búsqueda para dropdown Apple
+    resultadosBusqueda() {
+      if (!this.searchTerm || this.searchTerm.length < 2) return []
+      const termino = this.searchTerm.toLowerCase()
+      const resultados = this.asistencias.filter(asistencia => 
+        (asistencia.nombre_usuario && asistencia.nombre_usuario.toLowerCase().includes(termino)) ||
+        (asistencia.correo_usuario && asistencia.correo_usuario.toLowerCase().includes(termino))
+      )
+      // Agrupar por usuario único y mostrar máximo 8
+      const usuariosUnicos = new Map()
+      resultados.forEach(a => {
+        if (!usuariosUnicos.has(a.nombre_usuario)) {
+          usuariosUnicos.set(a.nombre_usuario, a)
+        }
+      })
+      return Array.from(usuariosUnicos.values()).slice(0, 8)
+    },
     totalAsistencias() {
       // Usar valor animado de tiempo real
       return this.animatedTotal || 0
@@ -631,7 +710,50 @@ export default {
     limpiarFiltros() {
       this.searchTerm = ''
       this.filtroRapido = ''
+      this.mostrarDropdown = false
       this.filtrarAsistencias()
+    },
+    
+    seleccionarResultado(resultado) {
+      this.searchTerm = resultado.nombre_usuario
+      this.mostrarDropdown = false
+      this.filtrarAsistencias()
+    },
+    
+    cerrarDropdownConDelay() {
+      setTimeout(() => {
+        this.mostrarDropdown = false
+      }, 180)
+    },
+    
+    abrirDropdown() {
+      this.actualizarPosicionDropdown()
+      this.mostrarDropdown = true
+    },
+    
+    onSearchInput() {
+      this.actualizarPosicionDropdown()
+      this.filtrarAsistencias()
+    },
+    
+    actualizarPosicionDropdown() {
+      if (this.$refs.searchContainer) {
+        const rect = this.$refs.searchContainer.getBoundingClientRect()
+        this.dropdownPosition = {
+          top: rect.bottom + 8,
+          left: rect.left,
+          width: rect.width
+        }
+      }
+    },
+    
+    getInitials(name) {
+      if (!name) return '?'
+      const words = name.trim().split(' ')
+      if (words.length >= 2) {
+        return (words[0][0] + words[1][0]).toUpperCase()
+      }
+      return name.substring(0, 2).toUpperCase()
     },
     
     exportarCSV() {
@@ -791,7 +913,8 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 /* Dynamic Background */
@@ -986,6 +1109,9 @@ export default {
   border: 2px solid #8BC34A;
   border-top: none;
   margin-top: -1px;
+  overflow: visible;
+  position: relative;
+  z-index: 100;
 }
 
 .apple-stats-grid {
@@ -1077,6 +1203,9 @@ export default {
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   padding-top: 12px;
   margin-top: 4px;
+  overflow: visible;
+  position: relative;
+  z-index: 200;
 }
 
 .apple-search-row {
@@ -1084,11 +1213,13 @@ export default {
   gap: 10px;
   margin-bottom: 10px;
   align-items: center;
+  overflow: visible;
 }
 
 .apple-search-container {
   position: relative;
   flex: 1;
+  z-index: 300;
 }
 
 .apple-search-icon {
@@ -1224,6 +1355,169 @@ export default {
   stroke-width: 2.5;
 }
 
+/* ==================== APPLE SEARCH DROPDOWN PORTAL ==================== */
+/* Must be global styles since dropdown is teleported to body */
+</style>
+
+<style>
+/* DROPDOWN PORTAL - ESTILOS GLOBALES */
+.apple-search-dropdown-portal {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 18px;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 12px 24px -8px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+/* Transition animation */
+.apple-dropdown-enter-active {
+  animation: appleDropdownEnter 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.apple-dropdown-leave-active {
+  animation: appleDropdownLeave 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes appleDropdownEnter {
+  0% { 
+    opacity: 0; 
+    transform: translateY(-12px) scale(0.94);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes appleDropdownLeave {
+  0% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+  100% { 
+    opacity: 0; 
+    transform: translateY(-8px) scale(0.96);
+  }
+}
+
+.apple-search-dropdown-portal .apple-dropdown-hint,
+.apple-search-dropdown-portal .apple-dropdown-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px 28px;
+  color: #8e8e93;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-hint svg,
+.apple-search-dropdown-portal .apple-dropdown-empty svg {
+  width: 36px;
+  height: 36px;
+  stroke: #c7c7cc;
+  flex-shrink: 0;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-results {
+  padding: 8px;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  margin-bottom: 2px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-search-dropdown-portal .apple-dropdown-item:last-child {
+  margin-bottom: 0;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-item:hover {
+  background: rgba(0, 122, 255, 0.08);
+}
+
+.apple-search-dropdown-portal .apple-dropdown-item:active {
+  background: rgba(0, 122, 255, 0.15);
+  transform: scale(0.98);
+}
+
+.apple-search-dropdown-portal .apple-dropdown-avatar {
+  width: 46px;
+  height: 46px;
+  background: linear-gradient(145deg, #34C759 0%, #30D158 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  box-shadow: 0 4px 14px rgba(52, 199, 89, 0.35);
+}
+
+.apple-search-dropdown-portal .apple-dropdown-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-email {
+  font-size: 13px;
+  color: #8e8e93;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-badge {
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-badge.presente {
+  background: linear-gradient(135deg, rgba(52, 199, 89, 0.18) 0%, rgba(48, 209, 88, 0.12) 100%);
+  color: #248A3D;
+}
+
+.apple-search-dropdown-portal .apple-dropdown-badge.ausente {
+  background: linear-gradient(135deg, rgba(255, 59, 48, 0.18) 0%, rgba(255, 69, 58, 0.12) 100%);
+  color: #D70015;
+}
+</style>
+
+<style scoped>
 .apple-quick-filters {
   display: flex;
   flex-wrap: wrap;
@@ -1691,7 +1985,7 @@ export default {
 .apple-loading p,
 .apple-error p,
 .apple-empty p {
-  fontSize: 16px;
+  font-size: 16px;
   color: var(--apple-gray-4);
   margin-top: 12px;
 }

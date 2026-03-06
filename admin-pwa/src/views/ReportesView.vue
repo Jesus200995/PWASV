@@ -1120,7 +1120,9 @@ const anios = computed(() => {
   return lista
 })
 
-const reportesFiltrados = computed(() => {
+// Computed para filtros que afectan los CONTADORES (mes, año, territorio, búsqueda, tipo)
+// NO incluye estadoFirma porque ese solo afecta la tabla
+const reportesFiltradosParaContadores = computed(() => {
   let resultado = [...reportes.value]
   
   // Filtro de búsqueda en tiempo real (nombre, correo, CURP, territorio)
@@ -1167,7 +1169,16 @@ const reportesFiltrados = computed(() => {
     resultado = resultado.filter(r => r.tipo === filtros.value.tipo)
   }
   
-  // Filtro por estado de firma
+  // NO aplicamos estadoFirma aquí - eso va solo en reportesFiltrados
+  
+  return resultado
+})
+
+// Computed para la TABLA (incluye todos los filtros + estadoFirma)
+const reportesFiltrados = computed(() => {
+  let resultado = [...reportesFiltradosParaContadores.value]
+  
+  // Filtro por estado de firma (solo afecta la tabla, NO los contadores)
   if (filtros.value.estadoFirma === 'pendiente') {
     resultado = resultado.filter(r => !r.firmado_supervisor)
   } else if (filtros.value.estadoFirma === 'firmado') {
@@ -1181,19 +1192,24 @@ const reportesFiltrados = computed(() => {
 const reportesFirmados = computed(() => reportes.value.filter(r => r.firmado_supervisor))
 const reportesPendientes = computed(() => reportes.value.filter(r => !r.firmado_supervisor))
 
-// Computed para detectar si hay filtros activos
-const hayFiltrosActivos = computed(() => {
+// Computed para detectar si hay filtros activos QUE AFECTAN LOS CONTADORES
+// NO incluye estadoFirma porque ese solo cambia la vista de la tabla
+const hayFiltrosParaContadores = computed(() => {
   return filtros.value.busqueda || 
          filtros.value.mes || 
          filtros.value.anio || 
          filtros.value.territorio || 
-         filtros.value.tipo ||
-         filtros.value.estadoFirma
+         filtros.value.tipo
 })
 
-// Computed para contadores basádos en reportes filtrados
+// Computed para detectar si hay cualquier filtro activo (para el botón limpiar)
+const hayFiltrosActivos = computed(() => {
+  return hayFiltrosParaContadores.value || filtros.value.estadoFirma
+})
+
+// Computed para contadores basados en reportes filtrados por FECHA/TERRITORIO (NO por estado)
 const contadoresFiltrados = computed(() => {
-  const datos = reportesFiltrados.value
+  const datos = reportesFiltradosParaContadores.value
   const firmados = datos.filter(r => r.firmado_supervisor).length
   const pendientes = datos.filter(r => !r.firmado_supervisor).length
   const usuarios = new Set(datos.map(r => r.usuario_id || r.usuario?.id)).size
@@ -1207,11 +1223,11 @@ const contadoresFiltrados = computed(() => {
 })
 
 // ====================== ACTUALIZACIÓN DE STATS TARGET ======================
-// Watcher para actualizar statsTarget - usa filtrados si hay filtros, o backend si no
-watch([estadisticas, contadoresFiltrados, hayFiltrosActivos], () => {
+// Watcher para actualizar statsTarget - usa filtrados si hay filtros de fecha/territorio, o backend si no
+watch([estadisticas, contadoresFiltrados, hayFiltrosParaContadores], () => {
   let newTotal, newFirmados, newPendientes, newUsuarios
   
-  if (hayFiltrosActivos.value) {
+  if (hayFiltrosParaContadores.value) {
     // Usar datos filtrados localmente
     newTotal = contadoresFiltrados.value.total
     newFirmados = contadoresFiltrados.value.firmados

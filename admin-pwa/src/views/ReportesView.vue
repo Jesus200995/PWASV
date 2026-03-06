@@ -1349,7 +1349,9 @@ async function cargarReportes() {
 
 async function cargarEstadisticas() {
   try {
-    const response = await reportesService.obtenerEstadisticas()
+    // Pasar territorio si el usuario es territorial
+    const territorio = territorioUsuario.value || null
+    const response = await reportesService.obtenerEstadisticas(territorio)
     if (response.success) {
       estadisticas.value = {
         totalReportes: response.estadisticas.total_reportes || 0,

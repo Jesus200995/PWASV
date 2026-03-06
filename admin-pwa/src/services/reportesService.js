@@ -47,11 +47,15 @@ const reportesService = {
 
   /**
    * Obtener estadísticas de reportes
+   * @param {string} territorio - Territorio para filtrar (opcional)
    */
-  async obtenerEstadisticas() {
+  async obtenerEstadisticas(territorio = null) {
     try {
-      const url = `${API_URL}/reportes/admin/estadisticas`
-      console.log('📊 [ReportesService] Obteniendo estadísticas...')
+      let url = `${API_URL}/reportes/admin/estadisticas`
+      if (territorio) {
+        url += `?territorio=${encodeURIComponent(territorio)}`
+      }
+      console.log('📊 [ReportesService] Obteniendo estadísticas...' + (territorio ? ` (Territorio: ${territorio})` : ''))
       
       const response = await fetch(url)
       

@@ -1917,7 +1917,9 @@ function logout() {
 async function actualizarEstadisticasEnVivo() {
   try {
     // Actualizar estadísticas de la BD sin mostrar loading
-    const response = await reportesService.obtenerEstadisticas()
+    // Pasar territorio si el usuario es territorial
+    const territorio = territorioUsuario.value || null
+    const response = await reportesService.obtenerEstadisticas(territorio)
     if (response.success) {
       estadisticas.value = {
         totalReportes: response.estadisticas.total_reportes || 0,
@@ -1931,7 +1933,11 @@ async function actualizarEstadisticasEnVivo() {
     }
     
     // También actualizar lista de reportes silenciosamente
-    const reportesResp = await reportesService.obtenerTodosReportes({ limite: 1000 })
+    const params = { limite: 1000 }
+    if (territorioUsuario.value) {
+      params.territorio = territorioUsuario.value
+    }
+    const reportesResp = await reportesService.obtenerTodosReportes(params)
     if (reportesResp.success) {
       reportes.value = reportesResp.reportes || []
     }

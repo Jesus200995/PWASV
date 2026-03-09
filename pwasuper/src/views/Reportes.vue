@@ -3572,6 +3572,37 @@ const imgGridWidth = 55;
       
       console.log('✅ Usuario info establecido:', JSON.stringify(this.usuarioInfo));
       
+      // Obtener datos actualizados del usuario desde la BD (incluyendo CURP)
+      try {
+        console.log('🔄 Actualizando datos del usuario desde la BD...');
+        const usuarioActualizado = await apiService.getUser(usuario.id);
+        if (usuarioActualizado) {
+          // Actualizar usuarioInfo con datos frescos
+          if (usuarioActualizado.curp) {
+            this.usuarioInfo.curp = usuarioActualizado.curp;
+            usuario.curp = usuarioActualizado.curp;
+          }
+          if (usuarioActualizado.nombre_completo) {
+            this.usuarioInfo.nombre = usuarioActualizado.nombre_completo;
+            usuario.nombre_completo = usuarioActualizado.nombre_completo;
+          }
+          if (usuarioActualizado.territorio) {
+            this.usuarioInfo.territorio = usuarioActualizado.territorio;
+            usuario.territorio = usuarioActualizado.territorio;
+          }
+          if (usuarioActualizado.cargo) {
+            this.usuarioInfo.cargo = usuarioActualizado.cargo;
+            usuario.cargo = usuarioActualizado.cargo;
+          }
+          // Actualizar localStorage con datos frescos
+          localStorage.setItem('user', JSON.stringify(usuario));
+          console.log('✅ Datos del usuario actualizados desde BD, CURP:', this.usuarioInfo.curp);
+        }
+      } catch (error) {
+        console.warn('⚠️ No se pudieron actualizar datos del usuario desde BD:', error.message);
+        // Continuar con los datos del localStorage
+      }
+      
       // Si es técnico, obtener supervisor automático basado en territorio
       const cargoUpper = (usuario.cargo || '').toUpperCase();
       if (cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') {

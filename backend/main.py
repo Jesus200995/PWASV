@@ -2155,28 +2155,34 @@ async def descargar_reporte(reporte_id: int):
     - Incluye la firma del supervisor si existe (firma_supervisor_base64)
     - El frontend genera el PDF con las firmas disponibles
     - Si hay pdf_base64 guardado (compatibilidad), también lo devuelve
+    - ACTUALIZADO: Obtiene la CURP actual del usuario desde la BD
     """
     try:
         print(f"📥 Descargando reporte ID: {reporte_id}")
         
         cursor.execute("""
             SELECT 
-                id,
-                nombre_reporte,
-                mes,
-                anio,
-                tipo,
-                fecha_generacion,
-                pdf_base64,
-                COALESCE(firmado_supervisor, false) as firmado_supervisor,
-                fecha_firma_supervisor,
-                firma_supervisor_base64,
-                nombre_supervisor,
-                supervisor_id,
-                datos_reporte,
-                firma_usuario_base64
-            FROM reportes_generados
-            WHERE id = %s
+                r.id,
+                r.nombre_reporte,
+                r.mes,
+                r.anio,
+                r.tipo,
+                r.fecha_generacion,
+                r.pdf_base64,
+                COALESCE(r.firmado_supervisor, false) as firmado_supervisor,
+                r.fecha_firma_supervisor,
+                r.firma_supervisor_base64,
+                r.nombre_supervisor,
+                r.supervisor_id,
+                r.datos_reporte,
+                r.firma_usuario_base64,
+                r.usuario_id,
+                u.curp as curp_actual,
+                u.nombre_completo as nombre_actual,
+                u.territorio as territorio_actual
+            FROM reportes_generados r
+            LEFT JOIN usuarios u ON r.usuario_id = u.id
+            WHERE r.id = %s
         """, (reporte_id,))
         
         reporte = cursor.fetchone()
@@ -2187,6 +2193,10 @@ async def descargar_reporte(reporte_id: int):
         pdf_base64 = reporte[6]
         datos_reporte = reporte[12]  # JSONB - puede ser dict o string
         firma_usuario_base64 = reporte[13]
+        usuario_id = reporte[14]
+        curp_actual = reporte[15]
+        nombre_actual = reporte[16]
+        territorio_actual = reporte[17]
         
         # Si no hay datos_reporte ni pdf_base64, no hay nada que descargar
         if not pdf_base64 and not datos_reporte:
@@ -2197,6 +2207,29 @@ async def descargar_reporte(reporte_id: int):
         print(f"   Tiene datos_reporte: {'Sí' if datos_reporte else 'No'}")
         print(f"   Tiene pdf_base64: {'Sí' if pdf_base64 else 'No'}")
         print(f"   Tiene firma_usuario: {'Sí' if firma_usuario_base64 else 'No'}")
+        print(f"   Usuario ID: {usuario_id}")
+        print(f"   CURP actual del usuario: {curp_actual}")
+        
+        # Actualizar datos_reporte con CURP actual del usuario
+        if datos_reporte and curp_actual:
+            # Si datos_reporte es string JSON, parsearlo
+            if isinstance(datos_reporte, str):
+                import json as json_module
+                datos_reporte = json_module.loads(datos_reporte)
+            
+            # Actualizar o crear la sección usuario con CURP actual
+            if isinstance(datos_reporte, dict):
+                if 'usuario' not in datos_reporte:
+                    datos_reporte['usuario'] = {}
+                
+                # Actualizar con los datos actuales de la BD
+                datos_reporte['usuario']['curp'] = curp_actual
+                if nombre_actual:
+                    datos_reporte['usuario']['nombre'] = nombre_actual
+                if territorio_actual:
+                    datos_reporte['usuario']['territorio'] = territorio_actual
+                
+                print(f"   ✅ CURP actualizada en datos_reporte: {curp_actual}")
         
         return {
             "success": True,
@@ -2208,7 +2241,7 @@ async def descargar_reporte(reporte_id: int):
                 "tipo": reporte[4],
                 "fecha": reporte[5].isoformat() if reporte[5] else None,
                 "pdf_base64": pdf_base64,  # Para compatibilidad con reportes antiguos
-                # Datos estructurados del reporte (NUEVO)
+                # Datos estructurados del reporte (NUEVO - con CURP actualizada)
                 "datos_reporte": datos_reporte,
                 "firma_usuario_base64": firma_usuario_base64,
                 # Datos de firma del supervisor

@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#6ee7b7" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#6ee7b7" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#34d399" />
+    <meta name="theme-color" content="#15803d" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#15803d" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#166534" />
     <meta name="description" content="Sistema de registro de asistencia y actividades con funcionalidad offline" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -24,7 +24,7 @@
     
     <!-- Windows Tiles -->
     <meta name="msapplication-TileImage" content="/pwa-192x192.png" />
-    <meta name="msapplication-TileColor" content="#10b981" />
+    <meta name="msapplication-TileColor" content="#15803d" />
     
     <!-- Offline Support -->
     <meta name="offline-support" content="true" />
@@ -50,9 +50,9 @@
         font-display: swap;
       }
       
-      /* Fondo de vidrio para evitar color morado durante la carga */
+      /* Fondo verde sólido durante la carga */
       html, body {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 35%, #6ee7b7 70%, #34d399 100%) !important;
+        background: linear-gradient(145deg, #166534 0%, #15803d 50%, #16a34a 100%) !important;
         margin: 0;
         padding: 0;
         min-height: 100vh;
@@ -70,9 +70,455 @@
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
       }
+
+      /* ========================================
+         SPLASH SCREEN - ANIMACIÓN ESTILO APPLE
+         ======================================== */
+      
+      #splash-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, #166534 0%, #15803d 40%, #16a34a 100%);
+        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+                    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: opacity, transform;
+      }
+
+      #splash-screen.splash-hidden {
+        opacity: 0;
+        transform: scale(1.05);
+        pointer-events: none;
+      }
+
+      /* Contenedor de hojas flotantes */
+      .splash-leaves-container {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      /* Hojas flotantes animadas */
+      .splash-leaf {
+        position: absolute;
+        opacity: 0;
+        will-change: transform, opacity;
+      }
+
+      .splash-leaf svg {
+        width: 100%;
+        height: 100%;
+        fill: currentColor;
+      }
+
+      /* Hojas con diferentes tamaños y posiciones */
+      .splash-leaf-1 {
+        width: 40px; height: 40px;
+        top: 15%; left: 10%;
+        color: rgba(134, 239, 172, 0.4);
+        animation: leafFloat1 4s ease-in-out infinite, leafFadeIn 0.8s 0.2s ease-out forwards;
+      }
+
+      .splash-leaf-2 {
+        width: 32px; height: 32px;
+        top: 25%; right: 15%;
+        color: rgba(74, 222, 128, 0.35);
+        animation: leafFloat2 5s ease-in-out infinite, leafFadeIn 0.8s 0.4s ease-out forwards;
+      }
+
+      .splash-leaf-3 {
+        width: 50px; height: 50px;
+        bottom: 30%; left: 8%;
+        color: rgba(134, 239, 172, 0.3);
+        animation: leafFloat3 6s ease-in-out infinite, leafFadeIn 0.8s 0.6s ease-out forwards;
+      }
+
+      .splash-leaf-4 {
+        width: 28px; height: 28px;
+        top: 40%; right: 10%;
+        color: rgba(187, 247, 208, 0.4);
+        animation: leafFloat4 4.5s ease-in-out infinite, leafFadeIn 0.8s 0.3s ease-out forwards;
+      }
+
+      .splash-leaf-5 {
+        width: 36px; height: 36px;
+        bottom: 20%; right: 20%;
+        color: rgba(74, 222, 128, 0.3);
+        animation: leafFloat5 5.5s ease-in-out infinite, leafFadeIn 0.8s 0.5s ease-out forwards;
+      }
+
+      .splash-leaf-6 {
+        width: 44px; height: 44px;
+        top: 60%; left: 15%;
+        color: rgba(134, 239, 172, 0.25);
+        animation: leafFloat6 7s ease-in-out infinite, leafFadeIn 0.8s 0.7s ease-out forwards;
+      }
+
+      .splash-leaf-7 {
+        width: 24px; height: 24px;
+        top: 10%; left: 45%;
+        color: rgba(187, 247, 208, 0.35);
+        animation: leafFloat7 4s ease-in-out infinite, leafFadeIn 0.8s 0.25s ease-out forwards;
+      }
+
+      .splash-leaf-8 {
+        width: 38px; height: 38px;
+        bottom: 15%; left: 35%;
+        color: rgba(74, 222, 128, 0.28);
+        animation: leafFloat8 6s ease-in-out infinite, leafFadeIn 0.8s 0.55s ease-out forwards;
+      }
+
+      /* Animaciones de flotación suaves estilo Apple */
+      @keyframes leafFloat1 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        25% { transform: translate(8px, -12px) rotate(5deg) scale(1.05); }
+        50% { transform: translate(-5px, -8px) rotate(-3deg) scale(0.98); }
+        75% { transform: translate(10px, -5px) rotate(8deg) scale(1.02); }
+      }
+
+      @keyframes leafFloat2 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        33% { transform: translate(-10px, 8px) rotate(-8deg); }
+        66% { transform: translate(6px, 15px) rotate(5deg); }
+      }
+
+      @keyframes leafFloat3 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        20% { transform: translate(12px, -10px) rotate(6deg) scale(1.03); }
+        40% { transform: translate(5px, 8px) rotate(-4deg) scale(0.97); }
+        60% { transform: translate(-8px, -5px) rotate(10deg) scale(1.05); }
+        80% { transform: translate(-3px, 12px) rotate(-6deg) scale(0.99); }
+      }
+
+      @keyframes leafFloat4 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(-12px, -15px) rotate(-10deg); }
+      }
+
+      @keyframes leafFloat5 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        25% { transform: translate(-8px, 10px) rotate(-5deg) scale(1.04); }
+        75% { transform: translate(10px, -8px) rotate(7deg) scale(0.96); }
+      }
+
+      @keyframes leafFloat6 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        14% { transform: translate(5px, -8px) rotate(4deg); }
+        28% { transform: translate(-3px, 5px) rotate(-6deg); }
+        42% { transform: translate(8px, 10px) rotate(8deg); }
+        57% { transform: translate(-6px, -3px) rotate(-4deg); }
+        71% { transform: translate(3px, -10px) rotate(6deg); }
+        85% { transform: translate(-8px, 6px) rotate(-8deg); }
+      }
+
+      @keyframes leafFloat7 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        33% { transform: translate(10px, 12px) rotate(12deg); }
+        66% { transform: translate(-8px, 6px) rotate(-8deg); }
+      }
+
+      @keyframes leafFloat8 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        50% { transform: translate(15px, -12px) rotate(10deg) scale(1.06); }
+      }
+
+      @keyframes leafFadeIn {
+        from { opacity: 0; transform: scale(0.5); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      /* Contenedor central del logo */
+      .splash-center {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+      }
+
+      /* Círculo de fondo con efecto de respiración */
+      .splash-logo-ring {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .splash-logo-ring::before {
+        content: '';
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        background: rgba(134, 239, 172, 0.15);
+        animation: ringPulse 2.5s ease-in-out infinite;
+      }
+
+      .splash-logo-ring::after {
+        content: '';
+        position: absolute;
+        inset: -16px;
+        border-radius: 50%;
+        background: rgba(134, 239, 172, 0.08);
+        animation: ringPulse 2.5s ease-in-out infinite 0.3s;
+      }
+
+      @keyframes ringPulse {
+        0%, 100% { transform: scale(1); opacity: 0.6; }
+        50% { transform: scale(1.08); opacity: 0.3; }
+      }
+
+      /* Icono de planta central */
+      .splash-plant-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+        border-radius: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 
+          0 20px 60px rgba(0, 0, 0, 0.15),
+          0 8px 25px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        animation: iconAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                   iconFloat 3s ease-in-out 0.8s infinite;
+        opacity: 0;
+        transform: scale(0.5) translateY(20px);
+      }
+
+      @keyframes iconAppear {
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      @keyframes iconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
+
+      .splash-plant-icon svg {
+        width: 56px;
+        height: 56px;
+        color: #15803d;
+        animation: plantGrow 1.2s ease-out 0.4s forwards;
+        transform: scale(0.8);
+        opacity: 0.7;
+      }
+
+      @keyframes plantGrow {
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      /* Texto de la marca */
+      .splash-brand {
+        text-align: center;
+        opacity: 0;
+        animation: textFadeUp 0.8s ease-out 0.5s forwards;
+      }
+
+      @keyframes textFadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .splash-title {
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: #ffffff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .splash-subtitle {
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 6px 0 0 0;
+        letter-spacing: 0.3px;
+      }
+
+      /* Indicador de carga */
+      .splash-loader {
+        position: absolute;
+        bottom: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        opacity: 0;
+        animation: loaderFadeIn 0.6s ease-out 0.9s forwards;
+      }
+
+      @keyframes loaderFadeIn {
+        to { opacity: 1; }
+      }
+
+      /* Barra de progreso estilo Apple */
+      .splash-progress-track {
+        width: 160px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .splash-progress-bar {
+        height: 100%;
+        width: 30%;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(187, 247, 208, 0.9));
+        border-radius: 2px;
+        animation: progressSlide 1.8s ease-in-out infinite;
+      }
+
+      @keyframes progressSlide {
+        0% { transform: translateX(-100%); width: 30%; }
+        50% { width: 60%; }
+        100% { transform: translateX(400%); width: 30%; }
+      }
+
+      .splash-loading-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 0.2px;
+      }
+
+      /* Reducir animaciones para usuarios que lo prefieren */
+      @media (prefers-reduced-motion: reduce) {
+        .splash-leaf,
+        .splash-plant-icon,
+        .splash-logo-ring::before,
+        .splash-logo-ring::after,
+        .splash-progress-bar {
+          animation: none !important;
+        }
+        
+        .splash-leaf { opacity: 0.3; }
+        .splash-plant-icon { opacity: 1; transform: none; }
+        .splash-brand { opacity: 1; }
+        .splash-loader { opacity: 1; }
+        .splash-progress-bar { width: 50%; transform: none; }
+      }
     </style>
   </head>
-  <body style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 35%, #6ee7b7 70%, #34d399 100%); margin: 0; padding: 0;">
+  <body style="background: linear-gradient(145deg, #166534 0%, #15803d 50%, #16a34a 100%); margin: 0; padding: 0;">
+    
+    <!-- SPLASH SCREEN - Animación de carga estilo Apple -->
+    <div id="splash-screen">
+      <!-- Hojas flotantes decorativas -->
+      <div class="splash-leaves-container">
+        <!-- Hoja 1 - Simple -->
+        <div class="splash-leaf splash-leaf-1">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+          </svg>
+        </div>
+        
+        <!-- Hoja 2 - Doble -->
+        <div class="splash-leaf splash-leaf-2">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.05,8.05C5.3,8.05 4.55,8.2 3.9,8.5L3.89,8.5C2.25,9.25 1.05,11.05 1.05,13.05C1.05,15.8 3.3,18.05 6.05,18.05C6.8,18.05 7.55,17.9 8.2,17.6L8.21,17.6C9.85,16.85 11.05,15.05 11.05,13.05C11.05,10.3 8.8,8.05 6.05,8.05M17.95,5.95C17.2,5.95 16.45,6.1 15.8,6.4L15.79,6.4C14.15,7.15 12.95,8.95 12.95,10.95C12.95,13.7 15.2,15.95 17.95,15.95C18.7,15.95 19.45,15.8 20.1,15.5L20.11,15.5C21.75,14.75 22.95,12.95 22.95,10.95C22.95,8.2 20.7,5.95 17.95,5.95Z"/>
+          </svg>
+        </div>
+        
+        <!-- Hoja 3 - Brote -->
+        <div class="splash-leaf splash-leaf-3">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12,3C12,3 6,8 6,13C6,15.79 8.09,18.13 10.85,18.79L12,22L13.15,18.79C15.91,18.13 18,15.79 18,13C18,8 12,3 12,3Z"/>
+          </svg>
+        </div>
+        
+        <!-- Hoja 4 -->
+        <div class="splash-leaf splash-leaf-4">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+          </svg>
+        </div>
+        
+        <!-- Hoja 5 -->
+        <div class="splash-leaf splash-leaf-5">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12,3C12,3 6,8 6,13C6,15.79 8.09,18.13 10.85,18.79L12,22L13.15,18.79C15.91,18.13 18,15.79 18,13C18,8 12,3 12,3Z"/>
+          </svg>
+        </div>
+        
+        <!-- Hoja 6 -->
+        <div class="splash-leaf splash-leaf-6">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.05,8.05C5.3,8.05 4.55,8.2 3.9,8.5L3.89,8.5C2.25,9.25 1.05,11.05 1.05,13.05C1.05,15.8 3.3,18.05 6.05,18.05C6.8,18.05 7.55,17.9 8.2,17.6L8.21,17.6C9.85,16.85 11.05,15.05 11.05,13.05C11.05,10.3 8.8,8.05 6.05,8.05M17.95,5.95C17.2,5.95 16.45,6.1 15.8,6.4L15.79,6.4C14.15,7.15 12.95,8.95 12.95,10.95C12.95,13.7 15.2,15.95 17.95,15.95C18.7,15.95 19.45,15.8 20.1,15.5L20.11,15.5C21.75,14.75 22.95,12.95 22.95,10.95C22.95,8.2 20.7,5.95 17.95,5.95Z"/>
+          </svg>
+        </div>
+        
+        <!-- Hoja 7 -->
+        <div class="splash-leaf splash-leaf-7">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+          </svg>
+        </div>
+        
+        <!-- Hoja 8 -->
+        <div class="splash-leaf splash-leaf-8">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12,3C12,3 6,8 6,13C6,15.79 8.09,18.13 10.85,18.79L12,22L13.15,18.79C15.91,18.13 18,15.79 18,13C18,8 12,3 12,3Z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Centro con logo y texto -->
+      <div class="splash-center">
+        <div class="splash-logo-ring">
+          <div class="splash-plant-icon">
+            <!-- Icono de planta/semilla germinando -->
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22V12M12 12C12 12 12 8 8 5C4 2 2 4 2 4C2 4 4 8 8 9C10 9.5 12 9 12 12ZM12 12C12 12 12 8 16 5C20 2 22 4 22 4C22 4 20 8 16 9C14 9.5 12 9 12 12Z" 
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="22" r="1" fill="currentColor"/>
+              <path d="M12 22C14 22 16 20 16 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+              <path d="M12 22C10 22 8 20 8 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="splash-brand">
+          <h1 class="splash-title">Sembrando Vida</h1>
+          <p class="splash-subtitle">Sistema de Supervisión</p>
+        </div>
+      </div>
+
+      <!-- Indicador de carga inferior -->
+      <div class="splash-loader">
+        <div class="splash-progress-track">
+          <div class="splash-progress-bar"></div>
+        </div>
+        <span class="splash-loading-text">Cargando...</span>
+      </div>
+    </div>
+    
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
     
@@ -83,5 +529,44 @@
         <p>Por favor, habilita JavaScript en tu navegador e intenta nuevamente.</p>
       </div>
     </noscript>
+
+    <script>
+      // Ocultar splash screen cuando Vue esté listo
+      (function() {
+        var splashHidden = false;
+        
+        function hideSplash() {
+          if (splashHidden) return;
+          splashHidden = true;
+          
+          var splash = document.getElementById('splash-screen');
+          if (splash) {
+            splash.classList.add('splash-hidden');
+            setTimeout(function() {
+              splash.style.display = 'none';
+            }, 700);
+          }
+        }
+        
+        // Método 1: Escuchar evento personalizado de Vue
+        window.addEventListener('app-ready', hideSplash);
+        
+        // Método 2: Esperar a que el #app tenga contenido
+        var checkInterval = setInterval(function() {
+          var app = document.getElementById('app');
+          if (app && app.children.length > 0) {
+            clearInterval(checkInterval);
+            // Pequeño delay para asegurar que Vue renderizó
+            setTimeout(hideSplash, 300);
+          }
+        }, 100);
+        
+        // Método 3: Timeout máximo de seguridad (8 segundos)
+        setTimeout(function() {
+          clearInterval(checkInterval);
+          hideSplash();
+        }, 8000);
+      })();
+    </script>
   </body>
 </html>

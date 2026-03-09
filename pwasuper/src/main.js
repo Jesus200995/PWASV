@@ -69,5 +69,9 @@ app.component('font-awesome-icon', FontAwesomeIcon)
 // Usar router
 app.use(router)
 
-// Montar aplicación
+// Montar aplicación y notificar que está lista
 app.mount('#app')
+
+// Emitir evento para ocultar splash screen
+window.dispatchEvent(new CustomEvent('app-ready'))
+console.log('🚀 Aplicación Vue montada - Splash screen oculto')

@@ -3684,45 +3684,35 @@ const imgGridWidth = 55;
   75% { transform: translate(30px, 10px) scale(1.02); }
 }
 
-/* Scroll Container */
+/* Scroll Container - Compacto */
 .apple-scroll-container {
   position: absolute;
   inset: 0;
   overflow-y: auto;
-  padding-top: 13rem;
-  padding-bottom: 2rem;
+  overflow-x: hidden;
+  padding-top: 9.75rem;
+  padding-bottom: 1rem;
   -webkit-overflow-scrolling: touch;
-}
-
-/* Breakpoints responsivos para adaptación gradual */
-@media (min-width: 480px) {
-  .apple-scroll-container {
-    padding-top: 13.5rem;
-  }
 }
 
 @media (min-width: 640px) {
   .apple-scroll-container {
-    padding-top: 14rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .apple-scroll-container {
-    padding-top: 14.5rem;
+    padding-top: 10.25rem;
   }
 }
 
 .apple-content-wrapper {
   position: relative;
   z-index: 10;
-  padding: 0 1rem;
+  padding: 0 0.75rem;
   min-height: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
 }
 
 @media (min-width: 640px) {
   .apple-content-wrapper {
-    padding: 0 1.5rem;
+    padding: 0 1rem;
   }
 }
 
@@ -3859,9 +3849,9 @@ const imgGridWidth = 55;
     rgba(255, 255, 255, 0.88) 100%);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 20px;
+  border-radius: 18px;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 0.875rem 1rem;
+  padding: 0.625rem 0.875rem;
   box-shadow: 
     0 4px 24px rgba(0, 0, 0, 0.06),
     0 1px 4px rgba(0, 0, 0, 0.04);
@@ -3883,27 +3873,28 @@ const imgGridWidth = 55;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .apple-compact-title-group {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 0;
 }
 
 .apple-compact-title {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
-  font-size: 1.375rem;
+  font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.025em;
   color: #7D1D3F;
   margin: 0;
+  line-height: 1.2;
 }
 
 .apple-compact-subtitle {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.45);
   margin: 0;
@@ -3912,15 +3903,15 @@ const imgGridWidth = 55;
 .apple-compact-right {
   display: flex;
   align-items: stretch;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 /* Status Stack - Columnas apiladas */
 .apple-status-stack {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  min-width: 72px;
+  gap: 0.125rem;
+  min-width: 64px;
 }
 
 /* Status Pill */
@@ -4013,16 +4004,16 @@ const imgGridWidth = 55;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0.375rem 0.625rem;
+  padding: 0.25rem 0.5rem;
   background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.06));
-  border-radius: 10px;
-  min-width: 72px;
+  border-radius: 8px;
+  min-width: 56px;
   align-self: stretch;
 }
 
 .apple-badge-value {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #3b82f6;
   line-height: 1;
@@ -4037,41 +4028,40 @@ const imgGridWidth = 55;
   margin-top: 0.1875rem;
 }
 
-/* Responsive Compact Header */
+/* Responsive Compact Header - Sin wrap para altura fija */
 @media (max-width: 400px) {
   .apple-compact-header {
-    padding: 0.75rem;
+    padding: 0.625rem 0.75rem;
   }
   
   .apple-compact-row {
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-  
-  .apple-compact-title {
-    font-size: 1.25rem;
-  }
-  
-  .apple-compact-subtitle {
-    font-size: 0.75rem;
-  }
-  
-  .apple-compact-right {
-    flex: 1 1 100%;
-    justify-content: space-between;
+    flex-wrap: nowrap;
     gap: 0.5rem;
   }
   
-  .apple-status-stack {
-    flex-direction: row;
+  .apple-compact-title {
+    font-size: 1.125rem;
+  }
+  
+  .apple-compact-subtitle {
+    font-size: 0.6875rem;
+  }
+  
+  .apple-compact-right {
+    flex-shrink: 0;
     gap: 0.375rem;
-    flex: 1;
-    min-width: auto;
+  }
+  
+  .apple-status-stack {
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 56px;
   }
   
   .apple-status-pill {
-    flex: 1;
     min-width: 0;
+    padding: 0.125rem 0.375rem;
+    font-size: 0.5625rem;
   }
   
   .apple-stat-badge {

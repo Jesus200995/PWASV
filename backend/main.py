@@ -7898,19 +7898,29 @@ async def validar_permisos_admin():
 # ==================== ENDPOINT BÚSQUEDA DE IMÁGENES SIMILARES ====================
 
 @app.post("/admin/buscar-imagen-similar")
-async def buscar_imagen_similar(file: UploadFile = File(...), umbral: int = 15):
+async def buscar_imagen_similar(
+    file: UploadFile = File(...), 
+    umbral: int = 15,
+    fecha_inicio: Optional[str] = None,
+    fecha_fin: Optional[str] = None
+):
     """
     Buscar imágenes similares en la base de datos usando perceptual hashing.
     - file: Imagen a buscar
     - umbral: Diferencia máxima permitida entre hashes (menor = más similar, default: 15)
+    - fecha_inicio: Fecha inicio filtro ISO (opcional)
+    - fecha_fin: Fecha fin filtro ISO (opcional)
     """
     try:
         from PIL import Image
         import imagehash
+        from datetime import datetime
         
         print(f"🔍 Iniciando búsqueda de imagen similar...")
         print(f"   📁 Archivo: {file.filename}")
         print(f"   📊 Umbral de similitud: {umbral}")
+        print(f"   📅 Fecha inicio: {fecha_inicio}")
+        print(f"   📅 Fecha fin: {fecha_fin}")
         
         # Leer la imagen subida
         contenido = await file.read()
@@ -7920,17 +7930,43 @@ async def buscar_imagen_similar(file: UploadFile = File(...), umbral: int = 15):
         hash_subido = imagehash.phash(imagen_subida)
         print(f"   🔑 Hash de imagen subida: {hash_subido}")
         
-        # Obtener todos los registros con foto_url
-        cursor.execute("""
+        # Construir consulta SQL con filtros de fecha opcionales
+        query = """
             SELECT r.id, r.usuario_id, r.foto_url, r.fecha_hora, r.descripcion, r.tipo_actividad,
                    u.nombre_completo, u.correo, u.curp
             FROM registros r
             LEFT JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.foto_url IS NOT NULL AND r.foto_url != ''
-            ORDER BY r.fecha_hora DESC
-        """)
+        """
+        params = []
+        
+        # Agregar filtro de fecha inicio
+        if fecha_inicio:
+            try:
+                # Parsear fecha ISO
+                fecha_inicio_dt = datetime.fromisoformat(fecha_inicio.replace('Z', '+00:00'))
+                query += " AND r.fecha_hora >= %s"
+                params.append(fecha_inicio_dt)
+                print(f"   📅 Filtro fecha inicio: {fecha_inicio_dt}")
+            except Exception as e:
+                print(f"   ⚠️ Error parseando fecha_inicio: {e}")
+        
+        # Agregar filtro de fecha fin
+        if fecha_fin:
+            try:
+                fecha_fin_dt = datetime.fromisoformat(fecha_fin.replace('Z', '+00:00'))
+                query += " AND r.fecha_hora <= %s"
+                params.append(fecha_fin_dt)
+                print(f"   📅 Filtro fecha fin: {fecha_fin_dt}")
+            except Exception as e:
+                print(f"   ⚠️ Error parseando fecha_fin: {e}")
+        
+        query += " ORDER BY r.fecha_hora DESC"
+        
+        # Ejecutar consulta
+        cursor.execute(query, params if params else None)
         registros = cursor.fetchall()
-        print(f"   📊 Total registros con fotos: {len(registros)}")
+        print(f"   📊 Total registros con fotos (filtrados): {len(registros)}")
         
         resultados_similares = []
         imagenes_procesadas = 0

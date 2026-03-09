@@ -1121,6 +1121,75 @@
                   </button>
                 </div>
               </div>
+
+              <!-- Filtros de fecha -->
+              <div class="filtros-fecha-busqueda">
+                <div class="filtro-fecha-header">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <span>Filtrar por periodo</span>
+                </div>
+                
+                <div class="filtro-fecha-opciones">
+                  <button 
+                    :class="['filtro-fecha-btn', { active: filtroFechaBusqueda === 'todos' }]"
+                    @click="filtroFechaBusqueda = 'todos'"
+                    :disabled="buscandoImagenSimilar"
+                  >Todos</button>
+                  <button 
+                    :class="['filtro-fecha-btn', { active: filtroFechaBusqueda === 'hoy' }]"
+                    @click="filtroFechaBusqueda = 'hoy'"
+                    :disabled="buscandoImagenSimilar"
+                  >Hoy</button>
+                  <button 
+                    :class="['filtro-fecha-btn', { active: filtroFechaBusqueda === 'semana' }]"
+                    @click="filtroFechaBusqueda = 'semana'"
+                    :disabled="buscandoImagenSimilar"
+                  >Esta semana</button>
+                  <button 
+                    :class="['filtro-fecha-btn', { active: filtroFechaBusqueda === 'mes' }]"
+                    @click="filtroFechaBusqueda = 'mes'"
+                    :disabled="buscandoImagenSimilar"
+                  >Este mes</button>
+                  <button 
+                    :class="['filtro-fecha-btn', { active: filtroFechaBusqueda === 'anio' }]"
+                    @click="filtroFechaBusqueda = 'anio'"
+                    :disabled="buscandoImagenSimilar"
+                  >Este año</button>
+                  <button 
+                    :class="['filtro-fecha-btn', { active: filtroFechaBusqueda === 'personalizado' }]"
+                    @click="filtroFechaBusqueda = 'personalizado'"
+                    :disabled="buscandoImagenSimilar"
+                  >Personalizado</button>
+                </div>
+                
+                <!-- Fechas personalizadas -->
+                <div v-if="filtroFechaBusqueda === 'personalizado'" class="filtro-fecha-personalizado">
+                  <div class="fecha-input-group">
+                    <label>Desde</label>
+                    <input 
+                      type="date" 
+                      v-model="fechaInicioBusqueda"
+                      :max="fechaFinBusqueda || maxDateBusqueda"
+                      :disabled="buscandoImagenSimilar"
+                    >
+                  </div>
+                  <div class="fecha-input-group">
+                    <label>Hasta</label>
+                    <input 
+                      type="date" 
+                      v-model="fechaFinBusqueda"
+                      :min="fechaInicioBusqueda"
+                      :max="maxDateBusqueda"
+                      :disabled="buscandoImagenSimilar"
+                    >
+                  </div>
+                </div>
+              </div>
               
               <!-- Slider de umbral de similitud -->
               <div class="similitud-control">
@@ -1174,50 +1243,59 @@
                   <div 
                     v-for="(resultado, index) in resultadosBusquedaImagen" 
                     :key="resultado.registro_id" 
-                    class="resultado-card"
+                    class="resultado-card-mejorado"
                   >
-                    <div class="resultado-imagen-container">
-                      <img :src="getImageUrl(resultado.foto_url)" :alt="'Resultado ' + (index + 1)" @error="handleImageError">
-                      <span class="similitud-badge" :class="getSimilitudClass(resultado.similitud)">
-                        {{ resultado.similitud }}%
-                      </span>
+                    <!-- Comparación visual: Imagen subida vs Encontrada -->
+                    <div class="comparacion-imagenes">
+                      <div class="imagen-comparacion subida">
+                        <span class="etiqueta-comparacion">Tu imagen</span>
+                        <img :src="imagenPreviewUrl" alt="Imagen subida">
+                      </div>
+                      <div class="indicador-similitud">
+                        <div class="circulo-similitud" :class="getSimilitudClass(resultado.similitud)">
+                          <span class="porcentaje">{{ resultado.similitud }}%</span>
+                        </div>
+                        <span class="texto-similitud">similitud</span>
+                      </div>
+                      <div class="imagen-comparacion encontrada">
+                        <span class="etiqueta-comparacion">Encontrada</span>
+                        <img :src="getImageUrl(resultado.foto_url)" :alt="'Resultado ' + (index + 1)" @error="handleImageError">
+                      </div>
                     </div>
-                    <div class="resultado-info">
-                      <div class="resultado-usuario">
-                        <div class="usuario-avatar">{{ resultado.usuario?.nombre_completo?.charAt(0) || '?' }}</div>
-                        <div class="usuario-datos">
+                    
+                    <!-- Info del usuario y registro -->
+                    <div class="info-resultado-mejorado">
+                      <div class="usuario-info-card">
+                        <div class="avatar-usuario">{{ resultado.usuario?.nombre_completo?.charAt(0) || '?' }}</div>
+                        <div class="datos-usuario">
                           <h5>{{ resultado.usuario?.nombre_completo || 'Sin nombre' }}</h5>
-                          <p class="usuario-correo">{{ resultado.usuario?.correo || 'Sin correo' }}</p>
-                          <p class="usuario-curp" v-if="resultado.usuario?.curp">CURP: {{ resultado.usuario.curp }}</p>
+                          <p class="correo">{{ resultado.usuario?.correo || 'Sin correo' }}</p>
+                          <p class="curp" v-if="resultado.usuario?.curp">{{ resultado.usuario.curp }}</p>
                         </div>
                       </div>
-                      <div class="resultado-detalles">
-                        <div class="detalle-item">
+                      
+                      <div class="detalles-registro">
+                        <div class="detalle-chip fecha">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                             <line x1="16" y1="2" x2="16" y2="6"/>
                             <line x1="8" y1="2" x2="8" y2="6"/>
                             <line x1="3" y1="10" x2="21" y2="10"/>
                           </svg>
-                          <span>{{ formatearFechaResultado(resultado.fecha_hora) }}</span>
+                          {{ formatearFechaResultado(resultado.fecha_hora) }}
                         </div>
-                        <div class="detalle-item" v-if="resultado.tipo_actividad">
+                        <div class="detalle-chip tipo" v-if="resultado.tipo_actividad">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                             <polyline points="22 4 12 14.01 9 11.01"/>
                           </svg>
-                          <span>{{ resultado.tipo_actividad }}</span>
-                        </div>
-                        <div class="detalle-item" v-if="resultado.descripcion">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="17" y1="10" x2="3" y2="10"/>
-                            <line x1="21" y1="6" x2="3" y2="6"/>
-                            <line x1="21" y1="14" x2="3" y2="14"/>
-                            <line x1="17" y1="18" x2="3" y2="18"/>
-                          </svg>
-                          <span class="descripcion-truncada">{{ resultado.descripcion }}</span>
+                          {{ resultado.tipo_actividad }}
                         </div>
                       </div>
+                      
+                      <p class="descripcion-resultado" v-if="resultado.descripcion">
+                        {{ resultado.descripcion }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1245,7 +1323,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
@@ -1350,6 +1428,12 @@ const inputImagenRef = ref(null)
 const resultadosBusquedaImagen = ref([])
 const totalImagenesProcesadas = ref(0)
 const busquedaRealizada = ref(false)
+
+// Variables para filtros de fecha en búsqueda de imagen
+const filtroFechaBusqueda = ref('todos') // 'todos', 'hoy', 'semana', 'mes', 'anio', 'personalizado'
+const fechaInicioBusqueda = ref('')
+const fechaFinBusqueda = ref('')
+const maxDateBusqueda = computed(() => new Date().toISOString().split('T')[0])
 
 // ============= VARIABLES PARA ESTADÍSTICAS DE REPORTES PDF =============
 const showEstadisticasReportesModal = ref(false)
@@ -2694,6 +2778,10 @@ const abrirModalBuscarImagen = () => {
   totalImagenesProcesadas.value = 0
   umbralSimilitud.value = 15
   isDragging.value = false
+  // Reiniciar filtros de fecha
+  filtroFechaBusqueda.value = 'todos'
+  fechaInicioBusqueda.value = ''
+  fechaFinBusqueda.value = ''
 }
 
 const cerrarModalBuscarImagen = () => {
@@ -2748,6 +2836,50 @@ const removerImagen = () => {
   }
 }
 
+// Función para calcular fechas según el filtro seleccionado
+const calcularFechasFiltro = () => {
+  const hoy = new Date()
+  let fechaInicio = null
+  let fechaFin = null
+  
+  switch (filtroFechaBusqueda.value) {
+    case 'hoy':
+      fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())
+      fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59)
+      break
+    case 'semana':
+      const inicioSemana = new Date(hoy)
+      inicioSemana.setDate(hoy.getDate() - hoy.getDay())
+      fechaInicio = new Date(inicioSemana.getFullYear(), inicioSemana.getMonth(), inicioSemana.getDate())
+      fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59)
+      break
+    case 'mes':
+      fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+      fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59)
+      break
+    case 'anio':
+      fechaInicio = new Date(hoy.getFullYear(), 0, 1)
+      fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59)
+      break
+    case 'personalizado':
+      if (fechaInicioBusqueda.value) {
+        fechaInicio = new Date(fechaInicioBusqueda.value + 'T00:00:00')
+      }
+      if (fechaFinBusqueda.value) {
+        fechaFin = new Date(fechaFinBusqueda.value + 'T23:59:59')
+      }
+      break
+    case 'todos':
+    default:
+      return { fechaInicio: null, fechaFin: null }
+  }
+  
+  return {
+    fechaInicio: fechaInicio ? fechaInicio.toISOString() : null,
+    fechaFin: fechaFin ? fechaFin.toISOString() : null
+  }
+}
+
 const ejecutarBusquedaImagen = async () => {
   if (!imagenParaBuscar.value || buscandoImagenSimilar.value) return
   
@@ -2757,22 +2889,33 @@ const ejecutarBusquedaImagen = async () => {
   
   try {
     console.log('🔍 Iniciando búsqueda de imagen similar...')
+    console.log(`📅 Filtro de fecha: ${filtroFechaBusqueda.value}`)
     
     const formData = new FormData()
     formData.append('file', imagenParaBuscar.value)
     
+    // Construir URL con parámetros
+    let url = `${apiConfig.url}/admin/buscar-imagen-similar?umbral=${umbralSimilitud.value}`
+    
+    // Agregar filtros de fecha
+    const { fechaInicio, fechaFin } = calcularFechasFiltro()
+    if (fechaInicio) {
+      url += `&fecha_inicio=${encodeURIComponent(fechaInicio)}`
+    }
+    if (fechaFin) {
+      url += `&fecha_fin=${encodeURIComponent(fechaFin)}`
+    }
+    
+    console.log('🔗 URL de búsqueda:', url)
+    
     const token = localStorage.getItem('admin_token')
-    const response = await axios.post(
-      `${apiConfig.url}/admin/buscar-imagen-similar?umbral=${umbralSimilitud.value}`,
-      formData,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        },
-        timeout: 120000 // 2 minutos para procesar muchas imágenes
-      }
-    )
+    const response = await axios.post(url, formData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      },
+      timeout: 120000 // 2 minutos para procesar muchas imágenes
+    })
     
     console.log('✅ Búsqueda completada:', response.data)
     
@@ -2838,6 +2981,39 @@ const formatearFechaResultado = (fechaStr) => {
     return fechaStr
   }
 }
+
+// ==================== WATCHERS PARA BÚSQUEDA EN TIEMPO REAL ====================
+
+// Ejecutar búsqueda automática cuando cambia el filtro de fecha (si ya hay imagen)
+watch(filtroFechaBusqueda, (newVal) => {
+  if (imagenParaBuscar.value && busquedaRealizada.value) {
+    console.log('🔄 Filtro de fecha cambiado a:', newVal)
+    ejecutarBusquedaImagen()
+  }
+})
+
+// Ejecutar búsqueda cuando cambian las fechas personalizadas
+watch([fechaInicioBusqueda, fechaFinBusqueda], ([inicio, fin]) => {
+  if (filtroFechaBusqueda.value === 'personalizado' && 
+      imagenParaBuscar.value && 
+      busquedaRealizada.value &&
+      inicio && fin) {
+    console.log('🔄 Fechas personalizadas cambiadas:', inicio, fin)
+    ejecutarBusquedaImagen()
+  }
+})
+
+// Ejecutar búsqueda cuando cambia el umbral de sensibilidad
+watch(umbralSimilitud, (newVal) => {
+  if (imagenParaBuscar.value && busquedaRealizada.value) {
+    console.log('🔄 Umbral de similitud cambiado a:', newVal)
+    // Usar debounce para evitar muchas llamadas
+    clearTimeout(window.umbralTimeout)
+    window.umbralTimeout = setTimeout(() => {
+      ejecutarBusquedaImagen()
+    }, 500)
+  }
+})
 
 // ==================== FUNCIONES DE TRANSFERENCIA DE ACTIVIDADES ====================
 

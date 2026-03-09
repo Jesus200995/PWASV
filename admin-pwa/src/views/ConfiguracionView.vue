@@ -199,6 +199,21 @@
                     </div>
                     <span class="action-badge orange">Selectiva</span>
                   </div>
+
+                  <div class="image-action-card blue" @click="abrirModalBuscarImagen" :class="{ disabled: buscandoImagenSimilar }">
+                    <div class="image-action-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <rect x="6" y="6" width="10" height="10" rx="1"/>
+                      </svg>
+                    </div>
+                    <div class="image-action-text">
+                      <h4>{{ buscandoImagenSimilar ? 'Buscando...' : 'Buscar Similar' }}</h4>
+                      <p>Encuentra imagenes parecidas en registros</p>
+                    </div>
+                    <span class="action-badge blue">Busqueda</span>
+                  </div>
                 </div>
               </div>
             </section>
@@ -1045,6 +1060,187 @@
         </Transition>
       </div>
     </Transition>
+
+    <!-- Modal de Búsqueda de Imagen Similar -->
+    <Transition name="modal-fade">
+      <div v-if="showBuscarImagenModal" class="modal-overlay buscar-imagen-overlay" @click="cerrarModalBuscarImagen">
+        <Transition name="modal-scale">
+          <div class="modal-content modal-buscar-imagen" @click.stop>
+            <!-- Header del modal -->
+            <div class="modal-header modal-header-buscar-imagen">
+              <div class="header-icon-buscar-imagen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <rect x="6" y="6" width="10" height="10" rx="1"/>
+                </svg>
+              </div>
+              <h3>Buscar Imagen Similar</h3>
+              <button @click="cerrarModalBuscarImagen" class="btn-close" :disabled="buscandoImagenSimilar">&times;</button>
+            </div>
+            
+            <!-- Body del modal -->
+            <div class="modal-body modal-body-buscar-imagen">
+              <!-- Zona de subida de imagen -->
+              <div 
+                class="dropzone-buscar-imagen" 
+                :class="{ 'dropzone-active': isDragging, 'dropzone-has-image': imagenParaBuscar }"
+                @dragover.prevent="isDragging = true"
+                @dragleave.prevent="isDragging = false"
+                @drop.prevent="handleDropImagen"
+                @click="triggerInputImagen"
+              >
+                <input 
+                  ref="inputImagenRef"
+                  type="file" 
+                  accept="image/*" 
+                  @change="handleSelectImagen"
+                  style="display: none"
+                >
+                
+                <div v-if="!imagenParaBuscar" class="dropzone-placeholder">
+                  <div class="dropzone-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <h4>Arrastra una imagen aqui</h4>
+                  <p>o haz clic para seleccionar</p>
+                  <span class="dropzone-formats">PNG, JPG, JPEG, WEBP</span>
+                </div>
+                
+                <div v-else class="preview-imagen-buscar">
+                  <img :src="imagenPreviewUrl" alt="Imagen a buscar">
+                  <button class="btn-remove-imagen" @click.stop="removerImagen" :disabled="buscandoImagenSimilar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Slider de umbral de similitud -->
+              <div class="similitud-control">
+                <label>
+                  <span class="similitud-label">Sensibilidad de busqueda</span>
+                  <span class="similitud-value">{{ umbralSimilitud <= 5 ? 'Muy similar' : umbralSimilitud <= 15 ? 'Similar' : 'Parecido' }}</span>
+                </label>
+                <input 
+                  type="range" 
+                  v-model="umbralSimilitud" 
+                  min="1" 
+                  max="30" 
+                  step="1"
+                  class="slider-similitud"
+                  :disabled="buscandoImagenSimilar"
+                >
+                <div class="similitud-hints">
+                  <span>Exacta</span>
+                  <span>Flexible</span>
+                </div>
+              </div>
+              
+              <!-- Botón de búsqueda -->
+              <button 
+                class="btn-buscar-imagen-similar" 
+                :disabled="!imagenParaBuscar || buscandoImagenSimilar"
+                @click="ejecutarBusquedaImagen"
+              >
+                <svg v-if="!buscandoImagenSimilar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span v-else class="spinner-buscar"></span>
+                {{ buscandoImagenSimilar ? 'Buscando coincidencias...' : 'Buscar Imagenes Similares' }}
+              </button>
+              
+              <!-- Resultados de búsqueda -->
+              <div v-if="resultadosBusquedaImagen.length > 0" class="resultados-busqueda-imagen">
+                <div class="resultados-header">
+                  <h4>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    {{ resultadosBusquedaImagen.length }} coincidencia(s) encontrada(s)
+                  </h4>
+                  <span class="resultados-stats">{{ totalImagenesProcesadas }} imagenes analizadas</span>
+                </div>
+                
+                <div class="resultados-lista">
+                  <div 
+                    v-for="(resultado, index) in resultadosBusquedaImagen" 
+                    :key="resultado.registro_id" 
+                    class="resultado-card"
+                  >
+                    <div class="resultado-imagen-container">
+                      <img :src="getImageUrl(resultado.foto_url)" :alt="'Resultado ' + (index + 1)" @error="handleImageError">
+                      <span class="similitud-badge" :class="getSimilitudClass(resultado.similitud)">
+                        {{ resultado.similitud }}%
+                      </span>
+                    </div>
+                    <div class="resultado-info">
+                      <div class="resultado-usuario">
+                        <div class="usuario-avatar">{{ resultado.usuario?.nombre_completo?.charAt(0) || '?' }}</div>
+                        <div class="usuario-datos">
+                          <h5>{{ resultado.usuario?.nombre_completo || 'Sin nombre' }}</h5>
+                          <p class="usuario-correo">{{ resultado.usuario?.correo || 'Sin correo' }}</p>
+                          <p class="usuario-curp" v-if="resultado.usuario?.curp">CURP: {{ resultado.usuario.curp }}</p>
+                        </div>
+                      </div>
+                      <div class="resultado-detalles">
+                        <div class="detalle-item">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                          </svg>
+                          <span>{{ formatearFechaResultado(resultado.fecha_hora) }}</span>
+                        </div>
+                        <div class="detalle-item" v-if="resultado.tipo_actividad">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                          </svg>
+                          <span>{{ resultado.tipo_actividad }}</span>
+                        </div>
+                        <div class="detalle-item" v-if="resultado.descripcion">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="17" y1="10" x2="3" y2="10"/>
+                            <line x1="21" y1="6" x2="3" y2="6"/>
+                            <line x1="21" y1="14" x2="3" y2="14"/>
+                            <line x1="17" y1="18" x2="3" y2="18"/>
+                          </svg>
+                          <span class="descripcion-truncada">{{ resultado.descripcion }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Estado sin resultados -->
+              <div v-else-if="busquedaRealizada && !buscandoImagenSimilar" class="sin-resultados-imagen">
+                <div class="sin-resultados-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    <line x1="8" y1="8" x2="14" y2="14"/>
+                    <line x1="14" y1="8" x2="8" y2="14"/>
+                  </svg>
+                </div>
+                <h4>No se encontraron coincidencias</h4>
+                <p>Intenta con una imagen diferente o aumenta la sensibilidad de busqueda</p>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -1142,6 +1338,18 @@ const periodoTextoPreview = computed(() => {
   }
   return `Todo el año ${eliminarFechaConfig.anio}`
 })
+
+// ============= VARIABLES PARA BÚSQUEDA DE IMAGEN SIMILAR =============
+const showBuscarImagenModal = ref(false)
+const buscandoImagenSimilar = ref(false)
+const imagenParaBuscar = ref(null)
+const imagenPreviewUrl = ref('')
+const isDragging = ref(false)
+const umbralSimilitud = ref(15)
+const inputImagenRef = ref(null)
+const resultadosBusquedaImagen = ref([])
+const totalImagenesProcesadas = ref(0)
+const busquedaRealizada = ref(false)
 
 // ============= VARIABLES PARA ESTADÍSTICAS DE REPORTES PDF =============
 const showEstadisticasReportesModal = ref(false)
@@ -2471,6 +2679,164 @@ const cerrarProgressModalFecha = () => {
 const onProgressFechaCompletado = () => {
   // No cerrar automáticamente - el usuario debe cerrar manualmente con el botón "Aceptar"
   eliminandoImagenesPorFecha.value = false
+}
+
+// ==================== FUNCIONES DE BÚSQUEDA DE IMAGEN SIMILAR ====================
+
+const abrirModalBuscarImagen = () => {
+  if (buscandoImagenSimilar.value) return
+  showBuscarImagenModal.value = true
+  // Limpiar estados anteriores
+  imagenParaBuscar.value = null
+  imagenPreviewUrl.value = ''
+  resultadosBusquedaImagen.value = []
+  busquedaRealizada.value = false
+  totalImagenesProcesadas.value = 0
+  umbralSimilitud.value = 15
+  isDragging.value = false
+}
+
+const cerrarModalBuscarImagen = () => {
+  if (buscandoImagenSimilar.value) return
+  showBuscarImagenModal.value = false
+  // Limpiar imagen
+  removerImagen()
+}
+
+const triggerInputImagen = () => {
+  if (buscandoImagenSimilar.value || imagenParaBuscar.value) return
+  inputImagenRef.value?.click()
+}
+
+const handleSelectImagen = (event) => {
+  const file = event.target.files?.[0]
+  if (file) {
+    procesarImagenSeleccionada(file)
+  }
+}
+
+const handleDropImagen = (event) => {
+  isDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file && file.type.startsWith('image/')) {
+    procesarImagenSeleccionada(file)
+  }
+}
+
+const procesarImagenSeleccionada = (file) => {
+  imagenParaBuscar.value = file
+  
+  // Crear URL de preview
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    imagenPreviewUrl.value = e.target.result
+  }
+  reader.readAsDataURL(file)
+  
+  // Limpiar resultados anteriores
+  resultadosBusquedaImagen.value = []
+  busquedaRealizada.value = false
+}
+
+const removerImagen = () => {
+  imagenParaBuscar.value = null
+  imagenPreviewUrl.value = ''
+  resultadosBusquedaImagen.value = []
+  busquedaRealizada.value = false
+  if (inputImagenRef.value) {
+    inputImagenRef.value.value = ''
+  }
+}
+
+const ejecutarBusquedaImagen = async () => {
+  if (!imagenParaBuscar.value || buscandoImagenSimilar.value) return
+  
+  buscandoImagenSimilar.value = true
+  resultadosBusquedaImagen.value = []
+  busquedaRealizada.value = false
+  
+  try {
+    console.log('🔍 Iniciando búsqueda de imagen similar...')
+    
+    const formData = new FormData()
+    formData.append('file', imagenParaBuscar.value)
+    
+    const token = localStorage.getItem('admin_token')
+    const response = await axios.post(
+      `${apiConfig.url}/admin/buscar-imagen-similar?umbral=${umbralSimilitud.value}`,
+      formData,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        },
+        timeout: 120000 // 2 minutos para procesar muchas imágenes
+      }
+    )
+    
+    console.log('✅ Búsqueda completada:', response.data)
+    
+    if (response.data.success) {
+      resultadosBusquedaImagen.value = response.data.resultados || []
+      totalImagenesProcesadas.value = response.data.total_procesadas || 0
+      busquedaRealizada.value = true
+      
+      if (resultadosBusquedaImagen.value.length > 0) {
+        console.log(`📊 Encontradas ${resultadosBusquedaImagen.value.length} coincidencias`)
+      } else {
+        console.log('📊 No se encontraron coincidencias')
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ Error en búsqueda de imagen:', error)
+    busquedaRealizada.value = true
+    
+    let mensaje = 'Error al buscar imágenes similares'
+    if (error.response?.data?.detail) {
+      mensaje = error.response.data.detail
+    } else if (error.message) {
+      mensaje = error.message
+    }
+    
+    mostrarMensaje('Error', mensaje)
+  } finally {
+    buscandoImagenSimilar.value = false
+  }
+}
+
+const getImageUrl = (fotoUrl) => {
+  if (!fotoUrl) return ''
+  if (fotoUrl.startsWith('http')) return fotoUrl
+  if (fotoUrl.startsWith('/fotos/')) return `${apiConfig.url}${fotoUrl}`
+  if (fotoUrl.startsWith('fotos/')) return `${apiConfig.url}/${fotoUrl}`
+  return `${apiConfig.url}/fotos/${fotoUrl}`
+}
+
+const handleImageError = (event) => {
+  event.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk5OSIgc3Ryb2tlLXdpZHRoPSIxLjUiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIi8+PGNpcmNsZSBjeD0iOC41IiBjeT0iOC41IiByPSIxLjUiLz48cG9seWxpbmUgcG9pbnRzPSIyMSAxNSAxNiAxMCA1IDIxIi8+PC9zdmc+'
+}
+
+const getSimilitudClass = (similitud) => {
+  if (similitud >= 90) return 'similitud-alta'
+  if (similitud >= 70) return 'similitud-media'
+  return 'similitud-baja'
+}
+
+const formatearFechaResultado = (fechaStr) => {
+  if (!fechaStr) return 'Fecha desconocida'
+  try {
+    const fecha = new Date(fechaStr)
+    return fecha.toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch {
+    return fechaStr
+  }
 }
 
 // ==================== FUNCIONES DE TRANSFERENCIA DE ACTIVIDADES ====================
@@ -4009,6 +4375,10 @@ const logout = () => {
   border-left: 3px solid #f97316;
 }
 
+.image-action-card.blue {
+  border-left: 3px solid #3b82f6;
+}
+
 .image-action-card:hover {
   transform: translateX(3px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -4038,6 +4408,11 @@ const logout = () => {
 .image-action-card.orange .image-action-icon {
   background: rgba(249, 115, 22, 0.1);
   color: #ea580c;
+}
+
+.image-action-card.blue .image-action-icon {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
 }
 
 .image-action-icon svg {
@@ -4084,6 +4459,11 @@ const logout = () => {
 .action-badge.orange {
   background: rgba(249, 115, 22, 0.1);
   color: #ea580c;
+}
+
+.action-badge.blue {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
 }
 
 /* === TOOLS ROW === */
@@ -8016,6 +8396,605 @@ const logout = () => {
   .modal-scale-leave-active {
     transition: transform 0.2s ease-in,
                 opacity 0.15s ease-in;
+  }
+}
+
+/* ==================== MODAL BÚSQUEDA DE IMAGEN SIMILAR ==================== */
+.buscar-imagen-overlay {
+  z-index: 9999;
+}
+
+.modal-buscar-imagen {
+  width: 95%;
+  max-width: 680px;
+  max-height: 90vh;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header-buscar-imagen {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  position: relative;
+}
+
+.header-icon-buscar-imagen {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon-buscar-imagen svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+}
+
+.modal-header-buscar-imagen h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.modal-header-buscar-imagen .btn-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal-header-buscar-imagen .btn-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.modal-body-buscar-imagen {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Dropzone */
+.dropzone-buscar-imagen {
+  border: 2px dashed #d1d5db;
+  border-radius: 16px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+  position: relative;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropzone-buscar-imagen:hover,
+.dropzone-buscar-imagen.dropzone-active {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.dropzone-buscar-imagen.dropzone-has-image {
+  border-style: solid;
+  border-color: #10b981;
+  padding: 12px;
+  cursor: default;
+}
+
+.dropzone-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropzone-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.dropzone-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: white;
+}
+
+.dropzone-placeholder h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.dropzone-placeholder p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.dropzone-formats {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 12px;
+  background: #e5e7eb;
+  border-radius: 20px;
+  font-size: 11px;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+/* Preview imagen */
+.preview-imagen-buscar {
+  position: relative;
+  width: 100%;
+  max-height: 200px;
+  display: flex;
+  justify-content: center;
+}
+
+.preview-imagen-buscar img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 12px;
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-remove-imagen {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid white;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.btn-remove-imagen:hover {
+  transform: scale(1.1);
+  background: #dc2626;
+}
+
+.btn-remove-imagen svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Control de similitud */
+.similitud-control {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px 20px;
+}
+
+.similitud-control label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.similitud-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.similitud-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.slider-similitud {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.slider-similitud::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.slider-similitud::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.similitud-hints {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Botón de búsqueda */
+.btn-buscar-imagen-similar {
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+}
+
+.btn-buscar-imagen-similar:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.45);
+}
+
+.btn-buscar-imagen-similar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-buscar-imagen-similar svg {
+  width: 20px;
+  height: 20px;
+}
+
+.spinner-buscar {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Resultados de búsqueda */
+.resultados-busqueda-imagen {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.resultados-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-bottom: 1px solid #bbf7d0;
+}
+
+.resultados-header h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resultados-header h4 svg {
+  width: 18px;
+  height: 18px;
+  stroke: #16a34a;
+}
+
+.resultados-stats {
+  font-size: 12px;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.15);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.resultados-lista {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.resultado-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.2s ease;
+}
+
+.resultado-card:last-child {
+  border-bottom: none;
+}
+
+.resultado-card:hover {
+  background: #fafafa;
+}
+
+.resultado-imagen-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.resultado-imagen-container img {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+}
+
+.similitud-badge {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.similitud-badge.similitud-alta {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+}
+
+.similitud-badge.similitud-media {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+  color: white;
+}
+
+.similitud-badge.similitud-baja {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+}
+
+.resultado-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.resultado-usuario {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.usuario-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.usuario-datos {
+  flex: 1;
+  min-width: 0;
+}
+
+.usuario-datos h5 {
+  margin: 0 0 2px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.usuario-correo {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.usuario-curp {
+  margin: 2px 0 0 0;
+  font-size: 11px;
+  color: #9ca3af;
+  font-family: monospace;
+}
+
+.resultado-detalles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detalle-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.detalle-item svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.descripcion-truncada {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sin resultados */
+.sin-resultados-imagen {
+  text-align: center;
+  padding: 40px 20px;
+  background: #fafafa;
+  border-radius: 16px;
+}
+
+.sin-resultados-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fee2e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.sin-resultados-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: #ef4444;
+}
+
+.sin-resultados-imagen h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.sin-resultados-imagen p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Responsive para modal búsqueda imagen */
+@media (max-width: 640px) {
+  .modal-buscar-imagen {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    border-radius: 24px 24px 0 0;
+    margin-top: auto;
+  }
+  
+  .modal-body-buscar-imagen {
+    padding: 16px;
+  }
+  
+  .dropzone-buscar-imagen {
+    padding: 30px 16px;
+    min-height: 150px;
+  }
+  
+  .dropzone-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .dropzone-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .resultado-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .resultado-imagen-container img {
+    width: 100%;
+    height: 120px;
+    object-fit: contain;
+    background: #f9fafb;
+  }
+  
+  .similitud-badge {
+    bottom: auto;
+    top: 8px;
+    right: 8px;
+  }
+  
+  .resultados-lista {
+    max-height: 300px;
   }
 }
 </style>

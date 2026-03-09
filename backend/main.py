@@ -7895,6 +7895,125 @@ async def validar_permisos_admin():
 
 # ==================== FIN ENDPOINTS DE GESTIÓN DE USUARIOS ADMINISTRATIVOS ====================
 
+# ==================== ENDPOINT BÚSQUEDA DE IMÁGENES SIMILARES ====================
+
+@app.post("/admin/buscar-imagen-similar")
+async def buscar_imagen_similar(file: UploadFile = File(...), umbral: int = 15):
+    """
+    Buscar imágenes similares en la base de datos usando perceptual hashing.
+    - file: Imagen a buscar
+    - umbral: Diferencia máxima permitida entre hashes (menor = más similar, default: 15)
+    """
+    try:
+        from PIL import Image
+        import imagehash
+        
+        print(f"🔍 Iniciando búsqueda de imagen similar...")
+        print(f"   📁 Archivo: {file.filename}")
+        print(f"   📊 Umbral de similitud: {umbral}")
+        
+        # Leer la imagen subida
+        contenido = await file.read()
+        imagen_subida = Image.open(BytesIO(contenido))
+        
+        # Calcular hash perceptual de la imagen subida
+        hash_subido = imagehash.phash(imagen_subida)
+        print(f"   🔑 Hash de imagen subida: {hash_subido}")
+        
+        # Obtener todos los registros con foto_url
+        cursor.execute("""
+            SELECT r.id, r.usuario_id, r.foto_url, r.fecha_hora, r.descripcion, r.tipo_actividad,
+                   u.nombre_completo, u.correo, u.curp
+            FROM registros r
+            LEFT JOIN usuarios u ON r.usuario_id = u.id
+            WHERE r.foto_url IS NOT NULL AND r.foto_url != ''
+            ORDER BY r.fecha_hora DESC
+        """)
+        registros = cursor.fetchall()
+        print(f"   📊 Total registros con fotos: {len(registros)}")
+        
+        resultados_similares = []
+        imagenes_procesadas = 0
+        imagenes_con_error = 0
+        
+        for registro in registros:
+            reg_id, usuario_id, foto_url, fecha_hora, descripcion, tipo_actividad, nombre_completo, correo, curp = registro
+            
+            try:
+                # Construir ruta completa del archivo
+                if foto_url.startswith('/fotos/'):
+                    ruta_archivo = os.path.join(FOTOS_DIR, foto_url[7:])
+                elif foto_url.startswith('fotos/'):
+                    ruta_archivo = os.path.join(FOTOS_DIR, foto_url[6:])
+                else:
+                    ruta_archivo = os.path.join(FOTOS_DIR, foto_url)
+                
+                # Verificar que el archivo existe
+                if not os.path.exists(ruta_archivo):
+                    continue
+                
+                # Cargar imagen y calcular hash
+                imagen_bd = Image.open(ruta_archivo)
+                hash_bd = imagehash.phash(imagen_bd)
+                
+                # Calcular diferencia entre hashes
+                diferencia = hash_subido - hash_bd
+                
+                imagenes_procesadas += 1
+                
+                # Si la diferencia es menor al umbral, es similar
+                if diferencia <= umbral:
+                    # Calcular porcentaje de similitud (0 = idéntico, umbral = límite)
+                    similitud = max(0, 100 - (diferencia * 100 / 64))  # phash tiene 64 bits
+                    
+                    resultados_similares.append({
+                        "registro_id": reg_id,
+                        "usuario_id": usuario_id,
+                        "foto_url": foto_url,
+                        "fecha_hora": fecha_hora.isoformat() if fecha_hora else None,
+                        "descripcion": descripcion,
+                        "tipo_actividad": tipo_actividad,
+                        "usuario": {
+                            "nombre_completo": nombre_completo,
+                            "correo": correo,
+                            "curp": curp
+                        },
+                        "similitud": round(similitud, 2),
+                        "diferencia_hash": diferencia
+                    })
+                    
+            except Exception as e:
+                imagenes_con_error += 1
+                continue
+        
+        # Ordenar por similitud (mayor primero)
+        resultados_similares.sort(key=lambda x: x['similitud'], reverse=True)
+        
+        print(f"   ✅ Búsqueda completada:")
+        print(f"      - Imágenes procesadas: {imagenes_procesadas}")
+        print(f"      - Imágenes con error: {imagenes_con_error}")
+        print(f"      - Coincidencias encontradas: {len(resultados_similares)}")
+        
+        return {
+            "success": True,
+            "total_procesadas": imagenes_procesadas,
+            "total_errores": imagenes_con_error,
+            "total_coincidencias": len(resultados_similares),
+            "umbral_usado": umbral,
+            "resultados": resultados_similares
+        }
+        
+    except ImportError as e:
+        print(f"❌ Error: Librería imagehash no instalada. Ejecutar: pip install imagehash Pillow")
+        raise HTTPException(status_code=500, detail="Librería imagehash no instalada en el servidor")
+    except Exception as e:
+        print(f"❌ Error en búsqueda de imagen similar: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error al buscar imagen: {str(e)}")
+
+# ==================== FIN ENDPOINT BÚSQUEDA IMÁGENES SIMILARES ====================
+
 @app.get("/auth/validar")
 async def validar_permisos_usuario():
     """Validar los permisos del usuario actual basado en el token"""

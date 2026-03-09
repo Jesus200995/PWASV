@@ -194,6 +194,22 @@
             <!-- Filtros Avanzados Expandibles -->
             <div v-if="mostrarFiltrosAvanzados" class="apple-advanced-filters">
               <div class="advanced-grid">
+                <!-- Filtro de Territorio (solo visible si hay más de uno) -->
+                <div v-if="mostrarFiltroTerritorio" class="filter-item filter-item-territorio">
+                  <label>
+                    <svg class="filter-label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    Territorio
+                  </label>
+                  <select v-model="filtroTerritorio" @change="aplicarFiltroTerritorio" :disabled="cargandoTerritorios">
+                    <option value="">Todos los territorios</option>
+                    <option v-for="territorio in territoriosDisponibles" :key="territorio" :value="territorio">
+                      {{ territorio }}
+                    </option>
+                  </select>
+                </div>
                 <div class="filter-item">
                   <label>Usuario</label>
                   <select v-model="filtroUsuario" @change="filtrarRegistros">
@@ -1265,6 +1281,73 @@ const filtroConFoto = ref(false)
 const filtroSinFoto = ref(false)
 const filtroConDescripcion = ref(false)
 
+// Variables para filtro de territorio
+const filtroTerritorio = ref('')
+const territoriosDisponibles = ref([])
+const cargandoTerritorios = ref(false)
+
+// Computed para mostrar filtro de territorio solo si hay más de uno disponible
+const mostrarFiltroTerritorio = computed(() => {
+  // Admin global siempre puede ver el filtro si hay territorios
+  if (userRol.value === 'admin' || authService.isAdmin()) {
+    return territoriosDisponibles.value.length > 0
+  }
+  // Para usuarios territoriales, solo mostrar si tienen acceso a más de un territorio
+  return territoriosDisponibles.value.length > 1
+})
+
+// Función para cargar territorios disponibles según permisos
+const cargarTerritorios = async () => {
+  try {
+    cargandoTerritorios.value = true
+    const token = localStorage.getItem('admin_token')
+    
+    // Verificar si el usuario es territorial
+    const currentUser = authService.getCurrentUser()
+    const esTerritorial = currentUser?.es_territorial || false
+    const territorioAsignado = currentUser?.territorio || null
+    
+    console.log('🗺️ Cargando territorios - Es territorial:', esTerritorial, '| Territorio:', territorioAsignado)
+    
+    if (esTerritorial && territorioAsignado) {
+      // Si es territorial, solo tiene acceso a su territorio
+      territoriosDisponibles.value = [territorioAsignado]
+      // Pre-seleccionar su territorio
+      filtroTerritorio.value = territorioAsignado
+      console.log('📍 Usuario territorial - Solo acceso a:', territorioAsignado)
+    } else {
+      // Si es admin global, cargar todos los territorios del backend
+      try {
+        const response = await axios.get(`${API_URL}/territorios-sembrando-vida`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 10000
+        })
+        
+        territoriosDisponibles.value = response.data.territorios || []
+        console.log('🌍 Admin global - Territorios disponibles:', territoriosDisponibles.value.length)
+      } catch (err) {
+        console.error('Error cargando territorios:', err)
+        territoriosDisponibles.value = []
+      }
+    }
+  } catch (err) {
+    console.error('Error en cargarTerritorios:', err)
+    territoriosDisponibles.value = []
+  } finally {
+    cargandoTerritorios.value = false
+  }
+}
+
+// Función para aplicar filtro de territorio
+const aplicarFiltroTerritorio = () => {
+  console.log('🌍 Aplicando filtro de territorio:', filtroTerritorio.value || 'todos')
+  paginaActual.value = 1
+  cargarRegistros()
+}
+
 // Variables para paginación y carga eficiente
 const paginaActual = ref(1)
 const registrosPorPagina = ref(50)
@@ -1280,8 +1363,8 @@ const cargarMasRegistros = async () => {
     cargandoMas.value = true
     const token = localStorage.getItem('admin_token')
     
-    // Obtener filtro de territorio si el admin es territorial
-    const territorioFilter = authService.getTerritorioFilter()
+    // Determinar filtro de territorio (igual que en cargarRegistros)
+    let territorioFilter = filtroTerritorio.value || authService.getTerritorioFilter()
     
     console.log('📊 Cargando más registros...')
     
@@ -1439,7 +1522,10 @@ const mostrarPagina = (numeroPagina) => {
 }
 
 onMounted(() => {
-  cargarRegistros()
+  // Cargar territorios primero, luego registros
+  cargarTerritorios().then(() => {
+    cargarRegistros()
+  })
   
   // Escuchar cambios de conexión
   window.addEventListener('online', () => {
@@ -1489,8 +1575,10 @@ const cargarRegistros = async () => {
   try {
     const token = localStorage.getItem('admin_token')
     
-    // Obtener filtro de territorio si el admin es territorial
-    const territorioFilter = authService.getTerritorioFilter()
+    // Determinar filtro de territorio:
+    // 1. Si hay filtro seleccionado manualmente, usar ese
+    // 2. Si no, usar el filtro por defecto del admin territorial
+    let territorioFilter = filtroTerritorio.value || authService.getTerritorioFilter()
     
     if (territorioFilter) {
       console.log(`📊 Solicitando registros del territorio: ${territorioFilter}...`)
@@ -1754,23 +1842,45 @@ const buscarEnTiempoReal = async () => {
   
   const termino = searchTerm.value?.trim() || ''
   
-  // Si el término de búsqueda tiene 3 o más caracteres, buscar en el backend
+  // Si el término de búsqueda tiene 3 o más caracteres, buscar en el backend + filtrar por descripción
   if (termino.length >= 3) {
     console.log(`⏳ Iniciando búsqueda en 500ms para: "${termino}"`)
     busquedaTimeout = setTimeout(async () => {
       console.log(`🚀 Ejecutando búsqueda para: "${termino}"`)
       const usuariosEncontrados = await buscarUsuarioEnBackend(termino)
       
-      // CAMBIO: Después de cargar los registros del usuario, mostrarlos directamente
-      // NO aplicar filtro local porque ya tenemos exactamente los registros que queremos
-      if (usuariosEncontrados.length > 0) {
-        console.log(`✅ Mostrando todos los registros del usuario encontrado`)
-        registrosFiltrados.value = [...registros.value]
+      // Búsqueda mejorada: combinar usuarios encontrados + registros que coincidan por descripción
+      const terminoLower = termino.toLowerCase()
+      
+      // Siempre filtrar también por descripción en los registros existentes
+      const registrosPorDescripcion = registros.value.filter(registro => {
+        const descripcion = (registro.descripcion || '').toLowerCase()
+        return descripcion.includes(terminoLower)
+      })
+      
+      console.log(`📝 Registros que coinciden por descripción: ${registrosPorDescripcion.length}`)
+      
+      if (usuariosEncontrados.length > 0 || registrosPorDescripcion.length > 0) {
+        // Si hay coincidencias por usuario, mostrar sus registros
+        // Si también hay coincidencias por descripción, combinar sin duplicados
+        if (usuariosEncontrados.length > 0) {
+          // Los registros del usuario ya están en registros.value después de buscarUsuarioEnBackend
+          // Combinar con los que coinciden por descripción
+          const idsUsuarioEncontrado = new Set(registros.value.map(r => r.id))
+          const registrosAdicionales = registrosPorDescripcion.filter(r => !idsUsuarioEncontrado.has(r.id))
+          
+          registrosFiltrados.value = [...registros.value, ...registrosAdicionales]
+        } else {
+          // Solo mostrar registros que coinciden por descripción
+          registrosFiltrados.value = registrosPorDescripcion
+        }
+        
+        console.log(`✅ Mostrando ${registrosFiltrados.value.length} registros (usuario + descripción)`)
         aplicarOrdenamiento()
         actualizarUsuariosUnicos()
         actualizarFiltrosActivos()
       } else {
-        console.log(`⚠️ No se encontraron usuarios, mostrando registros vacíos`)
+        console.log(`⚠️ No se encontraron usuarios ni descripciones coincidentes`)
         registrosFiltrados.value = []
       }
       
@@ -3964,6 +4074,15 @@ const logout = () => {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filter-label-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .filter-item select,

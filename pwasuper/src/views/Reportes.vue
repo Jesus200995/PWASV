@@ -3689,14 +3689,27 @@ const imgGridWidth = 55;
   position: absolute;
   inset: 0;
   overflow-y: auto;
-  padding-top: 10rem;
+  padding-top: 13rem;
   padding-bottom: 2rem;
   -webkit-overflow-scrolling: touch;
 }
 
+/* Breakpoints responsivos para adaptación gradual */
+@media (min-width: 480px) {
+  .apple-scroll-container {
+    padding-top: 13.5rem;
+  }
+}
+
 @media (min-width: 640px) {
   .apple-scroll-container {
-    padding-top: 10.5rem;
+    padding-top: 14rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .apple-scroll-container {
+    padding-top: 14.5rem;
   }
 }
 

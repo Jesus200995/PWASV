@@ -1,6 +1,14 @@
 <template>
-  <div class="flex flex-col relative">
-    <div class="page-container w-full max-w-lg mx-auto relative z-10 pt-0 pb-8 space-y-2">
+  <div class="fixed inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 overflow-hidden">
+    <!-- Elementos decorativos para efecto de vidrio -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
+      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="absolute inset-0 overflow-y-auto pt-[7rem] pb-8">
+      <div class="page-container w-full max-w-lg mx-auto relative z-10 px-2 space-y-2">
       <!-- Botones de selección de sección -->
       <div v-if="!modoAsistencia" class="glass-card">
         <div class="text-center mb-3">
@@ -648,6 +656,7 @@
             </button>
           </div>
         </div>
+      </div>
       </div>
 
     <!-- Modal de confirmación para entrada -->
@@ -1340,6 +1349,7 @@
           Ver todos los registros &rarr;
         </router-link>
       </div>
+      </div>
     </div>
 
     <!-- Modal de confirmación -->
@@ -1350,7 +1360,6 @@
       @close="closeSuccessModal"
     />
   </div>
-</div>
 </template>
 
 <script setup>

@@ -3689,14 +3689,14 @@ const imgGridWidth = 55;
   position: absolute;
   inset: 0;
   overflow-y: auto;
-  padding-top: 4.5rem;
+  padding-top: 10rem;
   padding-bottom: 2rem;
   -webkit-overflow-scrolling: touch;
 }
 
 @media (min-width: 640px) {
   .apple-scroll-container {
-    padding-top: 5rem;
+    padding-top: 10.5rem;
   }
 }
 
@@ -3720,13 +3720,7 @@ const imgGridWidth = 55;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding-top: 5.5rem;
-}
-
-@media (min-width: 640px) {
-  .apple-sections-container {
-    padding-top: 6rem;
-  }
+  padding-top: 0;
 }
 
 /* Header Card */

@@ -607,18 +607,18 @@ const currentUserId = computed(() => {
     <header v-if="isLoggedIn" class="header-decorative bg-green-800 shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-40 mx-2 mt-2" :class="showMobileMenu ? 'rounded-t-3xl' : 'rounded-3xl'">
       <div class="max-w-sm mx-auto px-3 py-2">
         <div class="flex items-center justify-between">
-          <div class="flex items-center">
+          <div class="flex items-center min-w-0 flex-1 pr-2">
             <!-- Icono de plantita con contorno neón -->
-            <PoinsettiaFlower />
-            <div>
-              <h1 class="header-title text-sm mb-0 font-semibold" style="color: #39ff14; letter-spacing: 0.02em;">
+            <PoinsettiaFlower class="flex-shrink-0" />
+            <div class="min-w-0 flex-1">
+              <h1 class="header-title text-xs mb-0 font-semibold leading-tight" style="color: #39ff14; letter-spacing: 0.02em;">
                 Sembrando Vida
               </h1>
-              <p class="text-xs text-gray-100 -mt-1">{{ userName }}</p>
+              <p class="text-[10px] text-gray-100 -mt-0.5 truncate max-w-full" :title="userName">{{ userName }}</p>
             </div>
           </div>
           
-          <div class="flex items-center space-x-2">
+          <div class="flex items-center space-x-2 flex-shrink-0">
             <!-- Botón de notificaciones -->
             <router-link
               to="/notificaciones"

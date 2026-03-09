@@ -9121,6 +9121,368 @@ const logout = () => {
   color: #6b7280;
 }
 
+/* ==================== FILTROS DE FECHA BÚSQUEDA ==================== */
+.filtros-fecha-busqueda {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.filtro-fecha-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.filtro-fecha-header svg {
+  width: 18px;
+  height: 18px;
+  stroke: #6b7280;
+}
+
+.filtro-fecha-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro-fecha-btn {
+  padding: 8px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filtro-fecha-btn:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.filtro-fecha-btn.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.filtro-fecha-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.filtro-fecha-personalizado {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.fecha-input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fecha-input-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.fecha-input-group input[type="date"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1f2937;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.fecha-input-group input[type="date"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.fecha-input-group input[type="date"]:disabled {
+  opacity: 0.5;
+  background: #f9fafb;
+}
+
+/* ==================== TARJETA DE RESULTADO MEJORADA ==================== */
+.resultado-card-mejorado {
+  padding: 20px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.2s ease;
+}
+
+.resultado-card-mejorado:last-child {
+  border-bottom: none;
+}
+
+.resultado-card-mejorado:hover {
+  background: #fafafa;
+}
+
+/* Comparación de imágenes lado a lado */
+.comparacion-imagenes {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.imagen-comparacion {
+  flex: 1;
+  max-width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.imagen-comparacion .etiqueta-comparacion {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.imagen-comparacion.subida .etiqueta-comparacion {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.imagen-comparacion.encontrada .etiqueta-comparacion {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+.imagen-comparacion img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.imagen-comparacion.subida img {
+  border-color: #3b82f6;
+}
+
+.imagen-comparacion.encontrada img {
+  border-color: #10b981;
+}
+
+.imagen-comparacion img:hover {
+  transform: scale(1.03);
+}
+
+/* Indicador de similitud central */
+.indicador-similitud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+.circulo-similitud {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.circulo-similitud::before {
+  content: '';
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: white;
+  z-index: 0;
+}
+
+.circulo-similitud .porcentaje {
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.circulo-similitud.similitud-alta {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.circulo-similitud.similitud-alta .porcentaje {
+  color: #16a34a;
+}
+
+.circulo-similitud.similitud-media {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+}
+
+.circulo-similitud.similitud-media .porcentaje {
+  color: #ca8a04;
+}
+
+.circulo-similitud.similitud-baja {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.circulo-similitud.similitud-baja .porcentaje {
+  color: #ea580c;
+}
+
+.texto-similitud {
+  font-size: 10px;
+  font-weight: 500;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Info del resultado mejorada */
+.info-resultado-mejorado {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.usuario-info-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.avatar-usuario {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.datos-usuario {
+  flex: 1;
+  min-width: 0;
+}
+
+.datos-usuario h5 {
+  margin: 0 0 2px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.datos-usuario .correo {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.datos-usuario .curp {
+  margin: 2px 0 0 0;
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: 'SF Mono', Monaco, monospace;
+  letter-spacing: 0.5px;
+}
+
+.detalles-registro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detalle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.detalle-chip svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.detalle-chip.fecha {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+.detalle-chip.fecha svg {
+  stroke: #3b82f6;
+}
+
+.detalle-chip.tipo {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.detalle-chip.tipo svg {
+  stroke: #10b981;
+}
+
+.descripcion-resultado {
+  margin: 0;
+  padding: 12px 14px;
+  background: #fafafa;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.5;
+  border-left: 3px solid #e5e7eb;
+}
+
 /* Responsive para modal búsqueda imagen */
 @media (max-width: 640px) {
   .modal-buscar-imagen {
@@ -9171,6 +9533,91 @@ const logout = () => {
   
   .resultados-lista {
     max-height: 300px;
+  }
+  
+  /* Filtros de fecha responsive */
+  .filtro-fecha-opciones {
+    gap: 6px;
+  }
+  
+  .filtro-fecha-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .filtro-fecha-personalizado {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  /* Comparación de imágenes responsive */
+  .comparacion-imagenes {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .imagen-comparacion {
+    max-width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  
+  .imagen-comparacion img {
+    width: 100px;
+    height: 80px;
+  }
+  
+  .indicador-similitud {
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px 0;
+  }
+  
+  .circulo-similitud {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .circulo-similitud::before {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .circulo-similitud .porcentaje {
+    font-size: 12px;
+  }
+  
+  /* Info usuario responsive */
+  .usuario-info-card {
+    padding: 10px 12px;
+  }
+  
+  .avatar-usuario {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+  
+  .datos-usuario h5 {
+    font-size: 14px;
+  }
+  
+  .datos-usuario .correo {
+    font-size: 12px;
+  }
+  
+  .detalles-registro {
+    gap: 6px;
+  }
+  
+  .detalle-chip {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  
+  .resultado-card-mejorado {
+    padding: 14px;
   }
 }
 </style>

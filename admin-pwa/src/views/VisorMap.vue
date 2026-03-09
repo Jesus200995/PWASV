@@ -159,7 +159,7 @@
             </div>
             <div class="apple-stats-grid">
               <div class="apple-stat-item">
-                <div class="apple-stat-icon blue">
+                <div class="apple-stat-icon burgundy">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>
@@ -167,18 +167,18 @@
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                   </svg>
                 </div>
-                <span class="apple-stat-value">{{ totalUsuariosRegistrados }}</span>
+                <span class="apple-stat-value burgundy">{{ totalUsuariosRegistrados }}</span>
                 <span class="apple-stat-label">Total Usuarios</span>
               </div>
               <div class="apple-stat-item">
-                <div class="apple-stat-icon green">
+                <div class="apple-stat-icon blue">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                     <polyline points="10 17 15 12 10 7"/>
                     <line x1="15" y1="12" x2="3" y2="12"/>
                   </svg>
                 </div>
-                <span class="apple-stat-value green">{{ estadisticasDiaActual.entradasDia }}</span>
+                <span class="apple-stat-value blue">{{ estadisticasDiaActual.entradasDia }}</span>
                 <span class="apple-stat-label">Entradas</span>
               </div>
               <div class="apple-stat-item">
@@ -193,7 +193,7 @@
                 <span class="apple-stat-label">Salidas</span>
               </div>
               <div class="apple-stat-item">
-                <div class="apple-stat-icon orange">
+                <div class="apple-stat-icon campo-green">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 18h18"/>
                     <path d="M8 14v-4"/>
@@ -201,26 +201,26 @@
                     <path d="M16 14v-8"/>
                   </svg>
                 </div>
-                <span class="apple-stat-value orange">{{ estadisticasDiaActual.campoHoy }}</span>
+                <span class="apple-stat-value campo-green">{{ estadisticasDiaActual.campoHoy }}</span>
                 <span class="apple-stat-label">Campo</span>
               </div>
               <div class="apple-stat-item">
-                <div class="apple-stat-icon purple">
+                <div class="apple-stat-icon orange">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
                   </svg>
                 </div>
-                <span class="apple-stat-value purple">{{ estadisticasDiaActual.gabineteHoy }}</span>
+                <span class="apple-stat-value orange">{{ estadisticasDiaActual.gabineteHoy }}</span>
                 <span class="apple-stat-label">Gabinete</span>
               </div>
               <div class="apple-stat-item">
-                <div class="apple-stat-icon gold">
+                <div class="apple-stat-icon gray">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
                 </div>
-                <span class="apple-stat-value gold">{{ estadisticasDiaActual.campoHoy + estadisticasDiaActual.gabineteHoy }}</span>
+                <span class="apple-stat-value gray">{{ estadisticasDiaActual.campoHoy + estadisticasDiaActual.gabineteHoy }}</span>
                 <span class="apple-stat-label">Total Hoy</span>
               </div>
             </div>
@@ -3331,11 +3331,14 @@ watch(filtroTipo, () => {
 }
 
 .apple-stat-icon.blue { background: linear-gradient(135deg, #007AFF, #0056CC); }
+.apple-stat-icon.burgundy { background: linear-gradient(135deg, #8B1538, #6B0F2A); }
 .apple-stat-icon.green { background: linear-gradient(135deg, #34C759, #2DA44E); }
+.apple-stat-icon.campo-green { background: linear-gradient(135deg, #34C759, #2DA44E); }
 .apple-stat-icon.red { background: linear-gradient(135deg, #FF3B30, #E6342B); }
 .apple-stat-icon.orange { background: linear-gradient(135deg, #FF9500, #E68600); }
 .apple-stat-icon.purple { background: linear-gradient(135deg, #AF52DE, #8B3DC7); }
 .apple-stat-icon.gold { background: linear-gradient(135deg, #FFD700, #FFC107); }
+.apple-stat-icon.gray { background: linear-gradient(135deg, #8E8E93, #636366); }
 
 .apple-stat-value {
   font-size: 15px;
@@ -3344,11 +3347,15 @@ watch(filtroTipo, () => {
   line-height: 1;
 }
 
+.apple-stat-value.blue { color: #007AFF; }
+.apple-stat-value.burgundy { color: #8B1538; }
 .apple-stat-value.green { color: #34C759; }
+.apple-stat-value.campo-green { color: #34C759; }
 .apple-stat-value.red { color: #FF3B30; }
 .apple-stat-value.orange { color: #FF9500; }
 .apple-stat-value.purple { color: #AF52DE; }
 .apple-stat-value.gold { color: #B8860B; }
+.apple-stat-value.gray { color: #8E8E93; }
 
 .apple-stat-label {
   font-size: 8px;
@@ -3395,11 +3402,11 @@ watch(filtroTipo, () => {
   flex-shrink: 0;
 }
 
-.apple-color-dot.entrada { background: linear-gradient(135deg, #34C759, #2DA44E); }
+.apple-color-dot.entrada { background: linear-gradient(135deg, #007AFF, #0056CC); }
 .apple-color-dot.salida { background: linear-gradient(135deg, #FF3B30, #E6342B); }
-.apple-color-dot.campo { background: linear-gradient(135deg, #FF9500, #E68600); }
-.apple-color-dot.gabinete { background: linear-gradient(135deg, #AF52DE, #8B3DC7); }
-.apple-color-dot.total { background: linear-gradient(135deg, #FFD700, #FFC107); }
+.apple-color-dot.campo { background: linear-gradient(135deg, #34C759, #2DA44E); }
+.apple-color-dot.gabinete { background: linear-gradient(135deg, #FF9500, #E68600); }
+.apple-color-dot.total { background: linear-gradient(135deg, #8E8E93, #636366); }
 
 /* ====================== APPLE HELP LIST ====================== */
 .apple-help-list {

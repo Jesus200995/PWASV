@@ -9,12 +9,12 @@
     
     <div class="page-container w-full max-w-md relative z-10 px-2">
       <!-- Header Section Compacto -->
-      <div class="text-center mb-4">
-        <div class="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 mx-auto -mb-6">
+      <div class="text-center mb-2">
+        <div class="w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 mx-auto -mb-20">
           <img 
-            src="/src/images/icono.png" 
+            src="/images/logosv.png" 
             alt="Sembrando Vida Logo" 
-            class="w-full h-full object-contain rounded-full"
+            class="w-full h-full object-contain"
           />
         </div>
         <h1 class="text-lg font-semibold mb-1 text-center modern-title">Aplicación de Seguimiento</h1>

@@ -444,168 +444,164 @@
 
     <!-- Modal para detalles -->
     <Teleport to="body">
-      <div v-if="showModal" class="modal-overlay" @click="cerrarModal">
-        <div class="modal-content" @click.stop>
-          <!-- Header del modal con degradado verde -->
-          <div class="modal-header">
-            <div class="modal-header-content">
-              <div class="modal-icon">
-                <svg width="18" height="18" fill="white" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625zM7.5 15a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 15zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H8.25z" clip-rule="evenodd"/>
-                  <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z"/>
-                </svg>
+      <!-- MODAL VER DETALLES - APPLE DESIGN VERDE -->
+      <Transition name="apple-details-fade">
+        <div v-if="showModal" class="apple-details-overlay" @click="cerrarModal">
+          <Transition name="apple-details-scale" appear>
+            <div class="apple-details-modal" @click.stop>
+              <!-- Background Effects -->
+              <div class="apple-details-bg-effects">
+                <div class="apple-details-orb apple-details-orb-1"></div>
+                <div class="apple-details-orb apple-details-orb-2"></div>
+                <div class="apple-details-orb apple-details-orb-3"></div>
               </div>
-              <h3 class="modal-title">
-                Detalles del Registro
-              </h3>
-            </div>
-            <button @click="cerrarModal" class="btn-close">
-              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          </div>
 
-          <!-- Contenido del modal -->
-          <div class="modal-body">
-            <!-- Vista de detalles del registro -->
-            <div v-if="modalType === 'details' && selectedRegistro" class="registro-detalles">
-              <div class="detail-grid">
-                <div class="detail-item">
-                  <div class="detail-icon">
-                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                    </svg>
+              <!-- Header -->
+              <div class="apple-details-header">
+                <div class="apple-details-header-content">
+                  <div class="apple-details-icon-ring">
+                    <div class="apple-details-icon-inner">
+                      <svg width="22" height="22" fill="white" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625zM7.5 15a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 15zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H8.25z" clip-rule="evenodd"/>
+                        <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z"/>
+                      </svg>
+                    </div>
                   </div>
-                  <div class="detail-content">
-                    <span class="detail-label">ID del Registro</span>
-                    <span class="detail-value highlight">#{{ selectedRegistro.id }}</span>
+                  <div class="apple-details-titles">
+                    <h3 class="apple-details-title">Detalles del Registro</h3>
+                    <div class="apple-details-subtitle" v-if="selectedRegistro">
+                      <span class="apple-details-id-chip">
+                        <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M5 3a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2H5zm2 3h2v2H7V6zm4 0h6v2h-6V6zM7 10h2v2H7v-2zm4 0h6v2h-6v-2zM7 14h2v2H7v-2zm4 0h6v2h-6v-2z"/>
+                        </svg>
+                        #{{ selectedRegistro.id }}
+                      </span>
+                      <span :class="['apple-details-tipo-chip', getTipoClass(selectedRegistro.tipo_actividad)]">
+                        {{ getTipoLabel(selectedRegistro.tipo_actividad) }}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <button @click="cerrarModal" class="apple-details-close">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
 
-                <div class="detail-item">
-                  <div class="detail-icon">
-                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+              <!-- Body -->
+              <div class="apple-details-body" v-if="modalType === 'details' && selectedRegistro">
+                <!-- User Info Card -->
+                <div class="apple-details-user-card">
+                  <div class="apple-details-user-avatar">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>
                   </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Usuario</span>
-                    <span class="detail-value">{{ selectedRegistro.usuario?.nombre_completo || `Usuario ${selectedRegistro.usuario_id}` }}</span>
+                  <div class="apple-details-user-info">
+                    <span class="apple-details-user-name">{{ selectedRegistro.usuario?.nombre_completo || `Usuario ${selectedRegistro.usuario_id}` }}</span>
+                    <span class="apple-details-user-email">{{ selectedRegistro.usuario?.correo || 'No disponible' }}</span>
                   </div>
                 </div>
 
-                <div class="detail-item">
-                  <div class="detail-icon">
-                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z"/>
-                      <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z"/>
-                    </svg>
+                <!-- Info Grid -->
+                <div class="apple-details-grid">
+                  <div class="apple-details-card apple-details-datetime-card">
+                    <div class="apple-details-card-icon apple-details-datetime-icon">
+                      <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd"/>
+                      </svg>
+                    </div>
+                    <div class="apple-details-card-content">
+                      <span class="apple-details-card-label">Fecha y Hora</span>
+                      <div class="apple-details-datetime-wrapper">
+                        <span class="apple-details-date-value">{{ formatFechaDetalle(selectedRegistro.fecha_hora).fecha }}</span>
+                        <span class="apple-details-time-badge">
+                          <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
+                          </svg>
+                          {{ formatFechaDetalle(selectedRegistro.fecha_hora).hora }}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Correo Electrónico</span>
-                    <span class="detail-value">{{ selectedRegistro.usuario?.correo || 'No disponible' }}</span>
+
+                  <div class="apple-details-card">
+                    <div class="apple-details-card-icon">
+                      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                      </svg>
+                    </div>
+                    <div class="apple-details-card-content">
+                      <span class="apple-details-card-label">Coordenadas</span>
+                      <span class="apple-details-card-value apple-details-coords">{{ parseFloat(selectedRegistro.latitud).toFixed(6) }}, {{ parseFloat(selectedRegistro.longitud).toFixed(6) }}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div class="detail-item">
-                  <div class="detail-icon">
-                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                      <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd"/>
-                    </svg>
-                  </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Fecha y Hora</span>
-                    <span class="detail-value">{{ formatFecha(selectedRegistro.fecha_hora) }}</span>
-                  </div>
-                </div>
-
-                <div class="detail-item">
-                  <div class="detail-icon">
-                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                  </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Tipo de Actividad</span>
-                    <span class="detail-value">
-                      <span :class="['tipo-badge-modal', getTipoClass(selectedRegistro.tipo_actividad)]">
-                        {{ getTipoLabel(selectedRegistro.tipo_actividad) }}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-
-                <div class="detail-item">
-                  <div class="detail-icon">
-                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                      <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
-                    </svg>
-                  </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Ubicación</span>
-                    <span class="detail-value location">{{ parseFloat(selectedRegistro.latitud).toFixed(6) }}, {{ parseFloat(selectedRegistro.longitud).toFixed(6) }}</span>
-                  </div>
-                </div>
-
-                <div class="detail-item full-width">
-                  <div class="detail-icon">
+                <!-- Description -->
+                <div class="apple-details-section">
+                  <div class="apple-details-section-header">
                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
                       <path fill-rule="evenodd" d="M4.125 3C3.089 3 2.25 3.84 2.25 4.875V18a3 3 0 003 3h15a3 3 0 01-3-3V4.875C17.25 3.839 16.41 3 15.375 3H4.125zM12 9.75a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5H12zm-.75-2.25a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5H12a.75.75 0 01-.75-.75zM6 12.75a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5H6zm-.75 3.75a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5H6a.75.75 0 01-.75-.75zM6 6.75a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h3a.75.75 0 00.75-.75v-3A.75.75 0 009 6.75H6z" clip-rule="evenodd"/>
-                      <path d="M18.75 6.75h1.875c.621 0 1.125.504 1.125 1.125V18a1.5 1.5 0 01-3 0V6.75z"/>
                     </svg>
+                    Descripción
                   </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Descripción</span>
-                    <span class="detail-value description">{{ selectedRegistro.descripcion || 'Sin descripción' }}</span>
-                  </div>
+                  <p class="apple-details-description">{{ selectedRegistro.descripcion || 'Sin descripción' }}</p>
                 </div>
 
-                <div v-if="selectedRegistro.foto_url" class="detail-item full-width">
-                  <div class="detail-icon">
+                <!-- Photo -->
+                <div v-if="selectedRegistro.foto_url" class="apple-details-section">
+                  <div class="apple-details-section-header">
                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
                       <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd"/>
                     </svg>
+                    Fotografía
                   </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Fotografía</span>
-                    <div class="photo-container">
-                      <img 
-                        :src="`${API_URL}/${selectedRegistro.foto_url}`" 
-                        alt="Foto del registro" 
-                        class="detail-photo"
-                        @click="abrirFotoCompleta(selectedRegistro.foto_url)"
-                      >
+                  <div class="apple-details-photo-container">
+                    <img 
+                      :src="`${API_URL}/${selectedRegistro.foto_url}`" 
+                      alt="Foto del registro" 
+                      class="apple-details-photo"
+                      @click="abrirFotoCompleta(selectedRegistro.foto_url)"
+                    >
+                    <div class="apple-details-photo-overlay">
+                      <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        <path d="M12 10h-2v2H9v-2H7V9h2V7h1v2h2v1z"/>
+                      </svg>
+                      <span>Ver completa</span>
                     </div>
                   </div>
                 </div>
 
-                <div class="detail-item full-width">
-                  <div class="detail-icon">
+                <!-- Map -->
+                <div class="apple-details-section">
+                  <div class="apple-details-section-header">
                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                      <path fill-rule="evenodd" d="M8.25 6.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-1.381z" clip-rule="evenodd"/>
-                      <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a3.75 3.75 0 013.57-4.047z"/>
-                      <path d="M20.226 19.389a8.287 8.287 0 00-1.308-5.135 3.75 3.75 0 013.57 4.047l-.01.121a.563.563 0 01-.373.486l-.115.041c-.07.027-.148.053-.3.102-.331.108-.763.21-1.464.338z"/>
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                     </svg>
+                    Ubicación en Mapa
                   </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Mapa de Ubicación</span>
-                    <div class="map-container">
-                      <div id="map" class="leaflet-map"></div>
-                    </div>
+                  <div class="apple-details-map-container">
+                    <div id="map" class="apple-details-map"></div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Footer del modal -->
-          <div class="modal-footer">
-            <!-- Footer simplificado sin botón de cerrar -->
-          </div>
+              <!-- Footer -->
+              <div class="apple-details-footer">
+                <button @click="cerrarModal" class="apple-details-btn-close">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </Transition>
         </div>
-      </div>
+      </Transition>
     </Teleport>
 
     <!-- Lightbox para ver foto en pantalla completa -->
@@ -968,233 +964,307 @@
 
     <!-- Modal para notificar sobre actividad -->
     <Teleport to="body" v-if="showNotificarModal">
-      <div class="modal-overlay-edit" @click="cerrarModalNotificar">
-        <div class="modal-edit-container modal-notificar" @click.stop>
-          <!-- Header -->
-          <div class="modal-edit-header modal-notificar-header">
-            <div class="header-icon-wrapper header-icon-notificar">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-              </svg>
-            </div>
-            <div class="header-text">
-              <h3 class="header-title-notificar">Notificar sobre Actividad</h3>
-              <span class="header-subtitle header-subtitle-notificar" v-if="actividadANotificar" style="display: flex; align-items: center; gap: 6px;">
-                <span :class="['tipo-badge', getTipoClass(actividadANotificar.tipo_actividad)]" style="font-size: 9px; padding: 3px 7px;">
-                  {{ actividadANotificar.tipo_actividad?.toUpperCase() }}
-                </span>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0;">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-                {{ actividadANotificar.usuario?.nombre_completo || 'Usuario' }}
-              </span>
-            </div>
-            <button @click="cerrarModalNotificar" class="btn-close-edit btn-close-notificar" title="Cerrar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          </div>
+      <Transition name="apple-modal-fade">
+        <div class="apple-notif-overlay" @click="cerrarModalNotificar">
+          <Transition name="apple-modal-scale">
+            <div class="apple-notif-modal" @click.stop>
+              <!-- Glassmorphism Background Effects -->
+              <div class="apple-notif-bg-effects">
+                <div class="apple-notif-orb apple-notif-orb-1"></div>
+                <div class="apple-notif-orb apple-notif-orb-2"></div>
+                <div class="apple-notif-orb apple-notif-orb-3"></div>
+              </div>
 
-          <!-- Contenido del modal con scroll -->
-          <div class="modal-edit-scroll-area">
-            <!-- Información de la actividad (readonly) -->
-            <div class="modal-edit-readonly-section readonly-section-notificar">
-              <h4 class="section-title section-title-notificar">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Actividad seleccionada
-              </h4>
-              
-              <div class="readonly-grid-3col" v-if="actividadANotificar">
-                <div class="readonly-card">
-                  <div class="readonly-card-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
+              <!-- Header Apple Style -->
+              <div class="apple-notif-header">
+                <div class="apple-notif-header-content">
+                  <div class="apple-notif-icon-ring">
+                    <div class="apple-notif-icon-inner">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                        <path d="M4 2C2.8 3.7 2 5.7 2 8"/>
+                        <path d="M22 8c0-2.3-.8-4.3-2-6"/>
+                      </svg>
+                    </div>
                   </div>
-                  <div class="readonly-card-content">
-                    <span class="readonly-card-label">Tipo</span>
-                    <span class="readonly-card-value">
-                      <span :class="['tipo-badge', getTipoClass(actividadANotificar.tipo_actividad)]" style="font-size: 11px; padding: 4px 10px;">
+                  <div class="apple-notif-titles">
+                    <h2 class="apple-notif-title">Notificar Actividad</h2>
+                    <div class="apple-notif-subtitle" v-if="actividadANotificar">
+                      <span class="apple-notif-user-chip">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        {{ actividadANotificar.usuario?.nombre_completo || 'Usuario' }}
+                      </span>
+                      <span :class="['apple-notif-tipo-chip', getTipoClass(actividadANotificar.tipo_actividad)]">
                         {{ actividadANotificar.tipo_actividad?.toUpperCase() }}
                       </span>
-                    </span>
+                    </div>
+                  </div>
+                </div>
+                <button @click="cerrarModalNotificar" class="apple-notif-close" title="Cerrar">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Body con scroll -->
+              <div class="apple-notif-body">
+                <!-- Tarjeta de actividad seleccionada -->
+                <div class="apple-notif-activity-card" v-if="actividadANotificar">
+                  <div class="apple-notif-activity-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <span>Actividad Seleccionada</span>
+                  </div>
+                  <div class="apple-notif-activity-grid">
+                    <div class="apple-notif-activity-item">
+                      <div class="apple-notif-activity-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                      </div>
+                      <div class="apple-notif-activity-text">
+                        <span class="apple-notif-activity-label">Tipo</span>
+                        <span :class="['apple-notif-activity-badge', getTipoClass(actividadANotificar.tipo_actividad)]">
+                          {{ actividadANotificar.tipo_actividad?.toUpperCase() }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="apple-notif-activity-item">
+                      <div class="apple-notif-activity-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                        </svg>
+                      </div>
+                      <div class="apple-notif-activity-text">
+                        <span class="apple-notif-activity-label">Categoría</span>
+                        <span class="apple-notif-activity-value">{{ actividadANotificar.categoria_actividad || 'Sin categoría' }}</span>
+                      </div>
+                    </div>
+                    <div class="apple-notif-activity-item">
+                      <div class="apple-notif-activity-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                        </svg>
+                      </div>
+                      <div class="apple-notif-activity-text">
+                        <span class="apple-notif-activity-label">Fecha</span>
+                        <span class="apple-notif-activity-value">{{ actividadANotificar.fecha_hora ? new Date(actividadANotificar.fecha_hora).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Sin fecha' }}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div class="readonly-card">
-                  <div class="readonly-card-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-                    </svg>
+                <!-- Formulario de notificación -->
+                <form @submit.prevent="enviarNotificacion" class="apple-notif-form">
+                  <!-- Título -->
+                  <div class="apple-notif-field">
+                    <label class="apple-notif-label">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                      </svg>
+                      Título de la notificación
+                      <span class="apple-notif-required">*</span>
+                    </label>
+                    <div class="apple-notif-input-wrapper">
+                      <input 
+                        type="text"
+                        v-model="formNotificacion.titulo"
+                        class="apple-notif-input"
+                        maxlength="150"
+                        placeholder="Ej: Revisión requerida de tu actividad"
+                        required
+                      />
+                      <span class="apple-notif-char-count">{{ formNotificacion.titulo.length }}/150</span>
+                    </div>
                   </div>
-                  <div class="readonly-card-content">
-                    <span class="readonly-card-label">Categoría</span>
-                    <span class="readonly-card-value">{{ actividadANotificar.categoria_actividad || 'Sin categoría' }}</span>
-                  </div>
-                </div>
 
-                <div class="readonly-card">
-                  <div class="readonly-card-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                  <!-- Motivos seleccionados preview -->
+                  <Transition name="apple-slide-fade">
+                    <div class="apple-notif-motivos-preview" v-if="formNotificacion.motivos_atencion.length > 0">
+                      <div class="apple-notif-preview-label">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h4l3 3 3-3h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                        Se enviará como subtítulo:
+                      </div>
+                      <div class="apple-notif-preview-text">
+                        {{ motivosAtencionOpciones.filter(m => formNotificacion.motivos_atencion.includes(m.value)).map(m => m.label).join(' • ') }}
+                      </div>
+                    </div>
+                  </Transition>
+
+                  <!-- Motivos de atención -->
+                  <div class="apple-notif-field">
+                    <label class="apple-notif-label">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                      </svg>
+                      Motivos de atención
+                      <span class="apple-notif-required">*</span>
+                    </label>
+                    <div class="apple-notif-motivos-grid">
+                      <label 
+                        v-for="motivo in motivosAtencionOpciones"  
+                        :key="motivo.value"
+                        class="apple-notif-motivo-chip"
+                        :class="{ 'selected': formNotificacion.motivos_atencion.includes(motivo.value) }"
+                      >
+                        <input 
+                          type="checkbox"
+                          :value="motivo.value"
+                          v-model="formNotificacion.motivos_atencion"
+                        />
+                        <span class="apple-notif-motivo-check">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        </span>
+                        <span class="apple-notif-motivo-text">{{ motivo.label }}</span>
+                      </label>
+                    </div>
+                    <span class="apple-notif-hint">Selecciona al menos un motivo</span>
+                  </div>
+
+                  <!-- Mensaje detallado -->
+                  <div class="apple-notif-field">
+                    <label class="apple-notif-label">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                      </svg>
+                      Mensaje detallado
+                      <span class="apple-notif-required">*</span>
+                    </label>
+                    <div class="apple-notif-textarea-wrapper">
+                      <textarea 
+                        v-model="formNotificacion.descripcion"
+                        class="apple-notif-textarea"
+                        rows="5"
+                        placeholder="Escribe un mensaje claro y detallado explicando el motivo de la notificación..."
+                        required
+                      ></textarea>
+                      <div class="apple-notif-textarea-footer">
+                        <span class="apple-notif-hint">Explica el motivo claramente</span>
+                        <span class="apple-notif-char-count">{{ formNotificacion.descripcion.length }} caracteres</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Enlace URL opcional -->
+                  <div class="apple-notif-field apple-notif-field-optional">
+                    <label class="apple-notif-label">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                      </svg>
+                      Enlace adicional
+                      <span class="apple-notif-optional-badge">Opcional</span>
+                    </label>
+                    <input 
+                      type="url"
+                      v-model="formNotificacion.enlace_url"
+                      class="apple-notif-input"
+                      placeholder="https://ejemplo.com/recurso"
+                    />
+                  </div>
+
+                  <!-- Imagen adjunta -->
+                  <div class="apple-notif-field apple-notif-field-optional">
+                    <label class="apple-notif-label">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                      </svg>
+                      Imagen adjunta
+                      <span class="apple-notif-optional-badge">Opcional</span>
+                    </label>
+                    <div class="apple-notif-file-area">
+                      <input 
+                        type="file"
+                        ref="archivoNotificacionInput"
+                        accept=".jpg,.jpeg,.png,.gif"
+                        @change="manejarArchivoNotificacion"
+                        class="apple-notif-file-input"
+                        id="notif-archivo-apple"
+                      />
+                      <label for="notif-archivo-apple" class="apple-notif-file-dropzone" :class="{ 'has-file': archivoNotificacion }">
+                        <div class="apple-notif-dropzone-content" v-if="!archivoNotificacion">
+                          <div class="apple-notif-dropzone-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                              <polyline points="17 8 12 3 7 8"/>
+                              <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                          </div>
+                          <span class="apple-notif-dropzone-text">Haz clic para seleccionar imagen</span>
+                          <span class="apple-notif-dropzone-hint">JPG, PNG o GIF • Máx. 10MB</span>
+                        </div>
+                        <div class="apple-notif-file-preview" v-else>
+                          <img :src="imagenPreviewUrl" alt="Preview" class="apple-notif-preview-img" />
+                          <div class="apple-notif-file-info">
+                            <span class="apple-notif-file-name">{{ archivoNotificacion.name }}</span>
+                            <span class="apple-notif-file-size">{{ (archivoNotificacion.size / 1024).toFixed(1) }} KB</span>
+                          </div>
+                        </div>
+                      </label>
+                      <button 
+                        v-if="archivoNotificacion" 
+                        type="button" 
+                        @click="quitarArchivoNotificacion" 
+                        class="apple-notif-file-remove"
+                        title="Quitar imagen"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="15" y1="9" x2="9" y2="15"/>
+                          <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Footer con acciones -->
+              <div class="apple-notif-footer">
+                <button 
+                  type="button" 
+                  @click="cerrarModalNotificar" 
+                  class="apple-notif-btn apple-notif-btn-cancel"
+                  :disabled="enviandoNotificacion"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                  Cancelar
+                </button>
+                <button 
+                  type="button"
+                  @click="enviarNotificacion" 
+                  class="apple-notif-btn apple-notif-btn-send"
+                  :disabled="enviandoNotificacion || !formNotificacion.titulo.trim() || formNotificacion.motivos_atencion.length === 0 || !formNotificacion.descripcion.trim()"
+                >
+                  <div class="apple-notif-btn-content">
+                    <svg v-if="!enviandoNotificacion" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="m22 2-7 20-4-9-9-4Z"/>
+                      <path d="M22 2 11 13"/>
                     </svg>
+                    <div v-else class="apple-notif-spinner"></div>
+                    <span>{{ enviandoNotificacion ? 'Enviando...' : 'Enviar Notificación' }}</span>
                   </div>
-                  <div class="readonly-card-content">
-                    <span class="readonly-card-label">Fecha</span>
-                    <span class="readonly-card-value">{{ actividadANotificar.fecha_hora ? new Date(actividadANotificar.fecha_hora).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Sin fecha' }}</span>
-                  </div>
-                </div>
+                </button>
               </div>
             </div>
-
-            <!-- Formulario de notificación -->
-            <div class="modal-edit-body">
-              <h4 class="section-title section-title-notificar">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-                Datos de la notificación
-              </h4>
-              
-              <form @submit.prevent="enviarNotificacion" class="edit-form">
-                <!-- Título (pre-llenado) -->
-                <div class="form-group">
-                  <label for="notif-titulo" class="form-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                    </svg>
-                    Título *
-                  </label>
-                  <input 
-                    type="text"
-                    id="notif-titulo"
-                    v-model="formNotificacion.titulo"
-                    class="form-input"
-                    maxlength="150"
-                    placeholder="Ej: Reporte sobre tu actividad de campo"
-                    required
-                  />
-                  <small class="char-count">{{ formNotificacion.titulo.length }}/150</small>
-                </div>
-
-                <!-- Subtítulo (generado automáticamente desde motivos) -->
-                <div class="form-group" v-if="formNotificacion.motivos_atencion.length > 0">
-                  <label class="form-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h4l3 3 3-3h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                    </svg>
-                    Motivos seleccionados (se enviarán en el subtítulo)
-                  </label>
-                  <div class="subtitulo-preview">
-                    {{ motivosAtencionOpciones.filter(m => formNotificacion.motivos_atencion.includes(m.value)).map(m => m.label).join(', ') }}
-                  </div>
-                </div>
-
-                <!-- Motivos de atención (checkboxes) -->
-                <div class="form-group">
-                  <label class="form-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
-                    </svg>
-                    Motivos de atención *
-                  </label>
-                  <div class="motivos-grid">
-                    <label 
-                      v-for="motivo in motivosAtencionOpciones"  
-                      :key="motivo.value"
-                      class="motivo-checkbox"
-                      :class="{ selected: formNotificacion.motivos_atencion.includes(motivo.value) }"
-                    >
-                      <input 
-                        type="checkbox"
-                        :value="motivo.value"
-                        v-model="formNotificacion.motivos_atencion"
-                      />
-                      <span>{{ motivo.label }}</span>
-                    </label>
-                  </div>
-                  <small class="form-help">Selecciona al menos uno</small>
-                </div>
-
-                <!-- Descripción detallada -->
-                <div class="form-group">
-                  <label for="notif-descripcion" class="form-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-                    </svg>
-                    Mensaje detallado *
-                  </label>
-                  <textarea 
-                    id="notif-descripcion"
-                    v-model="formNotificacion.descripcion"
-                    class="form-textarea form-textarea-notificacion"
-                    rows="7"
-                    placeholder="Escribe un mensaje detallado al usuario sobre por qué se le está notificando..."
-                    required
-                  ></textarea>
-                  <div class="textarea-footer">
-                    <small class="form-help">Explica claramente el motivo de la notificación</small>
-                    <small class="char-count">{{ formNotificacion.descripcion.length }} caracteres</small>
-                  </div>
-                </div>
-
-                <!-- Enlace URL (opcional) -->
-                <div class="form-group">
-                  <label for="notif-url" class="form-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
-                    </svg>
-                    Enlace adicional (opcional)
-                  </label>
-                  <input 
-                    type="url"
-                    id="notif-url"
-                    v-model="formNotificacion.enlace_url"
-                    class="form-input"
-                    placeholder="https://ejemplo.com"
-                  />
-                  <small class="form-help">URL con información adicional</small>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- Footer con acciones -->
-          <div class="modal-edit-footer">
-            <button 
-              type="button" 
-              @click="cerrarModalNotificar" 
-              class="btn-cancel-edit"
-              :disabled="enviandoNotificacion"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-              Cancelar
-            </button>
-            <button 
-              type="button"
-              @click="enviarNotificacion" 
-              class="btn-save-edit btn-enviar-notificacion"
-              :disabled="enviandoNotificacion || !formNotificacion.titulo.trim() || formNotificacion.motivos_atencion.length === 0 || !formNotificacion.descripcion.trim()"
-            >
-              <svg v-if="!enviandoNotificacion" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="m22 2-7 20-4-9-9-4Z"/>
-                <path d="M22 2 11 13"/>
-              </svg>
-              <svg v-else class="spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-              </svg>
-              {{ enviandoNotificacion ? 'Enviando...' : 'Enviar Notificación' }}
-            </button>
-          </div>
+          </Transition>
         </div>
-      </div>
+      </Transition>
     </Teleport>
   </div>
 </template>
@@ -1451,6 +1521,8 @@ const formNotificacion = ref({
   usuario_ids: []
 })
 const enviandoNotificacion = ref(false)
+const archivoNotificacion = ref(null)
+const archivoNotificacionInput = ref(null)
 
 // Opciones de motivos de atención
 const motivosAtencionOpciones = [
@@ -3133,6 +3205,26 @@ const formatFecha = (fechaStr) => {
   }
 }
 
+const formatFechaDetalle = (fechaStr) => {
+  try {
+    const fecha = new Date(fechaStr)
+    const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+    const horaFormateada = fecha.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+    return { fecha: fechaFormateada, hora: horaFormateada }
+  } catch (e) {
+    return { fecha: fechaStr, hora: '' }
+  }
+}
+
 const formatFechaCompacta = (fechaStr) => {
   try {
     const fecha = new Date(fechaStr)
@@ -3277,7 +3369,50 @@ const cerrarModalNotificar = () => {
     actividad_id: null,
     usuario_ids: []
   }
+  // Limpiar archivo
+  archivoNotificacion.value = null
+  if (archivoNotificacionInput.value) {
+    archivoNotificacionInput.value.value = ''
+  }
 }
+
+// Manejar selección de archivo para notificación
+const manejarArchivoNotificacion = (event) => {
+  const archivo = event.target.files[0]
+  if (archivo) {
+    // Validar tipo de archivo
+    const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+    if (!tiposPermitidos.includes(archivo.type)) {
+      mostrarToast('Solo se permiten imágenes (JPG, PNG, GIF)', 'error')
+      event.target.value = ''
+      return
+    }
+    // Validar tamaño (10MB)
+    if (archivo.size > 10 * 1024 * 1024) {
+      mostrarToast('La imagen no debe exceder 10MB', 'error')
+      event.target.value = ''
+      return
+    }
+    archivoNotificacion.value = archivo
+    console.log('📷 Imagen seleccionada:', archivo.name)
+  }
+}
+
+// Quitar archivo seleccionado
+const quitarArchivoNotificacion = () => {
+  archivoNotificacion.value = null
+  if (archivoNotificacionInput.value) {
+    archivoNotificacionInput.value.value = ''
+  }
+}
+
+// Computed para preview de imagen
+const imagenPreviewUrl = computed(() => {
+  if (archivoNotificacion.value) {
+    return URL.createObjectURL(archivoNotificacion.value)
+  }
+  return null
+})
 
 const enviarNotificacion = async () => {
   // Actualizar subtítulo con los motivos seleccionados
@@ -3311,7 +3446,8 @@ const enviarNotificacion = async () => {
       enviada_a_todos: false // Siempre individual
     }
     
-    const respuesta = await notificacionesService.crearNotificacion(notificacion, null)
+    // Enviar con archivo si existe
+    const respuesta = await notificacionesService.crearNotificacion(notificacion, archivoNotificacion.value)
     
     console.log('✅ Notificación enviada:', respuesta)
     mostrarToast('Notificación enviada exitosamente', 'success')
@@ -7025,417 +7161,981 @@ const logout = () => {
 }
 
 /* Modal de notificación - Naranja Oscuro Profesional - CON ESPECIFICIDAD ALTA */
-.modal-notificar.modal-edit-container {
-  max-width: 720px !important;
-  animation: modalSlideIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border-radius: 14px !important;
-  overflow: hidden;
-  box-shadow: 0 16px 48px rgba(230, 81, 0, 0.35) !important;
+/* ============================================
+   APPLE NOTIFICATION MODAL - REDESIGN COMPLETE
+   ============================================ */
+
+/* Transitions */
+.apple-modal-fade-enter-active,
+.apple-modal-fade-leave-active {
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.apple-modal-fade-enter-from,
+.apple-modal-fade-leave-to {
+  opacity: 0;
 }
 
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.apple-modal-scale-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.apple-modal-scale-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.apple-modal-scale-enter-from {
+  opacity: 0;
+  transform: scale(0.92) translateY(20px);
+}
+.apple-modal-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
 }
 
-/* Header con naranja oscuro - MAYOR ESPECIFICIDAD */
-.modal-notificar.modal-edit-container .modal-edit-header {
-  background: linear-gradient(135deg, #E65100 0%, #D84315 50%, #BF360C 100%) !important;
-  padding: 16px 22px !important;
-  border-bottom: 3px solid #BF360C !important;
-  box-shadow: 0 4px 16px rgba(230, 81, 0, 0.4) !important;
+.apple-slide-fade-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.apple-slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.apple-slide-fade-enter-from,
+.apple-slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* Overlay */
+.apple-notif-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Modal Container */
+.apple-notif-modal {
   position: relative;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 24px;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 25px 80px rgba(230, 81, 0, 0.25),
+    0 10px 40px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.modal-notificar.modal-edit-container .modal-edit-header::before {
+/* Background Effects */
+.apple-notif-bg-effects {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.apple-notif-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.4;
+  animation: appleOrbPulse 8s ease-in-out infinite;
+}
+
+.apple-notif-orb-1 {
+  width: 200px;
+  height: 200px;
+  top: -80px;
+  right: -60px;
+  background: linear-gradient(135deg, #FF6B35, #E65100);
+  animation-delay: 0s;
+}
+
+.apple-notif-orb-2 {
+  width: 150px;
+  height: 150px;
+  bottom: -50px;
+  left: -40px;
+  background: linear-gradient(135deg, #FFB74D, #FF9800);
+  animation-delay: 2s;
+}
+
+.apple-notif-orb-3 {
+  width: 100px;
+  height: 100px;
+  top: 40%;
+  right: -30px;
+  background: linear-gradient(135deg, #FFCC80, #FFA726);
+  animation-delay: 4s;
+}
+
+@keyframes appleOrbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.15); opacity: 0.55; }
+}
+
+/* Header */
+.apple-notif-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #E65100 0%, #D84315 40%, #BF360C 100%);
+  border-bottom: 1px solid rgba(191, 54, 12, 0.3);
+}
+
+.apple-notif-header::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 15% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+  inset: 0;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
   pointer-events: none;
 }
 
-.modal-notificar.modal-edit-container .modal-edit-header h3 {
-  color: #ffffff !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
-  letter-spacing: 0.3px !important;
-  margin: 0 !important;
-}
-
-.modal-notificar.modal-edit-container .header-subtitle {
-  color: rgba(255, 255, 255, 0.93) !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  display: flex !important;
+.apple-notif-header-content {
+  display: flex;
   align-items: center;
-  margin-top: 4px !important;
-  background: rgba(0, 0, 0, 0.18) !important;
-  padding: 3px 9px !important;
-  border-radius: 10px !important;
-  backdrop-filter: blur(8px);
-}
-
-.modal-notificar.modal-edit-container .btn-close-edit {
-  background: rgba(255, 255, 255, 0.16) !important;
-  backdrop-filter: blur(8px);
-  border: 1.5px solid rgba(255, 255, 255, 0.28) !important;
-  transition: all 0.3s ease !important;
-  width: 30px !important;
-  height: 30px !important;
-  padding: 0 !important;
-}
-
-.modal-notificar.modal-edit-container .btn-close-edit:hover {
-  background: rgba(255, 255, 255, 0.28) !important;
-  transform: rotate(90deg) scale(1.05) !important;
-  border-color: rgba(255, 255, 255, 0.45) !important;
-}
-
-.modal-notificar.modal-edit-container .header-icon-wrapper {
-  background: rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
-  width: 38px !important;
-  height: 38px !important;
-}
-
-/* Section titles con especificidad alta */
-.modal-notificar .section-title {
-  color: #D84315 !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  margin-bottom: 12px !important;
-  padding-bottom: 8px !important;
-  border-bottom: 2px solid rgba(230, 81, 0, 0.18) !important;
+  gap: 12px;
   position: relative;
+  z-index: 1;
+}
+
+.apple-notif-icon-ring {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: appleIconFloat 3s ease-in-out infinite;
+}
+
+@keyframes appleIconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.apple-notif-icon-inner {
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.apple-notif-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.apple-notif-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.3px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.apple-notif-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.apple-notif-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+.apple-notif-tipo-chip {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.apple-notif-tipo-chip.tipo-campo {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.apple-notif-tipo-chip.tipo-gabinete {
+  background: linear-gradient(135deg, #FFA726, #FF9800);
+  color: white;
+  border: 1px solid rgba(255, 167, 38, 0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.apple-notif-close {
+  position: relative;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+}
+
+.apple-notif-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg) scale(1.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.apple-notif-close:active {
+  transform: rotate(90deg) scale(0.95);
+}
+
+/* Body */
+.apple-notif-body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.apple-notif-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.apple-notif-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.apple-notif-body::-webkit-scrollbar-thumb {
+  background: rgba(230, 81, 0, 0.25);
+  border-radius: 10px;
+}
+
+.apple-notif-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 81, 0, 0.4);
+}
+
+/* Activity Card */
+.apple-notif-activity-card {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.08) 0%, rgba(230, 81, 0, 0.04) 100%);
+  border: 1.5px solid rgba(230, 81, 0, 0.15);
+  border-radius: 16px;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.apple-notif-activity-card:hover {
+  border-color: rgba(230, 81, 0, 0.25);
+  box-shadow: 0 4px 20px rgba(230, 81, 0, 0.1);
+}
+
+.apple-notif-activity-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #D84315;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(230, 81, 0, 0.12);
+}
+
+.apple-notif-activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.apple-notif-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba(230, 81, 0, 0.1);
+  transition: all 0.25s ease;
+}
+
+.apple-notif-activity-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.12);
+  border-color: rgba(230, 81, 0, 0.25);
+}
+
+.apple-notif-activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.12), rgba(255, 152, 0, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #E65100;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.apple-notif-activity-item:hover .apple-notif-activity-icon {
+  transform: scale(1.08);
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.18), rgba(255, 152, 0, 0.12));
+}
+
+.apple-notif-activity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.apple-notif-activity-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.modal-notificar .section-title::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 50px;
-  height: 2px;
-  background: #D84315;
-  border-radius: 2px;
+.apple-notif-activity-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+  word-break: break-word;
 }
 
-.modal-notificar .modal-edit-readonly-section {
-  background: linear-gradient(135deg, rgba(230, 81, 0, 0.04), transparent) !important;
-  border: 1.5px solid rgba(230, 81, 0, 0.18) !important;
-  border-radius: 11px !important;
-  padding: 14px !important;
+.apple-notif-activity-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
 }
 
-.modal-notificar .readonly-grid-3col {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.modal-notificar .readonly-card {
-  background: white !important;
-  border: 1.5px solid rgba(230, 81, 0, 0.22) !important;
-  border-radius: 9px !important;
-  padding: 10px !important;
-  transition: all 0.25s ease;
-  position: relative;
-}
-
-.modal-notificar .readonly-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background: #D84315;
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 0.25s ease;
-  border-radius: 9px 0 0 9px;
-}
-
-.modal-notificar .readonly-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.2) !important;
-  border-color: #D84315 !important;
-}
-
-.modal-notificar .readonly-card:hover::before {
-  transform: scaleY(1);
-}
-
-.modal-notificar .readonly-card-icon {
-  color: #E65100 !important;
-  margin-bottom: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px !important;
-  height: 32px !important;
-  background: linear-gradient(135deg, rgba(230, 81, 0, 0.13), rgba(230, 81, 0, 0.07)) !important;
-  border-radius: 8px !important;
-  transition: all 0.25s ease;
-}
-
-.modal-notificar .readonly-card:hover .readonly-card-icon {
-  background: linear-gradient(135deg, rgba(230, 81, 0, 0.22), rgba(230, 81, 0, 0.13)) !important;
-  transform: scale(1.08);
-}
-
-.modal-notificar .readonly-card-content {
+/* Form */
+.apple-notif-form {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 18px;
 }
 
-.modal-notificar .readonly-card-label {
-  font-size: 9px !important;
-  color: #777 !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.4px !important;
-}
-
-.modal-notificar .readonly-card-value {
-  font-size: 12px !important;
-  color: #1a1a1a !important;
-  font-weight: 600 !important;
-  line-height: 1.3 !important;
-}
-
-/* Preview de subtítulo */
-.modal-notificar .subtitulo-preview {
-  background: linear-gradient(135deg, rgba(230, 81, 0, 0.09), rgba(230, 81, 0, 0.05)) !important;
-  border: 1.5px solid rgba(230, 81, 0, 0.25) !important;
-  border-radius: 9px !important;
-  padding: 8px 11px !important;
-  font-size: 11px !important;
-  color: #D84315 !important;
-  font-weight: 600 !important;
-  line-height: 1.4 !important;
-  margin-top: 5px !important;
-}
-
-.modal-notificar .motivos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 9px;
-  margin-top: 9px;
-}
-
-.modal-notificar .motivo-checkbox {
+.apple-notif-field {
   display: flex;
-  align-items: center;
-  gap: 7px !important;
-  padding: 8px 10px !important;
-  border: 1.5px solid #ddd !important;
-  border-radius: 8px !important;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  background: white !important;
-  position: relative;
-}
-
-.modal-notificar .motivo-checkbox:hover {
-  border-color: #E65100 !important;
-  background: linear-gradient(135deg, rgba(230, 81, 0, 0.07), rgba(230, 81, 0, 0.03)) !important;
-  transform: translateX(2px);
-  box-shadow: 0 2px 7px rgba(230, 81, 0, 0.14) !important;
-}
-
-.modal-notificar .motivo-checkbox.selected {
-  border-color: #D84315 !important;
-  background: linear-gradient(135deg, rgba(230, 81, 0, 0.13), rgba(230, 81, 0, 0.07)) !important;
-  box-shadow: 0 2px 7px rgba(230, 81, 0, 0.17) !important;
-}
-
-.modal-notificar .motivo-checkbox.selected:hover {
-  background: linear-gradient(135deg, rgba(230, 81, 0, 0.17), rgba(230, 81, 0, 0.09)) !important;
-}
-
-.modal-notificar .motivo-checkbox input[type="checkbox"] {
-  width: 16px !important;
-  height: 16px !important;
-  cursor: pointer;
-  accent-color: #D84315 !important;
-  flex-shrink: 0;
-}
-
-.modal-notificar .motivo-checkbox span {
-  font-size: 11px !important;
-  color: #333 !important;
-  font-weight: 500 !important;
-  transition: color 0.2s ease;
-  line-height: 1.3 !important;
-}
-
-.modal-notificar .motivo-checkbox.selected span {
-  color: #D84315 !important;
-  font-weight: 600 !important;
-}
-
-.modal-notificar .form-textarea {
-  width: 100% !important;
-  padding: 10px !important;
-  border: 1.5px solid #ddd !important;
-  border-radius: 9px !important;
-  font-size: 12px !important;
-  line-height: 1.5 !important;
-  font-family: 'Inter', sans-serif !important;
-  transition: all 0.25s ease !important;
-  resize: vertical !important;
-  background: white !important;
-}
-
-.modal-notificar .form-textarea-notificacion {
-  min-height: 130px !important;
-}
-
-.modal-notificar .form-textarea:focus {
-  outline: none !important;
-  border-color: #D84315 !important;
-  box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.13), 0 3px 9px rgba(230, 81, 0, 0.13) !important;
-  background: white !important;
-}
-
-.modal-notificar .form-label {
-  font-size: 11px !important;
-  font-weight: 600 !important;
-  color: #555 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  margin-bottom: 5px !important;
-}
-
-.modal-notificar .form-label svg {
-  color: #D84315 !important;
-}
-
-.modal-notificar .form-help {
-  display: block;
-  margin-top: 4px !important;
-  font-size: 10px !important;
-  color: #666 !important;
-  font-style: italic;
-}
-
-.modal-notificar .textarea-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 4px !important;
+  flex-direction: column;
   gap: 8px;
 }
 
-.modal-notificar .char-count {
-  font-size: 9px !important;
-  color: #999 !important;
-  font-weight: 500 !important;
+.apple-notif-field-optional {
+  opacity: 0.95;
+}
+
+.apple-notif-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.apple-notif-label svg {
+  color: #E65100;
+}
+
+.apple-notif-required {
+  color: #E65100;
+  font-weight: 700;
+}
+
+.apple-notif-optional-badge {
+  font-size: 9px;
+  font-weight: 500;
+  color: #888;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+.apple-notif-input-wrapper {
+  position: relative;
+}
+
+.apple-notif-input {
+  width: 100%;
+  padding: 14px 16px;
+  padding-right: 60px;
+  background: white;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #222;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.apple-notif-input:hover {
+  border-color: #ccc;
+}
+
+.apple-notif-input:focus {
+  border-color: #E65100;
+  box-shadow: 0 0 0 4px rgba(230, 81, 0, 0.1);
+}
+
+.apple-notif-input::placeholder {
+  color: #aaa;
+  font-weight: 400;
+}
+
+.apple-notif-char-count {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  color: #bbb;
+  pointer-events: none;
+}
+
+.apple-notif-hint {
+  font-size: 11px;
+  color: #888;
+  font-style: italic;
+}
+
+/* Motivos Preview */
+.apple-notif-motivos-preview {
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.08), rgba(255, 152, 0, 0.04));
+  border: 1.5px solid rgba(230, 81, 0, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.apple-notif-preview-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.apple-notif-preview-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #D84315;
+  line-height: 1.4;
+}
+
+/* Motivos Grid */
+.apple-notif-motivos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.apple-notif-motivo-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: white;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.apple-notif-motivo-chip:hover {
+  border-color: #E65100;
+  background: rgba(230, 81, 0, 0.03);
+  transform: translateX(3px);
+}
+
+.apple-notif-motivo-chip.selected {
+  border-color: #E65100;
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.1), rgba(255, 152, 0, 0.05));
+  box-shadow: 0 2px 8px rgba(230, 81, 0, 0.15);
+}
+
+.apple-notif-motivo-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.apple-notif-motivo-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.apple-notif-motivo-chip.selected .apple-notif-motivo-check {
+  background: linear-gradient(135deg, #E65100, #D84315);
+  border-color: #E65100;
+  color: white;
+}
+
+.apple-notif-motivo-check svg {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
+}
+
+.apple-notif-motivo-chip.selected .apple-notif-motivo-check svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.apple-notif-motivo-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #444;
+  line-height: 1.3;
+  transition: color 0.2s ease;
+}
+
+.apple-notif-motivo-chip.selected .apple-notif-motivo-text {
+  color: #D84315;
+  font-weight: 600;
+}
+
+/* Textarea */
+.apple-notif-textarea-wrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.apple-notif-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px 16px;
+  padding-bottom: 32px;
+  background: white;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #222;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  font-family: inherit;
+}
+
+.apple-notif-textarea:hover {
+  border-color: #ccc;
+}
+
+.apple-notif-textarea:focus {
+  border-color: #E65100;
+  box-shadow: 0 0 0 4px rgba(230, 81, 0, 0.1);
+}
+
+.apple-notif-textarea::placeholder {
+  color: #aaa;
+  font-weight: 400;
+}
+
+.apple-notif-textarea-footer {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.apple-notif-textarea-footer .apple-notif-hint {
+  font-size: 10px;
+  color: #bbb;
+  font-style: italic;
+}
+
+.apple-notif-textarea-footer .apple-notif-char-count {
+  font-size: 10px;
+  color: #bbb;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* File Upload */
+.apple-notif-file-area {
+  position: relative;
+}
+
+.apple-notif-file-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.apple-notif-file-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fafafa, #f5f5f5);
+  border: 2px dashed #ddd;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.apple-notif-file-dropzone:hover {
+  border-color: #E65100;
+  background: linear-gradient(135deg, #fff8f0, #fff3e0);
+}
+
+.apple-notif-file-dropzone.has-file {
+  border-style: solid;
+  border-color: #E65100;
+  background: white;
+  padding: 12px;
+}
+
+.apple-notif-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-notif-dropzone-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.1), rgba(255, 152, 0, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #E65100;
+  transition: all 0.3s ease;
+}
+
+.apple-notif-file-dropzone:hover .apple-notif-dropzone-icon {
+  transform: translateY(-3px);
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.15), rgba(255, 152, 0, 0.08));
+}
+
+.apple-notif-dropzone-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+.apple-notif-dropzone-hint {
+  font-size: 11px;
+  color: #999;
+}
+
+.apple-notif-file-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.apple-notif-preview-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(230, 81, 0, 0.2);
+}
+
+.apple-notif-file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.apple-notif-file-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.modal-notificar .btn-enviar-notificacion,
-.modal-notificar .modal-edit-actions button:last-child {
-  background: linear-gradient(135deg, #E65100, #D84315, #BF360C) !important;
-  box-shadow: 0 3px 11px rgba(230, 81, 0, 0.38) !important;
-  font-size: 12px !important;
-  padding: 9px 18px !important;
-  font-weight: 600 !important;
-  border: none !important;
-  color: white !important;
+.apple-notif-file-size {
+  font-size: 11px;
+  color: #888;
 }
 
-.modal-notificar .btn-enviar-notificacion:hover:not(:disabled),
-.modal-notificar .modal-edit-actions button:last-child:hover:not(:disabled) {
-  background: linear-gradient(135deg, #D84315, #BF360C, #A51C00) !important;
-  box-shadow: 0 5px 16px rgba(230, 81, 0, 0.48) !important;
-  transform: translateY(-1px) !important;
+.apple-notif-file-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  border: 1.5px solid #fee2e2;
+  color: #dc2626;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+  z-index: 5;
 }
 
-.modal-notificar .btn-enviar-notificacion:active:not(:disabled),
-.modal-notificar .modal-edit-actions button:last-child:active:not(:disabled) {
-  transform: translateY(0) !important;
-  box-shadow: 0 2px 9px rgba(230, 81, 0, 0.38) !important;
+.apple-notif-file-remove:hover {
+  background: #fee2e2;
+  transform: scale(1.1);
+  border-color: #fecaca;
 }
 
-/* Responsividad con especificidad */
-@media (max-width: 768px) {
-  .modal-notificar.modal-edit-container {
-    max-width: 95vw !important;
-    margin: 10px !important;
+/* Footer */
+.apple-notif-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  background: rgba(250, 250, 250, 0.9);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(20px);
+}
+
+.apple-notif-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  outline: none;
+}
+
+.apple-notif-btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+  border: 1.5px solid #e0e0e0;
+}
+
+.apple-notif-btn-cancel:hover:not(:disabled) {
+  background: #eeeeee;
+  color: #444;
+}
+
+.apple-notif-btn-send {
+  background: linear-gradient(135deg, #E65100, #D84315);
+  color: white;
+  box-shadow: 0 4px 15px rgba(230, 81, 0, 0.35);
+  min-width: 180px;
+}
+
+.apple-notif-btn-send:hover:not(:disabled) {
+  background: linear-gradient(135deg, #D84315, #BF360C);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(230, 81, 0, 0.45);
+}
+
+.apple-notif-btn-send:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(230, 81, 0, 0.35);
+}
+
+.apple-notif-btn-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.apple-notif-btn-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-notif-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: appleSpinnerRotate 0.8s linear infinite;
+}
+
+@keyframes appleSpinnerRotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .apple-notif-overlay {
+    padding: 0;
+    align-items: flex-end;
   }
   
-  .modal-notificar .readonly-grid-3col {
-    grid-template-columns: 1fr !important;
-    gap: 9px !important;
+  .apple-notif-modal {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 24px 24px 0 0;
   }
   
-  .modal-notificar .motivos-grid {
-    grid-template-columns: 1fr !important;
+  .apple-notif-header {
+    padding: 20px 20px 16px;
   }
   
-  .modal-notificar .textarea-footer {
-    flex-direction: column;
-    align-items: flex-start !important;
+  .apple-notif-icon-ring {
+    width: 44px;
+    height: 44px;
   }
   
-  .modal-notificar .char-count {
-    align-self: flex-end !important;
+  .apple-notif-title {
+    font-size: 17px;
   }
   
-  .modal-notificar.modal-edit-container .modal-edit-header h3 {
-    font-size: 14px !important;
+  .apple-notif-body {
+    padding: 20px;
   }
   
-  .modal-notificar .section-title {
-    font-size: 12px !important;
+  .apple-notif-activity-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .apple-notif-motivos-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .apple-notif-footer {
+    padding: 16px 20px;
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+  
+  .apple-notif-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .apple-notif-btn-send {
+    min-width: auto;
   }
 }
 
 @media (max-width: 480px) {
-  .modal-notificar.modal-edit-container {
-    max-width: 100vw !important;
-    margin: 0 !important;
-    border-radius: 14px 14px 0 0 !important;
+  .apple-notif-header-content {
+    gap: 12px;
   }
   
-  .modal-notificar .form-textarea-notificacion {
-    min-height: 110px !important;
-    font-size: 11px !important;
+  .apple-notif-icon-ring {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
   }
   
-  .modal-notificar.modal-edit-container .modal-edit-header {
-    padding: 13px 16px !important;
+  .apple-notif-icon-inner svg {
+    width: 20px;
+    height: 20px;
   }
   
-  .modal-notificar .readonly-card {
-    padding: 9px !important;
+  .apple-notif-title {
+    font-size: 15px;
   }
   
-  .modal-notificar .readonly-card-icon {
-    width: 28px !important;
-    height: 28px !important;
+  .apple-notif-close {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .apple-notif-input,
+  .apple-notif-textarea {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  
+  .apple-notif-motivo-chip {
+    padding: 10px 12px;
+  }
+  
+  .apple-notif-btn {
+    padding: 12px 20px;
+    font-size: 13px;
   }
 }
 
@@ -7721,306 +8421,637 @@ const logout = () => {
 }
 
 /* Modal styles empresariales compactos */
-.modal-overlay {
+/* ============================================
+   APPLE DETAILS MODAL - GREEN DESIGN
+   ============================================ */
+
+/* Transitions */
+.apple-details-fade-enter-active,
+.apple-details-fade-leave-active {
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.apple-details-fade-enter-from,
+.apple-details-fade-leave-to {
+  opacity: 0;
+}
+
+.apple-details-scale-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.apple-details-scale-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.apple-details-scale-enter-from {
+  opacity: 0;
+  transform: scale(0.92) translateY(20px);
+}
+.apple-details-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
+}
+
+/* Overlay */
+.apple-details-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(3px);
-  z-index: 1000;
+  inset: 0;
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 15px;
-  animation: modalBackdropIn 0.25s ease-out;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-@keyframes modalBackdropIn {
-  from {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-  to {
-    opacity: 1;
-    backdrop-filter: blur(3px);
-  }
-}
-
-.modal-content {
-  background: #ffffff;
-  border-radius: 6px;
-  box-shadow: 
-    0 16px 48px rgba(76, 175, 80, 0.15),
-    0 4px 16px rgba(76, 175, 80, 0.08),
-    0 0 0 1px rgba(76, 175, 80, 0.1);
-  max-width: 520px;
+/* Modal Container */
+.apple-details-modal {
+  position: relative;
   width: 100%;
-  max-height: 85vh;
+  max-width: 560px;
+  max-height: 90vh;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 24px;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 25px 80px rgba(34, 139, 34, 0.25),
+    0 10px 40px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  animation: modalContentIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  position: relative;
 }
 
-@keyframes modalContentIn {
-  from {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+/* Background Effects */
+.apple-details-bg-effects {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.modal-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  padding: 14px 18px;
-  color: white;
+.apple-details-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  animation: appleDetailsOrbPulse 8s ease-in-out infinite;
+}
+
+.apple-details-orb-1 {
+  width: 180px;
+  height: 180px;
+  top: -70px;
+  right: -50px;
+  background: linear-gradient(135deg, #2E7D32, #1B5E20);
+  animation-delay: 0s;
+}
+
+.apple-details-orb-2 {
+  width: 140px;
+  height: 140px;
+  bottom: -40px;
+  left: -30px;
+  background: linear-gradient(135deg, #66BB6A, #43A047);
+  animation-delay: 2s;
+}
+
+.apple-details-orb-3 {
+  width: 90px;
+  height: 90px;
+  top: 45%;
+  right: -25px;
+  background: linear-gradient(135deg, #81C784, #4CAF50);
+  animation-delay: 4s;
+}
+
+@keyframes appleDetailsOrbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.35; }
+  50% { transform: scale(1.12); opacity: 0.5; }
+}
+
+/* Header */
+.apple-details-header {
   position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px solid #388e3c;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #2E7D32 0%, #388E3C 40%, #1B5E20 100%);
+  border-bottom: 1px solid rgba(27, 94, 32, 0.3);
 }
 
-.modal-header-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.modal-icon {
-  width: 24px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.modal-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
-  color: white;
-  letter-spacing: 0.2px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.btn-close {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 4px;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: white;
-}
-
-.btn-close:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: scale(1.05);
-}
-
-.modal-body {
-  padding: 0;
-  overflow-y: auto;
-  max-height: calc(85vh - 80px);
-}
-
-.registro-detalles {
-  padding: 20px;
-  animation: contentFadeIn 0.3s ease-out 0.1s both;
-}
-
-@keyframes contentFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  max-width: none;
-}
-
-.detail-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px;
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(76, 175, 80, 0.02) 100%);
-  border: 1px solid rgba(76, 175, 80, 0.15);
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.detail-item::before {
+.apple-details-header::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  inset: 0;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+  pointer-events: none;
 }
 
-.detail-item:hover {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.04) 100%);
-  border-color: rgba(76, 175, 80, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.12);
+.apple-details-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
-.detail-item.full-width {
-  grid-column: 1 / -1;
+.apple-details-icon-ring {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: appleDetailsIconFloat 3s ease-in-out infinite;
 }
 
-.detail-icon {
-  width: 24px;
-  height: 24px;
-  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
-  border-radius: 4px;
+@keyframes appleDetailsIconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.apple-details-icon-inner {
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.apple-details-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.apple-details-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.3px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.apple-details-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.apple-details-id-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+.apple-details-tipo-chip {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.apple-details-tipo-chip.tipo-campo {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.apple-details-tipo-chip.tipo-gabinete {
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+  color: white;
+  border: 1px solid rgba(255, 152, 0, 0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.apple-details-close {
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+}
+
+.apple-details-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg) scale(1.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Body */
+.apple-details-body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.apple-details-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.apple-details-body::-webkit-scrollbar-thumb {
+  background: rgba(46, 125, 50, 0.25);
+  border-radius: 10px;
+}
+
+/* User Card */
+.apple-details-user-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.08), rgba(76, 175, 80, 0.04));
+  border: 1.5px solid rgba(46, 125, 50, 0.2);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.apple-details-user-card:hover {
+  border-color: rgba(46, 125, 50, 0.35);
+  box-shadow: 0 4px 20px rgba(46, 125, 50, 0.12);
+}
+
+.apple-details-user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2E7D32, #43A047);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
 }
 
-.detail-content {
-  flex: 1;
+.apple-details-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   min-width: 0;
 }
 
-.detail-label {
-  display: block;
-  font-size: 10px;
-  font-weight: 600;
-  color: #4CAF50;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
+.apple-details-user-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1B5E20;
   line-height: 1.2;
 }
 
-.detail-value {
-  display: block;
+.apple-details-user-email {
+  font-size: 12px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Grid */
+.apple-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.apple-details-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: white;
+  border: 1.5px solid rgba(46, 125, 50, 0.12);
+  border-radius: 14px;
+  transition: all 0.25s ease;
+}
+
+.apple-details-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(46, 125, 50, 0.12);
+  border-color: rgba(46, 125, 50, 0.3);
+}
+
+.apple-details-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.12), rgba(76, 175, 80, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2E7D32;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.apple-details-card:hover .apple-details-card-icon {
+  transform: scale(1.08);
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.18), rgba(76, 175, 80, 0.12));
+}
+
+.apple-details-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.apple-details-card-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.apple-details-card-value {
   font-size: 13px;
-  color: #2c3e50;
-  font-weight: 500;
+  font-weight: 600;
+  color: #333;
   line-height: 1.3;
   word-break: break-word;
 }
 
-.detail-value.highlight {
-  color: #4CAF50;
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.detail-value.location {
-  font-family: 'Segoe UI Mono', 'Courier New', monospace;
+.apple-details-coords {
+  font-family: 'SF Mono', 'Consolas', monospace;
   font-size: 11px;
-  background: rgba(76, 175, 80, 0.1);
-  padding: 3px 6px;
-  border-radius: 4px;
+  background: rgba(46, 125, 50, 0.08);
+  padding: 4px 8px;
+  border-radius: 6px;
   display: inline-block;
-  margin-top: 2px;
-  border: 1px solid rgba(76, 175, 80, 0.2);
 }
 
-.detail-value.description {
-  max-height: 50px;
-  overflow-y: auto;
-  padding-right: 6px;
+/* DateTime Card Highlighted */
+.apple-details-datetime-card {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.08), rgba(76, 175, 80, 0.04));
+  border-color: rgba(46, 125, 50, 0.25);
 }
 
-/* Estilos para badges de tipo en el modal */
-.tipo-badge-modal {
-  display: inline-block;
-  padding: 4px 10px;
+.apple-details-datetime-card:hover {
+  border-color: rgba(46, 125, 50, 0.4);
+  box-shadow: 0 4px 20px rgba(46, 125, 50, 0.15);
+}
+
+.apple-details-datetime-icon {
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
-  font-size: 10px;
-  font-weight: 600;
+  background: linear-gradient(135deg, #2E7D32, #43A047);
+  color: white;
+}
+
+.apple-details-datetime-card:hover .apple-details-datetime-icon {
+  background: linear-gradient(135deg, #1B5E20, #2E7D32);
+}
+
+.apple-details-datetime-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.apple-details-date-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1B5E20;
+  text-transform: capitalize;
+  line-height: 1.3;
+}
+
+.apple-details-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #2E7D32, #43A047);
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  line-height: 1;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  margin-top: 3px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 12px rgba(46, 125, 50, 0.35);
+  width: fit-content;
+  animation: timeBadgePulse 2s ease-in-out infinite;
 }
 
-.tipo-badge-modal.tipo-campo {
-  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
-  color: #2e7d32;
-  border: 1px solid #4CAF50;
+@keyframes timeBadgePulse {
+  0%, 100% { box-shadow: 0 3px 12px rgba(46, 125, 50, 0.35); }
+  50% { box-shadow: 0 4px 18px rgba(46, 125, 50, 0.5); }
 }
 
-.tipo-badge-modal.tipo-gabinete {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  color: #ef6c00;
-  border: 1px solid #ff9800;
+/* Sections */
+.apple-details-section {
+  background: white;
+  border: 1.5px solid rgba(46, 125, 50, 0.12);
+  border-radius: 14px;
+  padding: 14px;
+  transition: all 0.25s ease;
 }
 
-.photo-container {
-  margin-top: 6px;
+.apple-details-section:hover {
+  border-color: rgba(46, 125, 50, 0.25);
 }
 
-.detail-photo {
-  width: 100%;
-  max-width: 150px;
-  height: auto;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
-  border: 2px solid rgba(76, 175, 80, 0.2);
+.apple-details-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2E7D32;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(46, 125, 50, 0.1);
 }
 
-.detail-photo:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
-  border-color: rgba(76, 175, 80, 0.4);
+.apple-details-description {
+  font-size: 13px;
+  color: #444;
+  line-height: 1.6;
+  margin: 0;
 }
 
-.map-container {
-  margin-top: 6px;
-  border-radius: 4px;
+/* Photo */
+.apple-details-photo-container {
+  position: relative;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.12);
-  border: 2px solid rgba(76, 175, 80, 0.2);
+  cursor: pointer;
+  max-width: 180px;
 }
 
-.leaflet-map {
-  height: 140px;
+.apple-details-photo {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.apple-details-photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.apple-details-photo-container:hover .apple-details-photo {
+  transform: scale(1.05);
+}
+
+.apple-details-photo-container:hover .apple-details-photo-overlay {
+  opacity: 1;
+}
+
+/* Map */
+.apple-details-map-container {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(46, 125, 50, 0.15);
+}
+
+.apple-details-map {
+  height: 160px;
   width: 100%;
 }
 
-.modal-footer {
-  padding: 0;
-  background: transparent;
+/* Footer */
+.apple-details-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  background: rgba(250, 250, 250, 0.9);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(20px);
+}
+
+.apple-details-btn-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
-  height: 0;
+  background: linear-gradient(135deg, #2E7D32, #388E3C);
+  color: white;
+  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.35);
+}
+
+.apple-details-btn-close:hover {
+  background: linear-gradient(135deg, #1B5E20, #2E7D32);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.45);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .apple-details-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  
+  .apple-details-modal {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 24px 24px 0 0;
+  }
+  
+  .apple-details-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .apple-details-body {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .apple-details-header {
+    padding: 14px 16px;
+  }
+  
+  .apple-details-icon-ring {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .apple-details-title {
+    font-size: 14px;
+  }
+  
+  .apple-details-user-avatar {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .apple-details-card {
+    padding: 12px;
+  }
+  
+  .apple-details-map {
+    height: 140px;
+  }
 }
 
 /* Estilos del Lightbox */
@@ -8031,11 +9062,16 @@ const logout = () => {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.95);
-  z-index: 11000;
+  z-index: 100000;
   display: flex;
   align-items: center;
   justify-content: center;
   animation: lightboxFadeIn 0.3s ease-out;
+}
+
+@keyframes lightboxFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .lightbox-container {
@@ -8079,6 +9115,17 @@ const logout = () => {
   cursor: pointer;
   transition: transform 0.3s ease;
   animation: lightboxImageIn 0.4s ease-out;
+}
+
+@keyframes lightboxImageIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.9); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
 }
 
 .lightbox-image:hover {

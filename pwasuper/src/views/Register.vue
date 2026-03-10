@@ -92,7 +92,7 @@
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
               </svg>
-              <input v-model="form.nombre" @input="formatNombre" type="text" required placeholder="NOMBRE COMPLETO" class="uppercase-input"/>
+              <input v-model="form.nombre" @input="formatNombre" type="text" required placeholder="NOMBRE(S)" class="uppercase-input"/>
             </div>
             <span class="field-hint">Ingresa tu nombre o nombres de pila</span>
           </div>

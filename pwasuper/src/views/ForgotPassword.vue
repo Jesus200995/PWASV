@@ -65,156 +65,203 @@
       </Transition>
 
       <!-- Reset Password Form -->
-      <form @submit.prevent="resetPassword" class="forgot-form">
-        <!-- Email Section -->
-        <div class="form-group">
-          <div class="group-header">
-            <div class="group-icon">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+      <div class="forgot-form">
+        <!-- Paso 1: Verificar Correo -->
+        <div v-if="!emailVerified">
+          <div class="form-group">
+            <div class="group-header">
+              <div class="group-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span class="group-title">Paso 1: Verificar Correo</span>
             </div>
-            <span class="group-title">Correo Electrónico</span>
+
+            <div class="form-field">
+              <label class="field-label">Tu correo registrado</label>
+              <div class="input-wrapper" :class="{ 'has-error': formError && !email }">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+                  <path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input 
+                  v-model="email" 
+                  type="email" 
+                  required 
+                  placeholder="nombre@ejemplo.com"
+                  autocomplete="email"
+                  @keyup.enter="verifyEmail"
+                />
+              </div>
+              <span class="field-hint">Primero verificaremos que este correo esté registrado</span>
+            </div>
           </div>
 
-          <div class="form-field">
-            <label class="field-label">Tu correo registrado</label>
-            <div class="input-wrapper" :class="{ 'has-error': formError && !email }">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
-                <path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              <input 
-                v-model="email" 
-                type="email" 
-                required 
-                placeholder="nombre@ejemplo.com"
-                autocomplete="email"
-              />
-            </div>
-          </div>
+          <!-- Verificar Correo Button -->
+          <button type="button" @click="verifyEmail" :disabled="verifyingEmail || !isFormComplete" class="submit-btn" :class="{ 'is-loading': verifyingEmail, 'is-disabled': !isFormComplete }">
+            <Transition name="btn-fade" mode="out-in">
+              <span v-if="verifyingEmail" key="verifying" class="btn-inner">
+                <div class="btn-loader"></div>
+                <span>Verificando correo...</span>
+              </span>
+              <span v-else-if="!email || !email.includes('@')" key="email" class="btn-inner">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span>Ingresa tu correo</span>
+              </span>
+              <span v-else key="ready" class="btn-inner">
+                <span>Verificar correo</span>
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12h14m-6-6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </Transition>
+          </button>
         </div>
 
-        <!-- New Password Section -->
-        <div class="form-group">
-          <div class="group-header">
-            <div class="group-icon">
-              <svg viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
-                <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
-              </svg>
+        <!-- Paso 2: Cambiar Contraseña -->
+        <form v-else @submit.prevent="resetPassword">
+          <!-- Email Verificado -->
+          <div class="form-group verified-group">
+            <div class="group-header">
+              <div class="group-icon verified-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span class="group-title">Correo Verificado</span>
             </div>
-            <span class="group-title">Nueva Contraseña</span>
+
+            <div class="form-field">
+              <div class="verified-email-display">
+                <svg class="verified-icon-small" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="verified-email-text">{{ email }}</span>
+                <button type="button" @click="emailVerified = false; foundUser = null; errorMessage = ''" class="change-email-btn">
+                  Cambiar
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="form-field">
-            <label class="field-label">Nueva contraseña</label>
-            <div class="input-wrapper password-wrapper" :class="{ 'has-error': formError && newPassword.length < 6 }">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
-                <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
-              </svg>
-              <input 
-                v-model="newPassword" 
-                :type="showPassword ? 'text' : 'password'" 
-                required 
-                placeholder="Mínimo 6 caracteres"
-                minlength="6"
-                @input="checkPasswordsMatch"
-              />
-              <button type="button" class="visibility-toggle" @click="togglePasswordVisibility">
-                <svg v-if="showPassword" viewBox="0 0 24 24" fill="none">
-                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/>
+          <!-- New Password Section -->
+          <div class="form-group">
+            <div class="group-header">
+              <div class="group-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+                  <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
                 </svg>
-                <svg v-else viewBox="0 0 24 24" fill="none">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                </svg>
-              </button>
+              </div>
+              <span class="group-title">Paso 2: Nueva Contraseña</span>
             </div>
-            <span class="field-hint">Mínimo 6 caracteres</span>
+
+            <div class="form-field">
+              <label class="field-label">Nueva contraseña</label>
+              <div class="input-wrapper password-wrapper" :class="{ 'has-error': formError && newPassword.length < 6 }">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+                  <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <input 
+                  v-model="newPassword" 
+                  :type="showPassword ? 'text' : 'password'" 
+                  required 
+                  placeholder="Mínimo 6 caracteres"
+                  minlength="6"
+                  @input="checkPasswordsMatch"
+                />
+                <button type="button" class="visibility-toggle" @click="togglePasswordVisibility">
+                  <svg v-if="showPassword" viewBox="0 0 24 24" fill="none">
+                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  <svg v-else viewBox="0 0 24 24" fill="none">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <span class="field-hint">Mínimo 6 caracteres</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">Confirmar nueva contraseña</label>
+              <div class="input-wrapper password-wrapper" :class="{ 'has-error': !passwordsMatch, 'has-success': passwordsMatch && confirmPassword.length > 0 }">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input 
+                  v-model="confirmPassword" 
+                  :type="showConfirmPassword ? 'text' : 'password'" 
+                  required 
+                  placeholder="Confirmar contraseña"
+                  minlength="6"
+                  @input="checkPasswordsMatch"
+                />
+                <button type="button" class="visibility-toggle" @click="toggleConfirmPasswordVisibility">
+                  <svg v-if="showConfirmPassword" viewBox="0 0 24 24" fill="none">
+                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  <svg v-else viewBox="0 0 24 24" fill="none">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <span v-if="confirmPassword && !passwordsMatch" class="field-hint error-hint">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Las contraseñas no coinciden
+              </span>
+              <span v-else-if="confirmPassword && passwordsMatch" class="field-hint success-hint">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Las contraseñas coinciden
+              </span>
+            </div>
           </div>
 
-          <div class="form-field">
-            <label class="field-label">Confirmar nueva contraseña</label>
-            <div class="input-wrapper password-wrapper" :class="{ 'has-error': !passwordsMatch, 'has-success': passwordsMatch && confirmPassword.length > 0 }">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <input 
-                v-model="confirmPassword" 
-                :type="showConfirmPassword ? 'text' : 'password'" 
-                required 
-                placeholder="Confirmar contraseña"
-                minlength="6"
-                @input="checkPasswordsMatch"
-              />
-              <button type="button" class="visibility-toggle" @click="toggleConfirmPasswordVisibility">
-                <svg v-if="showConfirmPassword" viewBox="0 0 24 24" fill="none">
-                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/>
+          <!-- Submit Button -->
+          <button type="submit" :disabled="loading || !isFormComplete || !passwordsMatch" class="submit-btn" :class="{ 'is-loading': loading, 'is-disabled': !isFormComplete || !passwordsMatch }">
+            <Transition name="btn-fade" mode="out-in">
+              <span v-if="loading" key="loading" class="btn-inner">
+                <div class="btn-loader"></div>
+                <span>Cambiando contraseña...</span>
+              </span>
+              <span v-else-if="newPassword.length < 6" key="password" class="btn-inner">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
-                <svg v-else viewBox="0 0 24 24" fill="none">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                <span>Mínimo 6 caracteres</span>
+              </span>
+              <span v-else-if="!passwordsMatch" key="mismatch" class="btn-inner">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
-              </button>
-            </div>
-            <span v-if="confirmPassword && !passwordsMatch" class="field-hint error-hint">
-              <svg viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              Las contraseñas no coinciden
-            </span>
-            <span v-else-if="confirmPassword && passwordsMatch" class="field-hint success-hint">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Las contraseñas coinciden
-            </span>
-          </div>
-        </div>
-
-        <!-- Submit Button -->
-        <button type="submit" :disabled="loading || !isFormComplete || !passwordsMatch" class="submit-btn" :class="{ 'is-loading': loading, 'is-disabled': !isFormComplete || !passwordsMatch }">
-          <Transition name="btn-fade" mode="out-in">
-            <span v-if="loading" key="loading" class="btn-inner">
-              <div class="btn-loader"></div>
-              <span>Cambiando contraseña...</span>
-            </span>
-            <span v-else-if="!email" key="email" class="btn-inner">
-              <svg viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              <span>Ingresa tu correo</span>
-            </span>
-            <span v-else-if="newPassword.length < 6" key="password" class="btn-inner">
-              <svg viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              <span>Mínimo 6 caracteres</span>
-            </span>
-            <span v-else-if="!passwordsMatch" key="mismatch" class="btn-inner">
-              <svg viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              <span>Las contraseñas deben coincidir</span>
-            </span>
-            <span v-else key="ready" class="btn-inner">
-              <span>Cambiar contraseña</span>
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M5 12h14m-6-6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </Transition>
-        </button>
-      </form>
+                <span>Las contraseñas deben coincidir</span>
+              </span>
+              <span v-else key="ready" class="btn-inner">
+                <span>Cambiar contraseña</span>
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12h14m-6-6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </Transition>
+          </button>
+        </form>
+      </div>
 
       <!-- Footer -->
       <footer class="forgot-footer">
@@ -241,8 +288,14 @@ const errorMessage = ref('');
 const formError = ref(false);
 const showSuccessModal = ref(false);
 const passwordsMatch = ref(true);
+const emailVerified = ref(false);
+const verifyingEmail = ref(false);
+const foundUser = ref(null);
 
 const isFormComplete = computed(() => {
+  if (!emailVerified.value) {
+    return email.value.trim() !== '' && email.value.includes('@');
+  }
   return email.value.trim() !== '' && 
          newPassword.value.length >= 6 && 
          confirmPassword.value.trim() !== '';
@@ -268,14 +321,88 @@ function goToLogin() {
   router.push('/login');
 }
 
+async function verifyEmail() {
+  verifyingEmail.value = true;
+  errorMessage.value = '';
+  formError.value = false;
+  
+  if (!email.value || !email.value.includes('@')) {
+    errorMessage.value = 'Por favor, ingresa un correo electrónico válido';
+    formError.value = true;
+    verifyingEmail.value = false;
+    return;
+  }
+  
+  // Verificar conexión a internet
+  const online = await checkInternetConnection();
+  if (!online) {
+    errorMessage.value = getOfflineMessage();
+    formError.value = true;
+    verifyingEmail.value = false;
+    return;
+  }
+  
+  try {
+    const currentApiUrl = await getBestApiUrl();
+    
+    const usuariosResponse = await axios.get(`${currentApiUrl}/usuarios`, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const usuarios = usuariosResponse.data.usuarios;
+    const usuario = usuarios.find(u => u.correo.toLowerCase() === email.value.toLowerCase());
+    
+    if (!usuario) {
+      errorMessage.value = 'No se encontró una cuenta registrada con ese correo electrónico';
+      formError.value = true;
+      verifyingEmail.value = false;
+      emailVerified.value = false;
+      foundUser.value = null;
+      return;
+    }
+    
+    // Usuario encontrado
+    foundUser.value = usuario;
+    emailVerified.value = true;
+    errorMessage.value = '';
+    formError.value = false;
+    
+  } catch (error) {
+    console.error('Error al verificar correo:', error);
+    
+    if (error.request) {
+      errorMessage.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+    } else if (error.code === 'ECONNABORTED') {
+      errorMessage.value = 'La conexión tardó demasiado. Verifica tu conexión a internet.';
+    } else {
+      errorMessage.value = 'Error al verificar el correo: ' + error.message;
+    }
+    
+    formError.value = true;
+    emailVerified.value = false;
+    foundUser.value = null;
+  } finally {
+    verifyingEmail.value = false;
+  }
+}
+
 async function resetPassword() {
+  if (!emailVerified.value || !foundUser.value) {
+    errorMessage.value = 'Primero debes verificar tu correo electrónico';
+    formError.value = true;
+    return;
+  }
+  
   loading.value = true;
   errorMessage.value = '';
   formError.value = false;
   
   // Validaciones
-  if (!email.value || !newPassword.value || !confirmPassword.value) {
-    errorMessage.value = 'Por favor, completa todos los campos';
+  if (!newPassword.value || !confirmPassword.value) {
+    errorMessage.value = 'Por favor, completa todos los campos de contraseña';
     formError.value = true;
     loading.value = false;
     return;
@@ -305,26 +432,8 @@ async function resetPassword() {
   }
   
   try {
-    // Obtener la mejor URL del servidor
     const currentApiUrl = await getBestApiUrl();
-    
-    // Primero verificar que el usuario existe
-    const usuariosResponse = await axios.get(`${currentApiUrl}/usuarios`, {
-      timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    const usuarios = usuariosResponse.data.usuarios;
-    const usuario = usuarios.find(u => u.correo.toLowerCase() === email.value.toLowerCase());
-    
-    if (!usuario) {
-      errorMessage.value = 'No se encontró una cuenta con ese correo electrónico';
-      formError.value = true;
-      loading.value = false;
-      return;
-    }
+    const usuario = foundUser.value;
     
     // Actualizar la contraseña
     const updateData = {
@@ -351,6 +460,8 @@ async function resetPassword() {
     email.value = '';
     newPassword.value = '';
     confirmPassword.value = '';
+    emailVerified.value = false;
+    foundUser.value = null;
     
     // Redirigir al login después de 3 segundos
     setTimeout(() => {
@@ -755,6 +866,65 @@ async function resetPassword() {
 
 @keyframes spinner-rotate {
   to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   VERIFIED EMAIL STYLES
+   ========================================================================== */
+
+.verified-group {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid rgba(52, 199, 89, 0.2);
+}
+
+.verified-icon {
+  background: linear-gradient(180deg, #34c759 0%, #30b350 100%) !important;
+}
+
+.verified-icon-small {
+  width: 18px;
+  height: 18px;
+  color: #34c759;
+  flex-shrink: 0;
+}
+
+.verified-email-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #34c759;
+}
+
+.verified-email-text {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.change-email-btn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #06c;
+  border-radius: 8px;
+  color: #06c;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.change-email-btn:hover {
+  background: rgba(0, 102, 204, 0.05);
+}
+
+.change-email-btn:active {
+  transform: scale(0.95);
 }
 
 /* Footer */

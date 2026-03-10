@@ -2174,7 +2174,14 @@ async function generarPDFEstadisticasReportes() {
     
     const data = await response.json()
     
+    console.log('📊 Datos recibidos del backend:', JSON.stringify(data, null, 2))
+    
     if (data.success) {
+      // Verificar que hay datos
+      if (!data.data || (!data.data.territorios?.length && !data.data.resumen_general?.total_reportes)) {
+        throw new Error('No hay datos de reportes para los filtros seleccionados')
+      }
+      
       // Generar PDF con los datos recibidos
       await generarPDFEstadisticasLocal(data.data)
       
@@ -2217,6 +2224,26 @@ async function generarPDFEstadisticasLocal(data) {
     negro: [33, 33, 33]
   }
   
+  // Mapear datos del backend a formato esperado
+  const resumen = data.resumen_general || {}
+  const territoriosData = data.territorios || []
+  
+  // Calcular totales desde territorios si no hay resumen
+  let totalReportes = resumen.total_reportes || 0
+  let firmados = resumen.reportes_firmados || 0
+  let pendientes = resumen.reportes_pendientes || 0
+  
+  // Si no hay datos en resumen, calcular desde territorios
+  if (totalReportes === 0 && territoriosData.length > 0) {
+    territoriosData.forEach(t => {
+      totalReportes += t.reportes_total || 0
+      firmados += t.reportes_firmados || 0
+      pendientes += t.reportes_pendientes || 0
+    })
+  }
+  
+  const porcentaje = totalReportes > 0 ? Math.round((firmados / totalReportes) * 100) : 0
+  
   // Función auxiliar para dibujar celdas de tabla
   const drawTableCell = (x, y, width, height, text, options = {}) => {
     const { 
@@ -2249,7 +2276,6 @@ async function generarPDFEstadisticasLocal(data) {
   }
   
   // ===================== HEADER PRINCIPAL =====================
-  // Fondo gradiente simulado
   doc.setFillColor(...colors.guinda)
   doc.rect(0, 0, pageWidth, 48, 'F')
   doc.setFillColor(...colors.guindaClaro)
@@ -2265,7 +2291,7 @@ async function generarPDFEstadisticasLocal(data) {
   if (data.territorio_filtro) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(14)
-    doc.setTextColor(255, 220, 180)  // Dorado claro
+    doc.setTextColor(255, 220, 180)
     doc.text(`Territorio: ${data.territorio_filtro}`, margin, 28)
   }
   
@@ -2291,11 +2317,6 @@ async function generarPDFEstadisticasLocal(data) {
   // ===================== RESUMEN GENERAL =====================
   doc.setFillColor(...colors.grisMuyClaro)
   doc.roundedRect(margin, y, pageWidth - margin * 2, 30, 3, 3, 'F')
-  
-  const totalReportes = data.totales?.total_reportes || 0
-  const firmados = data.totales?.firmados || 0
-  const pendientes = data.totales?.pendientes || 0
-  const porcentaje = totalReportes > 0 ? Math.round((firmados / totalReportes) * 100) : 0
   
   // Cards de resumen
   const cardWidth = (pageWidth - margin * 2 - 15) / 4
@@ -2341,7 +2362,7 @@ async function generarPDFEstadisticasLocal(data) {
   y += 40
   
   // ===================== TABLA POR TERRITORIO =====================
-  if (data.por_territorio && data.por_territorio.length > 0) {
+  if (territoriosData.length > 0) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(12)
     doc.setTextColor(...colors.guinda)
@@ -2366,12 +2387,19 @@ async function generarPDFEstadisticasLocal(data) {
     })
     y += 8
     
-    // Filas de datos
-    data.por_territorio.forEach((row, idx) => {
+    // Filas de datos - usar campos correctos del backend
+    territoriosData.forEach((row, idx) => {
       const isEven = idx % 2 === 0
       x = margin
-      const pct = row.total > 0 ? Math.round((row.firmados / row.total) * 100) : 0
-      const rowData = [row.territorio || 'Sin territorio', row.total, row.firmados, row.pendientes, `${pct}%`]
+      
+      // Mapear campos del backend
+      const terTotal = row.reportes_total || 0
+      const terFirmados = row.reportes_firmados || 0
+      const terPendientes = row.reportes_pendientes || 0
+      const terNombre = row.nombre || 'Sin territorio'
+      const pct = terTotal > 0 ? Math.round((terFirmados / terTotal) * 100) : 0
+      
+      const rowData = [terNombre, terTotal, terFirmados, terPendientes, `${pct}%`]
       
       rowData.forEach((val, i) => {
         drawTableCell(x, y, colWidths[i], 7, val, {
@@ -2390,6 +2418,13 @@ async function generarPDFEstadisticasLocal(data) {
         y = margin
       }
     })
+  } else {
+    // Sin datos de territorios
+    doc.setFont('helvetica', 'italic')
+    doc.setFontSize(11)
+    doc.setTextColor(...colors.gris)
+    doc.text('No se encontraron datos de reportes para los filtros seleccionados.', margin, y)
+    y += 10
   }
   
   // ===================== PIE DE PÁGINA =====================
@@ -2398,7 +2433,8 @@ async function generarPDFEstadisticasLocal(data) {
   doc.text('Sembrando Vida - Sistema de Gestión de Reportes', pageWidth / 2, pageHeight - 10, { align: 'center' })
   
   // Guardar el PDF
-  const nombreArchivo = `Estadisticas_Reportes_${estadisticasPDFConfig.value.mes || 'Anual'}_${estadisticasPDFConfig.value.anio}.pdf`
+  const territorioNombre = data.territorio_filtro ? `_${data.territorio_filtro.replace(/\s+/g, '_').substring(0, 20)}` : ''
+  const nombreArchivo = `Estadisticas_Reportes_${estadisticasPDFConfig.value.mes || 'Anual'}_${estadisticasPDFConfig.value.anio}${territorioNombre}.pdf`
   doc.save(nombreArchivo)
 }
 // ============= FIN FUNCIONES ESTADÍSTICAS PDF =============

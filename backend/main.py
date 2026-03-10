@@ -3075,6 +3075,11 @@ async def obtener_estadisticas_reportes_pdf(
     Obtener estadísticas detalladas de reportes para generar PDF.
     """
     try:
+        # Usar año actual si no se proporciona
+        if anio is None:
+            from datetime import datetime
+            anio = datetime.now().year
+        
         print(f"📊 [ADMIN] Obteniendo estadísticas para PDF...")
         print(f"   Filtros: mes={mes}, anio={anio}, territorio={territorio}, agrupar_por={agrupar_por}")
         

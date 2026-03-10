@@ -2204,10 +2204,10 @@ const validatePhoneEdit = () => {
 /* Modal Container */
 .apple-modal-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 400px;
   max-height: 90vh;
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 
               0 0 0 1px rgba(0, 0, 0, 0.05);
   overflow: hidden;
@@ -2215,6 +2215,18 @@ const validatePhoneEdit = () => {
   flex-direction: column;
   pointer-events: auto;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+}
+
+@media (max-width: 768px) {
+  .apple-modal-container {
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 480px) {
+  .apple-modal-container {
+    max-width: calc(100% - 24px);
+  }
 }
 
 /* Modal Header */
@@ -2232,41 +2244,41 @@ const validatePhoneEdit = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 12px 16px;
 }
 
 .modal-title-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .modal-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
-  border-radius: 8px;
+  border-radius: 7px;
   color: white;
 }
 
 .modal-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .modal-title {
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 600;
   color: #1d1d1f;
   letter-spacing: -0.3px;
 }
 
 .modal-close-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2284,15 +2296,15 @@ const validatePhoneEdit = () => {
 }
 
 .modal-close-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Modal Body */
 .modal-body {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 20px 32px;
+  padding: 16px 16px 24px;
   background: #fbfbfd;
 }
 
@@ -2318,24 +2330,24 @@ const validatePhoneEdit = () => {
 .modal-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 /* Error Alert */
 .error-alert {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 10px 12px;
   background: #fff5f5;
   border: 1px solid #feb2b2;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .alert-icon {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   color: #e53e3e;
 }
 
@@ -2346,9 +2358,9 @@ const validatePhoneEdit = () => {
 
 .alert-text {
   flex: 1;
-  font-size: 14px;
+  font-size: 12px;
   color: #c53030;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* Form Group */
@@ -2362,15 +2374,15 @@ const validatePhoneEdit = () => {
 .group-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
+  gap: 8px;
+  padding: 10px 12px;
   background: #f5f5f7;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .group-icon {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   color: #34c759;
 }
 
@@ -2380,7 +2392,7 @@ const validatePhoneEdit = () => {
 }
 
 .group-title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #1d1d1f;
   letter-spacing: -0.2px;
@@ -2388,7 +2400,7 @@ const validatePhoneEdit = () => {
 
 /* Form Field */
 .form-field {
-  padding: 16px;
+  padding: 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
@@ -2398,20 +2410,20 @@ const validatePhoneEdit = () => {
 
 .field-label {
   display: block;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   color: #6e6e73;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   letter-spacing: -0.1px;
 }
 
 .field-badge {
   display: inline-block;
-  padding: 2px 8px;
-  font-size: 11px;
+  padding: 2px 6px;
+  font-size: 9px;
   font-weight: 600;
-  border-radius: 6px;
-  margin-left: 8px;
+  border-radius: 5px;
+  margin-left: 6px;
   background: #e3f2fd;
   color: #1976d2;
 }
@@ -2439,9 +2451,9 @@ const validatePhoneEdit = () => {
 
 .input-icon {
   position: absolute;
-  left: 14px;
-  width: 18px;
-  height: 18px;
+  left: 12px;
+  width: 15px;
+  height: 15px;
   color: #86868b;
   pointer-events: none;
   z-index: 1;
@@ -2450,13 +2462,13 @@ const validatePhoneEdit = () => {
 .input-wrapper input,
 .input-wrapper select {
   width: 100%;
-  padding: 12px 14px 12px 44px;
-  font-size: 15px;
+  padding: 10px 12px 10px 36px;
+  font-size: 13px;
   font-weight: 400;
   color: #1d1d1f;
   background: #f5f5f7;
   border: 1.5px solid transparent;
-  border-radius: 10px;
+  border-radius: 9px;
   outline: none;
   transition: all 0.2s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
@@ -2506,9 +2518,9 @@ const validatePhoneEdit = () => {
 .input-lock,
 .input-spinner {
   position: absolute;
-  right: 14px;
-  width: 18px;
-  height: 18px;
+  right: 12px;
+  width: 15px;
+  height: 15px;
   color: #86868b;
 }
 
@@ -2532,16 +2544,16 @@ const validatePhoneEdit = () => {
 .field-hint {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  font-size: 12px;
+  gap: 5px;
+  margin-top: 6px;
+  font-size: 10px;
   color: #86868b;
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .field-hint svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
 }
 
@@ -2576,17 +2588,17 @@ const validatePhoneEdit = () => {
 .country-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 12px 12px;
+  gap: 5px;
+  padding: 10px 10px;
   background: #f5f5f7;
   border: 1.5px solid transparent;
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: 9px;
+  font-size: 13px;
   font-weight: 500;
   color: #1d1d1f;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 90px;
+  min-width: 80px;
 }
 
 .country-btn:hover {
@@ -2601,19 +2613,19 @@ const validatePhoneEdit = () => {
 }
 
 .country-flag {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1;
 }
 
 .country-code {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #1d1d1f;
 }
 
 .country-arrow {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   color: #86868b;
   transition: transform 0.2s ease;
 }
@@ -2625,13 +2637,13 @@ const validatePhoneEdit = () => {
 /* Country Dropdown */
 .country-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   left: 0;
-  width: 280px;
-  max-height: 320px;
+  width: 260px;
+  max-height: 280px;
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+  border-radius: 10px;
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.25);
   overflow: hidden;
   z-index: 100;
@@ -2642,23 +2654,23 @@ const validatePhoneEdit = () => {
   top: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
+  gap: 8px;
+  padding: 10px;
   background: white;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .search-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: #86868b;
   flex-shrink: 0;
 }
 
 .dropdown-search input {
   flex: 1;
-  padding: 8px 0;
-  font-size: 14px;
+  padding: 6px 0;
+  font-size: 12px;
   color: #1d1d1f;
   background: transparent;
   border: none;
@@ -2670,7 +2682,7 @@ const validatePhoneEdit = () => {
 }
 
 .country-list {
-  max-height: 260px;
+  max-height: 220px;
   overflow-y: auto;
   padding: 4px;
 }
@@ -2678,9 +2690,9 @@ const validatePhoneEdit = () => {
 .country-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 7px;
   cursor: pointer;
   transition: background 0.15s ease;
 }
@@ -2690,43 +2702,43 @@ const validatePhoneEdit = () => {
 }
 
 .country-item .country-flag {
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .country-item .country-name {
   flex: 1;
-  font-size: 14px;
+  font-size: 12px;
   color: #1d1d1f;
 }
 
 .country-item .country-code {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   color: #86868b;
 }
 
 .country-empty {
-  padding: 20px;
+  padding: 16px;
   text-align: center;
-  font-size: 13px;
+  font-size: 11px;
   color: #86868b;
 }
 
 /* Form Actions */
 .form-actions {
   display: flex;
-  gap: 12px;
-  padding-top: 8px;
+  gap: 10px;
+  padding-top: 6px;
 }
 
 .btn-cancel,
 .btn-save {
   flex: 1;
-  padding: 14px 20px;
-  font-size: 15px;
+  padding: 11px 16px;
+  font-size: 13px;
   font-weight: 600;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
@@ -2774,17 +2786,17 @@ const validatePhoneEdit = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .btn-content svg {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
 }
 
 .btn-spinner {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
   border-radius: 50%;
@@ -2879,33 +2891,43 @@ const validatePhoneEdit = () => {
 /* Responsive Design */
 @media (max-width: 640px) {
   .apple-modal-wrapper {
-    padding: 12px;
+    padding: 10px;
   }
   
   .apple-modal-container {
     max-width: 100%;
     max-height: 95vh;
-    border-radius: 16px;
+    border-radius: 14px;
   }
   
   .modal-header-content {
-    padding: 14px 16px;
+    padding: 10px 14px;
   }
   
   .modal-title {
-    font-size: 17px;
+    font-size: 15px;
+  }
+  
+  .modal-icon {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .modal-icon svg {
+    width: 14px;
+    height: 14px;
   }
   
   .modal-body {
-    padding: 20px 16px 28px;
+    padding: 14px 14px 20px;
   }
   
   .modal-form {
-    gap: 20px;
+    gap: 14px;
   }
   
   .form-field {
-    padding: 14px;
+    padding: 10px;
   }
   
   .phone-input-group {
@@ -2932,6 +2954,18 @@ const validatePhoneEdit = () => {
   .btn-cancel,
   .btn-save {
     width: 100%;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .apple-modal-container {
+    max-width: 380px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .apple-modal-container {
+    max-width: 400px;
   }
 }
 

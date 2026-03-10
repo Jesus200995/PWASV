@@ -141,7 +141,10 @@
                 <svg class="verified-icon-small" viewBox="0 0 24 24" fill="none">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span class="verified-email-text">{{ email }}</span>
+                <div class="verified-info">
+                  <span class="verified-email-text">{{ email }}</span>
+                  <span class="verified-name-text">{{ foundUser?.nombre_completo }}</span>
+                </div>
                 <button type="button" @click="emailVerified = false; foundUser = null; errorMessage = ''" class="change-email-btn">
                   Cambiar
                 </button>
@@ -898,11 +901,30 @@ async function resetPassword() {
   border: 2px solid #34c759;
 }
 
-.verified-email-text {
+.verified-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.verified-email-text {
   font-size: 15px;
   font-weight: 600;
   color: #1d1d1f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verified-name-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: #86868b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .change-email-btn {

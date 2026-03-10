@@ -212,7 +212,7 @@
                 </div>
                 <div class="filter-item">
                   <label>Usuario</label>
-                  <select v-model="filtroUsuario" @change="filtrarRegistros">
+                  <select v-model="filtroUsuario" @change="filtrarRegistrosLocales">
                     <option value="">Todos</option>
                     <option v-for="usuario in usuariosUnicos" :key="usuario.id" :value="usuario.id">
                       {{ usuario.nombre_completo }}
@@ -221,7 +221,7 @@
                 </div>
                 <div class="filter-item">
                   <label>Tipo</label>
-                  <select v-model="filtroTipoActividad" @change="filtrarRegistros">
+                  <select v-model="filtroTipoActividad" @change="filtrarRegistrosLocales">
                     <option value="">Todos</option>
                     <option value="campo">Campo</option>
                     <option value="gabinete">Gabinete</option>
@@ -229,24 +229,24 @@
                 </div>
                 <div class="filter-item">
                   <label>Desde</label>
-                  <input type="date" v-model="filtroFechaInicio" @change="filtrarRegistros" :max="filtroFechaFin || maxDate">
+                  <input type="date" v-model="filtroFechaInicio" @change="aplicarFiltroFechaPersonalizado" :max="filtroFechaFin || maxDate">
                 </div>
                 <div class="filter-item">
                   <label>Hasta</label>
-                  <input type="date" v-model="filtroFechaFin" @change="filtrarRegistros" :min="filtroFechaInicio" :max="maxDate">
+                  <input type="date" v-model="filtroFechaFin" @change="aplicarFiltroFechaPersonalizado" :min="filtroFechaInicio" :max="maxDate">
                 </div>
               </div>
               <div class="filter-checkboxes">
                 <label class="checkbox-label">
-                  <input type="checkbox" v-model="filtroConFoto" @change="filtrarRegistros">
+                  <input type="checkbox" v-model="filtroConFoto" @change="filtrarRegistrosLocales">
                   <span>Con foto</span>
                 </label>
                 <label class="checkbox-label">
-                  <input type="checkbox" v-model="filtroSinFoto" @change="filtrarRegistros">
+                  <input type="checkbox" v-model="filtroSinFoto" @change="filtrarRegistrosLocales">
                   <span>Sin foto</span>
                 </label>
                 <label class="checkbox-label">
-                  <input type="checkbox" v-model="filtroConDescripcion" @change="filtrarRegistros">
+                  <input type="checkbox" v-model="filtroConDescripcion" @change="filtrarRegistrosLocales">
                   <span>Con descripción</span>
                 </label>
               </div>
@@ -1641,9 +1641,15 @@ onUnmounted(() => {
   window.removeEventListener('user-session-updated', actualizarPermisosUsuario)
 })
 
-const cargarRegistros = async () => {
+// Variable para rastrear si estamos filtrando por fecha desde el backend
+const filtrandoPorFechaBackend = ref(false)
+
+const cargarRegistros = async (opciones = {}) => {
   loading.value = true
   error.value = ''
+  
+  // Extraer opciones de fecha si se proporcionan
+  const { fechaInicio = null, fechaFin = null } = opciones
   
   try {
     const token = localStorage.getItem('admin_token')
@@ -1658,18 +1664,34 @@ const cargarRegistros = async () => {
     } else {
       console.log('📊 Solicitando todos los registros (admin global)...')
     }
+    
+    if (fechaInicio || fechaFin) {
+      console.log(`📅 Con filtro de fechas: ${fechaInicio || 'inicio'} a ${fechaFin || 'fin'}`)
+    }
+    
     console.time('Carga de registros')
     
     // Construir parámetros con filtro territorial si aplica
     const params = {
       page: 1,
-      page_size: 1000, // Paginación optimizada
+      page_size: 2000, // Aumentado para permitir más registros con filtros de fecha
       usuario_id: filtroUsuario.value || undefined
     }
     
     if (territorioFilter) {
       params.territorio = territorioFilter
     }
+    
+    // Agregar filtros de fecha si se proporcionan
+    if (fechaInicio) {
+      params.fecha_inicio = fechaInicio
+    }
+    if (fechaFin) {
+      params.fecha_fin = fechaFin
+    }
+    
+    // Marcar si estamos filtrando por fecha desde backend
+    filtrandoPorFechaBackend.value = !!(fechaInicio || fechaFin)
     
     // Usar el nuevo endpoint optimizado /admin/registros
     const response = await axios.get(`${API_URL}/admin/registros`, {
@@ -1721,8 +1743,8 @@ const cargarRegistros = async () => {
     
     console.log(`📈 Estadísticas: ${registros.value.length.toLocaleString('es')} registros cargados | ${totalUsuariosUnicos} usuarios | ${conFotos} con foto (${(conFotos/registros.value.length*100).toFixed(1)}%) | ${conDescripcion} con descripción (${(conDescripcion/registros.value.length*100).toFixed(1)}%)`);
     
-    // Aplicar filtros iniciales
-    filtrarRegistros()
+    // Aplicar filtros locales adicionales (tipo, foto, descripción) - NO fechas si ya filtramos en backend
+    filtrarRegistrosLocales()
     
     // Calcular estadísticas
     calcularEstadisticas()
@@ -2134,6 +2156,70 @@ const filtrarRegistros = async () => {
   aplicarOrdenamiento()
 }
 
+// Nueva función para filtros locales (sin fechas, ya que se filtran en backend)
+const filtrarRegistrosLocales = () => {
+  console.log(`\n🔍 ===== APLICANDO FILTROS LOCALES =====`)
+  console.log(`📊 Total de registros en memoria: ${registros.value.length}`)
+  
+  let filtrados = [...registros.value]
+  
+  // Actualizar usuariosUnicos basado en los registros actuales
+  actualizarUsuariosUnicos()
+
+  // Filtro por texto de búsqueda
+  const terminoBusqueda = searchTerm.value?.trim() || ''
+  if (terminoBusqueda && terminoBusqueda.length >= 1) {
+    const termino = terminoBusqueda.toLowerCase()
+    filtrados = filtrados.filter(registro => {
+      if (!registro.usuario) return false
+      const nombre = (registro.usuario.nombre_completo || '').toLowerCase()
+      const correo = (registro.usuario.correo || '').toLowerCase()
+      const curp = (registro.usuario.curp || '').toLowerCase()
+      const descripcion = (registro.descripcion || '').toLowerCase()
+      return nombre.includes(termino) || correo.includes(termino) || curp.includes(termino) || descripcion.includes(termino)
+    })
+  }
+
+  // Filtro por usuario específico
+  if (filtroUsuario.value) {
+    filtrados = filtrados.filter(registro => 
+      registro.usuario_id === parseInt(filtroUsuario.value)
+    )
+  }
+  
+  // Filtro por tipo de actividad
+  if (filtroTipoActividad.value) {
+    filtrados = filtrados.filter(registro => {
+      const tipo = registro.tipo_actividad || 'campo'
+      return tipo.toLowerCase() === filtroTipoActividad.value.toLowerCase()
+    })
+  }
+  
+  // Filtros por estado de foto y descripción
+  if (filtroConFoto.value) {
+    filtrados = filtrados.filter(registro => registro.foto_url)
+  }
+  
+  if (filtroSinFoto.value) {
+    filtrados = filtrados.filter(registro => !registro.foto_url)
+  }
+  
+  if (filtroConDescripcion.value) {
+    filtrados = filtrados.filter(registro => 
+      registro.descripcion && registro.descripcion.trim() !== ''
+    )
+  }
+
+  registrosFiltrados.value = filtrados
+  
+  console.log(`📊 Registros después de filtros locales: ${filtrados.length}`)
+  console.log(`===== FIN DE FILTROS LOCALES =====\n`)
+  
+  paginaActual.value = 1
+  actualizarFiltrosActivos()
+  aplicarOrdenamiento()
+}
+
 // Nueva función para cargar registros de un usuario específico
 const cargarRegistrosParaUsuario = async (usuarioId) => {
   if (!usuarioId) return
@@ -2280,21 +2366,103 @@ const limpiarBusqueda = async () => {
   await cargarRegistros()
 }
 
-const seleccionarFechaRapida = (tipo) => {
-  filtroRapido.value = filtroRapido.value === tipo ? '' : tipo
-  filtroFechaInicio.value = ''
-  filtroFechaFin.value = ''
-  filtrarRegistros()
+// Función auxiliar para calcular fechas según el filtro rápido
+const calcularFechasParaFiltro = (tipo) => {
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0)
+  
+  let fechaInicio, fechaFin
+  
+  switch (tipo) {
+    case 'hoy':
+      fechaInicio = hoy.toISOString().split('T')[0]
+      fechaFin = fechaInicio
+      break
+    case 'ayer':
+      const ayer = new Date(hoy)
+      ayer.setDate(ayer.getDate() - 1)
+      fechaInicio = ayer.toISOString().split('T')[0]
+      fechaFin = fechaInicio
+      break
+    case 'semana':
+      const inicioSemana = new Date(hoy)
+      // Ir al domingo de esta semana (inicio de semana)
+      inicioSemana.setDate(hoy.getDate() - hoy.getDay())
+      fechaInicio = inicioSemana.toISOString().split('T')[0]
+      fechaFin = hoy.toISOString().split('T')[0]
+      break
+    case 'mes':
+      const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+      fechaInicio = inicioMes.toISOString().split('T')[0]
+      fechaFin = hoy.toISOString().split('T')[0]
+      break
+    default:
+      fechaInicio = null
+      fechaFin = null
+  }
+  
+  return { fechaInicio, fechaFin }
 }
 
-const limpiarFiltrosFechas = () => {
+const seleccionarFechaRapida = async (tipo) => {
+  // Si se hace clic en el mismo filtro, deseleccionar y cargar todos
+  if (filtroRapido.value === tipo) {
+    filtroRapido.value = ''
+    filtroFechaInicio.value = ''
+    filtroFechaFin.value = ''
+    console.log('🔄 Deseleccionando filtro rápido, cargando todos los registros...')
+    await cargarRegistros()
+    return
+  }
+  
+  // Seleccionar nuevo filtro
+  filtroRapido.value = tipo
+  filtroFechaInicio.value = ''
+  filtroFechaFin.value = ''
+  
+  // Calcular fechas para el filtro
+  const { fechaInicio, fechaFin } = calcularFechasParaFiltro(tipo)
+  
+  if (fechaInicio && fechaFin) {
+    console.log(`📅 Filtro rápido "${tipo}": ${fechaInicio} a ${fechaFin}`)
+    // Consultar al backend con las fechas
+    await cargarRegistros({ fechaInicio, fechaFin })
+  }
+  
+  // Actualizar filtros activos
+  actualizarFiltrosActivos()
+}
+
+const limpiarFiltrosFechas = async () => {
   filtroFechaInicio.value = ''
   filtroFechaFin.value = ''
   filtroRapido.value = ''
-  filtrarRegistros()
+  console.log('🔄 Limpiando filtros de fecha, cargando todos los registros...')
+  await cargarRegistros()
 }
 
-const quitarFiltro = (tipo, valor) => {
+// Función para aplicar filtro de fecha personalizado (Desde/Hasta)
+const aplicarFiltroFechaPersonalizado = async () => {
+  // Limpiar filtro rápido si se usa fecha personalizada
+  if (filtroFechaInicio.value || filtroFechaFin.value) {
+    filtroRapido.value = ''
+  }
+  
+  // Solo consultar al backend si tenemos ambas fechas
+  if (filtroFechaInicio.value && filtroFechaFin.value) {
+    console.log(`📅 Filtro de fecha personalizado: ${filtroFechaInicio.value} a ${filtroFechaFin.value}`)
+    await cargarRegistros({ 
+      fechaInicio: filtroFechaInicio.value, 
+      fechaFin: filtroFechaFin.value 
+    })
+  } else if (!filtroFechaInicio.value && !filtroFechaFin.value) {
+    // Si se limpian ambas fechas, recargar sin filtro
+    await cargarRegistros()
+  }
+  // Si solo hay una fecha, esperar a que el usuario complete la otra
+}
+
+const quitarFiltro = async (tipo, valor) => {
   switch (tipo) {
     case 'busqueda':
       searchTerm.value = ''
@@ -2322,10 +2490,16 @@ const quitarFiltro = (tipo, valor) => {
       filtroConDescripcion.value = false
       break
   }
-  filtrarRegistros()
+  
+  // Si quitamos filtro de fecha, recargar del backend
+  if (tipo === 'fechaRango' || tipo === 'fechaRapida') {
+    await cargarRegistros()
+  } else {
+    filtrarRegistrosLocales()
+  }
 }
 
-const limpiarTodosFiltros = () => {
+const limpiarTodosFiltros = async () => {
   searchTerm.value = ''
   filtroFechaInicio.value = ''
   filtroFechaFin.value = ''
@@ -2338,7 +2512,8 @@ const limpiarTodosFiltros = () => {
   filtroUsuarioTexto.value = ''
   mostrarSugerencias.value = false
   paginaActual.value = 1 // Resetear paginación
-  filtrarRegistros()
+  // Recargar todos los registros del backend
+  await cargarRegistros()
 }
 
 // Funciones de paginación

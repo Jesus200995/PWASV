@@ -1173,17 +1173,17 @@ def obtener_registros(usuario_id: int = None, limit: int = None, page: int = 1, 
 
 # NUEVO ENDPOINT OPTIMIZADO PARA ADMIN-PWA
 @app.get("/admin/registros")
-def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int = None, territorio: str = None):
-    """Endpoint optimizado para el admin-pwa con paginación obligatoria y filtro territorial"""
+def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int = None, territorio: str = None, fecha_inicio: str = None, fecha_fin: str = None):
+    """Endpoint optimizado para el admin-pwa con paginación obligatoria, filtro territorial y filtros por fecha"""
     try:
         # Límites de seguridad para admin
-        max_page_size = 200
+        max_page_size = 2000  # Aumentado para permitir cargas grandes con filtros de fecha
         page_size = min(page_size, max_page_size)
         page = max(1, page)  # Asegurar página mínima
         
         offset = (page - 1) * page_size
         
-        print(f"🔍 [ADMIN] Obteniendo registros - Página: {page}, Tamaño: {page_size}, Offset: {offset}, Usuario: {usuario_id}, Territorio: {territorio}")
+        print(f"🔍 [ADMIN] Obteniendo registros - Página: {page}, Tamaño: {page_size}, Offset: {offset}, Usuario: {usuario_id}, Territorio: {territorio}, Fechas: {fecha_inicio} a {fecha_fin}")
         
         # Verificar conexión antes de continuar
         if not verificar_conexion_db():
@@ -1218,6 +1218,21 @@ def obtener_registros_admin(page: int = 1, page_size: int = 50, usuario_id: int 
         if territorio:
             conditions.append("u.territorio = %s")
             params.append(territorio)
+        
+        # Filtros por fecha
+        if fecha_inicio:
+            if territorio:
+                conditions.append("r.fecha_hora >= %s")
+            else:
+                conditions.append("fecha_hora >= %s")
+            params.append(fecha_inicio + " 00:00:00")
+        
+        if fecha_fin:
+            if territorio:
+                conditions.append("r.fecha_hora <= %s")
+            else:
+                conditions.append("fecha_hora <= %s")
+            params.append(fecha_fin + " 23:59:59")
         
         # Agregar WHERE clause si hay condiciones
         if conditions:

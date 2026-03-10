@@ -1,539 +1,440 @@
 <template>
-  <div class="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4 relative" style="min-height: 100vh;">
-    <!-- Elementos decorativos para mejorar el efecto de vidrio -->
-    <div class="absolute inset-0">
-      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
-      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
-      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
-    </div>
-    
-    <div class="page-container w-full max-w-lg relative z-10 px-4">
-      <!-- Back to Login Link - Top Left -->
-      <div class="flex justify-start mb-3">
-        <router-link to="/login" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
-          ← Volver al inicio de sesión
-        </router-link>
-      </div>
+  <div class="apple-register">
+    <!-- Success Modal -->
+    <Teleport to="body">
+      <Transition name="modal-scale">
+        <div v-if="showSuccessModal" class="modal-backdrop" @click.self="goToLogin">
+          <div class="modal-container">
+            <div class="modal-success-icon">
+              <svg viewBox="0 0 56 56" fill="none">
+                <circle cx="28" cy="28" r="26" stroke="#34C759" stroke-width="3"/>
+                <path d="M17 28l7 7 15-15" stroke="#34C759" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h2 class="modal-heading">Registro Exitoso</h2>
+            <p class="modal-description">Tu cuenta ha sido creada correctamente</p>
+            <div class="modal-progress-track">
+              <div class="modal-progress-fill"></div>
+            </div>
+            <p class="modal-redirect-text">Redirigiendo al inicio de sesión...</p>
+            <button @click="goToLogin" class="modal-action-btn">Continuar</button>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Main Content -->
+    <div class="register-content">
+      <!-- Fixed Navigation Header -->
+      <nav class="register-nav">
+        <div class="nav-container">
+          <router-link to="/login" class="nav-back-btn">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Volver</span>
+          </router-link>
+          <h1 class="nav-title">Crear Cuenta</h1>
+          <div class="nav-spacer"></div>
+        </div>
+      </nav>
 
       <!-- Header Section -->
-      <div class="text-center mb-4">
-        <h1 class="text-lg font-bold text-primary mb-1 text-center glass-title">Crear Cuenta</h1>
-        <h2 class="text-base font-semibold text-gray-700">Registro</h2>
-        <p class="mt-1 text-gray-500 text-xs">Completa los datos para crear tu cuenta</p>
-      </div>
+      <header class="register-hero">
+        <p class="hero-instruction">Completa el formulario con tus datos personales y laborales para crear tu cuenta en el sistema.</p>
+      </header>
 
-      <!-- Success Message -->
-      <transition name="modal-fade">
-        <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div class="success-modal-card w-full max-w-sm mx-4 transform transition-all duration-500 animate-bounce-in">
-            <div class="p-6 text-center relative overflow-hidden">
-              
-              <!-- Elementos decorativos de fondo -->
-              <div class="absolute inset-0 opacity-10">
-                <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-400 via-emerald-300 to-teal-400"></div>
-                <div class="absolute -top-4 -right-4 w-16 h-16 bg-white/20 rounded-full animate-pulse"></div>
-                <div class="absolute -bottom-2 -left-2 w-12 h-12 bg-green-400/30 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
-              </div>
+      <!-- Error Alert -->
+      <Transition name="alert-slide">
+        <div v-if="message.text && message.type === 'error'" class="error-alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="alert-text">{{ message.text }}</span>
+        </div>
+      </Transition>
 
-              <!-- Icono de éxito animado -->
-              <div class="relative z-10 mx-auto mb-4 w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg animate-success-icon">
-                <div class="absolute inset-0 bg-gradient-to-br from-green-300 to-emerald-400 rounded-full animate-ping opacity-20"></div>
-                <svg class="w-10 h-10 text-white animate-check-draw" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" class="check-path"></path>
-                </svg>
-              </div>
-              
-              <!-- Título -->
-              <h3 class="relative z-10 text-xl font-bold text-green-600 mb-2 animate-slide-up">¡Registro Exitoso!</h3>
-              
-              <!-- Mensaje -->
-              <p class="relative z-10 text-gray-700 mb-6 text-sm leading-relaxed animate-slide-up" style="animation-delay: 0.2s;">
-                Tu cuenta ha sido creada correctamente.<br>
-                <span class="text-green-600 font-medium">Serás redirigido al login...</span>
-              </p>
-              
-              <!-- Barra de progreso mejorada -->
-              <div class="relative z-10 w-full bg-gray-200 rounded-full h-2 mb-6 overflow-hidden animate-slide-up" style="animation-delay: 0.4s;">
-                <div class="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full animate-progress-fill shadow-sm relative">
-                  <div class="absolute inset-0 bg-white/30 animate-shimmer"></div>
-                </div>
-              </div>
-              
-              <!-- Botón mejorado -->
-              <button @click="goToLogin" class="relative z-10 success-button animate-slide-up" style="animation-delay: 0.6s;">
-                <span class="relative z-10">Ir al Login Ahora</span>
-                <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </button>
+      <!-- Registration Form -->
+      <form @submit.prevent="register" @keydown.enter="handleEnterKey" class="register-form">
+        
+        <!-- Personal Information -->
+        <div class="form-group">
+          <div class="group-header">
+            <div class="group-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+                <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="group-title">Datos Personales</h3>
+          </div>
 
-              <!-- Confeti animado -->
-              <div class="absolute inset-0 pointer-events-none">
-                <div class="confetti-1"></div>
-                <div class="confetti-2"></div>
-                <div class="confetti-3"></div>
-                <div class="confetti-4"></div>
-                <div class="confetti-5"></div>
-                <div class="confetti-6"></div>
-              </div>
+          <!-- Email -->
+          <div class="form-field">
+            <label class="field-label">Correo Electrónico</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M2 7l10 6 10-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <input v-model="form.email" type="email" autocomplete="email" required placeholder="tu@email.com"/>
             </div>
           </div>
+
+          <!-- Name -->
+          <div class="form-field">
+            <label class="field-label">Nombre(s)</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <input v-model="form.nombre" @input="formatNombre" type="text" required placeholder="NOMBRE COMPLETO" class="uppercase-input"/>
+            </div>
+            <span class="field-hint">Ingresa tu nombre o nombres de pila</span>
+          </div>
+
+          <!-- First Last Name -->
+          <div class="form-field">
+            <label class="field-label">Apellido Paterno</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <input v-model="form.primerApellido" @input="formatPrimerApellido" type="text" required placeholder="APELLIDO PATERNO" class="uppercase-input"/>
+            </div>
+          </div>
+
+          <!-- Second Last Name -->
+          <div class="form-field">
+            <label class="field-label">Apellido Materno</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <input v-model="form.segundoApellido" @input="formatSegundoApellido" type="text" required placeholder="APELLIDO MATERNO" class="uppercase-input"/>
+            </div>
+          </div>
+
+          <!-- CURP -->
+          <div class="form-field">
+            <label class="field-label">CURP</label>
+            <div class="input-wrapper" :class="{ 'has-error': curpError, 'has-success': curpWarning }">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M7 8h10M7 12h6M7 16h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <input v-model="form.curp" @input="formatCurp" type="text" required maxlength="18" placeholder="CURP (18 CARACTERES)" class="uppercase-input letter-spaced"/>
+              <span v-if="form.curp" class="char-counter">{{ form.curp.length }}/18</span>
+            </div>
+            <span v-if="curpError" class="field-hint error-hint">{{ curpError }}</span>
+            <span v-else-if="curpWarning" class="field-hint success-hint">{{ curpWarning }}</span>
+            <span v-else class="field-hint">Clave Única de Registro de Población</span>
+          </div>
         </div>
-      </transition>
 
-      <!-- Error Message -->
-      <transition name="bounce">
-        <div v-if="message.text && message.type === 'error'" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-sm mb-4" role="alert">
-          <p class="flex items-center text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            {{ message.text }}
-          </p>
+        <!-- Work Information -->
+        <div class="form-group">
+          <div class="group-header">
+            <div class="group-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 12v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="group-title">Información Laboral</h3>
+          </div>
+
+          <!-- Territory -->
+          <div class="form-field">
+            <label class="field-label">Territorio</label>
+            <div class="select-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="2"/>
+                <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <select v-model="form.territorio" required>
+                <option value="" disabled>Selecciona tu territorio</option>
+                <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">{{ territorio }}</option>
+              </select>
+              <svg class="select-arrow" viewBox="0 0 24 24" fill="none">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span v-if="territorioError" class="field-hint error-hint">{{ territorioError }}</span>
+            <span v-else class="field-hint">Selecciona tu área de trabajo</span>
+          </div>
+
+          <!-- Position -->
+          <div class="form-field">
+            <label class="field-label">Puesto de Trabajo</label>
+            <div class="select-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+              <select v-model="form.cargo" required>
+                <option value="" disabled>Selecciona tu puesto</option>
+                <option v-for="cargo in cargosDisponibles" :key="cargo" :value="cargo">{{ cargo }}</option>
+              </select>
+              <svg class="select-arrow" viewBox="0 0 24 24" fill="none">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Other Position -->
+          <Transition name="field-expand">
+            <div v-if="form.cargo === 'OTRO'" class="form-field">
+              <label class="field-label">Especifica tu cargo</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input v-model="form.cargoOtro" @input="formatCargoOtro" type="text" required placeholder="NOMBRE DEL CARGO" class="uppercase-input"/>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- Supervisor -->
+          <div class="form-field">
+            <label class="field-label">Supervisor Inmediato</label>
+            <div class="input-wrapper" :class="{ 'is-disabled': esTecnico }">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <input v-model="form.supervisor" @input="formatSupervisor" type="text" required :readonly="esTecnico" :placeholder="esTecnico && buscandoSupervisor ? 'Buscando...' : 'NOMBRE DEL SUPERVISOR'" class="uppercase-input"/>
+              <div v-if="buscandoSupervisor" class="input-spinner"></div>
+            </div>
+            <span v-if="esTecnico" class="field-hint success-hint">
+              <svg viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Supervisor asignado automáticamente
+            </span>
+            <span v-else class="field-hint">Nombre completo de tu jefe directo</span>
+          </div>
         </div>
-      </transition>
 
-      <!-- Register Form -->
-      <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+        <!-- Contact Information -->
+        <div class="form-group">
+          <div class="group-header">
+            <div class="group-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="5" y="2" width="14" height="20" rx="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="group-title">Contacto</h3>
+          </div>
 
-        <form @submit.prevent="register" @keydown.enter="handleEnterKey">
-          <div class="space-y-3">
-            <div>
-              <label for="email" class="block text-xs font-medium text-gray-800 mb-1">Correo electrónico *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+          <!-- Phone -->
+          <div class="form-field">
+            <label class="field-label">Número de Teléfono</label>
+            <div class="phone-field">
+              <!-- Country Code Selector -->
+              <div class="country-code-selector">
+                <button type="button" @click="showCountrySelector = !showCountrySelector" class="country-trigger">
+                  <span class="country-code-text">{{ paises.find(p => p.codigo === form.codigoPais)?.abrev || 'MX' }}</span>
+                  <span class="country-dial">{{ form.codigoPais }}</span>
+                  <svg class="country-arrow" viewBox="0 0 24 24" fill="none">
+                    <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                </div>
-                <input 
-                  v-model="form.email" 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  autocomplete="email" 
-                  required 
-                  class="glass-input w-full pl-9 pr-3 py-2" 
-                  placeholder="ejemplo@correo.com" 
-                />
-              </div>
-            </div>
-            
-            <!-- Campos separados para nombre completo -->
-            <div>
-              <label for="nombre" class="block text-xs font-medium text-gray-800 mb-1">Nombre(s) *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.nombre" 
-                  @input="formatNombre"
-                  id="nombre" 
-                  name="nombre" 
-                  type="text" 
-                  required 
-                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
-                  placeholder="Ej. JOSÉ MARÍA" 
-                />
-              </div>
-              <p class="mt-1 text-xs text-gray-500">Ingresa tu nombre o nombres de pila</p>
-            </div>
-            
-            <div>
-              <label for="primerApellido" class="block text-xs font-medium text-gray-800 mb-1">Apellido Paterno *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.primerApellido" 
-                  @input="formatPrimerApellido"
-                  id="primerApellido" 
-                  name="primerApellido" 
-                  type="text" 
-                  required 
-                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
-                  placeholder="Ej. GARCÍA" 
-                />
-              </div>
-              <p class="mt-1 text-xs text-gray-500">Apellido del padre</p>
-            </div>
-            
-            <div>
-              <label for="segundoApellido" class="block text-xs font-medium text-gray-800 mb-1">Apellido Materno *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.segundoApellido" 
-                  @input="formatSegundoApellido"
-                  id="segundoApellido" 
-                  name="segundoApellido" 
-                  type="text" 
-                  required 
-                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
-                  placeholder="Ej. LÓPEZ" 
-                />
-              </div>
-              <p class="mt-1 text-xs text-gray-500">Apellido de la madre</p>
-            </div>
-            
-            <div>
-              <label for="territorio" class="block text-xs font-medium text-gray-800 mb-1">Territorio *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <select 
-                  v-model="form.territorio" 
-                  id="territorio" 
-                  name="territorio" 
-                  required
-                  class="glass-input w-full pl-9 pr-3 py-2 appearance-none cursor-pointer"
-                >
-                  <option value="" disabled>-- Selecciona tu territorio --</option>
-                  <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">{{ territorio }}</option>
-                </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </div>
-              </div>
-              <p v-if="territorioError" class="mt-1 text-xs text-red-600">{{ territorioError }}</p>
-              <p class="mt-1 text-xs text-gray-500">Selecciona el territorio correspondiente a tu área de trabajo</p>
-            </div>
-            
-            <div>
-              <label for="cargo" class="block text-xs font-medium text-gray-800 mb-1">Puesto de Trabajo *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <select 
-                  v-model="form.cargo" 
-                  id="cargo" 
-                  name="cargo" 
-                  required
-                  class="glass-input w-full pl-9 pr-3 py-2 appearance-none cursor-pointer"
-                >
-                  <option value="" disabled>-- Selecciona tu cargo --</option>
-                  <option v-for="cargo in cargosDisponibles" :key="cargo" :value="cargo">{{ cargo }}</option>
-                </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </div>
-              </div>
-              <p class="mt-1 text-xs text-gray-500">Selecciona tu posición o rol laboral</p>
-            </div>
-            
-            <!-- Campo para OTRO cargo -->
-            <div v-if="form.cargo === 'OTRO'">
-              <label for="cargoOtro" class="block text-xs font-medium text-gray-800 mb-1">Especifica tu cargo *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.cargoOtro" 
-                  @input="formatCargoOtro"
-                  id="cargoOtro" 
-                  name="cargoOtro" 
-                  type="text" 
-                  required
-                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
-                  placeholder="Ej. COORDINADOR DE PROYECTO" 
-                />
-              </div>
-              <p class="mt-1 text-xs text-gray-500">Escribe tu cargo sin tildes</p>
-            </div>
-            
-            <div>
-              <label for="curp" class="block text-xs font-medium text-gray-800 mb-1">CURP *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.curp" 
-                  @input="formatCurp" 
-                  id="curp" 
-                  name="curp" 
-                  type="text" 
-                  required
-                  maxlength="18" 
-                  placeholder="18 caracteres en mayúsculas"
-                  class="glass-input w-full pl-9 pr-3 py-2 uppercase tracking-wide" 
-                />
-              </div>
-              <p v-if="curpError" class="mt-1 text-xs text-red-600">{{ curpError }}</p>
-              <p class="mt-1 text-xs text-gray-500">La CURP debe contener exactamente 18 caracteres en mayúsculas</p>
-              <p v-if="curpWarning" class="mt-1 text-xs text-green-600">{{ curpWarning }}</p>
-            </div>
-            
-            <div>
-              <label for="supervisor" class="block text-xs font-medium text-gray-800 mb-1">Supervisor Inmediato *</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.supervisor" 
-                  @input="formatSupervisor"
-                  id="supervisor" 
-                  name="supervisor" 
-                  type="text" 
-                  required
-                  :readonly="esTecnico"
-                  class="glass-input w-full pl-9 pr-3 py-2 uppercase" 
-                  :style="esTecnico ? 'background-color: #d1d5db !important; color: #1f2937; border-color: #9ca3af; cursor: not-allowed;' : ''"
-                  :placeholder="esTecnico && buscandoSupervisor ? 'Buscando supervisor...' : 'Ej. MARÍA GARCÍA LÓPEZ'" 
-                />
-              </div>
-              <p v-if="esTecnico" class="mt-1 text-xs text-green-600">
-                ✅ Supervisor asignado automáticamente según tu territorio
-              </p>
-              <p v-else class="mt-1 text-xs text-gray-500">Nombre completo de tu jefe directo o coordinador</p>
-            </div>
-            
-            <div>
-              <label for="telefono" class="block text-xs font-medium text-gray-800 mb-1">Número de teléfono *</label>
-              <div class="flex space-x-2">
-                <!-- Selector de código de país -->
-                <div class="relative">
-                  <button 
-                    type="button"
-                    @click="showCountrySelector = !showCountrySelector"
-                    class="glass-input flex items-center px-2 py-2 min-w-[80px] justify-between text-sm"
-                  >
-                    <div class="flex items-center">
-                      <span class="text-xs mr-1">{{ paises.find(p => p.codigo === form.codigoPais)?.bandera || '🌎' }}</span>
-                      <span class="text-xs font-medium">{{ form.codigoPais }}</span>
+                </button>
+                
+                <Transition name="dropdown-fade">
+                  <div v-if="showCountrySelector" class="country-panel">
+                    <div class="country-search-box">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                        <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      <input type="text" v-model="countrySearch" placeholder="Buscar país..." @click.stop/>
                     </div>
-                    <svg class="w-3 h-3 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                  </button>
-                  
-                  <!-- Dropdown para selección de país -->
-                  <div 
-                    v-if="showCountrySelector" 
-                    class="absolute z-50 w-64 top-full left-0 mt-1 bg-white/90 backdrop-filter backdrop-blur-lg border border-white/20 rounded-lg shadow-xl overflow-hidden"
-                  >
-                    <!-- Barra de búsqueda -->
-                    <div class="sticky top-0 bg-white/80 backdrop-filter backdrop-blur-lg p-2 border-b border-white/20">
-                      <input 
-                        type="text"
-                        v-model="countrySearch"
-                        placeholder="Buscar país..."
-                        class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        @click="$event.stopPropagation()"
-                      />
-                    </div>
-                    
-                    <ul class="py-1 max-h-48 overflow-y-auto">
-                      <li 
-                        v-for="pais in filteredCountries" 
-                        :key="pais.codigo"
-                        @click="selectCountry(pais)"
-                        class="flex items-center px-2 py-1 hover:bg-white/20 cursor-pointer transition-colors"
-                      >
-                        <span class="text-sm mr-2">{{ pais.bandera }}</span>
-                        <span class="flex-1 text-xs">{{ pais.nombre }}</span>
-                        <span class="text-gray-500 font-mono text-xs">{{ pais.codigo }}</span>
+                    <ul class="country-options">
+                      <li v-for="pais in filteredCountries" :key="pais.codigo" @click="selectCountry(pais)" class="country-option">
+                        <span class="country-abbr">{{ pais.abrev }}</span>
+                        <span class="country-name">{{ pais.nombre }}</span>
+                        <span class="country-dial-code">{{ pais.codigo }}</span>
                       </li>
-                      <li v-if="filteredCountries.length === 0" class="px-2 py-1 text-gray-500 text-center text-xs">
-                        No se encontraron países
-                      </li>
+                      <li v-if="filteredCountries.length === 0" class="country-empty">Sin resultados</li>
                     </ul>
                   </div>
-                </div>
-                
-                <!-- Campo de entrada del número -->
-                <div class="flex-1">
-                  <input 
-                    v-model="form.telefono" 
-                    id="telefono" 
-                    name="telefono" 
-                    type="tel" 
-                    required
-                    maxlength="10"
-                    pattern="[0-9]{10}"
-                    placeholder="10 dígitos" 
-                    class="glass-input w-full py-2 px-3 text-sm"
-                    @input="validatePhone"
-                  />
-                </div>
+                </Transition>
               </div>
-              <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
-            </div>
-            
-            <div>
-              <label for="password" class="block text-xs font-medium text-gray-800 mb-1">Contraseña</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.password" 
-                  id="password" 
-                  name="password" 
-                  :type="showPassword ? 'text' : 'password'" 
-                  required 
-                  class="glass-input w-full pl-9 pr-9 py-2 text-sm" 
-                  placeholder="••••••••" 
-                  minlength="6"
-                />
-                <button
-                  type="button"
-                  @click="togglePasswordVisibility"
-                  class="absolute inset-y-0 right-0 flex items-center pr-2 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
-                >
-                  <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </button>
+              
+              <!-- Phone Input -->
+              <div class="input-wrapper phone-input-wrapper">
+                <input v-model="form.telefono" type="tel" required maxlength="10" pattern="[0-9]{10}" placeholder="10 dígitos" @input="validatePhone"/>
               </div>
-              <p class="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
             </div>
+            <span class="field-hint">Solo los 10 dígitos sin lada</span>
+          </div>
+        </div>
 
-            <div>
-              <label for="confirmPassword" class="block text-xs font-medium text-gray-800 mb-1">Confirmar contraseña</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="form.confirmPassword" 
-                  id="confirmPassword" 
-                  name="confirmPassword" 
-                  :type="showConfirmPassword ? 'text' : 'password'" 
-                  required 
-                  class="glass-input w-full pl-9 pr-9 py-2 text-sm" 
-                  placeholder="Confirmar contraseña" 
-                  minlength="6"
-                />
-                <button
-                  type="button"
-                  @click="toggleConfirmPasswordVisibility"
-                  class="absolute inset-y-0 right-0 flex items-center pr-2 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
-                >
-                  <svg v-if="showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </button>
-              </div>
+        <!-- Security -->
+        <div class="form-group">
+          <div class="group-header">
+            <div class="group-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             </div>
+            <h3 class="group-title">Seguridad</h3>
           </div>
 
-          <!-- AVISO DE PRIVACIDAD -->
-          <div class="mt-4 mb-3">
-            <div class="glass-card-inner">
-              <div class="p-3">
-                <h3 class="font-bold text-orange-600 mb-2 text-base bg-gradient-to-r from-yellow-200/80 to-yellow-100/80 px-2 py-1 rounded-lg shadow-sm border border-yellow-300/50 backdrop-filter backdrop-blur-sm">
-                  Aviso de Privacidad
-                </h3>
-                <div class="max-h-32 overflow-y-auto text-xs text-gray-700 space-y-1 pr-2">
-                  <div class="font-semibold">AVISO DE PRIVACIDAD PARA EL REGISTRO Y USO DE INFORMACIÓN DE LOS TÉCNICOS DEL PROGRAMA SEMBRANDO VIDA MEDIANTE APLICACIÓN MÓVIL OFICIAL</div>
-                  
-                  <p>En cumplimiento con lo dispuesto por la Ley General de Transparencia y Acceso a la Información pública y la Ley Federal de Transparencia y Acceso a la Información Pública, se informa a las y los Técnico(a)s del Programa Sembrando Vida que los datos personales recabados serán tratados conforme a los siguientes términos:</p>
-                  
-                  <div class="font-semibold">1. Identidad y domicilio del responsable</div>
-                  <p>El responsable del tratamiento de los datos personales es la Secretaría de Bienestar, Subsecretaria de Inclusión Productiva y Desarrollo Rural con domicilio en: Av. P.º de la Reforma 116, Juárez, Cuauhtémoc, 06600 Ciudad de México, CDMX.</p>
-                  
-                  <div class="font-semibold">2. Datos personales que se recaban</div>
-                  <ul class="list-disc pl-4 space-y-1">
-                    <li>Nombre completo, CURP, Número telefónico, Correo electrónico</li>
-                    <li>Cargo y supervisor asignado</li>
-                    <li>Datos de localización geográfica precisa, capturados a través de coordenadas</li>
-                    <li>Actividades realizadas en campo y fotografías</li>
-                  </ul>
-                  
-                  <div class="font-semibold">3. Finalidades del tratamiento</div>
-                  <p>Los datos serán utilizados exclusivamente para registrar actividades de técnicos, documentar avances del programa y elaborar reportes internos.</p>
-                  
-                  <div class="font-semibold">Fecha de última actualización: 12 de agosto del 2025.</div>
-                  
-                  <p class="font-semibold text-blue-800">Al proporcionar mis datos personales, acepto el tratamiento conforme al Aviso de Privacidad.</p>
-                </div>
-              </div>
+          <!-- Password -->
+          <div class="form-field">
+            <label class="field-label">Contraseña <span class="required-mark">*</span></label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
+                <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+              </svg>
+              <input v-model="form.password" @input="checkPasswordsMatch" :type="showPassword ? 'text' : 'password'" required minlength="6" placeholder="Mínimo 6 caracteres"/>
+              <button type="button" @click="togglePasswordVisibility" class="visibility-toggle">
+                <svg v-if="showPassword" viewBox="0 0 24 24" fill="none">
+                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M1 1l22 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
             </div>
-            
-            <!-- CHECKBOX OBLIGATORIO -->
-            <div class="mt-3">
-              <div class="flex items-start">
-                <div class="flex items-center h-4">
-                  <input 
-                    v-model="termsAccepted" 
-                    @change="clearTermsError"
-                    id="terms" 
-                    name="terms" 
-                    type="checkbox" 
-                    class="focus:ring-green-500 h-3 w-3 text-green-600 border-gray-300 rounded"
-                    required
-                  />
-                </div>
-                <div class="ml-2 text-xs">
-                  <label for="terms" class="font-medium text-gray-700">
-                    He leído y acepto el Aviso de Privacidad y los Términos y Condiciones. <span class="text-red-500">*</span>
-                  </label>
-                </div>
-              </div>
-              <p v-if="termsError" class="mt-1 text-xs text-red-600">{{ termsError }}</p>
-            </div>
+            <span class="field-hint">Usa al menos 6 caracteres</span>
           </div>
 
-          <button 
-            type="submit" 
-            :disabled="loading || !termsAccepted" 
-            class="glass-button w-full mt-4 flex items-center justify-center py-2 text-sm"
-            :class="{ 'opacity-50 cursor-not-allowed': loading || !termsAccepted }"
-          >
-            <svg v-if="loading" class="animate-spin h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>{{ loading ? 'Registrando...' : termsAccepted ? 'Registrarme' : 'Debes aceptar los términos' }}</span>
-          </button>
-        </form>
-      </div>
+          <!-- Confirm Password -->
+          <div class="form-field">
+            <label class="field-label">Confirmar Contraseña <span class="required-mark">*</span></label>
+            <div class="input-wrapper" :class="{ 'has-error': !passwordsMatch && form.confirmPassword.length > 0, 'has-success': passwordsMatch && form.confirmPassword.length >= 6 }">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <input v-model="form.confirmPassword" @input="checkPasswordsMatch" :type="showConfirmPassword ? 'text' : 'password'" required minlength="6" placeholder="Repite tu contraseña"/>
+              <button type="button" @click="toggleConfirmPasswordVisibility" class="visibility-toggle">
+                <svg v-if="showConfirmPassword" viewBox="0 0 24 24" fill="none">
+                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M1 1l22 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+            <span v-if="!passwordsMatch && form.confirmPassword.length > 0" class="field-hint error-hint">Las contraseñas no coinciden</span>
+            <span v-else-if="passwordsMatch && form.confirmPassword.length >= 6" class="field-hint success-hint">
+              <svg viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Las contraseñas coinciden
+            </span>
+          </div>
+        </div>
+
+        <!-- Privacy Agreement -->
+        <div class="form-group privacy-agreement">
+          <div class="privacy-container">
+            <div class="privacy-header">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <h4>Aviso de Privacidad</h4>
+            </div>
+            
+            <div class="privacy-scroll-area">
+              <p class="privacy-title-text">AVISO DE PRIVACIDAD PARA EL REGISTRO Y USO DE INFORMACIÓN DE LOS TÉCNICOS DEL PROGRAMA SEMBRANDO VIDA MEDIANTE APLICACIÓN MÓVIL OFICIAL</p>
+              <p>En cumplimiento con lo dispuesto por la Ley General de Transparencia y Acceso a la Información pública y la Ley Federal de Transparencia y Acceso a la Información Pública, se informa a las y los Técnico(a)s del Programa Sembrando Vida que los datos personales recabados serán tratados conforme a los siguientes términos:</p>
+              <p class="privacy-section-title">1. Identidad y domicilio del responsable</p>
+              <p>El responsable del tratamiento de los datos personales es la Secretaría de Bienestar, Subsecretaria de Inclusión Productiva y Desarrollo Rural con domicilio en: Av. P.º de la Reforma 116, Juárez, Cuauhtémoc, 06600 Ciudad de México, CDMX.</p>
+              <p class="privacy-section-title">2. Datos personales que se recaban</p>
+              <p>Nombre completo, CURP, Número telefónico, Correo electrónico, Cargo y supervisor asignado, Datos de localización geográfica precisa, Actividades realizadas en campo y fotografías.</p>
+              <p class="privacy-section-title">3. Finalidades del tratamiento</p>
+              <p>Los datos serán utilizados exclusivamente para registrar actividades de técnicos, documentar avances del programa y elaborar reportes internos.</p>
+              <p class="privacy-date">Fecha de última actualización: 12 de agosto del 2025.</p>
+              <p class="privacy-accept-text">Al proporcionar mis datos personales, acepto el tratamiento conforme al Aviso de Privacidad.</p>
+            </div>
+            
+            <label class="checkbox-field">
+              <input v-model="termsAccepted" @change="clearTermsError" type="checkbox" required/>
+              <span class="checkbox-indicator">
+                <svg viewBox="0 0 16 16" fill="none">
+                  <path d="M3.5 8l3 3 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="checkbox-text">He leído y acepto el Aviso de Privacidad y los Términos y Condiciones <span class="required-mark">*</span></span>
+            </label>
+            <Transition name="hint-fade">
+              <span v-if="termsError" class="field-hint error-hint terms-error-hint">{{ termsError }}</span>
+            </Transition>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" :disabled="loading || !termsAccepted || !passwordsMatch || !isFormComplete" class="submit-btn" :class="{ 'is-loading': loading, 'is-disabled': !termsAccepted || !passwordsMatch || !isFormComplete }">
+          <Transition name="btn-fade" mode="out-in">
+            <span v-if="loading" key="loading" class="btn-inner">
+              <div class="btn-loader"></div>
+              <span>Creando cuenta...</span>
+            </span>
+            <span v-else-if="!isFormComplete" key="incomplete" class="btn-inner">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span>Completa todos los campos</span>
+            </span>
+            <span v-else-if="!termsAccepted" key="locked" class="btn-inner">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <span>Acepta los términos</span>
+            </span>
+            <span v-else-if="!passwordsMatch" key="mismatch" class="btn-inner">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span>Las contraseñas deben coincidir</span>
+            </span>
+            <span v-else key="ready" class="btn-inner">
+              <span>Crear mi cuenta</span>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14m-6-6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </Transition>
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <footer class="register-footer">
+        <p>¿Ya tienes una cuenta? <router-link to="/login">Iniciar sesión</router-link></p>
+      </footer>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, computed, watch } from 'vue';
+import { reactive, ref, onMounted, computed, watch, Teleport, Transition } from 'vue';
 import { useRouter } from 'vue-router';
 import { apiService } from '../services/apiService.js';
 import { checkInternetConnection, getOfflineMessage } from '../utils/network.js';
@@ -551,6 +452,7 @@ const showSuccessModal = ref(false);
 const countrySearch = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const passwordsMatch = ref(true);
 
 const form = reactive({
   email: '',
@@ -562,13 +464,12 @@ const form = reactive({
   curp: '',
   territorio: '',
   supervisor: '',
-  codigoPais: '+52', // Código de país por defecto (México)
-  telefono: '', // Solo los dígitos del teléfono
+  codigoPais: '+52',
+  telefono: '',
   password: '',
   confirmPassword: ''
 });
 
-// Lista de cargos disponibles (sin tildes)
 const cargosDisponibles = [
   'TECNICO PRODUCTIVO',
   'TECNICO SOCIAL',
@@ -581,16 +482,36 @@ const cargosDisponibles = [
   'OTRO'
 ];
 
-// Estados para supervisor automático
 const buscandoSupervisor = ref(false);
 
-// Computed para verificar si es técnico
 const esTecnico = computed(() => {
   const cargoUpper = (form.cargo || '').toUpperCase();
   return cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO';
 });
 
-// Lista de los 30 territorios de Sembrando Vida
+const isFormComplete = computed(() => {
+  // Validar campos básicos
+  const basicFieldsFilled = 
+    form.email.trim() !== '' &&
+    form.nombre.trim() !== '' &&
+    form.primerApellido.trim() !== '' &&
+    form.segundoApellido.trim() !== '' &&
+    form.cargo.trim() !== '' &&
+    form.curp.trim() !== '' &&
+    form.territorio.trim() !== '' &&
+    form.supervisor.trim() !== '' &&
+    form.telefono.trim() !== '' &&
+    form.password.trim() !== '' &&
+    form.confirmPassword.trim() !== '';
+  
+  // Si el cargo es "OTRO", también debe llenar cargoOtro
+  const cargoOtroFilled = form.cargo.toUpperCase() === 'OTRO' 
+    ? form.cargoOtro.trim() !== '' 
+    : true;
+  
+  return basicFieldsFilled && cargoOtroFilled;
+});
+
 const territoriosSembrandoVida = [
   'Acapulco - Centro - Norte - Tierra Caliente',
   'Acayucan',
@@ -627,26 +548,23 @@ const territoriosSembrandoVida = [
 
 const territorioError = ref('');
 
-// Lista de países más comunes con sus códigos y banderas
 const paises = [
-  { codigo: '+52', nombre: 'México', bandera: '🇲🇽' },
-  { codigo: '+1', nombre: 'Estados Unidos', bandera: '🇺🇸' },
-  { codigo: '+34', nombre: 'España', bandera: '🇪🇸' },
-  { codigo: '+57', nombre: 'Colombia', bandera: '🇨🇴' },
-  { codigo: '+56', nombre: 'Chile', bandera: '🇨🇱' },
-  { codigo: '+54', nombre: 'Argentina', bandera: '🇦🇷' },
-  { codigo: '+51', nombre: 'Perú', bandera: '🇵🇪' },
-  { codigo: '+591', nombre: 'Bolivia', bandera: '🇧🇴' },
-  { codigo: '+502', nombre: 'Guatemala', bandera: '🇬🇹' },
-  { codigo: '+503', nombre: 'El Salvador', bandera: '🇸🇻' }
+  { codigo: '+52', nombre: 'México', abrev: 'MX' },
+  { codigo: '+1', nombre: 'Estados Unidos', abrev: 'US' },
+  { codigo: '+34', nombre: 'España', abrev: 'ES' },
+  { codigo: '+57', nombre: 'Colombia', abrev: 'CO' },
+  { codigo: '+56', nombre: 'Chile', abrev: 'CL' },
+  { codigo: '+54', nombre: 'Argentina', abrev: 'AR' },
+  { codigo: '+51', nombre: 'Perú', abrev: 'PE' },
+  { codigo: '+591', nombre: 'Bolivia', abrev: 'BO' },
+  { codigo: '+502', nombre: 'Guatemala', abrev: 'GT' },
+  { codigo: '+503', nombre: 'El Salvador', abrev: 'SV' }
 ];
 
 const showCountrySelector = ref(false);
 
-// Filtro de países basado en la búsqueda
 const filteredCountries = computed(() => {
   if (!countrySearch.value) return paises;
-  
   const searchTerm = countrySearch.value.toLowerCase();
   return paises.filter(pais => 
     pais.nombre.toLowerCase().includes(searchTerm) || 
@@ -654,30 +572,24 @@ const filteredCountries = computed(() => {
   );
 });
 
-// Watch para actualizar supervisor cuando cambie el territorio (solo para técnicos)
 watch(() => form.territorio, async (nuevoTerritorio, viejoTerritorio) => {
   if (nuevoTerritorio && nuevoTerritorio !== viejoTerritorio && esTecnico.value) {
-    console.log('🔄 Territorio cambió, buscando supervisor...');
     await buscarSupervisorPorTerritorio(nuevoTerritorio);
   }
 });
 
-// Watch para cuando cambie el cargo
 watch(() => form.cargo, async (nuevoCargo, viejoCargo) => {
   if (nuevoCargo !== viejoCargo) {
     const cargoUpper = (nuevoCargo || '').toUpperCase();
     const esNuevoTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO';
     
-    // Limpiar cargoOtro si el usuario cambia de OTRO a otro cargo
     if (viejoCargo === 'OTRO' && nuevoCargo !== 'OTRO') {
       form.cargoOtro = '';
     }
     
     if (esNuevoTecnico && form.territorio) {
-      // Si ahora es técnico y tiene territorio, buscar supervisor automático
       await buscarSupervisorPorTerritorio(form.territorio);
     } else if (!esNuevoTecnico) {
-      // Si ya no es técnico, limpiar supervisor para que pueda escribir manualmente
       form.supervisor = '';
     }
   }
@@ -692,12 +604,10 @@ onMounted(async () => {
     try {
       await apiService.refreshApiUrl();
       currentApiUrl.value = apiService.getCurrentApiUrl();
-      console.log(`🌐 Usando servidor: ${currentApiUrl.value}`);
     } catch (error) {
       console.warn('Error inicializando servicio API:', error);
     }
   }
-
   document.addEventListener('click', closeCountrySelector);
   document.addEventListener('keydown', handleEscKey);
 });
@@ -708,6 +618,14 @@ function togglePasswordVisibility() {
 
 function toggleConfirmPasswordVisibility() {
   showConfirmPassword.value = !showConfirmPassword.value;
+}
+
+function checkPasswordsMatch() {
+  if (form.confirmPassword.length > 0) {
+    passwordsMatch.value = form.password === form.confirmPassword;
+  } else {
+    passwordsMatch.value = true;
+  }
 }
 
 async function register() {
@@ -727,10 +645,7 @@ async function register() {
   
   try {
     const telefonoCompleto = `${form.codigoPais}${form.telefono.trim()}`;
-    // Construir nombre completo a partir de los campos separados
     const nombreCompleto = `${form.nombre.trim()} ${form.primerApellido.trim()} ${form.segundoApellido.trim()}`.toUpperCase();
-    
-    // Determinar cargo final: si es OTRO, usar cargoOtro; si no, usar cargo
     const cargoFinal = form.cargo === 'OTRO' ? form.cargoOtro.trim().toUpperCase() : form.cargo.toUpperCase();
     
     const payload = {
@@ -744,14 +659,8 @@ async function register() {
       territorio: form.territorio
     };
     
-    console.log('📤 Enviando payload:', payload);
-    
     const response = await apiService.createUser(payload);
-    
-    console.log('✅ Respuesta del servidor:', response);
-    
     currentApiUrl.value = apiService.getCurrentApiUrl();
-    
     showSuccessModal.value = true;
     
     setTimeout(() => {
@@ -766,21 +675,19 @@ async function register() {
       if (status === 400) {
         const detail = error.response.data.detail || '';
         if (detail.includes('correo')) {
-          message.text = 'El correo electrónico ya está registrado. Por favor, utiliza otro correo.';
+          message.text = 'El correo electrónico ya está registrado.';
         } else if (detail.includes('CURP')) {
-          message.text = 'La CURP ya está registrada. Si ya tienes una cuenta, inicia sesión.';
+          message.text = 'La CURP ya está registrada.';
         } else {
-          message.text = detail || 'Los datos proporcionados son inválidos. Verifica la información.';
+          message.text = detail || 'Los datos proporcionados son inválidos.';
         }
       } else if (status === 500) {
-        message.text = 'Error del servidor. Inténtalo de nuevo en unos minutos.';
+        message.text = 'Error del servidor. Inténtalo de nuevo.';
       } else {
         message.text = error.response.data.detail || 'Error al crear la cuenta.';
       }
     } else if (error.request) {
-      message.text = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
-    } else if (error.code === 'ECONNABORTED') {
-      message.text = 'La conexión tardó demasiado. Verifica tu conexión a internet.';
+      message.text = 'No se pudo conectar con el servidor.';
     } else {
       message.text = 'Error al crear la cuenta: ' + error.message;
     }
@@ -798,15 +705,13 @@ function validateForm() {
   territorioError.value = '';
   message.text = '';
   
-  // Validación de términos y condiciones
   if (!termsAccepted.value) {
-    termsError.value = 'Debes aceptar el Aviso de Privacidad para continuar';
-    message.text = 'Debes aceptar el Aviso de Privacidad para continuar';
+    termsError.value = 'Debes aceptar el Aviso de Privacidad';
+    message.text = 'Debes aceptar el Aviso de Privacidad';
     message.type = 'error';
     return false;
   }
 
-  // Validación de email obligatorio y formato
   if (!form.email || !form.email.trim()) {
     message.text = 'El correo electrónico es obligatorio';
     message.type = 'error';
@@ -815,56 +720,49 @@ function validateForm() {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(form.email.trim())) {
-    message.text = 'Por favor ingresa un correo electrónico válido';
+    message.text = 'Ingresa un correo electrónico válido';
     message.type = 'error';
     return false;
   }
 
-  // Validación de nombre obligatorio
   if (!form.nombre || !form.nombre.trim()) {
     message.text = 'El nombre es obligatorio';
     message.type = 'error';
     return false;
   }
 
-  // Validación de primer apellido obligatorio
   if (!form.primerApellido || !form.primerApellido.trim()) {
-    message.text = 'El primer apellido es obligatorio';
+    message.text = 'El apellido paterno es obligatorio';
     message.type = 'error';
     return false;
   }
 
-  // Validación de segundo apellido obligatorio
   if (!form.segundoApellido || !form.segundoApellido.trim()) {
-    message.text = 'El segundo apellido es obligatorio';
+    message.text = 'El apellido materno es obligatorio';
     message.type = 'error';
     return false;
   }
 
-  // Validación de cargo obligatorio
   if (!form.cargo || !form.cargo.trim()) {
     message.text = 'El puesto de trabajo es obligatorio';
     message.type = 'error';
     return false;
   }
 
-  // Si el cargo es OTRO, validar que cargoOtro tenga valor
   if (form.cargo === 'OTRO' && (!form.cargoOtro || !form.cargoOtro.trim())) {
-    message.text = 'Debes especificar el puesto de trabajo';
+    message.text = 'Especifica el puesto de trabajo';
     message.type = 'error';
     return false;
   }
 
-  // Validación de supervisor obligatorio (solo si NO es técnico)
   if (!esTecnico.value) {
     if (!form.supervisor || !form.supervisor.trim()) {
-      message.text = 'El supervisor inmediato es obligatorio. Debes ingresar el nombre de tu jefe directo';
+      message.text = 'El supervisor inmediato es obligatorio';
       message.type = 'error';
       return false;
     }
   }
   
-  // Validación de CURP obligatoria
   if (!form.curp || !form.curp.trim()) {
     curpError.value = 'La CURP es obligatoria';
     message.text = 'La CURP es obligatoria';
@@ -872,15 +770,13 @@ function validateForm() {
     return false;
   }
   
-  // Validación de territorio obligatorio
   if (!form.territorio || !form.territorio.trim()) {
     territorioError.value = 'El territorio es obligatorio';
-    message.text = 'Debes seleccionar el estado donde trabajarás';
+    message.text = 'Selecciona el territorio';
     message.type = 'error';
     return false;
   }
   
-  // Validación de teléfono obligatorio
   if (!form.telefono || !form.telefono.trim()) {
     message.text = 'El número de teléfono es obligatorio';
     message.type = 'error';
@@ -888,29 +784,27 @@ function validateForm() {
   }
   
   if (!/^\d{10}$/.test(form.telefono.trim())) {
-    message.text = 'El número de teléfono debe contener exactamente 10 dígitos';
+    message.text = 'El teléfono debe tener 10 dígitos';
     message.type = 'error';
     return false;
   }
   
-  // Validación de formato CURP
   const curpClean = form.curp.toUpperCase().trim();
   if (curpClean.length !== 18) {
-    curpError.value = 'La CURP debe contener exactamente 18 caracteres';
-    message.text = 'La CURP debe contener exactamente 18 caracteres en mayúsculas';
+    curpError.value = 'La CURP debe tener 18 caracteres';
+    message.text = 'La CURP debe tener 18 caracteres';
     message.type = 'error';
     return false;
   }
   
   const curpRegex = /^[A-Z0-9]{18}$/;
   if (!curpRegex.test(curpClean)) {
-    curpError.value = 'La CURP solo debe contener letras mayúsculas y números';
-    message.text = 'La CURP debe contener solo letras mayúsculas y números';
+    curpError.value = 'Solo letras mayúsculas y números';
+    message.text = 'CURP: solo letras mayúsculas y números';
     message.type = 'error';
     return false;
   }
   
-  // Validación de contraseñas
   if (form.password !== form.confirmPassword) {
     message.text = 'Las contraseñas no coinciden';
     message.type = 'error';
@@ -918,7 +812,7 @@ function validateForm() {
   }
   
   if (form.password.length < 6) {
-    message.text = 'La contraseña debe tener al menos 6 caracteres';
+    message.text = 'Contraseña: mínimo 6 caracteres';
     message.type = 'error';
     return false;
   }
@@ -928,26 +822,18 @@ function validateForm() {
 
 function formatCurp() {
   form.curp = form.curp.toUpperCase();
-  
-  if (curpError.value) {
-    curpError.value = '';
-  }
-  if (curpWarning.value) {
-    curpWarning.value = '';
-  }
-  if (termsError.value) {
-    termsError.value = '';
-  }
+  curpError.value = '';
+  curpWarning.value = '';
+  termsError.value = '';
   
   if (form.curp.length > 0 && form.curp.length < 18) {
     curpError.value = `Faltan ${18 - form.curp.length} caracteres`;
   } else if (form.curp.length === 18) {
     const curpRegex = /^[A-Z0-9]{18}$/;
     if (!curpRegex.test(form.curp)) {
-      curpError.value = 'La CURP solo debe contener letras mayúsculas y números';
+      curpError.value = 'Solo letras mayúsculas y números';
     } else {
-      curpError.value = '';
-      curpWarning.value = 'CURP válida ✓';
+      curpWarning.value = 'CURP válida';
     }
   }
 }
@@ -965,44 +851,28 @@ function formatSegundoApellido() {
 }
 
 function formatSupervisor() {
-  // Solo formatear si no es técnico (los técnicos tienen supervisor automático)
   if (!esTecnico.value) {
-    form.supervisor = form.supervisor
-      .toUpperCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
+    form.supervisor = form.supervisor.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
 }
 
-function formatCargo() {
-  // Ya no se usa porque ahora es un select
-}
-
 function formatCargoOtro() {
-  form.cargoOtro = form.cargoOtro
-    .toUpperCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+  form.cargoOtro = form.cargoOtro.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-// Función para buscar supervisor por territorio
 async function buscarSupervisorPorTerritorio(territorio) {
   if (!territorio || !esTecnico.value) return;
   
   buscandoSupervisor.value = true;
   try {
-    console.log('🔍 Buscando supervisor territorial para:', territorio);
     const response = await apiService.obtenerSupervisorTerritorio(territorio);
-    
     if (response.success && response.supervisor) {
       form.supervisor = response.supervisor;
-      console.log('✅ Supervisor encontrado:', response.supervisor);
     } else {
-      console.log('⚠️ No se encontró supervisor para:', territorio);
       form.supervisor = '';
     }
   } catch (error) {
-    console.error('❌ Error buscando supervisor:', error);
+    console.error('Error buscando supervisor:', error);
     form.supervisor = '';
   } finally {
     buscandoSupervisor.value = false;
@@ -1011,7 +881,6 @@ async function buscarSupervisorPorTerritorio(territorio) {
 
 function validatePhone() {
   form.telefono = form.telefono.replace(/\D/g, '');
-  
   if (form.telefono.length > 10) {
     form.telefono = form.telefono.slice(0, 10);
   }
@@ -1023,11 +892,9 @@ function selectCountry(pais) {
 }
 
 function closeCountrySelector(e) {
-  if (e.target.closest('button') && e.target.closest('button').contains(document.querySelector('svg')) || 
-      e.target.closest('div') && e.target.closest('div').querySelector && e.target.closest('div').querySelector('input[placeholder="Buscar país..."]')) {
-    return;
+  if (!e.target.closest('.country-code-selector')) {
+    showCountrySelector.value = false;
   }
-  showCountrySelector.value = false;
 }
 
 function handleEscKey(event) {
@@ -1037,9 +904,7 @@ function handleEscKey(event) {
 }
 
 function clearTermsError() {
-  if (termsError.value) {
-    termsError.value = '';
-  }
+  termsError.value = '';
   if (message.text && message.text.includes('Aviso de Privacidad')) {
     message.text = '';
   }
@@ -1048,8 +913,8 @@ function clearTermsError() {
 function handleEnterKey(event) {
   if (!termsAccepted.value) {
     event.preventDefault();
-    termsError.value = 'Debes aceptar el Aviso de Privacidad para continuar';
-    message.text = 'Debes aceptar el Aviso de Privacidad para continuar';
+    termsError.value = 'Debes aceptar el Aviso de Privacidad';
+    message.text = 'Debes aceptar el Aviso de Privacidad';
     message.type = 'error';
   }
 }
@@ -1061,698 +926,1123 @@ function goToLogin() {
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
+/* ==========================================================================
+   APPLE DESIGN SYSTEM - REGISTER PAGE
+   Clean, Minimal, Professional
+   ========================================================================== */
+
+/* Base Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.bounce-enter-active {
-  animation: bounce-in 0.5s;
-}
-.bounce-leave-active {
-  animation: bounce-in 0.5s reverse;
-}
-@keyframes bounce-in {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+/* Main Container */
+.apple-register {
+  position: fixed;
+  inset: 0;
+  background: #f5f5f7;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-.animate-shake {
-  animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-/* Efecto de vidrio realista - Glassmorphism */
-.glass-card {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 32px 0 rgba(31, 38, 135, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  padding: 1.25rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -50%;
-  width: 100%;
+/* Scrollable Content */
+.register-content {
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transform: skewX(-25deg);
-  transition: all 0.6s;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px env(safe-area-inset-bottom, 20px);
+  padding-top: 0;
 }
 
-.glass-card:hover::before {
-  left: 150%;
-}
-
-.glass-card-inner {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 4px 16px 0 rgba(31, 38, 135, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-}
-
-.glass-input {
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  font-size: 0.875rem;
-  color: #1f2937;
-  transition: all 0.3s ease;
-  box-shadow: 
-    0 4px 16px 0 rgba(31, 38, 135, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  min-height: 36px;
-}
-
-.glass-input:focus {
-  outline: none;
-  border: 1px solid rgba(76, 175, 80, 0.4);
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 0 0 3px rgba(76, 175, 80, 0.1),
-    0 8px 25px 0 rgba(31, 38, 135, 0.15),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-}
-
-.glass-input::placeholder {
-  color: rgba(75, 85, 99, 0.6);
-}
-
-.glass-button {
-  padding: 0.875rem 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(76, 175, 80, 0.8) 0%, 
-    rgba(56, 142, 60, 0.8) 100%);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  color: white;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 
-    0 4px 20px 0 rgba(76, 175, 80, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.glass-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 30px 0 rgba(76, 175, 80, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(76, 175, 80, 0.9) 0%, 
-    rgba(56, 142, 60, 0.9) 100%);
-}
-
-.glass-button:active:not(:disabled) {
-  transform: translateY(0px);
-  box-shadow: 
-    0 4px 15px 0 rgba(76, 175, 80, 0.3),
-    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
-}
-
-.glass-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s;
-}
-
-.glass-button:hover::before {
-  left: 100%;
-}
-
-.glass-link {
-  position: relative;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.glass-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #4CAF50, #81C784);
-  transition: width 0.3s ease;
-  border-radius: 1px;
-}
-
-.glass-link:hover::after {
-  width: 100%;
-}
-
-.glass-title {
-  color: #2e7d32;
-  text-shadow: 
-    0 1px 2px rgba(46, 125, 50, 0.3),
-    0 0 8px rgba(46, 125, 50, 0.2);
-  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.3));
-  position: relative;
-}
-
-.glass-title::before {
-  content: '';
-  position: absolute;
+/* Fixed Navigation */
+.register-nav {
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0.2) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  z-index: 1;
-  pointer-events: none;
+  z-index: 100;
+  background: rgba(245, 245, 247, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0 20px;
+  margin: 0 -20px;
 }
 
-/* Estilos específicos para los botones del ojo */
-button[type="button"] {
-  background: transparent !important;
-  border: none;
-  cursor: pointer;
+.nav-container {
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  gap: 16px;
+}
+
+.nav-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 980px;
+  color: #06c;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.nav-back-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateX(-2px);
+}
+
+.nav-back-btn:active {
+  transform: scale(0.97);
+}
+
+.nav-back-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.4px;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.nav-spacer {
+  width: 90px;
+  flex-shrink: 0;
+}
+
+/* Hero Section */
+.register-hero {
+  text-align: center;
+  padding: 24px 0 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.hero-instruction {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #86868b;
+  font-weight: 400;
+  margin: 0;
+  text-align: center;
+}
+
+/* Error Alert */
+.error-alert {
+  max-width: 500px;
+  margin: 0 auto 20px;
+  padding: 16px;
+  background: #fff2f2;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.alert-icon {
+  flex-shrink: 0;
+}
+
+.alert-icon svg {
+  width: 22px;
+  height: 22px;
+  color: #ff3b30;
+}
+
+.alert-text {
+  font-size: 14px;
+  color: #ff3b30;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Form Container */
+.register-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Form Groups */
+.form-group {
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.group-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(180deg, #34c759 0%, #30b350 100%);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  min-height: 32px;
-  transition: all 0.2s ease;
-  box-shadow: none !important;
+  flex-shrink: 0;
 }
 
-button[type="button"]:focus {
-  outline: none;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-button[type="button"]:hover {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-button[type="button"] svg {
-  transition: all 0.2s ease;
-}
-
-button[type="button"]:hover svg {
-  transform: scale(1.1);
-}
-
-/* Estilos para el scroll del aviso de privacidad */
-.max-h-40.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.max-h-40.overflow-y-auto::-webkit-scrollbar-track {
-  background: rgba(241, 245, 249, 0.5);
-  border-radius: 3px;
-}
-
-.max-h-40.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: rgba(203, 213, 225, 0.8);
-  border-radius: 3px;
-}
-
-.max-h-40.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.8);
-}
-
-/* Mejoras visuales para el checkbox */
-input[type="checkbox"]:checked {
-  background-color: #10b981;
-  border-color: #10b981;
-}
-
-/* Animación de la barra de progreso */
-@keyframes progress {
-  0% { width: 0%; }
-  100% { width: 100%; }
-}
-
-.animate-progress {
-  animation: progress 3s linear forwards;
-}
-
-/* Nuevas animaciones para el modal de éxito */
-.success-modal-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  border: 2px solid rgba(16, 185, 129, 0.2);
-  box-shadow: 
-    0 20px 40px rgba(16, 185, 129, 0.15),
-    0 10px 20px rgba(0, 0, 0, 0.1),
-    inset 0 1px 2px rgba(255, 255, 255, 0.8);
-  position: relative;
-  overflow: hidden;
-}
-
-.success-modal-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.6), transparent);
-  animation: scan 2s infinite;
-}
-
-@keyframes scan {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-.success-button {
-  background: linear-gradient(135deg, #10b981, #059669);
+.group-icon svg {
+  width: 16px;
+  height: 16px;
   color: white;
+}
+
+.group-title {
+  font-size: 15px;
   font-weight: 600;
-  border-radius: 12px;
-  padding: 12px 24px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #1d1d1f;
+  letter-spacing: -0.2px;
+}
+
+/* Form Fields */
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field:last-child {
+  margin-bottom: 0;
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+  letter-spacing: -0.1px;
+}
+
+/* Input Wrapper */
+.input-wrapper {
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-  min-width: 140px;
+  display: flex;
+  align-items: center;
+  background: #f5f5f7;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-.success-button:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+.input-wrapper:focus-within {
+  background: white;
+  border-color: #34c759;
+  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.1);
 }
 
-.success-button:active {
-  transform: translateY(0) scale(0.98);
+.input-wrapper.has-error {
+  border-color: #ff3b30;
 }
 
-.success-button:focus {
-  outline: 2px solid #059669;
-  outline-offset: 2px;
+.input-wrapper.has-error:focus-within {
+  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.1);
 }
 
-/* Animaciones específicas para el modal de éxito */
-@keyframes bounce-in-success {
-  0% {
-    opacity: 0;
-    transform: scale(0.3) translateY(-100px);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05) translateY(0);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+.input-wrapper.has-success {
+  border-color: #34c759;
 }
 
-@keyframes success-icon {
-  0% {
-    transform: scale(0) rotate(0deg);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.2) rotate(180deg);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) rotate(360deg);
-    opacity: 1;
-  }
+.input-wrapper.is-disabled {
+  background: #e8e8ed;
+  cursor: not-allowed;
 }
 
-@keyframes check-draw {
-  0% {
-    stroke-dasharray: 0 50;
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    stroke-dasharray: 50 0;
-    opacity: 1;
-  }
-}
-
-@keyframes slide-up {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes progress-fill {
-  0% {
-    width: 0%;
-  }
-  100% {
-    width: 100%;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes confetti-fall {
-  0% {
-    transform: translateY(-100vh) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(720deg);
-    opacity: 0;
-  }
-}
-
-/* Confeti animado */
-.confetti-1, .confetti-2, .confetti-3, .confetti-4, .confetti-5, .confetti-6 {
+.input-icon {
   position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  animation: confetti-fall 3s linear infinite;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  color: #86868b;
+  pointer-events: none;
+  transition: color 0.2s ease;
 }
 
-.confetti-1 {
-  background: #10b981;
-  left: 10%;
-  animation-delay: 0s;
-  animation-duration: 2.5s;
+.input-wrapper:focus-within .input-icon {
+  color: #34c759;
 }
 
-.confetti-2 {
-  background: #34d399;
-  left: 20%;
-  animation-delay: 0.3s;
-  animation-duration: 3s;
+.input-wrapper.has-error .input-icon {
+  color: #ff3b30;
 }
 
-.confetti-3 {
-  background: #ffffff;
-  left: 80%;
-  animation-delay: 0.6s;
-  animation-duration: 2.8s;
+.input-wrapper input {
+  flex: 1;
+  width: 100%;
+  padding: 14px 14px 14px 46px;
+  border: none;
+  background: transparent;
+  font-size: 17px;
+  color: #1d1d1f;
+  outline: none;
+  font-family: inherit;
 }
 
-.confetti-4 {
-  background: #059669;
-  left: 90%;
-  animation-delay: 0.9s;
-  animation-duration: 3.2s;
+.input-wrapper input::placeholder {
+  color: #86868b;
 }
 
-.confetti-5 {
-  background: #6ee7b7;
-  left: 50%;
-  animation-delay: 0.2s;
-  animation-duration: 2.7s;
-}
-
-.confetti-6 {
-  background: #d1fae5;
-  left: 70%;
-  animation-delay: 0.5s;
-  animation-duration: 3.1s;
-}
-
-/* Clases de animación */
-.animate-bounce-in {
-  animation: bounce-in-success 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.animate-success-icon {
-  animation: success-icon 1s ease-out 0.3s both;
-}
-
-.animate-check-draw {
-  stroke-dasharray: 50;
-  stroke-dashoffset: 50;
-  animation: check-draw 0.8s ease-out 0.8s both;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.6s ease-out both;
-}
-
-.animate-progress-fill {
-  animation: progress-fill 3s ease-out;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-/* Transiciones del modal */
-.modal-fade-enter-active, .modal-fade-leave-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.modal-fade-enter-from {
-  opacity: 0;
-  backdrop-filter: blur(0px);
-}
-
-.modal-fade-leave-to {
-  opacity: 0;
-  backdrop-filter: blur(0px);
-}
-
-.modal-fade-enter-active .success-modal-card,
-.modal-fade-leave-active .success-modal-card {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.modal-fade-enter-from .success-modal-card {
-  transform: scale(0.8) translateY(-100px);
-  opacity: 0;
-}
-
-.modal-fade-leave-to .success-modal-card {
-  transform: scale(0.8) translateY(100px);
-  opacity: 0;
-}
-
-.uppercase {
+.input-wrapper input.uppercase-input {
   text-transform: uppercase;
 }
 
-.tracking-wide {
-  letter-spacing: 0.025em;
+.input-wrapper input.letter-spaced {
+  letter-spacing: 2px;
 }
 
-/* Mejoras de responsividad para pantallas móviles */
+.input-wrapper input:read-only {
+  cursor: default;
+  color: #86868b;
+}
+
+.char-counter {
+  position: absolute;
+  right: 14px;
+  font-size: 12px;
+  color: #86868b;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Field Hints */
+.field-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #86868b;
+  margin-top: 6px;
+}
+
+.field-hint svg {
+  width: 14px;
+  height: 14px;
+}
+
+.field-hint.error-hint {
+  color: #ff3b30;
+}
+
+.field-hint.success-hint {
+  color: #34c759;
+}
+
+/* Select Wrapper */
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f5f5f7;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.select-wrapper:focus-within {
+  background: white;
+  border-color: #34c759;
+  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.1);
+}
+
+.select-wrapper select {
+  flex: 1;
+  width: 100%;
+  padding: 14px 44px 14px 46px;
+  border: none;
+  background: transparent;
+  font-size: 17px;
+  color: #1d1d1f;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.select-wrapper select option {
+  color: #1d1d1f;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 14px;
+  width: 20px;
+  height: 20px;
+  color: #86868b;
+  pointer-events: none;
+}
+
+/* Phone Field */
+.phone-field {
+  display: flex;
+  gap: 10px;
+}
+
+.country-code-selector {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.country-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 12px;
+  background: #f5f5f7;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1d1d1f;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.country-trigger:hover {
+  background: #e8e8ed;
+}
+
+.country-code-text {
+  font-weight: 600;
+  color: #34c759;
+}
+
+.country-dial {
+  color: #86868b;
+}
+
+.country-arrow {
+  width: 16px;
+  height: 16px;
+  color: #86868b;
+}
+
+.phone-input-wrapper {
+  flex: 1;
+}
+
+.phone-input-wrapper input {
+  padding-left: 14px;
+}
+
+/* Country Panel */
+.country-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 280px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.country-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.country-search-box svg {
+  width: 18px;
+  height: 18px;
+  color: #86868b;
+}
+
+.country-search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1d1d1f;
+}
+
+.country-search-box input::placeholder {
+  color: #86868b;
+}
+
+.country-options {
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.country-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.country-option:hover {
+  background: #f5f5f7;
+}
+
+.country-abbr {
+  font-size: 13px;
+  font-weight: 700;
+  color: #34c759;
+  min-width: 28px;
+}
+
+.country-name {
+  flex: 1;
+  font-size: 15px;
+  color: #1d1d1f;
+}
+
+.country-dial-code {
+  font-size: 14px;
+  color: #86868b;
+  font-variant-numeric: tabular-nums;
+}
+
+.country-empty {
+  padding: 20px;
+  text-align: center;
+  color: #86868b;
+  font-size: 14px;
+}
+
+/* Visibility Toggle */
+.visibility-toggle {
+  position: absolute;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+
+.visibility-toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.visibility-toggle svg {
+  width: 22px;
+  height: 22px;
+  color: #86868b;
+}
+
+/* Input Spinner */
+.input-spinner {
+  position: absolute;
+  right: 14px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e8e8ed;
+  border-top-color: #34c759;
+  border-radius: 50%;
+  animation: spinner-rotate 0.8s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Privacy Agreement */
+.privacy-agreement {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.privacy-container {
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.privacy-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.privacy-header svg {
+  width: 24px;
+  height: 24px;
+  color: #34c759;
+}
+
+.privacy-header h4 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.privacy-scroll-area {
+  background: #f5f5f7;
+  border-radius: 12px;
+  padding: 16px;
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #6e6e73;
+  margin-bottom: 20px;
+}
+
+.privacy-scroll-area p {
+  margin-bottom: 12px;
+}
+
+.privacy-scroll-area p:last-child {
+  margin-bottom: 0;
+}
+
+.privacy-title-text {
+  font-weight: 700;
+  color: #1d1d1f;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.privacy-section-title {
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-top: 16px;
+}
+
+.privacy-date {
+  font-style: italic;
+  color: #86868b;
+}
+
+.privacy-accept-text {
+  font-weight: 500;
+  color: #34c759;
+}
+
+/* Checkbox */
+.checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.checkbox-field input {
+  display: none;
+}
+
+.checkbox-indicator {
+  width: 24px;
+  height: 24px;
+  background: #f5f5f7;
+  border: 2px solid #d2d2d7;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.checkbox-indicator svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
+}
+
+.checkbox-field input:checked + .checkbox-indicator {
+  background: #34c759;
+  border-color: #34c759;
+}
+
+.checkbox-field input:checked + .checkbox-indicator svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.checkbox-text {
+  font-size: 14px;
+  color: #6e6e73;
+  line-height: 1.5;
+}
+
+.required-mark {
+  color: #ff3b30;
+  font-weight: 600;
+}
+
+.terms-error-hint {
+  margin-top: 12px;
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  padding: 18px 24px;
+  background: linear-gradient(180deg, #34c759 0%, #30b350 100%);
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+  box-shadow: 0 4px 14px rgba(52, 199, 89, 0.35);
+  font-family: inherit;
+  margin-top: 10px;
+}
+
+.submit-btn:hover:not(.is-loading):not(.is-disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(52, 199, 89, 0.4);
+}
+
+.submit-btn:active:not(.is-loading):not(.is-disabled) {
+  transform: translateY(0);
+}
+
+.submit-btn.is-disabled {
+  background: linear-gradient(180deg, #8e8e93 0%, #7c7c80 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.submit-btn.is-loading {
+  cursor: wait;
+}
+
+.btn-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-inner svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-loader {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spinner-rotate 0.8s linear infinite;
+}
+
+/* Footer */
+.register-footer {
+  max-width: 500px;
+  margin: 30px auto;
+  text-align: center;
+  padding-bottom: 30px;
+}
+
+.register-footer p {
+  font-size: 15px;
+  color: #86868b;
+}
+
+.register-footer a {
+  color: #06c;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   MODAL
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 24px;
+  padding: 40px 32px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+}
+
+.modal-success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+}
+
+.modal-success-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-heading {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.modal-description {
+  font-size: 16px;
+  color: #86868b;
+  margin-bottom: 24px;
+}
+
+.modal-progress-track {
+  height: 4px;
+  background: #f5f5f7;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.modal-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34c759, #30d158);
+  border-radius: 2px;
+  animation: progress-fill 3s linear forwards;
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.modal-redirect-text {
+  font-size: 13px;
+  color: #34c759;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.modal-action-btn {
+  padding: 14px 32px;
+  background: linear-gradient(180deg, #34c759 0%, #30b350 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.modal-action-btn:hover {
+  transform: scale(1.03);
+}
+
+.modal-action-btn:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   TRANSITIONS
+   ========================================================================== */
+
+/* Modal Scale */
+.modal-scale-enter-active,
+.modal-scale-leave-active {
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.modal-scale-enter-from,
+.modal-scale-leave-to {
+  opacity: 0;
+}
+
+.modal-scale-enter-from .modal-container,
+.modal-scale-leave-to .modal-container {
+  transform: scale(0.92) translateY(20px);
+  opacity: 0;
+}
+
+/* Alert Slide */
+.alert-slide-enter-active,
+.alert-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.alert-slide-enter-from {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+
+.alert-slide-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* Field Expand */
+.field-expand-enter-active,
+.field-expand-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.field-expand-enter-from,
+.field-expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
+}
+
+/* Dropdown Fade */
+.dropdown-fade-enter-active,
+.dropdown-fade-leave-active {
+  transition: all 0.2s ease;
+  transform-origin: top left;
+}
+
+.dropdown-fade-enter-from,
+.dropdown-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-6px);
+}
+
+/* Hint Fade */
+.hint-fade-enter-active,
+.hint-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.hint-fade-enter-from,
+.hint-fade-leave-to {
+  opacity: 0;
+}
+
+/* Button Fade */
+.btn-fade-enter-active,
+.btn-fade-leave-active {
+  transition: all 0.2s ease;
+}
+
+.btn-fade-enter-from,
+.btn-fade-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
 @media (max-width: 480px) {
-  .page-container {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+  .register-content {
+    padding: 0 16px env(safe-area-inset-bottom, 16px);
+    padding-top: 0;
   }
   
-  .glass-card {
-    padding: 1rem;
-    margin: 0 0.25rem;
+  .register-nav {
+    padding: 0 16px;
+    margin: 0 -16px;
   }
   
-  .glass-input {
-    font-size: 14px; /* Evita zoom en iOS */
-    min-height: 36px;
+  .nav-container {
+    height: 52px;
   }
   
-  .text-lg {
-    font-size: 1rem;
+  .nav-title {
+    font-size: 18px;
   }
   
-  .text-base {
-    font-size: 0.875rem;
+  .nav-back-btn {
+    padding: 7px 12px;
+    font-size: 14px;
   }
   
-  .w-64 {
-    max-width: 75vw;
+  .nav-back-btn svg {
+    width: 14px;
+    height: 14px;
   }
   
-  /* Responsividad específica para el modal de éxito */
-  .success-modal-card {
-    margin: 16px;
-    max-width: calc(100vw - 32px);
-    border-radius: 20px;
+  .nav-spacer {
+    width: 80px;
   }
   
-  .success-modal-card .p-6 {
+  .hero-instruction {
+    font-size: 14px;
+  }
+  
+  .form-group {
     padding: 20px;
+    border-radius: 16px;
   }
   
-  .success-button {
-    padding: 10px 20px;
-    font-size: 14px;
-    min-width: 120px;
+  .group-title {
+    font-size: 18px;
   }
   
-  .confetti-1, .confetti-2, .confetti-3, .confetti-4, .confetti-5, .confetti-6 {
-    width: 4px;
-    height: 4px;
+  .input-wrapper input,
+  .select-wrapper select {
+    font-size: 16px; /* Prevents iOS zoom */
+    padding: 13px 13px 13px 44px;
+  }
+  
+  .country-panel {
+    width: 260px;
+    left: -8px;
   }
 }
 
-@media (max-height: 600px) {
-  .page-container {
-    max-width: 320px;
-  }
-  
-  .text-center.mb-4 {
-    margin-bottom: 0.75rem;
-  }
-  
-  .glass-card {
-    padding: 1rem;
-  }
-}
-
-/* Para pantallas muy pequeñas como iPhone SE */
-@media (max-width: 375px) and (max-height: 667px) {
-  .page-container {
-    max-width: 300px;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-  
-  .glass-card {
-    padding: 0.875rem;
-  }
-  
-  .glass-input {
-    font-size: 14px;
-    min-height: 34px;
-  }
-}
-
-/* Para pantallas grandes */
 @media (min-width: 768px) {
-  .page-container {
-    max-width: 420px;
+  .register-content {
+    padding: 0 24px 40px;
+    padding-top: 0;
   }
   
-  .glass-card {
-    padding: 1.5rem;
+  .register-nav {
+    padding: 0 24px;
+    margin: 0 -24px;
+  }
+  
+  .nav-container {
+    height: 60px;
+  }
+  
+  .nav-title {
+    font-size: 22px;
+  }
+  
+  .form-group {
+    padding: 22px;
   }
 }
 
-/* Soporte adicional para navegadores que no soportan backdrop-filter */
-@supports not (backdrop-filter: blur(20px)) {
-  .glass-card {
-    background: rgba(255, 255, 255, 0.85);
-  }
-  
-  .glass-input {
-    background: rgba(255, 255, 255, 0.7);
-  }
-  
-  .glass-card-inner {
-    background: rgba(255, 255, 255, 0.7);
-  }
-  
-  .success-modal-card {
-    background: rgba(255, 255, 255, 0.95);
-  }
+/* ==========================================================================
+   SCROLLBAR
+   ========================================================================== */
+
+.register-content::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* Mejoras en accesibilidad */
+.register-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.register-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.register-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.privacy-scroll-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.privacy-scroll-area::-webkit-scrollbar-track {
+  background: #e8e8ed;
+  border-radius: 2px;
+}
+
+.privacy-scroll-area::-webkit-scrollbar-thumb {
+  background: #c7c7cc;
+  border-radius: 2px;
+}
+
+.country-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.country-options::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.country-options::-webkit-scrollbar-thumb {
+  background: #d2d2d7;
+  border-radius: 3px;
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-bounce-in,
-  .animate-success-icon,
-  .animate-check-draw,
-  .animate-slide-up,
-  .animate-progress-fill,
-  .animate-shimmer,
-  .confetti-1,
-  .confetti-2,
-  .confetti-3,
-  .confetti-4,
-  .confetti-5,
-  .confetti-6 {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   BACKDROP FILTER FALLBACK
+   ========================================================================== */
+
+@supports not (backdrop-filter: blur(20px)) {
+  .register-nav {
+    background: rgba(245, 245, 247, 0.98);
   }
   
-  .modal-fade-enter-active,
-  .modal-fade-leave-active,
-  .success-button {
-    transition-duration: 0.01ms !important;
+  .modal-backdrop {
+    background: rgba(0, 0, 0, 0.8);
   }
 }
 </style>

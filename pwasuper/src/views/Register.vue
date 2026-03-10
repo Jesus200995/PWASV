@@ -1,5 +1,12 @@
 <template>
-  <div class="apple-register">
+  <div class="apple-register bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 relative">
+    <!-- Elementos decorativos para mejorar el efecto de vidrio -->
+    <div class="absolute inset-0">
+      <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
+      <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
+    </div>
+    
     <!-- Success Modal -->
     <Teleport to="body">
       <Transition name="modal-scale">
@@ -24,7 +31,7 @@
     </Teleport>
 
     <!-- Main Content -->
-    <div class="register-content">
+    <div class="register-content relative z-10">
       <!-- Fixed Navigation Header -->
       <nav class="register-nav">
         <div class="nav-container">
@@ -942,7 +949,6 @@ function goToLogin() {
 .apple-register {
   position: fixed;
   inset: 0;
-  background: #f5f5f7;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -1014,10 +1020,10 @@ function goToLogin() {
 }
 
 .nav-title {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 600;
   color: #1d1d1f;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.3px;
   margin: 0;
   text-align: center;
   flex: 1;
@@ -1031,13 +1037,13 @@ function goToLogin() {
 /* Hero Section */
 .register-hero {
   text-align: center;
-  padding: 24px 0 20px;
+  padding: 20px 0 16px;
   max-width: 500px;
   margin: 0 auto;
 }
 
 .hero-instruction {
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.5;
   color: #86868b;
   font-weight: 400;
@@ -1048,14 +1054,14 @@ function goToLogin() {
 /* Error Alert */
 .error-alert {
   max-width: 500px;
-  margin: 0 auto 20px;
-  padding: 16px;
+  margin: 0 auto 16px;
+  padding: 14px;
   background: #fff2f2;
   border-radius: 12px;
   border: 1px solid rgba(255, 59, 48, 0.2);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .alert-icon {
@@ -1063,13 +1069,13 @@ function goToLogin() {
 }
 
 .alert-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   color: #ff3b30;
 }
 
 .alert-text {
-  font-size: 14px;
+  font-size: 13px;
   color: #ff3b30;
   font-weight: 500;
   line-height: 1.4;
@@ -1085,23 +1091,23 @@ function goToLogin() {
 .form-group {
   background: white;
   border-radius: 14px;
-  padding: 18px;
-  margin-bottom: 14px;
+  padding: 15px;
+  margin-bottom: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .group-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-  padding-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
   border-bottom: 1px solid #f5f5f7;
 }
 
 .group-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: linear-gradient(180deg, #34c759 0%, #30b350 100%);
   border-radius: 50%;
   display: flex;
@@ -1111,13 +1117,13 @@ function goToLogin() {
 }
 
 .group-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: white;
 }
 
 .group-title {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: #1d1d1f;
   letter-spacing: -0.2px;
@@ -1125,7 +1131,7 @@ function goToLogin() {
 
 /* Form Fields */
 .form-field {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .form-field:last-child {
@@ -1134,10 +1140,10 @@ function goToLogin() {
 
 .field-label {
   display: block;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   color: #1d1d1f;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
   letter-spacing: -0.1px;
 }
 
@@ -1177,9 +1183,9 @@ function goToLogin() {
 
 .input-icon {
   position: absolute;
-  left: 14px;
-  width: 20px;
-  height: 20px;
+  left: 12px;
+  width: 18px;
+  height: 18px;
   color: #86868b;
   pointer-events: none;
   transition: color 0.2s ease;
@@ -1196,10 +1202,10 @@ function goToLogin() {
 .input-wrapper input {
   flex: 1;
   width: 100%;
-  padding: 14px 14px 14px 46px;
+  padding: 12px 12px 12px 42px;
   border: none;
   background: transparent;
-  font-size: 17px;
+  font-size: 15px;
   color: #1d1d1f;
   outline: none;
   font-family: inherit;
@@ -1224,8 +1230,8 @@ function goToLogin() {
 
 .char-counter {
   position: absolute;
-  right: 14px;
-  font-size: 12px;
+  right: 12px;
+  font-size: 11px;
   color: #86868b;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -1235,10 +1241,10 @@ function goToLogin() {
 .field-hint {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 5px;
+  font-size: 11px;
   color: #86868b;
-  margin-top: 6px;
+  margin-top: 5px;
 }
 
 .field-hint svg {
@@ -1274,10 +1280,10 @@ function goToLogin() {
 .select-wrapper select {
   flex: 1;
   width: 100%;
-  padding: 14px 44px 14px 46px;
+  padding: 12px 40px 12px 42px;
   border: none;
   background: transparent;
-  font-size: 17px;
+  font-size: 15px;
   color: #1d1d1f;
   outline: none;
   appearance: none;
@@ -1292,9 +1298,9 @@ function goToLogin() {
 
 .select-arrow {
   position: absolute;
-  right: 14px;
-  width: 20px;
-  height: 20px;
+  right: 12px;
+  width: 18px;
+  height: 18px;
   color: #86868b;
   pointer-events: none;
 }
@@ -1313,12 +1319,12 @@ function goToLogin() {
 .country-trigger {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 14px 12px;
+  gap: 5px;
+  padding: 12px 10px;
   background: #f5f5f7;
   border: 2px solid transparent;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: #1d1d1f;
   cursor: pointer;
@@ -1340,8 +1346,8 @@ function goToLogin() {
 }
 
 .country-arrow {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: #86868b;
 }
 
@@ -1350,7 +1356,7 @@ function goToLogin() {
 }
 
 .phone-input-wrapper input {
-  padding-left: 14px;
+  padding-left: 12px;
 }
 
 /* Country Panel */
@@ -1369,14 +1375,14 @@ function goToLogin() {
 .country-search-box {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px;
+  gap: 8px;
+  padding: 12px;
   border-bottom: 1px solid #f5f5f7;
 }
 
 .country-search-box svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: #86868b;
 }
 
@@ -1384,7 +1390,7 @@ function goToLogin() {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 15px;
+  font-size: 14px;
   font-family: inherit;
   color: #1d1d1f;
 }
@@ -1403,8 +1409,8 @@ function goToLogin() {
 .country-option {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 10px;
+  padding: 10px;
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -1415,37 +1421,37 @@ function goToLogin() {
 }
 
 .country-abbr {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #34c759;
-  min-width: 28px;
+  min-width: 26px;
 }
 
 .country-name {
   flex: 1;
-  font-size: 15px;
+  font-size: 14px;
   color: #1d1d1f;
 }
 
 .country-dial-code {
-  font-size: 14px;
+  font-size: 13px;
   color: #86868b;
   font-variant-numeric: tabular-nums;
 }
 
 .country-empty {
-  padding: 20px;
+  padding: 18px;
   text-align: center;
   color: #86868b;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* Visibility Toggle */
 .visibility-toggle {
   position: absolute;
-  right: 8px;
-  width: 40px;
-  height: 40px;
+  right: 6px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1461,17 +1467,17 @@ function goToLogin() {
 }
 
 .visibility-toggle svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   color: #86868b;
 }
 
 /* Input Spinner */
 .input-spinner {
   position: absolute;
-  right: 14px;
-  width: 20px;
-  height: 20px;
+  right: 12px;
+  width: 18px;
+  height: 18px;
   border: 2px solid #e8e8ed;
   border-top-color: #34c759;
   border-radius: 50%;
@@ -1492,25 +1498,25 @@ function goToLogin() {
 .privacy-container {
   background: white;
   border-radius: 18px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .privacy-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .privacy-header svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   color: #34c759;
 }
 
 .privacy-header h4 {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   color: #1d1d1f;
 }
@@ -1518,13 +1524,13 @@ function goToLogin() {
 .privacy-scroll-area {
   background: #f5f5f7;
   border-radius: 12px;
-  padding: 16px;
-  max-height: 180px;
+  padding: 14px;
+  max-height: 160px;
   overflow-y: auto;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.6;
   color: #6e6e73;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .privacy-scroll-area p {
@@ -1539,7 +1545,7 @@ function goToLogin() {
   font-weight: 700;
   color: #1d1d1f;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.5px;
 }
 
@@ -1563,7 +1569,7 @@ function goToLogin() {
 .checkbox-field {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 12px;
   cursor: pointer;
 }
 
@@ -1572,11 +1578,11 @@ function goToLogin() {
 }
 
 .checkbox-indicator {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   background: #f5f5f7;
   border: 2px solid #d2d2d7;
-  border-radius: 8px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1585,8 +1591,8 @@ function goToLogin() {
 }
 
 .checkbox-indicator svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   opacity: 0;
   transform: scale(0.5);
   transition: all 0.2s ease;
@@ -1603,7 +1609,7 @@ function goToLogin() {
 }
 
 .checkbox-text {
-  font-size: 14px;
+  font-size: 12px;
   color: #6e6e73;
   line-height: 1.5;
 }
@@ -1620,18 +1626,18 @@ function goToLogin() {
 /* Submit Button */
 .submit-btn {
   width: 100%;
-  padding: 18px 24px;
+  padding: 15px 20px;
   background: linear-gradient(180deg, #34c759 0%, #30b350 100%);
   border: none;
   border-radius: 14px;
   color: white;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
   box-shadow: 0 4px 14px rgba(52, 199, 89, 0.35);
   font-family: inherit;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .submit-btn:hover:not(.is-loading):not(.is-disabled) {
@@ -1657,17 +1663,17 @@ function goToLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .btn-inner svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .btn-loader {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border: 2.5px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
   border-radius: 50%;
@@ -1677,13 +1683,13 @@ function goToLogin() {
 /* Footer */
 .register-footer {
   max-width: 500px;
-  margin: 30px auto;
+  margin: 24px auto;
   text-align: center;
-  padding-bottom: 30px;
+  padding-bottom: 24px;
 }
 
 .register-footer p {
-  font-size: 15px;
+  font-size: 13px;
   color: #86868b;
 }
 
@@ -1710,24 +1716,24 @@ function goToLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 20px;
   z-index: 1000;
 }
 
 .modal-container {
   background: white;
   border-radius: 24px;
-  padding: 40px 32px;
-  max-width: 380px;
+  padding: 32px 28px;
+  max-width: 360px;
   width: 100%;
   text-align: center;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
 }
 
 .modal-success-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 24px;
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 20px;
 }
 
 .modal-success-icon svg {
@@ -1736,7 +1742,7 @@ function goToLogin() {
 }
 
 .modal-heading {
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 700;
   color: #1d1d1f;
   margin-bottom: 8px;
@@ -1744,9 +1750,9 @@ function goToLogin() {
 }
 
 .modal-description {
-  font-size: 16px;
+  font-size: 14px;
   color: #86868b;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .modal-progress-track {
@@ -1770,19 +1776,19 @@ function goToLogin() {
 }
 
 .modal-redirect-text {
-  font-size: 13px;
+  font-size: 12px;
   color: #34c759;
   font-weight: 500;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .modal-action-btn {
-  padding: 14px 32px;
+  padding: 13px 28px;
   background: linear-gradient(180deg, #34c759 0%, #30b350 100%);
   border: none;
   border-radius: 12px;
   color: white;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1904,12 +1910,12 @@ function goToLogin() {
   }
   
   .nav-title {
-    font-size: 18px;
+    font-size: 16px;
   }
   
   .nav-back-btn {
     padding: 7px 12px;
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .nav-back-btn svg {
@@ -1922,22 +1928,22 @@ function goToLogin() {
   }
   
   .hero-instruction {
-    font-size: 14px;
+    font-size: 12px;
   }
   
   .form-group {
-    padding: 20px;
-    border-radius: 16px;
+    padding: 14px;
+    border-radius: 14px;
   }
   
   .group-title {
-    font-size: 18px;
+    font-size: 12px;
   }
   
   .input-wrapper input,
   .select-wrapper select {
     font-size: 16px; /* Prevents iOS zoom */
-    padding: 13px 13px 13px 44px;
+    padding: 12px 12px 12px 40px;
   }
   
   .country-panel {
@@ -1962,11 +1968,11 @@ function goToLogin() {
   }
   
   .nav-title {
-    font-size: 22px;
+    font-size: 19px;
   }
   
   .form-group {
-    padding: 22px;
+    padding: 18px;
   }
 }
 

@@ -655,55 +655,21 @@
                   <div class="form-field">
                     <label class="field-label">Teléfono</label>
                     <div class="phone-input-group">
-                      <!-- Country Selector -->
-                      <div class="country-selector" @click.stop>
-                        <button 
-                          type="button"
-                          @click="showCountrySelector = !showCountrySelector"
-                          class="country-btn"
-                        >
-                          <span class="country-flag">{{ paises.find(p => p.codigo === editForm.codigoPais)?.bandera || '🌎' }}</span>
-                          <span class="country-code">{{ editForm.codigoPais }}</span>
-                          <svg class="country-arrow" :class="{ 'rotate-180': showCountrySelector }" viewBox="0 0 24 24" fill="none">
-                            <path d="M19 9l-7 7-7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>
-                        </button>
-                        
-                        <transition name="dropdown-slide">
-                          <div v-if="showCountrySelector" class="country-dropdown">
-                            <div class="dropdown-search">
-                              <svg class="search-icon" viewBox="0 0 24 24" fill="none">
-                                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
-                                <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                              </svg>
-                              <input 
-                                type="text"
-                                v-model="countrySearch"
-                                placeholder="Buscar país..."
-                                @click.stop
-                              />
-                            </div>
-                            <ul class="country-list">
-                              <li 
-                                v-for="pais in filteredCountries" 
-                                :key="pais.codigo"
-                                @click="selectCountry(pais)"
-                                class="country-item"
-                              >
-                                <span class="country-flag">{{ pais.bandera }}</span>
-                                <span class="country-name">{{ pais.nombre }}</span>
-                                <span class="country-code">{{ pais.codigo }}</span>
-                              </li>
-                              <li v-if="filteredCountries.length === 0" class="country-empty">
-                                No se encontraron países
-                              </li>
-                            </ul>
-                          </div>
-                        </transition>
-                      </div>
+                      <!-- Country Selector Button -->
+                      <button 
+                        type="button"
+                        @click="showCountrySelector = true"
+                        class="country-selector-btn"
+                      >
+                        <span class="country-iso">{{ paises.find(p => p.codigo === editForm.codigoPais)?.iso || 'MX' }}</span>
+                        <span class="country-code-display">{{ editForm.codigoPais }}</span>
+                        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none">
+                          <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
                       
                       <!-- Phone Number Input -->
-                      <div class="input-wrapper flex-1">
+                      <div class="input-wrapper phone-input-wrapper">
                         <svg class="input-icon" viewBox="0 0 24 24" fill="none">
                           <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -716,9 +682,70 @@
                         />
                       </div>
                     </div>
-                    <span class="field-hint">Ingresa solo los 10 dígitos del número (sin lada)</span>
+                    <span class="field-hint">Solo 10 dígitos (sin lada)</span>
                   </div>
                 </div>
+
+                <!-- Country Selector Modal (Apple Sheet Style) -->
+                <teleport to="body">
+                  <transition name="sheet-backdrop">
+                    <div 
+                      v-if="showCountrySelector" 
+                      class="country-sheet-backdrop"
+                      @click="showCountrySelector = false"
+                    ></div>
+                  </transition>
+                  <transition name="sheet-slide">
+                    <div v-if="showCountrySelector" class="country-sheet">
+                      <div class="sheet-handle"></div>
+                      <div class="sheet-header">
+                        <h4 class="sheet-title">Código de País</h4>
+                        <button type="button" @click="showCountrySelector = false" class="sheet-close">
+                          <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <div class="sheet-search">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+                          <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                          <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <input 
+                          type="text"
+                          v-model="countrySearch"
+                          placeholder="Buscar país..."
+                          class="sheet-search-input"
+                        />
+                      </div>
+                      <ul class="sheet-country-list">
+                        <li 
+                          v-for="pais in filteredCountries" 
+                          :key="pais.codigo"
+                          @click="selectCountry(pais); showCountrySelector = false"
+                          class="sheet-country-item"
+                          :class="{ 'is-selected': editForm.codigoPais === pais.codigo }"
+                        >
+                          <div class="country-info">
+                            <span class="country-iso-badge">{{ pais.iso }}</span>
+                            <span class="country-name">{{ pais.nombre }}</span>
+                          </div>
+                          <div class="country-code-badge">{{ pais.codigo }}</div>
+                          <svg v-if="editForm.codigoPais === pais.codigo" class="check-icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </li>
+                        <li v-if="filteredCountries.length === 0" class="sheet-empty">
+                          <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                            <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                          <span>No se encontraron países</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </transition>
+                </teleport>
 
                 <!-- Action Buttons -->
                 <div class="form-actions">
@@ -938,16 +965,16 @@ const countrySearch = ref('')
 
 // Lista de países más comunes con sus códigos y banderas
 const paises = [
-  { codigo: '+52', nombre: 'México', bandera: '🇲🇽' },
-  { codigo: '+1', nombre: 'Estados Unidos', bandera: '🇺🇸' },
-  { codigo: '+34', nombre: 'España', bandera: '🇪🇸' },
-  { codigo: '+57', nombre: 'Colombia', bandera: '🇨🇴' },
-  { codigo: '+56', nombre: 'Chile', bandera: '🇨🇱' },
-  { codigo: '+54', nombre: 'Argentina', bandera: '🇦🇷' },
-  { codigo: '+51', nombre: 'Perú', bandera: '🇵🇪' },
-  { codigo: '+591', nombre: 'Bolivia', bandera: '🇧🇴' },
-  { codigo: '+502', nombre: 'Guatemala', bandera: '🇬🇹' },
-  { codigo: '+503', nombre: 'El Salvador', bandera: '🇸🇻' }
+  { codigo: '+52', nombre: 'México', iso: 'MX' },
+  { codigo: '+1', nombre: 'Estados Unidos', iso: 'US' },
+  { codigo: '+34', nombre: 'España', iso: 'ES' },
+  { codigo: '+57', nombre: 'Colombia', iso: 'CO' },
+  { codigo: '+56', nombre: 'Chile', iso: 'CL' },
+  { codigo: '+54', nombre: 'Argentina', iso: 'AR' },
+  { codigo: '+51', nombre: 'Perú', iso: 'PE' },
+  { codigo: '+591', nombre: 'Bolivia', iso: 'BO' },
+  { codigo: '+502', nombre: 'Guatemala', iso: 'GT' },
+  { codigo: '+503', nombre: 'El Salvador', iso: 'SV' }
 ]
 
 // Filtro de países basado en la búsqueda
@@ -2196,7 +2223,7 @@ const validatePhoneEdit = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
   z-index: 9999;
   pointer-events: none;
 }
@@ -2204,10 +2231,10 @@ const validatePhoneEdit = () => {
 /* Modal Container */
 .apple-modal-container {
   width: 100%;
-  max-width: 400px;
-  max-height: 90vh;
+  max-width: 380px;
+  max-height: calc(100vh - 80px);
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 18px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 
               0 0 0 1px rgba(0, 0, 0, 0.05);
   overflow: hidden;
@@ -2215,17 +2242,49 @@ const validatePhoneEdit = () => {
   flex-direction: column;
   pointer-events: auto;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  margin: auto;
 }
 
 @media (max-width: 768px) {
+  .apple-modal-wrapper {
+    padding: 32px 16px;
+  }
+  
   .apple-modal-container {
     max-width: 360px;
+    max-height: calc(100vh - 100px);
   }
 }
 
 @media (max-width: 480px) {
+  .apple-modal-wrapper {
+    padding: 40px 12px;
+  }
+  
   .apple-modal-container {
-    max-width: calc(100% - 24px);
+    max-width: calc(100% - 8px);
+    max-height: calc(100vh - 120px);
+    border-radius: 16px;
+  }
+}
+
+@media (max-height: 700px) {
+  .apple-modal-wrapper {
+    padding: 32px 12px;
+  }
+  
+  .apple-modal-container {
+    max-height: calc(100vh - 80px);
+  }
+}
+
+@media (max-height: 600px) {
+  .apple-modal-wrapper {
+    padding: 24px 12px;
+  }
+  
+  .apple-modal-container {
+    max-height: calc(100vh - 64px);
   }
 }
 
@@ -2234,17 +2293,18 @@ const validatePhoneEdit = () => {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
 }
 
 .modal-header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 14px 16px;
 }
 
 .modal-title-group {
@@ -2304,8 +2364,11 @@ const validatePhoneEdit = () => {
 .modal-body {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px 16px 24px;
   background: #fbfbfd;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* Scrollbar personalizado */
@@ -2576,20 +2639,20 @@ const validatePhoneEdit = () => {
 /* Phone Input Group */
 .phone-input-group {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: stretch;
 }
 
-/* Country Selector */
-.country-selector {
-  position: relative;
+.phone-input-wrapper {
+  flex: 1;
 }
 
-.country-btn {
+/* Country Selector Button */
+.country-selector-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 10px 10px;
+  gap: 6px;
+  padding: 10px 12px;
   background: #f5f5f7;
   border: 1.5px solid transparent;
   border-radius: 9px;
@@ -2598,144 +2661,283 @@ const validatePhoneEdit = () => {
   color: #1d1d1f;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 80px;
+  min-width: 95px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
 }
 
-.country-btn:hover {
+.country-selector-btn:hover {
   background: #e8e8ed;
 }
 
-.country-btn:focus {
-  background: white;
-  border-color: #34c759;
-  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.1);
-  outline: none;
+.country-selector-btn:active {
+  transform: scale(0.98);
 }
 
-.country-flag {
-  font-size: 16px;
-  line-height: 1;
+.country-iso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 16px;
+  background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
 }
 
-.country-code {
+.country-code-display {
   font-size: 12px;
   font-weight: 600;
   color: #1d1d1f;
 }
 
-.country-arrow {
-  width: 12px;
-  height: 12px;
+.chevron-icon {
+  width: 14px;
+  height: 14px;
   color: #86868b;
-  transition: transform 0.2s ease;
+  margin-left: auto;
 }
 
-.country-arrow.rotate-180 {
-  transform: rotate(180deg);
+/* Country Sheet (Apple Style Bottom Sheet) */
+.country-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10000;
 }
 
-/* Country Dropdown */
-.country-dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
+.country-sheet {
+  position: fixed;
+  bottom: 0;
   left: 0;
-  width: 260px;
-  max-height: 280px;
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  z-index: 100;
+  right: 0;
+  max-height: 60vh;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
 }
 
-.dropdown-search {
-  position: sticky;
-  top: 0;
+.sheet-handle {
+  width: 36px;
+  height: 5px;
+  background: #d1d1d6;
+  border-radius: 3px;
+  margin: 8px auto 0;
+}
+
+.sheet-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px;
-  background: white;
+  justify-content: space-between;
+  padding: 12px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.search-icon {
+.sheet-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+.sheet-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sheet-close:hover {
+  background: #e8e8ed;
+}
+
+.sheet-close svg {
   width: 14px;
   height: 14px;
+  color: #1d1d1f;
+}
+
+.sheet-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #f5f5f7;
+  margin: 12px 16px;
+  border-radius: 10px;
+}
+
+.sheet-search .search-icon {
+  width: 16px;
+  height: 16px;
   color: #86868b;
   flex-shrink: 0;
 }
 
-.dropdown-search input {
+.sheet-search-input {
   flex: 1;
-  padding: 6px 0;
-  font-size: 12px;
+  padding: 0;
+  font-size: 14px;
   color: #1d1d1f;
   background: transparent;
   border: none;
   outline: none;
+  font-family: inherit;
 }
 
-.dropdown-search input::placeholder {
+.sheet-search-input::placeholder {
   color: #a1a1a6;
 }
 
-.country-list {
-  max-height: 220px;
+.sheet-country-list {
+  flex: 1;
   overflow-y: auto;
-  padding: 4px;
+  padding: 0 8px 16px;
+  list-style: none;
+  margin: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
-.country-item {
+.sheet-country-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 7px;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
-.country-item:hover {
+.sheet-country-item:hover {
   background: #f5f5f7;
 }
 
-.country-item .country-flag {
-  font-size: 16px;
+.sheet-country-item:active {
+  background: #e8e8ed;
 }
 
-.country-item .country-name {
+.sheet-country-item.is-selected {
+  background: rgba(52, 199, 89, 0.1);
+}
+
+.country-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex: 1;
-  font-size: 12px;
+}
+
+.country-iso-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 22px;
+  background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.sheet-country-item .country-name {
+  font-size: 14px;
+  font-weight: 500;
   color: #1d1d1f;
 }
 
-.country-item .country-code {
-  font-size: 11px;
-  font-weight: 500;
+.country-code-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #86868b;
+  padding: 4px 10px;
+  background: #f5f5f7;
+  border-radius: 6px;
+}
+
+.sheet-country-item.is-selected .country-code-badge {
+  background: rgba(52, 199, 89, 0.15);
+  color: #34c759;
+}
+
+.check-icon {
+  width: 18px;
+  height: 18px;
+  color: #34c759;
+  flex-shrink: 0;
+}
+
+.sheet-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
   color: #86868b;
 }
 
-.country-empty {
-  padding: 16px;
-  text-align: center;
-  font-size: 11px;
-  color: #86868b;
+.sheet-empty svg {
+  width: 32px;
+  height: 32px;
+  opacity: 0.5;
+}
+
+.sheet-empty span {
+  font-size: 13px;
+}
+
+/* Sheet Transitions */
+.sheet-backdrop-enter-active,
+.sheet-backdrop-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.sheet-backdrop-enter-from,
+.sheet-backdrop-leave-to {
+  opacity: 0;
+}
+
+.sheet-slide-enter-active {
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.sheet-slide-leave-active {
+  transition: transform 0.25s ease-in;
+}
+
+.sheet-slide-enter-from,
+.sheet-slide-leave-to {
+  transform: translateY(100%);
 }
 
 /* Form Actions */
 .form-actions {
   display: flex;
   gap: 10px;
-  padding-top: 6px;
+  padding-top: 8px;
+  flex-shrink: 0;
 }
 
 .btn-cancel,
 .btn-save {
   flex: 1;
-  padding: 11px 16px;
-  font-size: 13px;
+  padding: 12px 16px;
+  font-size: 14px;
   font-weight: 600;
   border: none;
   border-radius: 10px;
@@ -2743,6 +2945,7 @@ const validatePhoneEdit = () => {
   transition: all 0.2s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
   letter-spacing: -0.2px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-cancel {
@@ -2752,7 +2955,11 @@ const validatePhoneEdit = () => {
 
 .btn-cancel:hover {
   background: #e8e8ed;
-  transform: translateY(-1px);
+}
+
+.btn-cancel:active {
+  transform: scale(0.98);
+  background: #dcdcdf;
 }
 
 .btn-save {
@@ -2762,12 +2969,11 @@ const validatePhoneEdit = () => {
 }
 
 .btn-save:hover:not(:disabled) {
-  transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(52, 199, 89, 0.4);
 }
 
 .btn-save:active:not(:disabled) {
-  transform: translateY(0);
+  transform: scale(0.98);
   box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
 }
 
@@ -2888,20 +3094,10 @@ const validatePhoneEdit = () => {
   opacity: 0;
 }
 
-/* Responsive Design */
+/* Responsive Design - Mobile First */
 @media (max-width: 640px) {
-  .apple-modal-wrapper {
-    padding: 10px;
-  }
-  
-  .apple-modal-container {
-    max-width: 100%;
-    max-height: 95vh;
-    border-radius: 14px;
-  }
-  
   .modal-header-content {
-    padding: 10px 14px;
+    padding: 12px 14px;
   }
   
   .modal-title {
@@ -2931,24 +3127,40 @@ const validatePhoneEdit = () => {
   }
   
   .phone-input-group {
+    flex-direction: row;
+    gap: 8px;
+  }
+  
+  .country-selector-btn {
+    min-width: 85px;
+    padding: 10px 10px;
+  }
+  
+  .form-actions {
+    flex-direction: row;
+    gap: 10px;
+  }
+  
+  .btn-cancel,
+  .btn-save {
+    flex: 1;
+  }
+}
+
+@media (max-width: 380px) {
+  .phone-input-group {
     flex-direction: column;
+    gap: 10px;
   }
   
-  .country-selector {
+  .country-selector-btn {
     width: 100%;
-  }
-  
-  .country-btn {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .country-dropdown {
-    width: 100%;
+    justify-content: flex-start;
   }
   
   .form-actions {
     flex-direction: column;
+    gap: 8px;
   }
   
   .btn-cancel,

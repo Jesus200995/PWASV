@@ -123,6 +123,7 @@ class AsistenciasServiceOptimized {
           nombre_usuario: usuario?.nombre_completo || 'Usuario no encontrado',
           correo_usuario: usuario?.correo || 'N/A',
           cargo_usuario: usuario?.cargo || 'N/A',
+          curp_usuario: usuario?.curp || null,
           foto_entrada_url: this.construirUrlFoto(asistencia.foto_entrada_url),
           foto_salida_url: this.construirUrlFoto(asistencia.foto_salida_url)
         };

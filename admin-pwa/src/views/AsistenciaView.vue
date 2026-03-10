@@ -96,7 +96,7 @@
                 @focus="abrirDropdown"
                 @blur="cerrarDropdownConDelay"
                 type="text" 
-                placeholder="Buscar por nombre, correo, cargo..." 
+                placeholder="Buscar por nombre, correo o CURP..." 
                 class="apple-search-input"
               >
               <button v-if="searchTerm" @click="limpiarBusqueda" class="apple-clear-btn">
@@ -159,6 +159,38 @@
               </svg>
               <span>{{ filter.label }}</span>
             </button>
+          </div>
+
+          <!-- ================== FILTROS DE TIPO ASISTENCIA ================== -->
+          <div class="apple-type-filters">
+            <span class="apple-type-label">Mostrar:</span>
+            <div class="apple-type-buttons">
+              <button 
+                v-for="tipo in tiposFiltro" 
+                :key="tipo.value"
+                @click="seleccionarTipo(tipo.value)" 
+                :class="['apple-type-chip', { 'active': filtroTipo === tipo.value }]"
+              >
+                <svg v-if="tipo.value === 'todas'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <svg v-else-if="tipo.value === 'entradas'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <polyline points="10 17 15 12 10 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="15" y1="12" x2="3" y2="12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg v-else-if="tipo.value === 'salidas'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <polyline points="16 17 21 12 16 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="21" y1="12" x2="9" y2="12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <polyline points="22 4 12 14.01 9 11.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>{{ tipo.label }}</span>
+              </button>
+            </div>
           </div>
         </div>
         </div>
@@ -396,6 +428,7 @@
               <div class="apple-dropdown-info">
                 <div class="apple-dropdown-name">{{ resultado.nombre_usuario }}</div>
                 <div class="apple-dropdown-email">{{ resultado.correo_usuario || 'Sin correo' }}</div>
+                <div v-if="resultado.curp_usuario" class="apple-dropdown-curp">CURP: {{ resultado.curp_usuario }}</div>
               </div>
               <div class="apple-dropdown-badge" :class="resultado.presente ? 'presente' : 'ausente'">
                 {{ resultado.presente ? 'Presente' : 'Ausente' }}
@@ -490,6 +523,14 @@ export default {
         { label: 'Esta semana', value: 'semana' },
         { label: 'Este mes', value: 'mes' }
       ],
+      // Filtros de tipo de asistencia
+      tiposFiltro: [
+        { label: 'Todas', value: 'todas' },
+        { label: 'Solo entradas', value: 'entradas' },
+        { label: 'Solo salidas', value: 'salidas' },
+        { label: 'Completas', value: 'completas' }
+      ],
+      filtroTipo: 'todas',
       // Carga incremental
       registrosCargados: 200,
       registrosPorCarga: 200,
@@ -517,7 +558,8 @@ export default {
       const termino = this.searchTerm.toLowerCase()
       const resultados = this.asistencias.filter(asistencia => 
         (asistencia.nombre_usuario && asistencia.nombre_usuario.toLowerCase().includes(termino)) ||
-        (asistencia.correo_usuario && asistencia.correo_usuario.toLowerCase().includes(termino))
+        (asistencia.correo_usuario && asistencia.correo_usuario.toLowerCase().includes(termino)) ||
+        (asistencia.curp_usuario && asistencia.curp_usuario.toLowerCase().includes(termino))
       )
       // Agrupar por usuario único y mostrar máximo 8
       const usuariosUnicos = new Map()
@@ -653,14 +695,35 @@ export default {
     filtrarAsistencias() {
       let filtradas = [...this.asistencias]
 
+      // ========== FILTRO POR BÚSQUEDA (nombre, correo, CURP) ==========
       if (this.searchTerm) {
         const termino = this.searchTerm.toLowerCase()
         filtradas = filtradas.filter(asistencia => 
           (asistencia.nombre_usuario && asistencia.nombre_usuario.toLowerCase().includes(termino)) ||
-          (asistencia.correo_usuario && asistencia.correo_usuario.toLowerCase().includes(termino))
+          (asistencia.correo_usuario && asistencia.correo_usuario.toLowerCase().includes(termino)) ||
+          (asistencia.curp_usuario && asistencia.curp_usuario.toLowerCase().includes(termino))
         )
       }
 
+      // ========== FILTRO POR TIPO DE ASISTENCIA ==========
+      if (this.filtroTipo && this.filtroTipo !== 'todas') {
+        switch (this.filtroTipo) {
+          case 'entradas':
+            // Solo registros que tienen entrada pero NO salida
+            filtradas = filtradas.filter(a => a.hora_entrada && !a.hora_salida)
+            break
+          case 'salidas':
+            // Solo registros que tienen salida (con o sin entrada)
+            filtradas = filtradas.filter(a => a.hora_salida)
+            break
+          case 'completas':
+            // Solo registros que tienen AMBOS: entrada Y salida
+            filtradas = filtradas.filter(a => a.hora_entrada && a.hora_salida)
+            break
+        }
+      }
+
+      // ========== FILTRO POR FECHA ==========
       if (this.filtroRapido) {
         const hoy = new Date()
         hoy.setHours(0, 0, 0, 0)
@@ -711,7 +774,13 @@ export default {
     limpiarFiltros() {
       this.searchTerm = ''
       this.filtroRapido = ''
+      this.filtroTipo = 'todas'
       this.mostrarDropdown = false
+      this.filtrarAsistencias()
+    },
+    
+    seleccionarTipo(tipo) {
+      this.filtroTipo = tipo
       this.filtrarAsistencias()
     },
     
@@ -1501,6 +1570,14 @@ export default {
   text-overflow: ellipsis;
 }
 
+.apple-search-dropdown-portal .apple-dropdown-curp {
+  font-size: 11px;
+  color: #007AFF;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+
 .apple-search-dropdown-portal .apple-dropdown-badge {
   padding: 6px 14px;
   border-radius: 100px;
@@ -1574,6 +1651,86 @@ export default {
 .apple-filter-chip.active svg {
   stroke: white !important;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* ==================== FILTROS DE TIPO ==================== */
+.apple-type-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-type-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--apple-text-secondary);
+  white-space: nowrap;
+}
+
+.apple-type-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.apple-type-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--apple-gray-1);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--apple-text);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apple-type-chip svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.apple-type-chip:hover {
+  background: rgba(52, 199, 89, 0.1);
+  border-color: rgba(52, 199, 89, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.15);
+}
+
+.apple-type-chip.active {
+  background: linear-gradient(135deg, #34C759 0%, #248A3D 100%);
+  border-color: #34C759;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(52, 199, 89, 0.4);
+  transform: translateY(-2px);
+}
+
+.apple-type-chip.active span {
+  color: white !important;
+}
+
+.apple-type-chip.active svg {
+  stroke: white !important;
+}
+
+/* Colores específicos para cada tipo */
+.apple-type-chip[data-tipo="entradas"]:hover {
+  background: rgba(0, 122, 255, 0.1);
+  border-color: rgba(0, 122, 255, 0.2);
+}
+
+.apple-type-chip[data-tipo="salidas"]:hover {
+  background: rgba(255, 149, 0, 0.1);
+  border-color: rgba(255, 149, 0, 0.2);
 }
 
 /* ==================== TABLE ==================== */
@@ -2262,6 +2419,28 @@ export default {
   .apple-filter-controls {
     width: 100%;
     justify-content: space-between;
+  }
+  
+  .apple-type-filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .apple-type-buttons {
+    width: 100%;
+  }
+  
+  .apple-type-chip {
+    padding: 6px 10px;
+    font-size: 11px;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .apple-type-chip svg {
+    width: 12px;
+    height: 12px;
   }
 }
 </style>

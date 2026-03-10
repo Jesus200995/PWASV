@@ -1784,20 +1784,26 @@ export default {
 
 .apple-photos-cell {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
 }
 
 .apple-photo-thumb {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid rgba(139, 195, 74, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .apple-photo-thumb:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
+  border-color: #8BC34A;
+  box-shadow: 0 4px 16px rgba(139, 195, 74, 0.35);
 }
 
 .apple-status-badge {

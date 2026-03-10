@@ -4449,19 +4449,22 @@ const logout = () => {
 }
 
 .apple-photo-thumb {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid rgba(139, 195, 74, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid rgba(139, 195, 74, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: block;
+  margin: 0 auto;
 }
 
 .apple-photo-thumb:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
   border-color: #8BC34A;
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 4px 16px rgba(139, 195, 74, 0.35);
 }
 
 .apple-tipo-badge {
@@ -5506,9 +5509,9 @@ const logout = () => {
   }
   
   .apple-photo-thumb {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
   }
   
   .apple-tipo-badge {

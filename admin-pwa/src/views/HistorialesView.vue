@@ -776,12 +776,66 @@ export default {
       return years
     })
 
-    // Historial ordenado por fecha
+    // Historial ordenado y filtrado localmente
     const historialOrdenado = computed(() => {
       if (!historial.value || historial.value.length === 0) return []
       
-      const copia = [...historial.value]
-      return copia.sort((a, b) => {
+      let resultado = [...historial.value]
+      
+      // ========== FILTRO POR TIPO ==========
+      if (filtros.value.tipo) {
+        resultado = resultado.filter(r => {
+          const tipoRegistro = (r.tipo || r.tipo_actividad || '').toLowerCase()
+          return tipoRegistro === filtros.value.tipo.toLowerCase()
+        })
+      }
+      
+      // ========== FILTRO POR PERÍODO Y FECHA ==========
+      if (filtros.value.periodo !== 'todo') {
+        resultado = resultado.filter(r => {
+          const fechaRegistro = new Date(r.fecha_hora || r.fecha || r.timestamp)
+          if (isNaN(fechaRegistro.getTime())) return true // Si no hay fecha válida, incluir
+          
+          const fechaRegistroStr = fechaRegistro.toISOString().split('T')[0]
+          
+          switch (filtros.value.periodo) {
+            case 'dia':
+              if (filtros.value.fechaEspecifica) {
+                return fechaRegistroStr === filtros.value.fechaEspecifica
+              }
+              break
+              
+            case 'semana':
+              if (filtros.value.semanaEspecifica) {
+                const fechasSemana = calcularFechasSemanaLocal(filtros.value.semanaEspecifica)
+                return fechaRegistroStr >= fechasSemana.inicio && fechaRegistroStr <= fechasSemana.fin
+              }
+              break
+              
+            case 'mes':
+              if (filtros.value.mesEspecifico) {
+                const [year, month] = filtros.value.mesEspecifico.split('-')
+                const inicioMes = `${year}-${month}-01`
+                const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate()
+                const finMes = `${year}-${month}-${lastDay.toString().padStart(2, '0')}`
+                return fechaRegistroStr >= inicioMes && fechaRegistroStr <= finMes
+              }
+              break
+              
+            case 'año':
+              if (filtros.value.añoEspecifico) {
+                const inicioAño = `${filtros.value.añoEspecifico}-01-01`
+                const finAño = `${filtros.value.añoEspecifico}-12-31`
+                return fechaRegistroStr >= inicioAño && fechaRegistroStr <= finAño
+              }
+              break
+          }
+          return true
+        })
+      }
+      
+      // ========== ORDENAR POR FECHA ==========
+      return resultado.sort((a, b) => {
         const fechaA = new Date(a.fecha_hora || a.fecha || a.timestamp || 0)
         const fechaB = new Date(b.fecha_hora || b.fecha || b.timestamp || 0)
         
@@ -792,6 +846,35 @@ export default {
         }
       })
     })
+    
+    // Función auxiliar para calcular fechas de semana (local)
+    const calcularFechasSemanaLocal = (semanaString) => {
+      if (!semanaString || !semanaString.includes('-W')) {
+        return { inicio: '', fin: '' }
+      }
+      const [year, week] = semanaString.split('-W')
+      const yearNum = parseInt(year)
+      const weekNum = parseInt(week)
+      
+      // Calcular el primer día de la semana ISO (lunes)
+      const simple = new Date(yearNum, 0, 1 + (weekNum - 1) * 7)
+      const dow = simple.getDay()
+      const ISOweekStart = simple
+      if (dow <= 4) {
+        ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1)
+      } else {
+        ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay())
+      }
+      
+      const inicio = new Date(ISOweekStart)
+      const fin = new Date(ISOweekStart)
+      fin.setDate(inicio.getDate() + 6)
+      
+      return {
+        inicio: inicio.toISOString().split('T')[0],
+        fin: fin.toISOString().split('T')[0]
+      }
+    }
 
     // Admin user
     const adminUser = computed(() => {
@@ -844,14 +927,10 @@ export default {
       
       try {
         const userId = parseInt(usuarioSeleccionado.value)
-        console.log('🔍 Cargando historial completo para usuario ID:', userId)
-        console.log('🔍 Filtros aplicados:', filtros.value)
+        console.log('🔍 Cargando historial COMPLETO para usuario ID:', userId)
         
-        const filtrosAPI = construirFiltrosAPI()
-        console.log('🔍 Filtros API:', filtrosAPI)
-        
-        // Usar el nuevo método de historial completo
-        const data = await historialService.obtenerHistorialCompleto(userId, filtrosAPI)
+        // Cargar TODO el historial sin filtros - el filtrado será local e instantáneo
+        const data = await historialService.obtenerHistorialCompleto(userId, {})
         
         historial.value = data.historial || []
         resumen.value = {
@@ -968,7 +1047,6 @@ export default {
           filtros.value.fechaEspecifica = new Date().toISOString().split('T')[0]
           break
         case 'semana':
-          const semanaActual = historialService.obtenerSemanaActual()
           const fechaActual = new Date()
           const año = fechaActual.getFullYear()
           const semana = getWeekNumber(fechaActual)
@@ -981,8 +1059,8 @@ export default {
           filtros.value.añoEspecifico = new Date().getFullYear()
           break
       }
-      
-      aplicarFiltros()
+      // El filtrado es AUTOMÁTICO y LOCAL via computed (historialOrdenado)
+      // No necesita recargar de la API - es instantáneo
     }
     
     const toggleOrden = () => {
@@ -998,23 +1076,15 @@ export default {
     }
 
     const aplicarFiltros = () => {
-      if (usuarioSeleccionado.value) {
+      // Los filtros ahora se aplican localmente en historialOrdenado (computed)
+      // Solo recargamos si no hay historial cargado
+      if (usuarioSeleccionado.value && historial.value.length === 0) {
         cargarHistorial()
       }
     }
     
-    // Watcher para filtros reactivos (excepto período que tiene su propio handler)
-    watch([
-      () => filtros.value.fechaEspecifica,
-      () => filtros.value.semanaEspecifica,
-      () => filtros.value.mesEspecifico,
-      () => filtros.value.añoEspecifico,
-      () => filtros.value.tipo
-    ], () => {
-      if (usuarioSeleccionado.value) {
-        aplicarFiltros()
-      }
-    }, { deep: false })
+    // Los filtros se aplican LOCAL e INSTANTÁNEAMENTE via computed (historialOrdenado)
+    // NO necesitamos watcher que llame a la API - el filtrado es reactivo y local
 
     const actualizarHistorial = () => {
       if (usuarioSeleccionado.value) {

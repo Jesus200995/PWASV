@@ -379,270 +379,371 @@
       </div>
     </transition>
 
-    <!-- Modal de edición de información personal -->
+    <!-- Modal de edición de información personal - Apple Style -->
     <teleport to="body">
-      <transition name="fade">
-        <!-- Overlay con difuminación -->
+      <transition name="modal-fade">
         <div 
           v-if="showEditModal" 
-          class="fixed inset-0 bg-black/30 backdrop-blur-md z-40"
+          class="apple-modal-backdrop"
           @click="closeEditModal"
         ></div>
       </transition>
       
-      <transition name="fade">
-        <div v-if="showEditModal" class="fixed inset-0 flex items-center justify-center p-3 pointer-events-none" style="z-index: 50;">
-          <div class="rounded-2xl max-w-xs w-full mx-3 max-h-[85vh] overflow-y-auto edit-modal pointer-events-auto border-2 border-green-400" style="background: linear-gradient(135deg, rgba(240, 253, 244, 0.95) 0%, rgba(220, 252, 231, 0.95) 100%); backdrop-filter: blur(10px);">
-          <div class="sticky top-0 rounded-t-2xl border-b-2 border-green-400 p-3" style="background: linear-gradient(135deg, rgba(240, 253, 244, 0.98) 0%, rgba(220, 252, 231, 0.98) 100%); backdrop-filter: blur(10px);">
-            <div class="flex justify-between items-center">
-              <h3 class="text-sm font-bold text-green-700 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Editar Información
-              </h3>
-              <button @click="closeEditModal" class="w-7 h-7 rounded-full flex items-center justify-center transition-colors" style="background-color: rgba(134, 239, 172, 0.3); border: 1px solid rgba(52, 211, 153, 0.5);">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          <div class="p-3">
-            <form @submit.prevent="updateUserInfo" class="space-y-3">
-              <!-- Mensaje de error general -->
-              <div v-if="editErrors.general" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 rounded-lg" role="alert">
-                <p class="text-xs">{{ editErrors.general }}</p>
-              </div>
-
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
-                <input
-                  v-model="editForm.nombre_completo"
-                  type="text"
-                  class="edit-input-small w-full"
-                  :class="{ 'border-red-500': editErrors.nombre_completo }"
-                  placeholder="Ingresa tu nombre completo"
-                  @input="editForm.nombre_completo = editForm.nombre_completo.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
-                  required
-                />
-                <p v-if="editErrors.nombre_completo" class="text-red-500 text-xs mt-1">{{ editErrors.nombre_completo }}</p>
-              </div>
-
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  v-model="editForm.correo"
-                  type="email"
-                  class="edit-input-small w-full"
-                  :class="{ 'border-red-500': editErrors.correo }"
-                  placeholder="Ingresa tu email"
-                  required
-                />
-                <p v-if="editErrors.correo" class="text-red-500 text-xs mt-1">{{ editErrors.correo }}</p>
-              </div>
-
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Cargo</label>
-                <select
-                  v-model="editForm.cargo"
-                  class="edit-input-small w-full"
-                  :class="{ 'border-red-500': editErrors.cargo }"
-                  required
-                >
-                  <option value="" disabled>-- Selecciona tu cargo --</option>
-                  <option v-for="cargo in cargosDisponibles" :key="cargo" :value="cargo">
-                    {{ cargo }}
-                  </option>
-                </select>
-                <p v-if="editErrors.cargo" class="text-red-500 text-xs mt-1">{{ editErrors.cargo }}</p>
-              </div>
-
-              <!-- Campo para cargo personalizado si selecciona OTRO -->
-              <div v-if="editForm.cargo === 'OTRO'">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Especifica tu cargo</label>
-                <input
-                  v-model="editForm.cargoOtro"
-                  type="text"
-                  class="edit-input-small w-full"
-                  :class="{ 'border-red-500': editErrors.cargoOtro }"
-                  placeholder="Escribe tu cargo"
-                  @input="editForm.cargoOtro = editForm.cargoOtro.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
-                  required
-                />
-                <p v-if="editErrors.cargoOtro" class="text-red-500 text-xs mt-1">{{ editErrors.cargoOtro }}</p>
-              </div>
-
-              <!-- Territorio (arriba de supervisor para técnicos) -->
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">
-                  Territorio de Sembrando Vida
-                  <span v-if="esTecnico" class="text-blue-600 text-xs font-normal ml-1">(Define tu supervisor)</span>
-                </label>
-                <select
-                  v-model="editForm.territorio"
-                  class="edit-input-small w-full"
-                  :class="{ 'border-blue-400 ring-1 ring-blue-200': esTecnico }"
-                >
-                  <option value="">-- Selecciona un territorio --</option>
-                  <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">{{ territorio }}</option>
-                </select>
-                <p v-if="esTecnico" class="text-xs text-blue-600 mt-1">
-                  <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                  Al cambiar territorio, tu supervisor se actualizará automáticamente
-                </p>
-              </div>
-
-              <!-- Supervisor (para técnicos es automático y readonly) -->
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">
-                  Supervisor
-                  <span v-if="esTecnico && !buscandoSupervisor" class="text-green-600 text-xs font-normal ml-1">(Automático)</span>
-                  <span v-if="buscandoSupervisor" class="text-orange-500 text-xs font-normal ml-1 animate-pulse">(Buscando...)</span>
-                </label>
-                <div class="relative">
-                  <input
-                    v-model="editForm.supervisor"
-                    type="text"
-                    class="edit-input-small w-full pr-8"
-                    :style="esTecnico && !buscandoSupervisor ? 'background-color: #d1d5db !important; color: #1f2937; border-color: #9ca3af;' : (buscandoSupervisor ? 'background-color: #fff7ed; border-color: #fdba74;' : '')"
-                    :class="{ 'cursor-not-allowed font-medium': esTecnico && !buscandoSupervisor }"
-                    :placeholder="esTecnico ? 'Se asigna según territorio' : 'Ingresa el nombre de tu supervisor'"
-                    :readonly="esTecnico"
-                    @input="!esTecnico && (editForm.supervisor = editForm.supervisor.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))"
-                  />
-                  <!-- Icono de candado para técnicos -->
-                  <div v-if="esTecnico && !buscandoSupervisor" class="absolute right-2 top-1/2 -translate-y-1/2">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      <transition name="modal-scale">
+        <div v-if="showEditModal" class="apple-modal-wrapper">
+          <div class="apple-modal-container" @click.stop>
+            <!-- Sticky Header -->
+            <div class="modal-header">
+              <div class="modal-header-content">
+                <div class="modal-title-group">
+                  <div class="modal-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                   </div>
-                  <!-- Spinner de carga -->
-                  <div v-if="buscandoSupervisor" class="absolute right-2 top-1/2 -translate-y-1/2">
-                    <svg class="animate-spin w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                  <h3 class="modal-title">Editar Información</h3>
+                </div>
+                <button @click="closeEditModal" class="modal-close-btn">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          
+            <!-- Modal Body -->
+            <div class="modal-body">
+              <form @submit.prevent="updateUserInfo" class="modal-form">
+                <!-- Error General -->
+                <transition name="alert-slide">
+                  <div v-if="editErrors.general" class="error-alert">
+                    <div class="alert-icon">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                    </div>
+                    <p class="alert-text">{{ editErrors.general }}</p>
+                  </div>
+                </transition>
+
+                <!-- Información Personal -->
+                <div class="form-group">
+                  <div class="group-header">
+                    <div class="group-icon">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+                        <path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                    </div>
+                    <span class="group-title">Información Personal</span>
+                  </div>
+
+                  <!-- Nombre Completo -->
+                  <div class="form-field">
+                    <label class="field-label">Nombre Completo</label>
+                    <div class="input-wrapper" :class="{ 'has-error': editErrors.nombre_completo }">
+                      <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+                        <path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      <input 
+                        v-model="editForm.nombre_completo"
+                        type="text"
+                        required
+                        placeholder="JUAN PÉREZ GARCÍA"
+                        @input="editForm.nombre_completo = editForm.nombre_completo.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
+                      />
+                    </div>
+                    <span v-if="editErrors.nombre_completo" class="field-hint error-hint">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      {{ editErrors.nombre_completo }}
+                    </span>
+                  </div>
+
+                  <!-- Email -->
+                  <div class="form-field">
+                    <label class="field-label">Correo Electrónico</label>
+                    <div class="input-wrapper" :class="{ 'has-error': editErrors.correo }">
+                      <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <input 
+                        v-model="editForm.correo"
+                        type="email"
+                        required
+                        placeholder="nombre@ejemplo.com"
+                      />
+                    </div>
+                    <span v-if="editErrors.correo" class="field-hint error-hint">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      {{ editErrors.correo }}
+                    </span>
                   </div>
                 </div>
-                <p v-if="esTecnico && !buscandoSupervisor" class="text-xs text-gray-500 mt-1">
-                  <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  El supervisor territorial se asigna automáticamente
-                </p>
-              </div>
 
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">CURP</label>
-                <input
-                  v-model="editForm.curp"
-                  type="text"
-                  class="edit-input-small w-full"
-                  :class="{ 'border-red-500': editErrors.curp }"
-                  placeholder="Ingresa tu CURP"
-                  maxlength="18"
-                  @input="editForm.curp = editForm.curp.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
-                />
-                <p v-if="editErrors.curp" class="text-red-500 text-xs mt-1">{{ editErrors.curp }}</p>
-              </div>
-
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
-                <div class="flex space-x-2">
-                  <!-- Selector de código de país -->
-                  <div class="relative">
-                    <button 
-                      type="button"
-                      @click="showCountrySelector = !showCountrySelector"
-                      class="edit-input-small flex items-center px-2 py-1 min-w-[70px] justify-between text-xs"
-                    >
-                      <div class="flex items-center">
-                        <span class="text-xs mr-1">{{ paises.find(p => p.codigo === editForm.codigoPais)?.bandera || '🌎' }}</span>
-                        <span class="text-xs font-medium">{{ editForm.codigoPais }}</span>
-                      </div>
-                      <svg class="w-2 h-2 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                <!-- Información Laboral -->
+                <div class="form-group">
+                  <div class="group-header">
+                    <div class="group-icon">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <path d="M8 4v-2a2 2 0 012-2h4a2 2 0 012 2v2M12 11v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                       </svg>
-                    </button>
-                    
-                    <!-- Dropdown para selección de país -->
-                    <div 
-                      v-if="showCountrySelector" 
-                      class="absolute z-50 w-56 top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden"
-                    >
-                      <!-- Barra de búsqueda -->
-                      <div class="sticky top-0 bg-white p-2 border-b border-gray-200">
+                    </div>
+                    <span class="group-title">Información Laboral</span>
+                  </div>
+
+                  <!-- Cargo -->
+                  <div class="form-field">
+                    <label class="field-label">Cargo</label>
+                    <div class="input-wrapper" :class="{ 'has-error': editErrors.cargo }">
+                      <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <select v-model="editForm.cargo" required>
+                        <option value="" disabled>-- Selecciona tu cargo --</option>
+                        <option v-for="cargo in cargosDisponibles" :key="cargo" :value="cargo">
+                          {{ cargo }}
+                        </option>
+                      </select>
+                    </div>
+                    <span v-if="editErrors.cargo" class="field-hint error-hint">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      {{ editErrors.cargo }}
+                    </span>
+                  </div>
+
+                  <!-- Campo para cargo personalizado -->
+                  <transition name="field-slide">
+                    <div v-if="editForm.cargo === 'OTRO'" class="form-field">
+                      <label class="field-label">Especifica tu cargo</label>
+                      <div class="input-wrapper" :class="{ 'has-error': editErrors.cargoOtro }">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
                         <input 
+                          v-model="editForm.cargoOtro"
                           type="text"
-                          v-model="countrySearch"
-                          placeholder="Buscar país..."
-                          class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                          @click="$event.stopPropagation()"
+                          required
+                          placeholder="ESCRIBE TU CARGO"
+                          @input="editForm.cargoOtro = editForm.cargoOtro.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
                         />
                       </div>
-                      
-                      <ul class="py-1 max-h-40 overflow-y-auto">
-                        <li 
-                          v-for="pais in filteredCountries" 
-                          :key="pais.codigo"
-                          @click="selectCountry(pais)"
-                          class="flex items-center px-2 py-1 hover:bg-gray-100 cursor-pointer transition-colors"
-                        >
-                          <span class="text-xs mr-2">{{ pais.bandera }}</span>
-                          <span class="flex-1 text-xs">{{ pais.nombre }}</span>
-                          <span class="text-gray-500 font-mono text-xs">{{ pais.codigo }}</span>
-                        </li>
-                        <li v-if="filteredCountries.length === 0" class="px-2 py-1 text-gray-500 text-center text-xs">
-                          No se encontraron países
-                        </li>
-                      </ul>
+                      <span v-if="editErrors.cargoOtro" class="field-hint error-hint">
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                          <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        {{ editErrors.cargoOtro }}
+                      </span>
                     </div>
+                  </transition>
+
+                  <!-- Territorio -->
+                  <div class="form-field">
+                    <label class="field-label">
+                      Territorio de Sembrando Vida
+                      <span v-if="esTecnico" class="field-badge">Define tu supervisor</span>
+                    </label>
+                    <div class="input-wrapper" :class="{ 'has-focus-blue': esTecnico }">
+                      <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                      <select v-model="editForm.territorio">
+                        <option value="">-- Selecciona un territorio --</option>
+                        <option v-for="territorio in territoriosSembrandoVida" :key="territorio" :value="territorio">{{ territorio }}</option>
+                      </select>
+                    </div>
+                    <span v-if="esTecnico" class="field-hint info-hint">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      Al cambiar territorio tu supervisor se actualizará automáticamente
+                    </span>
                   </div>
-                  
-                  <!-- Campo de entrada del número -->
-                  <div class="flex-1">
-                    <input
-                      v-model="editForm.telefonoDigitos"
-                      type="tel"
-                      class="edit-input-small w-full"
-                      placeholder="10 dígitos"
-                      maxlength="10"
-                      @input="validatePhoneEdit"
-                    />
+
+                  <!-- Supervisor -->
+                  <div class="form-field">
+                    <label class="field-label">
+                      Supervisor
+                      <span v-if="esTecnico && !buscandoSupervisor" class="field-badge badge-success">Automático</span>
+                      <span v-if="buscandoSupervisor" class="field-badge badge-warning">Buscando...</span>
+                    </label>
+                    <div class="input-wrapper" :class="{ 'is-locked': esTecnico && !buscandoSupervisor, 'is-loading': buscandoSupervisor }">
+                      <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8-8c1.66 0 3-1.34 3-3S9.66 0 8 0 5 1.34 5 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.89 1.97 1.5 1.97 2.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                      <input 
+                        v-model="editForm.supervisor"
+                        type="text"
+                        :readonly="esTecnico"
+                        :placeholder="esTecnico ? 'Se asigna según territorio' : 'Nombre de tu supervisor'"
+                        @input="!esTecnico && (editForm.supervisor = editForm.supervisor.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))"
+                      />
+                      <div v-if="esTecnico && !buscandoSupervisor" class="input-lock">
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
+                          <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                      </div>
+                      <div v-if="buscandoSupervisor" class="input-spinner">
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <span v-if="esTecnico && !buscandoSupervisor" class="field-hint info-hint">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      El supervisor territorial se asigna automáticamente
+                    </span>
                   </div>
                 </div>
-                <p class="mt-1 text-xs text-gray-500">Ingresa solo los 10 dígitos de tu número (sin lada)</p>
-              </div>
 
-              <div class="flex space-x-2 pt-3">
-                <button
-                  type="button"
-                  @click="closeEditModal"
-                  class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 text-xs font-medium transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  :disabled="isUpdatingUser"
-                  class="flex-1 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-xs font-medium hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  <svg v-if="isUpdatingUser" class="animate-spin h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  {{ isUpdatingUser ? 'Guardando...' : 'Guardar Cambios' }}
-                </button>
-              </div>
-            </form>
+                <!-- Información Adicional -->
+                <div class="form-group">
+                  <div class="group-header">
+                    <div class="group-icon">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <span class="group-title">Información Adicional</span>
+                  </div>
+
+                  <!-- CURP -->
+                  <div class="form-field">
+                    <label class="field-label">CURP</label>
+                    <div class="input-wrapper" :class="{ 'has-error': editErrors.curp }">
+                      <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <input 
+                        v-model="editForm.curp"
+                        type="text"
+                        maxlength="18"
+                        placeholder="GABC850102HDFRRL09"
+                        @input="editForm.curp = editForm.curp.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
+                      />
+                    </div>
+                    <span v-if="editErrors.curp" class="field-hint error-hint">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                      {{ editErrors.curp }}
+                    </span>
+                  </div>
+
+                  <!-- Teléfono -->
+                  <div class="form-field">
+                    <label class="field-label">Teléfono</label>
+                    <div class="phone-input-group">
+                      <!-- Country Selector -->
+                      <div class="country-selector" @click.stop>
+                        <button 
+                          type="button"
+                          @click="showCountrySelector = !showCountrySelector"
+                          class="country-btn"
+                        >
+                          <span class="country-flag">{{ paises.find(p => p.codigo === editForm.codigoPais)?.bandera || '🌎' }}</span>
+                          <span class="country-code">{{ editForm.codigoPais }}</span>
+                          <svg class="country-arrow" :class="{ 'rotate-180': showCountrySelector }" viewBox="0 0 24 24" fill="none">
+                            <path d="M19 9l-7 7-7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </button>
+                        
+                        <transition name="dropdown-slide">
+                          <div v-if="showCountrySelector" class="country-dropdown">
+                            <div class="dropdown-search">
+                              <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+                                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                                <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                              </svg>
+                              <input 
+                                type="text"
+                                v-model="countrySearch"
+                                placeholder="Buscar país..."
+                                @click.stop
+                              />
+                            </div>
+                            <ul class="country-list">
+                              <li 
+                                v-for="pais in filteredCountries" 
+                                :key="pais.codigo"
+                                @click="selectCountry(pais)"
+                                class="country-item"
+                              >
+                                <span class="country-flag">{{ pais.bandera }}</span>
+                                <span class="country-name">{{ pais.nombre }}</span>
+                                <span class="country-code">{{ pais.codigo }}</span>
+                              </li>
+                              <li v-if="filteredCountries.length === 0" class="country-empty">
+                                No se encontraron países
+                              </li>
+                            </ul>
+                          </div>
+                        </transition>
+                      </div>
+                      
+                      <!-- Phone Number Input -->
+                      <div class="input-wrapper flex-1">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <input 
+                          v-model="editForm.telefonoDigitos"
+                          type="tel"
+                          maxlength="10"
+                          placeholder="10 dígitos"
+                          @input="validatePhoneEdit"
+                        />
+                      </div>
+                    </div>
+                    <span class="field-hint">Ingresa solo los 10 dígitos del número (sin lada)</span>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                  <button type="button" @click="closeEditModal" class="btn-cancel">
+                    Cancelar
+                  </button>
+                  <button type="submit" :disabled="isUpdatingUser" class="btn-save" :class="{ 'is-loading': isUpdatingUser }">
+                    <Transition name="btn-fade" mode="out-in">
+                      <span v-if="isUpdatingUser" key="loading" class="btn-content">
+                        <div class="btn-spinner"></div>
+                        <span>Guardando...</span>
+                      </span>
+                      <span v-else key="ready" class="btn-content">
+                        <span>Guardar Cambios</span>
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </span>
+                    </Transition>
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
       </transition>
     </teleport>
 
@@ -2074,73 +2175,764 @@ const validatePhoneEdit = () => {
   }
 }
 
-/* Estilos para modales de edición */
-.edit-modal {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: slideIn 0.3s ease-out;
+/* ========================================
+   MODAL DE EDICIÓN - APPLE DESIGN SYSTEM
+   ======================================== */
+
+/* Modal Backdrop */
+.apple-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9998;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+/* Modal Wrapper */
+.apple-modal-wrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+  pointer-events: none;
 }
 
-/* Inputs del modal de edición */
-.edit-input {
-  padding: 0.75rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.75rem;
-  font-size: 0.875rem;
+/* Modal Container */
+.apple-modal-container {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 
+              0 0 0 1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Modal Header */
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.modal-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+  border-radius: 8px;
+  color: white;
+}
+
+.modal-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.modal-title {
+  font-size: 19px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.3px;
+}
+
+.modal-close-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 50%;
+  color: #1d1d1f;
+  cursor: pointer;
   transition: all 0.2s ease;
-  background-color: #f9fafb;
 }
 
-.edit-input:focus {
+.modal-close-btn:hover {
+  background: #e8e8ed;
+  transform: scale(1.05);
+}
+
+.modal-close-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Modal Body */
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px 32px;
+  background: #fbfbfd;
+}
+
+/* Scrollbar personalizado */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #d1d1d6;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a6;
+}
+
+/* Modal Form */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Error Alert */
+.error-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  border-radius: 12px;
+}
+
+.alert-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: #e53e3e;
+}
+
+.alert-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.alert-text {
+  flex: 1;
+  font-size: 14px;
+  color: #c53030;
+  line-height: 1.5;
+}
+
+/* Form Group */
+.form-group {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #f5f5f7;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.group-icon {
+  width: 22px;
+  height: 22px;
+  color: #34c759;
+}
+
+.group-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.group-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.2px;
+}
+
+/* Form Field */
+.form-field {
+  padding: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.form-field:last-child {
+  border-bottom: none;
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6e6e73;
+  margin-bottom: 8px;
+  letter-spacing: -0.1px;
+}
+
+.field-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  margin-left: 8px;
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.badge-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-warning {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+/* Input Wrapper */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper.flex-1 {
+  flex: 1;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: #86868b;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-wrapper input,
+.input-wrapper select {
+  width: 100%;
+  padding: 12px 14px 12px 44px;
+  font-size: 15px;
+  font-weight: 400;
+  color: #1d1d1f;
+  background: #f5f5f7;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
   outline: none;
-  border-color: #10b981;
-  background-color: white;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.edit-input.border-red-500 {
-  border-color: #ef4444;
-}
-
-.edit-input.border-red-500:focus {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-/* Versión pequeña de inputs para móviles */
-.edit-input-small {
-  padding: 0.5rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
   transition: all 0.2s ease;
-  background-color: #f9fafb;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
 }
 
-.edit-input-small:focus {
+.input-wrapper input::placeholder {
+  color: #86868b;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+  background: white;
+  border-color: #34c759;
+  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.1);
+}
+
+.input-wrapper.has-error input,
+.input-wrapper.has-error select {
+  border-color: #ff3b30;
+  background: #fff5f5;
+}
+
+.input-wrapper.has-error input:focus,
+.input-wrapper.has-error select:focus {
+  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.1);
+}
+
+.input-wrapper.has-focus-blue input:focus,
+.input-wrapper.has-focus-blue select:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.input-wrapper.is-locked input {
+  background: #e8e8ed;
+  color: #86868b;
+  cursor: not-allowed;
+  padding-right: 40px;
+}
+
+.input-wrapper.is-loading input {
+  background: #fff9f0;
+  border-color: #ffb951;
+  padding-right: 40px;
+}
+
+.input-lock,
+.input-spinner {
+  position: absolute;
+  right: 14px;
+  width: 18px;
+  height: 18px;
+  color: #86868b;
+}
+
+.input-lock svg,
+.input-spinner svg {
+  width: 100%;
+  height: 100%;
+}
+
+.input-spinner svg {
+  animation: spin 1s linear infinite;
+  color: #ffb951;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Field Hint */
+.field-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #86868b;
+  line-height: 1.4;
+}
+
+.field-hint svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.error-hint {
+  color: #ff3b30;
+}
+
+.error-hint svg {
+  color: #ff3b30;
+}
+
+.info-hint {
+  color: #007aff;
+}
+
+.info-hint svg {
+  color: #007aff;
+}
+
+/* Phone Input Group */
+.phone-input-group {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* Country Selector */
+.country-selector {
+  position: relative;
+}
+
+.country-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 12px;
+  background: #f5f5f7;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1d1d1f;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 90px;
+}
+
+.country-btn:hover {
+  background: #e8e8ed;
+}
+
+.country-btn:focus {
+  background: white;
+  border-color: #34c759;
+  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.1);
   outline: none;
-  border-color: #10b981;
-  background-color: white;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
 }
 
-.edit-input-small.border-red-500 {
-  border-color: #ef4444;
+.country-flag {
+  font-size: 18px;
+  line-height: 1;
 }
 
-.edit-input-small.border-red-500:focus {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+.country-code {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.country-arrow {
+  width: 14px;
+  height: 14px;
+  color: #86868b;
+  transition: transform 0.2s ease;
+}
+
+.country-arrow.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Country Dropdown */
+.country-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 280px;
+  max-height: 320px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  z-index: 100;
+}
+
+.dropdown-search {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.search-icon {
+  width: 16px;
+  height: 16px;
+  color: #86868b;
+  flex-shrink: 0;
+}
+
+.dropdown-search input {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #1d1d1f;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.dropdown-search input::placeholder {
+  color: #a1a1a6;
+}
+
+.country-list {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.country-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.country-item:hover {
+  background: #f5f5f7;
+}
+
+.country-item .country-flag {
+  font-size: 20px;
+}
+
+.country-item .country-name {
+  flex: 1;
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+.country-item .country-code {
+  font-size: 13px;
+  font-weight: 500;
+  color: #86868b;
+}
+
+.country-empty {
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #86868b;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.btn-cancel,
+.btn-save {
+  flex: 1;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  letter-spacing: -0.2px;
+}
+
+.btn-cancel {
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.btn-cancel:hover {
+  background: #e8e8ed;
+  transform: translateY(-1px);
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+
+.btn-save:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.4);
+}
+
+.btn-save:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+}
+
+.btn-save.is-loading {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-content svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Transitions */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-scale-enter-active {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-scale-leave-active {
+  transition: all 0.2s ease-out;
+}
+
+.modal-scale-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.modal-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.alert-slide-enter-active,
+.alert-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.alert-slide-enter-from {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.alert-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.field-slide-enter-active,
+.field-slide-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.field-slide-enter-from,
+.field-slide-leave-to {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.field-slide-enter-to,
+.field-slide-leave-from {
+  opacity: 1;
+  max-height: 200px;
+}
+
+.dropdown-slide-enter-active,
+.dropdown-slide-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-slide-enter-from,
+.dropdown-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.95);
+}
+
+.btn-fade-enter-active,
+.btn-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.btn-fade-enter-from,
+.btn-fade-leave-to {
+  opacity: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .apple-modal-wrapper {
+    padding: 12px;
+  }
+  
+  .apple-modal-container {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+  
+  .modal-header-content {
+    padding: 14px 16px;
+  }
+  
+  .modal-title {
+    font-size: 17px;
+  }
+  
+  .modal-body {
+    padding: 20px 16px 28px;
+  }
+  
+  .modal-form {
+    gap: 20px;
+  }
+  
+  .form-field {
+    padding: 14px;
+  }
+  
+  .phone-input-group {
+    flex-direction: column;
+  }
+  
+  .country-selector {
+    width: 100%;
+  }
+  
+  .country-btn {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .country-dropdown {
+    width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-cancel,
+  .btn-save {
+    width: 100%;
+  }
 }
 
 /* Botón de edición circular mejorado */

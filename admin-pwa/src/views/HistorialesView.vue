@@ -352,6 +352,7 @@
                   <th>Descripción</th>
                   <th>Fecha</th>
                   <th>Hora</th>
+                  <th class="th-imagen">Imagen</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -375,6 +376,16 @@
                   </td>
                   <td class="apple-hora-cell">
                     {{ formatearHora(registro.hora) }}
+                  </td>
+                  <td class="td-imagen-cell">
+                    <img 
+                      v-if="obtenerImagenUrl(registro)" 
+                      :src="obtenerImagenUrl(registro)"
+                      alt="Foto" 
+                      class="apple-photo-thumb"
+                      @click="abrirFotoCompleta(obtenerImagenUrl(registro))"
+                    >
+                    <span v-else class="apple-no-data">—</span>
                   </td>
                   <td>
                     <div class="apple-actions">
@@ -1018,15 +1029,14 @@ export default {
       error.value = ''
     }
 
-    // Métodos de búsqueda de usuarios
+    // Métodos de búsqueda de usuarios - OPTIMIZADO para velocidad
     const buscarUsuarios = async () => {
       // Limpiar timeout anterior
       if (timeoutBusqueda.value) {
         clearTimeout(timeoutBusqueda.value)
       }
 
-      const termino = terminoBusqueda.value.trim()
-      console.log('🔍 Término de búsqueda:', termino, 'Longitud:', termino.length)
+      const termino = terminoBusqueda.value.trim().toLowerCase()
       
       if (termino.length === 0) {
         usuariosFiltrados.value = []
@@ -1035,34 +1045,54 @@ export default {
       }
 
       if (termino.length < 2) {
-        // Mostrar mensaje de que necesita más caracteres
         usuariosFiltrados.value = []
         mostrarResultados.value = true
         return
       }
 
-      // Debounce de 300ms
+      // BÚSQUEDA LOCAL INMEDIATA (sin espera)
+      if (usuarios.value && usuarios.value.length > 0) {
+        const resultadosLocales = usuarios.value.filter(u => {
+          const nombre = (u.nombre_completo || '').toLowerCase()
+          const correo = (u.correo || '').toLowerCase()
+          const curp = (u.curp || '').toLowerCase()
+          return nombre.includes(termino) || 
+                 correo.includes(termino) || 
+                 curp.includes(termino)
+        }).slice(0, 10)
+        
+        if (resultadosLocales.length > 0) {
+          usuariosFiltrados.value = resultadosLocales
+          mostrarResultados.value = true
+          // Si encontramos suficientes locales, no buscar en servidor
+          if (resultadosLocales.length >= 5) return
+        }
+      }
+
+      // Búsqueda en servidor con debounce reducido (100ms)
       timeoutBusqueda.value = setTimeout(async () => {
         try {
           buscandoUsuarios.value = true
-          console.log(`🔍 Iniciando búsqueda con término: "${termino}"`)
           
           const resultados = await usuariosService.buscarUsuarios(termino)
-          console.log('📋 Resultados obtenidos:', resultados)
           
-          usuariosFiltrados.value = resultados
+          // Combinar con resultados locales sin duplicados
+          const idsLocales = new Set(usuariosFiltrados.value.map(u => u.id))
+          const nuevos = resultados.filter(u => !idsLocales.has(u.id))
+          usuariosFiltrados.value = [...usuariosFiltrados.value, ...nuevos].slice(0, 15)
           mostrarResultados.value = true
           
-          console.log(`✅ Mostrando ${resultados.length} usuarios filtrados`)
         } catch (err) {
           console.error('❌ Error al buscar usuarios:', err)
-          error.value = 'Error al buscar usuarios'
-          usuariosFiltrados.value = []
+          // Mantener resultados locales si hay error
+          if (usuariosFiltrados.value.length === 0) {
+            error.value = 'Error al buscar usuarios'
+          }
           mostrarResultados.value = true
         } finally {
           buscandoUsuarios.value = false
         }
-      }, 300)
+      }, 100)
     }
 
     // Métodos para dropdown con Teleport
@@ -2738,6 +2768,75 @@ export default {
 .apple-tipo-badge.actividad {
   background: rgba(59, 130, 246, 0.15);
   color: #2563eb;
+}
+
+/* ====================== APPLE PHOTO THUMBNAIL ====================== */
+.th-imagen {
+  text-align: center;
+  width: 60px;
+}
+
+.td-imagen-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.apple-photo-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 2px solid rgba(139, 195, 74, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apple-photo-thumb:hover {
+  transform: scale(1.15);
+  border-color: #8BC34A;
+  box-shadow: 0 6px 16px rgba(139, 195, 74, 0.4);
+}
+
+.apple-no-data {
+  color: #d1d1d6;
+  font-size: 13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Responsivo para columna de imagen */
+@media (max-width: 1024px) {
+  .apple-photo-thumb {
+    width: 34px;
+    height: 34px;
+  }
+  
+  .th-imagen {
+    width: 50px;
+  }
+}
+
+@media (max-width: 768px) {
+  .apple-photo-thumb {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .th-imagen {
+    width: 45px;
+  }
+}
+
+@media (max-width: 640px) {
+  .th-imagen {
+    display: none;
+  }
+  
+  .td-imagen-cell {
+    display: none;
+  }
 }
 
 .apple-descripcion-cell {
@@ -5255,12 +5354,15 @@ export default {
   align-items: center;
   z-index: 10000;
   animation: fadeIn 0.3s ease-in-out;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .lightbox-container {
   position: relative;
-  width: 90vw;
-  height: 90vh;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -5268,16 +5370,20 @@ export default {
 
 .lightbox-image-wrapper {
   position: relative;
-  display: inline-block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
+  max-height: calc(100vh - 60px);
 }
 
 .lightbox-image {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: calc(100vw - 60px);
+  max-height: calc(100vh - 80px);
   width: auto;
   height: auto;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
   animation: scaleIn 0.3s ease-in-out;
   cursor: pointer;
@@ -5286,40 +5392,104 @@ export default {
 
 .lightbox-close-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.25) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  font-size: 28px;
-  font-weight: bold;
-  color: rgba(255, 255, 255, 0.9);
+  width: 46px;
+  height: 46px;
+  font-size: 26px;
+  font-weight: 300;
+  color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.1);
   z-index: 10002;
   line-height: 1;
   text-align: center;
   padding: 0;
   margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .lightbox-close-btn:hover {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  font-size: 30px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+.lightbox-close-btn:active {
+  transform: scale(0.95);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+}
+
+/* Responsivo para lightbox */
+@media (max-width: 768px) {
+  .lightbox-overlay {
+    padding: 15px;
+  }
+  
+  .lightbox-image {
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 60px);
+    border-radius: 8px;
+  }
+  
+  .lightbox-close-btn {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lightbox-overlay {
+    padding: 10px;
+  }
+  
+  .lightbox-image {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 50px);
+    border-radius: 6px;
+  }
+  
+  .lightbox-close-btn {
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
 }
 
 .lightbox-fullscreen-btn {

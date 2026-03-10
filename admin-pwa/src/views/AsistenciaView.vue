@@ -342,13 +342,13 @@
     <transition name="apple-modal-fade">
       <div v-if="modalVisible" class="apple-modal-overlay" @click="cerrarModal">
         <div class="apple-modal-content" @click.stop>
-          <button @click="cerrarModal" class="apple-modal-close">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="18" y1="6" x2="6" y2="18" stroke-width="2" stroke-linecap="round"/>
-              <line x1="6" y1="6" x2="18" y2="18" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </button>
-          <img :src="modalImage" :alt="modalTitle" class="apple-modal-image">
+          <div class="lightbox-image-wrapper">
+            <img :src="modalImage" :alt="modalTitle" class="apple-modal-image">
+            <!-- Botón de cerrar estilo liquid glass -->
+            <button @click="cerrarModal" class="lightbox-close-btn">
+              ×
+            </button>
+          </div>
         </div>
       </div>
     </transition>
@@ -2057,33 +2057,91 @@ export default {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.apple-modal-close {
+.lightbox-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.lightbox-close-btn {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  border: none;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.25) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   border-radius: 50%;
+  width: 46px;
+  height: 46px;
+  font-size: 26px;
+  font-weight: 300;
+  color: #fff;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.1);
+  z-index: 10002;
+  line-height: 1;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.apple-modal-close:hover {
-  background: rgba(0, 0, 0, 0.2);
+.lightbox-close-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(255, 255, 255, 0.15);
 }
 
-.apple-modal-close svg {
-  width: 20px;
-  height: 20px;
-  stroke: white;
-  stroke-width: 2;
+.lightbox-close-btn:active {
+  transform: scale(0.95);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+}
+
+/* Responsive para botón lightbox */
+@media (max-width: 768px) {
+  .lightbox-close-btn {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lightbox-close-btn {
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
 }
 
 .apple-modal-image {

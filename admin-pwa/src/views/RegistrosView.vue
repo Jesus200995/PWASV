@@ -608,17 +608,18 @@
     <Teleport to="body" v-if="showLightbox">
       <div class="lightbox-overlay" @click="cerrarLightbox">
         <div class="lightbox-container">
-          <button class="lightbox-close" @click="cerrarLightbox">
-            <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
-          <img 
-            :src="lightboxImageUrl" 
-            alt="Fotografía en pantalla completa"
-            class="lightbox-image"
-            @click.stop="requestFullscreen"
-          >
+          <div class="lightbox-image-wrapper">
+            <img 
+              :src="lightboxImageUrl" 
+              alt="Fotografía en pantalla completa"
+              class="lightbox-image"
+              @click.stop="requestFullscreen"
+            >
+            <!-- Botón de cerrar estilo liquid glass -->
+            <button class="lightbox-close-btn" @click.stop="cerrarLightbox">
+              ×
+            </button>
+          </div>
           <p class="lightbox-hint">Haz clic en la imagen para pantalla completa • ESC o clic fuera para cerrar</p>
         </div>
       </div>
@@ -9087,26 +9088,91 @@ const logout = () => {
   gap: 20px;
 }
 
-.lightbox-close {
+.lightbox-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.lightbox-close-btn {
   position: absolute;
-  top: -50px;
-  right: 0;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.25) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
+  font-size: 26px;
+  font-weight: 300;
+  color: #fff;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.1);
+  z-index: 10002;
+  line-height: 1;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.lightbox-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+.lightbox-close-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+.lightbox-close-btn:active {
+  transform: scale(0.95);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+}
+
+/* Responsive para botón lightbox */
+@media (max-width: 768px) {
+  .lightbox-close-btn {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lightbox-close-btn {
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
 }
 
 .lightbox-image {
@@ -10371,10 +10437,12 @@ const logout = () => {
     gap: 15px;
   }
   
-  .lightbox-close {
-    top: -40px;
-    width: 35px;
-    height: 35px;
+  .lightbox-close-btn {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
   }
   
   .lightbox-image {

@@ -1,171 +1,231 @@
 <template>
-  <div class="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4 relative" style="min-height: 100vh;">
+  <div class="apple-forgot bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 relative">
     <!-- Elementos decorativos para mejorar el efecto de vidrio -->
     <div class="absolute inset-0">
       <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow"></div>
       <div class="absolute top-3/4 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 2s;"></div>
       <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse-slow" style="animation-delay: 4s;"></div>
     </div>
-    
-    <div class="page-container w-full max-w-md relative z-10 px-2">
-      <!-- Back to Login Link - Top Left -->
-      <div class="flex justify-start mb-3">
-        <router-link to="/login" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors duration-200 glass-link">
-          ← Volver al inicio de sesión
-        </router-link>
-      </div>
+
+    <!-- Success Modal -->
+    <Teleport to="body">
+      <Transition name="modal-scale">
+        <div v-if="showSuccessModal" class="modal-backdrop" @click.self="goToLogin">
+          <div class="modal-container">
+            <div class="modal-success-icon">
+              <svg viewBox="0 0 56 56" fill="none">
+                <circle cx="28" cy="28" r="26" stroke="#34C759" stroke-width="3"/>
+                <path d="M17 28l7 7 15-15" stroke="#34C759" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h2 class="modal-heading">Contraseña Actualizada</h2>
+            <p class="modal-description">Tu contraseña ha sido cambiada exitosamente</p>
+            <div class="modal-progress-track">
+              <div class="modal-progress-fill"></div>
+            </div>
+            <p class="modal-redirect-text">Redirigiendo al inicio de sesión...</p>
+            <button @click="goToLogin" class="modal-action-btn">Continuar</button>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Main Content -->
+    <div class="forgot-content relative z-10">
+      <!-- Fixed Navigation Header -->
+      <nav class="forgot-nav">
+        <div class="nav-container">
+          <router-link to="/login" class="nav-back-btn">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Volver</span>
+          </router-link>
+          <h1 class="nav-title">Recuperar Contraseña</h1>
+          <div class="nav-spacer"></div>
+        </div>
+      </nav>
 
       <!-- Header Section -->
-      <div class="text-center mb-4">
-        <h1 class="text-lg font-bold text-primary mb-1 text-center glass-title">Recuperar Contraseña</h1>
-        <h2 class="text-base font-semibold text-gray-700">Cambiar contraseña</h2>
-        <p class="mt-1 text-gray-500 text-xs">Ingresa tu correo y nueva contraseña</p>
-      </div>
+      <header class="forgot-hero">
+        <p class="hero-instruction">Ingresa tu correo electrónico y tu nueva contraseña para recuperar el acceso a tu cuenta.</p>
+      </header>
 
-      <!-- Success Message -->
-      <transition name="bounce">
-        <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-sm mb-4" role="alert">
-          <p class="flex items-center text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      <!-- Error Alert -->
+      <Transition name="alert-slide">
+        <div v-if="errorMessage" class="error-alert">
+          <div class="alert-icon">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            {{ successMessage }}
-          </p>
+          </div>
+          <p class="alert-text">{{ errorMessage }}</p>
         </div>
-      </transition>
-
-      <!-- Error Message -->
-      <transition name="bounce">
-        <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-sm mb-4" role="alert">
-          <p class="flex items-center text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            {{ errorMessage }}
-          </p>
-        </div>
-      </transition>
+      </Transition>
 
       <!-- Reset Password Form -->
-      <div class="glass-card">
-        <form @submit.prevent="resetPassword">
-          <div class="space-y-3">
-            <div>
-              <label for="email" class="block text-xs font-medium text-gray-800 mb-1">Correo electrónico</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="email" 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  autocomplete="email" 
-                  required 
-                  class="glass-input w-full pl-9 pr-3 py-2 text-sm" 
-                  placeholder="nombre@ejemplo.com" 
-                  :class="{ 'animate-shake': formError }" 
-                />
-              </div>
+      <form @submit.prevent="resetPassword" class="forgot-form">
+        <!-- Email Section -->
+        <div class="form-group">
+          <div class="group-header">
+            <div class="group-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </div>
-            
-            <div>
-              <label for="newPassword" class="block text-xs font-medium text-gray-800 mb-1">Nueva contraseña</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="newPassword" 
-                  id="newPassword" 
-                  name="newPassword" 
-                  :type="showPassword ? 'text' : 'password'" 
-                  autocomplete="new-password" 
-                  required 
-                  class="glass-input w-full pl-9 pr-9 py-2 text-sm" 
-                  placeholder="Nueva contraseña" 
-                  :class="{ 'animate-shake': formError }" 
-                  minlength="6"
-                />
-                <button
-                  type="button"
-                  @click="togglePasswordVisibility"
-                  class="absolute inset-y-0 right-0 flex items-center pr-2 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
-                >
-                  <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </button>
-              </div>
-              <p class="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
-            </div>
-
-            <div>
-              <label for="confirmPassword" class="block text-xs font-medium text-gray-800 mb-1">Confirmar nueva contraseña</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <input 
-                  v-model="confirmPassword" 
-                  id="confirmPassword" 
-                  name="confirmPassword" 
-                  :type="showConfirmPassword ? 'text' : 'password'" 
-                  autocomplete="new-password" 
-                  required 
-                  class="glass-input w-full pl-9 pr-9 py-2 text-sm" 
-                  placeholder="Confirmar contraseña" 
-                  :class="{ 'animate-shake': formError }" 
-                  minlength="6"
-                />
-                <button
-                  type="button"
-                  @click="toggleConfirmPasswordVisibility"
-                  class="absolute inset-y-0 right-0 flex items-center pr-2 text-primary hover:text-primary-dark focus:outline-none transition-colors duration-200"
-                >
-                  <svg v-if="showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </button>
-              </div>
-            </div>
+            <span class="group-title">Correo Electrónico</span>
           </div>
 
-          <button 
-            type="submit" 
-            :disabled="loading" 
-            class="glass-button w-full mt-4 flex items-center justify-center py-2 text-sm"
-            :class="{ 'opacity-50 cursor-not-allowed': loading }"
-          >
-            <svg v-if="loading" class="animate-spin h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>{{ loading ? 'Cambiando contraseña...' : 'Cambiar contraseña' }}</span>
-          </button>
-        </form>
-      </div>
+          <div class="form-field">
+            <label class="field-label">Tu correo registrado</label>
+            <div class="input-wrapper" :class="{ 'has-error': formError && !email }">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+                <path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <input 
+                v-model="email" 
+                type="email" 
+                required 
+                placeholder="nombre@ejemplo.com"
+                autocomplete="email"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- New Password Section -->
+        <div class="form-group">
+          <div class="group-header">
+            <div class="group-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </div>
+            <span class="group-title">Nueva Contraseña</span>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Nueva contraseña</label>
+            <div class="input-wrapper password-wrapper" :class="{ 'has-error': formError && newPassword.length < 6 }">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <input 
+                v-model="newPassword" 
+                :type="showPassword ? 'text' : 'password'" 
+                required 
+                placeholder="Mínimo 6 caracteres"
+                minlength="6"
+                @input="checkPasswordsMatch"
+              />
+              <button type="button" class="visibility-toggle" @click="togglePasswordVisibility">
+                <svg v-if="showPassword" viewBox="0 0 24 24" fill="none">
+                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+            <span class="field-hint">Mínimo 6 caracteres</span>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Confirmar nueva contraseña</label>
+            <div class="input-wrapper password-wrapper" :class="{ 'has-error': !passwordsMatch, 'has-success': passwordsMatch && confirmPassword.length > 0 }">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input 
+                v-model="confirmPassword" 
+                :type="showConfirmPassword ? 'text' : 'password'" 
+                required 
+                placeholder="Confirmar contraseña"
+                minlength="6"
+                @input="checkPasswordsMatch"
+              />
+              <button type="button" class="visibility-toggle" @click="toggleConfirmPasswordVisibility">
+                <svg v-if="showConfirmPassword" viewBox="0 0 24 24" fill="none">
+                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+            <span v-if="confirmPassword && !passwordsMatch" class="field-hint error-hint">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Las contraseñas no coinciden
+            </span>
+            <span v-else-if="confirmPassword && passwordsMatch" class="field-hint success-hint">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Las contraseñas coinciden
+            </span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" :disabled="loading || !isFormComplete || !passwordsMatch" class="submit-btn" :class="{ 'is-loading': loading, 'is-disabled': !isFormComplete || !passwordsMatch }">
+          <Transition name="btn-fade" mode="out-in">
+            <span v-if="loading" key="loading" class="btn-inner">
+              <div class="btn-loader"></div>
+              <span>Cambiando contraseña...</span>
+            </span>
+            <span v-else-if="!email" key="email" class="btn-inner">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span>Ingresa tu correo</span>
+            </span>
+            <span v-else-if="newPassword.length < 6" key="password" class="btn-inner">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span>Mínimo 6 caracteres</span>
+            </span>
+            <span v-else-if="!passwordsMatch" key="mismatch" class="btn-inner">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M15 9l-6 6m0-6l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span>Las contraseñas deben coincidir</span>
+            </span>
+            <span v-else key="ready" class="btn-inner">
+              <span>Cambiar contraseña</span>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14m-6-6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </Transition>
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <footer class="forgot-footer">
+        <p>¿Recordaste tu contraseña? <router-link to="/login">Iniciar sesión</router-link></p>
+      </footer>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, Teleport, Transition } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_URL, getBestApiUrl, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
@@ -178,8 +238,15 @@ const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref('');
-const successMessage = ref('');
 const formError = ref(false);
+const showSuccessModal = ref(false);
+const passwordsMatch = ref(true);
+
+const isFormComplete = computed(() => {
+  return email.value.trim() !== '' && 
+         newPassword.value.length >= 6 && 
+         confirmPassword.value.trim() !== '';
+});
 
 function togglePasswordVisibility() {
   showPassword.value = !showPassword.value;
@@ -189,10 +256,21 @@ function toggleConfirmPasswordVisibility() {
   showConfirmPassword.value = !showConfirmPassword.value;
 }
 
+function checkPasswordsMatch() {
+  if (confirmPassword.value === '') {
+    passwordsMatch.value = true;
+    return;
+  }
+  passwordsMatch.value = newPassword.value === confirmPassword.value;
+}
+
+function goToLogin() {
+  router.push('/login');
+}
+
 async function resetPassword() {
   loading.value = true;
   errorMessage.value = '';
-  successMessage.value = '';
   formError.value = false;
   
   // Validaciones
@@ -248,14 +326,13 @@ async function resetPassword() {
       return;
     }
     
-    // Actualizar la contraseña directamente en la base de datos
-    // Como el backend usa contraseñas sin encriptar, podemos usar el endpoint de actualización
+    // Actualizar la contraseña
     const updateData = {
       correo: usuario.correo,
       nombre_completo: usuario.nombre_completo,
       cargo: usuario.cargo,
       supervisor: usuario.supervisor,
-      contrasena: newPassword.value, // Nueva contraseña
+      contrasena: newPassword.value,
       curp: usuario.curp,
       telefono: usuario.telefono
     };
@@ -267,7 +344,8 @@ async function resetPassword() {
       }
     });
     
-    successMessage.value = 'Contraseña actualizada exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.';
+    // Mostrar modal de éxito
+    showSuccessModal.value = true;
     
     // Limpiar formulario
     email.value = '';
@@ -307,329 +385,627 @@ async function resetPassword() {
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
+/* ==========================================================================
+   APPLE DESIGN SYSTEM - FORGOT PASSWORD
+   ========================================================================== */
+
+/* Main Container */
+.apple-forgot {
+  position: fixed;
+  inset: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.bounce-enter-active {
-  animation: bounce-in 0.5s;
-}
-.bounce-leave-active {
-  animation: bounce-in 0.5s reverse;
-}
-@keyframes bounce-in {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-.animate-shake {
-  animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-/* Efecto de vidrio realista - Glassmorphism */
-.glass-card {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 32px 0 rgba(31, 38, 135, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  padding: 1.25rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -50%;
-  width: 100%;
+/* Scrollable Content */
+.forgot-content {
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transform: skewX(-25deg);
-  transition: all 0.6s;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px env(safe-area-inset-bottom, 20px);
+  padding-top: 0;
 }
 
-.glass-card:hover::before {
-  left: 150%;
-}
-
-.glass-input {
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  font-size: 0.875rem;
-  color: #1f2937;
-  transition: all 0.3s ease;
-  box-shadow: 
-    0 4px 16px 0 rgba(31, 38, 135, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  min-height: 36px;
-}
-
-.glass-input:focus {
-  outline: none;
-  border: 1px solid rgba(76, 175, 80, 0.4);
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 0 0 3px rgba(76, 175, 80, 0.1),
-    0 8px 25px 0 rgba(31, 38, 135, 0.15),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-}
-
-.glass-input::placeholder {
-  color: rgba(75, 85, 99, 0.6);
-}
-
-.glass-button {
-  padding: 0.875rem 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(76, 175, 80, 0.8) 0%, 
-    rgba(56, 142, 60, 0.8) 100%);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  color: white;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 
-    0 4px 20px 0 rgba(76, 175, 80, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.glass-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 30px 0 rgba(76, 175, 80, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
-  background: linear-gradient(135deg, 
-    rgba(76, 175, 80, 0.9) 0%, 
-    rgba(56, 142, 60, 0.9) 100%);
-}
-
-.glass-button:active:not(:disabled) {
-  transform: translateY(0px);
-  box-shadow: 
-    0 4px 15px 0 rgba(76, 175, 80, 0.3),
-    inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
-}
-
-.glass-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s;
-}
-
-.glass-button:hover::before {
-  left: 100%;
-}
-
-.glass-link {
-  position: relative;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.glass-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #4CAF50, #81C784);
-  transition: width 0.3s ease;
-  border-radius: 1px;
-}
-
-.glass-link:hover::after {
-  width: 100%;
-}
-
-.glass-title {
-  color: #2e7d32;
-  text-shadow: 
-    0 1px 2px rgba(46, 125, 50, 0.3),
-    0 0 8px rgba(46, 125, 50, 0.2);
-  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.3));
-  position: relative;
-}
-
-.glass-title::before {
-  content: '';
-  position: absolute;
+/* Fixed Navigation */
+.forgot-nav {
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0.2) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  z-index: 1;
-  pointer-events: none;
+  z-index: 100;
+  background: rgba(245, 245, 247, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0 20px;
+  margin: 0 -20px;
 }
 
-/* Estilos específicos para los botones del ojo */
-button[type="button"] {
-  background: transparent !important;
+.nav-container {
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  gap: 16px;
+}
+
+.nav-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 980px;
+  color: #06c;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
   border: none;
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nav-back-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateX(-2px);
+}
+
+.nav-back-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.3px;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.nav-spacer {
+  width: 90px;
+  flex-shrink: 0;
+}
+
+/* Hero Section */
+.forgot-hero {
+  text-align: center;
+  padding: 20px 0 16px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.hero-instruction {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #86868b;
+  font-weight: 400;
+  margin: 0;
+  text-align: center;
+}
+
+/* Error Alert */
+.error-alert {
+  max-width: 500px;
+  margin: 0 auto 16px;
+  padding: 14px;
+  background: #fff2f2;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alert-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #ff3b30;
+}
+
+.alert-text {
+  font-size: 13px;
+  color: #ff3b30;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Form Container */
+.forgot-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Form Groups */
+.form-group {
+  background: white;
+  border-radius: 14px;
+  padding: 15px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.group-icon {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(180deg, #34c759 0%, #30b350 100%);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  min-height: 32px;
-  transition: all 0.2s ease;
-  box-shadow: none !important;
+  flex-shrink: 0;
 }
 
-button[type="button"]:focus {
+.group-icon svg {
+  width: 14px;
+  height: 14px;
+  color: white;
+}
+
+.group-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.2px;
+}
+
+/* Form Fields */
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field:last-child {
+  margin-bottom: 0;
+}
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 7px;
+  letter-spacing: -0.1px;
+}
+
+/* Input Wrapper */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f5f5f7;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.input-wrapper:focus-within {
+  background: white;
+  border-color: #34c759;
+  box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.1);
+}
+
+.input-wrapper.has-error {
+  border-color: #ff3b30;
+}
+
+.input-wrapper.has-success {
+  border-color: #34c759;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  width: 18px;
+  height: 18px;
+  color: #86868b;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.input-wrapper:focus-within .input-icon {
+  color: #34c759;
+}
+
+.input-wrapper.has-error .input-icon {
+  color: #ff3b30;
+}
+
+.input-wrapper input {
+  flex: 1;
+  width: 100%;
+  padding: 12px 12px 12px 42px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: #1d1d1f;
   outline: none;
-  background: transparent !important;
-  box-shadow: none !important;
+  font-family: inherit;
 }
 
-button[type="button"]:hover {
-  background: transparent !important;
-  box-shadow: none !important;
+.input-wrapper input::placeholder {
+  color: #86868b;
 }
 
-button[type="button"] svg {
+.password-wrapper input {
+  padding-right: 44px;
+}
+
+/* Field Hints */
+.field-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #86868b;
+  margin-top: 5px;
+}
+
+.field-hint svg {
+  width: 14px;
+  height: 14px;
+}
+
+.field-hint.error-hint {
+  color: #ff3b30;
+}
+
+.field-hint.success-hint {
+  color: #34c759;
+}
+
+/* Visibility Toggle */
+.visibility-toggle {
+  position: absolute;
+  right: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+
+.visibility-toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.visibility-toggle svg {
+  width: 20px;
+  height: 20px;
+  color: #86868b;
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  padding: 15px 20px;
+  background: linear-gradient(180deg, #34c759 0%, #30b350 100%);
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+  box-shadow: 0 4px 14px rgba(52, 199, 89, 0.35);
+  font-family: inherit;
+  margin-top: 8px;
+}
+
+.submit-btn:hover:not(.is-loading):not(.is-disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(52, 199, 89, 0.4);
+}
+
+.submit-btn:active:not(.is-loading):not(.is-disabled) {
+  transform: translateY(0);
+}
+
+.submit-btn.is-disabled {
+  background: linear-gradient(180deg, #8e8e93 0%, #7c7c80 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.submit-btn.is-loading {
+  cursor: wait;
+}
+
+.btn-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-inner svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-loader {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spinner-rotate 0.8s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Footer */
+.forgot-footer {
+  max-width: 500px;
+  margin: 24px auto;
+  text-align: center;
+  padding-bottom: 24px;
+}
+
+.forgot-footer p {
+  font-size: 13px;
+  color: #86868b;
+}
+
+.forgot-footer a {
+  color: #06c;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.forgot-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   MODAL
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 24px;
+  padding: 32px 28px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+}
+
+.modal-success-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 20px;
+}
+
+.modal-success-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-heading {
+  font-size: 21px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.modal-description {
+  font-size: 14px;
+  color: #86868b;
+  margin-bottom: 20px;
+}
+
+.modal-progress-track {
+  height: 4px;
+  background: #f5f5f7;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.modal-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34c759, #30d158);
+  border-radius: 2px;
+  animation: progress-fill 3s linear forwards;
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.modal-redirect-text {
+  font-size: 12px;
+  color: #34c759;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.modal-action-btn {
+  padding: 13px 28px;
+  background: linear-gradient(180deg, #34c759 0%, #30b350 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.modal-action-btn:hover {
+  transform: scale(1.03);
+}
+
+/* ==========================================================================
+   ANIMATIONS
+   ========================================================================== */
+
+/* Modal Scale */
+.modal-scale-enter-active {
+  animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-scale-leave-active {
+  animation: modal-in 0.2s ease reverse;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Alert Slide */
+.alert-slide-enter-active,
+.alert-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.alert-slide-enter-from,
+.alert-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Button Fade */
+.btn-fade-enter-active,
+.btn-fade-leave-active {
   transition: all 0.2s ease;
 }
 
-button[type="button"]:hover svg {
-  transform: scale(1.1);
+.btn-fade-enter-from,
+.btn-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
 }
 
-/* Mejoras de responsividad para pantallas móviles */
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
 @media (max-width: 480px) {
-  .page-container {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+  .forgot-content {
+    padding: 0 16px env(safe-area-inset-bottom, 16px);
+    padding-top: 0;
   }
   
-  .glass-card {
-    padding: 1rem;
-    margin: 0 0.25rem;
+  .forgot-nav {
+    padding: 0 16px;
+    margin: 0 -16px;
   }
   
-  .glass-input {
-    font-size: 14px; /* Evita zoom en iOS */
-    min-height: 36px;
+  .nav-container {
+    height: 52px;
   }
   
-  .text-lg {
-    font-size: 1rem;
+  .nav-title {
+    font-size: 16px;
   }
   
-  .text-base {
-    font-size: 0.875rem;
+  .nav-back-btn {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+  
+  .nav-spacer {
+    width: 80px;
+  }
+  
+  .hero-instruction {
+    font-size: 12px;
+  }
+  
+  .form-group {
+    padding: 14px;
+    border-radius: 14px;
+  }
+  
+  .input-wrapper input {
+    font-size: 16px; /* Prevents iOS zoom */
+    padding: 12px 12px 12px 40px;
   }
 }
 
-@media (max-height: 600px) {
-  .page-container {
-    max-width: 320px;
-  }
-  
-  .text-center.mb-4 {
-    margin-bottom: 0.75rem;
-  }
-  
-  .glass-card {
-    padding: 1rem;
-  }
-}
-
-/* Para pantallas muy pequeñas como iPhone SE */
-@media (max-width: 375px) and (max-height: 667px) {
-  .page-container {
-    max-width: 300px;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-  
-  .glass-card {
-    padding: 0.875rem;
-  }
-  
-  .glass-input {
-    font-size: 14px;
-    min-height: 34px;
-  }
-}
-
-/* Para pantallas grandes */
 @media (min-width: 768px) {
-  .page-container {
-    max-width: 420px;
+  .forgot-content {
+    padding: 0 24px 40px;
+    padding-top: 0;
   }
   
-  .glass-card {
-    padding: 1.5rem;
+  .forgot-nav {
+    padding: 0 24px;
+    margin: 0 -24px;
+  }
+  
+  .nav-container {
+    height: 60px;
+  }
+  
+  .nav-title {
+    font-size: 19px;
+  }
+  
+  .form-group {
+    padding: 18px;
   }
 }
 
-/* Soporte adicional para navegadores que no soportan backdrop-filter */
+/* ==========================================================================
+   BACKDROP FILTER FALLBACK
+   ========================================================================== */
+
 @supports not (backdrop-filter: blur(20px)) {
-  .glass-card {
-    background: rgba(255, 255, 255, 0.85);
+  .forgot-nav {
+    background: rgba(245, 245, 247, 0.98);
   }
   
-  .glass-input {
-    background: rgba(255, 255, 255, 0.7);
+  .modal-backdrop {
+    background: rgba(0, 0, 0, 0.7);
   }
 }
 </style>

@@ -4545,13 +4545,13 @@ async def debug_tiempo_actual():
         return {"error": str(e)}
 
 @app.get("/asistencias")
-async def obtener_historial_asistencias(usuario_id: int = None, limit: int = None, offset: int = 0, territorio: str = None):
+async def obtener_historial_asistencias(usuario_id: int = None, limit: int = None, offset: int = 0, territorio: str = None, fecha: str = None, fecha_inicio: str = None, fecha_fin: str = None):
     try:
         # Verificar y reconectar si es necesario
         if not verificar_conexion_db():
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
         
-        print(f"🔍 Obteniendo historial de asistencias - Usuario: {usuario_id}, Límite: {limit if limit else 'Sin límite'}, Offset: {offset}, Territorio: {territorio}")
+        print(f"🔍 Obteniendo historial de asistencias - Usuario: {usuario_id}, Límite: {limit if limit else 'Sin límite'}, Offset: {offset}, Territorio: {territorio}, Fecha: {fecha}, Rango: {fecha_inicio} - {fecha_fin}")
         
         # Construir la query base con JOIN a usuarios si hay filtro de territorio
         base_select = """SELECT a.id, a.usuario_id, a.fecha, a.hora_entrada, a.hora_salida, 
@@ -4573,6 +4573,20 @@ async def obtener_historial_asistencias(usuario_id: int = None, limit: int = Non
         if territorio:
             conditions.append("u.territorio = %s")
             params.append(territorio)
+        
+        # Filtro por fecha exacta
+        if fecha:
+            conditions.append("a.fecha = %s")
+            params.append(fecha)
+        
+        # Filtro por rango de fechas
+        if fecha_inicio:
+            conditions.append("a.fecha >= %s")
+            params.append(fecha_inicio)
+        
+        if fecha_fin:
+            conditions.append("a.fecha <= %s")
+            params.append(fecha_fin)
         
         # Construir query completa
         query = base_select

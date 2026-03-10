@@ -170,32 +170,51 @@
             <!-- Separador visual -->
             <div class="apple-filters-divider"></div>
 
-            <!-- Filtros de tipo -->
+            <!-- Filtros de tipo con contadores -->
             <div class="apple-type-filters-inline">
               <button 
-                v-for="tipo in tiposFiltro" 
-                :key="tipo.value"
-                @click="seleccionarTipo(tipo.value)" 
-                :class="['apple-type-chip', { 'active': filtroTipo === tipo.value }]"
+                @click="seleccionarTipo('todas')" 
+                :class="['apple-type-chip', { 'active': filtroTipo === 'todas' }]"
               >
-                <svg v-if="tipo.value === 'todas'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round"/>
                 </svg>
-                <svg v-else-if="tipo.value === 'entradas'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <span>Todas ({{ conteoTipos.todas }})</span>
+              </button>
+              
+              <button 
+                @click="seleccionarTipo('entradas')" 
+                :class="['apple-type-chip', { 'active': filtroTipo === 'entradas' }]"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <polyline points="10 17 15 12 10 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <line x1="15" y1="12" x2="3" y2="12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <svg v-else-if="tipo.value === 'salidas'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <span>Pendientes ({{ conteoTipos.soloEntradas }})</span>
+              </button>
+              
+              <button 
+                @click="seleccionarTipo('salidas')" 
+                :class="['apple-type-chip', { 'active': filtroTipo === 'salidas' }]"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <polyline points="16 17 21 12 16 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <line x1="21" y1="12" x2="9" y2="12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <span>Con Salida ({{ conteoTipos.conSalidas }})</span>
+              </button>
+              
+              <button 
+                @click="seleccionarTipo('completas')" 
+                :class="['apple-type-chip', { 'active': filtroTipo === 'completas' }]"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <polyline points="22 4 12 14.01 9 11.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span>{{ tipo.label }}</span>
+                <span>Completas ({{ conteoTipos.completas }})</span>
               </button>
             </div>
           </div>
@@ -206,7 +225,13 @@
       <div class="apple-content-wrapper">
         <!-- ================== TABLE APPLE STYLE ================== -->
         <div class="apple-table-container">
-          <div v-if="loading && asistencias.length === 0" class="apple-loading">
+          <!-- Indicador de búsqueda en backend -->
+          <div v-if="buscandoUsuario" class="apple-searching">
+            <div class="apple-spinner"></div>
+            <p>Buscando en base de datos...</p>
+          </div>
+
+          <div v-else-if="loading && asistencias.length === 0" class="apple-loading">
             <div class="apple-spinner"></div>
             <p>Cargando asistencias...</p>
           </div>
@@ -233,6 +258,18 @@
           </div>
 
           <div v-else class="apple-table-wrapper">
+            <!-- Indicador de resultados -->
+            <div v-if="searchTerm && searchTerm.length >= 3" class="apple-results-indicator">
+              <span class="apple-results-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14">
+                  <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                  <path d="m21 21-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                {{ asistenciasFiltradas.length }} resultado{{ asistenciasFiltradas.length !== 1 ? 's' : '' }} encontrado{{ asistenciasFiltradas.length !== 1 ? 's' : '' }}
+                <button @click="limpiarBusqueda" class="apple-clear-search-btn">Ver todos</button>
+              </span>
+            </div>
+            
             <table class="apple-table">
               <thead>
                 <tr>
@@ -592,6 +629,14 @@ export default {
       // Usar valor animado de tiempo real
       return this.animatedPresentes || 0
     },
+    // Contadores de tipos de asistencia
+    conteoTipos() {
+      const todas = this.asistencias.length
+      const soloEntradas = this.asistencias.filter(a => a.hora_entrada && !a.hora_salida).length
+      const conSalidas = this.asistencias.filter(a => a.hora_salida).length
+      const completas = this.asistencias.filter(a => a.hora_entrada && a.hora_salida).length
+      return { todas, soloEntradas, conSalidas, completas }
+    },
     totalPaginas() {
       return Math.ceil(this.asistenciasFiltradas.length / this.asistenciasPorPagina)
     },
@@ -635,9 +680,6 @@ export default {
         this.asistenciasOriginales = [...asistencias] // Guardar copia original
         this.hayMasRegistros = asistencias.length === this.registrosCargados
         this.filtrarAsistencias()
-        
-        console.timeEnd('⚡ Carga total de asistencias')
-        console.log(`✅ ${asistencias.length} asistencias cargadas con éxito`)
       } catch (error) {
         console.error('Error al cargar asistencias:', error)
         this.error = 'Error al cargar las asistencias. Por favor, intenta de nuevo.'
@@ -653,15 +695,11 @@ export default {
       
       try {
         this.registrosCargados += this.registrosPorCarga
-        console.log(`📥 Cargando más asistencias... Total: ${this.registrosCargados}`)
-        
         const asistencias = await AsistenciasService.obtenerAsistenciasConUsuarios(this.registrosCargados)
         
         this.asistencias = asistencias
         this.hayMasRegistros = asistencias.length === this.registrosCargados
         this.filtrarAsistencias()
-        
-        console.log(`✅ ${asistencias.length} asistencias totales cargadas`)
       } catch (error) {
         console.error('Error al cargar más asistencias:', error)
         this.error = 'Error al cargar más registros. Por favor, intenta de nuevo.'
@@ -720,65 +758,150 @@ export default {
       if (this.filtroTipo && this.filtroTipo !== 'todas') {
         switch (this.filtroTipo) {
           case 'entradas':
-            // Solo registros que tienen entrada pero NO salida
             filtradas = filtradas.filter(a => a.hora_entrada && !a.hora_salida)
             break
           case 'salidas':
-            // Solo registros que tienen salida (con o sin entrada)
             filtradas = filtradas.filter(a => a.hora_salida)
             break
           case 'completas':
-            // Solo registros que tienen AMBOS: entrada Y salida
             filtradas = filtradas.filter(a => a.hora_entrada && a.hora_salida)
             break
         }
       }
 
-      // ========== FILTRO POR FECHA ==========
-      if (this.filtroRapido) {
-        const hoy = new Date()
-        hoy.setHours(0, 0, 0, 0)
-        
-        switch (this.filtroRapido) {
-          case 'hoy':
-            const fechaHoy = hoy.toISOString().split('T')[0]
-            filtradas = filtradas.filter(a => a.fecha === fechaHoy)
-            break
-          case 'ayer':
-            const ayer = new Date(hoy)
-            ayer.setDate(ayer.getDate() - 1)
-            const fechaAyer = ayer.toISOString().split('T')[0]
-            filtradas = filtradas.filter(a => a.fecha === fechaAyer)
-            break
-          case 'semana':
-            const inicioSemana = new Date(hoy)
-            inicioSemana.setDate(hoy.getDate() - hoy.getDay())
-            filtradas = filtradas.filter(a => {
-              const fecha = new Date(a.fecha)
-              return fecha >= inicioSemana && fecha <= hoy
-            })
-            break
-          case 'mes':
-            const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
-            filtradas = filtradas.filter(a => {
-              const fecha = new Date(a.fecha)
-              return fecha >= inicioMes && fecha <= hoy
-            })
-            break
-        }
-      }
+      // ========== FILTRO POR FECHA (solo aplica si no se cargó desde backend) ==========
+      // Los filtros de fecha ahora cargan directamente del backend via seleccionarFechaRapida()
+      // Este filtro local es solo backup/fallback
 
       this.asistenciasFiltradas = filtradas
       this.paginaActual = 1
     },
     
-    seleccionarFechaRapida(tipo) {
-      this.filtroRapido = this.filtroRapido === tipo ? '' : tipo
-      this.filtrarAsistencias()
+    async seleccionarFechaRapida(tipo) {
+      // Toggle del filtro
+      if (this.filtroRapido === tipo) {
+        this.filtroRapido = ''
+        // Restaurar datos originales
+        if (this.asistenciasOriginales.length > 0) {
+          this.asistencias = [...this.asistenciasOriginales]
+        }
+        this.filtrarAsistencias()
+        return
+      }
+      
+      this.filtroRapido = tipo
+      this.buscandoUsuario = true
+      
+      try {
+        const hoy = new Date()
+        hoy.setHours(0, 0, 0, 0)
+        
+        let fechaParam = ''
+        let fechaInicioParam = ''
+        let fechaFinParam = ''
+        
+        switch (tipo) {
+          case 'hoy':
+            fechaParam = hoy.toISOString().split('T')[0]
+            break
+          case 'ayer':
+            const ayer = new Date(hoy)
+            ayer.setDate(ayer.getDate() - 1)
+            fechaParam = ayer.toISOString().split('T')[0]
+            break
+          case 'semana':
+            const inicioSemana = new Date(hoy)
+            inicioSemana.setDate(hoy.getDate() - hoy.getDay())
+            fechaInicioParam = inicioSemana.toISOString().split('T')[0]
+            fechaFinParam = hoy.toISOString().split('T')[0]
+            break
+          case 'mes':
+            const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+            fechaInicioParam = inicioMes.toISOString().split('T')[0]
+            fechaFinParam = hoy.toISOString().split('T')[0]
+            break
+        }
+        
+        // Construir URL con parámetros de fecha
+        let url = `${API_URL}/asistencias?`
+        if (fechaParam) {
+          url += `fecha=${fechaParam}`
+        } else if (fechaInicioParam && fechaFinParam) {
+          url += `fecha_inicio=${fechaInicioParam}&fecha_fin=${fechaFinParam}`
+        }
+        
+        const response = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          const asistenciasRaw = data.asistencias || []
+          
+          // Cargar usuarios para enriquecer datos
+          const usuarios = await this.obtenerUsuariosCache()
+          const usuariosMap = new Map(usuarios.map(u => [u.id, u]))
+          
+          // Función helper para construir URL de foto
+          const construirUrlFoto = (rutaFoto) => {
+            if (!rutaFoto) return null
+            if (rutaFoto.startsWith('http://') || rutaFoto.startsWith('https://')) {
+              return rutaFoto
+            }
+            let rutaLimpia = rutaFoto
+            if (!rutaLimpia.startsWith('fotos/')) {
+              if (!rutaLimpia.includes('/')) {
+                rutaLimpia = `fotos/${rutaLimpia}`
+              }
+            }
+            return `${API_URL}/${rutaLimpia}`
+          }
+          
+          // Enriquecer asistencias
+          const asistenciasEnriquecidas = asistenciasRaw.map(a => {
+            const usuario = usuariosMap.get(a.usuario_id)
+            return {
+              ...a,
+              nombre_usuario: usuario?.nombre_completo || 'Usuario no encontrado',
+              correo_usuario: usuario?.correo || 'N/A',
+              cargo_usuario: usuario?.cargo || 'N/A',
+              curp_usuario: usuario?.curp || null,
+              foto_entrada_url: construirUrlFoto(a.foto_entrada_url),
+              foto_salida_url: construirUrlFoto(a.foto_salida_url)
+            }
+          })
+          
+          this.asistencias = asistenciasEnriquecidas
+          this.filtrarAsistencias()
+        }
+      } catch (error) {
+        console.error('Error cargando por fecha:', error)
+        // Fallback a filtro local
+        this.filtrarAsistencias()
+      } finally {
+        this.buscandoUsuario = false
+      }
+    },
+    
+    async obtenerUsuariosCache() {
+      // Intentar del caché del servicio o cargar
+      try {
+        const response = await fetch(`${API_URL}/usuarios`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
+        })
+        if (response.ok) {
+          const data = await response.json()
+          return data.usuarios || []
+        }
+      } catch (e) {
+        console.warn('Error cargando usuarios:', e)
+      }
+      return []
     },
     
     limpiarBusqueda() {
       this.searchTerm = ''
+      this.filtroRapido = ''
       // Restaurar asistencias originales si hay respaldo
       if (this.asistenciasOriginales.length > 0) {
         this.asistencias = [...this.asistenciasOriginales]
@@ -830,22 +953,21 @@ export default {
       
       const termino = this.searchTerm?.trim() || ''
       
-      // Si el término tiene 3+ caracteres, buscar en backend con debounce
+      // SIEMPRE hacer filtro local INMEDIATO para respuesta instantánea
+      this.filtrarAsistencias()
+      
+      // Si el término tiene 3+ caracteres, buscar en backend con debounce RÁPIDO
       if (termino.length >= 3) {
-        console.log(`⏳ Preparando búsqueda backend para: "${termino}"`)
         this.busquedaTimeout = setTimeout(async () => {
-          console.log(`🚀 Ejecutando búsqueda backend para: "${termino}"`)
           await this.buscarUsuarioEnBackend(termino)
-        }, 500) // Esperar 500ms después de que el usuario deje de escribir
+        }, 300) // Solo 300ms de espera
       } else if (termino.length === 0) {
         // Si se borra la búsqueda, restaurar asistencias originales
-        console.log('🔄 Búsqueda vacía, restaurando asistencias originales...')
-        this.asistencias = [...this.asistenciasOriginales]
-        this.filtrarAsistencias()
-      } else {
-        // Si es menos de 3 caracteres, solo filtrar localmente
-        console.log(`📝 Búsqueda corta (${termino.length} caracteres), filtro local`)
-        this.filtrarAsistencias()
+        if (this.asistenciasOriginales.length > 0) {
+          this.asistencias = [...this.asistenciasOriginales]
+          this.filtroRapido = '' // Limpiar filtro de fecha también
+          this.filtrarAsistencias()
+        }
       }
     },
     
@@ -857,9 +979,6 @@ export default {
       try {
         const token = localStorage.getItem('admin_token')
         const terminoLimpio = termino.trim()
-        
-        console.log(`\n🔍 ===== BÚSQUEDA DE ASISTENCIAS =====`)
-        console.log(`📝 Término de búsqueda: "${terminoLimpio}"`)
         
         // Buscar usuarios que coincidan con el término
         const response = await fetch(`${API_URL}/api/buscar-usuarios?nombre=${encodeURIComponent(terminoLimpio)}&correo=${encodeURIComponent(terminoLimpio)}&curp=${encodeURIComponent(terminoLimpio)}`, {
@@ -873,24 +992,11 @@ export default {
         const data = await response.json()
         const usuariosEncontrados = data.usuarios || []
         
-        console.log(`✅ Usuarios encontrados: ${usuariosEncontrados.length}`)
-        
         if (usuariosEncontrados.length === 0) {
-          console.log('❌ No se encontraron usuarios con ese criterio')
           this.asistencias = []
           this.filtrarAsistencias()
           return
         }
-        
-        // Mostrar usuarios encontrados
-        usuariosEncontrados.forEach((u, i) => {
-          console.log(`   👤 ${i + 1}. ID: ${u.id} | Nombre: ${u.nombre_completo} | CURP: ${u.curp || 'N/A'}`)
-        })
-        
-        // Cargar asistencias de cada usuario encontrado
-        console.log(`\n📥 Cargando asistencias de ${usuariosEncontrados.length} usuario(s)...`)
-        
-        let todasAsistencias = []
         
         // Función helper para construir URL de foto
         const construirUrlFoto = (rutaFoto) => {
@@ -907,15 +1013,16 @@ export default {
           return `${API_URL}/${rutaLimpia}`
         }
         
-        for (const usuario of usuariosEncontrados) {
+        // Cargar asistencias en PARALELO para mayor velocidad
+        const promesas = usuariosEncontrados.map(async (usuario) => {
           if (usuario.id) {
-            const asistResponse = await fetch(`${API_URL}/asistencias?usuario_id=${usuario.id}&limit=100`, {
+            const asistResponse = await fetch(`${API_URL}/asistencias?usuario_id=${usuario.id}`, {
               headers: { 'Authorization': `Bearer ${token}` }
             })
             
             if (asistResponse.ok) {
               const asistData = await asistResponse.json()
-              const asistenciasUsuario = (asistData.asistencias || []).map(a => ({
+              return (asistData.asistencias || []).map(a => ({
                 ...a,
                 nombre_usuario: usuario.nombre_completo || 'N/A',
                 correo_usuario: usuario.correo || 'N/A',
@@ -924,23 +1031,23 @@ export default {
                 foto_entrada_url: construirUrlFoto(a.foto_entrada_url),
                 foto_salida_url: construirUrlFoto(a.foto_salida_url)
               }))
-              
-              todasAsistencias = [...todasAsistencias, ...asistenciasUsuario]
-              console.log(`   ✅ ${asistenciasUsuario.length} asistencias de ${usuario.nombre_completo}`)
             }
           }
-        }
+          return []
+        })
+        
+        // Esperar todas las promesas en paralelo
+        const resultados = await Promise.all(promesas)
+        const todasAsistencias = resultados.flat()
         
         // Ordenar por fecha descendente
         todasAsistencias.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
         
-        console.log(`\n✅ Total asistencias encontradas: ${todasAsistencias.length}`)
         this.asistencias = todasAsistencias
         this.filtrarAsistencias()
         
       } catch (error) {
-        console.error('❌ Error en búsqueda:', error)
-        // En caso de error, mantener filtro local
+        console.error('Error en búsqueda:', error)
         this.filtrarAsistencias()
       } finally {
         this.buscandoUsuario = false
@@ -1922,6 +2029,48 @@ export default {
   flex-direction: column;
 }
 
+/* Indicador de resultados de búsqueda */
+.apple-results-indicator {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.04) 0%, rgba(52, 199, 89, 0.04) 100%);
+  border-bottom: 1px solid rgba(0, 122, 255, 0.08);
+}
+
+.apple-results-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #007AFF;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.12);
+}
+
+.apple-results-badge svg {
+  stroke: #007AFF;
+}
+
+.apple-clear-search-btn {
+  margin-left: 8px;
+  padding: 4px 10px;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apple-clear-search-btn:hover {
+  background: #0051D5;
+  transform: scale(1.05);
+}
+
 .apple-table-wrapper {
   overflow-y: auto;
   overflow-x: auto;
@@ -2307,13 +2456,23 @@ export default {
 /* ==================== STATES ==================== */
 .apple-loading,
 .apple-error,
-.apple-empty {
+.apple-empty,
+.apple-searching {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 80px 40px;
   text-align: center;
+}
+
+.apple-searching {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.03) 0%, rgba(52, 199, 89, 0.03) 100%);
+}
+
+.apple-searching p {
+  color: #007AFF;
+  font-weight: 600;
 }
 
 .apple-spinner {

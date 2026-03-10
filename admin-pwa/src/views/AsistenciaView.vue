@@ -85,10 +85,13 @@
           <div class="apple-search-section">
           <div class="apple-search-row">
             <div class="apple-search-container" ref="searchContainer">
-              <svg class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg v-if="!buscandoUsuario" class="apple-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="11" cy="11" r="8" stroke-width="2.5"/>
                 <path d="m21 21-4.35-4.35" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
+              <div v-else class="apple-search-loading">
+                <div class="apple-search-spinner"></div>
+              </div>
               <input 
                 ref="searchInput"
                 v-model="searchTerm" 
@@ -132,39 +135,43 @@
             </div>
           </div>
 
-          <div class="apple-quick-filters">
-            <button 
-              v-for="filter in quickFilters" 
-              :key="filter.value"
-              @click="seleccionarFechaRapida(filter.value)" 
-              :class="['apple-filter-chip', { 'active': filtroRapido === filter.value }]"
-            >
-              <svg v-if="filter.value === 'hoy'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                <path d="M12 6v6l4 2" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              <svg v-else-if="filter.value === 'ayer'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M3 3v5h5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <svg v-else-if="filter.value === 'semana'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
-                <line x1="16" y1="2" x2="16" y2="6" stroke-width="2" stroke-linecap="round"/>
-                <line x1="8" y1="2" x2="8" y2="6" stroke-width="2" stroke-linecap="round"/>
-                <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
-              </svg>
-              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
-                <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
-              </svg>
-              <span>{{ filter.label }}</span>
-            </button>
-          </div>
+          <!-- ================== FILTROS COMBINADOS: FECHA + TIPO ================== -->
+          <div class="apple-filters-row">
+            <!-- Filtros de fecha -->
+            <div class="apple-quick-filters">
+              <button 
+                v-for="filter in quickFilters" 
+                :key="filter.value"
+                @click="seleccionarFechaRapida(filter.value)" 
+                :class="['apple-filter-chip', { 'active': filtroRapido === filter.value }]"
+              >
+                <svg v-if="filter.value === 'hoy'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <path d="M12 6v6l4 2" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <svg v-else-if="filter.value === 'ayer'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3 3v5h5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg v-else-if="filter.value === 'semana'" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="8" y1="2" x2="8" y2="6" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                  <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                </svg>
+                <span>{{ filter.label }}</span>
+              </button>
+            </div>
 
-          <!-- ================== FILTROS DE TIPO ASISTENCIA ================== -->
-          <div class="apple-type-filters">
-            <span class="apple-type-label">Mostrar:</span>
-            <div class="apple-type-buttons">
+            <!-- Separador visual -->
+            <div class="apple-filters-divider"></div>
+
+            <!-- Filtros de tipo -->
+            <div class="apple-type-filters-inline">
               <button 
                 v-for="tipo in tiposFiltro" 
                 :key="tipo.value"
@@ -499,11 +506,14 @@ export default {
     return {
       asistencias: [],
       asistenciasFiltradas: [],
+      asistenciasOriginales: [], // Respaldo para restaurar al limpiar búsqueda
       searchTerm: '',
       filtroRapido: '',
       paginaActual: 1,
       asistenciasPorPagina: 50,
       totalAsistenciasServidor: 0,
+      buscandoUsuario: false,
+      busquedaTimeout: null,
       loading: false,
       error: null,
       modalVisible: false,
@@ -622,6 +632,7 @@ export default {
         const asistencias = await AsistenciasService.obtenerAsistenciasConUsuarios(this.registrosCargados)
         
         this.asistencias = asistencias
+        this.asistenciasOriginales = [...asistencias] // Guardar copia original
         this.hayMasRegistros = asistencias.length === this.registrosCargados
         this.filtrarAsistencias()
         
@@ -768,6 +779,10 @@ export default {
     
     limpiarBusqueda() {
       this.searchTerm = ''
+      // Restaurar asistencias originales si hay respaldo
+      if (this.asistenciasOriginales.length > 0) {
+        this.asistencias = [...this.asistenciasOriginales]
+      }
       this.filtrarAsistencias()
     },
     
@@ -776,6 +791,10 @@ export default {
       this.filtroRapido = ''
       this.filtroTipo = 'todas'
       this.mostrarDropdown = false
+      // Restaurar asistencias originales si hay respaldo
+      if (this.asistenciasOriginales.length > 0) {
+        this.asistencias = [...this.asistenciasOriginales]
+      }
       this.filtrarAsistencias()
     },
     
@@ -803,7 +822,129 @@ export default {
     
     onSearchInput() {
       this.actualizarPosicionDropdown()
-      this.filtrarAsistencias()
+      
+      // Limpiar timeout anterior
+      if (this.busquedaTimeout) {
+        clearTimeout(this.busquedaTimeout)
+      }
+      
+      const termino = this.searchTerm?.trim() || ''
+      
+      // Si el término tiene 3+ caracteres, buscar en backend con debounce
+      if (termino.length >= 3) {
+        console.log(`⏳ Preparando búsqueda backend para: "${termino}"`)
+        this.busquedaTimeout = setTimeout(async () => {
+          console.log(`🚀 Ejecutando búsqueda backend para: "${termino}"`)
+          await this.buscarUsuarioEnBackend(termino)
+        }, 500) // Esperar 500ms después de que el usuario deje de escribir
+      } else if (termino.length === 0) {
+        // Si se borra la búsqueda, restaurar asistencias originales
+        console.log('🔄 Búsqueda vacía, restaurando asistencias originales...')
+        this.asistencias = [...this.asistenciasOriginales]
+        this.filtrarAsistencias()
+      } else {
+        // Si es menos de 3 caracteres, solo filtrar localmente
+        console.log(`📝 Búsqueda corta (${termino.length} caracteres), filtro local`)
+        this.filtrarAsistencias()
+      }
+    },
+    
+    async buscarUsuarioEnBackend(termino) {
+      if (!termino || termino.length < 3) return
+      
+      this.buscandoUsuario = true
+      
+      try {
+        const token = localStorage.getItem('admin_token')
+        const terminoLimpio = termino.trim()
+        
+        console.log(`\n🔍 ===== BÚSQUEDA DE ASISTENCIAS =====`)
+        console.log(`📝 Término de búsqueda: "${terminoLimpio}"`)
+        
+        // Buscar usuarios que coincidan con el término
+        const response = await fetch(`${API_URL}/api/buscar-usuarios?nombre=${encodeURIComponent(terminoLimpio)}&correo=${encodeURIComponent(terminoLimpio)}&curp=${encodeURIComponent(terminoLimpio)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}`)
+        }
+        
+        const data = await response.json()
+        const usuariosEncontrados = data.usuarios || []
+        
+        console.log(`✅ Usuarios encontrados: ${usuariosEncontrados.length}`)
+        
+        if (usuariosEncontrados.length === 0) {
+          console.log('❌ No se encontraron usuarios con ese criterio')
+          this.asistencias = []
+          this.filtrarAsistencias()
+          return
+        }
+        
+        // Mostrar usuarios encontrados
+        usuariosEncontrados.forEach((u, i) => {
+          console.log(`   👤 ${i + 1}. ID: ${u.id} | Nombre: ${u.nombre_completo} | CURP: ${u.curp || 'N/A'}`)
+        })
+        
+        // Cargar asistencias de cada usuario encontrado
+        console.log(`\n📥 Cargando asistencias de ${usuariosEncontrados.length} usuario(s)...`)
+        
+        let todasAsistencias = []
+        
+        // Función helper para construir URL de foto
+        const construirUrlFoto = (rutaFoto) => {
+          if (!rutaFoto) return null
+          if (rutaFoto.startsWith('http://') || rutaFoto.startsWith('https://')) {
+            return rutaFoto
+          }
+          let rutaLimpia = rutaFoto
+          if (!rutaLimpia.startsWith('fotos/')) {
+            if (!rutaLimpia.includes('/')) {
+              rutaLimpia = `fotos/${rutaLimpia}`
+            }
+          }
+          return `${API_URL}/${rutaLimpia}`
+        }
+        
+        for (const usuario of usuariosEncontrados) {
+          if (usuario.id) {
+            const asistResponse = await fetch(`${API_URL}/asistencias?usuario_id=${usuario.id}&limit=100`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            })
+            
+            if (asistResponse.ok) {
+              const asistData = await asistResponse.json()
+              const asistenciasUsuario = (asistData.asistencias || []).map(a => ({
+                ...a,
+                nombre_usuario: usuario.nombre_completo || 'N/A',
+                correo_usuario: usuario.correo || 'N/A',
+                cargo_usuario: usuario.cargo || 'N/A',
+                curp_usuario: usuario.curp || null,
+                foto_entrada_url: construirUrlFoto(a.foto_entrada_url),
+                foto_salida_url: construirUrlFoto(a.foto_salida_url)
+              }))
+              
+              todasAsistencias = [...todasAsistencias, ...asistenciasUsuario]
+              console.log(`   ✅ ${asistenciasUsuario.length} asistencias de ${usuario.nombre_completo}`)
+            }
+          }
+        }
+        
+        // Ordenar por fecha descendente
+        todasAsistencias.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        
+        console.log(`\n✅ Total asistencias encontradas: ${todasAsistencias.length}`)
+        this.asistencias = todasAsistencias
+        this.filtrarAsistencias()
+        
+      } catch (error) {
+        console.error('❌ Error en búsqueda:', error)
+        // En caso de error, mantener filtro local
+        this.filtrarAsistencias()
+      } finally {
+        this.buscandoUsuario = false
+      }
     },
     
     actualizarPosicionDropdown() {
@@ -1308,6 +1449,30 @@ export default {
   z-index: 1;
 }
 
+/* Loading spinner para búsqueda */
+.apple-search-loading {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  z-index: 1;
+}
+
+.apple-search-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0, 122, 255, 0.2);
+  border-top-color: #007AFF;
+  border-radius: 50%;
+  animation: search-spin 0.8s linear infinite;
+}
+
+@keyframes search-spin {
+  to { transform: rotate(360deg); }
+}
+
 .apple-search-input {
   width: 100%;
   height: 38px;
@@ -1653,16 +1818,28 @@ export default {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
-/* ==================== FILTROS DE TIPO ==================== */
-.apple-type-filters {
+/* ==================== FILA COMBINADA DE FILTROS ==================== */
+.apple-filters-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
+.apple-filters-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.apple-type-filters-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Para mantener compatibilidad con estilos existentes */
 .apple-type-label {
   font-size: 12px;
   font-weight: 600;
@@ -2421,6 +2598,23 @@ export default {
     justify-content: space-between;
   }
   
+  /* Filtros combinados responsivos */
+  .apple-filters-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-top: 8px;
+  }
+  
+  .apple-filters-divider {
+    display: none;
+  }
+  
+  .apple-quick-filters,
+  .apple-type-filters-inline {
+    width: 100%;
+  }
+  
   .apple-type-filters {
     flex-direction: column;
     align-items: flex-start;
@@ -2431,6 +2625,7 @@ export default {
     width: 100%;
   }
   
+  .apple-filter-chip,
   .apple-type-chip {
     padding: 6px 10px;
     font-size: 11px;
@@ -2438,6 +2633,7 @@ export default {
     justify-content: center;
   }
   
+  .apple-filter-chip svg,
   .apple-type-chip svg {
     width: 12px;
     height: 12px;

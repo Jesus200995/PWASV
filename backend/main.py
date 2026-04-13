@@ -305,7 +305,51 @@ try:
         print("✅ Migración de columna territorio verificada")
     except Exception as e:
         print(f"⚠️ Error en migración de territorio: {e}")
-    
+
+    # ===== MIGRACIÓN: usuario_id en admin_users (vínculo con tabla usuarios) =====
+    try:
+        ejecutar_consulta_segura("""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name='admin_users' AND column_name='usuario_id'
+                ) THEN
+                    ALTER TABLE admin_users ADD COLUMN usuario_id INTEGER REFERENCES usuarios(id);
+                    RAISE NOTICE 'Columna usuario_id agregada a admin_users';
+                END IF;
+            END $$;
+        """, fetch_type='none')
+        print("✅ Migración usuario_id en admin_users verificada")
+    except Exception as e:
+        print(f"⚠️ Error en migración usuario_id: {e}")
+
+    # ===== MIGRACIÓN: Tabla facilitador_tecnico_asignaciones =====
+    try:
+        ejecutar_consulta_segura("""
+            CREATE TABLE IF NOT EXISTS facilitador_tecnico_asignaciones (
+                id                       BIGSERIAL PRIMARY KEY,
+                facilitador_usuario_id   INTEGER NOT NULL REFERENCES usuarios(id),
+                tecnico_usuario_id       INTEGER NOT NULL REFERENCES usuarios(id),
+                origen                   VARCHAR(10) NOT NULL DEFAULT 'csv'
+                                             CHECK (origen IN ('csv', 'manual')),
+                activo                   BOOLEAN NOT NULL DEFAULT TRUE,
+                created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                created_by_admin_user_id INTEGER REFERENCES admin_users(id),
+                UNIQUE (facilitador_usuario_id, tecnico_usuario_id)
+            );
+        """, fetch_type='none')
+        ejecutar_consulta_segura("""
+            CREATE INDEX IF NOT EXISTS idx_fta_facilitador
+                ON facilitador_tecnico_asignaciones(facilitador_usuario_id) WHERE activo = TRUE;
+            CREATE INDEX IF NOT EXISTS idx_fta_tecnico
+                ON facilitador_tecnico_asignaciones(tecnico_usuario_id) WHERE activo = TRUE;
+        """, fetch_type='none')
+        print("✅ Tabla facilitador_tecnico_asignaciones verificada")
+    except Exception as e:
+        print(f"⚠️ Error en migración facilitador_tecnico_asignaciones: {e}")
+
 except Exception as e:
     print(f"❌ Error en inicialización de base de datos: {e}")
     conn = None
@@ -2279,96 +2323,292 @@ async def descargar_reporte(reporte_id: int):
 # ============================================
 
 class FirmaReporteRequest(BaseModel):
-    supervisor_id: int
-    nombre_supervisor: str
-    firma_base64: Optional[str] = None  # Firma digital opcional
+    supervisor_id: int = 0          # mantenido por compatibilidad, se ignora si el firmante es facilitador
+    nombre_supervisor: str = ""     # idem, se ignora si el firmante es facilitador
+    firma_base64: Optional[str] = None
+    admin_id: Optional[int] = None  # ID del admin firmante para validación de facilitador
 
 @app.post("/reportes/firmar/{reporte_id}")
 async def firmar_reporte_supervisor(reporte_id: int, firma_data: FirmaReporteRequest):
     """
-    Permite a un supervisor firmar un reporte.
-    Una vez firmado, el reporte no puede ser eliminado por el usuario.
-    Actualiza el PDF agregando la firma del supervisor en la sección 'Autorizó'.
+    Permite firmar un reporte.
+    - Si admin_id tiene permiso 'firmas' → flujo facilitador (validación BD estricta)
+    - Si no → flujo legacy supervisor (sin cambios)
     """
     try:
-        # Verificar conexión a la base de datos
         verificar_conexion_db()
-        
-        print(f"✍️ [FIRMA] Firmando reporte ID: {reporte_id}")
-        print(f"   Supervisor: {firma_data.nombre_supervisor} (ID: {firma_data.supervisor_id})")
-        
-        # Verificar que el reporte existe y obtener datos actuales
+        print(f"✍️ [FIRMA] Firmando reporte ID: {reporte_id}, admin_id: {firma_data.admin_id}")
+
+        # ─── Flujo Facilitador ───────────────────────────────────────
+        if firma_data.admin_id:
+            cursor.execute(
+                "SELECT id, usuario_id, permisos, nombre_completo FROM admin_users WHERE id = %s AND activo = TRUE",
+                (firma_data.admin_id,)
+            )
+            admin = cursor.fetchone()
+            if not admin:
+                raise HTTPException(status_code=403, detail="Acceso denegado: usuario no encontrado")
+
+            admin_db_id, usuario_id, permisos_raw, nombre_admin = admin
+
+            # Verificar permiso 'firmas'
+            import json as _json
+            permisos = {}
+            if permisos_raw:
+                try:
+                    permisos = _json.loads(permisos_raw)
+                except Exception:
+                    pass
+
+            # Si no tiene permiso firmas y tampoco es admin, rechazar
+            es_admin_rol = False
+            cursor.execute("SELECT rol FROM admin_users WHERE id=%s", (admin_db_id,))
+            rol_row = cursor.fetchone()
+            if rol_row and rol_row[0] == 'admin':
+                es_admin_rol = True
+
+            if not permisos.get('firmas') and not es_admin_rol:
+                raise HTTPException(status_code=403, detail="No tienes permiso para firmar reportes")
+
+            if permisos.get('firmas') and not es_admin_rol:
+                # Es facilitador: validar usuario_id y asignación
+                if not usuario_id:
+                    raise HTTPException(status_code=403, detail="Cuenta de facilitador no vinculada a un usuario del sistema")
+
+                # Verificar cargo FACILITADOR COMUNITARIO en tabla usuarios
+                cursor.execute("SELECT cargo FROM usuarios WHERE id = %s", (usuario_id,))
+                u_row = cursor.fetchone()
+                if not u_row or 'FACILITADOR' not in (u_row[0] or '').upper():
+                    raise HTTPException(status_code=403, detail="El usuario vinculado no tiene el cargo de FACILITADOR COMUNITARIO")
+
+                # Obtener usuario_id del técnico del reporte
+                cursor.execute("SELECT usuario_id FROM reportes_generados WHERE id = %s", (reporte_id,))
+                rep = cursor.fetchone()
+                if not rep:
+                    raise HTTPException(status_code=404, detail="Reporte no encontrado")
+                tecnico_uid = rep[0]
+
+                # Verificar asignación activa
+                cursor.execute("""
+                    SELECT 1 FROM facilitador_tecnico_asignaciones
+                    WHERE facilitador_usuario_id = %s
+                      AND tecnico_usuario_id = %s
+                      AND activo = TRUE
+                """, (usuario_id, tecnico_uid))
+                if not cursor.fetchone():
+                    raise HTTPException(
+                        status_code=403,
+                        detail="No tienes asignado a este técnico para firmar sus reportes"
+                    )
+
+                # Obtener nombre completo del facilitador desde tabla usuarios
+                cursor.execute("SELECT nombre_completo FROM usuarios WHERE id = %s", (usuario_id,))
+                u = cursor.fetchone()
+                nombre_firmante = u[0] if u else nombre_admin
+                id_firmante = usuario_id
+            else:
+                # Admin total: usa datos del payload legacy
+                nombre_firmante = firma_data.nombre_supervisor or nombre_admin
+                id_firmante = usuario_id or firma_data.supervisor_id
+        else:
+            # ─── Flujo Legacy (supervisor territorial) ──────────────
+            nombre_firmante = firma_data.nombre_supervisor
+            id_firmante = firma_data.supervisor_id
+
+        # ─── Verificar y firmar reporte ──────────────────────────────
         cursor.execute("""
-            SELECT 
-                id,
-                nombre_reporte,
-                pdf_base64,
-                COALESCE(firmado_supervisor, false) as firmado_supervisor,
-                usuario_id
-            FROM reportes_generados
-            WHERE id = %s
+            SELECT id, nombre_reporte, pdf_base64,
+                   COALESCE(firmado_supervisor, false), usuario_id
+            FROM reportes_generados WHERE id = %s
         """, (reporte_id,))
-        
         reporte = cursor.fetchone()
-        
+
         if not reporte:
             raise HTTPException(status_code=404, detail="Reporte no encontrado")
-        
-        # Verificar si ya está firmado
         if reporte[3]:
-            raise HTTPException(status_code=400, detail="Este reporte ya ha sido firmado por un supervisor")
-        
-        # Obtener zona horaria de CDMX
+            raise HTTPException(status_code=400, detail="Este reporte ya ha sido firmado")
+
         from zoneinfo import ZoneInfo
-        cdmx_tz = ZoneInfo("America/Mexico_City")
-        fecha_firma = datetime.now(cdmx_tz)
-        
-        # Actualizar el reporte con la firma
-        update_query = """
-            UPDATE reportes_generados
-            SET 
-                firmado_supervisor = TRUE,
-                fecha_firma_supervisor = %s,
-                firma_supervisor_base64 = %s,
-                nombre_supervisor = %s,
-                supervisor_id = %s
+        fecha_firma = datetime.now(ZoneInfo("America/Mexico_City"))
+
+        cursor.execute("""
+            UPDATE reportes_generados SET
+                firmado_supervisor       = TRUE,
+                fecha_firma_supervisor   = %s,
+                firma_supervisor_base64  = %s,
+                nombre_supervisor        = %s,
+                supervisor_id            = %s
             WHERE id = %s
-        """
-        
-        cursor.execute(update_query, (
-            fecha_firma,
-            firma_data.firma_base64,
-            firma_data.nombre_supervisor,
-            firma_data.supervisor_id,
-            reporte_id
-        ))
-        
-        rows_affected = cursor.rowcount
-        conn.commit()
-        
-        if rows_affected == 0:
+        """, (fecha_firma, firma_data.firma_base64, nombre_firmante, id_firmante, reporte_id))
+
+        if cursor.rowcount == 0:
             raise HTTPException(status_code=500, detail="No se pudo actualizar el reporte")
-        
-        print(f"✅ Reporte firmado exitosamente por {firma_data.nombre_supervisor}")
-        
+
+        conn.commit()
+        print(f"✅ Reporte {reporte_id} firmado por {nombre_firmante}")
         return {
             "success": True,
-            "message": f"Reporte firmado exitosamente por {firma_data.nombre_supervisor}",
+            "message": f"Reporte firmado exitosamente por {nombre_firmante}",
             "data": {
                 "reporte_id": reporte_id,
                 "firmado_supervisor": True,
                 "fecha_firma": fecha_firma.isoformat(),
-                "nombre_supervisor": firma_data.nombre_supervisor,
-                "supervisor_id": firma_data.supervisor_id
+                "nombre_supervisor": nombre_firmante,
+                "supervisor_id": id_firmante
             }
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
         conn.rollback()
         print(f"❌ Error firmando reporte: {e}")
         raise HTTPException(status_code=500, detail=f"Error al firmar el reporte: {str(e)}")
+
+# ============================================================
+# ENDPOINTS FACILITADORES
+# ============================================================
+
+@app.get("/reportes/facilitador/mis-reportes")
+async def mis_reportes_facilitador(
+    admin_id: int,
+    estado: Optional[str] = None,
+    limite: int = 50,
+    offset: int = 0
+):
+    """
+    Lista los reportes de los técnicos asignados al facilitador autenticado.
+    estado: 'pendiente' | 'firmado' | None (todos)
+    """
+    try:
+        verificar_conexion_db()
+        # Obtener usuario_id del facilitador
+        cursor.execute(
+            "SELECT usuario_id, nombre_completo FROM admin_users WHERE id = %s AND activo = TRUE",
+            (admin_id,)
+        )
+        row = cursor.fetchone()
+        if not row or not row[0]:
+            raise HTTPException(status_code=403, detail="Facilitador no vinculado a un usuario del sistema")
+        facilitador_uid, facilitador_nombre = row
+
+        # Construir filtro de estado
+        estado_filter = ""
+        if estado == 'pendiente':
+            estado_filter = "AND COALESCE(r.firmado_supervisor, FALSE) = FALSE"
+        elif estado == 'firmado':
+            estado_filter = "AND COALESCE(r.firmado_supervisor, FALSE) = TRUE"
+
+        query = f"""
+            SELECT
+                r.id,
+                r.nombre_reporte,
+                r.fecha_generado,
+                COALESCE(r.firmado_supervisor, FALSE) as firmado,
+                r.fecha_firma_supervisor,
+                r.nombre_supervisor,
+                u.nombre_completo as tecnico_nombre,
+                u.cargo as tecnico_cargo,
+                u.territorio as tecnico_territorio
+            FROM reportes_generados r
+            JOIN facilitador_tecnico_asignaciones fta
+                ON fta.tecnico_usuario_id = r.usuario_id
+                AND fta.facilitador_usuario_id = %s
+                AND fta.activo = TRUE
+            JOIN usuarios u ON u.id = r.usuario_id
+            WHERE r.activo = TRUE
+            {estado_filter}
+            ORDER BY r.fecha_generado DESC
+            LIMIT %s OFFSET %s
+        """
+        cursor.execute(query, (facilitador_uid, limite, offset))
+        rows = cursor.fetchall()
+
+        reportes = []
+        for r in rows:
+            reportes.append({
+                "id": r[0],
+                "nombre_reporte": r[1],
+                "fecha_generado": r[2].isoformat() if r[2] else None,
+                "firmado_supervisor": r[3],
+                "fecha_firma_supervisor": r[4].isoformat() if r[4] else None,
+                "nombre_supervisor": r[5],
+                "tecnico_nombre": r[6],
+                "tecnico_cargo": r[7],
+                "tecnico_territorio": r[8]
+            })
+
+        # Contar totales para paginación
+        count_query = f"""
+            SELECT COUNT(*)
+            FROM reportes_generados r
+            JOIN facilitador_tecnico_asignaciones fta
+                ON fta.tecnico_usuario_id = r.usuario_id
+                AND fta.facilitador_usuario_id = %s
+                AND fta.activo = TRUE
+            WHERE r.activo = TRUE {estado_filter}
+        """
+        cursor.execute(count_query, (facilitador_uid,))
+        total = cursor.fetchone()[0]
+
+        return {
+            "success": True,
+            "reportes": reportes,
+            "total": total,
+            "limite": limite,
+            "offset": offset,
+            "facilitador": facilitador_nombre
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en mis-reportes: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/facilitadores/mis-tecnicos")
+async def mis_tecnicos_facilitador(admin_id: int):
+    """
+    Lista los técnicos asignados al facilitador.
+    """
+    try:
+        verificar_conexion_db()
+        cursor.execute(
+            "SELECT usuario_id FROM admin_users WHERE id = %s AND activo = TRUE",
+            (admin_id,)
+        )
+        row = cursor.fetchone()
+        if not row or not row[0]:
+            raise HTTPException(status_code=403, detail="Facilitador no vinculado")
+        facilitador_uid = row[0]
+
+        cursor.execute("""
+            SELECT
+                u.id, u.nombre_completo, u.cargo, u.territorio, u.curp,
+                fta.origen, fta.created_at
+            FROM facilitador_tecnico_asignaciones fta
+            JOIN usuarios u ON u.id = fta.tecnico_usuario_id
+            WHERE fta.facilitador_usuario_id = %s AND fta.activo = TRUE
+            ORDER BY u.nombre_completo
+        """, (facilitador_uid,))
+        rows = cursor.fetchall()
+
+        tecnicos = [{
+            "id": r[0],
+            "nombre_completo": r[1],
+            "cargo": r[2],
+            "territorio": r[3],
+            "curp": r[4],
+            "origen": r[5],
+            "asignado_desde": r[6].isoformat() if r[6] else None
+        } for r in rows]
+
+        return {"success": True, "tecnicos": tecnicos, "total": len(tecnicos)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.delete("/reportes/quitar-firma/{reporte_id}")
 async def quitar_firma_reporte(reporte_id: int, supervisor_id: int):

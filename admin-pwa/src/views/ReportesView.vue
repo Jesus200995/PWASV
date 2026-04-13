@@ -337,7 +337,7 @@
                   </th>
                   <th>Estado</th>
                   <th>Usuario</th>
-                  <th>Territorio</th>
+                  <th>Facilitador</th>
                   <th>Reporte</th>
                   <th>Período</th>
                   <th>Fecha</th>
@@ -359,13 +359,13 @@
                     >
                   </td>
                   <td>
-                    <div v-if="reporte.firmado_supervisor" class="apple-status-badge firmado" :title="'Firmado por ' + reporte.nombre_supervisor">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M9 12l2 2 4-4" stroke-width="2.5"/>
-                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                      </svg>
-                      <span>Firmado</span>
-                    </div>
+                      <div v-if="reporte.firmado_supervisor" class="apple-status-badge firmado" :title="'Firmado por ' + reporte.nombre_supervisor">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M9 12l2 2 4-4" stroke-width="2.5"/>
+                          <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        </svg>
+                        <span>Firmado</span>
+                      </div>
                     <div v-else class="apple-status-badge pendiente">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <circle cx="12" cy="12" r="10" stroke-width="2"/>
@@ -389,7 +389,7 @@
                     </div>
                   </td>
                   <td>
-                    <span :class="['apple-territorio-badge', `territorio-${obtenerColorTerritorio(reporte.usuario?.territorio)}`]">{{ reporte.usuario?.territorio || 'Sin territorio' }}</span>
+                    <span class="apple-territorio-badge" style="background:#f0fdf4;color:#166534;border-color:#86efac;">{{ reporte.facilitador_nombre || 'Sin asignar' }}</span>
                   </td>
                   <td>
                     <div class="apple-reporte-info">

@@ -313,9 +313,9 @@
                     </svg>
                     <span>Estado de firma</span>
                   </div>
-                  <div class="apple-status-pill apple-pill-sm" :class="reporteExistente.firmado_territorial ? 'apple-pill-green' : 'apple-pill-blue'">
+                  <div class="apple-status-pill apple-pill-sm" :class="reporteExistente.firmado_supervisor ? 'apple-pill-green' : 'apple-pill-blue'">
                     <div class="apple-pill-dot"></div>
-                    <span>{{ reporteExistente.firmado_territorial ? 'Firmado' : 'Pendiente' }}</span>
+                    <span>{{ reporteExistente.firmado_supervisor ? 'Firmado' : 'Pendiente' }}</span>
                   </div>
                 </div>
               </div>
@@ -329,11 +329,11 @@
                 </div>
                 <div class="apple-info-box-content">
                   <p class="apple-info-box-title">¿Necesitas generar uno nuevo?</p>
-                  <p class="apple-info-box-text" v-if="!reporteExistente.firmado_territorial">
+                  <p class="apple-info-box-text" v-if="!reporteExistente.firmado_supervisor">
                     Puedes eliminar este reporte desde el historial y generar uno nuevo con la información actualizada.
                   </p>
                   <p class="apple-info-box-text" v-else>
-                    Este reporte ya fue firmado por tu Territorial. Contacta con él para solicitar la eliminación y poder generar uno nuevo.
+                    Este reporte ya fue firmado por tu Facilitador. Contáctalo para solicitar la eliminación y poder generar uno nuevo.
                   </p>
                 </div>
               </div>
@@ -341,7 +341,7 @@
               <!-- Acciones -->
               <div class="apple-generated-actions">
                 <button 
-                  v-if="!reporteExistente.firmado_territorial"
+                  v-if="!reporteExistente.firmado_supervisor"
                   @click="scrollToHistorial"
                   class="apple-action-btn apple-action-secondary"
                 >
@@ -357,7 +357,7 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                   </svg>
-                  <span>Contactar Territorial</span>
+                  <span>Contactar Facilitador</span>
                 </button>
               </div>
             </div>
@@ -550,7 +550,7 @@
                     </svg>
                   </div>
                   <div class="apple-status-text">
-                    <p class="apple-status-title">{{ reporte.firmado_supervisor ? 'Firmado por supervisor' : 'Pendiente de firma' }}</p>
+                    <p class="apple-status-title">{{ reporte.firmado_supervisor ? 'Firmado por facilitador' : 'Pendiente de firma' }}</p>
                     <p class="apple-status-subtitle">{{ reporte.firmado_supervisor ? `${reporte.nombre_supervisor} • ${formatearFechaFirma(reporte.fecha_firma_supervisor)}` : 'Esperando revisión' }}</p>
                   </div>
                 </div>
@@ -1717,7 +1717,7 @@ export default {
         doc.setFontSize(7.5);
         doc.setFont(undefined, 'normal');
         doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-        doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+        doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
         
         // Nombre del supervisor/responsable (después, en negrita)
         doc.setFontSize(8);
@@ -2073,7 +2073,7 @@ export default {
             doc.setFontSize(7.5);
             doc.setFont(undefined, 'normal');
             doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-            doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+            doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
             doc.setFontSize(8);
             doc.setFont(undefined, 'bold');
             doc.text(this.usuarioInfo.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
@@ -2133,7 +2133,7 @@ export default {
           doc.setFontSize(7.5);
           doc.setFont(undefined, 'normal');
           doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-          doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+          doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.text(this.usuarioInfo.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
@@ -2936,7 +2936,7 @@ export default {
       doc.setFontSize(7.5);
       doc.setFont(undefined, 'normal');
       doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-      doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+      doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
       
       doc.setFontSize(8);
       doc.setFont(undefined, 'bold');
@@ -3253,7 +3253,7 @@ const imgGridWidth = 55;
           doc.setFontSize(7.5);
           doc.setFont(undefined, 'normal');
           doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-          doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+          doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           const nombreSupervisorFinal = nombreSupervisor || usuario.supervisor || 'Sin asignar';
@@ -3603,26 +3603,22 @@ const imgGridWidth = 55;
         // Continuar con los datos del localStorage
       }
       
-      // Si es técnico, obtener supervisor automático basado en territorio
+      // Obtener facilitador asignado (para técnicos de campo)
       const cargoUpper = (usuario.cargo || '').toUpperCase();
       if (cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') {
         try {
-          console.log('🔍 Buscando supervisor automático para técnico...');
-          const respuesta = await apiService.obtenerSupervisorAutomatico(usuario.id);
-          if (respuesta.success && respuesta.supervisor) {
-            this.usuarioInfo.supervisor = respuesta.supervisor;
-            
-            // Actualizar también el localStorage para que Profile.vue lo muestre
-            usuario.supervisor = respuesta.supervisor;
+          console.log('🔍 Buscando facilitador asignado...');
+          const respuesta = await apiService.obtenerFacilitadorAsignado(usuario.id);
+          if (respuesta.success && respuesta.facilitador_nombre) {
+            this.usuarioInfo.supervisor = respuesta.facilitador_nombre;
+            usuario.supervisor = respuesta.facilitador_nombre;
             localStorage.setItem('user', JSON.stringify(usuario));
-            
-            console.log(`✅ Supervisor automático asignado y guardado: ${respuesta.supervisor}`);
+            console.log(`✅ Facilitador asignado: ${respuesta.facilitador_nombre}`);
           } else {
-            console.log(`ℹ️ No se encontró supervisor automático: ${respuesta.mensaje}`);
+            console.log('ℹ️ Sin facilitador asignado, se mantiene el valor previo');
           }
         } catch (error) {
-          console.error('❌ Error obteniendo supervisor automático:', error);
-          // Mantener el supervisor actual si hay error
+          console.error('❌ Error obteniendo facilitador asignado:', error);
         }
       }
       

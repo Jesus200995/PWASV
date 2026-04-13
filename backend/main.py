@@ -2076,7 +2076,9 @@ async def verificar_reporte_existente(usuario_id: int, mes: str, anio: int):
         print(f"🔍 Verificando reporte existente para usuario {usuario_id}: {mes} {anio}")
         
         cursor.execute("""
-            SELECT id, nombre_reporte, fecha_generacion 
+            SELECT id, nombre_reporte, fecha_generacion,
+                   COALESCE(firmado_supervisor, false) as firmado_supervisor,
+                   nombre_supervisor
             FROM reportes_generados 
             WHERE usuario_id = %s AND mes = %s AND anio = %s
         """, (usuario_id, mes, anio))
@@ -2091,7 +2093,10 @@ async def verificar_reporte_existente(usuario_id: int, mes: str, anio: int):
                 "reporte": {
                     "id": existente[0],
                     "nombre": existente[1],
-                    "fecha_generacion": existente[2].isoformat() if existente[2] else None
+                    "fecha_generacion": existente[2].isoformat() if existente[2] else None,
+                    "firmado_supervisor": existente[3],
+                    "firmado_territorial": existente[3],  # alias para compatibilidad
+                    "nombre_supervisor": existente[4]
                 }
             }
         else:
@@ -2702,9 +2707,12 @@ async def obtener_todos_reportes_admin(
                 r.fecha_firma_supervisor,
                 r.nombre_supervisor,
                 r.supervisor_id,
-                CASE WHEN r.datos_reporte IS NOT NULL THEN true ELSE false END as tiene_datos_reporte
+                CASE WHEN r.datos_reporte IS NOT NULL THEN true ELSE false END as tiene_datos_reporte,
+                uf.nombre_completo as facilitador_nombre
             FROM reportes_generados r
             LEFT JOIN usuarios u ON r.usuario_id = u.id
+            LEFT JOIN facilitador_tecnico_asignaciones fta ON fta.tecnico_usuario_id = u.id AND fta.activo = TRUE
+            LEFT JOIN usuarios uf ON uf.id = fta.facilitador_usuario_id
             WHERE 1=1
         """
         params = []
@@ -2771,7 +2779,8 @@ async def obtener_todos_reportes_admin(
                 r.fecha_firma_supervisor,
                 r.nombre_supervisor,
                 r.supervisor_id,
-                CASE WHEN r.datos_reporte IS NOT NULL THEN true ELSE false END as tiene_datos_reporte""",
+                CASE WHEN r.datos_reporte IS NOT NULL THEN true ELSE false END as tiene_datos_reporte,
+                uf.nombre_completo as facilitador_nombre""",
             "SELECT COUNT(*)"
         ).replace(" ORDER BY r.fecha_generacion DESC", "")
         
@@ -2806,7 +2815,8 @@ async def obtener_todos_reportes_admin(
                 "fecha_firma_supervisor": r[13].isoformat() if r[13] else None,
                 "nombre_supervisor": r[14],
                 "supervisor_id": r[15],
-                "datos_reporte": r[16]  # true/false si tiene datos_reporte
+                "datos_reporte": r[16],  # true/false si tiene datos_reporte
+                "facilitador_nombre": r[17] if len(r) > 17 else None
             })
         
         print(f"✅ [ADMIN] {len(resultado)} reportes encontrados de {total} totales")
@@ -9304,6 +9314,33 @@ async def transferir_actividades(datos: TransferenciaActividades):
 # ==================== FIN TRANSFERIR ACTIVIDADES ====================
 
 # ==================== SUPERVISOR AUTOMÁTICO POR TERRITORIO ====================
+
+@app.get("/usuarios/{user_id}/facilitador-asignado")
+async def obtener_facilitador_asignado(user_id: int):
+    """
+    Obtiene el nombre del facilitador comunitario asignado a un técnico.
+    Usa la tabla facilitador_tecnico_asignaciones para la búsqueda.
+    """
+    try:
+        print(f"🔍 Buscando facilitador asignado para usuario ID: {user_id}")
+        cursor.execute("""
+            SELECT u.nombre_completo
+            FROM facilitador_tecnico_asignaciones fta
+            JOIN usuarios u ON u.id = fta.facilitador_usuario_id
+            WHERE fta.tecnico_usuario_id = %s AND fta.activo = TRUE
+            LIMIT 1
+        """, (user_id,))
+        row = cursor.fetchone()
+        if row and row[0]:
+            print(f"   ✅ Facilitador encontrado: {row[0]}")
+            return {"success": True, "facilitador_nombre": row[0]}
+        else:
+            print(f"   ℹ️ No hay facilitador asignado para usuario {user_id}")
+            return {"success": True, "facilitador_nombre": None, "mensaje": "Sin facilitador asignado"}
+    except Exception as e:
+        print(f"❌ Error obteniendo facilitador asignado: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 
 @app.get("/usuarios/{user_id}/supervisor-automatico")
 async def obtener_supervisor_automatico(user_id: int):

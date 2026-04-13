@@ -110,6 +110,12 @@ export const apiService = {
     return response.data;
   },
 
+  // Obtener facilitador asignado a un técnico
+  async obtenerFacilitadorAsignado(userId) {
+    const response = await api.get(`/usuarios/${userId}/facilitador-asignado`);
+    return response.data;
+  },
+
   // Obtener supervisor automático (para técnicos)
   async obtenerSupervisorAutomatico(userId) {
     const response = await api.get(`/usuarios/${userId}/supervisor-automatico`);
